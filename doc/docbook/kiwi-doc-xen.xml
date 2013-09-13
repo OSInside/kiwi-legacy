@@ -49,12 +49,11 @@
   <sect1 id="sec.xen.using">
     <title>Using the Image</title>
     <para>In order to run a domain U the Xen tool <command>xm</command>
-      needs to be called in conjunction with the KIWI generated domain
-      U configuration file </para>
+      needs to be called in conjunction with the KIWI generated domainU
+      configuration file </para>
 
     <screen><command>xm</command> create -c /tmp/myxen-result/
-        the-file-with-suffix.xenconfig
-    </screen>
+        the-file-with-suffix.xenconfig    </screen>
   </sect1>
 
   <sect1 id="sec.xen.flavours">

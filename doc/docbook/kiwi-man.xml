@@ -262,7 +262,7 @@
   </refsect1>
  
   <refsect1>
-    <title>Image format conversion</title>
+    <title>Image Format Conversion</title>
     <para>
       The KIWI format conversion is useful to perform the creation of
 	  another image output format like vmdk for VMware or ovf the open

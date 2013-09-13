@@ -31,12 +31,10 @@
 		This example is based on openSUSE and includes the KDE desktop.
 	</para>
 
-<screen>
-<command>cd</command> /usr/share/doc/packages/kiwi/examples
+<screen><command>cd</command> /usr/share/doc/packages/kiwi/examples
 ==> select the example directory for the desired distribution change into it
 <command>cd</command> suse-...  
-<command>kiwi</command> --build ./suse-live-iso -d /tmp/myiso-result --type iso
-</screen>
+<command>kiwi</command> --build ./suse-live-iso -d /tmp/myiso-result --type iso</screen>
 
   </sect1>
 
@@ -57,10 +55,8 @@
           Testing an iso can be done with any full virtual system for
           example: </para>
 
-<screen>
-<command>cd</command> /tmp/myiso-result
-<command>qemu</command> -cdrom ./suse-*-live-iso.*.iso
-</screen>
+<screen><command>cd</command> /tmp/myiso-result
+<command>qemu</command> -cdrom ./suse-*-live-iso.*.iso</screen>
 
       </listitem>
     </itemizedlist>
@@ -139,8 +135,7 @@
         to be writable. The following split section can be used if the
         flag compressed is used: </para>
 
-<screen>
-&lt;split&gt; 
+<screen>&lt;split&gt; 
   &lt;persistent&gt; 
      &lt;file name="/var"/&gt;
      &lt;file name="/var/*"/&gt; 
@@ -153,8 +148,7 @@
      &lt;file name="/tmp"/&gt;
      &lt;file name="/tmp/*"/&gt;
   &lt;/persistent&gt; 
-&lt;/split&gt;
-</screen>
+&lt;/split&gt;</screen>
 
     </sect2>
 
@@ -177,9 +171,7 @@
 			flag must be set to true as indicated below. 
 		</para>
 
-<screen>
-&lt;type image="iso" ... hybrid="true"/&gt;
-</screen>		
+<screen>&lt;type image="iso" ... hybrid="true"/&gt;</screen>		
 	</sect2>
   </sect1>
 
@@ -213,9 +205,7 @@
 			hybridpersistent is set to true.
 		</para>
 
-<screen>
-&lt;type image="iso" ... hybridpersistent="true"/&gt;
-</screen>
+<screen>&lt;type image="iso" ... hybridpersistent="true"/&gt;</screen>
 	</sect2>
 	<sect2>
 		<title>OEM USB stick</title>
@@ -223,46 +213,37 @@
 			<primary>KIWI</primary>
 			<secondary>OEM stick</secondary>
 		</indexterm>
-		<para>
-			In contrast to the hybrid iso image it's also possible to
-			create a oem virtual disk image which is dumped on the stick.
-			The big advantage with this approach is, that it's possible
-			to create a stick which contains a live OS but also a data
-			partition for custom data. The data partition is a fat partition
-			also recognized by the Windows operating system. In order
-			to create such a Windows friendly stick one has to pass the
-			option <option>--fat-storage &lt;size-in-MB&gt;</option>.
-
-<screen>
-kiwi --create ... --fat-storage 500
-</screen>
-
-			If this option is set kiwi will use the syslinux bootloader
-			for the image as well as the first partition as fat partition
-			of the specified size.
-			The live OS itself will live in a LVM which
-			allows easy manipulation of the logical root volume. For further
-			information about the OEM image type please refer to the OEM
-			chapter <xref linkend="chap.oem"/>
-		</para>
+		<para> In contrast to the hybrid iso image it's also possible to
+        create a oem virtual disk image which is dumped on the stick.
+        The big advantage with this approach is, that it's possible to
+        create a stick which contains a live OS but also a data
+        partition for custom data. The data partition is a fat partition
+        also recognized by the Windows operating system. In order to
+        create such a Windows friendly stick one has to pass the option
+          <option>--fat-storage &lt;size-in-MB&gt;</option>.
+        <screen><command>kiwi</command> --create ... --fat-storage 500</screen>
+        If this option is set kiwi will use the syslinux bootloader for
+        the image as well as the first partition as fat partition of the
+        specified size. The live OS itself will live in a LVM which
+        allows easy manipulation of the logical root volume. For further
+        information about the OEM image type please refer to the OEM
+        chapter <xref linkend="chap.oem"/>
+      </para>
 		<sect3>
 			<title>OEM compressed / readonly USB stick</title>
 			<indexterm>
 				<primary>KIWI</primary>
 				<secondary>compressed root</secondary>
 			</indexterm>
-		<para>
-			If a compressed filesystem type like clicfs is used for the
-			image root directory it's also possible to allow persistent
-			writing on the USB stick or alternatively disallow that and
-			let all write actions perfom in RAM only. kiwi provides the
-			type attribute ramonly for this purpose. So in order to create
-			a read-only oem stick with compressed root filesystem the
-			following type section is required:
-<screen>
-&lt;type image="oem" filesystem="clicfs" ramonly="true" .../&gt;
-</screen>
-		</para>
+		<para> If a compressed filesystem type like clicfs is used for the
+          image root directory it's also possible to allow persistent
+          writing on the USB stick or alternatively disallow that and
+          let all write actions perfom in RAM only. kiwi provides the
+          type attribute ramonly for this purpose. So in order to create
+          a read-only oem stick with compressed root filesystem the
+          following type section is required:
+          <screen>&lt;type image="oem" filesystem="clicfs" ramonly="true" .../&gt;</screen>
+        </para>
 		</sect3>
 	</sect2>
   </sect1>

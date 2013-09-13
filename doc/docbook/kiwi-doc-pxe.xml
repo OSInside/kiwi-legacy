@@ -152,7 +152,7 @@ subnet 192.168.100.0 netmask 255.255.255.0 {
           configuration applies to one client which means it is required
           to obtain the MAC address of this client. If the boot
           configuration should be used globally, copy the KIWI generated
-          file as config.default: </para>
+          file as <filename>config.default</filename>: </para>
 <screen><command>cp</command> suse-*-pxe-client.*.config \
   /srv/tftpboot/KIWI/config.<replaceable>MAC</replaceable></screen>
       </step>
@@ -797,7 +797,7 @@ NBD-Write-Port-Number;/dev/NBD-Write-Device</screen>
 		Below find examples for the different union modes.</para>
 
 		<sect3 id="sec.pxe.union.local.local">
-			<title>Download to local storage, write to local storage</title>
+			<title>Download to Local Storage, Write to Local Storage</title>
 			<indexterm>
 				<primary>union image</primary>
 				<secondary>local-local</secondary>
@@ -809,7 +809,7 @@ UNIONFS_CONFIG=/dev/sda3,/dev/sda2,unionfs
 KIWI_INITRD=/boot/initrd</screen>
 		</sect3>
 		<sect3 id="sec.pxe.union.local.ram">
-			<title>Download to local storage, write to ram</title>
+			<title>Download to Local Storage, Write to RAM</title>
 			<indexterm>
                 <primary>union image</primary>
                 <secondary>local-ram</secondary>
@@ -820,7 +820,7 @@ IMAGE='/dev/sda2;suse-##.#-pxe-client.i386;1.2.8;192.168.100.2;4096'
 UNIONFS_CONFIG=tmpfs,/dev/sda2,unionfs</screen>
         </sect3>
 		<sect3 id="sec.pxe.union.remote.local">
-			<title>Mount from remote, write to local storage</title>
+			<title>Mount from Remote, Write to Local Storage</title>
 			<indexterm>
                 <primary>union image</primary>
                 <secondary>remote-local</secondary>
@@ -851,7 +851,7 @@ UNIONFS_CONFIG=/dev/sda2,nbd,unionfs</screen>
 			</itemizedlist>
         </sect3>
 		<sect3 id="sec.pxe.union.remote.ram">
-			<title>Mount from remote, write to ram</title>
+			<title>Mount from Remote, Write to RAM</title>
 			<indexterm>
                 <primary>union image</primary>
                 <secondary>remote-ram</secondary>
@@ -872,7 +872,7 @@ UNIONFS_CONFIG=tmpfs,nbd,unionfs</screen>
             </itemizedlist>
         </sect3>
 		<sect3 id="sec.pxe.union.remote.remote">
-			<title>Mount from remote, write to remote</title>
+			<title>Mount from Remote, Write to Remote</title>
 			<indexterm>
                 <primary>union image</primary>
                 <secondary>remote-remote</secondary>
@@ -1118,10 +1118,13 @@ test3_KIWI_MAC_LIST="00:54:33:FA:44:33, 84:3D:45:2F:5F:33"</screen>
     </sect2>
     <sect2>
       <title>The Group Details File</title>
-      <para>In addition to the config.group file, each defined group will require a
-        config.&lt;GROUP_NAME> file. This file is exactly like a standard KIWI config.&lt;MAC> file,
-        but is assigned to a group of hosts rather than a single unit. If we continue with the
-        example we used in the previous section, we would need the following files:</para>
+      <para>In addition to the <filename>config.group</filename> file,
+        each defined group will require a
+          <filename>config.&lt;GROUP_NAME></filename> file. This file is
+        exactly like a standard KIWI config.&lt;MAC> file, but is
+        assigned to a group of hosts rather than a single unit. If we
+        continue with the example we used in the previous section, we
+        would need the following files:</para>
 <screen>/srv/tftpboot/KIWI/config.test1
 /srv/tftpboot/KIWI/config.test2
 /srv/tftpboot/KIWI/config.test3</screen>
@@ -1129,40 +1132,52 @@ test3_KIWI_MAC_LIST="00:54:33:FA:44:33, 84:3D:45:2F:5F:33"</screen>
         file, and all definitions that would be supported for a single host, are supported for a
         group of hosts. In addition, if a host is matched to a group, yet the config.&lt;GROUP_NAME>
         file does not exist, KIWI will error out.</para>
-      <para>For example, the following configuration file, called config.test1 would be used for
-        the group called "test1":</para>
+      <para>For example, the following configuration file, called
+          <filename>config.test1</filename> would be used for the group
+        called "test1":</para>
 <screen>DISK=/dev/sda
 PART='5;S;x,x;L;/'
 IMAGE='/dev/sda2;suse-##.#-pxe-client.i686;1.2.8;192.168.100.2;4096'
 CONF='CONFIGURATIONS/xorg.conf.test1;/etc/X11/xorg.conf;192.168.100.2;4096,\
      CONFIGURATIONS/syslog.conf;/etc/sysconfig/syslog.conf;192.168.100.2;4096'</screen>
-      <para>As a result of this configuration file, the image would be configured consistently
-        across all the hosts assigned to test1. The following file called config.test2, contains a
-        small change that may be specific to a function:</para>
+      <para>As a result of this configuration file, the image would be
+        configured consistently across all the hosts assigned to test1.
+        The following file called <filename>config.test2</filename>,
+        contains a small change that may be specific to a
+        function:</para>
 <screen>DISK=/dev/sda
 PART='5;S;x,x;L;/'
 IMAGE='/dev/sda2;suse-##.#-pxe-client.i686;1.2.8;192.168.100.2;4096'
 CONF='CONFIGURATIONS/xorg.conf.test2;/etc/X11/xorg.conf;192.168.100.2;4096,\
      CONFIGURATIONS/syslog.conf;/etc/sysconfig/syslog.conf;192.168.100.2;4096'</screen>
-      <para>As we can see, while group 1 and 2 share the syslog.conf configuration file, they have
-        different xorg.conf files defined, therefore two distinct groups with one or more hosts
-        assigned to each group can now be configured by managing a smaller number of files.</para>
+      <para>As we can see, while group 1 and 2 share the syslog.conf
+        configuration file, they have different
+          <filename>xorg.conf</filename> files defined, therefore two
+        distinct groups with one or more hosts assigned to each group
+        can now be configured by managing a smaller number of
+        files.</para>
     </sect2>
     <sect2>
       <title> Using Hardware Mapping to Provide Overrides</title>
-      <para>The only issue with running mixed hardware configurations pertains primarily to hardware
-        differences. For instance, it may be possible to create a single, xorg.conf file that is
-        able to work with all of the hardware, but there is a chance it might not be possible to do
-        so. With this in mind, KIWI provides a mechanism to provide "default" configurations that
-        works with the most common hardware configuration, while providing hardware specific
-        overrides to allow for any differences and yet have all hardware linked to the same
+      <para>The only issue with running mixed hardware configurations
+        pertains primarily to hardware differences. For instance, it may
+        be possible to create a single, <filename>xorg.conf</filename>
+        file that is able to work with all of the hardware, but there is
+        a chance it might not be possible to do so. With this in mind,
+        KIWI provides a mechanism to provide "default" configurations
+        that works with the most common hardware configuration, while
+        providing hardware specific overrides to allow for any
+        differences and yet have all hardware linked to the same
         group.</para>
       <sect3>
         <title>The Hardware Mapping Elements</title>
-        <para>To make use of the hardware linking mechanism, two additional parameters needs to be
-          added to the group details file, the one named config.&lt;group_name>. These two elements
-          "link" hardware specific configurations to the appropriate systems. A general example
-          would look like this:</para>
+        <para>To make use of the hardware linking mechanism, two
+          additional parameters needs to be added to the group details
+          file, the one named
+            <filename>config.&lt;group_name></filename>. These two
+          elements "link" hardware specific configurations to the
+          appropriate systems. A general example would look like
+          this:</para>
 <screen>HARDWARE_MAP="vendor_name_model"
 vendor_name_model_HARDWARE_MAP="00:00:00:11:11:11"</screen>
         <para>These parameters are not required, and the same functionality can be applied by using
@@ -1223,15 +1238,15 @@ vendor_name_model_HARDWARE_MAP="00:00:00:11:11:11"</screen>
           We will also assume that the differences we are trying to address are specific to the
           video card and X.Org drivers used as a result.</para>
         <para>With this in mind, we will need the following KIWI specific files:</para>
-<screen>cd /srv/tftpboot/KIWI
-ls
+<screen><command>cd</command> /srv/tftpboot/KIWI
+<command>ls</command>
    config.example1
    config.group
    hardware_config.maxterm_3500</screen>
         <para>As we can see, there is a KIWI group file, the group configuration or details file,
           and a new file that we have not seen before called hardware_config.maxterm_3500. We will
           first look at the contents of the config,group file:</para>
-<screen>cat config.group
+<screen><command>cat</command> config.group
 
 KIWI_GROUP="example1"
 example1_KIWI_MAC_LIST=
@@ -1243,7 +1258,7 @@ example1_KIWI_MAC_LIST=
         <para>Within the file, there is a group called "example1", with ten hosts defined, in this
           case with imaginary sequential MAC addresses. Next, we look at the config.example1 group
           details/configuration file:</para>
-<screen>cat config.example1
+<screen><command>cat</command> config.example1
 
 KIWI_INITRD=/boot/initrd
 KIWI_KERNEL=/boot/linux
@@ -1260,15 +1275,18 @@ maxterm_3500_HARDWARE_MAP='00:00:00:00:00:02 00:00:00:00:00:03 00:00:00:00:00:04
           extras. There are three areas we want to focus our attention on, the CONF, HARDWARE_MAP
           and maxterm_3500_HARDWARE_MAP variables, as they are the most critical elements to our
           example.</para>
-        <para>The first parameter to look at is the CONF parameter, which indicates a prefs.js (for
-          Mozilla Firefox), and a xorg.conf (for X Windows) files will be copied to the host during
-          boot up. These files should be considered defaults for the group, and all hosts defined in
-          this group will use these files. As such, when the systems boot, both of these files will
-          be copied over to their local file systems when the CONF element is processed.</para>
+        <para>The first parameter to look at is the CONF parameter,
+          which indicates a <filename>prefs.js</filename> (for Mozilla
+          Firefox), and a xorg.conf (for X Windows) files will be copied
+          to the host during boot up. These files should be considered
+          defaults for the group, and all hosts defined in this group
+          will use these files. As such, when the systems boot, both of
+          these files will be copied over to their local file systems
+          when the CONF element is processed.</para>
         <para>Lastly, we have a hardware mapping group called "maxterm_3500", with three of the
           groups hosts defined as part of of a sub-group, or hardware map. The content of this file
           is as follows:</para>
-<screen>cat hardware_config.maxterm_3500
+<screen><command>cat</command> hardware_config.maxterm_3500
 
 VENDOR_CONF='xorg.conf.maxterm_3500;/etc/X11/xorg.conf;192.168.1.2;4096,
             someconfig.cfg;/etc/sysconfig/someconfig.cfg;192.168.1.2;4096'</screen>
@@ -1278,20 +1296,28 @@ VENDOR_CONF='xorg.conf.maxterm_3500;/etc/X11/xorg.conf;192.168.1.2;4096,
           to the hardware map via the maxterm_3500_HARDWARE_MAP element. In our example the only
           systems that will receive the xorg.conf.maxterm_3500 file will be the three maxterms we
           linked to the hardware map itself.</para>
-        <para>In our VENDOR_CONF element, we are indicating two files that should be transferred, in
-          addition to any file transferred during the processing of the CONF element. A "specific"
-          xorg.conf file, as well as someconfig.cfg. In the case of the xorg.conf.maxterm_3500 file,
-          when it is transferred to the host, it will overwrite the xorg.conf file that was
-          previously transferred via the CONF element. However, with the someconfig.cfg file, because
-          it was not previously defined in the CONF element, it will simply get transferred over, and
-          is a perfect example of how one could enable functionality that is not otherwise
-          configured.</para>
-        <para>As a result of this example, we have seven terminals that are using a prefs.js and
-          generic xorg.conf file for their system configuration, and three terminals that are using
-          prefs.js, a new version of the xorg.conf file as well as a file called somconfig.cfg. For
-          the purposes of our example, the contents of the prefs.js, xorg.conf,
-          xorg.conf.maxterm_3500 and someconfig.cfg are arbitrary, and don't need to be explained
-          here.</para>
+        <para>In our VENDOR_CONF element, we are indicating two files
+          that should be transferred, in addition to any file
+          transferred during the processing of the CONF element. A
+          "specific" <filename>xorg.conf</filename> file, as well as
+          someconfig.cfg. In the case of the xorg.conf.maxterm_3500
+          file, when it is transferred to the host, it will overwrite
+          the <filename>xorg.conf</filename> file that was previously
+          transferred via the CONF element. However, with the
+            <filename>someconfig.cfg</filename> file, because it was not
+          previously defined in the CONF element, it will simply get
+          transferred over, and is a perfect example of how one could
+          enable functionality that is not otherwise configured.</para>
+        <para>As a result of this example, we have seven terminals that
+          are using a prefs.js and generic xorg.conf file for their
+          system configuration, and three terminals that are using
+          prefs.js, a new version of the <filename>xorg.conf</filename>
+          file as well as a file called somconfig.cfg. For the purposes
+          of our example, the contents of the
+            <filename>prefs.js</filename>,
+            <filename>xorg.conf</filename>, xorg.conf.maxterm_3500 and
+            <filename>someconfig.cfg</filename> are arbitrary, and don't
+          need to be explained here.</para>
       </sect3>
     </sect2>
   </sect1>

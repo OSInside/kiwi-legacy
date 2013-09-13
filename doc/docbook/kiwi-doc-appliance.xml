@@ -96,9 +96,7 @@
           hardware based test machine which allows to boot from USB is a
           good and fast approach.
         </para>
-<screen>
-&lt;type image="iso" boot="isoboot/suse-..." flags="clic" hybrid="true"/&gt;
-</screen>
+<screen>&lt;type image="iso" boot="isoboot/suse-..." flags="clic" hybrid="true"/&gt;</screen>
       </step>
       <step>
         <para>Create the preliminary live stick image of your new
