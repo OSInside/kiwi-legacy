@@ -51,20 +51,20 @@ sub assert_array_equal {
 	my $this           = shift;
 	my $base_array_ref = shift;
 	my $cmp_array_ref  = shift;
-
 	my @base_array = @{$base_array_ref};
 	my @cmp_array  = @{$cmp_array_ref};
-
+	my $text;
 	if (scalar @base_array != scalar @cmp_array) {
-		$this -> assert(0, 'Did not get the expected list of names.');
+		$text = 'Did not get the expected list of names: got: ';
+		$text.= "\(@base_array\) and \(@cmp_array\)";
+		$this -> assert(0, $text);
 	}
-
 	my %baseEntryMap = map { ("$_" => 1) } @base_array;
 	for my $item (@cmp_array) {
 		if (! $baseEntryMap{"$item"}) {
-			my $msg = 'Did not get the expected list of names. '
-			    .'Mismatch content.';
-			$this -> assert(0, $msg);
+			$text = 'Did not get the expected list of names. ';
+			$text.= 'Mismatch content.';
+			$this -> assert(0, $text);
 		}
 	}
 	return;
