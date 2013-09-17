@@ -1611,7 +1611,16 @@ sub getPackages {
 		if ($pckgFilter{$name}) {
 			next;
 		}
-		push @installPackages, $pckg;
+		my $added = 0;
+		foreach my $item (@installPackages) {
+			if ($item eq $pckg) {
+				$added = 1;
+				last;
+			}
+		}
+		if (! $added) {
+			push @installPackages, $pckg;
+		}
 	}
 	return \@installPackages;
 }
@@ -4653,9 +4662,6 @@ sub __populatePackageInfo {
 						push @access, 'pkgs';
 					}
 				}
-				if ($bootIncl && $bootIncl eq 'true') {
-					push @access, 'bootPkgs';
-				}
 				if (! @access) {
 					push @access, 'pkgs';
 				}
@@ -4666,6 +4672,9 @@ sub __populatePackageInfo {
 				if ($type eq 'bootstrap') {
 					# In a type='bootstrap' section attributes are ignored
 					@access = ('bootStrapPckgs');
+				}
+				if ($bootIncl && $bootIncl eq 'true') {
+					push @access, 'bootPkgs';
 				}
 				if ($type eq 'testsuite') {
 					# In a type='testsuite' section attributes are ignored
