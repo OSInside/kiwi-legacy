@@ -32,6 +32,11 @@ use warnings;
 use Carp qw (cluck);
 use Getopt::Long;
 use File::Spec;
+use KIWIAnalyse;
+use KIWIAnalyseCustomData;
+use KIWIAnalyseManagedSoftware;
+use KIWIAnalyseReport;
+use KIWIAnalyseTemplate;
 use KIWICommandLine;
 use KIWICache;
 use KIWIRoot;
@@ -41,7 +46,6 @@ use KIWILog;
 use KIWIImage;
 use KIWIImageCreator;
 use KIWIBoot;
-use KIWIMigrate;
 use KIWIQX qw (qxx);
 use KIWIRuntimeChecker;
 use KIWIImageFormat;
@@ -264,51 +268,73 @@ sub main {
 		my $nofiles     = $migopts->[2];
 		my $notempl     = $migopts->[3];
 		$destination    = "/tmp/".$destination;
-		$migrate = KIWIMigrate -> new (
-			$destination,
-			$cmdL->getOperationMode("migrate"),$exclude,$skip,
+		#==========================================
+		# create main analyser
+		#------------------------------------------
+		my $analyse = KIWIAnalyse -> new (
+			$destination,$cmdL->getForceNewRoot()
+		);
+		#==========================================
+		# analyse custom/modified files
+		#------------------------------------------
+		my $analyseCustom = KIWIAnalyseCustomData -> new (
+			$analyse->getDestination(),$exclude,$analyse->getCache()
+		);
+		if (! $nofiles) {
+			if (! $analyseCustom -> runQuery()) {
+				return;
+			}
+			$analyseCustom -> createCustomFileTree();
+		}
+		#==========================================
+		# analyse packages
+		#------------------------------------------
+		my $analysePackages = KIWIAnalyseManagedSoftware -> new (
 			$addlRepos->{repositories},
 			$addlRepos->{repositoryTypes},
 			$addlRepos->{repositoryAlia},
 			$addlRepos->{repositoryPriorities},
-			$cmdL->getForceNewRoot()
+			$skip,
+			$analyse->getCache()
 		);
-		#==========================================
-		# Check object and repo setup, mandatory
-		#------------------------------------------
-		if (! defined $migrate) {
-			kiwiExit (1);
-		}
-		if (! $migrate -> getRepos()) {
-			$migrate -> cleanMount();
-			kiwiExit (1);
+		if (! $analysePackages -> runQuery()) {
+			return;
 		}
 		#==========================================
-		# Create report HTML file, errors allowed
+		# write cache
 		#------------------------------------------
-		if (! $nofiles) {
-			$migrate -> setSystemOverlayFiles();
-			$migrate -> createTreeLayout();
-		}
-		$migrate -> getPackageList();
-		$migrate -> createReport();
+		$analyse -> writeCache();
+		#==========================================
+		# create image description template
+		#------------------------------------------
+		my $analyseTemplate = KIWIAnalyseTemplate -> new (
+			$analyse         -> getDestination(),
+			$analysePackages -> getRepositories(),
+			$analysePackages -> getOS(),
+			$analysePackages -> getPackageCollections(),
+			$analysePackages -> getPackageNames()
+		);
 		if (! $notempl) {
-			if (! $migrate -> setTemplate()) {
-				$migrate -> cleanMount();
-				kiwiExit (1);
-			}
-			if (! $migrate -> setPrepareConfigSkript()) {
-				$migrate -> cleanMount();
-				kiwiExit (1);
-			}
-			if (! $migrate -> setInitialSetup()) {
-				$migrate -> cleanMount();
-				kiwiExit (1);
-			}
+			$analyseTemplate -> writeKIWIXMLConfiguration();
+			$analyseTemplate -> writeKIWIScripts();
+			$analyseTemplate -> cloneLinuxConfigurationFiles();
 		}
-		$migrate -> commitTransaction();
-		$migrate -> cleanMount();
-		kiwiExit (0);
+		#==========================================
+		# create report page / worksheet
+		#------------------------------------------
+		my $analyseReport = KIWIAnalyseReport -> new (
+			$analyse         -> getDestination(),
+			$analysePackages -> getMultipleInstalledPackages(),
+			$analyseCustom   -> getLocalRepositories(),
+			$analyseCustom   -> getCustomFiles(),
+			$analysePackages -> getSolverProblems()
+		);
+		$analyseReport -> createViews();
+		$analyseReport -> createReport();
+		#==========================================
+		# commit transaction
+		#------------------------------------------
+		$analyse -> commitTransaction();
 	}
 
 	#==========================================

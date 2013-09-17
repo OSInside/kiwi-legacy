@@ -1,0 +1,794 @@
+#================
+# FILE          : KIWIAnalyseCustomData.pm
+#----------------
+# PROJECT       : openSUSE Build-Service
+# COPYRIGHT     : (c) 2006 SUSE LINUX Products GmbH, Germany
+#               :
+# AUTHOR        : Marcus Schaefer <ms@suse.de>
+#               :
+# BELONGS TO    : Operating System images
+#               :
+# DESCRIPTION   : This module is used to provide methods for
+#               : searching custom data not managed by any
+#               : package manager
+#               :
+#               :
+#               :
+# STATUS        : Development
+#----------------
+package KIWIAnalyseCustomData;
+#==========================================
+# Modules
+#------------------------------------------
+use strict;
+use warnings;
+use Carp qw (cluck);
+use Data::Dumper;
+use FileHandle;
+use File::Find;
+use File::stat;
+use File::Basename;
+use File::Path;
+use File::Copy;
+use File::Spec;
+use Fcntl ':mode';
+use Cwd qw (abs_path cwd);
+
+#==========================================
+# KIWI Modules
+#------------------------------------------
+use KIWIGlobals;
+use KIWILog;
+use KIWIQX qw (qxx);
+
+#==========================================
+# Constructor
+#------------------------------------------
+sub new {
+	# ...
+	# Create a new KIWIAnalyseCustomData object which is used to
+	# gather information on the running system
+	# ---
+	#==========================================
+	# Object setup
+	#------------------------------------------
+	my $this  = {};
+	my $class = shift;
+	bless $this,$class;
+	#==========================================
+	# Module Parameters
+	#------------------------------------------
+	my $dest  = shift; # destination directory
+	my $excl  = shift; # list reference to exclude items
+	my $cdata = shift; # cache reference
+	#==========================================
+	# Constructor setup
+	#------------------------------------------
+	my $kiwi = KIWILog -> instance();
+	if ((! defined $dest) || (! -d $dest)) {
+		$kiwi -> error  (
+			"KIWIAnalyseCustomData: Couldn't find destination dir: $dest"
+		);
+		$kiwi -> failed ();
+		return;
+	}
+	#==========================================
+	# Store default files not used for inspect
+	#------------------------------------------
+	my @denyFiles = (
+		'\.rpmnew',                     # no RPM backup files
+		'\.rpmsave',                    # []
+		'\.rpmorig',                    # []
+		'\.cache',                      # no cache files
+		'~$',                           # no emacs backup files
+		'\.swp$',                       # no vim backup files
+		'\.rej$',                       # no diff reject files
+		'\.lock$',                      # no lock files
+		'\.tmp$',                       # no tmp files
+		'\/etc\/gconf\/',               # no gconf files
+		'\.depend$',                    # no make depend targets
+		'\.backup$',                    # no sysconfig backup files
+		'\.gz',                         # no gzip archives
+		'\/usr\/src\/',                 # no sources
+		'\/spool',                      # no spool directories
+		'^\/dev\/',                     # no device node files
+		'^\/run\/',                     # no udev run files
+		'\/usr\/X11R6\/',               # no depreciated dirs
+		'\/tmp',                        # no /tmp data
+		'\/boot\/',                     # no /boot data
+		'\/proc\/',                     # no /proc data
+		'\/sys\/',                      # no /sys data
+		'\/abuild\/',                   # no /abuild data
+		'\/fillup-templates',           # no fillup data
+		'\/var\/lib\/rpm',              # no RPM data
+		'\/var\/lib\/zypp',             # no ZYPP data
+		'\/var\/lib\/smart',            # no smart data
+		'\/var\/lock\/',                # no locks
+		'\/var\/adm\/',                 # no var/adm
+		'\/var\/yp\/',                  # no yp files
+		'\/var\/lib\/',                 # no var/lib
+		'\/usr\/include\/',             # no header changes
+		'\/usr\/share/fonts\/',         # no font cache
+		'\/usr\/share/fonts-config\/',  # no font config
+		'\/usr\/share/locale-bundle\/', # no locale bundle
+		'\/usr\/share/sax\/',           # no sax data
+		'\/var\/log',                   # no logs
+		'\/var\/run',                   # no pid files
+		'\/etc\/fstab',                 # no fstab file
+		'\/etc\/udev\/rules.d',         # no udev rules
+		'\/media\/',                    # no media automount files
+		'\/lost\+\/found',              # no filesystem specific files
+		'\/var\/lib\/hardware\/',       # no hwinfo hardware files
+		'\/var\/cache\/',               # no cache files
+		'\/var\/db\/',                  # no db caches
+		'\/usr\/share\/doc\/',          # no documentation
+		'\/ruby\/gems\/',               # no ruby gems
+		'\/usr\/share\/mime\/',         # no mime types
+		'\/lost\+found',                # no fs inode backup
+		'\/icons',                      # no icon directories
+		'\/etc\/bootsplash',            # no splash data
+		'\/etc\/lvm',                   # no lvm meta data
+		'\/etc\/grub.conf',             # no bootloader config
+		'\.old$',                       # no .old files
+		'\/weak-updates'                # no weak-update links
+	);
+	if (defined $excl) {
+		my @exclude = @{$excl};
+		foreach (@exclude) {
+			$_ =~ s/\/$//;
+			$_ = quotemeta;
+		};
+		push @denyFiles,@exclude;
+	}
+	#==========================================
+	# Store object data
+	#------------------------------------------
+	$this->{kiwi}  = $kiwi;
+	$this->{deny}  = \@denyFiles;
+	$this->{dest}  = $dest;
+	$this->{cdata} = $cdata;
+	return $this;
+}
+
+#==========================================
+# runQuery
+#------------------------------------------
+sub runQuery {
+	my $this = shift;
+	return $this -> __populateCustomFiles();
+}
+
+#==========================================
+# createCustomFileTree
+#------------------------------------------
+sub createCustomFileTree {
+	# ...
+	# create directory with hard/soft links to custom files
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $dest = $this->{dest};
+	my $result_ref = $this->{nopackage};
+	if (! $result_ref) {
+		return;
+	}
+	my %result = %{$result_ref};
+	#==========================================
+	# Create custom (unpackaged) files tree
+	#------------------------------------------
+	$kiwi -> info ("Creating custom/unpackaged meta data...");
+	$kiwi -> cursorOFF();
+	my %filelist;
+	my @dirslist;
+	my @itemlist = sort keys %result;
+	my $tasks = @itemlist;
+	my $factor = 100 / $tasks;
+	my $done_percent = 0;
+	my $done_previos = 0;
+	my $done = 0;
+	foreach my $file (@itemlist) {
+		my $fattr = $result{$file}->[1];
+		my $type  = "file";
+		my $key   = "/";
+		my $binary= 0;
+		# /.../
+		# for performance reasons we only check for the
+		# ELF header which identifies the Linux binary format
+		# ----
+		if (($fattr) && (S_ISREG($fattr->mode))) {
+			if (sysopen (my $fd,$file,O_RDONLY)) {
+				my $buf;
+				seek ($fd,1,0);
+				sysread ($fd,$buf,3);
+				close ($fd);
+				if ($buf eq 'ELF') {
+					$binary = 1;
+				}
+			}
+		}
+		# /.../
+		# The following code is more accurate but way too slow
+		# $binary = 1;
+		# my $magic = qxx ("file \"$file\" 2>&1");
+		# if ($magic =~ /text|character data/) {
+		#	$binary = 0;
+		# }
+		# ----
+		if (($fattr) && (S_ISDIR($fattr->mode))) {
+			$type = "directory";
+		}
+		if ($type eq "directory") {
+			push @dirslist,$file;
+		} else {
+			my $name = basename $file;
+			my $dirn = dirname  $file;
+			$filelist{$dirn}{$name} = $fattr;
+			push @dirslist,$dirn;
+		}
+		$fattr->[13] = $binary;
+		$done_percent = int ($factor * $done);
+		if ($done_percent > $done_previos) {
+			$kiwi -> step ($done_percent);
+		}
+		$done_previos = $done_percent;
+		$done++;
+	}
+	$kiwi -> note ("\n");
+	$kiwi -> doNorm ();
+	$kiwi -> cursorON();
+	$kiwi -> info ("Creating custom/unpackaged files tree...");
+	$kiwi -> cursorOFF();
+	$factor = 100 / $tasks;
+	$done_percent = 0;
+	$done_previos = 0;
+	$done = 0;
+	foreach my $dir (sort @dirslist) {
+		mkpath ("$dest/custom/$dir", {verbose => 0});
+		$done_percent = int ($factor * $done);
+		if ($done_percent > $done_previos) {
+			$kiwi -> step ($done_percent);
+		}
+		$done_previos = $done_percent;
+		$done++;
+	}
+	foreach my $dir (sort keys %filelist) {
+		next if ! chdir "$dest/custom/$dir";
+		foreach my $file (sort keys %{$filelist{$dir}}) {
+			if (-e "$dir/$file") {
+				if (! link "$dir/$file", "$file") {
+					symlink "$dir/$file", "$file";
+				}
+				$done_percent = int ($factor * $done);
+				if ($done_percent > $done_previos) {
+					$kiwi -> step ($done_percent);
+				}
+				$done_previos = $done_percent;
+				$done++;
+			}
+		}
+	}
+	$kiwi -> note ("\n");
+	$kiwi -> doNorm ();
+	$kiwi -> cursorON();
+	return $this;
+}
+
+#==========================================
+# getCustomFiles
+#------------------------------------------
+sub getCustomFiles {
+	my $this = shift;
+	return $this->{nopackage};
+}
+
+#==========================================
+# getLocalRepositories
+#------------------------------------------
+sub getLocalRepositories {
+	my $this = shift;
+	return $this->{localrepos};
+}
+
+#==========================================
+# __populateCustomFiles
+#------------------------------------------
+sub __populateCustomFiles {
+	# ...
+	# 1) Find all files not owned by any package
+	# 2) Find all files changed according to the package manager
+	# 3) create linked list of the result
+	# ---
+	my $this   = shift;
+	my $kiwi   = $this->{kiwi};
+	my @deny   = @{$this->{deny}};
+	my $cdata  = $this->{cdata};
+	my $checkopt;
+	my %result;
+	my $data;
+	my $code;
+	my @modified;
+	my $root = "/";
+	#==========================================
+	# Find files packaged but changed
+	#------------------------------------------
+	$kiwi -> info ("Inspecting RPM database [modified files]...");
+	if (($cdata) && ($cdata->{modified})) {
+		@modified = @{$cdata->{modified}};
+		$kiwi -> done(); 
+	} else {
+		$checkopt = "--nodeps --nodigest --nosignature --nomtime ";
+		$checkopt.= "--nolinkto --nouser --nogroup --nomode";
+		my @rpmcheck = qxx ("rpm -Va $checkopt");
+		chomp @rpmcheck;
+		my $rpmsize = @rpmcheck;
+		my $spart = 100 / $rpmsize;
+		my $count = 1;
+		my $done;
+		my $done_old;
+		$kiwi -> cursorOFF();
+		foreach my $check (@rpmcheck) {
+			if ($check =~ /(\/.*)/) {
+				my $file = $1;
+				my ($name,$dir,$suffix) = fileparse ($file);
+				my $ok   = 1;
+				foreach my $exp (@deny) {
+					if ($file =~ /$exp/) {
+						$ok = 0; last;
+					}
+				}
+				if (($ok) && (-e $file)) {
+					my $attr;
+					if (-l $file) {
+						$attr = lstat ($file);
+					} else {
+						$attr = stat ($file);
+					}
+					$result{$file} = [$dir,$attr];
+					push (@modified,$file);
+				}
+			}
+			$done = int ($count * $spart);
+			if (($done_old) && ($done != $done_old)) {
+				$kiwi -> step ($done);
+			}
+			$done_old = $done;
+			$count++;
+		}
+		$cdata->{modified} = \@modified;
+		$kiwi -> note ("\n");
+		$kiwi -> doNorm ();
+		$kiwi -> cursorON();
+	}
+	#==========================================
+	# Find files/directories not packaged
+	#------------------------------------------
+	$kiwi -> info ("Inspecting package database(s) [unpackaged files]\n");
+	my @rpmcheck = ();
+	if (($cdata) && ($cdata->{rpmlist})) {
+		$kiwi -> info ("--> reading RPM package list from cache");
+		@rpmcheck = @{$cdata->{rpmlist}};
+	} else {
+		$kiwi -> info ("--> requesting RPM package list...");
+		@rpmcheck = qxx ("rpm -qlav");
+		chomp @rpmcheck;
+		$cdata->{rpmlist} = \@rpmcheck;
+	}
+	my @rpm_dir  = ();
+	my @rpm_file = ();
+	# /.../
+	# lookup rpm database files...
+	# ----
+	foreach my $dir (@rpmcheck) {
+		if ($dir =~ /^d.*?\/(.*)$/) {
+			my $base = $1;
+			my $name = basename $base;
+			my $dirn = dirname  $base;
+			$dirn = abs_path ("/$dirn");
+			if ($dirn) {
+				$base = "$dirn/$name";
+			} else {
+				$base = "/$name";
+			}
+			$base = "$dirn/$name";
+			$base =~ s/\/+/\//g;
+			$base =~ s/^\///;
+			next if $base eq './';
+			push @rpm_file,$base;
+			push @rpm_dir ,$base;
+		} elsif ($dir =~ /.*?\/(.*?)( -> .*)?$/) {
+			my $base = $1;
+			my $name = basename $base;
+			my $dirn = dirname  $base;
+			$dirn = abs_path ("/$dirn");
+			if ($dirn) {
+				$base = "$dirn/$name";
+			} else {
+				$base = "/$name";
+			}
+			$base =~ s/\/+/\//g;
+			$base =~ s/^\///;
+			next if $base eq './';
+			push @rpm_file,$base;
+		}
+	}
+	$kiwi -> done();
+	# /.../
+	# fake gem contents as rpm files...
+	# ----
+	if (-x "/usr/bin/gem") {
+		$kiwi -> info ("--> requesting GEM package list...");
+		my @gemcheck = qxx ("gem contents --all");
+		chomp @gemcheck;
+		foreach my $item (@gemcheck) {
+			my $name = basename $item;
+			my $dirn = dirname  $item;
+			$name =~ s/^\///;
+			$dirn =~ s/^\///;
+			push @rpm_file,$dirn."/".$name;
+			push @rpm_dir ,$dirn;
+		}
+		$kiwi -> done();
+	}
+	# /.../
+	# search files in packaged directories...
+	# ----
+	$kiwi -> info ("searching files in packaged directories...\n");
+	my %file_rpm;
+	my %dirs_rpm;
+	my %dirs_cmp;
+	@file_rpm{map {$_ = "/$_"} @rpm_file} = ();
+	@dirs_rpm{map {$_ = "/$_"} @rpm_dir}  = ();
+	$dirs_cmp{"/"} = undef;
+	foreach my $dir (sort keys %dirs_rpm) {
+		while ($dir =~ s:/[^/]+$::) {
+			$dirs_cmp{$dir} = undef;
+		}
+	}
+	my @packaged_dirs = sort keys %dirs_rpm;
+	my @packaged_dirs_new = ();
+	foreach my $dir (@packaged_dirs) {
+		my $ok = 1;
+		foreach my $exp (@deny) {
+			if ($dir =~ /$exp/) {
+				$ok = 0; last;
+			}
+		}
+		if (($ok) && (-d $dir)) {
+			push @packaged_dirs_new,$dir;
+		}
+	}
+	@packaged_dirs = @packaged_dirs_new;
+	$kiwi -> loginfo ("packaged directories: @packaged_dirs");
+	$kiwi -> snip ("--> Processing...");
+	my $wref = __generateWanted (\%result);
+	find({ wanted => $wref, follow => 0 }, @packaged_dirs);
+	$kiwi -> snap();
+	# /.../
+	# search for unpackaged symlinks whose origin is packaged
+	# ----
+	$kiwi -> info ("--> searching symlinks whose origin is packaged...");
+	foreach my $file (sort keys %result) {
+		if (-l $file) {
+			my $origin = readlink $file;
+			my $dirn = dirname $file;
+			my $path = $dirn."/".$origin;
+			my $base = basename $path;
+			$dirn = dirname $path;
+			$dirn = $this -> __resolvePath ($dirn);
+			$path = $dirn."/".$base;
+			if (exists $result{$path}) {
+				delete $result{$file};
+			}
+		}
+	}
+	$kiwi -> done();
+	# /.../
+	# search for unpackaged files in packaged directories...
+	# ----
+	$kiwi -> info ("--> searching unpackaged files in packaged dirs...");
+	foreach my $file (sort keys %result) {
+		if (exists $file_rpm{$file}) {
+			delete $result{$file};
+		}
+	}
+	foreach my $dir (sort keys %dirs_rpm) {
+		if (exists $result{$dir}) {
+			delete $result{$dir};
+		}
+	}
+	$kiwi -> done();
+	# /.../
+	# search for unpackaged directories...
+	# ----
+	$kiwi -> info ("--> searching unpackaged directories...");
+	foreach my $dir (sort keys %dirs_cmp) {
+		my $FH;
+		next if ! opendir ($FH,$dir);
+		while (my $f = readdir $FH) {
+			next if $f eq "." || $f eq "..";
+			my $path = "$dir/$f";
+			if ($dir eq "/") {
+				$path = "/$f";
+			}
+			if ((-d $path) && (! -l $path)) {
+				if (! exists $dirs_rpm{$path}) {
+					my $attr = stat $path;
+					$result{$path} = [$path,$attr];
+				}
+			}
+		}
+		closedir $FH;
+	}
+	$kiwi -> done ();
+	#==========================================
+	# add custom deny rules
+	#------------------------------------------
+	my @custom_deny = ();
+	#==========================================
+	# check for local repository checkouts
+	#------------------------------------------
+	$kiwi -> info ("Searching for revision control checkout(s)...");
+	my %repos = ();
+	foreach my $file (sort keys %result) {
+		if ($file =~ /\.osc$/) {
+			#==========================================
+			# buildservice repo
+			#------------------------------------------
+			my $dir = $file;
+			my $add = 1;
+			$dir =~ s/\/\.osc$//;
+			foreach my $rule (@custom_deny) {
+				if ($dir =~ /$rule/) {
+					$add = 0; last;
+				}
+			}
+			if ($add) {
+				push @custom_deny,'^'.$dir;
+				$repos{$dir} = "buildservice";
+			}
+		} elsif ($file =~ /\.git$/) {
+			#==========================================
+			# git repo
+			#------------------------------------------
+			my $dir = $file;
+			$dir =~ s/\/\.git$//;
+			push @custom_deny,'^'.$dir;
+			$repos{$dir} = "git";
+		} elsif ($file =~ /\.svn$/) {
+			#==========================================
+			# svn repo
+			#------------------------------------------
+			my $dir = $file;
+			my $add = 1;
+			$dir =~ s/\/\.svn$//;
+			foreach my $rule (@custom_deny) {
+				if ($dir =~ /$rule/) {
+					$add = 0; last;
+				}
+			}
+			if ($add) {
+				push @custom_deny,'^'.$dir;
+				$repos{$dir} = "svn";
+			}
+		}
+	}
+	$kiwi -> done();
+	#==========================================
+	# ignore files managed by augeas
+	#------------------------------------------
+	my $locator = KIWILocator -> instance();
+	my $augtool = $locator -> getExecPath('augtool');
+	if ($augtool) {
+		my %aug_files;
+		my $fd = FileHandle -> new();
+		if ($fd -> open ("$augtool print files/*|")) {
+			while (my $line = <$fd>) {
+				if ($line =~ /^\/files(.*)\/.*=/) {
+					my $file = $1;
+					if (-e $file) {
+						$aug_files{$file} = 1;
+					}
+				}
+			}
+		}
+		$fd -> close();
+		foreach my $file (sort keys %aug_files) {
+			push @custom_deny,$file;
+		}
+	}
+	#==========================================
+	# apply all deny files on result hash
+	#------------------------------------------
+	$kiwi -> info ("Apply deny expressions on custom tree...");
+	foreach my $file (sort keys %result) {
+		my $ok = 1;
+		foreach my $exp ((@deny,@custom_deny)) {
+			if ($file =~ /$exp/) {
+				$ok = 0; last;
+			}
+		}
+		if (! $ok) {
+			delete $result{$file};
+		}
+	}
+	$kiwi -> done();
+	#==========================================
+	# Ignore empty directories
+	#------------------------------------------
+	$kiwi -> info ("Checking for empty directories...");
+	# /.../
+	# store empty directories in %checkDirs
+	# ----
+	my $checkDirs;
+	foreach my $file (sort keys %result) {
+		my $sys_file = '/'.$file;
+		if ((-d $sys_file) && ($this -> __isEmptyDir ($sys_file))) {
+			$checkDirs->{$file} = $file;
+			delete $result{$file};
+		}
+	}
+	# /.../
+	# store empty dirs and subdirs of empty directories in @checkList
+	# ----
+	my @checkList = ();
+	while ($checkDirs) {
+		my $checkDirsNext;
+		foreach my $check (sort keys %{$checkDirs}) {
+			my $pre_dir = dirname $check;
+			if ($pre_dir ne '/') {
+				$checkDirsNext->{$pre_dir} = $pre_dir;
+			}
+		}
+		if (! $checkDirsNext) {
+			undef $checkDirs;
+			last;
+		}
+		$checkDirs = $checkDirsNext;
+		foreach my $check (sort keys %{$checkDirs}) {
+			push @checkList,$check;
+		}
+	}
+	# /.../
+	# walk through items in checkList and remove if substr occurs only once
+	# ----
+	my $tasks = @checkList;
+	my $factor = 100 / $tasks;
+	my $done_percent = 0;
+	my $done_previos = 0;
+	my $done = 0;
+	$kiwi -> cursorOFF();
+	my @fileList = sort keys %result;
+	foreach my $check (@checkList) {
+		my $count = 1;
+		foreach my $file (@fileList) {
+			if (index($file, $check.'/') != -1) {
+				$count = 2; last;
+			}
+		}
+		if ($count == 1) {
+			delete $result{$check};
+		}
+		$done_percent = int ($factor * $done);
+		if ($done_percent > $done_previos) {
+			$kiwi -> step ($done_percent);
+		}
+		$done_previos = $done_percent;
+		$done++;
+	}
+	$kiwi -> note ("\n");
+	$kiwi -> doNorm ();
+	$kiwi -> cursorON();
+	#==========================================
+	# Store in instance for report
+	#------------------------------------------
+	$this->{nopackage}  = \%result;
+	$this->{localrepos} = \%repos;
+	return $this;
+}
+
+#==========================================
+# __resolvePath
+#------------------------------------------
+sub __resolvePath {
+	# ...
+	# resolve a given path string into a clean
+	# representation this includes solving of jump
+	# backs like ../ or irrelevant information
+	# like // or ./
+	# ---
+	my $this = shift;
+	my $origin = shift;
+	my $current= $origin;
+	#========================================
+	# resolve jump back
+	#----------------------------------------
+	while ($current =~ /\.\./) {
+		my @path = split (/\/+/,$current);
+		for (my $l=0;$l<@path;$l++) {
+			if ($path[$l] eq "..") {
+				delete $path[$l];
+				delete $path[$l-1];
+				last;
+			}
+		}
+		if (@path) {
+			my @path_new;
+			foreach my $p (@path) {
+				if ($p) {
+					push @path_new,$p
+				}
+			}
+			$current = join ("/",@path_new);
+		}
+	}
+	#========================================
+	# resolve the rest
+	#----------------------------------------
+	my $result;
+	my @path = split (/\/+/,$current);
+	for (my $l=0;$l<@path;$l++) {
+		my $part = $path[$l];
+		if ($part eq "") {
+			$result.="/"; next;
+		}
+		if ($part eq ".") {
+			next;
+		}
+		$result.=$part;
+		if ($l < @path - 1) {
+			$result.="/";
+		}
+	}
+	$result =~ s/\/+/\//g;
+	return $result;
+}
+
+#==========================================
+# __generateWanted
+#------------------------------------------
+sub __generateWanted {
+	my $filehash = shift;
+	return sub {
+		my $file = $File::Find::name;
+		my $dirn = $File::Find::dir;
+		my $attr;
+		if (-d $file) {
+			$attr = stat ($file);
+			# dont follow directory links and nfs locations...
+			if (($attr->dev < 0x100) || (-l $file)) {
+				$File::Find::prune = 1;
+			} else {
+				$filehash->{$file} = [$dirn,$attr];
+			}
+		} else {
+			if (-l $file) {
+				$attr = lstat ($file);
+			} else {
+				$attr = stat ($file);
+			}
+			$filehash->{$file} = [$dirn,$attr];
+		}
+	}
+}
+
+#==========================================
+# __isEmptyDir
+#------------------------------------------
+sub __isEmptyDir {
+	my $this  = shift;
+	my $ldir  = shift;
+	my $empty = 1;
+	my $dh;
+	opendir($dh, $ldir) || return $empty;
+	readdir ($dh);
+	readdir ($dh);
+	if (readdir ($dh)) {
+		$empty = 0;
+	}
+	closedir $dh;
+	return $empty;
+}
+
+1;
+
+# vim: set noexpandtab:

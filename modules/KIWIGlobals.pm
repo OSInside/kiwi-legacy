@@ -1172,21 +1172,21 @@ sub _new_instance {
 	#==========================================
 	# Globals (path names)
 	#------------------------------------------
-	$data{Tools}     = $BasePath."/tools";
-	$data{Schema}    = $BasePath."/modules/KIWISchema.rng";
-	$data{SchemaTST} = $BasePath."/modules/KIWISchemaTest.rng";
-	$data{KConfig}   = $BasePath."/modules/KIWIConfig.sh";
-	$data{KMigrate}  = $BasePath."/modules/KIWIMigrate.txt";
-	$data{KRegion}   = $BasePath."/modules/KIWIEC2Region.txt";
-	$data{KMigraCSS} = $BasePath."/modules/KIWIMigrate.tgz";
-	$data{KSplit}    = $BasePath."/modules/KIWISplit.txt";
-	$data{KMigraTPL} = $BasePath."/modules";
-	$data{KStrip}    = $BasePath."/modules/KIWIConfig.txt";
-	$data{repoURI}   = $BasePath."/modules/KIWIURL.txt";
-	$data{Revision}  = $BasePath."/.revision";
-	$data{TestBase}  = $BasePath."/tests";
-	$data{SchemaCVT} = $BasePath."/xsl/master.xsl";
-	$data{Pretty}    = $BasePath."/xsl/print.xsl";
+	$data{Tools}       = $BasePath."/tools";
+	$data{Schema}      = $BasePath."/modules/KIWISchema.rng";
+	$data{SchemaTST}   = $BasePath."/modules/KIWISchemaTest.rng";
+	$data{KConfig}     = $BasePath."/modules/KIWIConfig.sh";
+	$data{KAnalyse}    = $BasePath."/modules/KIWIAnalyse.txt";
+	$data{KRegion}     = $BasePath."/modules/KIWIEC2Region.txt";
+	$data{KAnalyseCSS} = $BasePath."/modules/KIWIAnalyse.tgz";
+	$data{KSplit}      = $BasePath."/modules/KIWISplit.txt";
+	$data{KAnalyseTPL} = $BasePath."/modules";
+	$data{KStrip}      = $BasePath."/modules/KIWIConfig.txt";
+	$data{repoURI}     = $BasePath."/modules/KIWIURL.txt";
+	$data{Revision}    = $BasePath."/.revision";
+	$data{TestBase}    = $BasePath."/tests";
+	$data{SchemaCVT}   = $BasePath."/xsl/master.xsl";
+	$data{Pretty}      = $BasePath."/xsl/print.xsl";
 	#==========================================
 	# Globals (Supported filesystem names)
 	#------------------------------------------
