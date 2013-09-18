@@ -462,7 +462,7 @@ sub createReport {
 		print $FD '</table>'."\n";
 	}
 	if ($problem1) {
-		print $FD '<h1>Pattern conflict(s) by zypper</h1>'."\n";
+		print $FD '<h1>Pattern conflict(s)</h1>'."\n";
 		print $FD '<p>'."\n";
 		print $FD 'The following patterns could not be solved because ';
 		print $FD 'they have dependency conflicts. Please check the list ';
@@ -470,7 +470,7 @@ sub createReport {
 		print $FD "\n";
 		print $FD '<ul>'."\n";
 		print $FD '<li>'."\n";
-		print $FD 'Adding all software repositories to zypper which provide ';
+		print $FD 'Adding all software repositories which provide ';
 		print $FD 'the missing dependences, or';
 		print $FD "\n";
 		print $FD '</li>'."\n";
@@ -512,7 +512,7 @@ sub createReport {
 		print $FD '</pre>'."\n";
 	}
 	if (($failedJob1) && (@{$failedJob1})) {
-		print $FD '<h1>Pattern(s) not found by zypper</h1>'."\n";
+		print $FD '<h1>Pattern(s) not found</h1>'."\n";
 		print $FD '<p>'."\n";
 		print $FD 'The following patterns could not be found in your ';
 		print $FD 'repository list marked as installed. Please check the ';
@@ -520,7 +520,7 @@ sub createReport {
 		print $FD "\n";
 		print $FD '<ul>'."\n";
 		print $FD '<li>'."\n";
-		print $FD 'Adding a repository to zypper which provides the ';
+		print $FD 'Adding a repository which provides the ';
 		print $FD 'pattern, or';
 		print $FD "\n";
 		print $FD '</li>'."\n";
@@ -548,7 +548,7 @@ sub createReport {
 		print $FD "\n";
 		print $FD '<ul>'."\n";
 		print $FD '<li>'."\n";
-		print $FD 'Adding a repository to zypper which provides the ';
+		print $FD 'Adding a repository which provides the ';
 		print $FD 'package, or';
 		print $FD "\n";
 		print $FD '</li>'."\n";

@@ -244,7 +244,7 @@ sub __populateOperatingSystemVersion {
 #------------------------------------------
 sub __populateRepos {
 	# ...
-	# use zypper defined repositories as repo setup
+	# find configured repositories on this system
 	# ---
 	my $this    = shift;
 	my $kiwi    = $this->{kiwi};
@@ -276,6 +276,7 @@ sub __populateRepos {
 	#==========================================
 	# Obtain list from package manager
 	#------------------------------------------
+	# FIXME: move this into the KIWIManager backend
 	my @list    = qxx ("bash -c 'LANG=POSIX zypper lr --details 2>&1'");
 	chomp @list;
 	my $code    = $? >> 8;
@@ -386,9 +387,8 @@ sub __populateRepos {
 sub __populatePackageList {
 	# ...
 	# Find all packages installed on the system which doesn't
-	# belong to any of the installed patterns. This method
-	# requires a SUSE system based on zypper and rpm to work
-	# correctly
+	# belong to any of the installed patterns. This works
+	# only for systems which implementes a concept of patterns
 	# ---
 	my $this    = shift;
 	my $product = $this->{product};
@@ -468,8 +468,10 @@ sub __populatePackageList {
 	#------------------------------------------
 	if (@urllist) {
 		$kiwi -> info ("Creating System solvable from active repos...\n");
+		# FIXME: move this into the KIWIManager backend
+		my $opts = '-n --no-refresh';
 		my @list = qxx (
-			"bash -c 'LANG=POSIX zypper -n -R patterns --installed 2>&1'"
+			"bash -c 'LANG=POSIX zypper $opts patterns --installed 2>&1'"
 		);
 		my $code = $? >> 8;
 		if ($code != 0) {
@@ -502,7 +504,7 @@ sub __populatePackageList {
 			return;
 		}
 		# /.../
-		# solve the zypper pattern list into a package list and
+		# solve the pattern list into a package list and
 		# create a package list with packages _not_ part of the
 		# pattern list.
 		# ----

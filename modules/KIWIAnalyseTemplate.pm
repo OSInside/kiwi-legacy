@@ -274,6 +274,7 @@ sub writeKIWIScripts {
 		if ($flag ne "remote") {
 			next;
 		}
+		# FIXME: do this packagemanager related
 		print $FD "zypper ar \\\n\t\"".$url."\" \\\n\t\"".$alias."\"\n";
 	}
 	#==========================================
@@ -309,6 +310,7 @@ sub writeKIWIScripts {
 						}
 					}
 					if (! $alreadyThere) {
+						# FIXME: do this packagemanager related
 						print $FD "zypper ar \\\n\t\"";
 						print $FD $url."\" \\\n\t\"".$alias."\"\n";
 					}
