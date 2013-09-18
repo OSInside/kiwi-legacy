@@ -276,7 +276,8 @@ sub __populateRepos {
 	#==========================================
 	# Obtain list from package manager
 	#------------------------------------------
-	my @list    = qxx ("zypper lr --details 2>&1");	chomp @list;
+	my @list    = qxx ("bash -c 'LANG=POSIX zypper lr --details 2>&1'");
+	chomp @list;
 	my $code    = $? >> 8;
 	if ($code != 0) {
 		return;
@@ -467,7 +468,9 @@ sub __populatePackageList {
 	#------------------------------------------
 	if (@urllist) {
 		$kiwi -> info ("Creating System solvable from active repos...\n");
-		my @list = qxx ("zypper -n --no-refresh patterns --installed 2>&1");
+		my @list = qxx (
+			"bash -c 'LANG=POSIX zypper -n -R patterns --installed 2>&1'"
+		);
 		my $code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();
