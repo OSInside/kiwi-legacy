@@ -131,36 +131,37 @@ sub new {
 	my $cache = $dest.".cache";
 	if (-f $cache) {
 		$kiwi -> info ("Open cache file: $cache\n");
-		$cdata = retrieve($cache);
-		if (! $cdata) {
+		my $cdata_cur = retrieve($cache);
+		if (! $cdata_cur) {
 			$kiwi -> warning ("--> Failed to open cache file");
 			$kiwi -> skipped ();
-			undef $cache;
-		} elsif (! $cdata->{version}) {
+		} elsif (! $cdata_cur->{version}) {
 			$kiwi -> warning ("--> Cache doesn't provide version");
 			$kiwi -> skipped ();
-			undef $cache;
-		} elsif ($cdata->{version} ne $this->{gdata}->{Version}) {
+		} elsif ($cdata_cur->{version} ne $this->{gdata}->{Version}) {
 			$kiwi -> warning ("--> Cache version doesn't match");
 			$kiwi -> skipped ();
-			undef $cache;
-		} elsif ($cdata->{rpmdbsum}) {
+		} elsif ($cdata_cur->{rpmdbsum}) {
 			my $rpmdb = '/var/lib/rpm/Packages';
 			if (-e $rpmdb) {
 				my $dbsum = qxx ("cat $rpmdb | md5sum - | cut -f 1 -d-");
 				chomp $dbsum;
-				if ($dbsum ne $cdata->{rpmdbsum}) {
+				if ($dbsum ne $cdata_cur->{rpmdbsum}) {
 					$kiwi -> warning ("--> RPM database has changed");
 					$kiwi -> skipped ();
-					undef $cache;
+				} else {
+					$kiwi -> info ("--> Using cache file\n");
+					$cdata = $cdata_cur;
 				}
 			} else {
 				$kiwi -> warning ("--> RPM database not found");
 				$kiwi -> oops();
 				$kiwi -> info ("--> Using possibly outdated cache file\n");
+				$cdata = $cdata_cur;
 			}
 		} else {
 			$kiwi -> info ("--> Using cache file\n");
+			$cdata = $cdata_cur;
 		}
 	}
 	#==========================================
