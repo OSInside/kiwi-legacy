@@ -389,7 +389,6 @@ sub __populateCustomFiles {
 			} else {
 				$base = "/$name";
 			}
-			$base = "$dirn/$name";
 			$base =~ s/\/+/\//g;
 			$base =~ s/^\///;
 			next if $base eq './';
