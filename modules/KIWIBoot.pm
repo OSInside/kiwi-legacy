@@ -6183,8 +6183,8 @@ sub setStoragePartition {
 					} elsif ($type eq '8e') {
 						$p_cmd = "set $index lvm on";
 					} else {
-						# don't know about this flag, use default
-						next;
+						# be careful, this is a suse parted extension
+						$p_cmd = "set $index type 0x$type";
 					}
 					$kiwi -> loginfo ("PARTED input: $device [$p_cmd]\n");
 					$status = qxx (

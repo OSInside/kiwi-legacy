@@ -8394,8 +8394,8 @@ function createPartedInput {
 				elif [ "$ptypex" = "8e" ];then
 					cmdq="$cmdq set $partid lvm on"
 				else
-					# don't know about this flag, use default
-					flagok=0
+					# be careful, this is a suse parted extension
+					cmdq="$cmdq set $partid type 0x$ptypex"
 				fi
 				if [ ! "$partedTableType" = "gpt" ] && [ $flagok = 1 ];then
 					partedWrite "$disk" "$cmdq"
