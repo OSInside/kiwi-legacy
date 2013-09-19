@@ -341,21 +341,31 @@ sub createReport {
 	print $FD 'attributes in the type section of the config.xml file';
 	print $FD '</p>'."\n";
 	print $FD '<hr>'."\n";
-	print $FD '<table>'."\n";
-	my @list = qxx (
-		'rpm -qf --qf "%{NAME}:%{VERSION}\n" /lib/modules/$(uname -r)'
-	); chomp @list;
-	foreach my $item (sort @list) {
-		if ($item =~ /(.*):(.*)/) {
-			my $pac = $1;
-			my $ver = $2;
-			print $FD '<tr valign="top">'."\n";
-			print $FD '<td>'.$pac.'</td>'."\n";
-			print $FD '<td>'.$ver.'</td>'."\n";
-			print $FD '</tr>'."\n";
+	my $kernel = qxx ("uname -r");
+	chomp $kernel;
+	if (! -e "/lib/modules/$kernel") {
+		print $FD '<p>'."\n";
+		print $FD "Sorry no kernel package found for running kernel: $kernel ";
+		print $FD 'In case the kernel was updated make sure to reboot the ';
+		print $FD 'machine in order to activate the installed kernel ';
+		print $FD '</p>'."\n";
+	} else {
+		print $FD '<table>'."\n";
+		my @list = qxx (
+			"rpm -qf --qf \"%{NAME}:%{VERSION}\\n\" /lib/modules/$kernel"
+		); chomp @list;
+		foreach my $item (sort @list) {
+			if ($item =~ /(.*):(.*)/) {
+				my $pac = $1;
+				my $ver = $2;
+				print $FD '<tr valign="top">'."\n";
+				print $FD '<td>'.$pac.'</td>'."\n";
+				print $FD '<td>'.$ver.'</td>'."\n";
+				print $FD '</tr>'."\n";
+			}
 		}
+		print $FD '</table>'."\n";
 	}
-	print $FD '</table>'."\n";
 	#==========================================
 	# Hardware dependent packages report
 	#------------------------------------------
