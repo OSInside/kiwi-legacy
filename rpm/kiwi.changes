@@ -1,4 +1,23 @@
 -------------------------------------------------------------------
+Sun Sep 22 13:37:15 CEST 2013 - ms@suse.de
+
+- make sure systemIntegrity is set correctly to 'clean' for
+  netboot deployments into a ramdisk (bnc #839157)
+- follow up patch for setting systemIntegrity for netboot
+  deployments into a ramdisk. Along with systemIntegrity the
+  partition code has to check for haveRamDisk too (bnc #839157)
+
+-------------------------------------------------------------------
+Sun Sep 22 13:37:01 CEST 2013 - ms@suse.de
+
+- make sure IFS change in kernelCheck function will be
+  applied only in local scope (bnc #838921)
+- follow up fix for the IFS restore in kernelCheck function
+  The local scope of IFS is visible to functions called from
+  inside this block. Thus localizing IFS does not help, we have
+  to reset the value inside the function (bnc #838921)
+
+-------------------------------------------------------------------
 Mon Aug  5 12:46:52 CEST 2013 - ms@suse.de
 
 - fixed creation of .packages and .verified meta data if a
