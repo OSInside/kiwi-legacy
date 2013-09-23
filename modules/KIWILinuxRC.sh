@@ -8090,6 +8090,7 @@ function createHybridPersistent {
 		Echo "Failed to create hybrid persistent filesystem"
 		Echo "Persistent writing deactivated"
 		unset kiwi_hybridpersistent
+		return
 	fi
 	#======================================
 	# export read-write device name
