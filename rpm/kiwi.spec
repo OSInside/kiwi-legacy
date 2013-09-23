@@ -72,6 +72,7 @@ Requires:       checkmedia
 Requires:       coreutils
 Requires:       kiwi-tools >= %{version}
 Requires:       libxslt
+Requires:       git
 %if 0%{?rhel_version}
 # RHEL/CentOS seem to require the release info as well,
 # while matching the version. So the >=
