@@ -1176,7 +1176,8 @@ sub _new_instance {
 	$data{Schema}      = $BasePath."/modules/KIWISchema.rng";
 	$data{SchemaTST}   = $BasePath."/modules/KIWISchemaTest.rng";
 	$data{KConfig}     = $BasePath."/modules/KIWIConfig.sh";
-	$data{KAnalyse}    = $BasePath."/modules/KIWIAnalyse.txt";
+	$data{KAnalyse}    = $BasePath."/modules/KIWIAnalyse.systems";
+	$data{KAnalyseSkip}= $BasePath."/modules/KIWIAnalyse.skip";
 	$data{KRegion}     = $BasePath."/modules/KIWIEC2Region.txt";
 	$data{KAnalyseCSS} = $BasePath."/modules/KIWIAnalyse.tgz";
 	$data{KSplit}      = $BasePath."/modules/KIWISplit.txt";

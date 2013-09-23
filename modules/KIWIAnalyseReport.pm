@@ -145,9 +145,10 @@ sub createViews {
 		} else {
 			$mode = 'text data';
 		}
-		$kiwi -> info ("Creating JSON $mode parse tree...");
 		my @files  = @{$file_ref};
 		my $filenr = @files;
+		next if ! $filenr;
+		$kiwi -> info ("Creating JSON $mode parse tree...");
 		my $factor = 100 / $filenr;
 		my $done_percent = 0;
 		my $done_previos = 0;

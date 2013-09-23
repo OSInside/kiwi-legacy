@@ -75,63 +75,23 @@ sub new {
 	#==========================================
 	# Store default files not used for inspect
 	#------------------------------------------
-	my @denyFiles = (
-		'\.rpmnew',                     # no RPM backup files
-		'\.rpmsave',                    # []
-		'\.rpmorig',                    # []
-		'\.cache',                      # no cache files
-		'~$',                           # no emacs backup files
-		'\.swp$',                       # no vim backup files
-		'\.rej$',                       # no diff reject files
-		'\.lock$',                      # no lock files
-		'\.tmp$',                       # no tmp files
-		'\/etc\/gconf\/',               # no gconf files
-		'\.depend$',                    # no make depend targets
-		'\.backup$',                    # no sysconfig backup files
-		'\.gz',                         # no gzip archives
-		'\/usr\/src\/',                 # no sources
-		'\/spool',                      # no spool directories
-		'^\/dev\/',                     # no device node files
-		'^\/run\/',                     # no udev run files
-		'\/usr\/X11R6\/',               # no depreciated dirs
-		'\/tmp',                        # no /tmp data
-		'\/boot\/',                     # no /boot data
-		'\/proc\/',                     # no /proc data
-		'\/sys\/',                      # no /sys data
-		'\/abuild\/',                   # no /abuild data
-		'\/fillup-templates',           # no fillup data
-		'\/var\/lib\/rpm',              # no RPM data
-		'\/var\/lib\/zypp',             # no ZYPP data
-		'\/var\/lib\/smart',            # no smart data
-		'\/var\/lock\/',                # no locks
-		'\/var\/adm\/',                 # no var/adm
-		'\/var\/yp\/',                  # no yp files
-		'\/var\/lib\/',                 # no var/lib
-		'\/usr\/include\/',             # no header changes
-		'\/usr\/share/fonts\/',         # no font cache
-		'\/usr\/share/fonts-config\/',  # no font config
-		'\/usr\/share/locale-bundle\/', # no locale bundle
-		'\/usr\/share/sax\/',           # no sax data
-		'\/var\/log',                   # no logs
-		'\/var\/run',                   # no pid files
-		'\/etc\/fstab',                 # no fstab file
-		'\/etc\/udev\/rules.d',         # no udev rules
-		'\/media\/',                    # no media automount files
-		'\/lost\+\/found',              # no filesystem specific files
-		'\/var\/lib\/hardware\/',       # no hwinfo hardware files
-		'\/var\/cache\/',               # no cache files
-		'\/var\/db\/',                  # no db caches
-		'\/usr\/share\/doc\/',          # no documentation
-		'\/ruby\/gems\/',               # no ruby gems
-		'\/usr\/share\/mime\/',         # no mime types
-		'\/lost\+found',                # no fs inode backup
-		'\/icons',                      # no icon directories
-		'\/etc\/bootsplash',            # no splash data
-		'\/etc\/lvm',                   # no lvm meta data
-		'\/etc\/grub.conf',             # no bootloader config
-		'\.old$',                       # no .old files
-		'\/weak-updates'                # no weak-update links
-	);
+	my $global = KIWIGlobals -> instance();
+	$this->{gdata} = $global -> getKiwiConfig();
+	my @denyFiles = ();
+	my $FD = FileHandle -> new();
+	if (! $FD -> open ($this->{gdata}->{KAnalyseSkip})) {
+		$kiwi -> error  (
+			"KIWIAnalyseCustomData: Couldn't open custom exception data"
+		);
+		$kiwi -> failed ();
+		return;
+	}
+	while (my $line = <$FD>) {
+		next if ($line =~ /^#/);
+		chomp $line;
+		push @denyFiles,$line;
+	}
+	$FD -> close();
 	if (defined $excl) {
 		my @exclude = @{$excl};
 		foreach (@exclude) {
@@ -242,16 +202,12 @@ sub createCustomFileTree {
 	$done_percent = 0;
 	$done_previos = 0;
 	$done = 0;
-	foreach my $dir (sort @dirslist) {
-		mkpath ("$dest/custom/$dir", {verbose => 0});
-		$done_percent = int ($factor * $done);
-		if ($done_percent > $done_previos) {
-			$kiwi -> step ($done_percent);
-		}
-		$done_previos = $done_percent;
-		$done++;
-	}
+	qxx ("rm -rf $dest/custom 2>&1");
 	foreach my $dir (sort keys %filelist) {
+		next if ! %{$filelist{$dir}};
+		if (! -d "$dest/custom/$dir") {
+			mkpath ("$dest/custom/$dir", {verbose => 0});
+		}
 		next if ! chdir "$dest/custom/$dir";
 		foreach my $file (sort keys %{$filelist{$dir}}) {
 			if (-e "$dir/$file") {
@@ -651,6 +607,9 @@ sub __populateCustomFiles {
 	# walk through items in checkList and remove if substr occurs only once
 	# ----
 	my $tasks = @checkList;
+	if ($tasks == 0) {
+		$tasks = 1;
+	}
 	my $factor = 100 / $tasks;
 	my $done_percent = 0;
 	my $done_previos = 0;

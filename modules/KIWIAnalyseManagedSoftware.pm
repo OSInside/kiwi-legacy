@@ -179,64 +179,64 @@ sub getPackageCollections {
 # __populateOperatingSystemVersion
 #------------------------------------------
 sub __populateOperatingSystemVersion {
-    # ...
-    # Find the version information of this system according
-    # to the table KIWIAnalyse.txt
-    # ---
-    my $this = shift;
-    my $VFD = FileHandle -> new();
-    my $name;
-    my $vers;
-    my $plvl;
-    if (! $VFD -> open ("/etc/products.d/baseproduct")) {
-        return;
-    }
-    while (my $line = <$VFD>) {
-        if ($line =~ /<baseversion>(.*)<\/baseversion>/) {
-            $vers = $1;
-        } elsif ($line =~ /<version>(.*)<\/version>/) {
-            $vers = $1;
-        }
-        if ($line =~ /<patchlevel>(.*)<\/patchlevel>/) {
-            $plvl = $1;
-        }
-        if ($line =~ /<name>(.*)<\/name>/) {
-            $name = $1;
-        }
-    }
-    $VFD -> close();
-    if ((! $name) || (! $vers)) {
-        return;
-    }
-    if ($name eq 'SUSE_SLES') {
-        $name = 'SUSE-Linux-Enterprise-Server';
-    } elsif ($name eq 'SUSE_SLED') {
+	# ...
+	# Find the version information of this system according
+	# to the table KIWIAnalyse.systems
+	# ---
+	my $this = shift;
+	my $VFD = FileHandle -> new();
+	my $name;
+	my $vers;
+	my $plvl;
+	if (! $VFD -> open ("/etc/products.d/baseproduct")) {
+		return;
+	}
+	while (my $line = <$VFD>) {
+		if ($line =~ /<baseversion>(.*)<\/baseversion>/) {
+			$vers = $1;
+		} elsif ($line =~ /<version>(.*)<\/version>/) {
+			$vers = $1;
+		}
+		if ($line =~ /<patchlevel>(.*)<\/patchlevel>/) {
+			$plvl = $1;
+		}
+		if ($line =~ /<name>(.*)<\/name>/) {
+			$name = $1;
+		}
+	}
+	$VFD -> close();
+	if ((! $name) || (! $vers)) {
+		return;
+	}
+	if ($name eq 'SUSE_SLES') {
+		$name = 'SUSE-Linux-Enterprise-Server';
+	} elsif ($name eq 'SUSE_SLED') {
 		$name = 'SUSE-Linux-Enterprise-Desktop';
 	}
-    if ($plvl) {
-        $plvl = 'SP'.$plvl;
-        $name = $name.'-'.$vers.'-'.$plvl;
-    } else {
-        $name = $name.'-'.$vers;
-    }
-    my $MFD = FileHandle -> new();
-    if (! $MFD -> open ($this->{gdata}->{KAnalyse})) {
-        return;
-    }
-    while (my $line = <$MFD>) {
-        next if $line =~ /^#/;
-        if ($line =~ /(.*)\s*=\s*(.*)/) {
-            my $product= $1;
-            my $boot   = $2;
-            if ($product eq $name) {
-                close $MFD;
+	if ($plvl) {
+		$plvl = 'SP'.$plvl;
+		$name = $name.'-'.$vers.'-'.$plvl;
+	} else {
+		$name = $name.'-'.$vers;
+	}
+	my $MFD = FileHandle -> new();
+	if (! $MFD -> open ($this->{gdata}->{KAnalyse})) {
+		return;
+	}
+	while (my $line = <$MFD>) {
+		next if $line =~ /^#/;
+		if ($line =~ /(.*)\s*=\s*(.*)/) {
+			my $product= $1;
+			my $boot   = $2;
+			if ($product eq $name) {
+				close $MFD;
 				$this->{product} = $boot;
-                return $boot;
-            }
-        }
-    }
-    $MFD -> close();
-    return;
+				return $boot;
+			}
+		}
+	}
+	$MFD -> close();
+	return;
 }
 
 #==========================================
