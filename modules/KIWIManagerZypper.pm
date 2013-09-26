@@ -368,7 +368,7 @@ sub setupInstallationSource {
 				return;
 			}
 			$kiwi -> done ();
-			if ($source{$alias}{imgincl}) {
+			if (($source{$alias}{imgincl}) && (! -f $repo)) {
 				$kiwi -> info ("Adding $alias repo to image");
 				$sadd =~ s/--keep-packages//;
 				$data = qxx ("@kchroot zypper $sadd 2>&1");
@@ -391,6 +391,7 @@ sub setupInstallationSource {
 				}
 				$kiwi -> done ();
 			}
+
 		}
 		if ( $prio ) {
 			$kiwi -> info ("--> Set priority to: $prio");
