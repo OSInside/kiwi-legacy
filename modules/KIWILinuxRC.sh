@@ -6093,6 +6093,7 @@ function mountSystem {
 	# setup boot partition
 	#--------------------------------------
 	if \
+		[ -z "$HYBRID_RW" ]               && \
 		[ "$LOCAL_BOOT" = "no" ]          && \
 		[ ! "$systemIntegrity" = "fine" ] && \
 		[ $retval = 0 ]                   && \
