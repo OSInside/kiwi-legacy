@@ -183,7 +183,6 @@
 		<package name="perl-gettext"/>
 		<package name="permissions"/>
 		<package name="pm-utils"/>
-		<package name="pmtools"/>
 		<package name="suse-build-key"/>
 	</packages>
 </image>
