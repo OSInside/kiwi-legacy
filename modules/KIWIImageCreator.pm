@@ -294,7 +294,7 @@ sub prepareBootImage {
 	#==========================================
 	# merge/update boot incl. packages/archives
 	#------------------------------------------
-	if (! $this -> __addPackagesToBootBootXML ($systemXML, $bootXML)) {
+	if (! $this -> __addPackagesToBootXML ($systemXML, $bootXML)) {
 		return;
 	}
 	#==========================================
@@ -1591,7 +1591,7 @@ sub DESTROY {
 #==========================================
 # Private helper methods
 #------------------------------------------
-sub __addPackagesToBootBootXML {
+sub __addPackagesToBootXML {
 	# ...
 	# add boot included packages/archives information
 	# from the system XML data to the boot XML data
