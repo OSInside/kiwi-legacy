@@ -31,6 +31,7 @@ fi
 # Functions
 #------------------------------------------
 function clean {
+	umount /mnt &>/dev/null
 	if [ -d "$tmpdir" ];then
 		rm -rf $tmpdir
 	fi
@@ -103,7 +104,7 @@ if [ ! -d /boot/grub2/i386-pc ];then
 	echo "Can't find grub2(i386-pc) on this system"
 	clean
 fi
-cp -al /boot/grub2/i386-pc $tmpdir/boot/grub2
+cp -a /boot/grub2/i386-pc $tmpdir/boot/grub2
 
 #==========================================
 # create device.map file
