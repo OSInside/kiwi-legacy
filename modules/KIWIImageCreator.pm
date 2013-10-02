@@ -1603,6 +1603,7 @@ sub __addPackagesToBootXML {
 	my $bootArchives = $systemXML -> getBootIncludeArchives();
 	my $bootAddPacks = $systemXML -> getBootIncludePackages();
 	my $bootDelPacks = $systemXML -> getBootDeletePackages();
+	my @addPacks     = ();
 	if (@{$bootArchives}) {
 		$kiwi -> info ("Boot including archive(s) [bootstrap]:\n");
 		for my $archive (@{$bootArchives}) {
@@ -1616,6 +1617,17 @@ sub __addPackagesToBootXML {
 		for my $package (@{$bootAddPacks}) {
 			my $name = $package -> getName();
 			$kiwi -> info ("--> $name\n");
+			my $foundInDelPacks = 0;
+			for my $package (@{$bootDelPacks}) {
+				my $delName = $package -> getName();
+				if ($delName eq $name) {
+					$foundInDelPacks = 1;
+					last;
+				}
+			}
+			if (! $foundInDelPacks) {
+				push @addPacks, $name;
+			}
 		}
 		$bootXML -> addBootstrapPackages ($bootAddPacks);
 	}
@@ -1626,6 +1638,36 @@ sub __addPackagesToBootXML {
 			$kiwi -> info ("--> $name\n");
 		}
 		$bootXML -> addPackagesToDelete ($bootDelPacks);
+	}
+	my $deletePackages = $bootXML -> getPackagesToDelete();
+	if (($deletePackages) && (@addPacks)) {
+		my @resultDeletePackages;
+		my @exceptionList = ();
+		for my $package (@{$deletePackages}) {
+			my $delName = $package -> getName();
+			my $install = 0;
+			foreach my $instpack (@addPacks) {
+				if ($instpack eq $delName) {
+					$install = 1;
+					last;
+				}
+			}
+			if ($install) {
+				push @exceptionList,$delName
+			} else {
+				push @resultDeletePackages,$package;
+			}
+		}
+		if ((@resultDeletePackages) && (@exceptionList)) {
+			$kiwi -> info ("Packages protected from being deleted:\n");
+			foreach my $exception (@exceptionList) {
+				$kiwi -> warning (
+					"--> $exception: explicitly boot included"
+				);
+				$kiwi -> skipped ();
+			}
+			$bootXML -> setPackagesToDelete (\@resultDeletePackages);
+		}
 	}
 	return $this;
 }

@@ -1652,6 +1652,35 @@ sub getPackagesToDelete {
 }
 
 #==========================================
+# setPackagesToDelete
+#------------------------------------------
+sub setPackagesToDelete {
+	# ...
+	# set new list of PackageData objects for the packages
+	# that should be deleted.
+	# ---
+	my $this       = shift;
+	my $packages   = shift;
+	my $profNames  = shift;
+	my $sectionType= shift;
+	my @profsToUse = $this -> __getProfsToModify($profNames, 'package(s)');
+	if (! $sectionType) {
+		$sectionType = 'image';
+	}
+	for my $prof (@profsToUse) {
+		my %storeData = (
+			accessID => 'delPkgs',
+			profName => $prof,
+			type     => $sectionType
+		);
+		$this -> __clearInstallData (\%storeData);
+	}
+	return $this -> addPackagesToDelete (
+		$packages,$profNames,$sectionType
+	);
+}
+
+#==========================================
 # getPreferences
 #------------------------------------------
 sub getPreferences {
@@ -5229,6 +5258,41 @@ sub __setDefaultBuildType {
 		}
 	}
 	$this->{selectedType} = $defType;
+	return $this;
+}
+
+#==========================================
+# __clearInstallData
+#------------------------------------------
+sub __clearInstallData {
+	# ...
+	# Clear the given install data object in the proper
+	# location in the data structure.
+	# ---
+	my $this       = shift;
+	my $storeInfo  = shift;
+	my $accessID   = $storeInfo->{accessID};
+	my $arch       = $storeInfo->{arch};
+	my $profName   = $storeInfo->{profName};
+	my $type       = $storeInfo->{type};
+	my $kiwi       = $this->{kiwi};
+	if (! $accessID) {
+		my $msg = 'Internal error: __clearInstallData called without '
+			. 'accessID keyword argument.';
+		$kiwi -> erro($msg);
+		$kiwi -> failed();
+		return;
+	}
+	my %entryData = (
+		arch     => $arch,
+		profName => $profName,
+		type     => $type
+	);
+	my $entryPath = $this -> __getEntryPath(\%entryData);
+	if (! $entryPath) {
+		return;
+	}
+	undef $entryPath->{$accessID};
 	return $this;
 }
 
