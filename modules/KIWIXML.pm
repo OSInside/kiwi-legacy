@@ -1597,13 +1597,6 @@ sub getPackages {
 		my $name = $ignoreP -> getName();
 		$pckgFilter{$name} = 1;
 	}
-	# Filter any packages that are marked for deletion, this might save us
-	# some work later
-	my $delPckgs = $this -> __getInstallData('delPkgs');
-	for my $delP (@{$delPckgs}) {
-		my $name = $delP -> getName();
-		$pckgFilter{$name} = 1;
-	}
 	my @installPackages;
 	# Create the list of packages
 	for my $pckg (@{$pckgs}) {
