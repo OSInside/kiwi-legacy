@@ -1720,6 +1720,14 @@ sub __addPreferencesToBootXML {
 	if ($splashtheme) {
 		$bootpref -> setBootSplashTheme ($splashtheme);
 	}
+	#==========================================
+	# KIWIXMLPreferenceData
+	#------------------------------------------
+	# getPreferences returns a new KIWIXMLPreferenceData object
+	# containing combined information. Thus it's required to set
+	# the changed object back into the KIWIXML space
+	# ---
+	$bootXML -> setPreferences ($bootpref);
 	return $this;
 }
 
