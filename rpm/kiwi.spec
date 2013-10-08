@@ -120,6 +120,7 @@ Recommends:     db45-utils
 %endif
 # obsoletes
 Obsoletes:      kiwi-desc-usbboot <= 4.81
+Obsoletes:      kiwi-desc-xenboot <= 4.81
 # sources
 Source:         %{name}.tar.bz2
 Source1:        %{name}-rpmlintrc
