@@ -536,7 +536,7 @@ sub __populateCustomFiles {
 	if ($augtool) {
 		my %aug_files;
 		my $fd = FileHandle -> new();
-		if ($fd -> open ("$augtool print files/*|")) {
+		if ($fd -> open ("$augtool print /files/*|")) {
 			while (my $line = <$fd>) {
 				if ($line =~ /^\/files(.*)\/.*=/) {
 					my $file = $1;
