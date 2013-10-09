@@ -1140,7 +1140,7 @@ sub createImageLiveCD {
 	my $hybrid = 0;
 	my $isxen  = 0;
 	my $hybridpersistent = 0;
-	my $efibootloadsize  = 0;
+	my $bootloadsize = 0;
 	my $cmdline = "";
 	my $rootTarget = $cmdL->getRootTargetDir();
 	if (! $rootTarget) {
@@ -2025,7 +2025,7 @@ sub createImageLiveCD {
 			$kiwi -> failed ();
 			return;
 		}
-		$efibootloadsize = -s $efi_fat;
+		$bootloadsize = -s $efi_fat;
 	}
 	#==========================================
 	# copy base graphics boot CD files
@@ -2275,10 +2275,8 @@ sub createImageLiveCD {
 		if (! $isolinux -> callBootMethods()) {
 			$isoerror = 1;
 		}
-		if (($firmware eq "efi") || ($firmware eq "uefi")) {
-			if (! $isolinux -> addBootEFILive($efibootloadsize)) {
-				$isoerror = 1;
-			}
+		if (! $isolinux -> addBootLive($bootloadsize)) {
+			$isoerror = 1;
 		}
 		if (! $isolinux -> createISO()) {
 			$isoerror = 1;

@@ -856,17 +856,17 @@ sub mainTask
 					$this->logMsg('W', $msg);
 				}
 				else {
-										my $firmware = 'bios';
-										my $xmlFirmWare = $this->{m_xml} -> getImageType() -> getFirmwareType();
-										if ($xmlFirmWare) {
-											$firmware = $xmlFirmWare;
-										}
-                                        if ($firmware eq "efi" || $firmware eq "uefi") {
-		                            if (grep {"x86_64" eq $_} $this->{m_archlist}->headList()) {
-				            	$this->logMsg('I', "Add EFI Live setup");
-			                            $iso -> addBootEFILive(1);
-                                            }
-                                        }
+					my $firmware = 'bios';
+					my $xmlFirmWare = $this->{m_xml} -> getImageType() -> getFirmwareType();
+					if ($xmlFirmWare) {
+						$firmware = $xmlFirmWare;
+					}
+					if ($firmware eq "efi" || $firmware eq "uefi") {
+						if (grep {"x86_64" eq $_} $this->{m_archlist}->headList()) {
+							$this->logMsg('I', "Add Live setup");
+							$iso -> addBootLive(1);
+						}
+					}
 					$this->logMsg('I', "Boot methods called successfully");
 					$is_bootable = 1;
 				}
@@ -1415,7 +1415,7 @@ sub collectPackages {
 }
 # /collectPackages
 
-sub addToReportFile($$$)
+sub addToReportFile
 {
 	my ($this, $source, $medium, $target) = @_;
 
@@ -1425,6 +1425,7 @@ sub addToReportFile($$$)
 
         my $fh = $this->{m_reportLog}->{$medium};
         print $fh "$source from $target\n";
+	return $this;
 }
 
 #==========================================

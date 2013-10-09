@@ -373,16 +373,18 @@ sub ppc64_default {
 }
 
 #==========================================
-# addBootEFILive
+# addBootLive
 #------------------------------------------
-sub addBootEFILive {
-	my $this   = shift;
-	my $size   = shift;
-	my $para   = $this->{params};
-	my $sort   = $this->{sortfile};
-	my $src    = $this->{source};
-	my $tmpdir = $this->{tmpdir};
-	my $magicID= $this->{magicID};
+sub addBootLive {
+	my $this    = shift;
+	my $size    = shift;
+	my $para    = $this->{params};
+	my $sort    = $this->{sortfile};
+	my $src     = $this->{source};
+	my $tmpdir  = $this->{tmpdir};
+	my $magicID = $this->{magicID};
+	my $xml     = $this->{xml};
+	my $firmware= 'efi';
 	my $arch;
 	if ($size) {
 		$size = ($size + 2047) >> 11 << 2;
@@ -398,6 +400,16 @@ sub addBootEFILive {
 		return;
 	}
 	#==========================================
+	# Lookup firmware setup
+	#------------------------------------------
+	if ($xml) {
+		my $type = $xml -> getImageType();
+		my $xmlFirmWare = $type -> getFirmwareType();
+		if ($xmlFirmWare) {
+			$firmware = $xmlFirmWare;
+		}
+	}
+	#==========================================
 	# update sort file
 	#------------------------------------------
 	qxx ("echo $src/boot/$arch/efi 1000001 >> $sort");
@@ -409,10 +421,12 @@ sub addBootEFILive {
 	#==========================================
 	# update parameter list
 	#------------------------------------------
-	$para.= ' -eltorito-alt-boot ';
-	# FIXME: setting the size limits it, which is pretty bad
-	# $para.= " -boot-load-size $size";
-	$para.= " -b boot/$arch/efi";
+	if ($firmware ne 'bios') {
+		$para.= ' -eltorito-alt-boot ';
+		# FIXME: setting the size limits it, which is pretty bad
+		# $para.= " -boot-load-size $size";
+		$para.= " -b boot/$arch/efi";
+	}
 	$para.= ' -no-emul-boot -joliet-long -hide glump -hide-joliet glump';
 	$this -> {params} = $para;
 	return $this;
@@ -769,8 +783,8 @@ sub findAndCopyMagicBlock {
 	$kiwi -> loginfo ("
 		KIWIIsoLinux::findAndCopyMagicBlock start block at: $start\n"
 	);
-	$this->{efi_offset} = $start * 4;
-	$this->{efi_loop_offset} = $start * 2048;
+	$this->{magic_offset} = $start * 4;
+	$this->{magic_loop_offset} = $start * 2048;
 	return $start;
 }
 
@@ -871,7 +885,7 @@ sub createISO {
 	#==========================================
 	# Call mkisofs second stage
 	#------------------------------------------
-	if (($hybrid) && (($firmware eq "efi" || $firmware eq "uefi"))) {
+	if ($hybrid) {
 		if (! $this -> findAndCopyMagicBlock()) {
 			$kiwi -> error  ("Failed to read magic iso header");
 			$kiwi -> failed ();
@@ -1067,14 +1081,11 @@ sub createHybrid {
 	my $typeOpt   = $optNames{'type'};
 	my $partOpt   = $optNames{'partok'};
 	my $uefiOpt   = $optNames{'uefi'};
-	my $offset    = 0;
+	my $offset    = $this->{magic_offset};
 	if (($firmware eq 'efi' || $firmware eq 'uefi') && (! $uefiOpt)) {
-		$kiwi -> warning ("installed isohybrid does not support EFI");
-		$kiwi -> skipped ();
-		$firmware = 'efi';
-	}
-	if ($firmware eq 'efi' || $firmware eq 'uefi') {
-		$offset = $this->{efi_offset};
+		$kiwi -> error ("installed isohybrid does not support --uefi option");
+		$kiwi -> failed ();
+		return;
 	}
 	#==========================================
 	# Create partition table on iso
