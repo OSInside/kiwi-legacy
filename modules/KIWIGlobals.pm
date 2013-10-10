@@ -1080,157 +1080,6 @@ sub checkLVMbind {
 }
 
 #==========================================
-# Private helper methods
-#------------------------------------------
-#==========================================
-# One time initialization code
-#------------------------------------------
-sub _new_instance {
-	# ...
-	# Construct a KIWIGlobals object. The globals object holds configuration
-	# data for kiwi itself and provides methods
-	# ---
-	#==========================================
-	# Object setup
-	#------------------------------------------
-	my $this  = {};
-	my $class = shift;
-	bless $this,$class;
-	#==========================================
-	# Constructor setup
-	#------------------------------------------
-	my $arch = KIWIQX::qxx ("uname -m");
-	chomp $arch;
-	#==========================================
-	# Globals (generic)
-	#------------------------------------------
-	my %data;
-	$data{Version}         = "5.05.36";
-	$data{Publisher}       = "SUSE LINUX GmbH";
-	$data{Preparer}        = "KIWI - http://opensuse.github.com/kiwi";
-	$data{ConfigName}      = "config.xml";
-	$data{Partitioner}     = "parted";
-	$data{FSInodeRatio}    = 16384;
-	$data{FSMinInodes}     = 20000;
-	$data{FSInodeSize}     = 256;
-	$data{DiskStartSector} = 2048;
-	$data{DiskSectorSize}  = 512;
-	$data{DiskAlignment}   = 4096;
-	$data{SnapshotChunk}   = 4096;
-	$data{SnapshotCount}   = "5G";
-	$data{OverlayRootTree} = 0;
-	#============================================
-	# Read .kiwirc
-	#--------------------------------------------
-	my $file;
-	if (-f '.kiwirc') {
-		$file = '.kiwirc';
-	}
-	elsif (($ENV{'HOME'}) && (-f $ENV{'HOME'}.'/.kiwirc')) {
-		$file = "$ENV{'HOME'}/.kiwirc";
-	}
-	my $kiwi = KIWILog -> instance();
-	$this->{kiwi} = $kiwi;
-	if ($file) {
-		if (! do $file) {
-			$kiwi -> warning ("Invalid $file file...");
-			$kiwi -> skipped ();
-		} else {
-			$kiwi -> info ("Using $file");
-			$kiwi -> done ();
-		}
-	}
-	## no critic
-	no strict 'vars';
-	$data{BasePath}      = $BasePath;      # configurable base kiwi path
-	$data{Gzip}          = $Gzip;          # configurable gzip command
-	$data{Xz}            = $Xz;            # configurable xz command
-	$data{LogServerPort} = $LogServerPort; # configurable log server port
-	$data{LuksCipher}    = $LuksCipher;    # configurable luks passphrase
-	$data{System}        = $System;        # configurable base image desc. path
-	if ( ! defined $BasePath ) {
-		$data{BasePath} = "/usr/share/kiwi";
-	}
-	if (! defined $Gzip) {
-		$data{Gzip} = "gzip -9";
-	}
-	if (! defined $Xz) {
-		$data{Xz} = "xz -6";
-	}
-	if (! defined $LogServerPort) {
-		$data{LogServerPort} = "off";
-	}
-	if (! defined $System) {
-		$data{System} = $data{BasePath}."/image";
-	}
-	if (! defined $LuksCipher) {
-		# empty
-	}
-	use strict 'vars';
-	## use critic
-	my $BasePath = $data{BasePath};
-	#==========================================
-	# Globals (path names)
-	#------------------------------------------
-	$data{Tools}       = $BasePath."/tools";
-	$data{Schema}      = $BasePath."/modules/KIWISchema.rng";
-	$data{SchemaTST}   = $BasePath."/modules/KIWISchemaTest.rng";
-	$data{KConfig}     = $BasePath."/modules/KIWIConfig.sh";
-	$data{KAnalyse}    = $BasePath."/modules/KIWIAnalyse.systems";
-	$data{KAnalyseSkip}= $BasePath."/modules/KIWIAnalyse.skip";
-	$data{KRegion}     = $BasePath."/modules/KIWIEC2Region.txt";
-	$data{KAnalyseCSS} = $BasePath."/modules/KIWIAnalyse.tgz";
-	$data{KSplit}      = $BasePath."/modules/KIWISplit.txt";
-	$data{KAnalyseTPL} = $BasePath."/modules";
-	$data{KStrip}      = $BasePath."/modules/KIWIConfig.txt";
-	$data{repoURI}     = $BasePath."/modules/KIWIURL.txt";
-	$data{Revision}    = $BasePath."/.revision";
-	$data{TestBase}    = $BasePath."/tests";
-	$data{SchemaCVT}   = $BasePath."/xsl/master.xsl";
-	$data{Pretty}      = $BasePath."/xsl/print.xsl";
-	#==========================================
-	# Globals (Supported filesystem names)
-	#------------------------------------------
-	my %KnownFS;
-	my $locator = KIWILocator -> instance();
-	$KnownFS{ext4}{tool}      = $locator -> getExecPath("mkfs.ext4");
-	$KnownFS{ext3}{tool}      = $locator -> getExecPath("mkfs.ext3");
-	$KnownFS{ext2}{tool}      = $locator -> getExecPath("mkfs.ext2");
-	$KnownFS{squashfs}{tool}  = $locator -> getExecPath("mksquashfs");
-	$KnownFS{overlayfs}{tool} = $locator -> getExecPath("mksquashfs");
-	$KnownFS{clicfs}{tool}    = $locator -> getExecPath("mkclicfs");
-	$KnownFS{clic}{tool}      = $locator -> getExecPath("mkclicfs");
-	$KnownFS{seed}{tool}      = $locator -> getExecPath("mkfs.btrfs");
-	$KnownFS{overlay}{tool}   = $locator -> getExecPath("mksquashfs");
-	$KnownFS{clic_udf}{tool}  = $locator -> getExecPath("mkclicfs");
-	$KnownFS{compressed}{tool}= $locator -> getExecPath("mksquashfs");
-	$KnownFS{reiserfs}{tool}  = $locator -> getExecPath("mkreiserfs");
-	$KnownFS{btrfs}{tool}     = $locator -> getExecPath("mkfs.btrfs");
-	$KnownFS{xfs}{tool}       = $locator -> getExecPath("mkfs.xfs");
-	$KnownFS{zfs}{tool}       = $locator -> getExecPath("zpool");
-	$KnownFS{cpio}{tool}      = $locator -> getExecPath("cpio");
-	$KnownFS{ext3}{ro}        = 0;
-	$KnownFS{ext4}{ro}        = 0;
-	$KnownFS{ext2}{ro}        = 0;
-	$KnownFS{squashfs}{ro}    = 1;
-	$KnownFS{clicfs}{ro}      = 1;
-	$KnownFS{clic}{ro}        = 1;
-	$KnownFS{compressed}{ro}  = 1;
-	$KnownFS{reiserfs}{ro}    = 0;
-	$KnownFS{btrfs}{ro}       = 0;
-	$KnownFS{xfs}{ro}         = 0;
-	$KnownFS{zfs}{ro}         = 0;
-	$KnownFS{cpio}{ro}        = 0;
-	$data{KnownFS} = \%KnownFS;
-	#==========================================
-	# Store object data
-	#------------------------------------------
-	$this->{data} = \%data;
-	$this->{UmountStack} = [];
-	return $this;
-}
-
-#==========================================
 # downloadFile
 #------------------------------------------
 sub downloadFile {
@@ -1382,6 +1231,351 @@ sub downloadFile {
 		return;
 	}
 	return $url;
+}
+
+#==========================================
+# checkType
+#------------------------------------------
+sub checkType {
+	# ...
+	# Check the image type
+	# ---
+	my $this = shift;
+	my $xml  = shift;
+	my $root = shift;
+	my $cmdL = shift;
+	my $kiwi = $this->{kiwi};
+	my $type = $xml -> getImageType();
+	my $para = "ok";
+	#==========================================
+	# check for required image attributes
+	#------------------------------------------
+	if ($cmdL->getFatStorage()) {
+		# /.../
+		# if the option --fat-storage is set, we set grub2
+		# as bootloader because it works well on USB sticks.
+		# Additionally we use LVM because it allows to better
+		# resize the stick
+		# ----
+		$type -> setBootLoader('grub2');
+		$type -> setBootImageFileSystem('fat16');
+		$xml  -> updateType ($type);
+		my $sysDisk = $xml -> getSystemDiskConfig();
+		if (! $sysDisk) {
+			my %lvmData;
+			$sysDisk = KIWIXMLSystemdiskData -> new(\%lvmData);
+			$xml -> addSystemDisk ($sysDisk);
+		}
+	} elsif ($cmdL->getLVM()) {
+		# /.../
+		# if the option --lvm is set, we add/update a systemdisk
+		# element which triggers the use of LVM
+		# ----
+		my $sysDisk = $xml -> getSystemDiskConfig();
+		if (! $sysDisk) {
+			my %lvmData;
+			$sysDisk = KIWIXMLSystemdiskData -> new(\%lvmData);
+			$xml -> addSystemDisk ($sysDisk);
+		}
+	}
+	#==========================================
+	# check for required filesystem tool(s)
+	#------------------------------------------
+	my $typeName   = $type -> getTypeName();
+	my $flags      = $type -> getFlags();
+	my $filesystem = $type -> getFilesystem();
+	if (($flags) || ($filesystem)) {
+		my @fs = ();
+		if (($flags) && ($typeName eq "iso")) {
+			push (@fs, $flags);
+		} else {
+			@fs = split (/,/, $filesystem);
+		}
+		foreach my $fs (@fs) {
+			my %result = KIWIGlobals -> instance() -> checkFileSystem ($fs);
+			if (%result) {
+				if (! $result{hastool}) {
+					$kiwi -> error (
+						"Can't find filesystem tool for: $result{type}"
+					);
+					$kiwi -> failed ();
+					return;
+				}
+			} else {
+				$kiwi -> error ("Can't check filesystem attributes from: $fs");
+				$kiwi -> failed ();
+				return;
+			}
+		}
+	}
+	#==========================================
+	# check for default bootloader on iso
+	#------------------------------------------
+	my $hybrid = $type -> getHybrid();
+	if ($typeName eq 'iso') {
+		# /.../
+		# live iso images always use isolinux for bios boot
+		# and grub2 for efi boot. Thus overwrite the default
+		# if a hybrid setup is specified we have to use
+		# isolinux as well
+		# ----
+		$type -> setBootLoader ('isolinux');
+	} elsif ($hybrid) {
+		# /.../
+		# if type is not iso but hybrid is specified for the
+		# creation of a hybrid install iso media we have to
+		# set the bootloader type to an isolinux compatible
+		# loader, in this case we use syslinux
+		# ----
+		$type -> setBootLoader ('syslinux');
+	}
+	#==========================================
+	# check tool/driver compatibility
+	#------------------------------------------
+	my $check_mksquashfs = 0;
+	if ($typeName eq "squashfs") {
+		$check_mksquashfs = 1;
+	}
+	my $instISO = $type -> getInstallIso();
+	my $instStick = $type -> getInstallStick();
+	if ( $instISO || $instStick ) {
+		$check_mksquashfs = 1;
+	}
+	if (($filesystem) && ($filesystem =~ /squashfs/)) {
+		$check_mksquashfs = 1;
+	}
+	if (($flags) && ($flags =~ /compressed/)) {
+		$check_mksquashfs = 1;
+	}
+	#==========================================
+	# squashfs...
+	#------------------------------------------
+	if ($check_mksquashfs) {
+		my $km = glob ("$root/lib/modules/*/kernel/fs/squashfs/squashfs.ko");
+		if ($km) {
+			my $mktool_vs = KIWIQX::qxx (
+				"mksquashfs -version 2>&1 | head -n 1"
+			);
+			my $module_vs = KIWIQX::qxx ("modinfo -d $km 2>&1");
+			my $error = 0;
+			if ($mktool_vs =~ /^mksquashfs version (\d)\.\d \(/) {
+				$mktool_vs = $1;
+				$error++;
+			}
+			if ($module_vs =~ /^squashfs (\d)\.\d,/) {
+				$module_vs = $1;
+				$error++;
+			}
+			$kiwi -> loginfo ("squashfs mktool major version: $mktool_vs\n");
+			$kiwi -> loginfo ("squashfs module major version: $module_vs\n");
+			my $msg = "--> squashfs tool/driver mismatch";
+			if (($error == 2) && ($mktool_vs ne $module_vs)) {
+				$kiwi -> error (
+					"$msg: $mktool_vs vs $module_vs"
+				);
+				$kiwi -> failed ();
+				return;
+			}
+		}
+	}
+	#==========================================
+	# build and check KIWIImage method params
+	#------------------------------------------
+	my $bootImg = $type -> getBootImageDescript();
+	SWITCH: for ($typeName) {
+		/^iso/ && do {
+			if (! $bootImg) {
+				$kiwi -> error ("$typeName: No boot image specified");
+				$kiwi -> failed ();
+				return;
+			}
+			$para = $bootImg;
+			if ((defined $flags) && ($flags ne "")) {
+				$para .= ",$flags";
+			}
+			last SWITCH;
+		};
+		/^split/ && do {
+			my $fsro = $type -> getFSReadOnly();
+			my $fsrw = $type -> getFSReadWrite();
+			if (! $fsro || ! $fsrw) {
+				$kiwi -> error ("$typeName: No filesystem pair specified");
+				$kiwi -> failed ();
+				return;
+			}
+			$para = "$fsrw,$fsro";
+			if (defined $bootImg) {
+				$para .= ":".$bootImg;
+			}
+			last SWITCH;
+		};
+		/^vmx|oem|pxe/ && do {
+			if (! defined $filesystem) {
+				$kiwi -> error ("$typeName: No filesystem specified");
+				$kiwi -> failed ();
+				return;
+			}
+			if (! defined $bootImg) {
+				$kiwi -> error ("$typeName: No boot image specified");
+				$kiwi -> failed ();
+				return;
+			}
+			$para = $filesystem . ":" . $bootImg;
+			last SWITCH;
+		};
+	}
+	return $para;
+}
+
+#==========================================
+# Private helper methods
+#------------------------------------------
+#==========================================
+# One time initialization code
+#------------------------------------------
+sub _new_instance {
+	# ...
+	# Construct a KIWIGlobals object. The globals object holds configuration
+	# data for kiwi itself and provides methods
+	# ---
+	#==========================================
+	# Object setup
+	#------------------------------------------
+	my $this  = {};
+	my $class = shift;
+	bless $this,$class;
+	#==========================================
+	# Constructor setup
+	#------------------------------------------
+	my $arch = KIWIQX::qxx ("uname -m");
+	chomp $arch;
+	#==========================================
+	# Globals (generic)
+	#------------------------------------------
+	my %data;
+	$data{Version}         = "5.05.36";
+	$data{Publisher}       = "SUSE LINUX GmbH";
+	$data{Preparer}        = "KIWI - http://opensuse.github.com/kiwi";
+	$data{ConfigName}      = "config.xml";
+	$data{Partitioner}     = "parted";
+	$data{FSInodeRatio}    = 16384;
+	$data{FSMinInodes}     = 20000;
+	$data{FSInodeSize}     = 256;
+	$data{DiskStartSector} = 2048;
+	$data{DiskSectorSize}  = 512;
+	$data{DiskAlignment}   = 4096;
+	$data{SnapshotChunk}   = 4096;
+	$data{SnapshotCount}   = "5G";
+	$data{OverlayRootTree} = 0;
+	#============================================
+	# Read .kiwirc
+	#--------------------------------------------
+	my $file;
+	if (-f '.kiwirc') {
+		$file = '.kiwirc';
+	}
+	elsif (($ENV{'HOME'}) && (-f $ENV{'HOME'}.'/.kiwirc')) {
+		$file = "$ENV{'HOME'}/.kiwirc";
+	}
+	my $kiwi = KIWILog -> instance();
+	$this->{kiwi} = $kiwi;
+	if ($file) {
+		if (! do $file) {
+			$kiwi -> warning ("Invalid $file file...");
+			$kiwi -> skipped ();
+		} else {
+			$kiwi -> info ("Using $file");
+			$kiwi -> done ();
+		}
+	}
+	## no critic
+	no strict 'vars';
+	$data{BasePath}      = $BasePath;      # configurable base kiwi path
+	$data{Gzip}          = $Gzip;          # configurable gzip command
+	$data{Xz}            = $Xz;            # configurable xz command
+	$data{LogServerPort} = $LogServerPort; # configurable log server port
+	$data{LuksCipher}    = $LuksCipher;    # configurable luks passphrase
+	$data{System}        = $System;        # configurable base image desc. path
+	if ( ! defined $BasePath ) {
+		$data{BasePath} = "/usr/share/kiwi";
+	}
+	if (! defined $Gzip) {
+		$data{Gzip} = "gzip -9";
+	}
+	if (! defined $Xz) {
+		$data{Xz} = "xz -6";
+	}
+	if (! defined $LogServerPort) {
+		$data{LogServerPort} = "off";
+	}
+	if (! defined $System) {
+		$data{System} = $data{BasePath}."/image";
+	}
+	if (! defined $LuksCipher) {
+		# empty
+	}
+	use strict 'vars';
+	## use critic
+	my $BasePath = $data{BasePath};
+	#==========================================
+	# Globals (path names)
+	#------------------------------------------
+	$data{Tools}       = $BasePath."/tools";
+	$data{Schema}      = $BasePath."/modules/KIWISchema.rng";
+	$data{SchemaTST}   = $BasePath."/modules/KIWISchemaTest.rng";
+	$data{KConfig}     = $BasePath."/modules/KIWIConfig.sh";
+	$data{KAnalyse}    = $BasePath."/modules/KIWIAnalyse.systems";
+	$data{KAnalyseSkip}= $BasePath."/modules/KIWIAnalyse.skip";
+	$data{KRegion}     = $BasePath."/modules/KIWIEC2Region.txt";
+	$data{KAnalyseCSS} = $BasePath."/modules/KIWIAnalyse.tgz";
+	$data{KSplit}      = $BasePath."/modules/KIWISplit.txt";
+	$data{KAnalyseTPL} = $BasePath."/modules";
+	$data{KStrip}      = $BasePath."/modules/KIWIConfig.txt";
+	$data{repoURI}     = $BasePath."/modules/KIWIURL.txt";
+	$data{Revision}    = $BasePath."/.revision";
+	$data{TestBase}    = $BasePath."/tests";
+	$data{SchemaCVT}   = $BasePath."/xsl/master.xsl";
+	$data{Pretty}      = $BasePath."/xsl/print.xsl";
+	#==========================================
+	# Globals (Supported filesystem names)
+	#------------------------------------------
+	my %KnownFS;
+	my $locator = KIWILocator -> instance();
+	$KnownFS{ext4}{tool}      = $locator -> getExecPath("mkfs.ext4");
+	$KnownFS{ext3}{tool}      = $locator -> getExecPath("mkfs.ext3");
+	$KnownFS{ext2}{tool}      = $locator -> getExecPath("mkfs.ext2");
+	$KnownFS{squashfs}{tool}  = $locator -> getExecPath("mksquashfs");
+	$KnownFS{overlayfs}{tool} = $locator -> getExecPath("mksquashfs");
+	$KnownFS{clicfs}{tool}    = $locator -> getExecPath("mkclicfs");
+	$KnownFS{clic}{tool}      = $locator -> getExecPath("mkclicfs");
+	$KnownFS{seed}{tool}      = $locator -> getExecPath("mkfs.btrfs");
+	$KnownFS{overlay}{tool}   = $locator -> getExecPath("mksquashfs");
+	$KnownFS{clic_udf}{tool}  = $locator -> getExecPath("mkclicfs");
+	$KnownFS{compressed}{tool}= $locator -> getExecPath("mksquashfs");
+	$KnownFS{reiserfs}{tool}  = $locator -> getExecPath("mkreiserfs");
+	$KnownFS{btrfs}{tool}     = $locator -> getExecPath("mkfs.btrfs");
+	$KnownFS{xfs}{tool}       = $locator -> getExecPath("mkfs.xfs");
+	$KnownFS{zfs}{tool}       = $locator -> getExecPath("zpool");
+	$KnownFS{cpio}{tool}      = $locator -> getExecPath("cpio");
+	$KnownFS{ext3}{ro}        = 0;
+	$KnownFS{ext4}{ro}        = 0;
+	$KnownFS{ext2}{ro}        = 0;
+	$KnownFS{squashfs}{ro}    = 1;
+	$KnownFS{clicfs}{ro}      = 1;
+	$KnownFS{clic}{ro}        = 1;
+	$KnownFS{compressed}{ro}  = 1;
+	$KnownFS{reiserfs}{ro}    = 0;
+	$KnownFS{btrfs}{ro}       = 0;
+	$KnownFS{xfs}{ro}         = 0;
+	$KnownFS{zfs}{ro}         = 0;
+	$KnownFS{cpio}{ro}        = 0;
+	$data{KnownFS} = \%KnownFS;
+	#==========================================
+	# Store object data
+	#------------------------------------------
+	$this->{data} = \%data;
+	$this->{UmountStack} = [];
+	return $this;
 }
 
 1;

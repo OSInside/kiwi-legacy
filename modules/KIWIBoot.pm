@@ -238,8 +238,8 @@ sub new {
 	#==========================================
 	# setup pointer to XML configuration
 	#------------------------------------------
+	my $rootpath = $system;
 	if (defined $system) {
-		my $rootpath = $system;
 		if (! -d $system) {
 			#==========================================
 			# mount system image
@@ -319,6 +319,9 @@ sub new {
 	# store type information
 	#------------------------------------------
 	if (defined $xml) {
+		if (! KIWIGlobals -> instance() -> checkType ($xml,$rootpath,$cmdL)) {
+			return;
+		}
 		my $xmltype = $xml -> getImageType();
 		if (! $xmltype) {
 			return;
