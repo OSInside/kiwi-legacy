@@ -11,6 +11,11 @@
 <a href="graph.html">Dependency Graph</a>
 <hr>
 <ul>
+<li><a href="KIWIAnalyse.html">KIWIAnalyse</a></li>
+<li><a href="KIWIAnalyseCustomData.html">KIWIAnalyseCustomData</a></li>
+<li><a href="KIWIAnalyseManagedSoftware.html">KIWIAnalyseManagedSoftware</a></li>
+<li><a href="KIWIAnalyseReport.html">KIWIAnalyseReport</a></li>
+<li><a href="KIWIAnalyseTemplate.html">KIWIAnalyseTemplate</a></li>
 <li><a href="KIWIArch.html">KIWIArch</a></li>
 <li><a href="KIWIArchList.html">KIWIArchList</a></li>
 <li><a href="KIWIBoot.html">KIWIBoot</a></li>
@@ -37,7 +42,6 @@
 <li><a href="KIWIManagerSmart.html">KIWIManagerSmart</a></li>
 <li><a href="KIWIManagerYum.html">KIWIManagerYum</a></li>
 <li><a href="KIWIManagerZypper.html">KIWIManagerZypper</a></li>
-<li><a href="KIWIMigrate.html">KIWIMigrate</a></li>
 <li><a href="KIWIOverlay.html">KIWIOverlay</a></li>
 <li><a href="KIWIProductData.html">KIWIProductData</a></li>
 <li><a href="KIWIProfileFile.html">KIWIProfileFile</a></li>
@@ -91,16 +95,21 @@
 <h2>Unresolvable call information</h2>
 <p>
 <ul>
+<li>__generateWanted</li>
+<ul>
+<li>Cannot disambiguate call to: __generateWanted in KIWIAnalyseCustomData at 418
+</li>
+</ul>
 <li>cleanMount</li>
 <ul>
-<li>Cannot disambiguate call to: cleanMount in KIWIImageCreator at 1578
+<li>Cannot disambiguate call to: cleanMount in KIWIImageCreator at 1579
 </li>
-<li>Cannot disambiguate call to: cleanMount in KIWIImageCreator at 1586
+<li>Cannot disambiguate call to: cleanMount in KIWIImageCreator at 1587
 </li>
 </ul>
 <li>createImage</li>
 <ul>
-<li>Could not add cross reference for 'createImage' on 'KIWIImageBuildFactory', called from KIWIImageCreator:createImage:874; no entry.
+<li>Could not add cross reference for 'createImage' on 'KIWIImageBuildFactory', called from KIWIImageCreator:createImage:875; no entry.
 </li>
 </ul>
 <li>getArch</li>
@@ -109,9 +118,9 @@
 </li>
 <li>Cannot disambiguate call to: getArch in KIWICollect at 404
 </li>
-<li>Cannot disambiguate call to: getArch in KIWIImage at 3303
+<li>Cannot disambiguate call to: getArch in KIWIImage at 3301
 </li>
-<li>Cannot disambiguate call to: getArch in KIWIImage at 3309
+<li>Cannot disambiguate call to: getArch in KIWIImage at 3307
 </li>
 <li>Cannot disambiguate call to: getArch in KIWIImageFormat at 1057
 </li>
@@ -154,7 +163,7 @@
 <ul>
 <li>Cannot disambiguate call to: getBootKernel in KIWIImageCreator at 329
 </li>
-<li>Cannot disambiguate call to: getBootKernel in KIWIImageCreator at 1856
+<li>Cannot disambiguate call to: getBootKernel in KIWIImageCreator at 1907
 </li>
 <li>Cannot disambiguate call to: getBootKernel in KIWIProfileFile at 337
 </li>
@@ -165,7 +174,7 @@
 <ul>
 <li>Cannot disambiguate call to: getBootProfile in KIWIImageCreator at 328
 </li>
-<li>Cannot disambiguate call to: getBootProfile in KIWIImageCreator at 1874
+<li>Cannot disambiguate call to: getBootProfile in KIWIImageCreator at 1925
 </li>
 <li>Could not add cross reference for 'getBootProfile' on 'KIWIBoot', called from KIWIImageFormat:getBootProfile:117; no entry.
 </li>
@@ -188,13 +197,13 @@
 </li>
 <li>Cannot disambiguate call to: getConfigDir in KIWIImage at 1147
 </li>
-<li>Cannot disambiguate call to: getConfigDir in KIWIImage at 2408
+<li>Cannot disambiguate call to: getConfigDir in KIWIImage at 2406
 </li>
 <li>Cannot disambiguate call to: getConfigDir in KIWIImageCreator at 117
 </li>
-<li>Cannot disambiguate call to: getConfigDir in KIWIIsoLinux at 838
+<li>Cannot disambiguate call to: getConfigDir in KIWIIsoLinux at 852
 </li>
-<li>Cannot disambiguate call to: getConfigDir in KIWIIsoLinux at 904
+<li>Cannot disambiguate call to: getConfigDir in KIWIIsoLinux at 918
 </li>
 <li>Cannot disambiguate call to: getConfigDir in KIWIRuntimeChecker at 528
 </li>
@@ -209,34 +218,39 @@
 <li>Cannot disambiguate call to: getConfigDir in KIWIXMLInfo at 71
 </li>
 </ul>
+<li>getDestination</li>
+<ul>
+<li>Cannot disambiguate call to: getDestination in KIWIImage at 3321
+</li>
+</ul>
 <li>getEditBootConfig</li>
 <ul>
-<li>Cannot disambiguate call to: getEditBootConfig in KIWIBoot at 5175
+<li>Cannot disambiguate call to: getEditBootConfig in KIWIBoot at 5178
 </li>
 <li>Cannot disambiguate call to: getEditBootConfig in KIWIImage at 2210
 </li>
-<li>Cannot disambiguate call to: getEditBootConfig in KIWIIsoLinux at 833
+<li>Cannot disambiguate call to: getEditBootConfig in KIWIIsoLinux at 847
 </li>
 </ul>
 <li>getEditBootInstall</li>
 <ul>
-<li>Cannot disambiguate call to: getEditBootInstall in KIWIBoot at 5771
+<li>Cannot disambiguate call to: getEditBootInstall in KIWIBoot at 5774
 </li>
-<li>Cannot disambiguate call to: getEditBootInstall in KIWIImage at 2294
+<li>Cannot disambiguate call to: getEditBootInstall in KIWIImage at 2292
 </li>
-<li>Cannot disambiguate call to: getEditBootInstall in KIWIIsoLinux at 899
+<li>Cannot disambiguate call to: getEditBootInstall in KIWIIsoLinux at 913
 </li>
 </ul>
 <li>getFilesToDelete</li>
 <ul>
-<li>Cannot disambiguate call to: getFilesToDelete in KIWIImageCreator at 1956
+<li>Cannot disambiguate call to: getFilesToDelete in KIWIImageCreator at 2007
 </li>
 <li>Cannot disambiguate call to: getFilesToDelete in KIWIProfileFile at 439
 </li>
 </ul>
 <li>getLibsToKeep</li>
 <ul>
-<li>Cannot disambiguate call to: getLibsToKeep in KIWIImageCreator at 1960
+<li>Cannot disambiguate call to: getLibsToKeep in KIWIImageCreator at 2011
 </li>
 <li>Cannot disambiguate call to: getLibsToKeep in KIWIProfileFile at 459
 </li>
@@ -255,31 +269,35 @@
 </li>
 <li>Cannot disambiguate call to: getName in KIWICollect at 399
 </li>
-<li>Cannot disambiguate call to: getName in KIWICollect at 2498
+<li>Cannot disambiguate call to: getName in KIWICollect at 2499
 </li>
-<li>Cannot disambiguate call to: getName in KIWICollect at 2573
+<li>Cannot disambiguate call to: getName in KIWICollect at 2574
 </li>
-<li>Cannot disambiguate call to: getName in KIWICollect at 2625
+<li>Cannot disambiguate call to: getName in KIWICollect at 2626
 </li>
-<li>Cannot disambiguate call to: getName in KIWICollect at 2629
+<li>Cannot disambiguate call to: getName in KIWICollect at 2630
 </li>
-<li>Cannot disambiguate call to: getName in KIWIImage at 2516
+<li>Cannot disambiguate call to: getName in KIWIImage at 2514
 </li>
-<li>Cannot disambiguate call to: getName in KIWIImage at 2563
+<li>Cannot disambiguate call to: getName in KIWIImage at 2561
 </li>
-<li>Cannot disambiguate call to: getName in KIWIImage at 2570
+<li>Cannot disambiguate call to: getName in KIWIImage at 2568
 </li>
-<li>Cannot disambiguate call to: getName in KIWIImage at 2640
+<li>Cannot disambiguate call to: getName in KIWIImage at 2638
 </li>
-<li>Cannot disambiguate call to: getName in KIWIImage at 2719
+<li>Cannot disambiguate call to: getName in KIWIImage at 2717
 </li>
-<li>Cannot disambiguate call to: getName in KIWIImageCreator at 731
+<li>Cannot disambiguate call to: getName in KIWIImageCreator at 732
 </li>
-<li>Cannot disambiguate call to: getName in KIWIImageCreator at 1609
+<li>Cannot disambiguate call to: getName in KIWIImageCreator at 1611
 </li>
-<li>Cannot disambiguate call to: getName in KIWIImageCreator at 1617
+<li>Cannot disambiguate call to: getName in KIWIImageCreator at 1619
 </li>
-<li>Cannot disambiguate call to: getName in KIWIImageCreator at 1625
+<li>Cannot disambiguate call to: getName in KIWIImageCreator at 1623
+</li>
+<li>Cannot disambiguate call to: getName in KIWIImageCreator at 1638
+</li>
+<li>Cannot disambiguate call to: getName in KIWIImageCreator at 1648
 </li>
 <li>Cannot disambiguate call to: getName in KIWIManager at 332
 </li>
@@ -315,19 +333,17 @@
 </li>
 <li>Cannot disambiguate call to: getName in KIWIXML at 1597
 </li>
-<li>Cannot disambiguate call to: getName in KIWIXML at 1604
+<li>Cannot disambiguate call to: getName in KIWIXML at 1603
 </li>
-<li>Cannot disambiguate call to: getName in KIWIXML at 1610
+<li>Cannot disambiguate call to: getName in KIWIXML at 2434
 </li>
-<li>Cannot disambiguate call to: getName in KIWIXML at 2403
+<li>Cannot disambiguate call to: getName in KIWIXML at 2478
 </li>
-<li>Cannot disambiguate call to: getName in KIWIXML at 2447
+<li>Cannot disambiguate call to: getName in KIWIXML at 2786
 </li>
-<li>Cannot disambiguate call to: getName in KIWIXML at 2755
+<li>Cannot disambiguate call to: getName in KIWIXML at 5334
 </li>
-<li>Cannot disambiguate call to: getName in KIWIXML at 5268
-</li>
-<li>Cannot disambiguate call to: getName in KIWIXML at 5269
+<li>Cannot disambiguate call to: getName in KIWIXML at 5335
 </li>
 <li>Cannot disambiguate call to: getName in KIWIXMLInfo at 117
 </li>
@@ -342,15 +358,24 @@
 <li>Cannot disambiguate call to: getName in KIWIXMLInfo at 843
 </li>
 </ul>
+<li>getPackageCollections</li>
+<ul>
+<li>Cannot disambiguate call to: getPackageCollections in KIWICache at 168
+</li>
+<li>Cannot disambiguate call to: getPackageCollections in KIWIManager at 338
+</li>
+<li>Cannot disambiguate call to: getPackageCollections in KIWIXMLInfo at 128
+</li>
+</ul>
 <li>getPackageManager</li>
 <ul>
 <li>Cannot disambiguate call to: getPackageManager in KIWIImageCreator at 107
 </li>
-<li>Cannot disambiguate call to: getPackageManager in KIWIImageCreator at 1649
+<li>Cannot disambiguate call to: getPackageManager in KIWIImageCreator at 1692
 </li>
 <li>Cannot disambiguate call to: getPackageManager in KIWIRuntimeChecker at 559
 </li>
-<li>Cannot disambiguate call to: getPackageManager in KIWIXML at 2119
+<li>Cannot disambiguate call to: getPackageManager in KIWIXML at 2150
 </li>
 <li>Cannot disambiguate call to: getPackageManager in KIWIXMLInfo at 98
 </li>
@@ -359,7 +384,7 @@
 <ul>
 <li>Cannot disambiguate call to: getPackages in KIWICache at 163
 </li>
-<li>Cannot disambiguate call to: getPackages in KIWIImageCreator at 728
+<li>Cannot disambiguate call to: getPackages in KIWIImageCreator at 729
 </li>
 <li>Cannot disambiguate call to: getPackages in KIWIManager at 330
 </li>
@@ -377,9 +402,26 @@
 <li>Cannot disambiguate call to: getPriority in KIWIXMLInfo at 764
 </li>
 </ul>
+<li>getRepositories</li>
+<ul>
+<li>Cannot disambiguate call to: getRepositories in KIWIImageCreator at 267
+</li>
+<li>Cannot disambiguate call to: getRepositories in KIWIManagerZypper at 80
+</li>
+<li>Cannot disambiguate call to: getRepositories in KIWIRoot at 96
+</li>
+<li>Cannot disambiguate call to: getRepositories in KIWIRuntimeChecker at 652
+</li>
+<li>Cannot disambiguate call to: getRepositories in KIWIXMLInfo at 150
+</li>
+<li>Cannot disambiguate call to: getRepositories in KIWIXMLInfo at 494
+</li>
+<li>Cannot disambiguate call to: getRepositories in KIWIXMLInfo at 885
+</li>
+</ul>
 <li>getToolsToKeep</li>
 <ul>
-<li>Cannot disambiguate call to: getToolsToKeep in KIWIImageCreator at 1964
+<li>Cannot disambiguate call to: getToolsToKeep in KIWIImageCreator at 2015
 </li>
 <li>Cannot disambiguate call to: getToolsToKeep in KIWIProfileFile at 449
 </li>
@@ -395,35 +437,35 @@
 </ul>
 <li>getXMLElement</li>
 <ul>
-<li>Cannot disambiguate call to: getXMLElement in KIWIXML at 2315
+<li>Cannot disambiguate call to: getXMLElement in KIWIXML at 2346
 </li>
-<li>Cannot disambiguate call to: getXMLElement in KIWIXML at 2345
+<li>Cannot disambiguate call to: getXMLElement in KIWIXML at 2376
 </li>
-<li>Cannot disambiguate call to: getXMLElement in KIWIXML at 2361
+<li>Cannot disambiguate call to: getXMLElement in KIWIXML at 2392
 </li>
-<li>Cannot disambiguate call to: getXMLElement in KIWIXML at 2370
+<li>Cannot disambiguate call to: getXMLElement in KIWIXML at 2401
 </li>
-<li>Cannot disambiguate call to: getXMLElement in KIWIXML at 2406
+<li>Cannot disambiguate call to: getXMLElement in KIWIXML at 2437
 </li>
-<li>Cannot disambiguate call to: getXMLElement in KIWIXML at 2450
+<li>Cannot disambiguate call to: getXMLElement in KIWIXML at 2481
 </li>
-<li>Cannot disambiguate call to: getXMLElement in KIWIXML at 2469
+<li>Cannot disambiguate call to: getXMLElement in KIWIXML at 2500
 </li>
-<li>Cannot disambiguate call to: getXMLElement in KIWIXML at 2478
+<li>Cannot disambiguate call to: getXMLElement in KIWIXML at 2509
 </li>
-<li>Cannot disambiguate call to: getXMLElement in KIWIXML at 2489
+<li>Cannot disambiguate call to: getXMLElement in KIWIXML at 2520
 </li>
-<li>Cannot disambiguate call to: getXMLElement in KIWIXML at 2498
+<li>Cannot disambiguate call to: getXMLElement in KIWIXML at 2529
 </li>
-<li>Cannot disambiguate call to: getXMLElement in KIWIXML at 2518
+<li>Cannot disambiguate call to: getXMLElement in KIWIXML at 2549
 </li>
-<li>Cannot disambiguate call to: getXMLElement in KIWIXML at 2528
+<li>Cannot disambiguate call to: getXMLElement in KIWIXML at 2559
 </li>
-<li>Cannot disambiguate call to: getXMLElement in KIWIXML at 2977
+<li>Cannot disambiguate call to: getXMLElement in KIWIXML at 3008
 </li>
-<li>Cannot disambiguate call to: getXMLElement in KIWIXML at 2990
+<li>Cannot disambiguate call to: getXMLElement in KIWIXML at 3021
 </li>
-<li>Cannot disambiguate call to: getXMLElement in KIWIXML at 4097
+<li>Cannot disambiguate call to: getXMLElement in KIWIXML at 4128
 </li>
 <li>Cannot disambiguate call to: getXMLElement in KIWIXMLSplitData at 338
 </li>
@@ -484,7 +526,7 @@
 </ul>
 <li>setPackageManager</li>
 <ul>
-<li>Cannot disambiguate call to: setPackageManager in KIWIImageCreator at 1651
+<li>Cannot disambiguate call to: setPackageManager in KIWIImageCreator at 1694
 </li>
 </ul>
 <li>setupExcludeDocs</li>
