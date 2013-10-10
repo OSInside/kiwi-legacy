@@ -4445,7 +4445,7 @@ function setupNetworkDHCPCD {
 	#--------------------------------------
 	for j in 1 2 ;do
 		for i in 1 2 3 4 5 6 7 8 9 10 11;do
-			for try_iface in $prefer_iface ; do
+			for try_iface in ${prefer_iface[*]} ; do
 				if [ -s /var/lib/dhcpcd/dhcpcd-$try_iface.info ] &&
 					grep -q "^IPADDR=" /var/lib/dhcpcd/dhcpcd-$try_iface.info
 				then
@@ -4467,7 +4467,7 @@ function setupNetworkDHCPCD {
 	#======================================
 	# select interface from preferred list
 	#--------------------------------------
-	for try_iface in $prefer_iface $DHCPCD_STARTED; do
+	for try_iface in ${prefer_iface[*]} $DHCPCD_STARTED; do
 		if [ -s /var/lib/dhcpcd/dhcpcd-$try_iface.info ] &&
 			grep -q "^IPADDR=" /var/lib/dhcpcd/dhcpcd-$try_iface.info
 		then
@@ -4559,7 +4559,7 @@ function setupNetworkDHCLIENT {
 	#--------------------------------------
 	for j in 1 2 ;do
 		for i in 1 2 3 4 5 6 7 8 9 10 11;do
-			for try_iface in $prefer_iface ; do
+			for try_iface in ${prefer_iface[*]} ; do
 				if [ -f /var/lib/dhclient/${try_iface}.lease ] &&
 					grep -q "fixed-address" /var/lib/dhclient/${try_iface}.lease
 				then
@@ -4582,7 +4582,7 @@ function setupNetworkDHCLIENT {
 	#======================================
 	# select interface from preferred list
 	#--------------------------------------
-	for try_iface in $prefer_iface $DHCPCD_STARTED; do
+	for try_iface in ${prefer_iface[*]} $DHCPCD_STARTED; do
 		if [ -f /var/lib/dhclient/${try_iface}.lease ] &&
 			grep -q "fixed-address" /var/lib/dhclient/${try_iface}.lease
 		then
@@ -4626,13 +4626,18 @@ function setupNetwork {
 	local dev_list=0
 	local index=0
 	local hwicmd=/usr/sbin/hwinfo
-	local prefer_iface=eth0
 	local opts="--noipv4ll -p"
 	local try_iface
 	#======================================
 	# global variable setup
 	#--------------------------------------
-	export DHCPCD_STARTED
+	# setting interface names will hurt in the future because
+	# the names are no longer predictable. Read the following for
+	# further details: http://www.freedesktop.org
+	#     --> wiki/Software/systemd/PredictableNetworkInterfaceNames
+	# ----
+	export prefer_iface=eth0
+	export DHCPCD_STARTED=""
 	#======================================
 	# detect iface and HWaddr
 	#--------------------------------------
