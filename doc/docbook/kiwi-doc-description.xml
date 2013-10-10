@@ -1929,8 +1929,8 @@
    &lt;package name="name" bootinclude="true" bootdelete="true"/&gt; 
    &lt;archive name="name" bootinclude="true"/&gt; 
    &lt;package .../&gt; 
-   &lt;opensusePattern name="name"/&gt; 
-   &lt;opensusePattern .../&gt;
+   &lt;namedCollection name="name"/&gt; 
+   &lt;namedCollection .../&gt;
    &lt;opensuseProduct name="name"/&gt; 
    &lt;opensuseProduct .../&gt; 
    &lt;ignore name="name"/&gt; 
@@ -1939,7 +1939,7 @@
 
       <para>The mandatory <sgmltag>packages</sgmltag> element specifies
         the list of packages (element <sgmltag>package</sgmltag>) and
-        patterns (element <sgmltag>opensusePattern</sgmltag>) to be used
+        patterns (element <sgmltag>namedCollection</sgmltag>) to be used
         with the image. The value of the <sgmltag class="attribute"
           >type</sgmltag> attribute specifies how the packages and
         patterns listed are handled, supported values are as follows: </para>
@@ -1962,7 +1962,7 @@
             <para>When using the delete type only
                 <sgmltag>package</sgmltag> elements are considered, all
               other specifications such as
-                <sgmltag>opensusePattern</sgmltag> are ignored. The
+                <sgmltag>namedCollection</sgmltag> are ignored. The
               given package names are stored in the
                 $<envar>delete</envar> environment variable of the
                 <filename>/.profile</filename> file created by KIWI. The
@@ -2033,7 +2033,7 @@ $(<command>rpm</command> -q ‘baseGetPackagesForDeletion‘ | <command>grep</co
         <para> Using a pattern name allows you to considerably shorten
           the list of specified packages in the <filename>config.xml</filename>
           file. A named pattern, specified with the <sgmltag
-            class="element">opensusePattern</sgmltag> element is a
+            class="element">namedCollection</sgmltag> element is a
           representation of a predefined list of packages. Specifying a
           pattern will install all packages listed in the named pattern to be
           installed in the image. Support for patterns is SUSE-specific, 
