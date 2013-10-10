@@ -189,7 +189,7 @@ function OEMInstall {
 		else
 			Echo "Found Install Disk: $biosBootDevice"
 			mkdir -p /cdrom
-			mount $(ddn $biosBootDevice $kiwi_RootPart) /cdrom
+			mount $(ddn $biosBootDevice $kiwi_InstallRootPart) /cdrom
 			export OEMInstallType=DISK
 			export imageDiskDevice=$biosBootDevice
 		fi

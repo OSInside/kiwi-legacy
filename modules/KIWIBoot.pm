@@ -1148,9 +1148,11 @@ sub setupInstallStick {
 	$vmsize = sprintf ("%.0f", $vmsize);
 	$vmsize = $vmsize."M";
 	#==========================================
-	# Setup image basename
+	# Setup image basename and partid file
 	#------------------------------------------
 	my $nameusb = basename ($system);
+	my $partidfile = $diskname;
+	$partidfile =~ s/\.raw.install.raw$/\.pids/;
 	#==========================================
 	# Create virtual disk to be dumped on stick
 	#------------------------------------------
@@ -1219,14 +1221,14 @@ sub setupInstallStick {
 	push @commands,"n","p:lxboot",$pnr,".","+".$irdsize."M";
 	push @commands,"t",$pnr,$partid;
 	push @commands,"a",$pnr;
-	$this->{partids}{boot} = $pnr;
+	$this->{partids}{installboot} = $pnr;
 	#==========================================
 	# setup install partition
 	#------------------------------------------
 	if ($gotsys) {
 		$pnr++;
 		push @commands,"n","p:lxinstall",$pnr,".",".";
-		$this->{partids}{root} = $pnr;
+		$this->{partids}{installroot} = $pnr;
 	}
 	push @commands,"w","q";
 	#==========================================
@@ -1255,6 +1257,14 @@ sub setupInstallStick {
 	}
 	$kiwi -> done();
 	#==========================================
+	# Create partition IDs meta data file
+	#------------------------------------------
+	$kiwi -> info ("Create install partition IDs meta data...");
+	if (! $this -> setupPartIDs ($partidfile)) {
+		return;
+	}
+	$kiwi -> done();
+	#==========================================
 	# setup device mapper
 	#------------------------------------------
 	$kiwi -> info ("Setup device mapper for partition access");
@@ -1271,10 +1281,10 @@ sub setupInstallStick {
 	#==========================================
 	# Setup device names
 	#------------------------------------------
-	my $boot = $deviceMap{boot};
+	my $boot = $deviceMap{installboot};
 	my $data;
 	if ($gotsys) {
-		$data = $deviceMap{root};
+		$data = $deviceMap{installroot};
 	}
 	#==========================================
 	# Create filesystem on partitions
@@ -3173,46 +3183,86 @@ sub setupPartIDs {
 	my $file = shift;
 	my $kiwi = $this->{kiwi};
 	if ($this->{partids}) {
+		my %currentIDs;
 		my $ID_FD = FileHandle -> new();
-		if (! $ID_FD -> open (">$file")) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Couldn't create partition ID information");
-			$kiwi -> failed ();
-			return;
+		if (-e $file) {
+			if (! $ID_FD -> open ($file)) {
+				$kiwi -> failed ();
+				$kiwi -> error  ("Couldn't open partition ID information");
+				$kiwi -> failed ();
+				return;
+			}
+			while (my $line = <$ID_FD>) {
+				$currentIDs{$line} = 1;
+			}
+			$ID_FD -> close();
+			if (! $ID_FD -> open (">>$file")) {
+				$kiwi -> failed ();
+				$kiwi -> error  ("Couldn't append partition ID information");
+				$kiwi -> failed ();
+				return;
+			}
+		} else {
+			if (! $ID_FD -> open (">$file")) {
+				$kiwi -> failed ();
+				$kiwi -> error  ("Couldn't create partition ID information");
+				$kiwi -> failed ();
+				return;
+			}
 		}
+		my $entry;
 		if ($this->{md}) {
-			print $ID_FD "kiwi_RaidPart=\"$this->{partids}{root}\"\n";
-			print $ID_FD "kiwi_RaidDev=/dev/md0\n";
+			$entry = "kiwi_RaidPart=\"$this->{partids}{root}\"\n";
+			if (! $currentIDs{$entry}) { print $ID_FD $entry }
+			$entry = "kiwi_RaidDev=/dev/md0\n";
+			if (! $currentIDs{$entry}) { print $ID_FD $entry }
 		}
 		if ($this->{lvm}) {
 			if ($this->{partids}{root_lv}) {
-				print $ID_FD "kiwi_RootPart=\"$this->{partids}{root_lv}\"\n";
+				$entry = "kiwi_RootPart=\"$this->{partids}{root_lv}\"\n";
+				if (! $currentIDs{$entry}) { print $ID_FD $entry }
 			}
 			if ($this->{partids}{readonly_lv}) {
-				print $ID_FD "kiwi_ROPart=\"$this->{partids}{readonly_lv}\"\n";
+				$entry = "kiwi_ROPart=\"$this->{partids}{readonly_lv}\"\n";
+				if (! $currentIDs{$entry}) { print $ID_FD $entry }
 			}
 			if ($this->{partids}{readwrite_lv}) {
-				print $ID_FD "kiwi_RWPart=\"$this->{partids}{readwrite_lv}\"\n";
+				$entry = "kiwi_RWPart=\"$this->{partids}{readwrite_lv}\"\n";
+				if (! $currentIDs{$entry}) { print $ID_FD $entry }
 			}
 		} else {
 			if ($this->{partids}{root}) {
-				print $ID_FD "kiwi_RootPart=\"$this->{partids}{root}\"\n";
+				$entry = "kiwi_RootPart=\"$this->{partids}{root}\"\n";
+				if (! $currentIDs{$entry}) { print $ID_FD $entry }
 			}
 			if ($this->{partids}{readonly}) {
-				print $ID_FD "kiwi_ROPart=\"$this->{partids}{readonly}\"\n";
+				$entry = "kiwi_ROPart=\"$this->{partids}{readonly}\"\n";
+				if (! $currentIDs{$entry}) { print $ID_FD $entry }
 			}
 			if ($this->{partids}{readwrite}) {
-				print $ID_FD "kiwi_RWPart=\"$this->{partids}{readwrite}\"\n";
+				$entry = "kiwi_RWPart=\"$this->{partids}{readwrite}\"\n";
+				if (! $currentIDs{$entry}) { print $ID_FD $entry }
 			}
 		}
+		if ($this->{partids}{installboot}) {
+			$entry = "kiwi_InstallRootPart=\"$this->{partids}{installroot}\"\n";
+			if (! $currentIDs{$entry}) { print $ID_FD $entry }
+		}
+		if ($this->{partids}{installroot}) {
+			$entry = "kiwi_InstallBootPart=\"$this->{partids}{installboot}\"\n";
+			if (! $currentIDs{$entry}) { print $ID_FD $entry }
+		}
 		if ($this->{partids}{boot}) {
-			print $ID_FD "kiwi_BootPart=\"$this->{partids}{boot}\"\n";
+			$entry = "kiwi_BootPart=\"$this->{partids}{boot}\"\n";
+			if (! $currentIDs{$entry}) { print $ID_FD $entry }
 		}
 		if ($this->{partids}{jump}) {
-			print $ID_FD "kiwi_JumpPart=\"$this->{partids}{jump}\"\n";
+			$entry = "kiwi_JumpPart=\"$this->{partids}{jump}\"\n";
+			if (! $currentIDs{$entry}) { print $ID_FD $entry }
 		}
 		if ($this->{partids}{biosgrub}) {
-			print $ID_FD "kiwi_BiosGrub=\"$this->{partids}{biosgrub}\"\n";
+			$entry = "kiwi_BiosGrub=\"$this->{partids}{biosgrub}\"\n";
+			if (! $currentIDs{$entry}) { print $ID_FD $entry }
 		}
 		$ID_FD -> close();
 	}
@@ -6273,7 +6323,9 @@ sub setDefaultDeviceMap {
 	}
 	# wait for udev to finish device creation
 	qxx ("udevadm settle --timeout=30 2>&1");
-	for my $part (qw(root readonly readwrite boot jump)) {
+	for my $part
+		(qw(root readonly readwrite boot jump installroot installboot)
+	) {
 		if ($this->{partids}{$part}) {
 			$result{$part} = $this -> __getPartDevice (
 				$device,$this->{partids}{$part}
@@ -6297,7 +6349,9 @@ sub setLoopDeviceMap {
 	if (! defined $device) {
 		return;
 	}
-	for my $part (qw(root readonly readwrite boot jump)) {
+	for my $part
+		(qw(root readonly readwrite boot jump installroot installboot)
+	) {
 		if ($this->{partids}{$part}) {
 			$result{$part} = $this -> __getPartDevice (
 				$device,$this->{partids}{$part}
