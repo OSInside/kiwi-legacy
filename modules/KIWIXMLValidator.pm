@@ -1325,6 +1325,38 @@ sub __checkTypeConfigConsist {
 }
 
 #==========================================
+# __checkTypeInstallMediaConsist
+#------------------------------------------
+sub __checkTypeInstallMediaConsist {
+	# ...
+	# Cehck that the install media settings are consistent
+	# Valid combinations
+	# installiso="true"
+	# installstick="true"
+	# installstick="true" installiso="true"
+	# installiso="true" hybrid="true"
+	# ---
+	my $this = shift;
+	my @types = $this->{systemTree} -> getElementsByTagName('type');
+	for my $type (@types) {
+		my $hybrid = $type -> getAttribute('hybrid');
+		if ($hybrid && $hybrid eq 'true') {
+			my $stick = $type -> getAttribute('installstick');
+			if ($stick && $stick eq 'true') {
+				my $kiwi = $this -> {kiwi};
+				my $msg = 'Combination of hybrid="true" and '
+					. 'installstick="true" is ambiguous.';
+				$kiwi -> error($msg);
+				$kiwi -> failed();
+				return;
+			}
+		}
+	}
+
+	return 1;
+}
+
+#==========================================
 # __checkTypePckgsTypeExists
 #------------------------------------------
 sub __checkTypePckgsTypeExists {
@@ -1842,6 +1874,9 @@ sub __validateConsistency {
 		return;
 	}
 	if (! $this -> __checkTypeConfigConsist()) {
+		return;
+	}
+	if (! $this -> __checkTypeInstallMediaConsist()) {
 		return;
 	}
 	if (! $this -> __checkTypePckgsTypeExists()) {
