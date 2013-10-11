@@ -1234,6 +1234,36 @@ sub test_typeConfigConsist {
 }
 
 #==========================================
+# test_typeInstallMediaConsist
+#------------------------------------------
+sub test_typeInstallMediaConsist {
+	# ...
+	# Test that use of installstick=true and hybrid=true is flagged
+	# as inconsistent
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my @invalidConfigs = $this -> __getInvalidFiles('typeInstMedia');
+	for my $iConfFile (@invalidConfigs) {
+		my $validator = $this -> __getValidator($iConfFile);
+		$validator -> validate();
+		my $msg = $kiwi -> getMessage();
+		my $expectedMsg = 'Combination of hybrid="true" and '
+			. 'installstick="true" is ambiguous.';
+		$this -> assert_str_equals($expectedMsg, $msg);
+		my $msgT = $kiwi -> getMessageType();
+		$this -> assert_str_equals('error', $msgT);
+		my $state = $kiwi -> getState();
+		$this -> assert_str_equals('failed', $state);
+		# Test this condition last to get potential error messages
+		$this -> assert_not_null($validator);
+	}
+	my @validConfigs = $this -> __getValidFiles('typeInstMedia');
+	$this -> __verifyValid(@validConfigs);
+	return;
+}
+
+#==========================================
 # test_typePackTypeExists
 #------------------------------------------
 sub test_typePackTypeExists {
