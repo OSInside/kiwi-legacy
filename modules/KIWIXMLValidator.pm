@@ -1583,6 +1583,12 @@ sub __checkVersionDefinition {
 	my $systemTree = $this->{systemTree};
 	my @versions = $systemTree -> getElementsByTagName('version');
 	my $numVersions = @versions;
+	if (! @versions) {
+		my $msg = 'The <version> element must be present';
+		$kiwi -> error  ($msg);
+		$kiwi -> failed ();
+		return;
+	}
 	if ($numVersions > 1) {
 		my $msg = "Only one <version> definition expected, found $numVersions";
 		$kiwi -> error  ($msg);

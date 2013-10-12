@@ -1355,6 +1355,12 @@ sub test_versionFormat {
 		$validator -> validate();
 		my $msg = $kiwi -> getMessage();
 		my $expectedMsg = "Expected 'Major.Minor.Release'";
+		if ($iConfFile =~ /versionFormatInvalid_3\.xml/smx) {
+			$expectedMsg = 'The <version> element must be present';
+		}
+		if ($iConfFile =~ /versionFormatInvalid_4\.xml/smx) {
+			$expectedMsg = 'Only one <version> definition expected, found 2';
+		}
 		$this -> assert_str_equals($expectedMsg, $msg);
 		my $msgT = $kiwi -> getMessageType();
 		$this -> assert_str_equals('error', $msgT);
