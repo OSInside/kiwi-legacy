@@ -2681,6 +2681,9 @@ div {
 		k.preferences.profiles.attribute?
 	k.preferences =  
 		## Configuration Information Needed for Logical Extend
+        # All elements are optional since the combination of appropriate
+        # preference sections based on profiles combine to create on vaild
+        # definition
 		element preferences {
 			k.preferences.attlist &
 			k.bootsplash-theme? &
