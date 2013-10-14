@@ -739,9 +739,16 @@ function OEMRepart {
 			fi
 		fi
 		if [ "$loader" = "grub2" ];then
-			if ! cp /reco-root/boot/unicode.pf2 /reco-save/boot/;then
-				systemException "Failed to copy recovery unicode font" "reboot"
+			if [ -e /reco-root/boot/unicode.pf2 ]; then
+				if ! cp /reco-root/boot/unicode.pf2 /reco-save/boot/;then
+					systemException \
+						"Failed to copy recovery unicode font" \
+					"reboot"
+				fi
+			else
+				Echo "Warning: unicode grub2 font not available"
 			fi
+
 		fi
 		if ! dd if=$imageDiskDevice of=/reco-save/mbr bs=1 count=512;then
 			systemException "Failed to store MBR" "reboot"
