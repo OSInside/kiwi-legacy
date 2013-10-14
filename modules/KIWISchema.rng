@@ -3884,6 +3884,11 @@ and also depends of the selected image output type.</db:para>
       </optional>
     </define>
     <define name="k.preferences">
+      <!--
+        All elements are optional since the combination of appropriate
+        preference sections based on profiles combine to create on vaild
+        definition
+      -->
       <element name="preferences">
         <a:documentation>Configuration Information Needed for Logical Extend</a:documentation>
         <interleave>
