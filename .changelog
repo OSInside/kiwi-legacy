@@ -4,6 +4,8 @@ my $ignore = 0;
 my $indent_l1 = "  ";
 my $indent_l2 = $indent_l1.$indent_l1;
 
+$ENV{LC_ALL} = "C";
+
 while (my $line = <>) {
 	if ($ignore < 2) {
 		$ignore = 0;
