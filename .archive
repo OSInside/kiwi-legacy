@@ -15,7 +15,6 @@
 git log | ./.changelog | ./.filter > ../kiwi.changes
 touch -c -r kiwi.pl .revision
 
-find -type d | grep .git | xargs rm -rf
 find -name "*.swp" | xargs rm -f
 
 tar -cjf ../kiwi-docu.tar.bz2 doc
@@ -27,6 +26,7 @@ tar -cjf kiwi.tar.bz2 \
 	--exclude=system/*repo \
 	--exclude=rpm \
 	--exclude=doc \
+	--exclude=.git \
 	kiwi/
 
 mv kiwi.tar.bz2      kiwi/
