@@ -447,7 +447,7 @@ function baseMount {
 		mount -t binfmt_misc binfmt_misc /proc/sys/fs/binfmt_misc
 	fi
 	if [ ! -e /dev/pts/0 ];then
-		mount -t devpts devpts /dev/pts
+		mount -t devpts -o mode=0620,gid=5 devpts /dev/pts
 	fi
 }
 

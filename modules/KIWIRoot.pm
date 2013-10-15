@@ -1428,7 +1428,7 @@ sub setupMount {
 		qxx ("mkdir -p $root/sys");
 		qxx ("mount -t sysfs sysfs $root/sys");
 		qxx ("mkdir -p $root/dev/pts");
-		qxx ("mount -t devpts devpts $root/dev/pts");
+		qxx ("mount -t devpts -o mode=0620,gid=5 devpts $root/dev/pts");
 		push (@mountList,"$root/sys");
 		push (@mountList,"$root/dev/pts");
 	}
