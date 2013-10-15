@@ -689,9 +689,10 @@ function OEMRepart {
 		if ! mount $imageRootDevice /reco-root >/dev/null;then
 			systemException "Failed to mount root device" "reboot"
 		fi
-		if [ -e "$imageBootDevice" ];then
-			if [ ! $imageBootDevice = $imageRootDevice ];then
-				mkdir -p /recoboot && mount $imageBootDevice /recoboot
+		if [ "$haveBootPartition" = "yes" ];then
+			if [ ! "$kiwi_BootPart" = "$kiwi_RootPart" ];then
+				mkdir -p /recoboot
+				mount $(ddn $imageDiskDevice $kiwi_BootPart) /recoboot
 				mount --bind /recoboot/boot /reco-root/boot
 			fi
 		fi
@@ -757,8 +758,8 @@ function OEMRepart {
 				systemException "Failed to store LVM metadata" "reboot"
 			fi
 		fi
-		if [ -e "$imageBootDevice" ];then
-			if [ ! $imageBootDevice = $imageRootDevice ];then
+		if [ "$haveBootPartition" = "yes" ];then
+			if [ ! "$kiwi_BootPart" = "$kiwi_RootPart" ];then
 				umount /reco-root/boot
 				umount /recoboot && rmdir /recoboot
 			fi
