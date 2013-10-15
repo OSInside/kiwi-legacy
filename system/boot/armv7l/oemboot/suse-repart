@@ -115,7 +115,7 @@ function OEMRepartStandard {
 		# clean/backup boot partition
 		#--------------------------------------
 		if [ "$haveBootPartition" = "yes" ];then
-			pID=$((kiwi_BootPart + 1))
+			pID=$kiwi_RootPart
 			rootParam=$pID
 		fi
 		#======================================
@@ -243,9 +243,9 @@ function OEMRepartSplit {
 	# write new partition table
 	#--------------------------------------
 	if [ -z "$DONT_PARTITION" ];then
-		pID=$((kiwi_BootPart + 2))
+		pID=$kiwi_RWPart
 		bootParam=$kiwi_BootPart
-		rootParam=$((kiwi_BootPart + 1))
+		rootParam=$kiwi_ROPart
 		cowpParam=$pID
 		swapParam=no
 		recoParam=no
@@ -311,7 +311,7 @@ function OEMRepartLVM {
 	#--------------------------------------
 	local extendID
 	local VOverHeadMB=300
-	local LVMdevice=$((kiwi_BootPart + 1))
+	local LVMdevice=$kiwi_RootPart
 	local LVMdevice=$(ddn $imageDiskDevice $LVMdevice)
 	local diskFreeMBytes=$(($(getFreeDiskBytes $imageDiskDevice) / 1048576))
 	local diskRootMBytes=$(($(partitionSize $LVMdevice) / 1024))
@@ -340,7 +340,7 @@ function OEMRepartLVM {
 	# write new partition table
 	#--------------------------------------
 	if [ -z "$DONT_PARTITION" ];then
-		pID=$((kiwi_BootPart + 1))
+		pID=$kiwi_RootPart
 		bootParam=$kiwi_BootPart
 		rootParam=$pID
 		recoParam=no

@@ -1110,11 +1110,11 @@ function installBootLoaderGrub2Recovery {
 	#======================================
 	# create custom recovery entry
 	#--------------------------------------
-	cat >> /etc/grub.d/40_custom <<- EOF
-		menuentry 'Recovery' --class opensuse --class os {
-			set root='hd0,$recoid'
-			chainloader +1
-		}
+	cat > /etc/grub.d/40_custom <<- EOF
+		echo "menuentry 'Recovery' --class opensuse --class os {"
+		echo "	set root='hd0,$recoid'"
+		echo "	chainloader +1"
+		echo "}"
 	EOF
 	$confTool > $confPath
 	if [ ! $? = 0 ];then
