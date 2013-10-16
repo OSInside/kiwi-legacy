@@ -1097,8 +1097,8 @@ recovery partition. Default value is 83 (Linux)</db:para>
     </define>
     <define name="k.oem-recovery-part-size">
       <element name="oem-recovery-part-size">
-        <a:documentation>For oemboot driven images: Set the partition ID of
-recovery partition. Default value is 83 (Linux)</a:documentation>
+        <a:documentation>For oemboot driven images: Set the size of the
+recovery partition. Value is interpreted as MB</a:documentation>
         <db:para>For oemboot driven images: Set the size of
 the recovery partition in MBytes.</db:para>
         <ref name="k.oem-recovery-part-size.attlist"/>

@@ -20,6 +20,7 @@ package KIWIXMLOEMConfigData;
 #------------------------------------------
 use strict;
 use warnings;
+use Scalar::Util qw /looks_like_number/;
 use XML::LibXML;
 require Exporter;
 
@@ -50,7 +51,7 @@ sub new {
 	#    oem_reboot_interactive   = ''
 	#    oem_recovery             = ''
 	#    oem_recoveryID           = ''
-	#    oem_recoveryPartitionSize= ''
+	#    oem_recoveryPartSize     = ''
 	#    oem_shutdown             = ''
 	#    oem_shutdown_interactive = ''
 	#    oem_silent_boot          = ''
@@ -88,7 +89,7 @@ sub new {
 		oem_reboot_interactive
 		oem_recovery
 		oem_recoveryID
-		oem_recoveryPartitionSize
+		oem_recoveryPartSize
 		oem_shutdown
 		oem_shutdown_interactive
 		oem_silent_boot
@@ -135,6 +136,7 @@ sub new {
 		$this -> p_initializeBoolMembers($init);
 		$this->{oem_boot_title}    = $init->{oem_boot_title};
 		$this->{oem_recoveryID}    = $init->{oem_recoveryID};
+		$this->{oem_recoveryPartSize} = $init->{oem_recoveryPartSize};
 		$this->{oem_swapsize}      = $init->{oem_swapsize};
 		$this->{oem_systemsize}    = $init->{oem_systemsize};
 		$this->{oem_unattended_id} = $init->{oem_unattended_id};
@@ -287,7 +289,7 @@ sub getRecoveryID {
 #------------------------------------------
 sub getRecoveryPartSize {
 	my $this = shift;
-	return $this->{oem_recoveryPartitionSize};
+	return $this->{oem_recoveryPartSize};
 }
 
 #==========================================
@@ -486,6 +488,7 @@ sub getXMLElement {
 		text      => $this -> getRecoveryID ()
 	);
 	$element = $this -> p_addElement(\%initRecoverID);
+	my $size = $this -> getRecoveryPartSize ();
 	my %initRecoverPSize = (
 		parent    => $element,
 		childName => 'oem-recovery-part-size',
@@ -786,7 +789,16 @@ sub setRecoveryID {
 	if (! $val) {
 		delete $this->{oem_recoveryID};
 	} else {
-		$this->{oem_recoveryID} = $val;
+		if ($val =~ /[0-9A-Fa-f]{2}/smx) {
+			$this->{oem_recoveryID} = $val;
+		} else {
+			my $kiwi = $this -> {kiwi};
+			my $msg = 'The recovery partition ID must be 2 digit hex value';
+			$kiwi -> error($msg);
+			$kiwi -> failed();
+			return;
+		}
+		
 	}
 	return $this;
 }
@@ -794,17 +806,28 @@ sub setRecoveryID {
 #==========================================
 # setRecvoveryPartitionSize
 #------------------------------------------
-sub setRecvoveryPartitionSize {
+sub setRecoveryPartSize {
 	# ...
 	# Set the recovery partition size attribute, if called
-	# with no argument the attribute is removed
+	# with no argument the attribute is removed.
+	# Argument is expected to be a string or numeric value
 	# ---
 	my $this = shift;
 	my $val  = shift;
 	if (! $val) {
-		delete $this->{oem_recoveryPartitionSize};
+		delete $this->{oem_recoveryPartSize};
 	} else {
-		$this->{oem_recoveryPartitionSize} = $val;
+		if (looks_like_number($val)) {
+			$val = "$val";
+		}
+		if ($val =~ /\D/smx) {
+			my $kiwi = $this -> {kiwi};
+			my $msg = 'The recovery partition size must be an integer value';
+			$kiwi -> error($msg);
+			$kiwi -> failed();
+			return;
+		}
+		$this->{oem_recoveryPartSize} = $val;
 	}
 	return $this;
 }
