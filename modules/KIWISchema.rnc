@@ -841,8 +841,8 @@ div {
 div {
 	k.oem-recovery-part-size.attlist = empty
 	k.oem-recovery-part-size =
-		## For oemboot driven images: Set the partition ID of
-		## recovery partition. Default value is 83 (Linux)
+		## For oemboot driven images: Set the size of the
+		## recovery partition. Value is interpreted as MB
 		[
 		db:para [
 			"For oemboot driven images: Set the size of\x{a}"~

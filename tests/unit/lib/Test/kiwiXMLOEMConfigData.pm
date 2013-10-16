@@ -21,9 +21,16 @@ use XML::LibXML;
 
 use Common::ktLog;
 use Common::ktTestCase;
+use Readonly;
 use base qw /Common::ktTestCase/;
 
 use KIWIXMLOEMConfigData;
+
+
+#==========================================
+# constants
+#------------------------------------------
+Readonly my $RECOVER_SIZE => 1024;
 
 #==========================================
 # Constructor
@@ -330,6 +337,36 @@ sub test_getAlignPartition {
 }
 
 #==========================================
+# test_getAtaRaidScan
+#------------------------------------------
+sub test_getAtaRaidScan {
+	# ...
+	# Test the getATARaidScan method
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $init = $this -> __getBaseInitHash();
+	my $confDataObj = KIWIXMLOEMConfigData -> new($init);
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_not_null($confDataObj);
+	my $scan = $confDataObj -> getAtaRaidScan();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('true', $scan);
+	return;
+}
+
+#==========================================
 # test_getBootTitle
 #------------------------------------------
 sub test_getBootTitle {
@@ -599,6 +636,36 @@ sub test_getRecoveryID {
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	$this -> assert_str_equals('1234', $recoverID);
+	return;
+}
+
+#==========================================
+# test_getRecoveryPartSize
+#------------------------------------------
+sub test_getRecoveryPartSize {
+	# ...
+	# Test the getRecoveryPartSize method
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $init = $this -> __getBaseInitHash();
+	my $confDataObj = KIWIXMLOEMConfigData -> new($init);
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_not_null($confDataObj);
+	my $recoverSize = $confDataObj -> getRecoveryPartSize();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('2048', $recoverSize);
 	return;
 }
 
@@ -965,12 +1032,14 @@ sub test_getXMLElement{
 	my $xmlstr = $elem -> toString();
 	my $expected = '<oemconfig>'
 		. '<oem-align-partition>true</oem-align-partition>'
+		. '<oem-ataraid-scan>true</oem-ataraid-scan>'
 		. '<oem-boot-title>test build</oem-boot-title>'
 		. '<oem-inplace-recovery>true</oem-inplace-recovery>'
 		. '<oem-kiwi-initrd>false</oem-kiwi-initrd>'
 		. '<oem-partition-install>false</oem-partition-install>'
 		. '<oem-recovery>true</oem-recovery>'
 		. '<oem-recoveryID>1234</oem-recoveryID>'
+		. '<oem-recovery-part-size>2048</oem-recovery-part-size>'
 		. '<oem-silent-boot>true</oem-silent-boot>'
 		. '<oem-silent-install>true</oem-silent-install>'
 		. '<oem-silent-verify>true</oem-silent-verify>'
@@ -1059,6 +1128,91 @@ sub test_setAlignPartitionNoArg {
 	# Test this condition last to get potential error messages
 	$this -> assert_not_null($confDataObj);
 	my $align = $confDataObj -> getAlignPartition();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('false', $align);
+	return;
+}
+#RJS
+#==========================================
+# test_setAtaRaidScan
+#------------------------------------------
+sub test_setAtaRaidScan {
+	# ...
+	# Test the setAtaRaidScan method
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $confDataObj = KIWIXMLOEMConfigData -> new();
+	$confDataObj = $confDataObj -> setAtaRaidScan('false');
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_not_null($confDataObj);
+	my $align = $confDataObj -> getAtaRaidScan();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('false', $align);
+	return;
+}
+
+#==========================================
+# test_setAtaRaidScanInvalidArg
+#------------------------------------------
+sub test_setAtaRaidScanInvalidArg {
+	# ...
+	# Test the setAtaRaidScan method with an unrecognized bool value
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $confDataObj = KIWIXMLOEMConfigData -> new();
+	my $res = $confDataObj -> setAtaRaidScan(1);
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'KIWIXMLOEMConfigData:setAtaRaidScan: unrecognized '
+		. 'argument expecting "true" or "false".';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_null($res);
+	return;
+}
+
+#==========================================
+# test_setAtaRaidScanNoArg
+#------------------------------------------
+sub test_setAtaRaidScanNoArg {
+	# ...
+	# Test the setAtaRaidScan method
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $init = $this -> __getBaseInitHash();
+	my $confDataObj = KIWIXMLOEMConfigData -> new($init);
+	$confDataObj = $confDataObj -> setAtaRaidScan();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_not_null($confDataObj);
+	my $align = $confDataObj -> getAtaRaidScan();
 	$msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	$msgT = $kiwi -> getMessageType();
@@ -1828,7 +1982,7 @@ sub test_setRecoveryID {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $confDataObj = KIWIXMLOEMConfigData -> new();
-	$confDataObj = $confDataObj -> setRecoveryID('foobar');
+	$confDataObj = $confDataObj -> setRecoveryID('8e');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -1844,7 +1998,30 @@ sub test_setRecoveryID {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('foobar', $recovID);
+	$this -> assert_str_equals('8e', $recovID);
+	return;
+}
+
+#==========================================
+# test_setRecoveryIDInvalid
+#------------------------------------------
+sub test_setRecoveryIDInvalid {
+	# ...
+	# Test the setRecoveryID method
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $confDataObj = KIWIXMLOEMConfigData -> new();
+	my $res = $confDataObj -> setRecoveryID('foo');
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'The recovery partition ID must be 2 digit hex value';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_null($res);
 	return;
 }
 
@@ -1876,6 +2053,129 @@ sub test_setRecoveryIDNoArg {
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	$this -> assert_null($recovID);
+	return;
+}
+
+#==========================================
+# test_setRecoveryPartSize
+#------------------------------------------
+sub test_setRecoveryPartSize {
+	# ...
+	# Test the setRecoveryPartSize method
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $confDataObj = KIWIXMLOEMConfigData -> new();
+	$confDataObj = $confDataObj -> setRecoveryPartSize('512');
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_not_null($confDataObj);
+	my $recovSize = $confDataObj -> getRecoveryPartSize();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('512', $recovSize);
+	return;
+}
+
+#==========================================
+# test_setRecoveryPartSizeInvalid
+#------------------------------------------
+sub test_setRecoveryPartSizeInvalid {
+	# ...
+	# Test the setRecoveryPartSize method
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $init = $this -> __getBaseInitHash();
+	my $confDataObj = KIWIXMLOEMConfigData -> new($init);
+	my $res = $confDataObj -> setRecoveryPartSize('foobar');
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'The recovery partition size must be an integer value';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_null($res);
+	my $recovSize = $confDataObj -> getRecoveryPartSize();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('2048', $recovSize);
+	return;
+}
+
+#==========================================
+# test_setRecoveryPartSizeNoArg
+#------------------------------------------
+sub test_setRecoveryPartSizeNoArg {
+	# ...
+	# Test the setRecoveryPartSize method with no argument
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $init = $this -> __getBaseInitHash();
+	my $confDataObj = KIWIXMLOEMConfigData -> new($init);
+	$confDataObj = $confDataObj -> setRecoveryPartSize();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_not_null($confDataObj);
+	my $recovSize = $confDataObj -> getRecoveryPartSize();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_null($recovSize);
+	return;
+}
+
+#==========================================
+# test_setRecoveryPartSizeNumber
+#------------------------------------------
+sub test_setRecoveryPartSizeNumber {
+	# ...
+	# Test the setRecoveryPartSize method
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $confDataObj = KIWIXMLOEMConfigData -> new();
+	$confDataObj = $confDataObj -> setRecoveryPartSize($RECOVER_SIZE);
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_not_null($confDataObj);
+	my $recovSize = $confDataObj -> getRecoveryPartSize();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('1024', $recovSize);
 	return;
 }
 
@@ -2836,21 +3136,23 @@ sub __getBaseInitHash {
 	# ---
 	my $this = shift;
 	my %init = (
-				oem_align_partition   => 'true',
-				oem_boot_title        => 'test build',
-				oem_inplace_recovery  => 'true',
-				oem_kiwi_initrd       => 'false',
-				oem_partition_install => 'false',
-				oem_recovery          => 'true',
-				oem_recoveryID        => '1234',
-				oem_silent_boot       => 'true',
-				oem_silent_install    => 'true',
-				oem_silent_verify     => 'true',
-				oem_swap              => 'true',
-				oem_swapsize          => '2048',
-				oem_systemsize        => '8192',
-				oem_unattended        => 'true',
-				oem_unattended_id     => '1'
+				oem_align_partition       => 'true',
+				oem_ataraid_scan          => 'true',
+				oem_boot_title            => 'test build',
+				oem_inplace_recovery      => 'true',
+				oem_kiwi_initrd           => 'false',
+				oem_partition_install     => 'false',
+				oem_recovery              => 'true',
+				oem_recoveryID            => '1234',
+				oem_recoveryPartSize      => '2048',
+				oem_silent_boot           => 'true',
+				oem_silent_install        => 'true',
+				oem_silent_verify         => 'true',
+				oem_swap                  => 'true',
+				oem_swapsize              => '2048',
+				oem_systemsize            => '8192',
+				oem_unattended            => 'true',
+				oem_unattended_id         => '1'
 			);
 	return \%init;
 }
