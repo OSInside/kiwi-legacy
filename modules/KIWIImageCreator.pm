@@ -84,7 +84,9 @@ sub new {
 	#==========================================
 	# Store object data
 	#------------------------------------------
-	$this -> initialize();
+	if ( ! $this -> initialize()) {
+		return;
+	}
 	return $this;
 }
 
@@ -116,7 +118,39 @@ sub initialize {
 	$this->{format}           = $cmdL -> getImageFormat();
 	$this->{configDir}        = $cmdL -> getConfigDir();
 	$this->{buildType}        = $cmdL -> getBuildType();
+	#==========================================
+	# Store selected image type
+	#------------------------------------------
+	my $xml = KIWIXML -> new(
+		$this->{configDir}, $this->{buildType},
+		$this->{buildProfiles}, $this->{cmdL}
+	);
+	if (! $xml) {
+		return;
+	}
+	my $xmltype = $xml -> getImageType();
+	if (! $xmltype) {
+		return;
+	}
+	$this->{selectedBuildType}= $xmltype -> getTypeName();
+	$this->{systemXML} = $xml;
 	return 1;
+}
+
+#==========================================
+# getSelectedBuildType
+#------------------------------------------
+sub getSelectedBuildType {
+	my $this = shift;
+	return $this->{selectedBuildType};
+}
+
+#==========================================
+# getSystemXML
+#------------------------------------------
+sub getSystemXML {
+	my $this = shift;
+	return $this->{systemXML};
 }
 
 #==========================================
@@ -170,15 +204,22 @@ sub prepareBootImage {
 	# Determine the location of the boot image
 	#------------------------------------------
 	my $locator = KIWILocator -> instance();
-	my $bootDescript = $systemXML -> getImageType() -> getBootImageDescript();
-	if (! $bootDescript) {
+	my $xmltype = $systemXML -> getImageType();
+	my $buildtype = $xmltype -> getTypeName();
+	my $bootDescript = $xmltype -> getBootImageDescript();
+	if ((! $bootDescript) && ($buildtype ne 'cpio')) {
 		my $msg = 'prepareBootImage: error, trying to create a boot image '
-			. 'for a type that has not boot description defined.';
+			. 'for a type that has no boot description defined.';
 		$kiwi -> error ($msg);
 		$kiwi -> failed ();
 		return;
 	}
-	my $configDir = $locator -> getBootImageDescription($bootDescript);
+	my $configDir;
+	if ($bootDescript) {
+		$configDir = $locator -> getBootImageDescription($bootDescript);
+	} else {
+		$configDir = $cmdL -> getConfigDir();
+	}
 	if (! $configDir) {
 		return;
 	}
@@ -565,7 +606,15 @@ sub createBootImage {
 	#------------------------------------------
 	$kiwi -> info ("--> Create boot image (initrd)...\n");
 	if (! defined $bootXML) {
-		return;
+		# /.../
+		# if only the initrd is build by local kiwi commands
+		# on the commandline, the systemXML is the same as the
+		# boot XML
+		# ----
+		$bootXML = $this->{systemXML};
+		if (! defined $bootXML) {
+			return;
+		}
 	}
 	#==========================================
 	# Create destdir if needed
