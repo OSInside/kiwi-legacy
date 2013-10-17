@@ -49,10 +49,6 @@
 			</machine>
 		</type>
 		<type image="oem" filesystem="ext3" boot="oemboot/suse-12.3" installiso="true" bootloader="grub2">
-			<systemdisk name="lvm">
-				<volume name="sentry" freespace="all"/>
-				<volume name="@root" size="13G"/>
-			</systemdisk>
 			<oemconfig>
 				<oem-systemsize>2048</oem-systemsize>
 				<oem-swap>true</oem-swap>
