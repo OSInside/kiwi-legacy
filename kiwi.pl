@@ -144,8 +144,17 @@ sub main {
 		$cmdL -> setOperationMode ("prepare", $cmdL->getConfigDir());
 		mkdir $imageTarget;
 		$kic = KIWIImageCreator -> new ($cmdL);
-		if (! $kic -> prepareImage()) {
-			kiwiExit (1);
+		my $selectedType = $kic -> getSelectedBuildType();
+		if ($selectedType eq 'cpio') {
+			if (! $kic -> prepareBootImage(
+				$cmdL-> getConfigDir(),$rootTarget,$rootTarget
+			)) {
+				kiwiExit (1);
+			}
+		} else {
+			if (! $kic -> prepareImage()) {
+				kiwiExit (1);
+			}
 		}
 		#==========================================
 		# Setup create 
@@ -155,8 +164,16 @@ sub main {
 		$cmdL -> setForceNewRoot (0);
 		$cmdL -> unsetRecycleRootDir();
 		$kic  -> initialize();
-		if (! $kic -> createImage($cmdL)) {
-			kiwiExit (1);
+		if ($selectedType eq 'cpio') {
+			if (! $kic -> createBootImage(
+				$rootTarget,$imageTarget
+			)) {
+				kiwiExit (1);
+			}
+		} else {
+			if (! $kic -> createImage($cmdL)) {
+				kiwiExit (1);
+			}
 		}
 		kiwiExit (0);
 	}
@@ -217,8 +234,19 @@ sub main {
 		if (! $kic) {
 			kiwiExit (1);
 		}
-		if (! $kic -> prepareImage()) {
-			kiwiExit (1);
+		my $selectedType = $kic -> getSelectedBuildType();
+		if ($selectedType eq 'cpio') {
+			if (! $kic -> prepareBootImage(
+				$cmdL-> getConfigDir(),
+				$cmdL-> getRootTargetDir(),
+				$cmdL-> getRootTargetDir()
+			)) {
+				kiwiExit (1);
+			}
+		} else {
+			if (! $kic -> prepareImage()) {
+				kiwiExit (1);
+			}
 		}
 		kiwiExit (0);
 	}
@@ -231,8 +259,17 @@ sub main {
 		if (! $kic) {
 			kiwiExit (1);
 		}
-		if (! $kic -> createImage()) {
-			kiwiExit (1);
+		my $selectedType = $kic -> getSelectedBuildType();
+		if ($selectedType eq 'cpio') {
+			if (! $kic -> createBootImage(
+				$cmdL-> getConfigDir(),$cmdL-> getImageTargetDir()
+			)) {
+				kiwiExit (1);
+			}
+		} else {
+			if (! $kic -> createImage()) {
+				kiwiExit (1);
+			}
 		}
 		kiwiExit (0);
 	}

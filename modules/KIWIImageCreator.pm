@@ -80,7 +80,9 @@ sub new {
 	#==========================================
 	# Store object data
 	#------------------------------------------
-	$this -> initialize();
+	if ( ! $this -> initialize()) {
+		return;
+	}
 	return $this;
 }
 
@@ -112,7 +114,30 @@ sub initialize {
 	$this->{format}           = $cmdL -> getImageFormat();
 	$this->{configDir}        = $cmdL -> getConfigDir();
 	$this->{buildType}        = $cmdL -> getBuildType();
+	#==========================================
+	# Store selected image type
+	#------------------------------------------
+	my $xml = KIWIXML -> new(
+		$this->{configDir}, $this->{buildType},
+		$this->{buildProfiles}, $this->{cmdL}
+	);
+	if (! $xml) {
+		return;
+	}
+	my $xmltype = $xml -> getImageType();
+	if (! $xmltype) {
+		return;
+	}
+	$this->{selectedBuildType}= $xmltype -> getImageType();
 	return 1;
+}
+
+#==========================================
+# getSelectedBuildType
+#------------------------------------------
+sub getSelectedBuildType {
+	my $this = shift;
+	return $this->{selectedBuildType};
 }
 
 #==========================================
