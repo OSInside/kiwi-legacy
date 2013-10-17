@@ -94,12 +94,12 @@ function setupInitialDeviceNames {
 	export imageBootDevice=$(ddn $imageDiskDevice $kiwi_BootPart)
 	if searchVolumeGroup; then
 		export haveLVM=yes
-		export imageRootDevice=/dev/$kiwi_lvmgroup/$kiwi_RootPart
-		if [ ! -z "$kiwi_ROPart" ];then
-			export imageRODevice=/dev/$kiwi_lvmgroup/$kiwi_ROPart
+		export imageRootDevice=/dev/$kiwi_lvmgroup/$kiwi_RootPartVol
+		if [ ! -z "$kiwi_ROPartVol" ];then
+			export imageRODevice=/dev/$kiwi_lvmgroup/$kiwi_ROPartVol
 		fi
-		if [ ! -z "$kiwi_RWPart" ];then
-			export imageRWDevice=/dev/$kiwi_lvmgroup/$kiwi_RWPart
+		if [ ! -z "$kiwi_RWPartVol" ];then
+			export imageRWDevice=/dev/$kiwi_lvmgroup/$kiwi_RWPartVol
 			export imageIOWRDevice=$imageRWDevice
 		fi
 	elif [ ! -z "$kiwi_RaidDev" ];then
