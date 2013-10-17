@@ -1833,12 +1833,19 @@ sub __addSystemDiskToBootXML {
 					$name = $volInfo{name}.'['.$mount.']';
 				}
 				if ($volInfo{freespace}) {
-					$kiwi -> info (
-						"--> Volume $name: free:$volInfo{freespace}M\n"
-					);
+					my $free = $volInfo{freespace};
+					if ($free eq 'all') {
+						$kiwi -> info (
+							"--> Volume $name: takes remaining free space\n"
+						);
+					} else {
+						$kiwi -> info (
+							"--> Volume $name: with $free MB free\n"
+						);
+					}
 				} elsif ($volInfo{size}) {
 					$kiwi -> info (
-						"--> Volume $name: size:$volInfo{size}M\n"
+						"--> Volume $name: size: $volInfo{size} MB\n"
 					);
 				} else {
 					$kiwi-> info (
