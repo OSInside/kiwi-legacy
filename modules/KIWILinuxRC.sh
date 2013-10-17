@@ -3012,6 +3012,11 @@ function updateRootDeviceFstab {
 				>> $nfstab
 			fi
 		done
+		if [ ! -z $kiwi_allFreeVolume ];then
+			mppath="/dev/$kiwi_lvmgroup/$kiwi_allFreeVolume"
+			mpoint=$(echo $kiwi_allFreeVolume | tr -d LV | tr _ /)
+			echo "$mppath /$mpoint $FSTYPE $opts 1 2" >> $nfstab
+		fi
 	fi
 }
 #======================================
@@ -5921,6 +5926,8 @@ function mountSystemCombined {
 #--------------------------------------
 function mountSystemStandard {
 	local mountDevice=$1
+	local mpoint
+	local mppath
 	if [ "$FSTYPE" = "btrfs" ];then
 		export haveBtrFS=yes
 	fi
@@ -5948,6 +5955,11 @@ function mountSystemStandard {
 				mount /dev/$VGROUP/LV$volume /mnt/$mpoint
 			fi
 		done
+		if [ ! -z $kiwi_allFreeVolume ];then
+			mppath="/dev/$kiwi_lvmgroup/$kiwi_allFreeVolume"
+			mpoint=$(echo $kiwi_allFreeVolume | tr -d LV | tr _ /)
+			kiwiMount "$mppath" "/mnt/$mpoint"
+		fi
 	fi
 	return $?
 }
@@ -7011,6 +7023,10 @@ function cleanImage {
 			umount $mpoint 1>&2
 		fi
 	done
+	if [ ! -z $kiwi_allFreeVolume ];then
+		mpoint=$(echo $kiwi_allFreeVolume | tr -d LV | tr _ /)
+		umount /$mpoint 1>&2
+	fi
 	#======================================
 	# umount image boot partition if any
 	#--------------------------------------
