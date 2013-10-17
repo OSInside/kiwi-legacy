@@ -3011,6 +3011,11 @@ function updateRootDeviceFstab {
 				echo "$mppath /$mpoint $FSTYPE $opts 1 2" >> $nfstab
 			fi
 		done
+		if [ ! -z $kiwi_allFreeVolume ];then
+			mppath="/dev/$kiwi_lvmgroup/$kiwi_allFreeVolume"
+			mpoint=$(echo $kiwi_allFreeVolume | tr -d LV | tr _ /)
+			echo "$mppath /$mpoint $FSTYPE $opts 1 2" >> $nfstab
+		fi
 	fi
 }
 #======================================
@@ -6021,6 +6026,7 @@ function mountSystemStandard {
 	local content
 	local volpath
 	local mpoint
+	local mppath
 	if [ ! -z $FSTYPE ]          && 
 	   [ ! $FSTYPE = "unknown" ] && 
 	   [ ! $FSTYPE = "auto" ]
@@ -6049,6 +6055,11 @@ function mountSystemStandard {
 				kiwiMount "/dev/$kiwi_lvmgroup/$volume" "/mnt/$mpoint"
 			fi
 		done
+		if [ ! -z $kiwi_allFreeVolume ];then
+			mppath="/dev/$kiwi_lvmgroup/$kiwi_allFreeVolume"
+			mpoint=$(echo $kiwi_allFreeVolume | tr -d LV | tr _ /)
+			kiwiMount "$mppath" "/mnt/$mpoint"
+		fi
 	fi
 	return $?
 }
@@ -7166,6 +7177,10 @@ function cleanImage {
 			umount /$mpoint 1>&2
 		fi
 	done
+	if [ ! -z $kiwi_allFreeVolume ];then
+		mpoint=$(echo $kiwi_allFreeVolume | tr -d LV | tr _ /)
+		umount /$mpoint 1>&2
+	fi
 	#======================================
 	# umount image boot partition if any
 	#--------------------------------------
