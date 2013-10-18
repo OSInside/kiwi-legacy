@@ -3026,13 +3026,14 @@ sub setupPartIDs {
 		}
 		if ($this->{lvm}) {
 			if ($this->{partids}{root_lv}) {
-				print $ID_FD "kiwi_RootPart=\"$this->{partids}{root_lv}\"\n";
+				print $ID_FD "kiwi_RootPartVol=\"$this->{partids}{root_lv}\"\n";
+				print $ID_FD "kiwi_RootPart=\"$this->{partids}{root}\"\n";
 			}
 			if ($this->{partids}{readonly_lv}) {
-				print $ID_FD "kiwi_ROPart=\"$this->{partids}{readonly_lv}\"\n";
+				print $ID_FD "kiwi_ROPartVol=\"$this->{partids}{readonly_lv}\"\n";
 			}
 			if ($this->{partids}{readwrite_lv}) {
-				print $ID_FD "kiwi_RWPart=\"$this->{partids}{readwrite_lv}\"\n";
+				print $ID_FD "kiwi_RWPartVol=\"$this->{partids}{readwrite_lv}\"\n";
 			}
 		} else {
 			if ($this->{partids}{root}) {

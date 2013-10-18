@@ -159,12 +159,12 @@ importFile < $PART_IDS
 export imageBootDevice=$(ddn $imageDiskDevice $kiwi_BootPart)
 if searchVolumeGroup; then
 	export haveLVM=yes
-	export imageRootDevice=/dev/$VGROUP/$kiwi_RootPart
-	if [ ! -z "$kiwi_ROPart" ];then
-		export imageRODevice=/dev/$VGROUP/$kiwi_ROPart
+	export imageRootDevice=/dev/$VGROUP/$kiwi_RootPartVol
+	if [ ! -z "$kiwi_ROPartVol" ];then
+		export imageRODevice=/dev/$VGROUP/$kiwi_ROPartVol
 	fi
-	if [ ! -z "$kiwi_RWPart" ];then
-		export imageRWDevice=/dev/$VGROUP/$kiwi_RWPart
+	if [ ! -z "$kiwi_RWPartVol" ];then
+		export imageRWDevice=/dev/$VGROUP/$kiwi_RWPartVol
 	fi
 elif [ ! -z "$kiwi_RaidDev" ];then
 	export imageRootDevice=$kiwi_RaidDev
