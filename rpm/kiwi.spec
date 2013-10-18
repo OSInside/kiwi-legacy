@@ -552,12 +552,24 @@ EOF
 done
 
 %ifarch %ix86 x86_64
+%pre -n kiwi-pxeboot
+#============================================================
+# create user and group tftp if they does not exist
+if ! /usr/bin/getent group tftp >/dev/null; then
+	%{_sbindir}/groupadd -r tftp 2>/dev/null || :
+fi
+if ! /usr/bin/getent passwd tftp >/dev/null; then
+	%{_sbindir}/useradd -c "TFTP account" -d /srv/tftpboot -G tftp -g tftp \
+		-r -s /bin/false tftp 2>/dev/null || :
+fi
+
 %post -n kiwi-pxeboot
 #============================================================
 # create /srv/tftpboot/pxelinux.cfg/default only if not exist
-	if ( [ ! -e srv/tftpboot/pxelinux.cfg/default  ] ) ; then
-		cp /srv/tftpboot/pxelinux.cfg/default.default /srv/tftpboot/pxelinux.cfg/default
-	fi
+if ( [ ! -e srv/tftpboot/pxelinux.cfg/default  ] ) ; then
+	cp /srv/tftpboot/pxelinux.cfg/default.default \
+		/srv/tftpboot/pxelinux.cfg/default
+fi
 %endif
 
 %ifarch %ix86 x86_64 ppc ppc64 s390 s390x
