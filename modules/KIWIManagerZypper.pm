@@ -322,6 +322,7 @@ sub setupInstallationSource {
 		my $alias_filename = $alias;
 		$alias_filename =~ s/\//_/g;
 		my $repo = "$root/$dataDir/repos/$alias_filename.repo";
+		my $imgRepo = "$root/etc/zypp/repos.d/$alias_filename.repo";
 		my $sed;
 		if (! $chroot) {
 			if (! -f $repo) {
@@ -368,7 +369,7 @@ sub setupInstallationSource {
 				return;
 			}
 			$kiwi -> done ();
-			if (($source{$alias}{imgincl}) && (! -f $repo)) {
+			if (($source{$alias}{imgincl}) && (! -f $imgRepo)) {
 				$kiwi -> info ("Adding $alias repo to image");
 				$sadd =~ s/--keep-packages//;
 				$data = qxx ("@kchroot zypper $sadd 2>&1");
