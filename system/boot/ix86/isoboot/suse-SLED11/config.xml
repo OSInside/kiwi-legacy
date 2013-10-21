@@ -19,6 +19,7 @@
 		<profile name="pae" description="KERNEL: pae kernel"/>
 		<profile name="rt" description="KERNEL: Real time kernel"/>
 		<profile name="xenk" description="KERNEL: Xen kernel/mboot.c32"/>
+		<profile name="custom" description="KERNEL: specified by bootinclude in system XML"/>
 	</profiles>
 	<drivers>
 		<file name="crypto/*"/>
@@ -86,6 +87,7 @@
 <!-- xen dom0 support only on x86_64 -->
 		<package name="xen" arch="x86_64"/>
 	</packages>
+	<packages type="image" profiles="custom"><!-- empty custom section to allow bootincluding custom kernel --></packages>
 	<packages type="bootstrap">
 		<package name="bind-libs"/>
 		<package name="bind-utils"/>

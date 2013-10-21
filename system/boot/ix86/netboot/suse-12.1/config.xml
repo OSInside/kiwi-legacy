@@ -14,6 +14,7 @@
 	</preferences>
 	<profiles>
 		<profile name="default" description="Booting default profile"/>
+		<profile name="custom" description="KERNEL: specified by bootinclude in system XML"/>
 		<profile name="diskless" description="Booting diskless thin clients"/>
 		<profile name="xen" description="Booting with xen mboot.c32 setup"/>
 		<profile name="std" description="KERNEL: Default"/>
@@ -226,6 +227,7 @@
 		<package name="tar"/>
 		<package name="util-linux"/>
 	</packages>
+	<packages type="image" profiles="custom"><!-- empty custom section to allow bootincluding custom kernel --></packages>
 	<packages type="bootstrap">
 		<package name="dialog"/>
 		<package name="fbiterm"/>

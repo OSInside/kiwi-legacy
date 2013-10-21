@@ -20,6 +20,7 @@
 		<profile name="xenk" description="KERNEL: Xen kernel/mboot.c32"/>
 		<profile name="pae" description="KERNEL: pae"/>
 		<profile name="desktop" description="KERNEL: Desktop kernel"/>
+		<profile name="custom" description="KERNEL: specified by bootinclude in system XML"/>
 	</profiles>
 	<drivers profiles="xen">
 		<file name="drivers/xen/*"/>
@@ -198,6 +199,7 @@
 		<package name="tar"/>
 		<package name="xfsprogs"/>
 	</packages>
+	<packages type="image" profiles="custom"><!-- empty custom section to allow bootincluding custom kernel --></packages>
 	<packages type="bootstrap">
 		<package name="atftp"/>
 		<package name="bc"/>

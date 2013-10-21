@@ -18,6 +18,7 @@
 		<profile name="std" description="KERNEL: Default"/>
 		<profile name="xenk" description="KERNEL: Xen kernel/mboot.c32"/>
 		<profile name="smp" description="KERNEL: pae kernel"/>
+		<profile name="custom" description="KERNEL: specified by bootinclude in system XML"/>
 	</profiles>
 	<drivers>
 		<file name="drivers/acpi/*"/>
@@ -72,6 +73,7 @@
 		<package name="kernel-xenpae" arch="i586"/>
 		<package name="xen"/>
 	</packages>
+	<packages type="image" profiles="custom"><!-- empty custom section to allow bootincluding custom kernel --></packages>
 	<packages type="bootstrap">
 		<package name="atftp"/>
 		<package name="bc"/>

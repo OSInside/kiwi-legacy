@@ -15,6 +15,7 @@
 	<profiles>
 		<profile name="default" description="Boot with default setup"/>
 		<profile name="std" description="KERNEL: Default"/>
+		<profile name="custom" description="KERNEL: specified by bootinclude in system XML"/>
 	</profiles>
 	<drivers>
 		<file name="crypto/*"/>
@@ -83,6 +84,7 @@
 		<package name="util-linux"/>
 		<package name="xfsprogs"/>
 	</packages>
+	<packages type="image" profiles="custom"><!-- empty custom section to allow bootincluding custom kernel --></packages>
 	<packages type="bootstrap">
 		<package name="diffutils"/>
 		<package name="filesystem"/>

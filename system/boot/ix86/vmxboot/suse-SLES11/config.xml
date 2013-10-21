@@ -20,6 +20,7 @@
 		<profile name="pae" description="KERNEL: pae kernel"/>
 		<profile name="ec2" description="KERNEL: Ec2 kernel"/>
 		<profile name="rt" description="KERNEL: RealTime kernel"/>
+		<profile name="custom" description="KERNEL: specified by bootinclude in system XML"/>
 	</profiles>
 	<drivers>
 		<file name="crypto/*"/>
@@ -125,6 +126,7 @@
 		<package name="util-linux"/>
 		<package name="xfsprogs"/>
 	</packages>
+	<packages type="image" profiles="custom"><!-- empty custom section to allow bootincluding custom kernel --></packages>
 	<packages type="bootstrap">
 		<package name="diffutils"/>
 		<package name="filesystem"/>

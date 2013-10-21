@@ -20,6 +20,7 @@
 		<profile name="xenk" description="KERNEL: Xen kernel/mboot.c32"/>
 		<profile name="pae" description="KERNEL: pae kernel"/>
 		<profile name="rt" description="KERNEL: RealTime kernel"/>
+		<profile name="custom" description="KERNEL: specified by bootinclude in system XML"/>
 	</profiles>
 	<drivers profiles="xen">
 		<file name="drivers/xen/*"/>
@@ -215,6 +216,7 @@
 		<package name="tar"/>
 		<package name="util-linux"/>
 	</packages>
+	<packages type="image" profiles="custom"><!-- empty custom section to allow bootincluding custom kernel --></packages>
 	<packages type="bootstrap">
 		<package name="dialog"/>
 		<package name="fbiterm"/>

@@ -16,6 +16,7 @@
 		<profile name="default" description="Boot with default kernel"/>
 		<profile name="std" description="KERNEL: Default"/>
 		<profile name="smp" description="KERNEL: bigsmp kernel"/>
+		<profile name="custom" description="KERNEL: specified by bootinclude in system XML"/>
 	</profiles>
 	<drivers>
 		<file name="crypto/*"/>
@@ -62,6 +63,7 @@
 	<packages type="bootstrap" profiles="smp">
 		<package name="kernel-smp"/>
 	</packages>
+	<packages type="image" profiles="custom"><!-- empty custom section to allow bootincluding custom kernel --></packages>
 	<packages type="bootstrap">
 		<package name="atftp"/>
 		<package name="bc"/>

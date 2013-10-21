@@ -17,6 +17,7 @@
 		<profile name="diskless" description="Booting diskless thin clients"/>
 		<profile name="std" description="KERNEL: Default"/>
 		<profile name="ppc64" description="KERNEL: PPC64 kernel"/>
+		<profile name="custom" description="KERNEL: specified by bootinclude in system XML"/>
 	</profiles>
 	<drivers profiles="default,ppc64">
 		<file name="crypto/*"/>
@@ -185,6 +186,7 @@
 		<package name="tar"/>
 		<package name="util-linux"/>
 	</packages>
+	<packages type="image" profiles="custom"><!-- empty custom section to allow bootincluding custom kernel --></packages>
 	<packages type="bootstrap">
 		<package name="dialog"/>
 		<package name="fbiterm"/>
