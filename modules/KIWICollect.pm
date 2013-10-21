@@ -2055,13 +2055,11 @@ sub getArchList
 	if(defined($packOptions->{'addarch'})) {
 		# addarch is a modifier, use default list as base
 		@archs = $this->{m_archlist}->headList();
-		if( not (grep {$packOptions->{'addarch'}} @archs eq $_)) {
-			$packOptions->{'addarch'} =~ s{,\s*,}{,}g;
-			$packOptions->{'addarch'} =~ s{,\s*}{,}g;
-			$packOptions->{'addarch'} =~ s{,\s*$}{};
-			$packOptions->{'addarch'} =~ s{^\s*,}{};
-			push @archs, split(/,\s*/, $packOptions->{'addarch'});
-		}
+		$packOptions->{'addarch'} =~ s{,\s*,}{,}g;
+		$packOptions->{'addarch'} =~ s{,\s*}{,}g;
+		$packOptions->{'addarch'} =~ s{,\s*$}{};
+		$packOptions->{'addarch'} =~ s{^\s*,}{};
+		push @archs, split(/,\s*/, $packOptions->{'addarch'});
 	}
 	if(defined($packOptions->{'removearch'})) {
 		# removearch is a modifier, use default list as base
