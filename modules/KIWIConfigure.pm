@@ -501,9 +501,9 @@ sub setupHWclock {
 	my $timectl = $locator -> getExecPath('timedatectl', $root);
 	if ($timectl) {
 		if ($hwClock eq 'utc') {
-			qxx("$timectl set-local-rtc false 2>&1");
+			qxx("chroot $root $timectl set-local-rtc false 2>&1");
 		} else {
-			qxx("$timectl set-local-rtc true 2>&1");
+			qxx("chroot $root $timectl set-local-rtc true 2>&1");
 		}
 		my $code = $? >> 8;
 		if ($code != 0) {
@@ -531,7 +531,7 @@ sub setupKeyboardMap {
 	}
 	my $localectl = $locator -> getExecPath('localectl', $root);
 	if ($localectl) {
-		qxx("$localectl set-keymap $keymap 2>&1");
+		qxx("chroot $root $localectl set-keymap $keymap 2>&1");
 		my $code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> loginfo ("warning: unable to set the keyboard map\n");
@@ -560,7 +560,7 @@ sub setupLocale {
 	my $primary = $locales[0];
 	my $localectl = $locator -> getExecPath('localectl', $root);
 	if ($localectl) {
-		qxx("$localectl set-locale $primary 2>&1");
+		qxx("chroot $root $localectl set-locale $primary 2>&1");
 		my $code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> loginfo ("warning: unable to set the locale\n");
@@ -706,7 +706,7 @@ sub setupTimezone {
 	}
 	my $timectl = $locator -> getExecPath('timedatectl', $root);
 	if ($timectl) {
-		qxx("$timectl set-timezone $tz 2>&1");
+		qxx("chroot $root $timectl set-timezone $tz 2>&1");
 		my $code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> loginfo ("warning: unable to set the timezone\n");
@@ -727,6 +727,8 @@ sub setupUsers {
 	my $xml     = $this->{xml};
 	my $users    = $xml -> getUsers();
 	my $adduser  = $locator -> getExecPath('useradd', $root);
+	my $chown    = $locator -> getExecPath('chown', $root);
+	my $grep     = $locator -> getExecPath('grep', $root);
 	my $moduser  = $locator -> getExecPath('usermod', $root);
 	my $numUsers = scalar @{$users};
 	if ($numUsers) {
@@ -784,7 +786,7 @@ sub setupUsers {
 			$adduser .= " -c \"$uRname\"";
 			$moduser .= " -c \"$uRname\"";
 		}
-		my $data = qxx ("chroot $root grep -q ^$uName: /etc/passwd 2>&1");
+		my $data = qxx ("chroot $root $grep -q ^$uName: /etc/passwd 2>&1");
 		my $code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> info ("Adding user: $uName [$group]");
@@ -805,7 +807,7 @@ sub setupUsers {
 		if ((defined $uHome) && (-d "$root/$uHome")) {
 			my $iMsg = "Setting owner/group permissions $uName [$group]";
 			$kiwi -> info($iMsg);
-			$data = qxx("chroot $root chown -R $uName:$group $uHome 2>&1");
+			$data = qxx("chroot $root $chown -R $uName:$group $uHome 2>&1");
 			$code = $? >> 8;
 			if ($code != 0) {
 				$kiwi -> failed ();
