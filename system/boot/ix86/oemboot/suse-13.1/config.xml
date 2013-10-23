@@ -127,7 +127,6 @@
 		<package name="dmraid"/>
 		<package name="dosfstools"/>
 		<package name="e2fsprogs"/>
-		<package name="eject"/>
 		<package name="fbiterm"/>
 		<package name="file"/>
 		<package name="fribidi"/>

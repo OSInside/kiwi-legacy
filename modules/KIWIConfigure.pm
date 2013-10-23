@@ -202,8 +202,11 @@ sub setupFirstBootYaST {
 	}
 	$kiwi -> info ("Setting up YaST firstboot service...");
 	if (
-		(! -f "$root/etc/init.d/firstboot") &&
-		(! -f "$root/usr/share/YaST2/clients/firstboot.ycp")
+		((! -f "$root/etc/init.d/firstboot") &&
+		(! -f "$root/usr/share/YaST2/clients/firstboot.ycp"))
+		&&
+		((!-f "$root/usr/lib/systemd/system/YaST2-Firstboot.service") &&
+		(! -f "$root/usr/share/YaST2/clients/firstboot.rb"))
 	) {
 		$kiwi -> failed ();
 		$kiwi -> error  ('yast2-firstboot is not installed');
