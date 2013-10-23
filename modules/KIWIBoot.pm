@@ -5397,7 +5397,11 @@ sub installBootLoader {
 	#------------------------------------------
 	my $boot_id = 1;
 	if ($this->{partids}) {
-		$boot_id = $this->{partids}{boot};
+		if ($this->{partids}{boot}) {
+			$boot_id = $this->{partids}{boot};
+		} elsif ($this->{partids}{installboot}) {
+			$boot_id = $this->{partids}{installboot};
+		}
 	}
 	if ((! $this->{bindloop}) && (-b $diskname)) {
 		$bootdev = $this -> __getPartBase ($diskname).$boot_id;

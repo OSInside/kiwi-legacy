@@ -121,19 +121,21 @@ sub initialize {
 	#==========================================
 	# Store selected image type
 	#------------------------------------------
-	my $xml = KIWIXML -> new(
-		$this->{configDir}, $this->{buildType},
-		$this->{buildProfiles}, $this->{cmdL}
-	);
-	if (! $xml) {
-		return;
+	if ($this->{buildType}) {
+		my $xml = KIWIXML -> new(
+			$this->{configDir}, $this->{buildType},
+			$this->{buildProfiles}, $this->{cmdL}
+		);
+		if (! $xml) {
+			return;
+		}
+		my $xmltype = $xml -> getImageType();
+		if (! $xmltype) {
+			return;
+		}
+		$this->{selectedBuildType}= $xmltype -> getTypeName();
+		$this->{systemXML} = $xml;
 	}
-	my $xmltype = $xml -> getImageType();
-	if (! $xmltype) {
-		return;
-	}
-	$this->{selectedBuildType}= $xmltype -> getTypeName();
-	$this->{systemXML} = $xml;
 	return 1;
 }
 
