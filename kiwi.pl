@@ -150,7 +150,7 @@ sub main {
 		mkdir $imageTarget;
 		$kic = KIWIImageCreator -> new ($cmdL);
 		my $selectedType = $kic -> getSelectedBuildType();
-		if ($selectedType eq 'cpio') {
+		if ($selectedType && $selectedType eq 'cpio') {
 			if (! $kic -> prepareBootImage(
 				$kic-> getSystemXML(),$rootTarget,$rootTarget
 			)) {
@@ -169,7 +169,7 @@ sub main {
 		$cmdL -> setForceNewRoot (0);
 		$cmdL -> unsetRecycleRootDir();
 		$kic  -> initialize();
-		if ($selectedType eq 'cpio') {
+		if ($selectedType && $selectedType eq 'cpio') {
 			if (! $kic -> createBootImage(
 				$kic-> getSystemXML(),$rootTarget,$imageTarget
 			)) {
@@ -239,7 +239,7 @@ sub main {
 			kiwiExit (1);
 		}
 		my $selectedType = $kic -> getSelectedBuildType();
-		if ($selectedType eq 'cpio') {
+		if ($selectedType && $selectedType eq 'cpio') {
 			if (! $kic -> prepareBootImage(
 				$kic -> getSystemXML(),
 				$cmdL-> getRootTargetDir(),$cmdL-> getRootTargetDir()
@@ -263,7 +263,7 @@ sub main {
 			kiwiExit (1);
 		}
 		my $selectedType = $kic -> getSelectedBuildType();
-		if ($selectedType eq 'cpio') {
+		if ($selectedType && $selectedType eq 'cpio') {
 			if (! $kic -> createBootImage(
 				$kic -> getSystemXML(),
 				$cmdL-> getConfigDir(),$cmdL-> getImageTargetDir()
