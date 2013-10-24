@@ -263,7 +263,7 @@ sub main {
 			kiwiExit (1);
 		}
 		my $selectedType = $kic -> getSelectedBuildType();
-		if ($selectedType eq 'cpio') {
+		if ($selectedType && $selectedType eq 'cpio') {
 			if (! $kic -> createBootImage(
 				$kic -> getSystemXML(),
 				$cmdL-> getConfigDir(),$cmdL-> getImageTargetDir()
