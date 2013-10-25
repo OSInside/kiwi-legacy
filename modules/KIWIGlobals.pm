@@ -985,48 +985,58 @@ sub callContained {
 		$kiwi -> failed ();
 		return;
 	}
-	my $locator = KIWILocator -> instance();
-	my $lxstart = $locator -> getExecPath('lxc-start');
-	my $lxstop  = $locator -> getExecPath('lxc-stop');
-	my $legacy  = 0;
-	if ((! $lxstart) || (! $lxstop)) {
-		#==========================================
-		# no lxc installed used chroot
-		#------------------------------------------
-		$kiwi -> loginfo ("lxc not installed\n");
-		$legacy = 1;
-	} else {
+	# /.../
+	# currently the use of lxc to run the call is deactivated
+	# because lxc requires cgroups support which is often not
+	# present in the environments people call kiwi in
+	# ----
+	my $uselxc   = 0;
+	my $fallback = 0;
+	if ($uselxc) {
 		#==========================================
 		# create lxc config file
 		#------------------------------------------
-		if (! open ($FD,">","$root/config.lxc")) {
-			$kiwi -> loginfo ("Couldn't create lxc config file: $!\n");
-			$legacy = 1;
+		my $locator = KIWILocator -> instance();
+		my $lxstart = $locator -> getExecPath('lxc-start');
+		my $lxstop  = $locator -> getExecPath('lxc-stop');
+		if ((! $lxstart) || (! $lxstop)) {
+			#==========================================
+			# no lxc installed used chroot
+			#------------------------------------------
+			$kiwi -> loginfo ("lxc not installed\n");
+			$fallback = 1;
 		} else {
-			print $FD "lxc.utsname = kiwi-contained-script"."\n";
-			print $FD "lxc.rootfs  = $root"."\n";
-			close $FD;
-			#==========================================
-			# call via lxc-start
-			#------------------------------------------
-			$data = KIWIQX::qxx (
-				"$lxstart -n kiwi -f $root/config.lxc ./$prog 2>&1"
-			);
-			$code = $? >> 8;
-			#==========================================
-			# cleanup lxc
-			#------------------------------------------
-			KIWIQX::qxx ("rm -f $root/config.lxc 2>&1");
-			KIWIQX::qxx ("$lxstop -n kiwi 2>&1");
+			if (! open ($FD,">","$root/config.lxc")) {
+				$kiwi -> loginfo ("Couldn't create lxc config file: $!\n");
+				$fallback = 1;
+			} else {
+				print $FD "lxc.utsname = kiwi-contained-script"."\n";
+				print $FD "lxc.rootfs  = $root"."\n";
+				close $FD;
+				#==========================================
+				# call via lxc-start
+				#------------------------------------------
+				$data = KIWIQX::qxx (
+					"$lxstart -n kiwi -f $root/config.lxc ./$prog 2>&1"
+				);
+				$code = $? >> 8;
+				#==========================================
+				# cleanup lxc
+				#------------------------------------------
+				KIWIQX::qxx ("rm -f $root/config.lxc 2>&1");
+				KIWIQX::qxx ("$lxstop -n kiwi 2>&1");
+			}
 		}
 	}
-	if ($legacy) {
+	if ((! $uselxc) || ($fallback)) {
 		#==========================================
 		# cleanup lxc
 		#------------------------------------------
-		$kiwi -> loginfo ("Falling back to chroot method\n");
-		if (-e "$root/config.lxc") {
-			KIWIQX::qxx ("rm -f $root/config.lxc 2>&1");
+		if ($fallback) {
+			$kiwi -> loginfo ("Falling back to chroot method\n");
+			if (-e "$root/config.lxc") {
+				KIWIQX::qxx ("rm -f $root/config.lxc 2>&1");
+			}
 		}
 		#==========================================
 		# call in chroot
