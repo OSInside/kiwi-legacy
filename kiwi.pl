@@ -357,6 +357,10 @@ sub main {
 			$analyseTemplate -> cloneLinuxConfigurationFiles();
 		}
 		#==========================================
+		# check for dbs and export them
+		#------------------------------------------
+		$analyseCustom -> createDatabaseDump();
+		#==========================================
 		# create report page / worksheet
 		#------------------------------------------
 		my $analyseReport = KIWIAnalyseReport -> new (

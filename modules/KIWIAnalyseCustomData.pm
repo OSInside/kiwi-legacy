@@ -246,6 +246,74 @@ sub getLocalRepositories {
 }
 
 #==========================================
+# createDatabaseDump
+#------------------------------------------
+sub createDatabaseDump {
+	# ...
+	# check for running databases and if available
+	# dump the content to a file
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $dest = $this->{dest};
+	my $netstat;
+	my $netstat_query;
+	my $dump_cmd;
+	my $db_file;
+	my $result;
+	my $status;
+	$kiwi -> info ("Checking for running databases...\n");
+	$netstat = qxx ("netstat -tl");
+	foreach my $db_type ("mysql") {
+		#========================================
+		# initialize db values
+		#----------------------------------------
+		if ($db_type eq 'mysql') {
+			$netstat_query = ':mysql\s';
+			$dump_cmd = "mysqldump -p -u root --all-databases --events";
+			$db_file =  "$dest/$db_type.sql";
+		} else { 
+			$kiwi -> error  ("DB $db_type unknown.");
+			$kiwi -> failed ();
+			return;
+		}
+		#========================================
+		# check for running db
+		#----------------------------------------
+		unless ($netstat =~ /$netstat_query/) {
+			$kiwi -> info (
+				"--> No running $db_type db found, ignoring..."
+			);
+			$kiwi -> skipped ();
+			next;
+		}
+		#========================================
+		# dump db content and compress it
+		#----------------------------------------
+		$kiwi -> info ("--> Found $db_type db, dumping to $db_file...");
+		$status = qxx ("$dump_cmd > $db_file 2>&1");
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> loginfo ($status);
+			next;
+		} else {
+			$kiwi -> done();
+		}
+		$kiwi -> info ("--> Compressing database...");
+		$status = qxx ("$this->{gdata}->{Gzip} $db_file 2>&1");
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> loginfo ($status);
+		} else {
+			$kiwi -> done();
+		}
+	}
+	return $this;
+}
+
+#==========================================
 # __populateCustomFiles
 #------------------------------------------
 sub __populateCustomFiles {
