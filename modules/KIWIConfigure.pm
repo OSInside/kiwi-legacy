@@ -405,7 +405,7 @@ sub setupAugeasImport {
 # setupAugeasTraverse
 #------------------------------------------
 sub setupAugeasTraverse {
-	my $this -> shift;
+	my $this = shift;
 	my $node = shift;
 	my @nodes = $node -> getChildrenByTagName ("node");
 	if (! @nodes) {
