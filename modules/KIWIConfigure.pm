@@ -411,6 +411,9 @@ sub setupAugeasTraverse {
 	if (! @nodes) {
 		my $p = join ('/',@p_aug_path);
 		if ($p_aug_val) {
+			$p_aug_val =~ s/^"//x;
+			$p_aug_val =~ s/"$//x;
+			$p_aug_val =~ s/\\//xg;
 			push @p_aug_result,"/files/$p \"$p_aug_val\"";
 		}
 		pop @p_aug_path;
