@@ -278,7 +278,7 @@ sub createDatabaseDump {
 			$kiwi -> failed ();
 			return;
 		}
-		$target = "$dest$db_type.$dump_ext";
+		$target = "$dest/dbs/$db_type.$dump_ext";
 		#========================================
 		# check for running db
 		#----------------------------------------
@@ -293,7 +293,7 @@ sub createDatabaseDump {
 		# dump db content and compress it
 		#----------------------------------------
 		$kiwi -> info ("--> Found $db_type db, dumping contents...");
-		$status = qxx ("mkdir -p $dest && $dump_cmd > $target 2>&1");
+		$status = qxx ("mkdir -p $dest/dbs && $dump_cmd > $target 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
