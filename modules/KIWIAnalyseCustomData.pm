@@ -259,24 +259,26 @@ sub createDatabaseDump {
 	my $netstat;
 	my $netstat_query;
 	my $dump_cmd;
-	my $db_file;
+	my $dump_ext;
+	my $target;
 	my $result;
 	my $status;
 	$kiwi -> info ("Checking for running databases...\n");
-	$netstat = qxx ("netstat -tl");
-	foreach my $db_type ("mysql") {
+	$netstat = qxx ('netstat -tl');
+	foreach my $db_type ('mysql') {
 		#========================================
 		# initialize db values
 		#----------------------------------------
 		if ($db_type eq 'mysql') {
 			$netstat_query = ':mysql\s';
 			$dump_cmd = "mysqldump -p -u root --all-databases --events";
-			$db_file =  "$dest/$db_type.sql";
+			$dump_ext = 'sql';
 		} else { 
 			$kiwi -> error  ("DB $db_type unknown.");
 			$kiwi -> failed ();
 			return;
 		}
+		$target = "$dest$db_type.$dump_ext";
 		#========================================
 		# check for running db
 		#----------------------------------------
@@ -290,8 +292,8 @@ sub createDatabaseDump {
 		#========================================
 		# dump db content and compress it
 		#----------------------------------------
-		$kiwi -> info ("--> Found $db_type db, dumping to $db_file...");
-		$status = qxx ("$dump_cmd > $db_file 2>&1");
+		$kiwi -> info ("--> Found $db_type db, dumping contents...");
+		$status = qxx ("mkdir -p $dest && $dump_cmd > $target 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -300,8 +302,8 @@ sub createDatabaseDump {
 		} else {
 			$kiwi -> done();
 		}
-		$kiwi -> info ("--> Compressing database...");
-		$status = qxx ("$this->{gdata}->{Gzip} $db_file 2>&1");
+		$kiwi -> info ("--> Compressing database [ $target.gz ]...");
+		$status = qxx ("$this->{gdata}->{Gzip} $target 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
