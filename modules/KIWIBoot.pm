@@ -5836,8 +5836,6 @@ sub initGeometry {
 	my $kiwi   = $this->{kiwi};
 	my $cmdL   = $this->{cmdL};
 	my $align  = $cmdL->getDiskAlignment();
-	my $secsz  = $cmdL->getDiskBIOSSectorSize();
-	my $align_sectors = int ($align / $secsz);
 	my $locator= KIWILocator -> new();
 	if (! defined $this->{pStart}) {
 		$this->{pStart} = $cmdL->getDiskStartSector();
@@ -5848,11 +5846,12 @@ sub initGeometry {
 		my $status = qxx (
 			"$parted | grep :$this->{pStart} | cut -f3 -d:"
 		);
+		chomp $status;
 		$status=~ s/s//;
-		if ($status >= $align_sectors) {
-			$status = int ($status / $align_sectors);
-			$status*= $align_sectors;
-			$status+= $align_sectors;
+		if ($status >= $align) {
+			$status = int ($status / $align);
+			$status*= $align;
+			$status+= $align;
 		}
 		$this->{pStart} = $status;
 	}
