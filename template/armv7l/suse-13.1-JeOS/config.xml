@@ -55,18 +55,21 @@
 	<users group="root">
 		<user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
 	</users>
+	<repository type="yast2">
+		<source path="http://download.opensuse.org/ports/armv7hl/distribution/13.1/repo/oss"/>
+	</repository>
 	<repository type="rpm-md">
-		<source path="obs://openSUSE:/13.1:/ARM/standard"/>
+		<source path="obs://openSUSE:13.1:Ports/ports"/>
 	</repository>
 	<packages type="bootstrap" profiles="pandaFlavour">
-		<package name="kernel-omap2plus" bootinclude="true"/>
+		<package name="kernel-default" bootinclude="true"/>
 		<package name="u-boot-omap4panda" bootinclude="true"/>
 	</packages>
 	<packages type="bootstrap" profiles="efikaFlavour">
 		<package name="kernel-imx51" bootinclude="true"/>
 	</packages>
 	<packages type="bootstrap" profiles="beagleFlavour">
-		<package name="kernel-omap2plus" bootinclude="true"/>
+		<package name="kernel-default" bootinclude="true"/>
 		<package name="u-boot-omap3beagle" bootinclude="true"/>
 		<package name="x-loader-omap3beagle" bootinclude="true"/>
 	</packages>
@@ -92,10 +95,8 @@
 		<package name="hwinfo"/>
 		<package name="procps"/>
 		<package name="sysconfig"/>
-		<package name="pwdutils"/>
 		<package name="openssh"/>
 		<package name="dhcpcd"/>
-		<package name="insserv"/>
 		<package name="polkit"/>
 		<package name="netcfg"/>
 		<package name="rpcbind"/>
