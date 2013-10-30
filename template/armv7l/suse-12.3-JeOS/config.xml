@@ -12,6 +12,7 @@
 		<profile name="pandaFlavour" description="Kernel/Tools setup for panda boards" import="true"/>
 		<profile name="efikaFlavour" description="Kernel/Tools setup for efika boards"/>
 		<profile name="beagleFlavour" description="Kernel/Tools setup for beagle boards"/>
+		<profile name="origenFlavour" description="Kernel/Tools setup for Origen boards"/>
 	</profiles>
 	<preferences>
 		<type image="tbz" primary="true"/>
@@ -52,11 +53,26 @@
 			</oemconfig>
 		</type>
 	</preferences>
+	<preferences profiles="origenFlavour">
+		<type image="oem" filesystem="ext3" boot="oemboot/suse-13.1" bootloader="uboot" kernelcmdline="console=ttySAC2,115200n8" editbootconfig="uboot-image-setup" editbootinstall="uboot-image-install">
+			<systemdisk/>
+			<oemconfig>
+				<oem-swapsize>500</oem-swapsize>
+				<oem-swap>true</oem-swap>
+			</oemconfig>
+		</type>
+	</preferences>
 	<users group="root">
 		<user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
 	</users>
+	<repository type="yast2">
+		<source path="obs://openSUSE:12.3:Ports/standard"/>
+	</repository>
 	<repository type="rpm-md">
-		<source path="obs://openSUSE:/12.3:/ARM/standard"/>
+		<source path="obs://openSUSE:12.3:Ports/ports"/>
+	</repository>
+	<repository type="rpm-md">
+		<source path="obs://devel/ARM/12.3/Contrib/Origen/standard"/>
 	</repository>
 	<packages type="bootstrap" profiles="pandaFlavour">
 		<package name="kernel-omap2plus" bootinclude="true"/>
@@ -69,6 +85,10 @@
 		<package name="kernel-omap2plus" bootinclude="true"/>
 		<package name="u-boot-omap3beagle" bootinclude="true"/>
 		<package name="x-loader-omap3beagle" bootinclude="true"/>
+	</packages>
+	<packages type="bootstrap" profiles="origenFlavour">
+		<package name="kernel-exynos" bootinclude="true"/>
+		<package name="u-boot-origen" bootinclude="true"/>
 	</packages>
 <!-- don't remove qemu binfmt helpers from initrd -->
 	<strip type="tools">
