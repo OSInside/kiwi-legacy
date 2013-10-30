@@ -20,16 +20,3 @@ if [ -f "boot/MLO" ];then
 	dd if=/dev/zero of=$diskname bs=440 count=1 conv=notrunc
 fi
 
-#==========================================
-# install Origen SPL & u-boot as raw
-#------------------------------------------
-if [ -f "boot/origen-spl.bin" ];then
-	if ! dd if=boot/origen-spl.bin of=$diskname seek=1 conv=notrunc; then
-		echo "Couldn't install SPL on $diskname"
-		exit 1
-	fi
-	if ! dd if=boot/u-boot.bin of=$diskname seek=65 conv=notrunc; then
-		echo "Couldn't install u-boot on $diskname"
-		exit 1
-	fi
-fi
