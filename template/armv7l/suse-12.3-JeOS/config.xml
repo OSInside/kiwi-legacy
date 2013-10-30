@@ -66,13 +66,10 @@
 		<user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
 	</users>
 	<repository type="yast2">
-		<source path="obs://openSUSE:12.3:Ports/standard"/>
+		<source path="http://download.opensuse.org/ports/armv7hl/distribution/12.3/repo/oss"/>
 	</repository>
 	<repository type="rpm-md">
-		<source path="obs://openSUSE:12.3:Ports/ports"/>
-	</repository>
-	<repository type="rpm-md">
-		<source path="obs://devel/ARM/12.3/Contrib/Origen/standard"/>
+		<source path="http://download.opensuse.org/repositories/devel:/ARM:/12.3:/Contrib:/Origen/standard"/>
 	</repository>
 	<packages type="bootstrap" profiles="pandaFlavour">
 		<package name="kernel-omap2plus" bootinclude="true"/>
@@ -112,10 +109,8 @@
 		<package name="hwinfo"/>
 		<package name="procps"/>
 		<package name="sysconfig"/>
-		<package name="pwdutils"/>
 		<package name="openssh"/>
 		<package name="dhcpcd"/>
-		<package name="insserv"/>
 		<package name="polkit"/>
 		<package name="netcfg"/>
 		<package name="rpcbind"/>
