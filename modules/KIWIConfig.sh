@@ -1623,22 +1623,31 @@ function suseStripKernel {
 			#------------------------------------------
 			pushd /boot
 			if [ -f uImage-$VERSION ];then
+				# dedicated to kernels on arm
 				mv uImage-$VERSION vmlinuz
-			elif [[ $arch =~ ^arm ]] && [ -f Image-$VERSION ];then
+			elif [ -f Image-$VERSION ];then
+				# dedicated to kernels on arm
 				mv Image-$VERSION vmlinuz
-			elif [ -f vmlinux-$VERSION.gz ];then
-				mv vmlinux-$VERSION.gz vmlinux.gz
+			elif [ -f zImage-$VERSION ] && [ -f vmlinux-$VERSION.gz ];then
+				# dedicated to kernels on arm
+				mv vmlinux-$VERSION.gz vmlinuz
+			elif [ -f vmlinuz-$VERSION.gz ];then
+				# dedicated to kernels on x86
 				mv vmlinuz-$VERSION vmlinuz
 			elif [ -f vmlinuz-$VERSION.el5 ];then
+				# dedicated to kernels on ppc
 				mv vmlinux-$VERSION.el5 vmlinuz
 			elif [ -f vmlinuz-$VERSION ];then
+				# dedicated to kernels on ppc
 				mv vmlinuz-$VERSION vmlinuz
 			elif [ -f image-$VERSION ];then
+				# dedicated to kernels on s390
 				mv image-$VERSION vmlinuz
 			else
-				rm -f vmlinux
-				cp vmlinux-$VERSION vmlinux
-				mv vmlinux-$VERSION vmlinuz
+				echo "Failed to find a mapping kernel"
+			fi
+			if [ -f vmlinux-$VERSION.gz ];then
+				mv vmlinux-$VERSION.gz vmlinux.gz
 			fi
 			popd
 		done

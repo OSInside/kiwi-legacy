@@ -4068,11 +4068,7 @@ sub extractLinux {
 	if ($vconf) {
 		$xendomain = $vconf -> getDomain();
 	}
-	if ((-f "$imageTree/boot/vmlinux.gz")  ||
-		(-f "$imageTree/boot/vmlinuz.el5") ||
-		(-f "$imageTree/boot/vmlinux")     ||
-		(-f "$imageTree/boot/vmlinuz")
-	) {
+	if (-f "$imageTree/boot/vmlinuz") {
 		$kiwi -> info ("Extracting kernel\n");
 		#==========================================
 		# setup file names / cleanup...
