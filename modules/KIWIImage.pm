@@ -4722,11 +4722,8 @@ sub checkKernel {
 	# this function receives two parameters. The initrd image
 	# file and the system image tree directory path. It checks
 	# whether at least one kernel matches both, the initrd and
-	# the system image. If not the function tries to copy the
-	# kernel from the system image into the initrd. If the
-	# system image specifies more than one kernel an error
-	# is printed pointing out that the boot image needs to
-	# specify one of the found system image kernels
+	# the system image. If not the function returns with an
+	# error
 	# ---
 	my $this    = shift;
 	my $initrd  = shift;
@@ -4788,117 +4785,13 @@ sub checkKernel {
 		}
 	}
 	#==========================================
-	# check system image kernel count
+	# no kernel matches the one in the initrd
 	#------------------------------------------
-	if (keys %sysk > 1) {
-		$kiwi -> error  ("*** kernel check failed ***");
-		$kiwi -> failed ();
-		$kiwi -> note ("Can't find a system kernel matching the initrd\n");
-		$kiwi -> note ("multiple system kernels were found, make sure your\n");
-		$kiwi -> note ("boot image includes the intended kernel\n");
-		return;
-	}
-	#==========================================
-	# fix kernel inconsistency:
-	#------------------------------------------
-	$kiwi -> info ("Fixing kernel inconsistency...");
-	$tmpdir = qxx ("mktemp -qdt kiwi-fixboot.XXXXXX"); chomp $tmpdir;
-	$result = $? >> 8;
-	if ($result != 0) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Couldn't create tmp dir: $tmpdir: $!");
-		$kiwi -> failed ();
-		return;
-	}
-	push @{$this->{tmpdirs}},$tmpdir;
-	#==========================================
-	# 1) unpack initrd...
-	#------------------------------------------
-	$status = qxx ("cd $tmpdir && $cmd|cpio -di --quiet");
-	$result = $? >> 8;
-	if ($result != 0) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Couldn't unpack initrd: $status");
-		$kiwi -> failed ();
-		qxx ("rm -rf $tmpdir");
-		return;
-	}
-	#==========================================
-	# 2) create images.sh script...
-	#------------------------------------------
-	my $FD = FileHandle -> new();
-	if (! $FD -> open (">$tmpdir/images.sh")) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Couldn't create image.sh file: $!");
-		$kiwi -> failed ();
-		qxx ("rm -rf $tmpdir");
-		return;
-	}
-	print $FD '#!/bin/sh'."\n";
-	print $FD 'test -f /.kconfig && . /.kconfig'."\n";
-	print $FD 'test -f /.profile && . /.profile'."\n";
-	print $FD 'echo "*** Fixing kernel inconsistency ***"'."\n";
-	print $FD 'suseStripKernel'."\n";
-	print $FD 'exit 0'."\n";
-	$FD -> close();
-	#==========================================
-	# 3) copy system kernel to initrd...
-	#------------------------------------------
-	qxx ("rm -rf $tmpdir/boot");
-	qxx ("cp -a  $systree/boot $tmpdir");
-	qxx ("rm -rf $tmpdir/lib/modules");
-	qxx ("cp -a  $systree/lib/modules $tmpdir/lib");
-	qxx (
-		"cp $this->{gdata}->{BasePath}/modules/KIWIConfig.sh $tmpdir/.kconfig"
+	$kiwi -> error  (
+		"Can't find any system kernel matching the initrd"
 	);
-	qxx ("chmod u+x $tmpdir/images.sh");
-	#==========================================
-	# 4) call images.sh script...
-	#------------------------------------------
-	($result,$status) = KIWIGlobals -> instance() -> callContained (
-		$tmpdir,"/images.sh"
-	);
-	if ($result != 0) {
-		$kiwi -> failed ();
-		$kiwi -> info   ($status);
-		qxx ("rm -rf $tmpdir");
-		return;
-	} else {
-		$kiwi -> loginfo ("images.sh: $status");
-	}
-	$kiwi -> done();
-	#==========================================
-	# 5) extract kernel files...
-	#------------------------------------------
-	my $dest = dirname $initrd;
-	qxx ("rm -f $dest/$name*");
-	if (! $this -> extractLinux ($name,$tmpdir,$dest)) {
-		qxx ("rm -rf $tmpdir");
-		return;
-	}
-	#==========================================
-	# 6) rebundle initrd...
-	#------------------------------------------
-	my @cpio = ("--create", "--format=newc", "--quiet");
-	$status = qxx ( "cd $tmpdir && find . | cpio @cpio > $dest/$name");
-	if ($zip) {
-		$status = qxx (
-			"cd $tmpdir && cat $dest/$name | $zipper -f > $initrd"
-		);
-	}
-	#==========================================
-	# 7) recreate md5 file...
-	#------------------------------------------
-	my $origDest = $this->{imageDest};
-	$this->{imageDest} = $dest;
-	if (! $this -> buildMD5Sum ($name)) {
-		$this->{imageDest} = $origDest;
-		qxx ("rm -rf $tmpdir");
-		return;
-	}
-	$this->{imageDest} = $origDest;
-	qxx ("rm -rf $tmpdir");
-	return $this;
+	$kiwi -> failed ();
+	return;
 }
 
 #==========================================
