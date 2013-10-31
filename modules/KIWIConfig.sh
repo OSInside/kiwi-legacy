@@ -1628,9 +1628,9 @@ function suseStripKernel {
 			elif [ -f Image-$VERSION ];then
 				# dedicated to kernels on arm
 				mv Image-$VERSION vmlinuz
-			elif [ -f zImage-$VERSION ] && [ -f vmlinux-$VERSION.gz ];then
+			elif [ -f zImage-$VERSION ];then
 				# dedicated to kernels on arm
-				mv vmlinux-$VERSION.gz vmlinuz
+				mv zImage-$VERSION vmlinuz
 			elif [ -f vmlinuz-$VERSION.gz ];then
 				# dedicated to kernels on x86
 				mv vmlinuz-$VERSION vmlinuz
