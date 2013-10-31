@@ -32,6 +32,10 @@
 	<repository type="yast2">
 		<source path="/tmp"/>
 	</repository>
+	<packages type="image" profiles="my-second">
+	</packages>
+	<packages type="image" profiles="my-second" patternType="plusRecommended">
+	</packages>
 	<packages type="image" profiles="my-first">
 		<package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>
 		<package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>

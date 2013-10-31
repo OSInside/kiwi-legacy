@@ -866,93 +866,61 @@ sub __checkPatternUnique {
 sub __checkPatternTypeAttrConsistent {
 	# ...
 	# Check that the values for the patternType attribute do not conflict.
-	# If all <packages> sections use profiles attributes the patternType
-	# attribute value may be different for all <packages> sections. However,
-	# if a default <packages> section exists, i.e. no profiles attribute
-	# is used, then all patternType attribute values must be the same as
-	# the value set for the default profile.
+	# This means patternTypes set for profiles must be uniq for this
+	# profile. This also applies to sections without a profile which
+	# are handled as __standard in this check. The getInstallOption
+	# function from KIWIXML will use the highest prio patternType
+	# according to the selected profiles.
 	# ---
 	my $this = shift;
+	my $kiwi = $this->{kiwi};
 	my @pkgsNodes = $this->{systemTree} -> getElementsByTagName('packages');
-	my $defPatternTypeVal = '';
-	my $defPackSection;
-	# Check if a <packages> spec without a profiles attribute exists
+	my %result;
+	#==========================================
+	# build hash profiles -> [ ptype list ]
+	#------------------------------------------
 	for my $pkgs (@pkgsNodes) {
-		if ( (! $pkgs -> getAttribute( 'profiles' ))
-			&& ($pkgs -> getAttribute( 'type' ) eq 'image')) {
-			$defPackSection = $pkgs;
-			my $patternType = $pkgs -> getAttribute( 'patternType' );
-			if ($patternType) {
-				$defPatternTypeVal = $patternType;
-			} else {
-				$defPatternTypeVal = 'onlyRequired';
-			}
-			last;
-		}
-	}
-	# Set up a hash for specified profiles for packages, if a profile is used
-	# multiple times, the value of patternType must be the same for each use
-	my %profPatternUseMap = ();
-	for my $pkgs (@pkgsNodes) {
-		if ( $pkgs -> getAttribute( 'type' ) eq 'delete') {
+		my $type = $pkgs -> getAttribute('type');
+		if ($type ne 'image') {
 			next;
 		}
-		my $profiles = $pkgs -> getAttribute( 'profiles' );
-		if ($profiles) {
-			my @profNames = split /,/, $profiles;
-			my $patternType = $pkgs -> getAttribute( 'patternType' );
-			if (! $patternType) {
-				$patternType = 'onlyRequired';
-			}
-			for my $profName (@profNames) {
-				if (! grep { /^$profName$/x } (keys %profPatternUseMap) ) {
-					$profPatternUseMap{$profName} = $patternType;
-				} elsif ( $profPatternUseMap{$profName} ne $patternType) {
-					my $kiwi = $this->{kiwi};
-					my $msg = 'Conflicting patternType attribute values for "'
-					. $profName
-					. '" profile found.';
-					$kiwi -> error ( $msg );
-					$kiwi -> failed ();
-					return;
-				}
+		my $ptype = $pkgs -> getAttribute('patternType');
+		if (! $ptype) {
+			$ptype = 'onlyRequired';
+		}
+		my $profile = $pkgs -> getAttribute('profiles');
+		my @profile_list = ();
+		if (! $profile) {
+			push @profile_list, '__standard';
+		} else {
+			@profile_list = split (/,/,$profile);
+		}
+		foreach my $profile (@profile_list) {
+			if (! $result{$profile}) {
+				$result{$profile} = [$ptype];
+			} else {
+				my @list = @{$result{$profile}};
+				push @list,$ptype;
+				$result{$profile} = \@list;
 			}
 		}
 	}
-	if (! $defPackSection) {
-		# No default <packages> section exists, no additional checking
-		# required
-		return 1;
-	}
-	for my $pkgs (@pkgsNodes) {
-		if (refaddr($pkgs) != refaddr($defPackSection)) {
-			my $patternType = $pkgs -> getAttribute( 'patternType' );
-			if ($patternType && $patternType ne $defPatternTypeVal) {
-				my $kiwi = $this->{kiwi};
-				my $msg = 'The specified value "'
-				. $patternType
-				. '" for the patternType attribute differs from the '
-				. 'specified default value: "'
-				. $defPatternTypeVal
-				. '".';
-				$kiwi -> error ( $msg );
-				$kiwi -> failed ();
-				return;
-			}
-			my $type = $pkgs -> getAttribute( 'type' );
-			if (! $patternType
-				&& $type ne 'bootstrap'
-				&& $type ne 'delete'
-				&& $defPatternTypeVal ne 'onlyRequired') {
-				my $kiwi = $this->{kiwi};
-				my $msg = 'The patternType attribute was omitted, but the '
-				. 'base <packages> specification requires "'
-				. $defPatternTypeVal
-				. '" the values must match.';
-				$kiwi -> error ( $msg );
-				$kiwi -> failed ();
-				return;
-			}
+	#==========================================
+	# check patternType consistency in profiles
+	#------------------------------------------
+	foreach my $profName (keys %result) {
+		my %check;
+		foreach my $ptype (@{$result{$profName}}) {
+			$check{$ptype} = $ptype;
+		}
+		my $valid = keys %check;
+		if ($valid > 1) {
+			my $msg;
+			$msg = 'Conflicting patternType attribute values for "';
+			$msg.= $profName.'" profile found.';
+			$kiwi -> error ( $msg );
+			$kiwi -> failed ();
+			return;
 		}
 	}
 	return 1;

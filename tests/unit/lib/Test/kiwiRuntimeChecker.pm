@@ -171,20 +171,10 @@ sub test_conflictingProfiles {
 	my $res = $checker -> prepareChecks();
 	my $infoMsg = $kiwi -> getInfoMessage();
 	my $expected = 'Set profiles to command line provided profiles for '
-		. "validation.\nUsing profile(s): my-first, my-second";
+		. "validation.\nUsing profile(s): my-first, my-secondReset profiles to original values.\n";
 	$this -> assert_str_equals($expected, $infoMsg);
-	my $msg = $kiwi -> getErrorMessage();
-	$expected = 'Conflicting patternType attribute values for specified '
-		. 'profiles "my-first my-second" found';
-	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('error', $msgT);
-	my $state = $kiwi -> getErrorState();
-	$this -> assert_str_equals('failed', $state);
-	# Clear all states
-	$state = $kiwi -> getState();
-	# Test this condition last to get potential error messages
-	$this -> assert_null($res);
+	$this -> assert_str_equals('info', $msgT);
 	return;
 }
 

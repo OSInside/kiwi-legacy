@@ -4574,7 +4574,8 @@ sub test_getInstallOptionConflict {
 	$this -> assert_str_equals('none', $msgT);
 	$state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_null($instOpt);
+	$expected = "plusRecommended";
+	$this -> assert_str_equals($expected, $instOpt);
 	return;
 }
 

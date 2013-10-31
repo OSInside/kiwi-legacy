@@ -1504,8 +1504,10 @@ sub getImageType {
 #------------------------------------------
 sub getInstallOption {
 	# ...
-	# Return the install option type setting. Returns undef if there is
-	# a conflict and thus the settings are ambiguous.
+	# Return the install option type setting.
+	# decides for plusRecommended if it was selected
+	# by a profile even if the default setting is
+	# at onlyRequired
 	# ---
 	my $this     = shift;
 	my $profName = shift;
@@ -1518,8 +1520,8 @@ sub getInstallOption {
 			next;
 		}
 		if ($opt && $instOpt) {
-			if ($opt ne $instOpt) {
-				return;
+			if (($opt ne $instOpt) && ($opt eq 'plusRecommended')) {
+				$instOpt = $opt;
 			}
 		}
 	}

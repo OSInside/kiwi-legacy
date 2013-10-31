@@ -936,6 +936,9 @@ sub __hasValidArchives {
 	my $cmdL = $this->{cmdArgs};
 	my $archives = $xml -> getArchives();
 	my $desc = $cmdL-> getConfigDir();
+	if (! $desc) {
+		return 1;
+	}
 	my @nogo = ('^etc\/YaST2\/licenses\/.*');
 	#==========================================
 	# check for origin of image description

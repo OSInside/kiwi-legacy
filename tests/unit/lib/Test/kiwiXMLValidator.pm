@@ -913,14 +913,6 @@ sub test_patternTattrConsistent {
 		} elsif ($iConfFile =~ /patternTattrConsInvalid_2\.xml/smx) {
 			$expectedMsg = 'Conflicting patternType attribute values for '
 			. '"my-first" profile found.';
-		} elsif ($iConfFile =~ /patternTattrConsInvalid_3\.xml/smx) {
-			$expectedMsg = 'The specified value "plusRecommended" for the '
-			. 'patternType attribute differs from the specified default '
-			. 'value: "onlyRequired".';
-		} elsif ($iConfFile =~ /patternTattrConsInvalid_4\.xml/smx) {
-			$expectedMsg = 'The patternType attribute was omitted, but the '
-			. 'base <packages> specification requires "plusRecommended" '
-			. 'the values must match.';
 		} else {
 			# Force a test failure, there is no generic message in this test
 			# stream
