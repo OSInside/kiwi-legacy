@@ -265,6 +265,7 @@ sub createDatabaseDump {
 	my $status;
 	$kiwi -> info ("Checking for running databases...\n");
 	$netstat = qxx ('netstat -tl');
+	$dest .= "/root/var/cache/dbs";
 	foreach my $db_type ('mysql') {
 		#========================================
 		# initialize db values
@@ -278,7 +279,7 @@ sub createDatabaseDump {
 			$kiwi -> failed ();
 			return;
 		}
-		$target = "$dest/dbs/$db_type.$dump_ext";
+		$target = "$dest/$db_type.$dump_ext";
 		#========================================
 		# check for running db
 		#----------------------------------------
@@ -293,7 +294,7 @@ sub createDatabaseDump {
 		# dump db content and compress it
 		#----------------------------------------
 		$kiwi -> info ("--> Found $db_type db, dumping contents...");
-		$status = qxx ("mkdir -p $dest/dbs && $dump_cmd > $target 2>&1");
+		$status = qxx ("mkdir -p $dest && $dump_cmd > $target 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
