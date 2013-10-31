@@ -54,7 +54,7 @@
 		</type>
 	</preferences>
 	<preferences profiles="origenFlavour">
-		<type image="oem" filesystem="ext3" boot="oemboot/suse-13.1" bootloader="uboot" kernelcmdline="console=ttySAC2,115200n8" editbootconfig="uboot-image-setup" editbootinstall="uboot-image-install">
+		<type image="oem" filesystem="ext3" boot="oemboot/suse-12.3" bootloader="uboot" kernelcmdline="console=ttySAC2,115200n8" editbootconfig="uboot-image-setup" editbootinstall="uboot-image-install">
 			<systemdisk/>
 			<oemconfig>
 				<oem-swapsize>500</oem-swapsize>
