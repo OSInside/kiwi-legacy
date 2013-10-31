@@ -256,24 +256,23 @@ sub createDatabaseDump {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $dest = $this->{dest};
-	my $netstat;
-	my $netstat_query;
+	my $db_test_cmd;
+	my $db_type;
 	my $dump_cmd;
 	my $dump_ext;
 	my $target;
 	my $result;
 	my $status;
-	$kiwi -> info ("Checking for running databases...\n");
-	$netstat = qxx ('netstat -tl');
 	$dest .= "/root/var/cache/dbs";
+	$kiwi -> info ("Checking for running databases...\n");
 	foreach my $db_type ('mysql') {
 		#========================================
 		# initialize db values
 		#----------------------------------------
 		if ($db_type eq 'mysql') {
-			$netstat_query = ':mysql\s';
-			$dump_cmd = "mysqldump -p -u root --all-databases --events";
-			$dump_ext = 'sql';
+			$db_test_cmd = "mysqladmin ping";
+			$dump_cmd    = "mysqldump -p -u root --all-databases --events";
+			$dump_ext    = 'sql';
 		} else { 
 			$kiwi -> error  ("DB $db_type unknown.");
 			$kiwi -> failed ();
@@ -283,7 +282,9 @@ sub createDatabaseDump {
 		#========================================
 		# check for running db
 		#----------------------------------------
-		unless ($netstat =~ /$netstat_query/) {
+		qxx ("$db_test_cmd");
+		$result = $? >> 8;
+		if ($result != 0) {
 			$kiwi -> info (
 				"--> No running $db_type db found, ignoring..."
 			);
