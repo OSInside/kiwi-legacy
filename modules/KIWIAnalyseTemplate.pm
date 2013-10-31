@@ -333,6 +333,7 @@ sub writeKIWIScripts {
 		$sctl -> close();
 	}
 	print $FD 'suseConfig'."\n";
+	print $FD 'importDatabases'."\n";
 	print $FD 'baseCleanMount'."\n";
 	print $FD 'exit 0'."\n";
 	$FD -> close();
