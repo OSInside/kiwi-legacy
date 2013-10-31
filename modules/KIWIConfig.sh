@@ -1784,4 +1784,50 @@ function baseSetupBuildDay {
 	echo "build_day=$buildDay" > /build_day
 }
 
+#======================================
+# importDatabases
+#--------------------------------------
+function importDatabases {
+	# /.../
+	# This function allows the import of databases
+	# exported by the KIWIAnalyseCustomData
+	# createDatabaseDump
+	# ----
+	local dir="/var/cache/dbs"
+	local db_type=""
+	for file in $dir/*
+	do
+		if [[ -f $file ]]; then
+			db_type=$(basename "$file" | cut -d. -f1)
+		else
+			echo "No database found!"
+			break
+		fi
+		echo "Trying to import $db_type database..."
+		case "$db_type" in
+		'mysql')
+			# bring up db
+			mysql_install_db --user=mysql
+			mysqld_safe --nowatch --user=mysql --skip-networking
+			local i
+			for((i=0; i<150; i++)); do
+				sleep 0.2
+				mysqladmin ping 2>/dev/null && break
+			done
+			# import content
+			if zcat $file | mysql -u root; then
+				echo "Import of $db_type successfull!"
+			else
+				echo "Import of $db_type failed!"
+			fi
+			mysqladmin shutdown
+		;;
+		*)
+			echo "Ignoring unknown database type $db_type!"
+		;;
+		esac
+	done
+	rm -rf "$dir"
+}
+
 # vim: set noexpandtab:
