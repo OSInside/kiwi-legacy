@@ -122,8 +122,12 @@ sub initialize {
 	# Store selected image type
 	#------------------------------------------
 	if ($this->{buildType}) {
+		my $configDir = $this->{configDir};
+		if (! $configDir) {
+			$configDir = $cmdL -> getSystemLocation();
+		}
 		my $xml = KIWIXML -> new(
-			$this->{configDir}, $this->{buildType},
+			$configDir, $this->{buildType},
 			$this->{buildProfiles}, $this->{cmdL}
 		);
 		if (! $xml) {
