@@ -1714,8 +1714,7 @@ sub usage {
 	print "\n";
 	print "    [ --check-kernel ]\n";
 	print "      Activates check for matching kernels between boot and\n";
-	print "      system image. The kernel check also tries to fix the boot\n";
-	print "      image if no matching kernel was found.\n";
+	print "      system image.\n";
 	print "\n";
 	print "    [ --mbrid <number>]\n";
 	print "      Sets the disk id to the given value. The default is to\n";
