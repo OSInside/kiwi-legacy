@@ -1044,6 +1044,7 @@ sub setupPackageFiles
 			if ( $last_progress_time < time() ){
 				my $str;
 				$str = (time() - $this->{m_startUpTime}) / 60;
+				$str = sprintf "%.0f", $str;
 				my $msg = "  process $usedPackages->{_name}->{label} package "
 				    . "links: ($count_packs/$num_packs), running $str minutes";
 				$this->logMsg('I', $msg);
@@ -1810,6 +1811,7 @@ sub lookUpAllPackages
 					if ( $last_progress_time < time() ){
 						my $str;
 						$str = (time() - $this->{m_startUpTime}) / 60;
+						$str = sprintf "%.0f", $str;
 						my $msg = 'read package progress: '
 						    . "($count_repos/$num_repos | "
 						    . "$count_dirs/$num_dirs | "
