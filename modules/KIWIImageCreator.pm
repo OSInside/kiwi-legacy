@@ -1777,6 +1777,13 @@ sub __addPreferencesToBootXML {
 		$bootpref -> setBootSplashTheme ($splashtheme);
 	}
 	#==========================================
+	# rpm signature check
+	#------------------------------------------
+	my $checkSig = $syspref -> getRPMCheckSig();
+	if ($checkSig) {
+		$bootpref -> setRPMCheckSig ($checkSig);
+	}
+	#==========================================
 	# KIWIXMLPreferenceData
 	#------------------------------------------
 	# getPreferences returns a new KIWIXMLPreferenceData object
