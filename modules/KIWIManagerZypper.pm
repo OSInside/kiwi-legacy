@@ -108,12 +108,18 @@ sub new {
 		$kiwi -> done ();
 	}
 	#==========================================
+	# Get signature information
+	#------------------------------------------
+	my $imgCheckSig = $xml -> getPreferences() -> getRPMCheckSig();
+	if (! $imgCheckSig) {
+		$imgCheckSig = 'false';
+	}
+	#==========================================
 	# Store zypper command parameters
 	#------------------------------------------
 	$this->{zypper} = [
 		$locator -> getExecPath('zypper'),
 		'--non-interactive',
-		'--no-gpg-checks',
 		'--pkg-cache-dir /var/cache/kiwi/packages',
 		"--reposd-dir $root/$dataDir/repos",
 		"--solv-cache-dir $root/$dataDir/solv",
@@ -123,13 +129,16 @@ sub new {
 	$this->{zypper_chroot} = [
 		"zypper",
 		'--non-interactive',
-		'--no-gpg-checks',
 		'--pkg-cache-dir /var/cache/kiwi/packages',
 		"--reposd-dir $dataDir/repos",
 		"--solv-cache-dir $dataDir/solv",
 		"--cache-dir $dataDir",
 		"--config $zypperConf"
 	];
+	if ($imgCheckSig eq 'false') {
+		push $this->{zypper_chroot},'--no-gpg-checks';
+		push $this->{zypper},'--no-gpg-checks';
+	}
 	#==========================================
 	# Store object data
 	#------------------------------------------
