@@ -3848,6 +3848,7 @@ function setupHybridPersistent {
 		# ----
 		unset HYBRID_RW
 		unset kiwi_hybridpersistent
+		export skipSetupBootPartition=1
 	fi
 }
 #======================================
@@ -6113,7 +6114,7 @@ function mountSystem {
 	# setup boot partition
 	#--------------------------------------
 	if \
-		[ -z "$HYBRID_RW" ]               && \
+		[ -z "$skipSetupBootPartition" ]  && \
 		[ "$LOCAL_BOOT" = "no" ]          && \
 		[ ! "$systemIntegrity" = "fine" ] && \
 		[ $retval = 0 ]                   && \
@@ -8056,6 +8057,7 @@ function createCustomHybridPersistent {
 	#======================================
 	# export read-write device name
 	#--------------------------------------
+	export skipSetupBootPartition=1
 	export HYBRID_RW=$kiwi_cowdevice
 }
 #======================================
@@ -8085,6 +8087,7 @@ function createHybridPersistent {
 		local label=$(blkid $partd -s LABEL -o value)
 		if [ "$label" = "hybrid" ];then
 			Echo "Existing persistent hybrid partition found"
+			export skipSetupBootPartition=1
 			export HYBRID_RW=$partd
 			return
 		fi
@@ -8120,6 +8123,7 @@ function createHybridPersistent {
 	#======================================
 	# export read-write device name
 	#--------------------------------------
+	export skipSetupBootPartition=1
 	export HYBRID_RW=$(ddn $device $pID)
 }
 #======================================
