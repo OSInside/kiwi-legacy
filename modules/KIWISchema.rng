@@ -3680,7 +3680,6 @@ and setup the system disk</db:para>
         <choice>
           <value>ix86</value>
           <value>x86_64</value>
-          <value>%arch</value>
         </choice>
       </attribute>
     </define>

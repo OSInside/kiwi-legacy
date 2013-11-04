@@ -798,6 +798,37 @@ sub __checkNoIDSystemGroups {
 }
 
 #==========================================
+# __checkOVFTypeSet
+#------------------------------------------
+sub __checkOVFTypeSet {
+	# ...
+	# If the format attribute on the <type> is set to ovf the user must
+	# specify the ovftype in the <machine> definition
+	# ---
+	my $this = shift;
+	my $systemTree  = $this->{systemTree};
+	my @types = $systemTree -> getElementsByTagName('type');
+	for my $type (@types) {
+		my $format = $type -> getAttribute('format');
+		if ($format && $format eq 'ovf') {
+			my @vmdef = $type -> getElementsByTagName('machine');
+			# there can only be one <machine> section
+			my $machineDef = $vmdef[0];
+			my $ovfType = $machineDef -> getAttribute('ovftype');
+			if (! $ovfType) {
+				my $kiwi = $this -> {kiwi};
+				my $msg = 'Specified ovf format for the image, but no '
+					. 'ovftype specified on the <machine> definition.';
+				$kiwi -> error($msg);
+				$kiwi -> failed();
+				return;
+			}
+		}
+	}
+	return 1;
+}
+
+#==========================================
 # __checkPackageUnique
 #------------------------------------------
 sub __checkPackageUnique {
@@ -1812,6 +1843,9 @@ sub __validateConsistency {
 		return;
 	}
 	if (! $this -> __checkNoIDSystemGroups()) {
+		return;
+	}
+	if (! $this -> __checkOVFTypeSet()) {
 		return;
 	}
 	if (! $this -> __checkPackageUnique()) {
