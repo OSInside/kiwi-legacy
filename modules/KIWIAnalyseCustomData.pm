@@ -282,7 +282,7 @@ sub createDatabaseDump {
 		#========================================
 		# check for running db
 		#----------------------------------------
-		qxx ("$db_test_cmd");
+		$status = qxx ("$db_test_cmd 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> info (
