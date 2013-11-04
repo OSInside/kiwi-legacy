@@ -32,7 +32,7 @@
 	<repository type="yast2">
 		<source path="/tmp"/>
 	</repository>
-	<packages type="image" profiles="my-first">
+	<packages type="image" profiles="my-first" patternType="plusRecommended">
 		<package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>
 		<package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
 		<package name="kernel-default"/>
@@ -48,7 +48,7 @@
 		<package name="vim"/>
 		<namedCollection name="base"/>
 	</packages>
-	<packages type="image" profiles="my-first,my-second" patternType="plusRecommended">
+	<packages type="image" profiles="my-first,my-second">
 		<package name="yast2"/>
 	</packages>
 	<packages type="bootstrap">
