@@ -73,7 +73,7 @@
 <a name="DESTROY"><h2>DESTROY</h2></a>
 <p>
 Missing<p>
-Defined on line: 5058
+Defined on line: 4947
 <a name="buildLogicalExtend"><h2>buildLogicalExtend</h2></a>
 <p>
 Missing<p>
@@ -85,23 +85,20 @@ Called in
 <a name="buildMD5Sum"><h2>buildMD5Sum</h2></a>
 <p>
 Missing<p>
-Defined on line: 4447
+Defined on line: 4443
 <p>
 Called in
 <ul>
-<li><a href="KIWIImage.html">KIWIImage</a> : 406</li><li><a href="KIWIImage.html">KIWIImage</a> : 669</li><li><a href="KIWIImage.html">KIWIImage</a> : 760</li><li><a href="KIWIImage.html">KIWIImage</a> : 1406</li><li><a href="KIWIImage.html">KIWIImage</a> : 2997</li><li><a href="KIWIImage.html">KIWIImage</a> : 3535</li><li><a href="KIWIImage.html">KIWIImage</a> : 4112</li><li><a href="KIWIImage.html">KIWIImage</a> : 4898</li></ul>
+<li><a href="KIWIImage.html">KIWIImage</a> : 406</li><li><a href="KIWIImage.html">KIWIImage</a> : 669</li><li><a href="KIWIImage.html">KIWIImage</a> : 760</li><li><a href="KIWIImage.html">KIWIImage</a> : 1406</li><li><a href="KIWIImage.html">KIWIImage</a> : 2997</li><li><a href="KIWIImage.html">KIWIImage</a> : 3535</li><li><a href="KIWIImage.html">KIWIImage</a> : 4108</li></ul>
 <a name="checkKernel"><h2>checkKernel</h2></a>
 <p>
  this function receives two parameters. The initrd image
  file and the system image tree directory path. It checks
  whether at least one kernel matches both, the initrd and
- the system image. If not the function tries to copy the
- kernel from the system image into the initrd. If the
- system image specifies more than one kernel an error
- is printed pointing out that the boot image needs to
- specify one of the found system image kernels
+ the system image. If not the function returns with an
+ error
 <p>
-Defined on line: 4724
+Defined on line: 4720
 <p>
 Called in
 <ul>
@@ -109,7 +106,7 @@ Called in
 <a name="cleanKernelFSMount"><h2>cleanKernelFSMount</h2></a>
 <p>
 Missing<p>
-Defined on line: 4977
+Defined on line: 4866
 <p>
 Called in
 <ul>
@@ -117,23 +114,23 @@ Called in
 <a name="cleanLuks"><h2>cleanLuks</h2></a>
 <p>
 Missing<p>
-Defined on line: 4911
+Defined on line: 4800
 <p>
 Called in
 <ul>
-<li><a href="KIWIImage.html">KIWIImage</a> : 1297</li><li><a href="KIWIImage.html">KIWIImage</a> : 1314</li><li><a href="KIWIImage.html">KIWIImage</a> : 1327</li><li><a href="KIWIImage.html">KIWIImage</a> : 1335</li><li><a href="KIWIImage.html">KIWIImage</a> : 1340</li><li><a href="KIWIImage.html">KIWIImage</a> : 2829</li><li><a href="KIWIImage.html">KIWIImage</a> : 2835</li><li><a href="KIWIImage.html">KIWIImage</a> : 2889</li><li><a href="KIWIImage.html">KIWIImage</a> : 2895</li><li><a href="KIWIImage.html">KIWIImage</a> : 2926</li><li><a href="KIWIImage.html">KIWIImage</a> : 2935</li><li><a href="KIWIImage.html">KIWIImage</a> : 2990</li><li><a href="KIWIImage.html">KIWIImage</a> : 3000</li><li><a href="KIWIImage.html">KIWIImage</a> : 3006</li><li><a href="KIWIImage.html">KIWIImage</a> : 3424</li><li><a href="KIWIImage.html">KIWIImage</a> : 3433</li><li><a href="KIWIImage.html">KIWIImage</a> : 3526</li><li><a href="KIWIImage.html">KIWIImage</a> : 3530</li><li><a href="KIWIImage.html">KIWIImage</a> : 3686</li><li><a href="KIWIImage.html">KIWIImage</a> : 3694</li><li><a href="KIWIImage.html">KIWIImage</a> : 4353</li><li><a href="KIWIImage.html">KIWIImage</a> : 5071</li></ul>
+<li><a href="KIWIImage.html">KIWIImage</a> : 1297</li><li><a href="KIWIImage.html">KIWIImage</a> : 1314</li><li><a href="KIWIImage.html">KIWIImage</a> : 1327</li><li><a href="KIWIImage.html">KIWIImage</a> : 1335</li><li><a href="KIWIImage.html">KIWIImage</a> : 1340</li><li><a href="KIWIImage.html">KIWIImage</a> : 2829</li><li><a href="KIWIImage.html">KIWIImage</a> : 2835</li><li><a href="KIWIImage.html">KIWIImage</a> : 2889</li><li><a href="KIWIImage.html">KIWIImage</a> : 2895</li><li><a href="KIWIImage.html">KIWIImage</a> : 2926</li><li><a href="KIWIImage.html">KIWIImage</a> : 2935</li><li><a href="KIWIImage.html">KIWIImage</a> : 2990</li><li><a href="KIWIImage.html">KIWIImage</a> : 3000</li><li><a href="KIWIImage.html">KIWIImage</a> : 3006</li><li><a href="KIWIImage.html">KIWIImage</a> : 3424</li><li><a href="KIWIImage.html">KIWIImage</a> : 3433</li><li><a href="KIWIImage.html">KIWIImage</a> : 3526</li><li><a href="KIWIImage.html">KIWIImage</a> : 3530</li><li><a href="KIWIImage.html">KIWIImage</a> : 3686</li><li><a href="KIWIImage.html">KIWIImage</a> : 3694</li><li><a href="KIWIImage.html">KIWIImage</a> : 4349</li><li><a href="KIWIImage.html">KIWIImage</a> : 4960</li></ul>
 <a name="cleanMount"><h2>cleanMount</h2></a>
 <p>
 Missing<p>
-Defined on line: 4953
+Defined on line: 4842
 <p>
 Called in
 <ul>
-<li><a href="KIWIImage.html">KIWIImage</a> : 187</li><li><a href="KIWIImage.html">KIWIImage</a> : 1338</li><li><a href="KIWIImage.html">KIWIImage</a> : 2938</li><li><a href="KIWIImage.html">KIWIImage</a> : 3436</li><li><a href="KIWIImage.html">KIWIImage</a> : 3737</li><li><a href="KIWIImage.html">KIWIImage</a> : 3745</li><li><a href="KIWIImage.html">KIWIImage</a> : 3787</li><li><a href="KIWIImage.html">KIWIImage</a> : 5070</li></ul>
+<li><a href="KIWIImage.html">KIWIImage</a> : 187</li><li><a href="KIWIImage.html">KIWIImage</a> : 1338</li><li><a href="KIWIImage.html">KIWIImage</a> : 2938</li><li><a href="KIWIImage.html">KIWIImage</a> : 3436</li><li><a href="KIWIImage.html">KIWIImage</a> : 3737</li><li><a href="KIWIImage.html">KIWIImage</a> : 3745</li><li><a href="KIWIImage.html">KIWIImage</a> : 3787</li><li><a href="KIWIImage.html">KIWIImage</a> : 4959</li></ul>
 <a name="compressImage"><h2>compressImage</h2></a>
 <p>
 Missing<p>
-Defined on line: 4543
+Defined on line: 4539
 <p>
 Called in
 <ul>
@@ -146,7 +143,7 @@ Defined on line: 523
 <p>
 Called in
 <ul>
-<li><a href="KIWIImage.html">KIWIImage</a> : 941</li><li><a href="KIWIImage.html">KIWIImage</a> : 1365</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 906</li></ul>
+<li><a href="KIWIImage.html">KIWIImage</a> : 941</li><li><a href="KIWIImage.html">KIWIImage</a> : 1365</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 961</li></ul>
 <a name="createImageBootImage"><h2>createImageBootImage</h2></a>
 <p>
 Missing<p>
@@ -165,7 +162,7 @@ Defined on line: 695
 <p>
 Called in
 <ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 593</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 919</li></ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 648</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 974</li></ul>
 <a name="createImageClicFS"><h2>createImageClicFS</h2></a>
 <p>
  create compressed loop image container
@@ -174,7 +171,7 @@ Defined on line: 266
 <p>
 Called in
 <ul>
-<li><a href="KIWIImage.html">KIWIImage</a> : 932</li><li><a href="KIWIImage.html">KIWIImage</a> : 1357</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 915</li></ul>
+<li><a href="KIWIImage.html">KIWIImage</a> : 932</li><li><a href="KIWIImage.html">KIWIImage</a> : 1357</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 970</li></ul>
 <a name="createImageEXT"><h2>createImageEXT</h2></a>
 <p>
  Create EXT2 image from source tree
@@ -192,7 +189,7 @@ Defined on line: 450
 <p>
 Called in
 <ul>
-<li><a href="KIWIImage.html">KIWIImage</a> : 893</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 886</li></ul>
+<li><a href="KIWIImage.html">KIWIImage</a> : 893</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 941</li></ul>
 <a name="createImageEXT3"><h2>createImageEXT3</h2></a>
 <p>
  create journaled EXT3 image from source tree
@@ -201,7 +198,7 @@ Defined on line: 463
 <p>
 Called in
 <ul>
-<li><a href="KIWIImage.html">KIWIImage</a> : 902</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 891</li></ul>
+<li><a href="KIWIImage.html">KIWIImage</a> : 902</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 946</li></ul>
 <a name="createImageEXT4"><h2>createImageEXT4</h2></a>
 <p>
  create journaled EXT4 image from source tree
@@ -210,7 +207,7 @@ Defined on line: 476
 <p>
 Called in
 <ul>
-<li><a href="KIWIImage.html">KIWIImage</a> : 911</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 896</li></ul>
+<li><a href="KIWIImage.html">KIWIImage</a> : 911</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 951</li></ul>
 <a name="createImageLiveCD"><h2>createImageLiveCD</h2></a>
 <p>
  Create a live filesystem on CD using the isoboot boot image
@@ -230,7 +227,7 @@ Defined on line: 1113
 <p>
 Called in
 <ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 923</li></ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 978</li></ul>
 <a name="createImagePXE"><h2>createImagePXE</h2></a>
 <p>
  Create Image usable within a PXE boot environment. The
@@ -242,7 +239,7 @@ Defined on line: 1020
 <p>
 Called in
 <ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 939</li></ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 994</li></ul>
 <a name="createImageReiserFS"><h2>createImageReiserFS</h2></a>
 <p>
  create journaled ReiserFS image from source tree
@@ -251,7 +248,7 @@ Defined on line: 489
 <p>
 Called in
 <ul>
-<li><a href="KIWIImage.html">KIWIImage</a> : 920</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 901</li></ul>
+<li><a href="KIWIImage.html">KIWIImage</a> : 920</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 956</li></ul>
 <a name="createImageRootAndBoot"><h2>createImageRootAndBoot</h2></a>
 <p>
  Create root filesystem image if required according to
@@ -277,7 +274,7 @@ Defined on line: 2364
 <p>
 Called in
 <ul>
-<li><a href="KIWIImage.html">KIWIImage</a> : 1349</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 927</li></ul>
+<li><a href="KIWIImage.html">KIWIImage</a> : 1349</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 982</li></ul>
 <a name="createImageSquashFS"><h2>createImageSquashFS</h2></a>
 <p>
  create squashfs image from source tree
@@ -286,7 +283,7 @@ Defined on line: 641
 <p>
 Called in
 <ul>
-<li><a href="KIWIImage.html">KIWIImage</a> : 928</li><li><a href="KIWIImage.html">KIWIImage</a> : 936</li><li><a href="KIWIImage.html">KIWIImage</a> : 1382</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 911</li></ul>
+<li><a href="KIWIImage.html">KIWIImage</a> : 928</li><li><a href="KIWIImage.html">KIWIImage</a> : 936</li><li><a href="KIWIImage.html">KIWIImage</a> : 1382</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 966</li></ul>
 <a name="createImageVMX"><h2>createImageVMX</h2></a>
 <p>
  Create virtual machine disks. By default a raw disk image will
@@ -301,7 +298,7 @@ Defined on line: 1042
 <p>
 Called in
 <ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 931</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 935</li></ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 986</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 990</li></ul>
 <a name="createImageXFS"><h2>createImageXFS</h2></a>
 <p>
  create XFS image from source tree
@@ -310,7 +307,7 @@ Defined on line: 607
 <p>
 Called in
 <ul>
-<li><a href="KIWIImage.html">KIWIImage</a> : 950</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 943</li></ul>
+<li><a href="KIWIImage.html">KIWIImage</a> : 950</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 998</li></ul>
 <a name="createImageZFS"><h2>createImageZFS</h2></a>
 <p>
  create ZFS image from source tree
@@ -319,7 +316,7 @@ Defined on line: 572
 <p>
 Called in
 <ul>
-<li><a href="KIWIImage.html">KIWIImage</a> : 959</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 948</li></ul>
+<li><a href="KIWIImage.html">KIWIImage</a> : 959</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1003</li></ul>
 <a name="executeUserImagesScript"><h2>executeUserImagesScript</h2></a>
 <p>
  Execute the images.sh script if it exists
@@ -332,7 +329,7 @@ Called in
 <a name="extractCPIO"><h2>extractCPIO</h2></a>
 <p>
 Missing<p>
-Defined on line: 4989
+Defined on line: 4878
 <p>
 Called in
 <ul>
@@ -352,7 +349,7 @@ Defined on line: 4059
 <p>
 Called in
 <ul>
-<li><a href="KIWIImage.html">KIWIImage</a> : 4051</li><li><a href="KIWIImage.html">KIWIImage</a> : 4879</li></ul>
+<li><a href="KIWIImage.html">KIWIImage</a> : 4051</li></ul>
 <a name="extractSplash"><h2>extractSplash</h2></a>
 <p>
 Missing<p>
@@ -382,13 +379,13 @@ Defined on line: 200
 <p>
 Called in
 <ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 795</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 2036</li></ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 850</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 2105</li></ul>
 <a name="getSize"><h2>getSize</h2></a>
 <p>
  calculate size of the logical extend. The
  method returns the size value in MegaByte
 <p>
-Defined on line: 4619
+Defined on line: 4615
 <p>
 Called in
 <ul>
@@ -414,7 +411,7 @@ Called in
  isolinux handles spaces as "_", so we replace
  each space with an underscore
 <p>
-Defined on line: 5044
+Defined on line: 4933
 <p>
 Called in
 <ul>
@@ -437,7 +434,7 @@ Defined on line: 45
 <p>
 Called in
 <ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 582</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 784</li></ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 637</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 839</li></ul>
 <a name="postImage"><h2>postImage</h2></a>
 <p>
  post-stage preparation of a logical extend.
@@ -465,15 +462,15 @@ Called in
 <a name="remapImageDest"><h2>remapImageDest</h2></a>
 <p>
 Missing<p>
-Defined on line: 4942
+Defined on line: 4831
 <p>
 Called in
 <ul>
-<li><a href="KIWIImage.html">KIWIImage</a> : 3003</li><li><a href="KIWIImage.html">KIWIImage</a> : 4199</li><li><a href="KIWIImage.html">KIWIImage</a> : 4239</li><li><a href="KIWIImage.html">KIWIImage</a> : 4277</li><li><a href="KIWIImage.html">KIWIImage</a> : 4361</li><li><a href="KIWIImage.html">KIWIImage</a> : 4402</li><li><a href="KIWIImage.html">KIWIImage</a> : 4439</li></ul>
+<li><a href="KIWIImage.html">KIWIImage</a> : 3003</li><li><a href="KIWIImage.html">KIWIImage</a> : 4195</li><li><a href="KIWIImage.html">KIWIImage</a> : 4235</li><li><a href="KIWIImage.html">KIWIImage</a> : 4273</li><li><a href="KIWIImage.html">KIWIImage</a> : 4357</li><li><a href="KIWIImage.html">KIWIImage</a> : 4398</li><li><a href="KIWIImage.html">KIWIImage</a> : 4435</li></ul>
 <a name="restoreCDRootData"><h2>restoreCDRootData</h2></a>
 <p>
 Missing<p>
-Defined on line: 4495
+Defined on line: 4491
 <p>
 Called in
 <ul>
@@ -481,15 +478,15 @@ Called in
 <a name="restoreImageDest"><h2>restoreImageDest</h2></a>
 <p>
 Missing<p>
-Defined on line: 4931
+Defined on line: 4820
 <p>
 Called in
 <ul>
-<li><a href="KIWIImage.html">KIWIImage</a> : 1339</li><li><a href="KIWIImage.html">KIWIImage</a> : 2996</li><li><a href="KIWIImage.html">KIWIImage</a> : 3005</li><li><a href="KIWIImage.html">KIWIImage</a> : 3529</li><li><a href="KIWIImage.html">KIWIImage</a> : 4191</li><li><a href="KIWIImage.html">KIWIImage</a> : 4237</li><li><a href="KIWIImage.html">KIWIImage</a> : 4275</li><li><a href="KIWIImage.html">KIWIImage</a> : 4300</li><li><a href="KIWIImage.html">KIWIImage</a> : 4357</li><li><a href="KIWIImage.html">KIWIImage</a> : 4400</li><li><a href="KIWIImage.html">KIWIImage</a> : 4437</li></ul>
+<li><a href="KIWIImage.html">KIWIImage</a> : 1339</li><li><a href="KIWIImage.html">KIWIImage</a> : 2996</li><li><a href="KIWIImage.html">KIWIImage</a> : 3005</li><li><a href="KIWIImage.html">KIWIImage</a> : 3529</li><li><a href="KIWIImage.html">KIWIImage</a> : 4187</li><li><a href="KIWIImage.html">KIWIImage</a> : 4233</li><li><a href="KIWIImage.html">KIWIImage</a> : 4271</li><li><a href="KIWIImage.html">KIWIImage</a> : 4296</li><li><a href="KIWIImage.html">KIWIImage</a> : 4353</li><li><a href="KIWIImage.html">KIWIImage</a> : 4396</li><li><a href="KIWIImage.html">KIWIImage</a> : 4433</li></ul>
 <a name="restoreSplitExtend"><h2>restoreSplitExtend</h2></a>
 <p>
 Missing<p>
-Defined on line: 4512
+Defined on line: 4508
 <p>
 Called in
 <ul>
@@ -497,7 +494,7 @@ Called in
 <a name="setupBTRFS"><h2>setupBTRFS</h2></a>
 <p>
 Missing<p>
-Defined on line: 4207
+Defined on line: 4203
 <p>
 Called in
 <ul>
@@ -505,7 +502,7 @@ Called in
 <a name="setupEXT2"><h2>setupEXT2</h2></a>
 <p>
 Missing<p>
-Defined on line: 4136
+Defined on line: 4132
 <p>
 Called in
 <ul>
@@ -520,7 +517,7 @@ Defined on line: 3646
 <p>
 Called in
 <ul>
-<li><a href="KIWIImage.html">KIWIImage</a> : 3638</li><li><a href="KIWIImage.html">KIWIImage</a> : 4342</li></ul>
+<li><a href="KIWIImage.html">KIWIImage</a> : 3638</li><li><a href="KIWIImage.html">KIWIImage</a> : 4338</li></ul>
 <a name="setupLogicalExtend"><h2>setupLogicalExtend</h2></a>
 <p>
 Missing<p>
@@ -542,7 +539,7 @@ Called in
 <a name="setupReiser"><h2>setupReiser</h2></a>
 <p>
 Missing<p>
-Defined on line: 4247
+Defined on line: 4243
 <p>
 Called in
 <ul>
@@ -550,7 +547,7 @@ Called in
 <a name="setupSquashFS"><h2>setupSquashFS</h2></a>
 <p>
 Missing<p>
-Defined on line: 4285
+Defined on line: 4281
 <p>
 Called in
 <ul>
@@ -558,7 +555,7 @@ Called in
 <a name="setupXFS"><h2>setupXFS</h2></a>
 <p>
 Missing<p>
-Defined on line: 4410
+Defined on line: 4406
 <p>
 Called in
 <ul>
@@ -566,7 +563,7 @@ Called in
 <a name="setupZFS"><h2>setupZFS</h2></a>
 <p>
 Missing<p>
-Defined on line: 4369
+Defined on line: 4365
 <p>
 Called in
 <ul>
@@ -584,11 +581,11 @@ Called in
 <a name="updateMD5File"><h2>updateMD5File</h2></a>
 <p>
 Missing<p>
-Defined on line: 4582
+Defined on line: 4578
 <p>
 Called in
 <ul>
-<li><a href="KIWIImage.html">KIWIImage</a> : 4567</li></ul>
+<li><a href="KIWIImage.html">KIWIImage</a> : 4563</li></ul>
 <a name="writeImageConfig"><h2>writeImageConfig</h2></a>
 <p>
 Missing<p>
