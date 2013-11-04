@@ -1520,11 +1520,11 @@ sub usage {
 	print "Image Preparation/Creation in two steps:\n";
 	print "    kiwi -p | --prepare <image-path>\n";
 	print "       [ --root <image-root> ]\n";
-	print "       [ --recycle-root <base-root-dir> [ --force-bootstrap ]] ||\n";
+	print "       [ --recycle-root [ --force-bootstrap ]] ||\n";
 	print "       [ --cache <dir> ]\n";
 	print "    kiwi -c | --create  <image-root> -d <destination>\n";
 	print "       [ --type <image-type> ]\n";
-	print "       [ --recycle-root <base-boot-dir> [ --force-bootstrap ]]\n";
+	print "       [ --recycle-root [ --force-bootstrap ]]\n";
 	print "Image Cache:\n";
 	print "    kiwi --init-cache <image-path>\n";
 	print "       [ --cache <dir> ]\n";
