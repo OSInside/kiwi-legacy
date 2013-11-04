@@ -822,6 +822,35 @@ sub test_oemPostDump {
 }
 
 #==========================================
+# test_ovfTypeSet
+#------------------------------------------
+sub test_ovfTypeSet {
+	# ...
+	# Test that the ovftype specification requirement is properly enforced
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my @invalidConfigs = $this -> __getInvalidFiles('ovftype');
+	my $expectedMsg = 'Specified ovf format for the image, but no '
+		. 'ovftype specified on the <machine> definition.';
+	for my $iConfFile (@invalidConfigs) {
+		my $validator = $this -> __getValidator($iConfFile);
+		$validator -> validate();
+		my $msg = $kiwi -> getMessage();
+		$this -> assert_str_equals($expectedMsg, $msg);
+		my $msgT = $kiwi -> getMessageType();
+		$this -> assert_str_equals('error', $msgT);
+		my $state = $kiwi -> getState();
+		$this -> assert_str_equals('failed', $state);
+		# Test this condition last to get potential error messages
+		$this -> assert_not_null($validator);
+	}
+	my @validConfigs = $this -> __getValidFiles('ovftype');
+	$this -> __verifyValid(@validConfigs);
+	return;
+}
+
+#==========================================
 # test_packageUnique
 #------------------------------------------
 sub test_packageUnique {

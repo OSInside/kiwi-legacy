@@ -2576,7 +2576,7 @@ div {
 		attribute HWversion { xsd:integer }
 	k.machine.arch.attribute =
 		## the VM architecture type (vmdk only)
-		attribute arch { "ix86" | "x86_64" | "%arch" }
+		attribute arch { "ix86" | "x86_64" }
 	k.machine.domain.attribute =
 		## The domain setup for the VM (xen only)
 		attribute domain { "dom0" | "domU" }
