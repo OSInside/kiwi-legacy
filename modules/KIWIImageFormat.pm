@@ -1214,7 +1214,7 @@ sub createOVFConfiguration {
 	#------------------------------------------
 	my $size = -s $this->{image};
 	print $OVFFD '<ovf:References>' . "\n"
-		. "\t" . '<ovf:File ovf:href="' . $base. '" ovf:id="file1"'
+		. "\t" . '<ovf:File ovf:href="' . $base. '" ovf:id="file1" '
 		. 'ovf:size="' . $size . '"/>' . "\n"
 		. '</ovf:References>' . "\n";
 	#==========================================
@@ -1225,7 +1225,7 @@ sub createOVFConfiguration {
 		. "\t" . '<ovf:Disk ovf:capacity="' . $size . '" '
 		. 'ovf:capacityAllocationUnits="byte" '
 		. 'ovf:diskId="vmdisk1" '
-		. 'ovf:fileRef="file1"'
+		. 'ovf:fileRef="file1" '
 		. 'ovf:format="' . $diskformat . '" '
 		. 'ovf:populatedSize="' . $size . '"/>' . "\n"
 	    . '</ovf:DiskSection>' . "\n";
