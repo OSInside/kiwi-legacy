@@ -125,6 +125,9 @@ sub createChecks {
 	if (! $this -> __checkVMscsiCapable()) {
 		return;
 	}
+	if (! $this -> __checkVMdiskmodeCapable()) {
+		return;
+	}
 	if (! $this -> __hasValidLVMName()) {
 		return;
 	}
@@ -876,6 +879,57 @@ sub __checkVMscsiCapable {
 	return 1;
 }
 
+#==========================================
+# __checkVMdiskmodeCapable
+#------------------------------------------
+sub __checkVMdiskmodeCapable {
+	# ...
+	# qemu-img command must support specified diskmode
+	# ---
+	my $this = shift;
+	my $xml = $this -> {xml};
+	my $type = $xml -> getImageType();
+	if (! $type) {
+		return 1;
+	}
+	my $imgtype = $type -> getTypeName();
+	if ($imgtype ne 'vmx') {
+		# Nothing to do
+		return 1;
+	}
+	my $vmConfig = $xml -> getVMachineConfig();
+	if (! $vmConfig) {
+		# no machine config requested, ok
+		return 1;
+	}
+	my $diskMode = $vmConfig -> getSystemDiskMode();
+	if ($diskMode) {
+		my $QEMU_IMG_CAP;
+		if (! open($QEMU_IMG_CAP, '-|', "qemu-img create -f vmdk foo -o '?'")){
+			my $msg = 'Could not execute qemu-img command. This precludes '
+			. 'format conversion.';
+			$this -> {kiwi} -> error ($msg);
+			$this -> {kiwi} -> failed ();
+			return;
+		}
+		while (<$QEMU_IMG_CAP>) {
+			if ($_ =~ /$diskMode/x) {
+				close $QEMU_IMG_CAP;
+				return 1;
+			}
+		}
+		# Not scsi capable
+		close $QEMU_IMG_CAP;
+		my $msg = "Configuration specifies diskmode $diskMode. This disk "
+		. "mode cannot be\ncreated on this system. The qemu-img command "
+		. 'must support the "-o subformat" option, but does not. Upgrade'
+		. "\nto a newer version of qemu-img or keep default mode";
+		$this -> {kiwi} -> error ($msg);
+		$this -> {kiwi} -> failed ();
+		return;
+	}
+	return 1;
+}
 #==========================================
 # __hasValidLVMName
 #------------------------------------------

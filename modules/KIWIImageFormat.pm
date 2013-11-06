@@ -332,6 +332,10 @@ sub createVMDK {
 		if ($diskType && $diskType eq 'scsi') {
 			$convert .= ' -o scsi';
 		}
+		my $diskMode = $this->{vmdata} -> getSystemDiskMode();
+		if ($diskMode) {
+			$convert .= " -o subformat=$diskMode";
+		}
 	}
 	$status = qxx ("qemu-img $convert $target 2>&1");
 	$result = $? >> 8;
