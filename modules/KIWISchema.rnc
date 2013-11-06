@@ -1967,11 +1967,21 @@ div {
 	k.vmdisk.device.attribute =
 		## The disk device to appear in the guest (xen only)
 		attribute device { text }
+	k.vmdisk.diskmode.attribute = 
+		## The disk mode (vmdk only)
+		attribute diskmode {
+			"monolithicSparse"     |
+			"monolithicFlat"       |
+			"twoGbMaxExtentSparse" |
+			"twoGbMaxExtentFlat"   |
+			"streamOptimized"
+		}
 	k.vmdisk.attlist =
 		k.vmdisk.disktype.attribute? &
 		k.vmdisk.controller.attribute? &
 		k.vmdisk.id.attribute? &
-		k.vmdisk.device.attribute?
+		k.vmdisk.device.attribute? &
+		k.vmdisk.diskmode.attribute?
 	k.vmdisk =
 		## The VM disk definition.
 		element vmdisk {

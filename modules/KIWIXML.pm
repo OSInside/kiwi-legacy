@@ -3359,6 +3359,7 @@ sub __createVMachineConfig {
 		$diskSet{controller} = $disk -> getAttribute('controller');
 		$diskSet{device}     = $disk -> getAttribute('device');
 		$diskSet{disktype}   = $disk -> getAttribute('disktype');
+		$diskSet{diskmode}   = $disk -> getAttribute('diskmode');
 		$diskSet{id}         = $disk -> getAttribute('id');
 		# Currently there is only one disk, the system disk
 		$diskData{system} = \%diskSet;

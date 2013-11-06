@@ -62,7 +62,8 @@ sub new {
 	#            controller = '',
 	#            device     = '',
 	#            disktype 	= '',
-	#            id         = ''
+	#            id         = '',
+	#            diskmode	= ''
 	#        }
 	#    }
 	#    vmdvd  = {
@@ -491,6 +492,17 @@ sub getSystemDiskType {
 	# ---
 	my $this = shift;
 	return $this->{vmdisks}{system}{disktype};
+}
+
+#==========================================
+# getSystemDiskMode
+#------------------------------------------
+sub getSystemDiskMode {
+	# ...
+	# Return the configured disk mode for the system disk
+	# ---
+	my $this = shift;
+	return $this->{vmdisks}{system}{diskmode};
 }
 
 #==========================================
@@ -1096,6 +1108,36 @@ sub setSystemDiskType {
 }
 
 #==========================================
+# setSystemDiskMode
+#------------------------------------------
+sub setSystemDiskMode {
+	# ...
+	# Set the mode to emulate for the system disk for this VM
+	# ---
+	my $this = shift;
+	my $mode = shift;
+	if (! $mode ) {
+		my $kiwi = $this->{kiwi};
+		my $msg = 'setSystemDiskMode: no value provided, retaining '
+			. 'current data.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	if (! $this->{vmdisks} ) {
+		my %diskInfo = ( diskmode => $mode );
+		my %sysDisk = ( 'system' => \%diskInfo );
+		$this->{vmdisks} = \%sysDisk;
+	} elsif (! $this->{vmdisks}{system} ) {
+		my %diskInfo = ( diskmode => $mode );
+		$this->{vmdisks}{system} = \%diskInfo;
+	} else {
+		$this->{vmdisks}{system}{diskmode} = $mode;
+	}
+	return $this;
+}
+
+#==========================================
 # setSystemDiskID
 #------------------------------------------
 sub setSystemDiskID {
@@ -1164,7 +1206,8 @@ sub __addVMdiskXMLElements {
 	my $sysDDev = $this -> getSystemDiskDevice();
 	my $sysDTyp = $this -> getSystemDiskType();
 	my $sysDID  = $this -> getSystemDiskID();
-	if ($sysDCnt || $sysDDev || $sysDTyp || $sysDID) {
+	my $sysDMod = $this -> getSystemDiskMode();
+	if ($sysDCnt || $sysDDev || $sysDTyp || $sysDID || $sysDMod) {
 		my $vmdElem = XML::LibXML::Element -> new('vmdisk');
 		if ($sysDCnt) {
 			$vmdElem -> setAttribute('controller', $sysDCnt);
@@ -1174,6 +1217,9 @@ sub __addVMdiskXMLElements {
 		}
 		if ($sysDTyp) {
 			$vmdElem -> setAttribute('disktype', $sysDTyp);
+		}
+		if ($sysDMod) {
+			$vmdElem -> setAttribute('diskmode', $sysDMod);
 		}
 		if ($sysDID) {
 			$vmdElem -> setAttribute('id', $sysDID);
@@ -1337,7 +1383,7 @@ sub __isDiskInitValid {
 		$kiwi -> failed();
 		return;
 	}
-	my %supported = map { ($_ => 1) } qw(controller device disktype id);
+	my %supported = map { ($_ => 1) } qw(controller device disktype diskmode id);
 	my %diskInfo = %{$disks};
 	for my $entry (values %diskInfo) {
 		my %diskData = %{$entry};
