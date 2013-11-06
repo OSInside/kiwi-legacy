@@ -596,7 +596,8 @@ sub createEC2 {
 	$GCFD -> close();
 	# boot/grub/menu.lst
 	my $title= $xml -> getImageDisplayName();
-	my $args = "xencons=xvc0 console=xvc0 splash=silent showopts";
+	my $args = 'xencons=xvc0 console=xvc0 multipath=off '
+		. 'splash=silent showopts';
 	my $GMFD = FileHandle -> new();
 	if (! $GMFD -> open (">$tmpdir/create_bootmenu.sh")) {
 		$kiwi -> error  ("Failed to open $tmpdir/create_bootmenu.sh: $!");
