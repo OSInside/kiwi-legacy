@@ -261,6 +261,7 @@ sub new {
 		ia64
 		i586
 		i686
+		m68k
 		ppc
 		ppc64
 		s390
