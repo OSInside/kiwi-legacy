@@ -1530,8 +1530,8 @@ sub createOVFConfiguration {
 	}
 	my $base_image = basename $this->{image};
 	my $base_config= basename $ovf;
-	my $ovfsha1   = qxx ("sha1sum $ovf | cut -f1 -d ' ' 2>&1");
-	my $imagesha1 = qxx ("sha1sum $this->{image} | cut -f1 -d ' ' 2>&1");
+	my $ovfsha1   = qxx ("sha1sum $ovf | cut -f1 -d ' ' 2>&1"); chomp ($ovfsha1);
+	my $imagesha1 = qxx ("sha1sum $this->{image} | cut -f1 -d ' ' 2>&1"); chomp ($imagesha1);
 	print $MFFD "SHA1($base_config)= $ovfsha1"."\n";
 	print $MFFD "SHA1($base_image)= $imagesha1"."\n";
 	$MFFD -> close();
