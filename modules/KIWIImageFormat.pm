@@ -1214,7 +1214,7 @@ sub createOVFConfiguration {
 	#------------------------------------------
 	my $size = -s $this->{image};
 	print $OVFFD '<ovf:References>' . "\n"
-		. "\t" . '<ovf:File ovf:href="' . $base. '" ovf:id="file1"'
+		. "\t" . '<ovf:File ovf:href="' . $base. '" ovf:id="file1" '
 		. 'ovf:size="' . $size . '"/>' . "\n"
 		. '</ovf:References>' . "\n";
 	#==========================================
@@ -1225,7 +1225,7 @@ sub createOVFConfiguration {
 		. "\t" . '<ovf:Disk ovf:capacity="' . $size . '" '
 		. 'ovf:capacityAllocationUnits="byte" '
 		. 'ovf:diskId="vmdisk1" '
-		. 'ovf:fileRef="file1"'
+		. 'ovf:fileRef="file1" '
 		. 'ovf:format="' . $diskformat . '" '
 		. 'ovf:populatedSize="' . $size . '"/>' . "\n"
 	    . '</ovf:DiskSection>' . "\n";
@@ -1530,8 +1530,8 @@ sub createOVFConfiguration {
 	}
 	my $base_image = basename $this->{image};
 	my $base_config= basename $ovf;
-	my $ovfsha1   = qxx ("sha1sum $ovf | cut -f1 -d ' ' 2>&1");
-	my $imagesha1 = qxx ("sha1sum $this->{image} | cut -f1 -d ' ' 2>&1");
+	my $ovfsha1   = qxx ("sha1sum $ovf | cut -f1 -d ' ' 2>&1"); chomp ($ovfsha1);
+	my $imagesha1 = qxx ("sha1sum $this->{image} | cut -f1 -d ' ' 2>&1"); chomp ($imagesha1);
 	print $MFFD "SHA1($base_config)= $ovfsha1"."\n";
 	print $MFFD "SHA1($base_image)= $imagesha1"."\n";
 	$MFFD -> close();
