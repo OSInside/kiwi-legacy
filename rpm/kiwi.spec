@@ -220,6 +220,7 @@ Authors:
 
 %package -n kiwi-pxeboot
 PreReq:         coreutils
+PreReq:         shadow
 %ifarch %ix86 x86_64
 Requires:       syslinux
 %endif
