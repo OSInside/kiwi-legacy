@@ -220,7 +220,11 @@ Authors:
 
 %package -n kiwi-pxeboot
 PreReq:         coreutils
+%if 0%{?suse_version} > 1220
 PreReq:         shadow
+%else
+PreReq:         pwdutils
+%endif
 %ifarch %ix86 x86_64
 Requires:       syslinux
 %endif
