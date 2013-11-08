@@ -1960,7 +1960,9 @@ div {
 		attribute disktype { text }
 	k.vmdisk.controller.attribute =
 		## The disk controller used for the VM guest (vmdk only)
-		attribute controller { "ide" | "scsi" }
+		attribute controller {
+			"ide" | "buslogic" | "lsilogic" | "legacyESX" | "scsi"
+		}
 	k.vmdisk.id.attribute =
 		## The disk ID / device for the VM disk (vmdk only)
 		attribute id { xsd:nonNegativeInteger }

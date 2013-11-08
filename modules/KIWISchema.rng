@@ -2767,6 +2767,9 @@ by the VM (ovf only)</a:documentation>
         <a:documentation>The disk controller used for the VM guest (vmdk only)</a:documentation>
         <choice>
           <value>ide</value>
+          <value>buslogic</value>
+          <value>lsilogic</value>
+          <value>legacyESX</value>
           <value>scsi</value>
         </choice>
       </attribute>

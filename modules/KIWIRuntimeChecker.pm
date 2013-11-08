@@ -122,7 +122,7 @@ sub createChecks {
 	if (! $this -> __checkPackageManagerExists()) {
 		return;
 	}
-	if (! $this -> __checkVMscsiCapable()) {
+	if (! $this -> __checkVMControllerCapable()) {
 		return;
 	}
 	if (! $this -> __checkVMdiskmodeCapable()) {
@@ -822,22 +822,22 @@ sub __checkUsersConsistent {
 }
 
 #==========================================
-# __checkVMscsiCapable
+# __checkVMControllerCapable
 #------------------------------------------
-sub __checkVMscsiCapable {
+sub __checkVMControllerCapable {
 	# ...
-	# If a VM image is being built and the specified vmdisk controller is
-	# scsi, then the qemu-img command on the system must support the scsi
-	# option.
+	# If a VM image is being built and the specified vmdisk controller,
+	# then the qemu-img command on the system must support this option.
 	# ---
 	my $this = shift;
-	my $xml = $this -> {xml};
-	my $type = $xml -> getImageType();
+	my $kiwi = $this->{kiwi};
+	my $xml  = $this->{xml};
+	my $type = $xml->getImageType();
 	if (! $type) {
 		return 1;
 	}
 	my $imgtype = $type -> getTypeName();
-	if ($imgtype ne 'vmx') {
+	if (($imgtype ne 'vmx') && ($imgtype ne 'oem')) {
 		# Nothing to do
 		return 1;
 	}
@@ -846,34 +846,42 @@ sub __checkVMscsiCapable {
 		# no machine config requested, ok
 		return 1;
 	}
-	my $diskType = $vmConfig -> getSystemDiskType();
-	if ($diskType) {
-		if ($diskType ne 'scsi') {
-			# Nothing to do
-			return 1;
-		}
+	my $diskCnt = $vmConfig -> getSystemDiskController();
+	if ($diskCnt) {
 		my $QEMU_IMG_CAP;
-		if (! open($QEMU_IMG_CAP, '-|', "qemu-img create -f vmdk foo -o '?'")){
-			my $msg = 'Could not execute qemu-img command. This precludes '
-			. 'format conversion.';
-			$this -> {kiwi} -> error ($msg);
-			$this -> {kiwi} -> failed ();
+		my $msg;
+		if (! open($QEMU_IMG_CAP, '-|', "qemu-img create -f vmdk foo -o '?'")) {
+			$msg = 'Could not execute qemu-img command. ';
+			$msg.= 'This precludes format conversion.';
+			$kiwi -> error ($msg);
+			$kiwi -> failed ();
 			return;
 		}
+		my $ok = 0;
 		while (<$QEMU_IMG_CAP>) {
-			if ($_ =~ /^scsi/x) {
-				close $QEMU_IMG_CAP;
-				return 1;
+			if ($_ =~ /adapter_type/) {
+				# newer version support adapter_type option, ok
+				$ok = 1;
+				last;
+			} elsif (($_ =~ /^scsi/) && ($diskCnt eq 'scsi')) {
+				# older version but supports -o scsi
+				$ok = 1;
+				last;
 			}
 		}
-		# Not scsi capable
+		if ($ok) {
+			close $QEMU_IMG_CAP;
+			return 1;
+		}
 		close $QEMU_IMG_CAP;
-		my $msg = 'Configuration specifies scsi vmdisk controller. This disk '
-		. "type cannot be\ncreated on this system. The qemu-img command "
-		. 'must support the "-o scsi" option, but does not. Upgrade'
-		. "\nto a newer version of qemu-img or change the controller to ide";
-		$this -> {kiwi} -> error ($msg);
-		$this -> {kiwi} -> failed ();
+		# can't create image format for this adapter type
+		$msg = "Configuration specifies $diskCnt vmdisk controller."."\n";
+		$msg.= "This disk type cannot be created on this system."."\n";
+		$msg.= "The qemu-img command must support the option:"."\n";
+		$msg.= "\t\"-o adapter_type=$diskCnt\""."\n";
+		$msg.= "Upgrade to a newer version of qemu-img"."\n";
+		$msg.= "Alternatively change the controller type to ide"."\n";
+		$kiwi -> error ($msg);
 		return;
 	}
 	return 1;

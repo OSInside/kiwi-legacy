@@ -328,9 +328,22 @@ sub createVMDK {
 	$target  =~ s/\.raw$/\.$format/;
 	$convert = "convert -f raw $source -O $format";
 	if ($this->{vmdata}) {
-		my $diskType = $this->{vmdata} -> getSystemDiskType();
-		if ($diskType && $diskType eq 'scsi') {
-			$convert .= ' -o scsi';
+		my $diskCnt = $this->{vmdata} -> getSystemDiskController;
+		if ($diskCnt) {
+			my $adapter = " -o adapter_type=$diskCnt";
+			if ($diskCnt eq 'scsi') {
+				if (open(my $QIMG,'-|', "qemu-img create -f vmdk foo -o '?'")) {
+					while (<$QIMG>) {
+						if ($_ =~ /^scsi/) {
+							# older versions support '-o scsi'
+							$adapter = " -o $diskCnt";
+							last;
+						}
+					}
+					close $QIMG;
+				}
+			}
+			$convert .= " $adapter";
 		}
 		my $diskMode = $this->{vmdata} -> getSystemDiskMode();
 		if ($diskMode) {
@@ -1064,7 +1077,7 @@ sub createVMwareConfiguration {
 		# SCSI Interface...
 		print $VMWFD $device.'.present = "true"'."\n";
 		print $VMWFD $device.'.sharedBus = "none"'."\n";
-		print $VMWFD $device.'.virtualDev = "lsilogic"'."\n";
+		print $VMWFD $device.'.virtualDev = "' . $diskController . '"' . "\n";
 		print $VMWFD $device.':0.present = "true"'."\n";
 		print $VMWFD $device.':0.fileName = "'.$image.'.vmdk"'."\n";
 		print $VMWFD $device.':0.deviceType = "scsi-hardDisk"'."\n";
