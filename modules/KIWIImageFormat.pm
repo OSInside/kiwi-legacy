@@ -181,6 +181,9 @@ sub createFormat {
 	} elsif ($format eq "vhd") {
 		$kiwi -> info ("Starting raw => $format conversion\n");
 		return $this -> createVHD();
+	} elsif ($format eq "vdi") {
+		$kiwi -> info ("Starting raw => $format conversion\n");
+		return $this -> createVDI();
 	} elsif ($format eq "vhd-fixed") {
 		$kiwi -> info ("Starting raw => $format conversion\n");
 		return $this -> createVHDSubFormatFixed()
@@ -330,6 +333,33 @@ sub createVMDK {
 			$convert .= ' -o scsi';
 		}
 	}
+	$status = qxx ("qemu-img $convert $target 2>&1");
+	$result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Couldn't create $format image: $status");
+		$kiwi -> failed ();
+		return;
+	}
+	$kiwi -> done ();
+	return $target;
+}
+
+#==========================================
+# createVDI
+#------------------------------------------
+sub createVDI {
+	my $this   = shift;
+	my $kiwi   = $this->{kiwi};
+	my $format = $this->{format};
+	my $source = $this->{image};
+	my $target = $source;
+	my $convert;
+	my $status;
+	my $result;
+	$kiwi -> info ("Creating $format image...");
+	$target  =~ s/\.raw$/\.$format/;
+	$convert = "convert -f raw $source -O $format";
 	$status = qxx ("qemu-img $convert $target 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
