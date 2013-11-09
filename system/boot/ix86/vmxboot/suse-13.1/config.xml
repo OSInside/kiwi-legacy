@@ -72,7 +72,7 @@
 		<file name="drivers/xen/*"/>
 	</drivers>
 	<repository type="yast2" status="replaceable">
-		<source path="obs://12.3/repo/oss"/>
+		<source path="obs://13.1/repo/oss"/>
 	</repository>
 	<packages type="image" profiles="std">
 		<package name="kernel-default"/>
