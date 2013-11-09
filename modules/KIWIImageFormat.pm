@@ -544,7 +544,9 @@ sub createEC2 {
 	print $IRDFD 'export rootfstype='.$fsType."\n";
 	print $IRDFD 'mknod /dev/sda1 b 8 1'."\n";
 	print $IRDFD 'touch /boot/.rebuild-initrd'."\n";
-	print $IRDFD 'mv /lib/mkinitrd/setup/61-multipath.sh /tmp'."\n";
+	print $IRDFD 'if [ -f /lib/mkinitrd/setup/61-multipath.sh ]; then'."\n";
+	print $IRDFD '    mv /lib/mkinitrd/setup/61-multipath.sh /tmp'."\n";
+	print $IRDFD 'fi'."\n";
 	print $IRDFD 'sed -i -e \'s@^';
 	print $IRDFD $kmod;
 	print $IRDFD '="\(.*\)"@'.$kmod.'="\1 ';
@@ -553,7 +555,9 @@ sub createEC2 {
 	print $IRDFD $sysk;
 	print $IRDFD "\n";
 	print $IRDFD 'mkinitrd -A -B'."\n";
-	print $IRDFD 'mv /tmp/61-multipath.sh /lib/mkinitrd/setup/'."\n";
+	print $IRDFD 'if [ -f /tmp/61-multipath.sh ]; then'."\n";
+	print $IRDFD '    mv /tmp/61-multipath.sh /lib/mkinitrd/setup/'."\n";
+	print $IRDFD 'fi'."\n";
 	$IRDFD -> close();
 	qxx ("chmod u+x $tmpdir/create_initrd.sh");
 	$status = qxx ("chroot $tmpdir bash -c ./create_initrd.sh 2>&1");
