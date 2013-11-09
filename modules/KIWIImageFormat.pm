@@ -1242,11 +1242,9 @@ sub createOVFConfiguration {
 		. 'xmlns="http://schemas.dmtf.org/ovf/envelope/1"' . "\n"
 		. 'xmlns:cim="http://schemas.dmtf.org/wbem/wscim/1/common"' . "\n"
 		. 'xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1"' . "\n"
-		. 'xmlns:rasd="http://schemas.dmtf.org/'
-		. 'wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData"' . "\n"
+		. 'xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData"' . "\n"
 		. 'xmlns:vmw="http://www.vmware.com/schema/ovf"' . "\n"
-		. 'xmlns:vssd="http://schemas.dmtf.org/'
-		. 'wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData"' . "\n"
+		. 'xmlns:vssd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData"' . "\n"
 		. 'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">' . "\n";
 	#==========================================
 	# image description
@@ -1321,12 +1319,6 @@ sub createOVFConfiguration {
 	my $minCPU = $vmdata -> getMinCPUCnt();
 	my $numCPU = $vmdata -> getNumCPUs();
 	if ($maxCPU || $minCPU || $numCPU) {
-		print $OVFFD "\t\t" . '<Item>' . "\n"
-			. "\t\t\t"
-			. '<rasd:Description>Number of Virtual CPUs</rasd:Description>'
-			. "\n"
-			. "\t\t\t"
-			. '<rasd:ElementName>CPU definition</rasd:ElementName>' . "\n";
 		if (! $numCPU) {
 			if ($maxCPU && $minCPU) {
 				my $max = int $maxCPU;
@@ -1342,9 +1334,13 @@ sub createOVFConfiguration {
 				$numCPU += 1;
 			}
 		}
-		print $OVFFD "\t\t\t"
-			. '<rasd:VirtualQuantity>' . $numCPU
-			. '</rasd:VirtualQuantity>' . "\n";
+		print $OVFFD "\t\t" . '<Item>' . "\n"
+			. "\t\t\t"
+			. '<rasd:Description>Number of Virtual CPUs</rasd:Description>'	. "\n"
+			. "\t\t\t"
+			. '<rasd:ElementName>CPU definition</rasd:ElementName>' . "\n"
+			. "\t\t\t"
+			. '<rasd:InstanceID>' . $instID . '</rasd:InstanceID>' . "\n";
 		if ($minCPU) {
 			print $OVFFD "\t\t\t"
 				. '<rasd:Limit>' . $minCPU . '</rasd:Limit>' . "\n";
@@ -1354,10 +1350,10 @@ sub createOVFConfiguration {
 				. '<rasd:Limit>' . $maxCPU . '</rasd:Limit>' . "\n";
 		}
 		print $OVFFD "\t\t\t"
-			. '<rasd:InstanceID>' . $instID . '</rasd:InstanceID>' . "\n"
-			. "\t\t\t"
-			. '<rasd:ResourceType>3</rasd:ResourceType>' . "\n"
-			. "\t\t" . '</Item>' . "\n";
+			. '<rasd:ResourceType>3</rasd:ResourceType>' . "\n";
+		print $OVFFD "\t\t\t" 
+			. '<rasd:VirtualQuantity>' . $numCPU . '</rasd:VirtualQuantity>' . "\n";
+		print $OVFFD "\t\t" . '</Item>' . "\n";
 		$instID += 1;
 	}
 	# Memory setup
@@ -1365,11 +1361,6 @@ sub createOVFConfiguration {
 	my $minMem = $vmdata -> getMinMemory();
 	my $memory = $vmdata -> getMemory();
 	if ($maxMem || $minMem || $memory) {
-		print $OVFFD "\t\t" . '<Item>' . "\n"
-			. "\t\t\t"
-			. '<rasd:AllocationUnits>MB</rasd:AllocationUnits>' . "\n"
-			. "\t\t\t"
-			. '<rasd:Description>Memory Size</rasd:Description>' . "\n";
 		if (! $memory) {
 			if ($maxMem && $minMem) {
 				my $max = int $maxMem;
@@ -1385,25 +1376,28 @@ sub createOVFConfiguration {
 				$memory += 512;
 			}
 		}
-		print $OVFFD "\t\t\t"
-			. '<rasd:ElementName>' . $memory
-			. 'MB Memory</rasd:ElementName>' . "\n"
+		print $OVFFD "\t\t" . '<Item>' . "\n"
+			. "\t\t\t"
+			. '<rasd:AllocationUnits>MB</rasd:AllocationUnits>' . "\n"
+			. "\t\t\t"
+			. '<rasd:Description>Memory Size</rasd:Description>' . "\n"
+			. "\t\t\t"
+			. '<rasd:ElementName>' . $memory . 'MB Memory</rasd:ElementName>' . "\n"
 			. "\t\t\t"
 			. '<rasd:InstanceID>' . $instID . '</rasd:InstanceID>' . "\n";
 		if ($minMem) {
-			print $OVFFD "\t\t\t"
+			print $OVFFD "\t\t\t" 
 				. '<rasd:Limit>' . $minMem . '</rasd:Limit>' . "\n";
 		}
 		if ($maxMem) {
-			print $OVFFD "\t\t\t"
+			print $OVFFD "\t\t\t" 
 				. '<rasd:Limit>' . $maxMem . '</rasd:Limit>' . "\n";
 		}
 		print $OVFFD "\t\t\t"
 			. '<rasd:ResourceType>4</rasd:ResourceType>' . "\n"
 			. "\t\t\t"
-			. '<rasd:VirtualQuantity>' . $memory
-			. '</rasd:VirtualQuantity>' . "\n"
-			. "\t\t" . '</Item>' . "\n";
+			. '<rasd:VirtualQuantity>' . $memory . '</rasd:VirtualQuantity>' . "\n";
+		print $OVFFD "\t\t" . '</Item>' . "\n";
 		$instID += 1;
 	}
 	# Disk controller
@@ -1418,13 +1412,13 @@ sub createOVFConfiguration {
 		}
 		print $OVFFD "\t\t" . '<Item>' . "\n"
 		. "\t\t\t"
-		. '<rasd:Description>System disk controller</rasd:Description>'
-		. "\n"
+		. '<rasd:Description>System disk controller</rasd:Description>' . "\n"
 		. "\t\t\t"
-		. '<rasd:ElementName>' . $controller . 'Controller'
-		. '</rasd:ElementName>' . "\n"
+		. '<rasd:ElementName>' . $controller . 'Controller' . '</rasd:ElementName>' . "\n"
 		. "\t\t\t"
 		. '<rasd:InstanceID>' . $instID . '</rasd:InstanceID>' . "\n"
+		. "\t\t\t"
+		. '<rasd:ResourceSubType>' . $controller . '</rasd:ResourceSubType>' . "\n"
 		. "\t\t\t"
 		. '<rasd:ResourceType>' . $rType . '</rasd:ResourceType>' . "\n"
 		. "\t\t" . '</Item>' . "\n";
@@ -1435,8 +1429,7 @@ sub createOVFConfiguration {
 	if ($controller) {
 		print $OVFFD "\t\t" . '<Item>' . "\n"
 		. "\t\t\t"
-		. '<rasd:AddressOnParent>' . $pAddress
-		. '</rasd:AddressOnParent>' . "\n"
+		. '<rasd:AddressOnParent>' . $pAddress . '</rasd:AddressOnParent>' . "\n"
 		. "\t\t\t"
 		. '<rasd:ElementName>disk1</rasd:ElementName>' . "\n"
 		. "\t\t\t"
@@ -1464,27 +1457,22 @@ sub createOVFConfiguration {
 			}
 			print $OVFFD "\t\t" . '<Item>' . "\n"
 				. "\t\t\t"
-				. '<rasd:Description>DVD controller</rasd:Description>'
-				. "\n"
+				. '<rasd:Description>DVD controller</rasd:Description>'	. "\n"
 				. "\t\t\t"
-				. '<rasd:ElementName>DVDController' . $dvdController
-				. '</rasd:ElementName>' . "\n"
+				. '<rasd:ElementName>DVDController' . $dvdController . '</rasd:ElementName>' . "\n"
 				. "\t\t\t"
 				. '<rasd:InstanceID>' . $instID . '</rasd:InstanceID>' . "\n"
 				. "\t\t\t"
-				. '<rasd:ResourceType>' . $rType . '</rasd:ResourceType>'
-				. "\n"
+				. '<rasd:ResourceType>' . $rType . '</rasd:ResourceType>' . "\n"
 				. "\t\t" . '</Item>' . "\n";
 			$dvdContID = $instID;
 			$instID += 1;
 		}
 		print $OVFFD "\t\t" . '<Item ovf:required="false">' . "\n"
 		. "\t\t\t"
-		. '<rasd:AddressOnParent>' . $pAddress
-		. '</rasd:AddressOnParent>' . "\n"
+		. '<rasd:AddressOnParent>' . $pAddress . '</rasd:AddressOnParent>' . "\n"
 		. "\t\t\t"
-		. '<rasd:AutomaticAllocation>false</rasd:AutomaticAllocation>'
-		. "\n"
+		. '<rasd:AutomaticAllocation>false</rasd:AutomaticAllocation>' . "\n"
 		. "\t\t\t"
 		. '<rasd:Description>DVD device</rasd:Description>' . "\n"
 		. "\t\t\t"
@@ -1509,26 +1497,22 @@ sub createOVFConfiguration {
 				. '<rasd:Address>' . $mac . '</rasd:Address>'. "\n";
 		}
 		print $OVFFD "\t\t\t"
-			. '<rasd:AddressOnParent>' . $pAddress
-			. '</rasd:AddressOnParent>' . "\n"
+			. '<rasd:AddressOnParent>' . $pAddress . '</rasd:AddressOnParent>' . "\n"
 			. "\t\t\t"
-			. '<rasd:AutomaticAllocation>true</rasd:AutomaticAllocation>'
-			. "\n";
+			. '<rasd:AutomaticAllocation>true</rasd:AutomaticAllocation>' . "\n";
 		my $mode = $vmdata -> getNICMode($id);
 		print $OVFFD "\t\t\t"
 			. '<rasd:Connection>' . $mode . '</rasd:Connection>' . "\n"
 			. "\t\t\t"
 			. '<rasd:Description>Network adapter</rasd:Description>' . "\n"
 			. "\t\t\t"
-			. '<rasd:ElementName>ethernet' . $iFace
-			. '</rasd:ElementName>' . "\n"
+			. '<rasd:ElementName>ethernet' . $iFace . '</rasd:ElementName>' . "\n"
 			. "\t\t\t"
 			. '<rasd:InstanceID>' . $instID . '</rasd:InstanceID>' . "\n";
 		my $driver = $vmdata -> getNICDriver($id);
 		if ($driver) {
 			print $OVFFD "\t\t\t"
-			. '<rasd:ResourceSubType>' . $driver . '</rasd:ResourceSubType>'
-			. "\n";
+			. '<rasd:ResourceSubType>' . $driver . '</rasd:ResourceSubType>' . "\n";
 		}
 		print $OVFFD "\t\t\t"
 			. '<rasd:ResourceType>10</rasd:ResourceType>' . "\n"
