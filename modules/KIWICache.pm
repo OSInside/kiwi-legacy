@@ -137,14 +137,14 @@ sub initializeCache {
 	#------------------------------------------
 	$kiwi -> info ("Initialize image cache...\n");
 	my $name = $xml -> getImageName();
-	foreach my $t (keys %{$xml->{typeInfo}}) {
-		my %type = %{$xml->{typeInfo}->{$t}};
-		if (($type{boot}) && ($type{boot} =~ /.*\/(.*)/)) {
-			$CacheDistro = $1; last;
-		} elsif (
-			($type{type} =~ /ext2|cpio/) && ($name =~ /initrd-.*boot-(.*)/)
-		) {
-			$CacheDistro = $1; last;
+	foreach my $typeName (@{$xml->getConfiguredTypeNames()}) {
+		my $type = $xml->getType($typeName);
+		if (($type->{boot}) && ($type->{boot} =~ /.*\/(.*)/)) {
+			$CacheDistro = $1;
+			last;
+		} elsif (($typeName =~ /ext2|cpio/) && ($name =~ /initrd-.*boot-(.*)/)){
+			$CacheDistro = $1;
+			last;
 		}
 	}
 	if (! $CacheDistro) {
