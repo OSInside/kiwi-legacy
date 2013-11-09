@@ -1552,7 +1552,7 @@ sub usage {
 	print "       [ --installpxe-system <vmx-system-image> ]\n";
 	print "Image format conversion:\n";
 	print "    kiwi --convert <systemImage>\n";
-	print "       [ --format <vmdk|ovf|qcow2|vhd|..> ]\n";
+	print "       [ --format <vmdk|vdi|ovf|qcow2|vhd|..> ]\n";
 	print "Helper Tools:\n";
 	print "    kiwi --createpassword\n";
 	print "    kiwi --createhash <image-path>\n";
