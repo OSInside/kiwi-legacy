@@ -324,12 +324,6 @@ sub createVMDK {
 	$kiwi -> info ("Creating $format image...");
 	$target  =~ s/\.raw$/\.$format/;
 	$convert = "convert -f raw $source -O $format";
-	if ($this->{vmdata}) {
-		my $diskType = $this->{vmdata} -> getSystemDiskType();
-		if ($diskType && $diskType eq 'scsi') {
-			$convert .= ' -o scsi';
-		}
-	}
 	$status = qxx ("qemu-img $convert $target 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
