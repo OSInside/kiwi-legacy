@@ -32,6 +32,7 @@ use warnings;
 use Carp qw (cluck);
 use Getopt::Long;
 use File::Spec;
+use File::Find;
 use KIWIAnalyse;
 use KIWIAnalyseCustomData;
 use KIWIAnalyseManagedSoftware;
@@ -1878,6 +1879,38 @@ sub cloneImage {
 		$kiwi -> failed ();
 		kiwiExit (1);
 	}
+	# /.../
+	# if there are symlinks pointing to a relative destination
+	# we fixup the link still pointing to the right location
+	# with regards to the new origen of the cloned description
+	# ----
+	my $fixupLinks = sub {
+		my $file = $File::Find::name;
+		my $dirn = $File::Find::dir;
+		my $fixlink = 0;
+		if ((-e $file) && (-l $file)) {
+			if (! File::Spec->file_name_is_absolute (readlink $file)) {
+				$fixlink = 1;
+			}
+		}
+		if ($fixlink) {
+			my ($src,$data,$code);
+			$src = $clone."/".substr($file, length($destination."/"));
+			$src = Cwd::abs_path ($src);
+			unlink $file;
+			$data = qxx ("cp -L $src $dirn 2>&1");
+			$code = $? >> 8;
+			if ($code != 0) {
+				$kiwi -> failed ();
+				$kiwi -> error ("Failed to fix-up link $src: $data");
+				$kiwi -> failed ();
+				kiwiExit (1);
+			}
+		}
+	};
+	File::Find::find (
+		{wanted => $fixupLinks}, $destination
+	);
 	#==========================================
 	# Remove checksum 
 	#------------------------------------------
