@@ -72,8 +72,11 @@
 	<drivers profiles="xen">
 		<file name="drivers/xen/*"/>
 	</drivers>
+	<repository type="rpm-md" status="replaceable">
+		<source path="http://download.opensuse.org/update/12.3/"/>
+	</repository>
 	<repository type="yast2" status="replaceable">
-		<source path="obs://12.3/repo/oss"/>
+		<source path="http://download.opensuse.org/distribution/12.3/repo/oss/"/>
 	</repository>
 	<packages type="image" profiles="std">
 		<package name="kernel-default"/>
