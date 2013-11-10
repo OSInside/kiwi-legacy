@@ -409,6 +409,14 @@ sub init {
 		}
 	}
 	#==================================
+	# If cache is used, network is required as it's not cached
+	#----------------------------------
+	# need resolv.conf/hosts for internal chroot name resolution
+	qxx (" cp /etc/resolv.conf $root/etc 2>&1 ");
+	qxx (" cp /etc/hosts $root/etc 2>&1 ");
+	# need /etc/sysconfig/proxy for internal chroot proxy usage
+	qxx (" cp /etc/sysconfig/proxy $root/etc/sysconfig 2>&1 ");
+	#==================================
 	# Return early if cache is used
 	#----------------------------------
 	if (($cmdL-> getCacheDir()) && (! $cmdL->getOperationMode("initCache"))) {
@@ -510,11 +518,6 @@ sub init {
 	}
 	qxx (" cp $groupTemplate $root/etc/group  2>&1 ");
 	qxx (" cp $paswdTemplate $root/etc/passwd 2>&1 ");
-	# need resolv.conf/hosts for internal chroot name resolution
-	qxx (" cp /etc/resolv.conf $root/etc 2>&1 ");
-	qxx (" cp /etc/hosts $root/etc 2>&1 ");
-	# need /etc/sysconfig/proxy for internal chroot proxy usage
-	qxx (" cp /etc/sysconfig/proxy $root/etc/sysconfig 2>&1 ");
 	$kiwi -> done();
 	#==========================================
 	# Create package keys
@@ -1512,14 +1515,16 @@ sub cleanMount {
 		my $code = $? >> 8;
 		if (($code != 0) && ($data !~ "not mounted")) {
 			$kiwi -> loginfo ("Umount failed: $data");
-			$kiwi -> warning ("Umount of $item failed: calling lazy umount");
-			my $data = qxx ("umount -l \"$item\" 2>&1");
-			my $code = $? >> 8;
-			if ($code != 0) {
-				$kiwi -> failed();
-			} else {
-				$kiwi -> done();
-			}
+			$kiwi -> warning ("Umount of $item failed");
+			$kiwi -> skipped ();
+			#$kiwi -> warning ("Umount of $item failed: calling lazy umount");
+			#my $data = qxx ("umount -l \"$item\" 2>&1");
+			#my $code = $? >> 8;
+			#if ($code != 0) {
+			#	$kiwi -> failed();
+			#} else {
+			#	$kiwi -> done();
+			#}
 		}
 		if (($prefix) && ($item =~ /^$prefix/)) {
 			qxx ("rmdir -p \"$item\" 2>&1");

@@ -32,6 +32,7 @@ use warnings;
 use Carp qw (cluck);
 use Getopt::Long;
 use File::Spec;
+use File::Find;
 use KIWIAnalyse;
 use KIWIAnalyseCustomData;
 use KIWIAnalyseManagedSoftware;
@@ -1552,7 +1553,7 @@ sub usage {
 	print "       [ --installpxe-system <vmx-system-image> ]\n";
 	print "Image format conversion:\n";
 	print "    kiwi --convert <systemImage>\n";
-	print "       [ --format <vmdk|ovf|qcow2|vhd|..> ]\n";
+	print "       [ --format <vmdk|vdi|ovf|qcow2|vhd|..> ]\n";
 	print "Helper Tools:\n";
 	print "    kiwi --createpassword\n";
 	print "    kiwi --createhash <image-path>\n";
@@ -1878,6 +1879,33 @@ sub cloneImage {
 		$kiwi -> failed ();
 		kiwiExit (1);
 	}
+
+	my $fixupLinks = sub {
+		my ($dev,$ino,$mode,$nlink,$uid,$gid,$fixlink);
+
+		(($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_)) &&
+		-l _ && !-e && ! File::Spec->file_name_is_absolute(readlink $File::Find::name) && ($fixlink = 1); 
+
+		if ($fixlink) {
+			my ($src,$data,$code);
+
+			$src = Cwd::abs_path("$clone/" . substr($File::Find::name, length("$destination/")));
+			qxx ("/usr/bin/rm -f $File::Find::name");
+
+			$data = qxx ("cp -L $src $File::Find::dir 2>&1\n");
+
+			$code = $? >> 8;
+			if ($code != 0) {
+				$kiwi -> failed ();
+				$kiwi -> error ("Failed to fix-up link $src: $data");
+				$kiwi -> failed ();
+				kiwiExit (1);
+			}
+		}
+	};
+
+	File::Find::find({wanted => $fixupLinks}, $destination);
+
 	#==========================================
 	# Remove checksum 
 	#------------------------------------------

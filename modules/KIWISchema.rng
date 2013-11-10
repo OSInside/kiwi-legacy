@@ -2272,6 +2272,7 @@ or clic and applies to the iso type only</a:documentation>
           <value>ova</value>
           <value>qcow2</value>
           <value>vmdk</value>
+          <value>vdi</value>
           <value>vhd</value>
           <value>vhd-fixed</value>
         </choice>
