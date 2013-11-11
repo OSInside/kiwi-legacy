@@ -412,10 +412,11 @@ sub init {
 	# make sure DNS/proxy works
 	#----------------------------------
 	# need resolv.conf/hosts for internal chroot name resolution
-	qxx (" cp /etc/resolv.conf $root/etc 2>&1 ");
-	qxx (" cp /etc/hosts $root/etc 2>&1 ");
+	qxx ("cp /etc/resolv.conf $root/etc 2>&1");
+	qxx ("cp /etc/hosts $root/etc 2>&1");
 	# need /etc/sysconfig/proxy for internal chroot proxy usage
-	qxx (" cp /etc/sysconfig/proxy $root/etc/sysconfig 2>&1 ");
+	qxx ("mkdir -p $root/etc/sysconfig 2>&1");
+	qxx ("cp /etc/sysconfig/proxy $root/etc/sysconfig 2>&1");
 	#==================================
 	# Return early if cache is used
 	#----------------------------------
