@@ -62,8 +62,11 @@
 	<users group="root">
 		<user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
 	</users>
+	<repository type="rpm-md">
+		<source path="http://download.opensuse.org/update/12.3/"/>
+	</repository>
 	<repository type="yast2">
-		<source path="obs://12.3/repo/oss"/>
+		<source path="http://download.opensuse.org/distribution/12.3/repo/oss/"/>
 	</repository>
 	<packages type="image">
 		<namedCollection name="base"/>
