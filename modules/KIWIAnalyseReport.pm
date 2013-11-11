@@ -307,6 +307,8 @@ sub createReport {
 	print $FD ' href=".report/d3/style.css"/>'."\n";
 	print $FD '<link type="text/css" rel="stylesheet"';
 	print $FD ' href=".report/d3/kiwi.css">'."\n";
+	print $FD '<link type="text/css" rel="stylesheet"';
+	print $FD ' href=".report/d3/theme.css">'."\n";
 	#==========================================
 	# Java Script
 	#------------------------------------------
@@ -318,12 +320,58 @@ sub createReport {
 	print $FD ' src=".report/d3/kiwi.js"></script>'."\n";
 	print $FD '</head>'."\n";
 	#==========================================
-	# Title
+	# Container Menu
 	#------------------------------------------
+	my %menu = ();
+	my $img  = '.report/d3/img/menu';
+	# /.../
+	# Don't show the following in the top menu because it
+	# will become too long
+	# ----
+	#$menu{'RPM-packages'} = [
+	#	"$img/RPM-packages.jpg","RPM"
+	#];
+	#$menu{'multiple-RPM'} = [
+	#	"$img/multiple-RPM.jpg","Multiple RPM"
+	#];
+	#$menu{'RPM-conflicts'} = [
+	#	"$img/RPM-conflicts.jpg","RPM Conflicts"
+	#];
+	#$menu{'pattern-conflicts'} = [
+	#	"$img/RPM-conflicts.jpg","Pattern Conflicts"
+	#];
+	#$menu{'pattern-lost'} = [
+	#	"$img/RPM-lost.jpg","Pattern not found"
+	#];
+	$menu{'kernel'} = [
+		"$img/kernel.jpg","Kernel"
+	];
+	$menu{'local-repositories'} = [
+		"$img/local-repositories.jpg","Repositories"
+	];
+	$menu{'gems'} = [
+		"$img/gems.jpg","GEMs"
+	];
+	$menu{'RPM-lost'} = [
+		"$img/RPM-lost.jpg","RPM not found"
+	];
+	$menu{'custom-files'} = [
+		"$img/custom-files.jpg","Custom Files"
+	];
+	$menu{'custom-files-visualisation'} = [
+		"$img/custom-files-visualisation.jpg","C. Files Visualisation"
+	];
 	print $FD '<body class="files">'."\n";
-	print $FD '<div class="headerwrap">'."\n";
-	print $FD '<div class="container"><h1>'.$title.'</h1></div>'."\n";
+	print $FD '<header>'."\n";
+	print $FD '<div class="container menu">'."\n";
+	foreach my $item (keys %menu) {
+		print $FD '<a href="#'.$item.'">'."\n";
+		print $FD '<img src="'.$menu{$item}->[0].'">'."\n";
+		print $FD '<h3>'.$menu{$item}->[1].'</h3>'."\n";
+		print $FD '</a>'."\n";
+	}
 	print $FD '</div>'."\n";
+	print $FD '</header>'."\n";
 	#==========================================
 	# Chapters
 	#------------------------------------------
@@ -331,6 +379,8 @@ sub createReport {
 	#==========================================
 	# Kernel version report
 	#------------------------------------------
+	print $FD '<div class="infoPanel">'."\n";
+	print $FD '<a name="kernel"></a>'."\n";
 	print $FD '<h1>Currently active kernel version</h1>'."\n";
 	print $FD '<p>'."\n";
 	print $FD 'The table below shows the packages required for the currently ';
@@ -367,11 +417,14 @@ sub createReport {
 		}
 		print $FD '</table>'."\n";
 	}
+	print $FD '</div>'."\n";
 	#==========================================
 	# Hardware dependent packages report
 	#------------------------------------------
 	my $pack;
 	my %modalias;
+	print $FD '<div class="infoPanel">'."\n";
+	print $FD '<a name="RPM-packages"></a>'."\n";
 	print $FD '<h1>Hardware dependent RPM packages </h1>'."\n";
 	print $FD '<p>'."\n";
 	print $FD 'The table below shows packages that depend on specific ';
@@ -394,10 +447,13 @@ sub createReport {
 		print $FD '</tr>'."\n";
 	}
 	print $FD '</table>'."\n";
+	print $FD '</div>'."\n";
 	#==========================================
 	# Local repository checkout(s)
 	#------------------------------------------
 	if ($repos) {
+		print $FD '<div class="infoPanel">'."\n";
+		print $FD '<a name="local-repositories"></a>'."\n";
 		print $FD '<h1>Local repository checkout paths </h1>'."\n";
 		print $FD '<p>'."\n";
 		print $FD 'The table below shows the local paths which belongs ';
@@ -417,12 +473,15 @@ sub createReport {
 			print $FD '</tr>'."\n";
 		}
 		print $FD '</table>'."\n";
+		print $FD '</div>'."\n";
 	}
 	#==========================================
 	# GEM packages report
 	#------------------------------------------
 	if (-x "/usr/bin/gem") {
 		my @gems;
+		print $FD '<div class="infoPanel">'."\n";
+		print $FD '<a name="gems"></a>'."\n";
 		print $FD '<h1>Installed GEM packages </h1>'."\n";
 		print $FD '<p>'."\n";
 		print $FD 'The table below shows GEM packages installed locally. ';
@@ -443,12 +502,15 @@ sub createReport {
 			print $FD '</tr>'."\n";
 		}
 		print $FD '</table>'."\n";
+		print $FD '</div>'."\n";
 	}
 	#==========================================
 	# Package/Pattern report
 	#------------------------------------------
 	if ($twice) {
 		my @pacs = @{$twice};
+		print $FD '<div class="infoPanel">'."\n";
+		print $FD '<a name="multiple-RPM"></a>'."\n";
 		print $FD '<h1>RPM Package(s) installed multiple times</h1>'."\n";
 		print $FD '<p>'."\n";
 		print $FD 'The following packages are installed multiple times. ';
@@ -471,8 +533,11 @@ sub createReport {
 			}
 		}
 		print $FD '</table>'."\n";
+		print $FD '</div>'."\n";
 	}
 	if ($problem1) {
+		print $FD '<div class="infoPanel">'."\n";
+		print $FD '<a name="pattern-conflicts"></a>'."\n";
 		print $FD '<h1>Pattern conflict(s)</h1>'."\n";
 		print $FD '<p>'."\n";
 		print $FD 'The following patterns could not be solved because ';
@@ -496,8 +561,11 @@ sub createReport {
 		print $FD '<pre>'."\n";
 		print $FD "$problem1";
 		print $FD '</pre>'."\n";
+		print $FD '</div>'."\n";
 	}
 	if ($problem2) {
+		print $FD '<div class="infoPanel">'."\n";
+		print $FD '<a name="RPM-conflicts"></a>'."\n";
 		print $FD '<h1>RPM Package conflict(s)</h1>'."\n";
 		print $FD '<p>'."\n";
 		print $FD 'The following packages could not be solved due to ';
@@ -521,8 +589,11 @@ sub createReport {
 		print $FD '<pre>'."\n"; 
 		print $FD "$problem2";
 		print $FD '</pre>'."\n";
+		print $FD '</div>'."\n";
 	}
 	if (($failedJob1) && (@{$failedJob1})) {
+		print $FD '<div class="infoPanel">'."\n";
+		print $FD '<a name="pattern-lost"></a>'."\n";
 		print $FD '<h1>Pattern(s) not found</h1>'."\n";
 		print $FD '<p>'."\n";
 		print $FD 'The following patterns could not be found in your ';
@@ -548,8 +619,11 @@ sub createReport {
 			print $FD '<li>'.$job.'</li>'."\n";
 		}
 		print $FD '</ul>'."\n";
+		print $FD '</div>'."\n";
 	}
 	if (($failedJob2) && (@{$failedJob2})) {
+		print $FD '<div class="infoPanel">'."\n";
+		print $FD '<a name="RPM-lost"></a>'."\n";
 		print $FD '<h1>RPM Package(s) not found</h1>'."\n";
 		print $FD '<p>'."\n";
 		print $FD 'The following packages could not be found in your ';
@@ -605,11 +679,14 @@ sub createReport {
 			}
 		}
 		print $FD '</table>'."\n";
+		print $FD '</div>'."\n";
 	}
 	#==========================================
 	# Custom files report...
 	#------------------------------------------
 	if ($nopackage) {
+		print $FD '<div class="infoPanel">'."\n";
+		print $FD '<a name="custom-files"></a>'."\n";
 		print $FD '<h1>Custom files</h1>'."\n";
 		print $FD '<p>'."\n";
 		print $FD 'Below the current custom files directory you will ';
@@ -630,6 +707,7 @@ sub createReport {
 		print $FD '</p>'."\n";
 		print $FD '<div>'."\n";
 		print $FD 'Open <a href="'.$dest.'/custom">Custom directory</a>.'."\n";
+		print $FD '</div>'."\n";
 		print $FD '</div>'."\n";
 		foreach my $tree ($this->{jsontree_binary},$this->{jsontree_text}) {
 			#==========================================
@@ -746,6 +824,8 @@ sub createReport {
 			print $JD '</html>'."\n";
 			$JD -> close();
 		}
+		print $FD '<div class="infoPanel">'."\n";
+		print $FD '<a name="custom-files-visualisation"></a>'."\n";
 		print $FD '<h1>Custom files visualisation</h1>'."\n";
 		print $FD '<p>'."\n";
 		print $FD 'For a better overview the following data reports ';
@@ -766,6 +846,7 @@ sub createReport {
 			print $FD 'Custom text data</a>.'."\n";
 			print $FD '</p>'."\n";
 		}
+		print $FD '</div>'."\n";
 		print $FD '</div>'."\n";
 	}
 	print $FD '</div>'."\n";
