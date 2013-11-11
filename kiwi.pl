@@ -1888,7 +1888,7 @@ sub cloneImage {
 		my $file = $File::Find::name;
 		my $dirn = $File::Find::dir;
 		my $fixlink = 0;
-		if ((-e $file) && (-l $file)) {
+		if ((!-e $file) && (-l $file)) {
 			if (! File::Spec->file_name_is_absolute (readlink $file)) {
 				$fixlink = 1;
 			}
