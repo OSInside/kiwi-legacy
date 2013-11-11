@@ -716,7 +716,8 @@ sub createReport {
 		print $FD 'level here:'."\n";
 		print $FD '</p>'."\n";
 		print $FD '<div>'."\n";
-		print $FD 'Open <a href="custom">Custom directory</a>.'."\n";
+		print $FD 'Open <a href="custom" target="_blank">';
+		print $FD 'Custom directory</a>.'."\n";
 		print $FD '</div>'."\n";
 		print $FD '</div>'."\n";
 		foreach my $tree ($this->{jsontree_binary},$this->{jsontree_text}) {
