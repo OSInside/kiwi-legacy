@@ -235,13 +235,13 @@ sub createMachineConfiguration {
 	}
 	if (($bootp) && ($bootp eq "xen")
 		&& ($xend eq "domU")) {
-		$kiwi -> info ("Starting $imgtype image machine configuration\n");
+		$kiwi -> info ("Creating $imgtype image machine configuration\n");
 		return $this -> createXENConfiguration();
 	} elsif ($format eq "vmdk") {
-		$kiwi -> info ("Starting $imgtype image machine configuration\n");
+		$kiwi -> info ("Creating $imgtype image machine configuration\n");
 		return $this -> createVMwareConfiguration();
 	} elsif (($format eq "ovf") || ($format eq "ova")) {
-		$kiwi -> info ("Starting $imgtype image machine configuration\n");
+		$kiwi -> info ("Creating $imgtype image machine configuration\n");
 		my $ret = $this -> createVMwareConfiguration();
 		if (! $ret ) {
 			return;
