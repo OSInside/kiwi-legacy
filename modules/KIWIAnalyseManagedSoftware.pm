@@ -476,7 +476,7 @@ sub __populatePackageList {
 		my $code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();
-			$kiwi -> error  ("Failed to obtain installed patterns");
+			$kiwi -> error  ("Failed to obtain installed patterns: @list");
 			$kiwi -> failed ();
 			return;
 		} else {

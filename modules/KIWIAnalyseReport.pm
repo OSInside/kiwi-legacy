@@ -324,36 +324,11 @@ sub createReport {
 	#------------------------------------------
 	my %menu = ();
 	my $img  = '.report/d3/img/menu';
-	# /.../
-	# Don't show the following in the top menu because it
-	# will become too long
-	# ----
-	#$menu{'RPM-packages'} = [
-	#	"$img/RPM-packages.jpg","RPM"
-	#];
-	#$menu{'multiple-RPM'} = [
-	#	"$img/multiple-RPM.jpg","Multiple RPM"
-	#];
-	#$menu{'RPM-conflicts'} = [
-	#	"$img/RPM-conflicts.jpg","RPM Conflicts"
-	#];
-	#$menu{'pattern-conflicts'} = [
-	#	"$img/RPM-conflicts.jpg","Pattern Conflicts"
-	#];
-	#$menu{'pattern-lost'} = [
-	#	"$img/RPM-lost.jpg","Pattern not found"
-	#];
+	$menu{'RPM-packages'} = [
+		"$img/RPM-packages.jpg","Hardware Packages"
+	];
 	$menu{'kernel'} = [
 		"$img/kernel.jpg","Kernel"
-	];
-	$menu{'local-repositories'} = [
-		"$img/local-repositories.jpg","Repositories"
-	];
-	$menu{'gems'} = [
-		"$img/gems.jpg","GEMs"
-	];
-	$menu{'RPM-lost'} = [
-		"$img/RPM-lost.jpg","RPM not found"
 	];
 	$menu{'custom-files'} = [
 		"$img/custom-files.jpg","Custom Files"
@@ -361,6 +336,41 @@ sub createReport {
 	$menu{'custom-files-visualisation'} = [
 		"$img/custom-files-visualisation.jpg","C. Files Visualisation"
 	];
+	if ($twice) {
+		$menu{'multiple-RPM'} = [
+			"$img/multiple-RPM.jpg","Multiple RPM"
+		];
+	}
+	if ($problem2) {
+		$menu{'RPM-conflicts'} = [
+			"$img/RPM-conflicts.jpg","RPM Conflicts"
+		];
+	}
+	if ($problem1) {
+		$menu{'pattern-conflicts'} = [
+			"$img/RPM-conflicts.jpg","Pattern Conflicts"
+		];
+	}
+	if (($failedJob1) && (@{$failedJob1})) {
+		$menu{'pattern-lost'} = [
+			"$img/RPM-lost.jpg","Pattern not found"
+		];
+	}
+	if (($failedJob2) && (@{$failedJob2})) {
+		$menu{'RPM-lost'} = [
+			"$img/RPM-lost.jpg","RPM not found"
+		];
+	}
+	if ($repos) {
+		$menu{'local-repositories'} = [
+			"$img/local-repositories.jpg","Repositories"
+		];
+	}
+	if (-x "/usr/bin/gem") {
+		$menu{'gems'} = [
+			"$img/gems.jpg","GEMs"
+		];
+	}
 	print $FD '<body class="files">'."\n";
 	print $FD '<header>'."\n";
 	print $FD '<div class="container menu">'."\n";
