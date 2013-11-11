@@ -1815,6 +1815,7 @@ sub cloneImage {
 	my $configName = $gdata->{ConfigName};
 	my $system     = $gdata->{System};
 	my $destination= $cmdL->getImageTargetDir();
+	my %checklinks = ();
 	#==========================================
 	# Check destination definition
 	#------------------------------------------
@@ -1879,38 +1880,29 @@ sub cloneImage {
 		$kiwi -> failed ();
 		kiwiExit (1);
 	}
-	# /.../
-	# if there are symlinks pointing to a relative destination
-	# we fixup the link still pointing to the right location
-	# with regards to the new origen of the cloned description
-	# ----
-	my $fixupLinks = sub {
-		my $file = $File::Find::name;
-		my $dirn = $File::Find::dir;
-		my $fixlink = 0;
-		if ((-e $file) && (-l $file)) {
-			if (! File::Spec->file_name_is_absolute (readlink $file)) {
-				$fixlink = 1;
-			}
+	#==========================================
+	# find links with relative path pointer
+	#------------------------------------------
+	my $wref = findLinksRelative (\%checklinks);
+	find({ wanted => $wref }, $destination);
+	#==========================================
+	# ...and fix them if needed due to clone cp
+	#------------------------------------------
+	foreach my $file (keys %checklinks) {
+		my $dirn = $checklinks{$file};
+		my ($src,$data,$code);
+		$src = $clone."/".substr($file, length($destination."/"));
+		$src = Cwd::abs_path ($src);
+		unlink $file;
+		$data = qxx ("cp -L $src $dirn 2>&1");
+		$code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error ("Failed to fix-up link $src: $data");
+			$kiwi -> failed ();
+			kiwiExit (1);
 		}
-		if ($fixlink) {
-			my ($src,$data,$code);
-			$src = $clone."/".substr($file, length($destination."/"));
-			$src = Cwd::abs_path ($src);
-			unlink $file;
-			$data = qxx ("cp -L $src $dirn 2>&1");
-			$code = $? >> 8;
-			if ($code != 0) {
-				$kiwi -> failed ();
-				$kiwi -> error ("Failed to fix-up link $src: $data");
-				$kiwi -> failed ();
-				kiwiExit (1);
-			}
-		}
-	};
-	File::Find::find (
-		{wanted => $fixupLinks}, $destination
-	);
+	}
 	#==========================================
 	# Remove checksum 
 	#------------------------------------------
@@ -1922,6 +1914,31 @@ sub cloneImage {
 	}
 	kiwiExit (0);
 	return;
+}
+
+#==========================================
+# findLinksRelative
+#------------------------------------------
+sub findLinksRelative {
+	# ...
+	# find symlinks in the File::Find given directory whose
+	# pointer is specified as a relative path. Such links
+	# might be relinked if they have been moved
+	# ---
+	my $filehash = shift;
+	return sub {
+		my $file   = $File::Find::name;
+		my $dirn   = $File::Find::dir;
+		my $fixlink = 0;
+		if (-l $file) {
+			if (! File::Spec->file_name_is_absolute (readlink $file)) {
+				$fixlink = 1;
+			}
+		}
+		if ($fixlink) {
+			$filehash->{$file} = $dirn;
+		}
+	}
 }
 
 #==========================================
