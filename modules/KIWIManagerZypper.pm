@@ -136,8 +136,8 @@ sub new {
 		"--config $zypperConf"
 	];
 	if ($imgCheckSig eq 'false') {
-		push $this->{zypper_chroot},'--no-gpg-checks';
-		push $this->{zypper},'--no-gpg-checks';
+		push @{$this->{zypper_chroot}},'--no-gpg-checks';
+		push @{$this->{zypper}},'--no-gpg-checks';
 	}
 	#==========================================
 	# Store object data
