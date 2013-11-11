@@ -242,6 +242,10 @@ sub createMachineConfiguration {
 		return $this -> createVMwareConfiguration();
 	} elsif (($format eq "ovf") || ($format eq "ova")) {
 		$kiwi -> info ("Starting $imgtype image machine configuration\n");
+		my $ret = $this -> createVMwareConfiguration();
+		if (! $ret ) {
+			return;
+		}
 		return $this -> createOVFConfiguration();
 	} else {
 		$kiwi -> warning (
