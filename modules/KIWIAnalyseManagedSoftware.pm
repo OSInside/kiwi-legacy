@@ -399,6 +399,7 @@ sub __populatePackageList {
 	my @urllist = ();
 	my @patlist = ();
 	my @ilist   = ();
+	my @rpmsort = ();
 	my $code;
 	#==========================================
 	# clean pattern/package lists
@@ -425,7 +426,8 @@ sub __populatePackageList {
 			return;
 		}
 		$kiwi -> done();
-		$cdata->{rpmsort} = \@ilist;
+		@rpmsort = @ilist;
+		$cdata->{rpmsort} = \@rpmsort;
 	}
 	#==========================================
 	# find packages installed n times n > 1
