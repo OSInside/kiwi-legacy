@@ -305,7 +305,7 @@ sub createDatabaseDump {
 			$kiwi -> done();
 		}
 		$kiwi -> info ("--> Compressing database [ $target.gz ]...");
-		$status = qxx ("$this->{gdata}->{Gzip} $target 2>&1");
+		$status = qxx ("$this->{gdata}->{Gzip} -f $target 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
