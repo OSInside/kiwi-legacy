@@ -624,12 +624,12 @@ sub createReport {
 		print $FD 'if they can be easily restored later or store them in ';
 		print $FD 'the overlay files tree but keep in mind that the size ';
 		print $FD 'of the image could become big. Move all of the files you ';
-		print $FD 'want to be part of the image into the '.$dest.'/root ';
+		print $FD 'want to be part of the image into the root ';
 		print $FD 'directory. you can browse the tree on the filesystem ';
 		print $FD 'level here:'."\n";
 		print $FD '</p>'."\n";
 		print $FD '<div>'."\n";
-		print $FD 'Open <a href="'.$dest.'/custom">Custom directory</a>.'."\n";
+		print $FD 'Open <a href="custom">Custom directory</a>.'."\n";
 		print $FD '</div>'."\n";
 		foreach my $tree ($this->{jsontree_binary},$this->{jsontree_text}) {
 			#==========================================
@@ -756,13 +756,13 @@ sub createReport {
 		my $text_report   = $dest.'/report-text.html';
 		if (-e $binary_report) {
 			print $FD '<p>'."\n";
-			print $FD "Open <a href=\"$binary_report\" target=\"_blank\">";
+			print $FD "Open <a href=\"report-binary.html\" target=\"_blank\">";
 			print $FD 'Custom binary data</a>.'."\n";
 			print $FD '</p>'."\n";
 		}
 		if (-e $text_report) {
 			print $FD '<p>'."\n";
-			print $FD "Open <a href=\"$text_report\" target=\"_blank\">";
+			print $FD "Open <a href=\"report-text.html\" target=\"_blank\">";
 			print $FD 'Custom text data</a>.'."\n";
 			print $FD '</p>'."\n";
 		}
