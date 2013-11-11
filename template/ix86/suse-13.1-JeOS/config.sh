@@ -65,11 +65,6 @@ rm -rf /opt/kde*
 sed -i -e's/^syntax on/" syntax on/' /etc/vimrc
 
 #======================================
-# SuSEconfig
-#--------------------------------------
-suseConfig
-
-#======================================
 # Add 13.1 repo
 #--------------------------------------
 baseRepo="http://download.opensuse.org/distribution/13.1/repo/oss"
