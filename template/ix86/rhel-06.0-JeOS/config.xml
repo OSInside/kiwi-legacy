@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="5.8" name="LimeJeOS-RHEL-06.2">
+<image schemaversion="5.9" name="LimeJeOS-RHEL-06.2">
 	<description type="system">
 		<author>Marcus Schäfer</author>
 		<contact>ms@suse.com</contact>
@@ -31,7 +31,7 @@
 		<type image="iso" primary="true" boot="isoboot/rhel-06.0" flags="clic" firmware="bios"/>
 		<type image="vmx" boot="vmxboot/rhel-06.0" filesystem="ext3" format="vmdk" kernelcmdline="rhgb">
 			<machine memory="1024" guestOS="rhel6">
-				<vmdisk controller="scsi" id="0"/>
+				<vmdisk id="0" controller="ide"/>
 				<vmnic driver="e1000" interface="0" mode="bridged"/>
 			</machine>
 			<systemdisk name="Vgroup1">

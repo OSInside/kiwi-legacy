@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="5.8" name="suse-13.1-vm-guest">
+<image schemaversion="5.9" name="suse-13.1-vm-guest">
 	<description type="system">
 		<author>Marcus Schäfer</author>
 		<contact>ms@novell.com</contact>
@@ -9,7 +9,7 @@
 	<preferences>
 		<type image="vmx" primary="true" filesystem="ext4" boot="vmxboot/suse-13.1" format="ovf" bootloader="grub2">
 			<machine memory="512" ovftype="vmware">
-				<vmdisk controller="ide" id="0"/>
+				<vmdisk id="0" controller="ide"/>
 			</machine>
 		</type>
 		<version>1.1.2</version>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="5.8" name="suse-11.4-gnome-demo">
+<image schemaversion="5.9" name="suse-11.4-gnome-demo">
 	<description type="system">
 		<author>Robert Schweikert</author>
 		<contact>rjschwei@suse.com</contact>
@@ -9,7 +9,7 @@
 	<preferences>
 		<type image="vmx" primary="true" filesystem="ext4" boot="vmxboot/suse-11.4" format="vmdk">
 			<machine memory="1024">
-				<vmdisk controller="ide" id="0"/>
+				<vmdisk id="0" controller="ide"/>
 			</machine>
 		</type>
 		<type image="iso" boot="isoboot/suse-11.4" flags="clic"/>

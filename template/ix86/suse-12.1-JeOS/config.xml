@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="5.8" name="LimeJeOS-openSUSE-12.1">
+<image schemaversion="5.9" name="LimeJeOS-openSUSE-12.1">
 	<description type="system">
 		<author>Marcus Schäfer</author>
 		<contact>ms@novell.com</contact>
@@ -27,7 +27,7 @@
 	<preferences profiles="xenFlavour">
 		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-12.1" bootprofile="xen" bootkernel="xenk">
 			<machine memory="512" domain="domU">
-				<vmdisk controller="ide" id="0" device="/dev/xvda"/>
+				<vmdisk id="0" device="/dev/xvda" controller="ide"/>
 				<vmnic interface=""/>
 			</machine>
 		</type>
@@ -37,14 +37,14 @@
 				<oem-swap>true</oem-swap>
 			</oemconfig>
 			<machine domain="dom0">
-				<vmdisk controller="scsi" id="0"/>
+				<vmdisk id="0" controller="ide"/>
 			</machine>
 		</type>
 	</preferences>
 	<preferences profiles="vmxFlavour">
 		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-12.1" format="vmdk">
 			<machine memory="512" guestOS="suse" HWversion="4">
-				<vmdisk controller="scsi" id="0"/>
+				<vmdisk id="0" controller="ide"/>
 				<vmnic driver="e1000" interface="0" mode="bridged"/>
 			</machine>
 		</type>
@@ -54,7 +54,7 @@
 				<oem-swap>true</oem-swap>
 			</oemconfig>
 			<machine memory="512" guestOS="suse" HWversion="4">
-				<vmdisk controller="scsi" id="0"/>
+				<vmdisk id="0" controller="ide"/>
 				<vmnic driver="e1000" interface="0" mode="bridged"/>
 			</machine>
 		</type>
