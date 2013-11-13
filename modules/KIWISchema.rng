@@ -23,7 +23,7 @@
 <grammar xmlns:db="http://docbook.org/ns/docbook" xmlns:a="http://relaxng.org/ns/compatibility/annotations/1.0" xmlns:rng="http://relaxng.org/ns/structure/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
   <db:info>
     <db:releaseinfo>$Id: kiwi.rnc 2957 2008-01-11 12:53:39Z thomas-schraitle $</db:releaseinfo>
-    <db:releaseinfo>RNC Schema Version 5.8</db:releaseinfo>
+    <db:releaseinfo>RNC Schema Version 5.9</db:releaseinfo>
     <db:pubdate>START</db:pubdate>
     <db:pubdate>2008-01-08</db:pubdate>
   </db:info>
@@ -96,7 +96,7 @@ second the location of the XSD Schema
     <define name="k.image.schemaversion.attribute">
       <attribute name="schemaversion">
         <a:documentation>The allowed Schema version (fixed value)</a:documentation>
-        <value>5.8</value>
+        <value>5.9</value>
       </attribute>
     </define>
     <define name="k.image.kiwirevision.attribute">
@@ -2770,7 +2770,6 @@ by the VM (ovf only)</a:documentation>
           <value>buslogic</value>
           <value>lsilogic</value>
           <value>legacyESX</value>
-          <value>scsi</value>
         </choice>
       </attribute>
     </define>
