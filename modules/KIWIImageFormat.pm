@@ -326,6 +326,7 @@ sub createVMDK {
 	my $source = $this->{image};
 	my $target = $source;
 	my $convert;
+	my $converter;
 	my $status;
 	my $result;
 	$kiwi -> info ("Creating $format image...");
@@ -1201,8 +1202,11 @@ sub createOVFConfiguration {
 	my $diskformat;
 	my $osid;
 	my $systemtype;
+	my $converter = $vmdata -> getSystemDiskConverter();
 	my $guest = $vmdata -> getGuestOS();
 	my $hwVersion = $vmdata -> getHardwareVersion();
+	my $vmdk = $base;
+	$vmdk =~ s/\.ovf/\.vmdk/;
 	if ($guest eq 'suse') {
 		$guest = 'SUSE';
 	} elsif ($guest eq 'suse-64') {
@@ -1255,7 +1259,7 @@ sub createOVFConfiguration {
 	#------------------------------------------
 	my $size = -s $this->{image};
 	print $OVFFD '<ovf:References>' . "\n"
-		. "\t" . '<ovf:File ovf:href="' . $base. '" ovf:id="file1" '
+		. "\t" . '<ovf:File ovf:href="' . $vmdk. '" ovf:id="file1" '
 		. 'ovf:size="' . $size . '"/>' . "\n"
 		. '</ovf:References>' . "\n";
 	#==========================================
@@ -1573,10 +1577,17 @@ sub createOVFConfiguration {
 		$ovaimage =~ s/\.ovf$/\.ova/;
 		my $ovabasis = $ovaimage;
 		$ovabasis =~ s/\.ova$//;
-		my $files = "$ovabasis.ovf $ovabasis.mf $ovabasis.vmdk";
-		my $status = qxx (
-			"tar -h -C $ovfdir -cf $destdir/$ovaimage $files 2>&1"
-		);
+		my $status;
+		if ($converter && ($converter eq 'ovftool')) {
+			$status = qxx (
+				"cd $ovfdir && ovftool $ovabasis.ovf $destdir/$ovaimage 2>&1"
+			);	
+		} else {
+			my $files = "$ovabasis.ovf $ovabasis.mf $ovabasis.vmdk";
+			$status = qxx (
+				"tar -h -C $ovfdir -cf $destdir/$ovaimage $files 2>&1"
+			);
+		}
 		my $result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
