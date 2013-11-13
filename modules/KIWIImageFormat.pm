@@ -1180,7 +1180,7 @@ sub createOVFConfiguration {
 	my $format = $this->{format};
 	my $base   = basename $this->{image};
 	my $ovf;
-
+	my $vmdk;
 	#==========================================
 	# setup config file name from image name
 	#------------------------------------------
@@ -1191,6 +1191,8 @@ sub createOVFConfiguration {
 		$base  = $image.".ovf";
 	}
 	$ovf = $ovfdir."/".$base;
+	$vmdk = $base;
+	$vmdk =~ s/\.ovf/\.vmdk/;
 	unlink $ovf;
 	#==========================================
 	# check XML configuration data
@@ -1272,7 +1274,7 @@ sub createOVFConfiguration {
 	#------------------------------------------
 	my $size = -s $this->{image};
 	print $OVFFD '<ovf:References>' . "\n"
-		. "\t" . '<ovf:File ovf:href="' . $base. '" ovf:id="file1" '
+		. "\t" . '<ovf:File ovf:href="' . $vmdk. '" ovf:id="file1" '
 		. 'ovf:size="' . $size . '"/>' . "\n"
 		. '</ovf:References>' . "\n";
 	#==========================================
