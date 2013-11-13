@@ -313,7 +313,7 @@ sub createOVF {
 		qxx ("mkdir -p $ovfdir");
 	}
 	my $img_base = basename $image;
-	qxx ("ln -s $image $ovfdir/$img_base");
+	qxx ("ln -s ../$img_base $ovfdir/$img_base");
 	$this->{ovfdir} = $ovfdir;
 	return $ovfdir;
 }
