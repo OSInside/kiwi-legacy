@@ -2767,7 +2767,9 @@ by the VM (ovf only)</a:documentation>
         <a:documentation>The disk controller used for the VM guest (vmdk only)</a:documentation>
         <choice>
           <value>ide</value>
-          <value>scsi</value>
+          <value>buslogic</value>
+          <value>lsilogic</value>
+          <value>legacyESX</value>
         </choice>
       </attribute>
     </define>
@@ -2780,6 +2782,27 @@ by the VM (ovf only)</a:documentation>
     <define name="k.vmdisk.device.attribute">
       <attribute name="device">
         <a:documentation>The disk device to appear in the guest (xen only)</a:documentation>
+      </attribute>
+    </define>
+    <define name="k.vmdisk.diskmode.attribute">
+      <attribute name="diskmode">
+        <a:documentation>The disk mode (vmdk only)</a:documentation>
+        <choice>
+          <value>monolithicSparse</value>
+          <value>monolithicFlat</value>
+          <value>twoGbMaxExtentSparse</value>
+          <value>twoGbMaxExtentFlat</value>
+          <value>streamOptimized</value>
+        </choice>
+      </attribute>
+    </define>
+    <define name="k.vmdisk.converter.attribute">
+      <attribute name="converter">
+        <a:documentation>Utility that will be used during conversions (vmdk only)</a:documentation>
+        <choice>
+          <value>qemu-img</value>
+          <value>ovftool</value>
+        </choice>
       </attribute>
     </define>
     <define name="k.vmdisk.attlist">
@@ -2795,6 +2818,12 @@ by the VM (ovf only)</a:documentation>
         </optional>
         <optional>
           <ref name="k.vmdisk.device.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.vmdisk.diskmode.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.vmdisk.converter.attribute"/>
         </optional>
       </interleave>
     </define>

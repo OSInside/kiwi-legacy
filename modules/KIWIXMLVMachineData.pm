@@ -62,7 +62,9 @@ sub new {
 	#            controller = '',
 	#            device     = '',
 	#            disktype 	= '',
-	#            id         = ''
+	#            id         = '',
+	#            diskmode	= '',
+	#            converter	= ''
 	#        }
 	#    }
 	#    vmdvd  = {
@@ -491,6 +493,28 @@ sub getSystemDiskType {
 	# ---
 	my $this = shift;
 	return $this->{vmdisks}{system}{disktype};
+}
+
+#==========================================
+# getSystemDiskMode
+#------------------------------------------
+sub getSystemDiskMode {
+	# ...
+	# Return the configured disk mode for the system disk
+	# ---
+	my $this = shift;
+	return $this->{vmdisks}{system}{diskmode};
+}
+
+#==========================================
+# getSystemDiskConverter
+#------------------------------------------
+sub getSystemDiskConverter {
+	# ...
+	# Return the configured disk converter for the system disk
+	# ---
+	my $this = shift;
+	return $this->{vmdisks}{system}{converter};
 }
 
 #==========================================
@@ -1096,6 +1120,36 @@ sub setSystemDiskType {
 }
 
 #==========================================
+# setSystemDiskMode
+#------------------------------------------
+sub setSystemDiskMode {
+	# ...
+	# Set the mode to emulate for the system disk for this VM
+	# ---
+	my $this = shift;
+	my $mode = shift;
+	if (! $mode ) {
+		my $kiwi = $this->{kiwi};
+		my $msg = 'setSystemDiskMode: no value provided, retaining '
+			. 'current data.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	if (! $this->{vmdisks} ) {
+		my %diskInfo = ( diskmode => $mode );
+		my %sysDisk = ( 'system' => \%diskInfo );
+		$this->{vmdisks} = \%sysDisk;
+	} elsif (! $this->{vmdisks}{system} ) {
+		my %diskInfo = ( diskmode => $mode );
+		$this->{vmdisks}{system} = \%diskInfo;
+	} else {
+		$this->{vmdisks}{system}{diskmode} = $mode;
+	}
+	return $this;
+}
+
+#==========================================
 # setSystemDiskID
 #------------------------------------------
 sub setSystemDiskID {
@@ -1121,6 +1175,35 @@ sub setSystemDiskID {
 		$this->{vmdisks}{system} = \%diskInfo;
 	} else {
 		$this->{vmdisks}{system}{id} = $id;
+	}
+	return $this;
+}
+#==========================================
+# setSystemDiskConverter
+#------------------------------------------
+sub setSystemDiskConverter {
+	# ...
+	# Set the converter for the system disk for this VM
+	# ---
+	my $this   = shift;
+	my $converter = shift;
+	if (! defined $converter ) {
+		my $kiwi = $this->{kiwi};
+		my $msg = 'setSystemDiskConverter: no value provided, retaining '
+			. 'current data.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	if (! $this->{vmdisks} ) {
+		my %diskInfo = ( converter => $converter );
+		my %sysDisk = ( 'system' => \%diskInfo );
+		$this->{vmdisks} = \%sysDisk;
+	} elsif (! $this->{vmdisks}{system} ) {
+		my %diskInfo = ( converter => $converter );
+		$this->{vmdisks}{system} = \%diskInfo;
+	} else {
+		$this->{vmdisks}{system}{converter} = $converter;
 	}
 	return $this;
 }
@@ -1164,7 +1247,9 @@ sub __addVMdiskXMLElements {
 	my $sysDDev = $this -> getSystemDiskDevice();
 	my $sysDTyp = $this -> getSystemDiskType();
 	my $sysDID  = $this -> getSystemDiskID();
-	if ($sysDCnt || $sysDDev || $sysDTyp || $sysDID) {
+	my $sysDMod = $this -> getSystemDiskMode();
+	my $sysDCon = $this -> getSystemDiskConverter();
+	if ($sysDCnt || $sysDDev || $sysDTyp || $sysDID || $sysDMod || $sysDCon) {
 		my $vmdElem = XML::LibXML::Element -> new('vmdisk');
 		if ($sysDCnt) {
 			$vmdElem -> setAttribute('controller', $sysDCnt);
@@ -1175,8 +1260,14 @@ sub __addVMdiskXMLElements {
 		if ($sysDTyp) {
 			$vmdElem -> setAttribute('disktype', $sysDTyp);
 		}
+		if ($sysDMod) {
+			$vmdElem -> setAttribute('diskmode', $sysDMod);
+		}
 		if ($sysDID) {
 			$vmdElem -> setAttribute('id', $sysDID);
+		}
+		if ($sysDCon) {
+			$vmdElem -> setAttribute('converter', $sysDCon);
 		}
 		$parent -> appendChild($vmdElem);
 	}
@@ -1337,7 +1428,7 @@ sub __isDiskInitValid {
 		$kiwi -> failed();
 		return;
 	}
-	my %supported = map { ($_ => 1) } qw(controller device disktype id);
+	my %supported = map { ($_ => 1) } qw(controller device disktype diskmode id converter);
 	my %diskInfo = %{$disks};
 	for my $entry (values %diskInfo) {
 		my %diskData = %{$entry};

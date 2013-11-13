@@ -122,7 +122,13 @@ sub createChecks {
 	if (! $this -> __checkPackageManagerExists()) {
 		return;
 	}
-	if (! $this -> __checkVMscsiCapable()) {
+	if (! $this -> __checkVMConverterExist()) {
+		return;
+	}
+	if (! $this -> __checkVMControllerCapable()) {
+		return;
+	}
+	if (! $this -> __checkVMdiskmodeCapable()) {
 		return;
 	}
 	if (! $this -> __hasValidLVMName()) {
@@ -819,13 +825,12 @@ sub __checkUsersConsistent {
 }
 
 #==========================================
-# __checkVMscsiCapable
+# __checkVMControllerCapable
 #------------------------------------------
-sub __checkVMscsiCapable {
+sub __checkVMControllerCapable {
 	# ...
-	# If a VM image is being built and the specified vmdisk controller is
-	# scsi, then the qemu-img command on the system must support the scsi
-	# option.
+	# If a VM image is being built and the specified vmdisk controller,
+	# then the qemu-img command on the system must support this option.
 	# ---
 	my $this = shift;
 	my $xml = $this -> {xml};
@@ -843,12 +848,8 @@ sub __checkVMscsiCapable {
 		# no machine config requested, ok
 		return 1;
 	}
-	my $diskType = $vmConfig -> getSystemDiskType();
-	if ($diskType) {
-		if ($diskType ne 'scsi') {
-			# Nothing to do
-			return 1;
-		}
+	my $diskCnt = $vmConfig -> getSystemDiskController();
+	if ($diskCnt) {
 		my $QEMU_IMG_CAP;
 		if (! open($QEMU_IMG_CAP, '-|', "qemu-img create -f vmdk foo -o '?'")){
 			my $msg = 'Could not execute qemu-img command. This precludes '
@@ -858,16 +859,16 @@ sub __checkVMscsiCapable {
 			return;
 		}
 		while (<$QEMU_IMG_CAP>) {
-			if ($_ =~ /^scsi/x) {
+			if ($_ =~ /$diskCnt/x) {
 				close $QEMU_IMG_CAP;
 				return 1;
 			}
 		}
 		# Not scsi capable
 		close $QEMU_IMG_CAP;
-		my $msg = 'Configuration specifies scsi vmdisk controller. This disk '
+		my $msg = "Configuration specifies $diskCnt vmdisk controller. This disk "
 		. "type cannot be\ncreated on this system. The qemu-img command "
-		. 'must support the "-o scsi" option, but does not. Upgrade'
+		. "must support the \"-o adapter_type=$diskCnt\" option, but does not. Upgrade"
 		. "\nto a newer version of qemu-img or change the controller to ide";
 		$this -> {kiwi} -> error ($msg);
 		$this -> {kiwi} -> failed ();
@@ -876,6 +877,62 @@ sub __checkVMscsiCapable {
 	return 1;
 }
 
+#==========================================
+# __checkVMdiskmodeCapable
+#------------------------------------------
+sub __checkVMdiskmodeCapable {
+	# ...
+	# qemu-img command must support specified diskmode
+	# ---
+	my $this = shift;
+	my $xml = $this -> {xml};
+	my $type = $xml -> getImageType();
+	if (! $type) {
+		return 1;
+	}
+	my $imgtype = $type -> getTypeName();
+	if ($imgtype ne 'vmx') {
+		# Nothing to do
+		return 1;
+	}
+	my $vmConfig = $xml -> getVMachineConfig();
+	if (! $vmConfig) {
+		# no machine config requested, ok
+		return 1;
+	}
+	my $converter = $vmConfig -> getSystemDiskConverter();
+	if ($converter eq 'ovftool') {
+		# no need in check
+		return 1;
+	}
+	my $diskMode = $vmConfig -> getSystemDiskMode();
+	if ($diskMode) {
+		my $QEMU_IMG_CAP;
+		if (! open($QEMU_IMG_CAP, '-|', "qemu-img create -f vmdk foo -o '?'")){
+			my $msg = 'Could not execute qemu-img command. This precludes '
+			. 'format conversion.';
+			$this -> {kiwi} -> error ($msg);
+			$this -> {kiwi} -> failed ();
+			return;
+		}
+		while (<$QEMU_IMG_CAP>) {
+			if ($_ =~ /$diskMode/x) {
+				close $QEMU_IMG_CAP;
+				return 1;
+			}
+		}
+		# Not scsi capable
+		close $QEMU_IMG_CAP;
+		my $msg = "Configuration specifies diskmode $diskMode. This disk "
+		. "mode cannot be\ncreated on this system. The qemu-img command "
+		. 'must support the "-o subformat" option, but does not. Upgrade'
+		. "\nto a newer version of qemu-img or keep default mode";
+		$this -> {kiwi} -> error ($msg);
+		$this -> {kiwi} -> failed ();
+		return;
+	}
+	return 1;
+}
 #==========================================
 # __hasValidLVMName
 #------------------------------------------
@@ -1144,6 +1201,35 @@ sub __isoHybridCapable {
 		}
 	}
 	return 1;
+}
+
+#==========================================
+# __checkVMConverterExist
+#------------------------------------------
+sub __checkVMConverterExist {
+	# ...
+	# Check that the specified converter exists
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $xml  = $this->{xml};
+	my $sysDisk = $xml -> getSystemDiskConfig();
+	if (! $sysDisk ) {
+		return 1;
+	}
+	my $converter = $sysDisk -> getSystemDiskConverter();
+	if (! $converter ) {
+		# default converter
+		$converter='qemu-img';
+	}
+	my $convCmd = $this->{locator}->getExecPath($converter);
+	if (! $convCmd) {
+		my $msg = "$converter tool not found on system.";
+		$kiwi -> error  ($msg);
+		$kiwi -> failed ();
+		return;
+	}
+	return 1;	
 }
 
 1;
