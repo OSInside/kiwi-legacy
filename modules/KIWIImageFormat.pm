@@ -335,21 +335,8 @@ sub createVMDK {
 	$convert = "convert -f raw $source -O $format";
 	if ($this->{vmdata}) {
 		my $diskCnt = $this->{vmdata} -> getSystemDiskController;
-		if ($diskCnt) {
-			my $adapter = " -o adapter_type=$diskCnt";
-			if ($diskCnt eq 'scsi') {
-				if (open(my $QIMG,'-|', "qemu-img create -f vmdk foo -o '?'")) {
-					while (<$QIMG>) {
-						if ($_ =~ /^scsi/) {
-							# older versions support '-o scsi'
-							$adapter = " -o $diskCnt";
-							last;
-						}
-					}
-					close $QIMG;
-				}
-			}
-			$convert .= " $adapter";
+		if (($diskCnt) && ($diskCnt ne 'ide')) {
+			$convert .= " -o adapter_type=$diskCnt";
 		}
 		my $diskMode = $this->{vmdata} -> getSystemDiskMode();
 		if ($diskMode) {

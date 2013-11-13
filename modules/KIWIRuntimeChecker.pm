@@ -847,7 +847,7 @@ sub __checkVMControllerCapable {
 		return 1;
 	}
 	my $diskCnt = $vmConfig -> getSystemDiskController();
-	if ($diskCnt) {
+	if (($diskCnt) && ($diskCnt ne 'ide')) {
 		my $QEMU_IMG_CAP;
 		my $msg;
 		if (! open($QEMU_IMG_CAP, '-|', "qemu-img create -f vmdk foo -o '?'")) {
@@ -861,10 +861,6 @@ sub __checkVMControllerCapable {
 		while (<$QEMU_IMG_CAP>) {
 			if ($_ =~ /adapter_type/) {
 				# newer version support adapter_type option, ok
-				$ok = 1;
-				last;
-			} elsif (($_ =~ /^scsi/) && ($diskCnt eq 'scsi')) {
-				# older version but supports -o scsi
 				$ok = 1;
 				last;
 			}
