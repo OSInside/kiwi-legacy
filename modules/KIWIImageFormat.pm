@@ -1621,7 +1621,7 @@ sub createOVFConfiguration {
 		$ovabasis =~ s/\.ova$//;
 		my $files = "$ovabasis.ovf $ovabasis.mf $ovabasis.vmdk";
 		my $status = qxx (
-			"tar -h -C $ovfdir -cf $destdir/$ovaimage $files 2>&1"
+			"cd $ovfdir && ovftool $ovabasis.ovf $destdir/$ovaimage 2>&1"
 		);
 		my $result = $? >> 8;
 		if ($result != 0) {

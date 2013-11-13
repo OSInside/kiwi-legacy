@@ -122,6 +122,9 @@ sub createChecks {
 	if (! $this -> __checkPackageManagerExists()) {
 		return;
 	}
+	if (! $this -> __checkVMConverterExist()) {
+		return;
+	}
 	if (! $this -> __checkVMControllerCapable()) {
 		return;
 	}
@@ -179,6 +182,12 @@ sub prepareChecks {
 		return;
 	}
 	if (! $this -> __hasValidArchives()) {
+		return;
+	}
+	if (! $this -> __checkVMConverterExist()) {
+		return;
+	}
+	if (! $this -> __checkVMControllerCapable()) {
 		return;
 	}
 	return 1;
@@ -816,6 +825,35 @@ sub __checkUsersConsistent {
 	my $xml = $this -> {xml};
 	my $userData = $xml -> getUsers();
 	if (! $userData) {
+		return;
+	}
+	return 1;
+}
+
+#==========================================
+# __checkVMConverterExist
+#------------------------------------------
+sub __checkVMConverterExist {
+	# ...
+	# Check that the required converter exists
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $xml  = $this->{xml};
+	my $bldType = $xml -> getImageType();
+	if (! $bldType) {
+		return 1;
+	}
+	my $format = $bldType -> getFormat();
+	if ((! $format) || ($format ne 'ova')) {
+		return 1;
+	}
+	my $converter = 'ovftool';
+	my $convCmd = $this->{locator}->getExecPath($converter);
+	if (! $convCmd) {
+		my $msg = "$converter tool not found on system.";
+		$kiwi -> error  ($msg);
+		$kiwi -> failed ();
 		return;
 	}
 	return 1;
