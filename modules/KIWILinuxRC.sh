@@ -8774,7 +8774,13 @@ function pxeSetupDownloadServer {
 	# ----
 	pxeCheckServer
 	if [ -z "$SERVER" ];then
-		SERVER=tftp.$DOMAIN
+		if [ ! -z "$ip" ];then
+			Echo "Found server in PXE ip kernel cmdline"
+			SERVER=$(echo $ip | awk -F ':' '{ print $2 }')
+		else
+			Echo "No server configured, trying: tftp.$DOMAIN"
+			SERVER=tftp.$DOMAIN
+		fi
 	fi
 	Echo "Checking Server name: $SERVER"
 	if ! ping -c 1 -w 30 $SERVER >/dev/null 2>&1;then
