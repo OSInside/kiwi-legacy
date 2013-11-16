@@ -2972,6 +2972,73 @@ sub setupInstallFlags {
 	}
 	print $FD "$this->{mbrid}";
 	close $FD;
+	#==========================================
+	# Set DEFAULT_VGA for VMX second stage
+	#------------------------------------------
+	my ($OFD, $line, $linuxrc_path, $linuxrc_new);
+
+	$linuxrc_path = "$irddir/linuxrc";
+	$linuxrc_new = qxx ("mktemp -qt linuxrc.XXXXXX"); chomp $linuxrc_new;
+	$result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Couldn't create $linuxrc_new: $!");
+		$kiwi -> failed ();
+		return;
+	}
+
+	if (! open ($FD, '<', $linuxrc_path)) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Couldn't read $linuxrc_path: $!");
+		$kiwi -> failed ();
+		return;
+	}
+
+	if (! open ($OFD, '>', $linuxrc_new)) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Couldn't create $linuxrc_new: $!");
+		$kiwi -> failed ();
+		return;
+	}
+
+	while(<$FD>) {
+		print $OFD $_;
+		last if m/^#\s*Exports\s*\(Booting\)/;
+	}
+
+	$line = <$FD>;
+	$kiwi -> warning("unexpected linuxrc format") unless $line =~ m/^#[-]*$/;
+	print $OFD $line;
+	print $OFD "export DEFAULT_VGA=\"$this->{vga}\"\n";
+
+	while(<$FD>) {
+		print $OFD $_;
+	}
+
+	close $FD;
+	close $OFD;
+
+	if (! open ($OFD, '>', $linuxrc_path)) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Couldn't write $linuxrc_path: $!");
+		$kiwi -> failed ();
+		return;
+	}
+
+	if (! open ($FD, '<', $linuxrc_new)) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Couldn't read $linuxrc_new: $!");
+		$kiwi -> failed ();
+		return;
+	}
+
+	while(<$FD>) {
+		print $OFD $_;
+	}
+
+	close $FD;
+	close $OFD;
+
 	#===========================================
 	# add image.md5 / config.vmxsystem to initrd
 	#-------------------------------------------
