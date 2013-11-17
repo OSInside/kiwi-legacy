@@ -3112,6 +3112,42 @@ sub setupBootFlags {
 			return;
 		}
 	}
+	#========================================
+	# Set DEFAULT_VGA as defined in XML config
+	#----------------------------------------
+	if (-f "$irddir/include") {
+		$kiwi -> info ("Setting DEFAULT_VGA in linuxrc include...");
+		my ($IFD, $OFD);
+
+		if (! open ($IFD, '<', "$irddir/include")) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't read $irddir/include: $!");
+			$kiwi -> failed ();
+			return;
+		}
+
+		if (! open ($OFD, '>', "$irddir/include.new")) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't create $irddir/include.new: $!");
+			$kiwi -> failed ();
+			return;
+		}
+
+		while( <$IFD> ) {
+			s/(^test\s+-z\s+"\$DEFAULT_VGA"\s+&&\s+export\s+DEFAULT_VGA)=0x[0-9]{3}/$1=$this->{vga}/;
+			print $OFD $_;
+		}
+
+		close $IFD;
+		close $OFD;
+
+		if (! rename ("$irddir/include.new", "$irddir/include")) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't mv $irddir/include.new $irddir/include: $!");
+			$kiwi -> failed ();
+			return;
+		}
+	}
 	#==========================================
 	# Include MBR ID to initrd
 	#------------------------------------------
