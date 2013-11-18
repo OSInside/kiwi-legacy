@@ -862,7 +862,7 @@ sub createReport {
 	}
 	print $FD '</div>'."\n";
 	print $FD '<div class="footer container">'."\n";
-	print $FD "\t".'&copy; 2012 SuSE Linux Products GmbH.'."\n";
+	print $FD "\t".'&copy; 2012 SUSE Linux Products GmbH.'."\n";
 	print $FD '</div>'."\n";
 	print $FD '</body>'."\n";
 	print $FD '</html>'."\n";
