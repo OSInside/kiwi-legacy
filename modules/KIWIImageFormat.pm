@@ -1413,7 +1413,7 @@ sub createOVFConfiguration {
 		}
 		print $OVFFD "\t\t" . '<Item>' . "\n"
 			. "\t\t\t"
-			. '<rasd:AllocationUnits>MB</rasd:AllocationUnits>' . "\n"
+			. '<rasd:AllocationUnits>byte * 2^20</rasd:AllocationUnits>' . "\n"
 			. "\t\t\t"
 			. '<rasd:Description>Memory Size</rasd:Description>' . "\n"
 			. "\t\t\t"
