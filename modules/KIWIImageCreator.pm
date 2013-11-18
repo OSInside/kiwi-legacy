@@ -1997,6 +1997,15 @@ sub __addTypeToBootXML {
 		$bootType -> setBootProfile ($bootprofile);
 		$kiwi -> done();
 	}
+	#==========================================
+	# vga
+	#------------------------------------------
+	my $vga = $systemType -> getVGA();
+	if ($vga) {
+		$kiwi -> info ("--> vga: $vga");
+		$bootType -> setVGA ($vga);
+		$kiwi -> done();
+	}
 	return $this;
 }
 

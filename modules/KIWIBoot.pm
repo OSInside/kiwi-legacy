@@ -4305,6 +4305,10 @@ sub setupBootLoaderConfiguration {
 		$vesa{'0x319'} = ["1280x1024x16", "1280x1024"];
 		$vesa{'0x31a'} = ["1280x1024x24", "1280x1024"];
 		$vesa{'0x31b'} = ["1280x1024x32", "1280x1024"];
+		my $gfx = 'keep';
+		if (($vga) && ($vesa{$vga})) {
+			$gfx = $vesa{$vga}->[1];
+		}
 		#==========================================
 		# add unicode font for grub2
 		#------------------------------------------
@@ -4356,7 +4360,7 @@ sub setupBootLoaderConfiguration {
 			if ($firmware ne "uefi") {
 				# support theme and graphics if not in efi secure boot mode
 				print $FD 'if loadfont $font ;then'."\n";
-				print $FD "\t"."set gfxmode=$vesa{$vga}->[0]"."\n";
+				print $FD "\t"."set gfxmode=$gfx"."\n";
 				print $FD "\t".'insmod gfxterm'."\n";
 				print $FD "\t".'insmod gfxmenu'."\n";
 				print $FD "\t".'terminal_input gfxterm'."\n";
@@ -4429,18 +4433,18 @@ sub setupBootLoaderConfiguration {
 			if ((! $isxen) || ($isxen && $xendomain eq "domU")) {
 				if ($iso) {
 					print $FD "\t"."echo Loading linux...\n";
-					print $FD "\t"."set gfxpayload=keep"."\n";
+					print $FD "\t"."set gfxpayload=$gfx"."\n";
 					print $FD "\t"."linux$efi_suffix /boot/linux";
 					print $FD ' ramdisk_size=512000 ramdisk_blocksize=4096';
 					print $FD " cdinst=1 splash=silent";
 				} elsif (($topic=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
 					print $FD "\t"."echo Loading linux.vmx...\n";
-					print $FD "\t"."set gfxpayload=keep"."\n";
+					print $FD "\t"."set gfxpayload=$gfx"."\n";
 					print $FD "\t"."linux$efi_suffix /boot/linux.vmx";
 					print $FD " splash=silent";
 				} else {
 					print $FD "\t"."echo Loading linux...\n";
-					print $FD "\t"."set gfxpayload=keep"."\n";
+					print $FD "\t"."set gfxpayload=$gfx"."\n";
 					print $FD "\t"."linux$efi_suffix /boot/linux";
 					print $FD " splash=silent";
 				}
@@ -4461,7 +4465,7 @@ sub setupBootLoaderConfiguration {
 					print $FD "\t"."echo Loading Xen\n";
 					print $FD "\t"."multiboot /boot/xen.gz dummy\n";
 					print $FD "\t"."echo Loading linux...\n";
-					print $FD "\t"."set gfxpayload=keep"."\n";
+					print $FD "\t"."set gfxpayload=$gfx"."\n";
 					print $FD "\t"."module /boot/linux dummy";
 					print $FD ' ramdisk_size=512000 ramdisk_blocksize=4096';
 					print $FD " cdinst=1 splash=silent";
@@ -4469,14 +4473,14 @@ sub setupBootLoaderConfiguration {
 					print $FD "\t"."echo Loading Xen\n";
 					print $FD "\t"."multiboot /boot/xen.gz dummy\n";
 					print $FD "\t"."echo Loading linux.vmx...\n";
-					print $FD "\t"."set gfxpayload=keep"."\n";
+					print $FD "\t"."set gfxpayload=$gfx"."\n";
 					print $FD "\t".'module /boot/linux.vmx dummy';
 					print $FD " splash=silent";
 				} else {
 					print $FD "\t"."echo Loading Xen\n";
 					print $FD "\t"."multiboot /boot/xen.gz dummy\n";
 					print $FD "\t"."echo Loading linux...\n";
-					print $FD "\t"."set gfxpayload=keep"."\n";
+					print $FD "\t"."set gfxpayload=$gfx"."\n";
 					print $FD "\t".'module /boot/linux dummy';
 					print $FD " splash=silent";
 				}
@@ -4503,7 +4507,7 @@ sub setupBootLoaderConfiguration {
 				if ((! $isxen) || ($isxen && $xendomain eq "domU")) {
 					if ($iso) {
 						print $FD "\t"."echo Loading linux...\n";
-						print $FD "\t"."set gfxpayload=keep"."\n";
+						print $FD "\t"."set gfxpayload=$gfx"."\n";
 						print $FD "\t"."linux$efi_suffix /boot/linux";
 						print $FD ' ramdisk_size=512000 ramdisk_blocksize=4096';
 						print $FD " cdinst=1 splash=silent";
@@ -4512,12 +4516,12 @@ sub setupBootLoaderConfiguration {
 						($imgtype=~ /vmx|oem|split/)
 					) {
 						print $FD "\t"."echo Loading linux.vmx...\n";
-						print $FD "\t"."set gfxpayload=keep"."\n";
+						print $FD "\t"."set gfxpayload=$gfx"."\n";
 						print $FD "\t"."linux$efi_suffix /boot/linux.vmx";
 						print $FD " splash=silent";
 					} else {
 						print $FD "\t"."echo Loading linux...\n";
-						print $FD "\t"."set gfxpayload=keep"."\n";
+						print $FD "\t"."set gfxpayload=$gfx"."\n";
 						print $FD "\t"."linux$efi_suffix /boot/linux";
 						print $FD " splash=silent";
 					}
@@ -4542,7 +4546,7 @@ sub setupBootLoaderConfiguration {
 						print $FD "\t"."echo Loading Xen\n";
 						print $FD "\t"."multiboot /boot/xen.gz dummy\n";
 						print $FD "\t"."echo Loading linux...\n";
-						print $FD "\t"."set gfxpayload=keep"."\n";
+						print $FD "\t"."set gfxpayload=$gfx"."\n";
 						print $FD "\t"."module /boot/linux dummy";
 						print $FD ' ramdisk_size=512000 ramdisk_blocksize=4096';
 						print $FD " cdinst=1 splash=silent";
@@ -4553,14 +4557,14 @@ sub setupBootLoaderConfiguration {
 						print $FD "\t"."echo Loading Xen\n";
 						print $FD "\t"."multiboot /boot/xen.gz dummy\n";
 						print $FD "\t"."echo Loading linux.vmx...\n";
-						print $FD "\t"."set gfxpayload=keep"."\n";
+						print $FD "\t"."set gfxpayload=$gfx"."\n";
 						print $FD "\t".'module /boot/linux.vmx dummy';
 						print $FD " splash=silent";
 					} else {
 						print $FD "\t"."echo Loading Xen\n";
 						print $FD "\t"."multiboot /boot/xen.gz dummy\n";
 						print $FD "\t"."echo Loading linux...\n";
-						print $FD "\t"."set gfxpayload=keep"."\n";
+						print $FD "\t"."set gfxpayload=$gfx"."\n";
 						print $FD "\t".'module /boot/linux dummy';
 						print $FD " splash=silent";
 					}

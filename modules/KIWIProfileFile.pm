@@ -115,6 +115,7 @@ sub new {
 		kiwi_testing
 		kiwi_timezone
 		kiwi_type
+		kiwi_vga
 		kiwi_xendomain
 	);
 	#==========================================
@@ -337,6 +338,7 @@ sub __updateXMLType {
 	$data{kiwi_bootkernel}       = $type -> getBootKernel();
 	$data{kiwi_fsmountoptions}   = $type -> getFSMountOptions();
 	$data{kiwi_bootprofile}      = $type -> getBootProfile();
+	$data{kiwi_vga}              = $type -> getVGA();
 	#==========================================
 	# store as profile variable
 	#------------------------------------------
