@@ -2669,8 +2669,8 @@ function setupBootLoaderGrub2 {
 	#======================================
 	# write vesa vga setup
 	#--------------------------------------
-	if [ ! -z "${vesa[$vga]}" ];then
-		echo "GRUB_GFXMODE=${vesa[$vga]}" >> $inst_default_grub
+	if [ ! -z "${vesa[$DEFAULT_VGA]}" ];then
+		echo "GRUB_GFXMODE=${vesa[$DEFAULT_VGA]}" >> $inst_default_grub
 	fi
 	#======================================
 	# write bootloader theme setup
