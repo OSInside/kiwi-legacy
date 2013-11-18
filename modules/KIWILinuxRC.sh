@@ -2672,6 +2672,9 @@ function setupBootLoaderGrub2 {
 	if [ ! -z "$kiwi_vga" ] && [ ! -z "${vesa[$kiwi_vga]}" ];then
 		echo "GRUB_GFXMODE=${vesa[$kiwi_vga]}" >> $inst_default_grub
 		echo "GRUB_GFXPAYLOAD_LINUX=${vesa[$kiwi_vga]}" >> $inst_default_grub
+	else
+		echo "GRUB_GFXMODE=${vesa[$DEFAULT_VGA]}" >> $inst_default_grub
+		echo "GRUB_GFXPAYLOAD_LINUX=keep" >> $inst_default_grub
 	fi
 	#======================================
 	# write bootloader theme setup
