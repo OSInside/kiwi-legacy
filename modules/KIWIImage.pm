@@ -1637,7 +1637,7 @@ sub createImageLiveCD {
 	#------------------------------------------
 	my @cpio = ("--create", "--format=newc", "--quiet");
 	$data = qxx (
-		"cd $tmpdir && find . | cpio @cpio | $zipper -f > $destination/initrd"
+		"cd $tmpdir && find . -path ./image -prune -o -print | cpio @cpio | $zipper -f > $destination/initrd"
 	);
 	$code = $? >> 8;
 	if ($code != 0) {
