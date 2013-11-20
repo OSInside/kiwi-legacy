@@ -1512,8 +1512,8 @@
       <title><sgmltag>users</sgmltag> Element</title>
 
       <screen>&lt;users group="group_name" id="number"&gt; 
-  &lt;user home="dir" id="number" name="user" pwd="..."
-        pwdformat="encrypted|plain" realname="string" shell="path/&gt;
+  &lt;user home="dir" id="number" name="user" password="..."
+        pwdformat="encrypted|plain" realname="string" shell="path"/&gt;
   <sgmltag class="sgmlcomment"> ... </sgmltag>
 &lt;/users&gt;</screen>
 
