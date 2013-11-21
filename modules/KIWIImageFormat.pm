@@ -1280,10 +1280,18 @@ sub createOVFConfiguration {
 	#==========================================
 	# storage description
 	#------------------------------------------
+	# for vSphere it needs some bigger then real image disk size.
+	# this size is in "byte * 2^20" because MB is not a right value, 
+	# because rasd/cim standart define nothing and vbox and vSphere understand different values.
+	my $vsize = $xml -> getImageType() -> getSize();
+	if (! $vsize) {
+		#fallback if size not set, should be ok for VirtualBox, but bad for vSphere 5
+		$vsize = $size;
+	}
 	print $OVFFD '<ovf:DiskSection>' . "\n"
 		. "\t" . '<ovf:Info>Virtual disk information</ovf:Info>' . "\n"
-		. "\t" . '<ovf:Disk ovf:capacity="' . $size . '" '
-		. 'ovf:capacityAllocationUnits="byte" '
+		. "\t" . '<ovf:Disk ovf:capacity="' . $vsize . '" '
+		. 'ovf:capacityAllocationUnits="byte * 2^20" '
 		. 'ovf:diskId="vmdisk1" '
 		. 'ovf:fileRef="file1" '
 		. 'ovf:format="' . $diskformat . '" '
