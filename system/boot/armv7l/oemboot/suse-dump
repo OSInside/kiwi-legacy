@@ -217,7 +217,7 @@ function OEMInstall {
 	# Add optional dmraid device(s)
 	#--------------------------------------
 	if [ -z "$DISABLE_OEM_ATARAID_SCAN" ];then
-		if which dmraid &>/dev/null && dmraid -s &>/dev/null;then
+		if lookup dmraid &>/dev/null && dmraid -s &>/dev/null;then
 			dmraid -a y
 			udevPending
 			identifyDMRaid

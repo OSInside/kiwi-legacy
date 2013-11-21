@@ -574,7 +574,7 @@ function errorLogStart {
 #--------------------------------------
 function udevPending {
 	local timeout=30
-	local udevadmExec=$(which udevadm 2>/dev/null)
+	local udevadmExec=$(lookup udevadm 2>/dev/null)
 	if [ -x $udevadmExec ];then
 		$udevadmExec settle --timeout=$timeout
 	else
@@ -587,7 +587,7 @@ function udevPending {
 # udevTrigger
 #--------------------------------------
 function udevTrigger {
-	local udevadmExec=$(which udevadm 2>/dev/null)
+	local udevadmExec=$(lookup udevadm 2>/dev/null)
 	if [ -x $udevadmExec ];then
 		$udevadmExec trigger
 	else
@@ -1133,7 +1133,7 @@ function updateModuleDependencies {
 	# /.../
 	# update the kernel module dependencies list
 	# ---
-	local depmodExec=$(which depmod 2>/dev/null)
+	local depmodExec=$(lookup depmod 2>/dev/null)
 	if [ ! -x "$depmodExec" ];then
 		Echo "Could not find depmod executable"
 		Echo "Skipping module dependency update"
@@ -1156,8 +1156,8 @@ function setupRHELInitrd {
 	local umountProc=0
 	local umountSys=0
 	local systemMap=0
-	local dracutExec=$(which dracut 2>/dev/null)
-	local mkinitrdExec=$(which mkinitrd 2>/dev/null)
+	local dracutExec=$(lookup dracut 2>/dev/null)
+	local mkinitrdExec=$(lookup mkinitrd 2>/dev/null)
 	local params
 	local running
 	local rlinux
@@ -1244,7 +1244,7 @@ function setupSUSEInitrd {
 	local umountProc=0
 	local umountSys=0
 	local systemMap=0
-	local mkinitrdExec=$(which mkinitrd 2>/dev/null)
+	local mkinitrdExec=$(lookup mkinitrd 2>/dev/null)
 	local params
 	local running
 	local rlinux
@@ -10001,6 +10001,12 @@ function FBOK {
 		return 1
 	fi
 	return 0
+}
+#======================================
+# lookup
+#--------------------------------------
+function lookup {
+	bash -c "PATH=$PATH:/sbin:/usr/sbin type -p $1"
 }
 #======================================
 # initialize

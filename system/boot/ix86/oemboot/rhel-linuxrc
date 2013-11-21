@@ -173,7 +173,7 @@ ldconfig
 mountSystemFilesystems &>/dev/null
 if [ ! -z "$OEM_SILENTBOOT" ];then
     test -e /proc/splash && echo verbose > /proc/splash
-	if which plymouthd &>/dev/null;then
+	if lookup plymouthd &>/dev/null;then
 		plymouth hide-splash
 	fi
 fi
