@@ -33,6 +33,7 @@ use File::Copy;
 use File::Spec;
 use Fcntl ':mode';
 use Cwd qw (abs_path cwd);
+use File::Slurp;
 
 #==========================================
 # KIWI Modules
@@ -230,6 +231,54 @@ sub createCustomFileTree {
 }
 
 #==========================================
+# diffChangedConfigFiles
+#------------------------------------------
+sub diffChangedConfigFiles {
+	# ...
+	# diff all configuration files changed by the user
+	# against the originals and store the result
+	# in 'changed_config.diff'
+	# ---
+	my $this  = shift;
+	my $dest  = $this->{dest};
+	my $kiwi  = $this->{kiwi};
+	my $cdata = $this->{cdata};
+	my $original_conf = $cdata->{original_conf};
+	my $result = 1;
+	if (! %$original_conf) {
+		return $this;
+	}
+	$kiwi -> info ("Create diff for changed config files...");
+	my $diff_file = "$dest/changed_config.diff";
+	if (-e $diff_file) {
+		qxx ("rm -rf '$diff_file' 2>&1");
+	}
+	my $tmpdir = qxx ("mktemp -qdt kiwi-analyse.XXXXXX");
+	chomp $tmpdir;
+	while ( my ($file, $entry) = each(%$original_conf) ) {
+		unless ($entry->{'content'}) {
+			$kiwi -> failed();
+			$kiwi -> info("--> Couldn't create diff for $file");
+			$result = 0;
+			next;
+		}
+		my $filename = "$tmpdir$file";
+		my $dirn     = dirname($filename);
+		qxx ("mkdir -p '$dirn'");
+		write_file( $filename, $entry->{'content'} );
+		utime($entry->{'atime'}, $entry->{'mtime'}, $filename);
+		qxx ("diff -uN '$tmpdir$file' '$file' >> '$diff_file'");
+	}
+	qxx ("rm -rf '$tmpdir' 2>&1");
+	if ($result == 0) {
+		$kiwi -> failed();
+		return;
+	}
+	$kiwi -> done();
+	return $this;
+}
+
+#==========================================
 # getCustomFiles
 #------------------------------------------
 sub getCustomFiles {
@@ -335,13 +384,15 @@ sub __populateCustomFiles {
 	my $data;
 	my $code;
 	my @modified;
+	my $original_conf = {};
 	my $root = "/";
 	#==========================================
 	# Find files packaged but changed
 	#------------------------------------------
 	$kiwi -> info ("Inspecting RPM database [modified files]...");
-	if (($cdata) && ($cdata->{modified})) {
+	if (($cdata) && ($cdata->{modified}) && ($cdata->{original_conf})) {
 		@modified = @{$cdata->{modified}};
+		$original_conf = $cdata->{original_conf};
 		$kiwi -> done(); 
 	} else {
 		$checkopt = "--nodeps --nodigest --nosignature --nomtime ";
@@ -355,8 +406,10 @@ sub __populateCustomFiles {
 		my $done_old;
 		$kiwi -> cursorOFF();
 		foreach my $check (@rpmcheck) {
-			if ($check =~ /(\/.*)/) {
-				my $file = $1;
+			if ($check =~ /^..(.).+\s+(.)\s(\/.*)$/) {
+				my $has_changed = ($1 eq "5");
+				my $is_config = ($2 eq "c");
+				my $file = $3;
 				my ($name,$dir,$suffix) = fileparse ($file);
 				my $ok   = 1;
 				foreach my $exp (@deny) {
@@ -373,6 +426,11 @@ sub __populateCustomFiles {
 					}
 					$result{$file} = [$dir,$attr];
 					push (@modified,$file);
+					if (($has_changed) && ($is_config)) {
+						my $package = qxx ("rpm -qf '$file'");
+						chomp $package;
+						$original_conf->{$file}->{'package'} = $package;
+					}
 				}
 			}
 			$done = int ($count * $spart);
@@ -386,6 +444,13 @@ sub __populateCustomFiles {
 		$kiwi -> note ("\n");
 		$kiwi -> doNorm ();
 		$kiwi -> cursorON();
+		#==========================================
+		# download originals of changed conf. files
+		#------------------------------------------
+		$cdata->{original_conf} = \%{$original_conf};
+		if (%{$original_conf}) {
+			$this -> __getOriginalConfigFiles();
+		}
 	}
 	#==========================================
 	# Find files/directories not packaged
@@ -713,6 +778,92 @@ sub __populateCustomFiles {
 	#------------------------------------------
 	$this->{nopackage}  = \%result;
 	$this->{localrepos} = \%repos;
+	return $this;
+}
+
+#==========================================
+# __getOriginalConfigFiles
+#------------------------------------------
+sub __getOriginalConfigFiles {
+	# ...
+	# 1) Download all packages which configuration files where changed
+	# 2) Extract the packages and store the configuration files in cache
+	# ---
+	my $this   = shift;
+	my $kiwi   = $this->{kiwi};
+	my $cdata  = $this->{cdata};
+	my $original_conf = $cdata->{original_conf};
+	#==========================================
+	# Get packages for changed configuration
+	#------------------------------------------
+	my @packages;
+	$kiwi -> info ("Downloading packages of changed configuration files...");
+	while ( my ($file, $entry) = each(%$original_conf) ) {
+		my $package = $entry->{'package'};
+		push(@packages, $package) unless grep{$_ eq $package} @packages;
+	}
+	#==========================================
+	# Download and extract packages
+	#------------------------------------------
+	my $packages = @packages;
+	my $spart = 100 / $packages;
+	my $count = 1;
+	my $done;
+	my $done_old;
+	my $status;
+	my $result = 1;
+	$kiwi -> cursorOFF();
+	my $tmpdir = qxx ("mktemp -qdt kiwi-analyse.XXXXXX");
+	chomp $tmpdir;
+	my $cwd = cwd();
+	chdir $tmpdir;
+	foreach my $package (@packages) {
+		my $pck_path = qxx (
+			"find /var/cache/zypp/packages/ -name '$package*'"
+		);
+		chomp $pck_path;
+		my $does_exist = (-e $pck_path) ? 1 : 0;
+		$status = qxx ("zypper install -dfy $package 2>&1");
+		$pck_path = qxx (
+			"find /var/cache/zypp/packages/ -name '$package*'"
+		);
+		chomp $pck_path;
+		unless ( -e $pck_path) {
+			$kiwi -> loginfo ($status);
+			$kiwi -> failed();
+			$kiwi -> info ("--> The package $package couldn't be downloaded");
+			$result = 0;
+			next;
+		}
+		qxx ("rpm2cpio '$pck_path' | cpio -idm 2>/dev/null");
+		unless ($does_exist) {
+			qxx ("rm -f '$pck_path'");
+		}
+		$done = int ($count * $spart);
+		if (($done_old) && ($done != $done_old)) {
+			$kiwi -> step ($done);
+		}
+		$done_old = $done;
+		$count++;
+	}
+	chdir $cwd;
+	($result) ? $kiwi -> note ("\n") : $kiwi -> failed();
+	$kiwi -> doNorm ();
+	$kiwi -> cursorON();
+	#==========================================
+	# Store original config files in cache
+	#------------------------------------------
+	while ( my ($file, $entry) = each(%$original_conf) ) {
+		if ( -e "$tmpdir$file") {
+			my $content = read_file( "$tmpdir$file" ) ;
+			my $sb = stat("$tmpdir$file");
+			$original_conf->{ $file }->{ 'atime' }   = $sb->atime;
+			$original_conf->{ $file }->{ 'mtime' }   = $sb->mtime;
+			$original_conf->{ $file }->{ 'content' } = $content;
+		}
+	}
+	qxx ("rm -rf '$tmpdir' 2>&1");
+	$cdata->{original_conf} = \%{$original_conf};
 	return $this;
 }
 
