@@ -1,0 +1,37 @@
+Build instructions for local build
+==================================
+* create a SLES12 installation source below /path/to/SLE12/repo
+  tip: copy SLE12 DVD
+
+* call kiwi prepare:
+  kiwi -p suse-SLE12-JeOS --root /tmp/kiwi-sle12 --ignore-repos \
+       --add-repo /path/to/SLE12/repo \
+       --add-repotype yast2 \
+       --add-repo /usr/share/kiwi/repo/suse-repo/suse-sle12-repo/ \
+       --add-repotype rpm-dir
+
+* call kiwi create for DASD device:
+  kiwi --create /tmp/kiwi-sle12 --ignore-repos \
+	   --add-repo /path/to/SLE12/repo \
+       --add-repotype yast2 \
+       --add-repo /usr/share/kiwi/repo/suse-repo/suse-sle12-repo/ \
+       --add-repotype rpm-dir \
+	   -d /tmp/myimage --type vmx --targetDevice /dev/dasdX
+
+* call kiwi create for virtio device (KVM):
+  kiwi --create /tmp/kiwi-sle12 --ignore-repos \
+       --add-repo /path/to/SLE12/repo \
+       --add-repotype yast2 \
+       --add-repo /usr/share/kiwi/repo/suse-repo/suse-sle12-repo/ \
+       --add-repotype rpm-dir \
+       -d /tmp/myimage --type vmx
+
+
+Kernel paramters to configure the image:
+========================================
+busid=0.0.0530
+qeth_port=VSWL2
+qeth_read=0.0.0800
+qeth_write=0.0.0801
+qeth_ctrl=0.0.0802
+qeth_up=1

@@ -610,11 +610,13 @@ rm -rf $RPM_BUILD_ROOT
 %exclude %{_datadir}/kiwi/image/suse-13.2-JeOS
 %exclude %{_datadir}/kiwi/image/suse-SLE10-JeOS
 %exclude %{_datadir}/kiwi/image/suse-SLE11-JeOS
+%exclude %{_datadir}/kiwi/image/suse-SLE12-JeOS
 %exclude %{_datadir}/kiwi/image/rhel-05.4-JeOS
 %exclude %{_datadir}/kiwi/image/rhel-06.0-JeOS
 %endif
 %ifarch s390 s390x
 %exclude %{_datadir}/kiwi/image/suse-SLE11-JeOS
+%exclude %{_datadir}/kiwi/image/suse-SLE12-JeOS
 %endif
 %ifarch %arm aarch64
 %exclude %{_datadir}/kiwi/image/suse-12.2-JeOS
@@ -760,11 +762,13 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/kiwi/image/suse-13.2-JeOS
 %{_datadir}/kiwi/image/suse-SLE10-JeOS
 %{_datadir}/kiwi/image/suse-SLE11-JeOS
+%{_datadir}/kiwi/image/suse-SLE12-JeOS
 %{_datadir}/kiwi/image/rhel-05.4-JeOS
 %{_datadir}/kiwi/image/rhel-06.0-JeOS
 %endif
 %ifarch s390 s390x
 %{_datadir}/kiwi/image/suse-SLE11-JeOS
+%{_datadir}/kiwi/image/suse-SLE12-JeOS
 %endif
 %ifarch %arm aarch64
 %{_datadir}/kiwi/image/suse-12.2-JeOS
@@ -774,6 +778,7 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 %ifarch ppc ppc64
 %{_datadir}/kiwi/image/suse-SLE11-JeOS
+%{_datadir}/kiwi/image/suse-SLE12-JeOS
 %endif
 
 %endif
