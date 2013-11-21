@@ -934,13 +934,17 @@ function installBootLoaderGrub2 {
 	#======================================
 	# check for EFI and mount EFI partition
 	#--------------------------------------
-	if [ ! -z "$kiwi_JumpPart" ] && [ -d /boot/efi ];then
+	if [ ! -z "$kiwi_JumpPart" ];then
 		local jdev=$(ddn $imageDiskDevice $kiwi_JumpPart)
-		if ! mount $jdev /boot/efi;then
-			Echo "Failed to mount EFI boot partition"
-			return 1
+		local label=$(blkid $jdev -s LABEL -o value)
+		if [ "$label" = "EFI" ];then
+			mkdir -p /boot/efi
+			if ! mount $jdev /boot/efi;then
+				Echo "Failed to mount EFI boot partition"
+				return 1
+			fi
+			isEFI=1
 		fi
-		isEFI=1
 	fi
 	#======================================
 	# lookup grub2 mkconfig tool
@@ -3044,15 +3048,27 @@ function updateBootDeviceFstab {
 	# ----
 	local prefix=$1
 	local sdev=$2
-	local mount=boot_bind
+	local nfstab=$prefix/etc/fstab
+	#======================================
+	# check for kiwi_JumpPart
+	#--------------------------------------
+	if [ ! -z "$kiwi_JumpPart" ];then
+		local jdev=$(ddn $imageDiskDevice $kiwi_JumpPart)
+		local fstype=$(blkid $jdev -s TYPE -o value)
+		local label=$(blkid $jdev -s LABEL -o value)
+		if [ ! -z "$fstype" ] && [ "$label" = "EFI" ];then
+			jdev=$(getDiskID $jdev)
+			echo "$jdev /boot/efi $fstype defaults 0 0" >> $nfstab
+		fi
+	fi
 	#======================================
 	# Return if no action required
 	#--------------------------------------
+	local mount=boot_bind
 	if [ ! -e /mnt/$mount ];then
 		return
 	fi
 	local diskByID=$(getDiskID $sdev)
-	local nfstab=$prefix/etc/fstab
 	if [ ! -z "$FSTYPE" ];then
 		FSTYPE_SAVE=$FSTYPE
 	fi
@@ -3067,17 +3083,6 @@ function updateBootDeviceFstab {
 	echo "/$mount/boot /boot none bind 0 0" >> $nfstab
 	if [ ! -z "$FSTYPE_SAVE" ];then
 		FSTYPE=$FSTYPE_SAVE
-	fi
-	#======================================
-	# check for kiwi_JumpPart
-	#--------------------------------------
-	if [ ! -z "$kiwi_JumpPart" ] && [ -d /mnt/$mount/efi ];then
-		local jdev=$(ddn $imageDiskDevice $kiwi_JumpPart)
-		local fstype=$(blkid $jdev -s TYPE -o value)
-		if [ ! -z "$fstype" ];then
-			jdev=$(getDiskID $jdev)
-			echo "$jdev /boot/efi $fstype defaults 0 0" >> $nfstab
-		fi
 	fi
 }
 #======================================
