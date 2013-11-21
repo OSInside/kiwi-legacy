@@ -223,7 +223,8 @@ sub x86_64_legacy {
 	my $sort  = $this -> createLegacySortFile ("x86_64");
 	my $boot  = $base{$arch}{boot};
 	my $loader= $base{$arch}{loader};
-	$para.= " -sort $sort -no-emul-boot -boot-load-size 4 -boot-info-table";
+	$para.= " -sort $sort" if $sort;
+	$para.= " -no-emul-boot -boot-load-size 4 -boot-info-table";
 	$para.= " -b $loader -c $boot/boot.catalog";
 	$para.= " -hide $boot/boot.catalog -hide-joliet $boot/boot.catalog";
 	$this -> {params} = $para;
@@ -242,7 +243,8 @@ sub ix86_legacy {
 	my $sort  = $this -> createLegacySortFile ("ix86");
 	my $boot  = $base{$arch}{boot};
 	my $loader= $base{$arch}{loader};
-	$para.= " -sort $sort -no-emul-boot -boot-load-size 4 -boot-info-table";
+	$para.= " -sort $sort" if $sort;
+	$para.= " -no-emul-boot -boot-load-size 4 -boot-info-table";
 	$para.= " -b $loader -c $boot/boot.catalog";
 	$para.= " -hide $boot/boot.catalog -hide-joliet $boot/boot.catalog";
 	$this -> {params} = $para;
@@ -300,7 +302,7 @@ sub ia64_efi {
 
 	$para.= " -no-emul-boot";
 	$para.= " -boot-load-size 1";
-	$para.= " -sort $sort";
+	$para.= " -sort $sort" if $sort;
 	$para.= " -b $loader";
 	$para.= " -c $boot/boot.catalog";
 	$para.= " -hide $boot/boot.catalog -hide-joliet $boot/boot.catalog";
