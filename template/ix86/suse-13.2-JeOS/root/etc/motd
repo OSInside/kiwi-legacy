@@ -1,0 +1,7 @@
+This is the Lime-JeOS 13.2 SuSE Linux System.
+To upgrade your system call:
+
+    zypper refresh
+    zypper install -t product openSUSE-13.2
+
+Have a lot of fun...
