@@ -1736,7 +1736,7 @@ sub listImage {
 	my $system = $gdata->{System};
 	opendir (FD,$system);
 	my @images = readdir (FD); closedir (FD);
-	foreach my $image (@images) {
+	foreach my $image (sort @images) {
 		if ($image =~ /^\./) {
 			next;
 		}
