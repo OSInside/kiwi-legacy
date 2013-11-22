@@ -328,17 +328,26 @@ sub createVMDK {
 	my $source = $this->{image};
 	my $target = $source;
 	my $convert;
+	my $converter;
 	my $status;
 	my $result;
 	$kiwi -> info ("Creating $format image...");
 	$target  =~ s/\.raw$/\.$format/;
 	$convert = "convert -f raw $source -O $format";
-	if ($this->{vmdata}) {
-		my $diskCnt = $this->{vmdata} -> getSystemDiskController;
-		if (($diskCnt) && ($diskCnt ne 'ide')) {
+	my $vmdata = $this->{vmdata};
+	my $diskCnt;
+	my $diskMode;
+	if ($vmdata) {
+		$converter = $vmdata -> getSystemDiskConverter();
+		$diskCnt = $vmdata -> getSystemDiskController();
+		$diskMode = $vmdata -> getSystemDiskMode();
+	}
+	#if ovftool, then create vmdk with default (no values), 
+	#right format will be extracted from ova later
+	if (! $converter || ($converter ne "ovftool")) {
+		if ($diskCnt) {
 			$convert .= " -o adapter_type=$diskCnt";
 		}
-		my $diskMode = $this->{vmdata} -> getSystemDiskMode();
 		if ($diskMode) {
 			$convert .= " -o subformat=$diskMode";
 		}
@@ -1205,8 +1214,12 @@ sub createOVFConfiguration {
 	my $diskformat;
 	my $osid;
 	my $systemtype;
+	my $converter = $vmdata -> getSystemDiskConverter();
+	my $diskmode = $vmdata -> getSystemDiskMode();
 	my $guest = $vmdata -> getGuestOS();
 	my $hwVersion = $vmdata -> getHardwareVersion();
+	my $vmdk = $base;
+	$vmdk =~ s/\.ovf/\.vmdk/;
 	if ($guest eq 'suse') {
 		$guest = 'SUSE';
 	} elsif ($guest eq 'suse-64') {
@@ -1267,10 +1280,18 @@ sub createOVFConfiguration {
 	#==========================================
 	# storage description
 	#------------------------------------------
+	# for vSphere it needs some bigger then real image disk size.
+	# this size is in "byte * 2^20" because MB is not a right value, 
+	# because rasd/cim standart define nothing and vbox and vSphere understand different values.
+	my $vsize = $xml -> getImageType() -> getSize();
+	if (! $vsize) {
+		#fallback if size not set, should be ok for VirtualBox, but bad for vSphere 5
+		$vsize = $size;
+	}
 	print $OVFFD '<ovf:DiskSection>' . "\n"
 		. "\t" . '<ovf:Info>Virtual disk information</ovf:Info>' . "\n"
-		. "\t" . '<ovf:Disk ovf:capacity="' . $size . '" '
-		. 'ovf:capacityAllocationUnits="byte" '
+		. "\t" . '<ovf:Disk ovf:capacity="' . $vsize . '" '
+		. 'ovf:capacityAllocationUnits="byte * 2^20" '
 		. 'ovf:diskId="vmdisk1" '
 		. 'ovf:fileRef="file1" '
 		. 'ovf:format="' . $diskformat . '" '
@@ -1400,7 +1421,7 @@ sub createOVFConfiguration {
 		}
 		print $OVFFD "\t\t" . '<Item>' . "\n"
 			. "\t\t\t"
-			. '<rasd:AllocationUnits>MB</rasd:AllocationUnits>' . "\n"
+			. '<rasd:AllocationUnits>byte * 2^20</rasd:AllocationUnits>' . "\n"
 			. "\t\t\t"
 			. '<rasd:Description>Memory Size</rasd:Description>' . "\n"
 			. "\t\t\t"
@@ -1619,16 +1640,51 @@ sub createOVFConfiguration {
 		$ovaimage =~ s/\.ovf$/\.ova/;
 		my $ovabasis = $ovaimage;
 		$ovabasis =~ s/\.ova$//;
-		my $files = "$ovabasis.ovf $ovabasis.mf $ovabasis.vmdk";
-		my $status = qxx (
-			"cd $ovfdir && ovftool $ovabasis.ovf $destdir/$ovaimage 2>&1"
-		);
+		my $status;
+		if ($converter && ($converter eq 'ovftool')) {
+			my $options;
+			if ($diskmode) {
+				$options = " --diskMode=$diskmode";
+			}
+			$status = qxx (
+				"cd $ovfdir && ovftool $options $ovabasis.ovf $destdir/$ovaimage 2>&1"
+			);	
+		} else {
+			my $files = "$ovabasis.ovf $ovabasis.mf $ovabasis.vmdk";
+			$status = qxx (
+				"tar -h -C $ovfdir -cf $destdir/$ovaimage $files 2>&1"
+			);
+		}
 		my $result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't create $format image: $status");
 			$kiwi -> failed ();
 			return;
+		}
+		if ($converter && ($converter eq 'ovftool')) {
+			$kiwi -> info ("Replacing initial .vmdk file with version from generated .ova");
+			$status = qxx ( "cd $ovfdir && rm $ovabasis.vmdk && cd ../ && " .
+					"rm $ovabasis.vmdk &&" .
+					"tar xf $destdir/$ovaimage $ovabasis-disk1.vmdk &&" .
+					"mv $ovabasis-disk1.vmdk $ovabasis.vmdk");
+			my $result = $? >> 8;
+			if ($result != 0) {
+				$kiwi -> failed ();
+				$kiwi -> error  ("Couldn't unpack vmdk file: $status");
+				$kiwi -> failed ();
+				return;
+			}
+			$kiwi -> info ("Replacing initial .ovf file with version from generated .ova");
+			$status = qxx ( "cd $ovfdir && rm $ovabasis.ovf $ovabasis.mf && tar xf $destdir/$ovaimage $ovabasis.ovf");
+			$result = $? >> 8;
+			if ($result != 0) {
+				$kiwi -> failed ();
+				$kiwi -> error  ("Couldn't unpack ovf and mf file: $status");
+				$kiwi -> failed ();
+				return;
+			}
+			
 		}
 	}
 	$kiwi -> done();

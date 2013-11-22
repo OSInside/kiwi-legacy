@@ -1978,12 +1978,16 @@ div {
 			"twoGbMaxExtentFlat"   |
 			"streamOptimized"
 		}
+	k.vmdisk.converter.attribute = 
+		## Utility that will be used during conversions (vmdk only)
+		attribute converter { "qemu-img" | "ovftool" }
 	k.vmdisk.attlist =
 		k.vmdisk.disktype.attribute? &
 		k.vmdisk.controller.attribute? &
 		k.vmdisk.id.attribute? &
 		k.vmdisk.device.attribute? &
-		k.vmdisk.diskmode.attribute?
+		k.vmdisk.diskmode.attribute? &
+		k.vmdisk.converter.attribute?
 	k.vmdisk =
 		## The VM disk definition.
 		element vmdisk {

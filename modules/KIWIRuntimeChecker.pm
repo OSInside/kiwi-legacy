@@ -944,6 +944,11 @@ sub __checkVMdiskmodeCapable {
 		# no machine config requested, ok
 		return 1;
 	}
+	my $converter = $vmConfig -> getSystemDiskConverter();
+	if ($converter eq 'ovftool') {
+		# no need in check
+		return 1;
+	}
 	my $diskMode = $vmConfig -> getSystemDiskMode();
 	if ($diskMode) {
 		my $QEMU_IMG_CAP;
@@ -1240,6 +1245,35 @@ sub __isoHybridCapable {
 		}
 	}
 	return 1;
+}
+
+#==========================================
+# __checkVMConverterExist
+#------------------------------------------
+sub __checkVMConverterExist {
+	# ...
+	# Check that the specified converter exists
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $xml  = $this->{xml};
+	my $sysDisk = $xml -> getSystemDiskConfig();
+	if (! $sysDisk ) {
+		return 1;
+	}
+	my $converter = $sysDisk -> getSystemDiskConverter();
+	if (! $converter ) {
+		# default converter
+		$converter='qemu-img';
+	}
+	my $convCmd = $this->{locator}->getExecPath($converter);
+	if (! $convCmd) {
+		my $msg = "$converter tool not found on system.";
+		$kiwi -> error  ($msg);
+		$kiwi -> failed ();
+		return;
+	}
+	return 1;	
 }
 
 1;

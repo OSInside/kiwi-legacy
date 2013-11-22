@@ -2796,6 +2796,15 @@ by the VM (ovf only)</a:documentation>
         </choice>
       </attribute>
     </define>
+    <define name="k.vmdisk.converter.attribute">
+      <attribute name="converter">
+        <a:documentation>Utility that will be used during conversions (vmdk only)</a:documentation>
+        <choice>
+          <value>qemu-img</value>
+          <value>ovftool</value>
+        </choice>
+      </attribute>
+    </define>
     <define name="k.vmdisk.attlist">
       <interleave>
         <optional>
@@ -2812,6 +2821,9 @@ by the VM (ovf only)</a:documentation>
         </optional>
         <optional>
           <ref name="k.vmdisk.diskmode.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.vmdisk.converter.attribute"/>
         </optional>
       </interleave>
     </define>
