@@ -1819,7 +1819,7 @@ sub cloneImage {
 	#==========================================
 	# Check destination definition
 	#------------------------------------------
-	if (! defined $destination) {
+	if (! $destination) {
 		$kiwi -> error  ("No destination directory specified");
 		$kiwi -> failed ();
 		kiwiExit (1);
