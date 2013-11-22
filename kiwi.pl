@@ -358,6 +358,10 @@ sub main {
 			$analyseTemplate -> cloneLinuxConfigurationFiles();
 		}
 		#==========================================
+		# diff all changed configuration files
+		#------------------------------------------
+		$analyseCustom -> diffChangedConfigFiles();
+		#==========================================
 		# check for dbs and export them
 		#------------------------------------------
 		$analyseCustom -> createDatabaseDump();
