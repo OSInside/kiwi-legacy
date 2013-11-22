@@ -326,19 +326,30 @@ sub createVMDK {
 	my $kiwi   = $this->{kiwi};
 	my $format = $this->{format};
 	my $source = $this->{image};
+	my $vmdata = $this->{vmdata};
 	my $target = $source;
 	my $convert;
 	my $status;
 	my $result;
+	my $diskCnt;
+	my $diskMode;
+	if ($vmdata) {
+		$diskCnt  = $vmdata -> getSystemDiskController();
+		$diskMode = $vmdata -> getSystemDiskMode();
+	}
 	$kiwi -> info ("Creating $format image...");
 	$target  =~ s/\.raw$/\.$format/;
 	$convert = "convert -f raw $source -O $format";
-	if ($this->{vmdata}) {
-		my $diskCnt = $this->{vmdata} -> getSystemDiskController;
-		if (($diskCnt) && ($diskCnt ne 'ide')) {
+	if (($format ne 'ovf') && ($format ne 'ova')) {
+		# /.../
+		# if the format is set to ova/ovf the format parameters
+		# are stored in the ovf configuration and not inside the
+		# vmdk format. Thus we skip the format parameters in this
+		# case
+		# -----
+		if ($diskCnt) {
 			$convert .= " -o adapter_type=$diskCnt";
 		}
-		my $diskMode = $this->{vmdata} -> getSystemDiskMode();
 		if ($diskMode) {
 			$convert .= " -o subformat=$diskMode";
 		}
@@ -1177,10 +1188,20 @@ sub createOVFConfiguration {
 		$image = $1;
 		$base  = $image.".ovf";
 	}
-	$ovf = $ovfdir."/".$base;
+	$ovf  = $ovfdir."/".$base;
 	$vmdk = $base;
 	$vmdk =~ s/\.ovf/\.vmdk/;
 	unlink $ovf;
+	#==========================================
+	# search for ovftool, needed for ova
+	#------------------------------------------
+	my $locator = KIWILocator -> instance();
+	my $ovftool = $locator -> getExecPath ('ovftool');
+	if (($format eq 'ova') && (! $ovftool)) {
+		$kiwi -> skipped ();
+		$kiwi -> warning ('ovftool not found, will create only ova tarball');
+		$kiwi -> skipped ();
+	}
 	#==========================================
 	# check XML configuration data
 	#------------------------------------------
@@ -1205,6 +1226,7 @@ sub createOVFConfiguration {
 	my $diskformat;
 	my $osid;
 	my $systemtype;
+	my $diskmode = $vmdata -> getSystemDiskMode();
 	my $guest = $vmdata -> getGuestOS();
 	my $hwVersion = $vmdata -> getHardwareVersion();
 	if ($guest eq 'suse') {
@@ -1267,10 +1289,22 @@ sub createOVFConfiguration {
 	#==========================================
 	# storage description
 	#------------------------------------------
+	# /.../
+	# for vSphere it needs some bigger then real image disk size.
+	# this size is in "byte * 2^20" because MB is not a right value,
+	# because rasd/cim standart define nothing and vbox and vSphere
+	# understand different values.
+	# ----
+	my $vsize = $xml -> getImageType() -> getSize();
+	if (! $vsize) {
+		# fallback if size not set, should be ok for VirtualBox,
+		# but bad for vSphere 5
+		$vsize = $size;
+	}
 	print $OVFFD '<ovf:DiskSection>' . "\n"
 		. "\t" . '<ovf:Info>Virtual disk information</ovf:Info>' . "\n"
-		. "\t" . '<ovf:Disk ovf:capacity="' . $size . '" '
-		. 'ovf:capacityAllocationUnits="byte" '
+		. "\t" . '<ovf:Disk ovf:capacity="' . $vsize . '" '
+		. 'ovf:capacityAllocationUnits="byte * 2^20" '
 		. 'ovf:diskId="vmdisk1" '
 		. 'ovf:fileRef="file1" '
 		. 'ovf:format="' . $diskformat . '" '
@@ -1400,7 +1434,7 @@ sub createOVFConfiguration {
 		}
 		print $OVFFD "\t\t" . '<Item>' . "\n"
 			. "\t\t\t"
-			. '<rasd:AllocationUnits>MB</rasd:AllocationUnits>' . "\n"
+			. '<rasd:AllocationUnits>byte * 2^20</rasd:AllocationUnits>' . "\n"
 			. "\t\t\t"
 			. '<rasd:Description>Memory Size</rasd:Description>' . "\n"
 			. "\t\t\t"
@@ -1613,22 +1647,70 @@ sub createOVFConfiguration {
 	#==========================================
 	# create OVA tarball
 	#------------------------------------------
-	if ($format eq "ova") {
+	if ($format eq 'ova') {
 		my $destdir  = dirname $this->{image};
 		my $ovaimage = basename $ovfdir;
 		$ovaimage =~ s/\.ovf$/\.ova/;
 		my $ovabasis = $ovaimage;
 		$ovabasis =~ s/\.ova$//;
-		my $files = "$ovabasis.ovf $ovabasis.mf $ovabasis.vmdk";
-		my $status = qxx (
-			"cd $ovfdir && ovftool $ovabasis.ovf $destdir/$ovaimage 2>&1"
-		);
+		my $ovapath = $destdir."/".$ovaimage;
+		my $status;
+		if ($ovftool) {
+			my $options;
+			if ($diskmode) {
+				$options = " --diskMode=$diskmode";
+			}
+			$status = qxx (
+				"cd $ovfdir && ovftool $options $ovabasis.ovf $ovapath 2>&1"
+			);
+		} else {
+			my $files = "$ovabasis.ovf $ovabasis.mf $ovabasis.vmdk";
+			$status = qxx (
+				"tar -h -C $ovfdir -cf $ovapath $files 2>&1"
+			);
+		}
 		my $result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't create $format image: $status");
 			$kiwi -> failed ();
 			return;
+		}
+		if ($ovftool) {
+			$kiwi -> info (
+				"Replacing qemu's vmdk file with version from generated OVA"
+			);
+			qxx ("rm -f $ovabasis.vmdk $ovfdir/$ovabasis.vmdk");
+			my $extract = "$ovabasis-disk1.vmdk";
+			$status = qxx (
+				"tar -h -C $ovfdir -xf $destdir/$ovaimage $extract 2>&1"
+			);
+			$result = $? >> 8;
+			if ($result == 0) {
+				$status = qxx ("mv $ovfdir/$extract $ovabasis.vmdk 2>&1");
+				$result = $? >> 8;
+			}
+			if ($result != 0) {
+				$kiwi -> failed ();
+				$kiwi -> error  ("Couldn't unpack vmdk file: $status");
+				$kiwi -> failed ();
+				return;
+			}
+			$kiwi -> info (
+				"Replacing kiwi's ovf file with version from generated OVA"
+			);
+			qxx ("rm -f $ovfdir/$ovabasis.ovf $ovfdir/$ovabasis.mf");
+			$extract = "$ovabasis.ovf";
+			$status = qxx (
+				"tar -h -C $ovfdir -xf $destdir/$ovaimage $extract"
+			);
+			$result = $? >> 8;
+			if ($result != 0) {
+				$kiwi -> failed ();
+				$kiwi -> error  ("Couldn't unpack ovf and mf file: $status");
+				$kiwi -> failed ();
+				return;
+			}
 		}
 	}
 	$kiwi -> done();
