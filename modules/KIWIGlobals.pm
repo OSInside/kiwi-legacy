@@ -1506,6 +1506,7 @@ sub _new_instance {
 	$data{LogServerPort} = $LogServerPort; # configurable log server port
 	$data{LuksCipher}    = $LuksCipher;    # configurable luks passphrase
 	$data{System}        = $System;        # configurable base image desc. path
+	$data{IrdZipper}     = $IrdZipper;     # configurable zipper switch for ird
 	if ( ! defined $BasePath ) {
 		$data{BasePath} = "/usr/share/kiwi";
 	}
@@ -1521,8 +1522,17 @@ sub _new_instance {
 	if (! defined $System) {
 		$data{System} = $data{BasePath}."/image";
 	}
+	if (! defined $IrdZipper) {
+		$data{IrdZipper} = "gzip";
+	}
 	if (! defined $LuksCipher) {
 		# empty
+	}
+	$data{IrdZipperCommand} = $data{Gzip};
+	$data{IrdZipperSuffix} = "gz";
+	if ($data{IrdZipper} eq "xz") {
+		$data{IrdZipperCommand} = $data{Xz}." --check=crc32";
+		$data{IrdZipperSuffix} = "xz";
 	}
 	use strict 'vars';
 	## use critic

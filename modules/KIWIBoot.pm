@@ -69,6 +69,7 @@ sub new {
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
+	my $global    = KIWIGlobals -> instance();
 	my $syszip    = 0;
 	my $sysird    = 0;
 	my $zipped    = 0;
@@ -157,15 +158,15 @@ sub new {
 	#==========================================
 	# compressed initrd used...
 	#------------------------------------------
-	if (($initrd) && ($initrd =~ /\.gz$/)) {
+	if (($initrd) && ($initrd =~ /\.(g|x)z$/)) {
 		$zipped = 1;
 	}
 	#==========================================
 	# find kernel file
 	#------------------------------------------
 	$kernel = $initrd;
-	if (($kernel) && ($kernel =~ /gz$/)) {
-		$kernel =~ s/gz$/kernel/;
+	if (($kernel) && ($kernel =~ /(g|x)z$/)) {
+		$kernel =~ s/(g|x)z$/kernel/;
 	} else {
 		$kernel = $kernel.".kernel";
 	}
@@ -187,12 +188,14 @@ sub new {
 	#==========================================
 	# check if Xen system is used
 	#------------------------------------------
+	$this->{gdata} = $global -> getKiwiConfig();
 	$isxen = 0;
 	$xengz = $initrd;
+	my $suf  = $this->{gdata}->{IrdZipperSuffix};
 	if ($xengz) {
-		$xengz =~ s/\.gz$//;
+		$xengz =~ s/\.$suf$//;
 		$xengz =~ s/\.splash$//;
-		foreach my $xen (glob ("$xengz*xen*.gz")) {
+		foreach my $xen (glob ("$xengz*xen*.$suf")) {
 			$isxen = 1;
 			$xengz = $xen;
 			last;
@@ -224,9 +227,7 @@ sub new {
 	#==========================================
 	# Store object data (1)
 	#------------------------------------------
-	my $global = KIWIGlobals -> instance();
 	$this->{cleanupStack} = [];
-	$this->{gdata}    = $global -> getKiwiConfig();
 	$this->{tmpdir}   = $tmpdir;
 	$this->{loopdir}  = $loopdir;
 	$this->{lvmgroup} = $vgroup;
@@ -531,18 +532,19 @@ sub createBootStructure {
 	my $zipped = $this->{zipped};
 	my $isxen  = $this->{isxen};
 	my $xengz  = $this->{xengz};
+	my $suf    = $this->{gdata}->{IrdZipperSuffix};
+	my $zipper = $this->{gdata}->{IrdZipperCommand};
 	my $xendomain = $this->{xendomain};
 	my $lname  = "linux";
 	my $iname  = "initrd";
 	my $xname  = "xen.gz";
-	my $zipper = $this->{gdata}->{Gzip};
 	my $status;
 	my $result;
 	if (defined $loc) {
 		$lname  = $lname.".".$loc;
 		$iname  = $iname.".".$loc;
 	}
-	if ($initrd !~ /splash\.gz$|splash\.install\.gz/) {
+	if ($initrd !~ /splash\.$suf$|splash\.install\.$suf/) {
 		$initrd = $this -> setupSplash();
 		$zipped = 1;
 	}
@@ -2894,7 +2896,8 @@ sub setupInstallFlags {
 	my $initrd = $this->{initrd};
 	my $system = $this->{system};
 	my $xml    = $this->{xml};
-	my $zipper = $this->{gdata}->{Gzip};
+	my $zipper = $this->{gdata}->{IrdZipperCommand};
+	my $suf    = $this->{gdata}->{IrdZipperSuffix};
 	my $newird;
 	my $irddir = qxx ("mktemp -qdt kiwiird.XXXXXX"); chomp $irddir;
 	my $result = $? >> 8;
@@ -2907,7 +2910,7 @@ sub setupInstallFlags {
 	#==========================================
 	# unpack initrd files
 	#------------------------------------------
-	my $unzip  = "$this->{gdata}->{Gzip} -cd $initrd 2>&1";
+	my $unzip  = "$zipper -cd $initrd 2>&1";
 	my $status = qxx ("$unzip | (cd $irddir && cpio -di 2>&1)");
 	$result = $? >> 8;
 	if ($result != 0) {
@@ -3009,7 +3012,7 @@ sub setupInstallFlags {
 	# create new initrd with vmxsystem file
 	#------------------------------------------
 	$newird = $initrd;
-	$newird =~ s/\.gz/\.install\.gz/;
+	$newird =~ s/\.$suf/\.install\.$suf/;
 	$status = qxx (
 		"(cd $irddir && find|cpio --quiet -oH newc | $zipper) > $newird"
 	);
@@ -3026,8 +3029,8 @@ sub setupInstallFlags {
 	# recreate splash data to initrd
 	#------------------------------------------
 	my $splash = $initrd;
-	if (! ($splash =~ s/splash\.gz/spl/)) {
-		$splash =~ s/gz/spl/;
+	if (! ($splash =~ s/splash\.$suf/spl/)) {
+		$splash =~ s/$suf/spl/;
 	}
 	if (-f $splash) {
 		qxx ("cat $splash >> $newird");
@@ -3042,7 +3045,8 @@ sub setupBootFlags {
 	my $this   = shift;
 	my $kiwi   = $this->{kiwi};
 	my $initrd = $this->{initrd};
-	my $zipper = $this->{gdata}->{Gzip};
+	my $zipper = $this->{gdata}->{IrdZipperCommand};
+	my $suf    = $this->{gdata}->{IrdZipperSuffix};
 	my $newird;
 	my $irddir = qxx ("mktemp -qdt kiwiird.XXXXXX"); chomp $irddir;
 	my $result = $? >> 8;
@@ -3062,7 +3066,7 @@ sub setupBootFlags {
 	#==========================================
 	# unpack initrd files
 	#------------------------------------------
-	my $unzip  = "$this->{gdata}->{Gzip} -cd $initrd 2>&1";
+	my $unzip  = "$zipper -cd $initrd 2>&1";
 	my $status = qxx ("$unzip | (cd $irddir && cpio -di 2>&1)");
 	$result = $? >> 8;
 	if ($result != 0) {
@@ -3130,7 +3134,7 @@ sub setupBootFlags {
 	# create new initrd with mbr information
 	#------------------------------------------
 	$newird = $initrd;
-	$newird =~ s/\.gz/\.mbrinfo\.gz/;
+	$newird =~ s/\.$suf/\.mbrinfo\.$suf/;
 	$status = qxx (
 		"(cd $irddir && find|cpio --quiet -oH newc | $zipper) > $newird"
 	);
@@ -3148,11 +3152,11 @@ sub setupBootFlags {
 	}
 	qxx ("rm -rf $irddir");
 	#==========================================
-	# update splash.gz initrd if required
+	# update splash initrd if required
 	#------------------------------------------
 	my $splashird = $initrd;
-	$splashird =~ s/\.gz$/\.splash.gz/;
-	if (($initrd !~ /splash\.gz$/) && (-f $splashird)) {
+	$splashird =~ s/\.$suf$/\.splash.$suf/;
+	if (($initrd !~ /splash\.$suf$/) && (-f $splashird)) {
 		qxx ("cp $initrd $splashird 2>&1");
 		$initrd = $splashird;
 	}
@@ -3160,8 +3164,8 @@ sub setupBootFlags {
 	# recreate splash data to initrd
 	#------------------------------------------
 	my $splash = $initrd;
-	if (! ($splash =~ s/splash\.gz/spl/)) {
-		$splash =~ s/gz/spl/;
+	if (! ($splash =~ s/splash\.$suf/spl/)) {
+		$splash =~ s/$suf/spl/;
 	}
 	if (-f $splash) {
 		qxx ("cat $splash >> $initrd");
@@ -3283,6 +3287,7 @@ sub setupSplash {
 	my $initrd = $this->{initrd};
 	my $destdir= dirname ($initrd);
 	my $isxen  = $this->{isxen};
+	my $suf    = $this->{gdata}->{IrdZipperSuffix};
 	my $zipped = 0;
 	my $status;
 	my $newird;
@@ -3291,14 +3296,14 @@ sub setupSplash {
 	#==========================================
 	# setup file names
 	#------------------------------------------
-	if ($initrd =~ /\.gz$/) {
+	if (($initrd =~ /\.(g|x)z$/)) {
 		$zipped = 1;
 	}
 	if ($zipped) {
-		$newird = $initrd; $newird =~ s/\.gz/\.splash.gz/;
-		$splfile= $initrd; $splfile =~ s/\.gz/\.spl/;
+		$newird = $initrd; $newird =~ s/\.((g|x)z)/\.splash.$1/;
+		$splfile= $initrd; $splfile =~ s/\.(g|x)z/\.spl/;
 	} else {
-		$newird = $initrd.".splash.gz";
+		$newird = $initrd.".splash.".$suf;
 		$splfile= $initrd.".spl";
 	}
 	my $plymouth = $destdir."/plymouth.splash.active";
@@ -3361,7 +3366,7 @@ sub setupSplash {
 #------------------------------------------
 sub setupSplashLink {
 	# ...
-	# This function only makes sure the .splash.gz
+	# This function only makes sure the .splash.(g|x)z
 	# file exists. This is done by creating a link to the
 	# original initrd file
 	# ---
@@ -3370,13 +3375,13 @@ sub setupSplashLink {
 	my $initrd = $this->{initrd};
 	my $status;
 	my $result;
-	if ($initrd !~ /.gz$/) {
-		$status = qxx ("$this->{gdata}->{Gzip} -f $initrd 2>&1");
+	if ($initrd !~ /.(g|x)z$/) {
+		$status = qxx ("$this->{gdata}->{IrdZipperCommand} -f $initrd 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			return ("Failed to compress initrd: $status");
 		}
-		$initrd = $initrd.".gz";
+		$initrd = $initrd.".".$this->{gdata}->{IrdZipperSuffix};
 	}
 	my $dirname = dirname  $initrd;
 	my $curfile = basename $initrd;
@@ -3554,7 +3559,7 @@ sub setupBootLoaderStages {
 	my $tmpdir   = $this->{tmpdir};
 	my $initrd   = $this->{initrd};
 	my $zipped   = $this->{zipped};
-	my $zipper   = $this->{gdata}->{Gzip};
+	my $zipper   = $this->{gdata}->{IrdZipperCommand};
 	my $firmware = $this->{firmware};
 	my $arch     = $this->{arch};
 	my $status   = 0;

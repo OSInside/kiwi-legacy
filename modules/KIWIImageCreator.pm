@@ -266,7 +266,7 @@ sub prepareBootImage {
 				$lookup =  $defaultPath . '/';
 			}
 		}
-		my $pinitrd = $lookup.$bootImageName.".gz";
+		my $pinitrd = $lookup.$bootImageName.".".$this->{gdata}->{IrdZipperSuffix};
 		my $psplash;
 		if (-f $lookup.$bootImageName.'.spl') {
 			$psplash = $lookup.$bootImageName.'.spl';
