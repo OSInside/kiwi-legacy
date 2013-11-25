@@ -919,9 +919,7 @@ function installBootLoaderGrub2 {
 	#--------------------------------------
 	if [ $isEFI -eq 1 ] && [ -e $product ] && [ -e $elilo_efi ];then
 		product=$(readlink $product)
-		if  [ "$product" = "SUSE_SLES.prod" ] ||\
-			[ "$product" = "SUSE_SLED.prod" ]
-		then
+		if [[ "$product" =~ "SUSE_SLE" ]];then
 			#======================================
 			# write elilo.conf
 			#--------------------------------------
@@ -934,7 +932,7 @@ function installBootLoaderGrub2 {
 				# Modified by YaST2.
 				timeout = $timeout
 				##YaST - boot_efilabel = "SUSE Linux Enterprise Server 11"
-				vendor-directory = BOOT
+				vendor-directory = SuSE
 				secure-boot = on
 				prompt
 				image  = /boot/vmlinuz
@@ -945,6 +943,10 @@ function installBootLoaderGrub2 {
 				description = Linux
 				root = $(getDiskID $imageRootDevice)
 			EOF
+			#======================================
+			# copy vendor directory
+			#--------------------------------------
+			cp -a /boot/efi/EFI/BOOT /boot/efi/EFI/SuSE
 			#======================================
 			# update sysconfig/bootloader
 			#--------------------------------------
