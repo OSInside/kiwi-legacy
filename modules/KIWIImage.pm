@@ -702,7 +702,8 @@ sub createImageCPIO {
 	my $kiwi = $this->{kiwi};
 	my $xml  = $this->{xml};
 	my $imageTree = $this->{imageTree};
-	my $zipper    = $this->{gdata}->{Gzip};
+	my $zipper    = $this->{gdata}->{IrdZipperCommand};
+	my $suf       = $this->{gdata}->{IrdZipperSuffix};
 	my $compress  = 1;
 	#==========================================
 	# PRE filesystem setup
@@ -717,7 +718,7 @@ sub createImageCPIO {
 	$kiwi -> info ("Creating cpio archive...");
 	my $pwd  = qxx ("pwd"); chomp $pwd;
 	my @cpio = ("--create", "--format=newc", "--quiet");
-	my $dest = $this->{imageDest}."/".$name.".gz";
+	my $dest = $this->{imageDest}."/".$name.".".$suf;
 	my $dspl = $this->{imageDest}."/".$name.".splash.gz";
 	my $data;
 	if (! $compress) {
@@ -755,7 +756,7 @@ sub createImageCPIO {
 	# PRE filesystem setup
 	#------------------------------------------
 	if ($compress) {
-		$name = $name.".gz";
+		$name = $name.".".$suf;
 	}
 	if (! $this -> buildMD5Sum ($name)) {
 		return;
@@ -982,7 +983,7 @@ sub createImageRootAndBoot {
 	#==========================================
 	# setup initrd name
 	#------------------------------------------
-	my $initrd = $idest."/".$bname.".gz";
+	my $initrd = $idest."/".$bname.".".$this->{gdata}->{IrdZipperSuffix};
 	if (! -f $initrd) {
 		$initrd = $idest."/".$bname;
 	}
@@ -1462,7 +1463,8 @@ sub createImageLiveCD {
 	#==========================================
 	# setup initrd/kernel names
 	#------------------------------------------
-	my $pinitrd = $idest."/".$bname.".gz";
+	my $suf = $this->{gdata}->{IrdZipperSuffix};
+	my $pinitrd = $idest."/".$bname.".".$suf;
 	my $plinux  = $idest."/".$bname.".kernel";
 	my $pxboot  = glob ($idest."/".$bname."*xen.gz");
 	if (($pxboot) && (-f $pxboot)) {
@@ -1604,7 +1606,7 @@ sub createImageLiveCD {
 	}
 	chomp $tmpdir;
 	push @{$this->{tmpdirs}},$tmpdir;
-	my $zipper = $this->{gdata}->{Gzip};
+	my $zipper = $this->{gdata}->{IrdZipperCommand};
 	$data = qxx ("$zipper -cd $pinitrd | (cd $tmpdir && cpio -di 2>&1)");
 	$code = $? >> 8;
 	if ($code != 0) {
@@ -1651,8 +1653,8 @@ sub createImageLiveCD {
 	# recreate splash data to initrd
 	#------------------------------------------
 	my $splash = $pinitrd;
-	if (! ($splash =~ s/splash\.gz/spl/)) {
-		$splash =~ s/gz/spl/;
+	if (! ($splash =~ s/splash\.(g|x)z/spl/)) {
+		$splash =~ s/(g|x)z/spl/;
 	}
 	if (-f $splash) {
 		qxx ("cat $splash >> $destination/initrd");
@@ -3036,7 +3038,7 @@ sub createImageSplit {
 	#==========================================
 	# setup initrd name
 	#------------------------------------------
-	my $initrd = $idest."/".$bname.".gz";
+	my $initrd = $idest."/".$bname.".".$this->{gdata}->{IrdZipperSuffix};
 	if (! -f $initrd) {
 		$initrd = $idest."/".$bname;
 	}
@@ -4549,8 +4551,9 @@ sub compressImage {
 	# Compress image using gzip
 	#------------------------------------------
 	$kiwi -> info ("Compressing image...");
+	my $suf = $this->{gdata}->{IrdZipperSuffix};
 	my $data = qxx (
-		"cat $image | $this->{gdata}->{Gzip} > $this->{imageDest}/$name.gz"
+		"cat $image | $this->{gdata}->{IrdZipperCommand} > $this->{imageDest}/$name.$suf"
 	);
 	my $code = $? >> 8;
 	if ($code != 0) {
@@ -4560,14 +4563,14 @@ sub compressImage {
 		return;
 	}
 	$kiwi -> done();
-	$this -> updateMD5File ("$this->{imageDest}/$name.gz");
+	$this -> updateMD5File ("$this->{imageDest}/$name.$suf");
 	#==========================================
 	# Relink filesystem link to comp image file
 	#------------------------------------------
 	my $fslink = $this->{imageDest}."/".$name.".".$fstype;
 	if (-l $fslink) {
 		qxx ("rm -f $fslink 2>&1");
-		qxx ("ln -vs $this->{imageDest}/$name.gz $fslink 2>&1");
+		qxx ("ln -vs $this->{imageDest}/$name.$suf $fslink 2>&1");
 	}
 	return $name;
 }
@@ -4730,7 +4733,8 @@ sub checkKernel {
 	my $systree = shift;
 	my $name    = shift;
 	my $kiwi    = $this->{kiwi};
-	my $zipper  = $this->{gdata}->{Gzip};
+	my $zipper  = $this->{gdata}->{IrdZipperCommand};
+	my $suf     = $this->{gdata}->{IrdZipperSuffix};
 	my %sysk    = ();
 	my %bootk   = ();
 	my $status;
@@ -4755,7 +4759,7 @@ sub checkKernel {
 	#------------------------------------------
 	my $cmd = "cat $initrd";
 	my $zip = 0;
-	if ($initrd =~ /\.gz$/) {
+	if ($initrd =~ /\.(g|x)z$/) {
 		$cmd = "$zipper -cd $initrd";
 		$zip = 1;
 	}

@@ -157,15 +157,15 @@ sub new {
 	#==========================================
 	# compressed initrd used...
 	#------------------------------------------
-	if (($initrd) && ($initrd =~ /\.gz$/)) {
+	if (($initrd) && ($initrd =~ /\.(g|x)z$/)) {
 		$zipped = 1;
 	}
 	#==========================================
 	# find kernel file
 	#------------------------------------------
 	$kernel = $initrd;
-	if (($kernel) && ($kernel =~ /gz$/)) {
-		$kernel =~ s/gz$/kernel/;
+	if (($kernel) && ($kernel =~ /(g|x)z$/)) {
+		$kernel =~ s/(g|x)z$/kernel/;
 	} else {
 		$kernel = $kernel.".kernel";
 	}
@@ -2894,7 +2894,8 @@ sub setupInstallFlags {
 	my $initrd = $this->{initrd};
 	my $system = $this->{system};
 	my $xml    = $this->{xml};
-	my $zipper = $this->{gdata}->{Gzip};
+	my $zipper = $this->{gdata}->{IrdZipperCommand};
+	my $suf    = $this->{gdata}->{IrdZipperSuffix};
 	my $newird;
 	my $irddir = qxx ("mktemp -qdt kiwiird.XXXXXX"); chomp $irddir;
 	my $result = $? >> 8;
@@ -3009,7 +3010,7 @@ sub setupInstallFlags {
 	# create new initrd with vmxsystem file
 	#------------------------------------------
 	$newird = $initrd;
-	$newird =~ s/\.gz/\.install\.gz/;
+	$newird =~ s/\.$suf/\.install\.$suf/;
 	$status = qxx (
 		"(cd $irddir && find|cpio --quiet -oH newc | $zipper) > $newird"
 	);
@@ -3042,7 +3043,8 @@ sub setupBootFlags {
 	my $this   = shift;
 	my $kiwi   = $this->{kiwi};
 	my $initrd = $this->{initrd};
-	my $zipper = $this->{gdata}->{Gzip};
+	my $zipper = $this->{gdata}->{IrdZipperCommand};
+	my $suf    = $this->{gdata}->{IrdZipperSuffix};
 	my $newird;
 	my $irddir = qxx ("mktemp -qdt kiwiird.XXXXXX"); chomp $irddir;
 	my $result = $? >> 8;
@@ -3130,7 +3132,7 @@ sub setupBootFlags {
 	# create new initrd with mbr information
 	#------------------------------------------
 	$newird = $initrd;
-	$newird =~ s/\.gz/\.mbrinfo\.gz/;
+	$newird =~ s/\.$suf/\.mbrinfo\.$suf/;
 	$status = qxx (
 		"(cd $irddir && find|cpio --quiet -oH newc | $zipper) > $newird"
 	);
@@ -3291,12 +3293,12 @@ sub setupSplash {
 	#==========================================
 	# setup file names
 	#------------------------------------------
-	if ($initrd =~ /\.gz$/) {
+	if (($initrd =~ /\.(g|x)z$/)) {
 		$zipped = 1;
 	}
 	if ($zipped) {
-		$newird = $initrd; $newird =~ s/\.gz/\.splash.gz/;
-		$splfile= $initrd; $splfile =~ s/\.gz/\.spl/;
+		$newird = $initrd; $newird =~ s/\.((g|x)z)/\.splash.$1/;
+		$splfile= $initrd; $splfile =~ s/\.(g|x)z/\.spl/;
 	} else {
 		$newird = $initrd.".splash.gz";
 		$splfile= $initrd.".spl";
@@ -3370,13 +3372,13 @@ sub setupSplashLink {
 	my $initrd = $this->{initrd};
 	my $status;
 	my $result;
-	if ($initrd !~ /.gz$/) {
-		$status = qxx ("$this->{gdata}->{Gzip} -f $initrd 2>&1");
+	if ($initrd !~ /.(g|x)z$/) {
+		$status = qxx ("$this->{gdata}->{IrdZipperCommand} -f $initrd 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			return ("Failed to compress initrd: $status");
 		}
-		$initrd = $initrd.".gz";
+		$initrd = $initrd.".".$this->{gdata}->{IrdZipperSuffix};
 	}
 	my $dirname = dirname  $initrd;
 	my $curfile = basename $initrd;

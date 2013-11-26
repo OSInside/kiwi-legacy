@@ -1524,6 +1524,12 @@ sub _new_instance {
 	if (! defined $LuksCipher) {
 		# empty
 	}
+	$data{IrdZipperCommand} = $data{Gzip};
+	$data{IrdZipperSuffix} = "gz";
+	if (defined $IrdZipper) {
+		$data{IrdZipperCommand} = $data{Xz}." --check=crc32";
+		$data{IrdZipperSuffix} = "xz";
+	}
 	use strict 'vars';
 	## use critic
 	my $BasePath = $data{BasePath};
