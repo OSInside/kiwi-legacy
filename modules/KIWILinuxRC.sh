@@ -30,6 +30,13 @@ export bootLoaderOK=0
 export enablePlymouth=1
 
 #======================================
+# lookup
+#--------------------------------------
+function lookup {
+	bash -c "PATH=$PATH:/sbin:/usr/sbin:/bin:/usr/bin type -p $1"
+}
+
+#======================================
 # Exports (console)
 #--------------------------------------
 test -z "$ELOG_BOOTSHELL" && export ELOG_BOOTSHELL=/dev/tty2
@@ -53,7 +60,7 @@ test -z "$UTIMER"             && export UTIMER=0
 test -z "$PARTED_HAVE_ALIGN"  && export PARTED_HAVE_ALIGN=0
 test -z "$PARTED_HAVE_MACHINE"&& export PARTED_HAVE_MACHINE=0
 test -z "$DHCPCD_HAVE_PERSIST"&& export DHCPCD_HAVE_PERSIST=1
-if which parted &>/dev/null;then
+if lookup parted &>/dev/null;then
 	if parted -h | grep -q '\-\-align';then
 		export PARTED_HAVE_ALIGN=1
 	fi
@@ -64,7 +71,7 @@ if which parted &>/dev/null;then
 		export PARTITIONER=unsupported
 	fi
 fi
-if which dhcpcd &>/dev/null;then
+if lookup dhcpcd &>/dev/null;then
 	if dhcpcd -p 2>&1 | grep -q 'Usage';then
 		export DHCPCD_HAVE_PERSIST=0
 	fi
@@ -96,7 +103,7 @@ failsafe="$failsafe nomodeset x11failsafe"
 #--------------------------------------
 function hideSplash {
 	test -e /proc/splash && echo verbose > /proc/splash
-	if which plymouthd &>/dev/null;then
+	if lookup plymouthd &>/dev/null;then
 		plymouth hide-splash
 	fi
 }
@@ -722,7 +729,7 @@ function udevKill {
 # startPlymouth
 #--------------------------------------
 function startPlymouth {
-	if which plymouthd &>/dev/null;then
+	if lookup plymouthd &>/dev/null;then
 		mkdir --mode 755 /run/plymouth
 		plymouth-set-default-theme $kiwi_splash_theme &>/dev/null
 		plymouthd \
@@ -745,7 +752,7 @@ function startDropBear {
 	if [ -z "$kiwidebug" ];then
 		return
 	fi
-	if which dropbear &>/dev/null;then
+	if lookup dropbear &>/dev/null;then
 		mkdir -p /root/.ssh
 		fetchFile KIWI/debug_ssh.pub $auth_keys
 		if [ ! -e $auth_keys ]; then
@@ -793,7 +800,7 @@ function installBootLoader {
 		"reboot"
 	esac
 	if [ ! $? = 0 ];then
-		if which dialog &>/dev/null;then
+		if lookup dialog &>/dev/null;then
 			Dialog \
 				--backtitle \"$TEXT_BOOT_SETUP_FAILED\" \
 				--msgbox "\"$TEXT_BOOT_SETUP_FAILED_INFO\"" 10 70
@@ -901,7 +908,7 @@ function installBootLoaderGrub {
 	# install the grub according to the contents of
 	# /etc/grub.conf and /boot/grub/menu.lst
 	# ----
-	if which grub &>/dev/null;then
+	if lookup grub &>/dev/null;then
 		Echo "Installing boot loader..."
 		grub --batch --no-floppy < /etc/grub.conf 1>&2
 		if [ ! $? = 0 ];then
@@ -950,10 +957,10 @@ function installBootLoaderGrub2 {
 	# lookup grub2 mkconfig tool
 	#--------------------------------------
 	if [ $isEFI -eq 1 ];then
-		which grub2-efi-mkconfig &>/dev/null && confTool=grub2-efi-mkconfig
+		lookup grub2-efi-mkconfig &>/dev/null && confTool=grub2-efi-mkconfig
 		confFile_grub=$confFile_grub_efi
 	fi
-	if ! which $confTool &>/dev/null;then
+	if ! lookup $confTool &>/dev/null;then
 		Echo "Image doesn't have grub2 installed"
 		Echo "Can't install boot loader"
 		return 1
@@ -1060,7 +1067,7 @@ function installBootLoaderGrubRecovery {
 	echo "root (hd0,$gdevreco)"  >> $input
 	echo "setup (hd0,$gdevreco)" >> $input
 	echo "quit"          >> $input
-	if which grub &>/dev/null;then
+	if lookup grub &>/dev/null;then
 		if ! grub --batch < $input 1>&2;then
 			Echo "Failed to install boot loader"
 			return 1
@@ -1089,11 +1096,11 @@ function installBootLoaderGrub2Recovery {
 	# check tool status
 	#--------------------------------------
 	if [ "$partedTableType" = "gpt" ];then
-		which grub2-efi-mkconfig &>/dev/null && confTool=grub2-efi-mkconfig
-		which grub2-efi-install  &>/dev/null && instTool=grub2-efi-install
+		lookup grub2-efi-mkconfig &>/dev/null && confTool=grub2-efi-mkconfig
+		lookup grub2-efi-install  &>/dev/null && instTool=grub2-efi-install
 		confPath=/boot/grub2-efi/grub.cfg
 	fi
-	if ! which $confTool &>/dev/null;then
+	if ! lookup $confTool &>/dev/null;then
 		Echo "Image doesn't have grub2 installed"
 		Echo "Can't install boot loader"
 		return 1
@@ -1221,7 +1228,7 @@ function setupRHELInitrd {
 		bootLoaderOK=0
 	fi
 	if [ $bootLoaderOK = 0 ];then
-		if which dialog &>/dev/null;then
+		if lookup dialog &>/dev/null;then
 			Dialog \
 				--backtitle \"$TEXT_BOOT_SETUP_FAILED\" \
 				--msgbox "\"$TEXT_BOOT_SETUP_FAILED_INFO\"" 10 70
@@ -1318,7 +1325,7 @@ function setupSUSEInitrd {
 		bootLoaderOK=0
 	fi
 	if [ $bootLoaderOK = 0 ];then
-		if which dialog &>/dev/null;then
+		if lookup dialog &>/dev/null;then
 			Dialog \
 				--backtitle \"$TEXT_BOOT_SETUP_FAILED\" \
 				--msgbox "\"$TEXT_BOOT_SETUP_FAILED_INFO\"" 10 70
@@ -1333,7 +1340,7 @@ function setupSUSEInitrd {
 # setupDefaultTheme
 #--------------------------------------
 function setupDefaultTheme {
-	if which plymouthd &>/dev/null;then
+	if lookup plymouthd &>/dev/null;then
 		plymouth-set-default-theme $kiwi_splash_theme &>/dev/null
 	fi
 }
@@ -1412,7 +1419,7 @@ function setupBootThemes {
 		#======================================
 		# plymouth splash
 		#--------------------------------------
-		if which plymouthd &>/dev/null;then
+		if lookup plymouthd &>/dev/null;then
 			local orig_plymouthconf=$srcprefix/etc/plymouth/plymouth.conf
 			local inst_plymouthconf=$destprefix/etc/plymouth/plymouth.conf
 			mkdir -p $destprefix/etc/plymouth
@@ -4345,7 +4352,7 @@ function loadNetworkCardS390 {
 	#======================================
 	# check for required tools
 	#--------------------------------------
-	if [ ! which cmsfscat &>/dev/null ];then
+	if [ ! lookup cmsfscat &>/dev/null ];then
 		Echo "Can't find cmsfscat program required for loading"
 		return 1
 	fi
@@ -4691,9 +4698,9 @@ function setupNetwork {
 	#======================================
 	# ask for an address
 	#--------------------------------------
-	if which dhcpcd &>/dev/null; then
+	if lookup dhcpcd &>/dev/null; then
 		setupNetworkDHCPCD
-	elif which dhclient &>/dev/null; then
+	elif lookup dhclient &>/dev/null; then
 		setupNetworkDHCLIENT
 	else
 		Echo "No supported DHCP client tool found (dhcpcd/dhclient)"
@@ -4735,7 +4742,7 @@ function releaseNetwork {
 	# Do that only for _non_ network root devices
 	# ----
 	if [ -z "$NFSROOT" ] && [ -z "$NBDROOT" ] && [ -z "$AOEROOT" ];then
-		if which dhcpcd &>/dev/null; then
+		if lookup dhcpcd &>/dev/null; then
 			#======================================
 			# unset dhcp info variables
 			#--------------------------------------
@@ -4744,7 +4751,7 @@ function releaseNetwork {
 			# free the lease and the cache
 			#--------------------------------------
 			dhcpcd -k $PXE_IFACE
-		elif which dhclient &>/dev/null; then
+		elif lookup dhclient &>/dev/null; then
 			#======================================
 			# unset dhclient info variables
 			#--------------------------------------
@@ -7078,7 +7085,7 @@ function activateImage {
 	#======================================
 	# create dbus machine id
 	#--------------------------------------
-	if which dbus-uuidgen &>/dev/null;then
+	if lookup dbus-uuidgen &>/dev/null;then
 		dbus-uuidgen > /mnt/var/lib/dbus/machine-id
 	fi
 	#======================================
@@ -7366,7 +7373,7 @@ function bootImage {
 	#======================================
 	# tell plymouth the new root fs
 	#--------------------------------------
-	if which plymouthd &>/dev/null;then
+	if lookup plymouthd &>/dev/null;then
 		plymouth update-root-fs --new-root-dir=/mnt
 		#======================================
 		# stop if not installed in system image
@@ -8619,7 +8626,7 @@ function resizeFilesystem {
 	elif [ "$FSTYPE" = "btrfs" ];then
 		Echo "Resize BTRFS filesystem to full partition space..."
 		resize_fs="mount $deviceResize $mnt &&"
-		if which btrfs &>/dev/null;then
+		if lookup btrfs &>/dev/null;then
 			resize_fs="$resize_fs btrfs filesystem resize max $mnt;umount $mnt"
 		else
 			resize_fs="$resize_fs btrfsctl -r max $mnt;umount $mnt"
@@ -9954,7 +9961,7 @@ function createOriginSnapshot {
 	if [ ! "$FSTYPE" = "btrfs" ];then
 		return
 	fi
-	if ! which btrfs &>/dev/null;then
+	if ! lookup btrfs &>/dev/null;then
 		echo "Can't find btrfs tools, creation of origin snapshot skipped !"
 		return
 	fi
@@ -9987,11 +9994,11 @@ function FBOK {
 		# no framebuffer device found
 		return 1
 	fi
-	if ! which fbiterm &>/dev/null;then
+	if ! lookup fbiterm &>/dev/null;then
 		# no framebuffer terminal program found
 		return 1
 	fi
-	if which isconsole &>/dev/null;then
+	if lookup isconsole &>/dev/null;then
 		if ! isconsole;then
 			# inappropriate ioctl (not a linux console)
 			return 1
@@ -10001,12 +10008,6 @@ function FBOK {
 		return 1
 	fi
 	return 0
-}
-#======================================
-# lookup
-#--------------------------------------
-function lookup {
-	bash -c "PATH=$PATH:/sbin:/usr/sbin type -p $1"
 }
 #======================================
 # initialize
@@ -10052,7 +10053,7 @@ function initialize {
 	#======================================
 	# Set kernel log level
 	#--------------------------------------
-	if which klogconsole;then
+	if lookup klogconsole;then
 		klogconsole -l 6
 	fi
 }
