@@ -1381,7 +1381,15 @@ sub createImageLiveCD {
 			};
 			/^overlay$/ && do {
 				$kiwi -> info ("Creating overlayfs read only filesystem...\n");
-				if (! $this -> createImageSquashFS ($namero,'-comp xz')) {
+				my $options = "-comp xz -b 1M";
+				if (($isoarch eq 'i386') || ($isoarch eq 'x86_64')) {
+					$options .= ' -Xbcj x86';
+				} elsif ($isoarch =~ /arm/) {
+					$options .= ' -Xbcj arm';
+				} elsif ($isoarch =~ /ppc/) {
+					$options .= ' -Xbcj powerpc';
+				}
+				if (! $this -> createImageSquashFS ($namero,$options)) {
 					$this -> restoreSplitExtend ();
 					return;
 				}
