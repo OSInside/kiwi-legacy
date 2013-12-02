@@ -17,6 +17,7 @@ package KIWILocator;
 #==========================================
 # Modules
 #------------------------------------------
+use Env;
 use strict;
 use warnings;
 use base qw (Exporter);
@@ -349,21 +350,22 @@ sub getExecPath {
 	my $execName = shift;
 	my $root     = shift;
 	my $kiwi     = $this->{kiwi};
-
 	my $cmd = q{};
 	if ($root) {
 		$cmd .= "chroot $root ";
 	}
-	$cmd .= 'bash -c "PATH=$PATH:/sbin:/usr/sbin type -p ' . $execName .  '" 2>&1';
+	$cmd .= 'bash -c "PATH='.$ENV{PATH};
+	$cmd .= ':/bin:/sbin:/usr/bin:/usr/sbin type -p ';
+	$cmd .= $execName . '" 2>&1';
 	my $execPath = KIWIQX::qxx ($cmd);
-	chomp $execPath;
 	my $code = $? >> 8;
-	if ($code != 0 || !$execPath) {
+	if (($code != 0) || (! $execPath)) {
 		if ($kiwi) {
 			$kiwi -> loginfo ("warning: $execName not found\n");
 		}
 		return;
 	}
+	chomp $execPath;
 	return $execPath;
 }
 

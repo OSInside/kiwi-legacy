@@ -133,8 +133,8 @@ sub getColumns {
 	# to put the status text at the end of the line
 	# ---
 	my $this = shift;
-	my $size = qx (stty size 2>/dev/null); chomp ($size);
-	if ($size eq "") {
+	my $size = qx (stty size 2>/dev/null);
+	if ((! $size) || (chomp $size eq "")) {
 		return 80;
 	}
 	my @size = split (/ +/,$size);
@@ -287,6 +287,9 @@ sub snip {
 	my $text = shift;
 	my $col  = 36; # cyan
 	my @data = ('-','\\','|','/','-','\\','|','/');
+	if (defined $this->{nocolor}) {
+		return;
+	}
 	my $child = fork();
 	$this -> cursorOFF();
 	if ($child) {
@@ -317,9 +320,11 @@ sub snap {
 	# Stop moving elements
 	# ---
 	my $this = shift;
-	kill 15, $this->{spinPID};
-	$this -> done ();
-	$this -> cursorON();
+	if ($this->{spinPID}) {
+		kill 15, $this->{spinPID};
+		$this -> done ();
+		$this -> cursorON();
+	}
 	return;
 }
 

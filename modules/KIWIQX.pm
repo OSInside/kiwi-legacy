@@ -19,6 +19,7 @@ package KIWIQX;
 # Modules
 #------------------------------------------
 require Exporter;
+use Env;
 use Carp qw (cluck);
 use strict;
 use warnings;
@@ -98,7 +99,10 @@ sub qxx {
 	#==========================================
 	# Try to find program name in PATH
 	#------------------------------------------
-	$prog = qx (bash -c "type $prog" 2>&1);
+	my $path = $ENV{PATH};
+	my $prog_check = qx (
+		bash -c "PATH=$path:/bin:/sbin:/usr/bin:/usr/sbin type -p $prog" 2>&1
+	);
 	my $exit = $?;
 	my $code = $exit >> 8;
 	if (($code != 0) || ($exit == -1)) {

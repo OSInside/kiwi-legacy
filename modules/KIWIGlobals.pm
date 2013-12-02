@@ -40,7 +40,11 @@ sub getArch {
 	# ...
 	# Return the architecture setting of the build environment
 	# ---
-	my $arch = KIWIQX::qxx ("uname -m"); chomp $arch;
+	my $locator = KIWILocator -> instance();
+	my $uname_exec = $locator -> getExecPath("uname");
+	return if ! $uname_exec;
+	my $arch = KIWIQX::qxx ("$uname_exec -m");
+	chomp $arch;
 	return $arch;
 }
 
@@ -576,7 +580,11 @@ sub generateBuildImageName {
 	my $xml       = shift;
 	my $separator = shift;
 	my $extension = shift;
-	my $arch = KIWIQX::qxx ("uname -m"); chomp ( $arch );
+	my $locator   = KIWILocator -> instance();
+	my $uname_exec= $locator -> getExecPath("uname");
+	return if ! $uname_exec;
+	my $arch = KIWIQX::qxx ("$uname_exec -m");
+	chomp ( $arch );
 	$arch = ".$arch";
 	if (! defined $separator) {
 		$separator = "-";
