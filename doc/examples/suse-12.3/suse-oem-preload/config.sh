@@ -40,6 +40,7 @@ suseInsertService boot.device-mapper
 #======================================
 # SuSEconfig
 #--------------------------------------
+suseConfig
 baseUpdateSysConfig /etc/sysconfig/windowmanager DEFAULT_WM kde
 baseUpdateSysConfig /etc/sysconfig/displaymanager DISPLAYMANAGER kdm
 baseSetRunlevel 5

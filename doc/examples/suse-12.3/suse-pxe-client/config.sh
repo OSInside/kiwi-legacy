@@ -41,6 +41,7 @@ suseInsertService sshd
 #======================================
 # SuSEconfig
 #--------------------------------------
+suseConfig
 baseUpdateSysConfig /etc/sysconfig/windowmanager DEFAULT_WM icewm-session
 baseUpdateSysConfig /etc/sysconfig/displaymanager DISPLAYMANAGER xdm
 baseSetRunlevel 5

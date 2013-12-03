@@ -32,6 +32,11 @@ echo "Configure image: [$kiwi_iname]..."
 suseSetupProduct
 
 #======================================
+# SuSEconfig
+#--------------------------------------
+suseConfig
+
+#======================================
 # Activate services
 #--------------------------------------
 suseActivateDefaultServices

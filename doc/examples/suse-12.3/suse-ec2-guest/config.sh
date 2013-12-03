@@ -44,6 +44,7 @@ suseInsertService sces-client
 #======================================
 # Let the DHCP server set the hostname
 #--------------------------------------
+suseConfig
 baseUpdateSysConfig /etc/sysconfig/network/dhcp DHCLIENT_SET_HOSTNAME yes
 
 #======================================
