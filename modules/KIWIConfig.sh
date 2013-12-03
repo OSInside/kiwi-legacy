@@ -362,10 +362,15 @@ function suseConfig {
 	# is EOL in June 2019. This setup is done via localectl
 	# and datetimectl from KIWIConfigure.pm in the future
 	# ----
-	if [ -x /usr/bin/localectl ];then
-		echo "Deprecated function suseConfig for this distribution version"
-		return 0
-	fi
+	# Unfortunately localectl and datetimectl apply changes
+	# to the host system. Thus we can't make use of them at
+	# the moment
+	# ----
+	# if [ -x /usr/bin/localectl ];then
+	#	echo "Deprecated function suseConfig for this distribution version"
+	#	return 0
+	# fi
+	# ----
 	#======================================
 	# keytable
 	#--------------------------------------
