@@ -1176,10 +1176,19 @@ sub setup {
 	if (! $configure -> setupUsers()) {
 		return;
 	}
-	$configure -> setupHWclock();
-	$configure -> setupKeyboardMap();
-	$configure -> setupLocale();
-	$configure -> setupTimezone();
+	# /.../
+	# The following functions have been disabled because they
+	# use the systemd tools timedatectl and localectl. Problem
+	# is that these tools doesn't work correctly from within a
+	# chroot environment. They access the dbus daemon from the
+	# host system and thus they change the currently active
+	# configuration on the host system which is unwanted
+	# ---- 
+	# $configure -> setupHWclock();
+	# $configure -> setupKeyboardMap();
+	# $configure -> setupLocale();
+	# $configure -> setupTimezone();
+	# ----
 	#========================================
 	# check for yast firstboot setup file
 	#----------------------------------------
