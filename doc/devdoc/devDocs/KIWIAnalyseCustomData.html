@@ -14,6 +14,7 @@
 <ul>
 <li><a href="#createCustomFileTree">createCustomFileTree</a></li>
 <li><a href="#createDatabaseDump">createDatabaseDump</a></li>
+<li><a href="#diffChangedConfigFiles">diffChangedConfigFiles</a></li>
 <li><a href="#getCustomFiles">getCustomFiles</a></li>
 <li><a href="#getLocalRepositories">getLocalRepositories</a></li>
 <li><a href="#new">new</a></li>
@@ -23,6 +24,7 @@
 <p>
 <ul>
 <li><a href="#__generateWanted">__generateWanted</a></li>
+<li><a href="#__getOriginalConfigFiles">__getOriginalConfigFiles</a></li>
 <li><a href="#__isEmptyDir">__isEmptyDir</a></li>
 <li><a href="#__populateCustomFiles">__populateCustomFiles</a></li>
 <li><a href="#__resolvePath">__resolvePath</a></li>
@@ -31,26 +33,36 @@
 <a name="__generateWanted"><h2>__generateWanted</h2></a>
 <p>
 Missing<p>
-Defined on line: 779
-<a name="__isEmptyDir"><h2>__isEmptyDir</h2></a>
+Defined on line: 940
+<a name="__getOriginalConfigFiles"><h2>__getOriginalConfigFiles</h2></a>
 <p>
-Missing<p>
-Defined on line: 807
+ 1) Download all packages which configuration files where changed
+ 2) Extract the packages and store the configuration files in cache
+<p>
+Defined on line: 797
 <p>
 Called in
 <ul>
-<li><a href="KIWIAnalyseCustomData.html">KIWIAnalyseCustomData</a> : 652</li></ul>
+<li><a href="KIWIAnalyseCustomData.html">KIWIAnalyseCustomData</a> : 458</li></ul>
+<a name="__isEmptyDir"><h2>__isEmptyDir</h2></a>
+<p>
+Missing<p>
+Defined on line: 968
+<p>
+Called in
+<ul>
+<li><a href="KIWIAnalyseCustomData.html">KIWIAnalyseCustomData</a> : 727</li></ul>
 <a name="__populateCustomFiles"><h2>__populateCustomFiles</h2></a>
 <p>
  1) Find all files not owned by any package
  2) Find all files changed according to the package manager
  3) create linked list of the result
 <p>
-Defined on line: 323
+Defined on line: 378
 <p>
 Called in
 <ul>
-<li><a href="KIWIAnalyseCustomData.html">KIWIAnalyseCustomData</a> : 118</li></ul>
+<li><a href="KIWIAnalyseCustomData.html">KIWIAnalyseCustomData</a> : 125</li></ul>
 <a name="__resolvePath"><h2>__resolvePath</h2></a>
 <p>
  resolve a given path string into a clean
@@ -58,37 +70,44 @@ Called in
  backs like ../ or irrelevant information
  like // or ./
 <p>
-Defined on line: 722
+Defined on line: 883
 <p>
 Called in
 <ul>
-<li><a href="KIWIAnalyseCustomData.html">KIWIAnalyseCustomData</a> : 504</li></ul>
+<li><a href="KIWIAnalyseCustomData.html">KIWIAnalyseCustomData</a> : 575</li></ul>
 <a name="createCustomFileTree"><h2>createCustomFileTree</h2></a>
 <p>
  create directory with hard/soft links to custom files
 <p>
-Defined on line: 124
+Defined on line: 131
 <a name="createDatabaseDump"><h2>createDatabaseDump</h2></a>
 <p>
  check for running databases and if available
  dump the content to a file
 <p>
-Defined on line: 251
+Defined on line: 306
+<a name="diffChangedConfigFiles"><h2>diffChangedConfigFiles</h2></a>
+<p>
+ diff all configuration files changed by the user
+ against the originals and store the result
+ in 'changed_config.diff'
+<p>
+Defined on line: 242
 <a name="getCustomFiles"><h2>getCustomFiles</h2></a>
 <p>
 Missing<p>
-Defined on line: 235
+Defined on line: 290
 <a name="getLocalRepositories"><h2>getLocalRepositories</h2></a>
 <p>
 Missing<p>
-Defined on line: 243
+Defined on line: 298
 <a name="new"><h2>new</h2></a>
 <p>
  Create a new KIWIAnalyseCustomData object which is used to
  gather information on the running system
 <p>
-Defined on line: 47
+Defined on line: 48
 <a name="runQuery"><h2>runQuery</h2></a>
 <p>
 Missing<p>
-Defined on line: 116
+Defined on line: 123
