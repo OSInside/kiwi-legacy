@@ -551,9 +551,11 @@ function OEMRepartLVM {
 		#--------------------------------------
 		resizeLVMVolumes
 		#======================================
-		# Extend root or allFreeVolume
+		# Extend allFreeVolume if not done
 		#--------------------------------------
-		lvextend -l +100%FREE /dev/$kiwi_lvmgroup/$allFreeVolume
+		if [ -z "$(eval echo \$kiwi_LVM_${allFreeVolume})" ] ; then
+			lvextend -l +100%FREE /dev/$kiwi_lvmgroup/$allFreeVolume
+		fi
 		#======================================
 		# setup new device names
 		#--------------------------------------
