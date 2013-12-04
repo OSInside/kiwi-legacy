@@ -282,7 +282,16 @@ sub createReport {
 	# Beautify report...
 	#------------------------------------------
 	mkdir "$dest/.report";
-	qxx ("tar -C $dest/.report -xf $this->{gdata}->{KAnalyseCSS} 2>&1");
+	my $status = qxx (
+		"tar -C $dest/.report -xf $this->{gdata}->{KAnalyseCSS} 2>&1"
+	);
+	my $result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Couldn't extract CSS data: $status");
+		$kiwi -> failed ();
+		return;
+	}
 	#==========================================
 	# Start report
 	#------------------------------------------

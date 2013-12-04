@@ -59,9 +59,12 @@ sub new {
 	#==========================================
 	# Module Parameters
 	#------------------------------------------
-	my $dest  = shift; # destination directory
-	my $excl  = shift; # list reference to exclude items
-	my $cdata = shift; # cache reference
+	my $dest    = shift; # destination directory
+	my $excl    = shift; # list reference to exclude items
+	my $skipgem = shift; # skip gem lookup
+	my $skiprcs = shift; # skip revision control system lookup
+	my $skipaug = shift; # skip augeas managed files lookup
+	my $cdata   = shift; # cache reference
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
@@ -104,10 +107,13 @@ sub new {
 	#==========================================
 	# Store object data
 	#------------------------------------------
-	$this->{kiwi}  = $kiwi;
-	$this->{deny}  = \@denyFiles;
-	$this->{dest}  = $dest;
-	$this->{cdata} = $cdata;
+	$this->{kiwi}    = $kiwi;
+	$this->{deny}    = \@denyFiles;
+	$this->{dest}    = $dest;
+	$this->{skipgem} = $skipgem;
+	$this->{skiprcs} = $skiprcs;
+	$this->{skipaug} = $skipaug;
+	$this->{cdata}   = $cdata;
 	return $this;
 }
 
@@ -507,7 +513,7 @@ sub __populateCustomFiles {
 	# /.../
 	# fake gem contents as rpm files...
 	# ----
-	if (-x "/usr/bin/gem") {
+	if ((! $this->{skipgem}) && (-x "/usr/bin/gem")) {
 		$kiwi -> info ("--> requesting GEM package list...");
 		my @gemcheck = qxx ("gem contents --all");
 		chomp @gemcheck;
@@ -619,73 +625,78 @@ sub __populateCustomFiles {
 	#==========================================
 	# check for local repository checkouts
 	#------------------------------------------
-	$kiwi -> info ("Searching for revision control checkout(s)...");
-	my %repos = ();
-	foreach my $file (sort keys %result) {
-		if ($file =~ /\.osc$/) {
-			#==========================================
-			# buildservice repo
-			#------------------------------------------
-			my $dir = $file;
-			my $add = 1;
-			$dir =~ s/\/\.osc$//;
-			foreach my $rule (@custom_deny) {
-				if ($dir =~ /$rule/) {
-					$add = 0; last;
+	if (! $this->{skiprcs}) {
+		$kiwi -> info ("Searching for revision control checkout(s)...");
+		my %repos = ();
+		foreach my $file (sort keys %result) {
+			if ($file =~ /\.osc$/) {
+				#==========================================
+				# buildservice repo
+				#------------------------------------------
+				my $dir = $file;
+				my $add = 1;
+				$dir =~ s/\/\.osc$//;
+				foreach my $rule (@custom_deny) {
+					if ($dir =~ /$rule/) {
+						$add = 0; last;
+					}
 				}
-			}
-			if ($add) {
-				push @custom_deny,'^'.$dir;
-				$repos{$dir} = "buildservice";
-			}
-		} elsif ($file =~ /\.git$/) {
-			#==========================================
-			# git repo
-			#------------------------------------------
-			my $dir = $file;
-			$dir =~ s/\/\.git$//;
-			push @custom_deny,'^'.$dir;
-			$repos{$dir} = "git";
-		} elsif ($file =~ /\.svn$/) {
-			#==========================================
-			# svn repo
-			#------------------------------------------
-			my $dir = $file;
-			my $add = 1;
-			$dir =~ s/\/\.svn$//;
-			foreach my $rule (@custom_deny) {
-				if ($dir =~ /$rule/) {
-					$add = 0; last;
+				if ($add) {
+					push @custom_deny,'^'.$dir;
+					$repos{$dir} = "buildservice";
 				}
-			}
-			if ($add) {
+			} elsif ($file =~ /\.git$/) {
+				#==========================================
+				# git repo
+				#------------------------------------------
+				my $dir = $file;
+				$dir =~ s/\/\.git$//;
 				push @custom_deny,'^'.$dir;
-				$repos{$dir} = "svn";
+				$repos{$dir} = "git";
+			} elsif ($file =~ /\.svn$/) {
+				#==========================================
+				# svn repo
+				#------------------------------------------
+				my $dir = $file;
+				my $add = 1;
+				$dir =~ s/\/\.svn$//;
+				foreach my $rule (@custom_deny) {
+					if ($dir =~ /$rule/) {
+						$add = 0; last;
+					}
+				}
+				if ($add) {
+					push @custom_deny,'^'.$dir;
+					$repos{$dir} = "svn";
+				}
 			}
 		}
+		$this->{localrepos} = \%repos;
+		$kiwi -> done();
 	}
-	$kiwi -> done();
 	#==========================================
 	# ignore files managed by augeas
 	#------------------------------------------
-	my $locator = KIWILocator -> instance();
-	my $augtool = $locator -> getExecPath('augtool');
-	if ($augtool) {
-		my %aug_files;
-		my $fd = FileHandle -> new();
-		if ($fd -> open ("$augtool print /files/*|")) {
-			while (my $line = <$fd>) {
-				if ($line =~ /^\/files(.*)\/.*=/) {
-					my $file = $1;
-					if (-e $file) {
-						$aug_files{$file} = 1;
+	if (! $this->{skipaug}) {
+		my $locator = KIWILocator -> instance();
+		my $augtool = $locator -> getExecPath('augtool');
+		if ($augtool) {
+			my %aug_files;
+			my $fd = FileHandle -> new();
+			if ($fd -> open ("$augtool print /files/*|")) {
+				while (my $line = <$fd>) {
+					if ($line =~ /^\/files(.*)\/.*=/) {
+						my $file = $1;
+						if (-e $file) {
+							$aug_files{$file} = 1;
+						}
 					}
 				}
 			}
-		}
-		$fd -> close();
-		foreach my $file (sort keys %aug_files) {
-			push @custom_deny,$file;
+			$fd -> close();
+			foreach my $file (sort keys %aug_files) {
+				push @custom_deny,$file;
+			}
 		}
 	}
 	#==========================================
@@ -777,7 +788,6 @@ sub __populateCustomFiles {
 	# Store in instance for report
 	#------------------------------------------
 	$this->{nopackage}  = \%result;
-	$this->{localrepos} = \%repos;
 	return $this;
 }
 

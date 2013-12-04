@@ -1054,11 +1054,13 @@ sub setMigrationOptions {
 	my $skip    = shift;
 	my $nofiles = shift;
 	my $notempl = shift;
+	my $skipgem = shift;
+	my $skiprcs = shift;
+	my $skipaug = shift;
 	my @result;
-	push @result,$exclude;
-	push @result,$skip;
-	push @result,$nofiles;
-	push @result,$notempl;
+	push @result,(
+		$exclude,$skip,$nofiles,$notempl,$skipgem,$skiprcs,$skipaug
+	);
 	$this->{migrationOptions} = \@result;
 	return 1;
 }
