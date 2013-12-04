@@ -80,7 +80,7 @@ fi
 #======================================
 # Exports (arch specific)
 #--------------------------------------
-if [ "$arch" = "ppc64" ];then
+if [[ $arch =~ ppc64 ]];then
 	test -z "$loader" && export loader=yaboot
 elif [[ $arch =~ arm ]];then
 	test -z "$loader" && export loader=uboot
@@ -2742,7 +2742,7 @@ function setupBootLoaderYaboot {
 	local rdisk=""
 	local fbmode=$vga
 	local loader_type=lilo
-	if [ "$arch" = "ppc64" ];then
+	if [[ $arch =~ ppc64 ]];then
 		loader_type=ppc
 	fi
 	if [ -z "$fbmode" ];then
