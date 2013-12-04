@@ -285,7 +285,7 @@ Meta-package to pull in all requires to build a isoboot media.
 
 %endif
 
-%ifarch %ix86 x86_64 ppc ppc64 s390 s390x %arm aarch64
+%ifarch %ix86 x86_64 ppc ppc64 ppc64le s390 s390x %arm aarch64
 
 %package -n kiwi-desc-vmxboot
 Requires:       dosfstools
@@ -334,14 +334,14 @@ Meta-package to pull in all requires to build a vmxboot media.
 
 %endif
 
-%ifarch %ix86 x86_64 ppc ppc64 s390 s390x
+%ifarch %ix86 x86_64 ppc ppc64 ppc64le s390 s390x
 
 %package -n kiwi-desc-netboot
 Requires:       kiwi = %{version}
 Summary:        openSUSE - KIWI Image System PXE network boot
 License:        GPL-2.0+
 Group:          System/Management
-%ifarch ppc ppc64 s390 s390x
+%ifarch ppc ppc64 ppc64le s390 s390x
 Requires:       virt-utils
 %else
 %if 0%{?suse_version} >= 1130
@@ -371,7 +371,7 @@ Meta-package to pull in all requires to build a netboot media.
 
 %endif
 
-%ifarch %ix86 x86_64 ppc ppc64 s390 s390x %arm aarch64
+%ifarch %ix86 x86_64 ppc ppc64 ppc64le s390 s390x %arm aarch64
 
 %package -n kiwi-desc-oemboot
 Requires:       dosfstools
@@ -426,7 +426,7 @@ Meta-package to pull in all requires to build a oemboot media.
 
 %endif
 
-%ifarch %ix86 x86_64 ppc ppc64 s390 s390x %arm aarch64
+%ifarch %ix86 x86_64 ppc ppc64 ppc64le s390 s390x %arm aarch64
 
 %package -n kiwi-templates
 PreReq:         coreutils
@@ -447,7 +447,7 @@ Authors:
     Marcus Schaefer
 %endif
 
-%ifarch %ix86 x86_64 ppc ppc64 s390 s390x %arm aarch64
+%ifarch %ix86 x86_64 ppc ppc64 ppc64le s390 s390x %arm aarch64
 
 %package -n kiwi-media-requires
 Summary:        openSUSE - packages which should be part of the DVD
@@ -577,7 +577,7 @@ if ( [ ! -e srv/tftpboot/pxelinux.cfg/default  ] ) ; then
 fi
 %endif
 
-%ifarch %ix86 x86_64 ppc ppc64 s390 s390x
+%ifarch %ix86 x86_64 ppc ppc64 ppc64le  s390 s390x
 
 %post -n kiwi-templates
 #============================================================
@@ -705,7 +705,7 @@ rm -rf $RPM_BUILD_ROOT
 %doc %{_datadir}/kiwi/image/isoboot/README.requires
 %endif
 
-%ifarch %ix86 x86_64 ppc ppc64 s390 s390x
+%ifarch %ix86 x86_64 ppc ppc64 ppc64le s390 s390x
 
 %files -n kiwi-desc-vmxboot
 %defattr(-, root, root)
@@ -721,7 +721,7 @@ rm -rf $RPM_BUILD_ROOT
 %doc %{_datadir}/kiwi/image/vmxboot/README.requires
 %endif
 
-%ifarch %ix86 x86_64 ppc ppc64 s390 s390x
+%ifarch %ix86 x86_64 ppc ppc64 ppc64le s390 s390x
 
 %files -n kiwi-desc-netboot
 %defattr(-, root, root)
@@ -734,7 +734,7 @@ rm -rf $RPM_BUILD_ROOT
 %doc %{_datadir}/kiwi/image/netboot/README.requires
 %endif
 
-%ifarch %ix86 x86_64 ppc ppc64 s390 s390x %arm aarch64
+%ifarch %ix86 x86_64 ppc ppc64 ppc64le s390 s390x %arm aarch64
 
 %files -n kiwi-desc-oemboot
 %defattr(-, root, root)
@@ -750,7 +750,7 @@ rm -rf $RPM_BUILD_ROOT
 %doc %{_datadir}/kiwi/image/oemboot/README.requires
 %endif
 
-%ifarch %ix86 x86_64 ppc ppc64 s390 s390x %arm aarch64
+%ifarch %ix86 x86_64 ppc ppc64 ppc64le s390 s390x %arm aarch64
 
 %files -n kiwi-templates
 %defattr(-, root, root)
@@ -774,14 +774,14 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/kiwi/image/suse-13.1-JeOS
 %{_datadir}/kiwi/image/suse-13.2-JeOS
 %endif
-%ifarch ppc ppc64
+%ifarch ppc ppc64 ppc64le
 %{_datadir}/kiwi/image/suse-SLE11-JeOS
 %{_datadir}/kiwi/image/suse-SLE12-JeOS
 %endif
 
 %endif
 
-%ifarch %ix86 x86_64 ppc ppc64 s390 s390x %arm aarch64
+%ifarch %ix86 x86_64 ppc ppc64 ppc64le s390 s390x %arm aarch64
 
 %files -n kiwi-media-requires
 %defattr(-, root, root)

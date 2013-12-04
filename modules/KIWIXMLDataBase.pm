@@ -63,6 +63,7 @@ sub new {
 		m68k
 		ppc
 		ppc64
+		ppc64le
 		s390
 		s390x
 		x86_64
