@@ -4347,6 +4347,7 @@ sub initGeometry {
 	my $size   = shift;
 	my $kiwi   = $this->{kiwi};
 	my $locator= new KIWILocator($kiwi);
+	my $align  = 4096;
 	if (! defined $this->{pStart}) {
 		$this->{pStart} = 2048
 	} else {
@@ -4356,10 +4357,13 @@ sub initGeometry {
 		my $status = qxx (
 			"$parted | grep :$this->{pStart} | cut -f3 -d:"
 		);
+		chomp $status;
 		$status=~ s/s//;
-		$status = int ($status / 8);
-		$status*= 8;
-		$status+= 8;
+		if ($status >= $align) {
+			$status = int ($status / $align);
+			$status*= $align;
+			$status+= $align;
+		}
 		$this->{pStart} = $status;
 	}
 	my $sector = $this -> getSector ($size);

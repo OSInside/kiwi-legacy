@@ -6788,6 +6788,7 @@ function partedSectorInit {
 	local s_stopp
 	unset startSectors
 	unset endSectors
+	local align=4096
 	for i in $(
 		parted -m $disk unit s print | grep ^[1-4]: | cut -f2-3 -d: | tr -d s
 	);do
@@ -6799,9 +6800,9 @@ function partedSectorInit {
 			startSectors=${startSectors}:${s_start}s
 		fi
 		if [ -z "$endSectors" ];then
-			endSectors=$((s_stopp/8*8+8))s
+			endSectors=$((s_stopp/align*align+align))s
 		else
-			endSectors=$endSectors:$((s_stopp/8*8+8))s
+			endSectors=$endSectors:$((s_stopp/align*align+align))s
 		fi
 	done
 	# /.../
