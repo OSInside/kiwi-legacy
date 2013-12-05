@@ -29,7 +29,7 @@ use LWP;
 #------------------------------------------
 use KIWIGlobals;
 use KIWILog;
-use KIWIQX qw (qxx);
+use KIWIQX;
 
 #==========================================
 # Constructor
@@ -328,7 +328,7 @@ sub thisPath {
 	# turn into absolute path
 	#------------------------------------------
 	if ($thisPath !~ /^\//) {
-		my $pwd = qxx ("pwd"); chomp $pwd;
+		my $pwd = KIWIQX::qxx ("pwd"); chomp $pwd;
 		$thisPath = $pwd."/".$thisPath;
 	}
 	$thisPath =~ s/\/\.\//\//g;
@@ -352,7 +352,7 @@ sub dirPath {
 	}
 	$module =~ s/dir:\/\///;
 	if ($module !~ /^\//) {
-		my $pwd = qxx ("pwd"); chomp $pwd;
+		my $pwd = KIWIQX::qxx ("pwd"); chomp $pwd;
 		$module = $pwd."/".$module;
 	}
 	my ( $module_test ) = glob ($module);
@@ -397,7 +397,7 @@ sub smbPath {
 	if (! defined $root) {
 		return $tmpdir;
 	}
-	$tmpdir = qxx ("mktemp -qdt kiwimount.XXXXXX"); chomp $tmpdir;
+	$tmpdir = KIWIQX::qxx ("mktemp -qdt kiwimount.XXXXXX"); chomp $tmpdir;
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> warning ("Couldn't create tmp dir for smb mount: $tmpdir: $!");
@@ -405,11 +405,11 @@ sub smbPath {
 		return;
 	}
 	if (($user) && ($pwd)) {
-		$status = qxx (
+		$status = KIWIQX::qxx (
 	      "mount -t cifs -o username=$user,passwort=$pwd $module $tmpdir 2>&1"
 		);
 	} else {
-		$status = qxx ("mount -t cifs -o guest $module $tmpdir 2>&1");
+		$status = KIWIQX::qxx ("mount -t cifs -o guest $module $tmpdir 2>&1");
 	}
 	$result = $? >> 8;
 	if ($result != 0) {
@@ -507,7 +507,7 @@ sub isoPath {
 	# Check existence of iso file
 	#------------------------------------------
 	if ($module !~ /^\//) {
-		my $pwd = qxx ("pwd"); chomp $pwd;
+		my $pwd = KIWIQX::qxx ("pwd"); chomp $pwd;
 		$module = $pwd."/".$module;
 	}
 	if ($module =~ /(.*\.iso)(.*)/) {
@@ -529,14 +529,14 @@ sub isoPath {
 	if (! defined $root) {
 		return $tmpdir;
 	}
-	$status = qxx ("mkdir -p $tmpdir 2>&1");
+	$status = KIWIQX::qxx ("mkdir -p $tmpdir 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> warning ("Couldn't create tmp dir for iso mount: $status: $!");
 		$kiwi -> skipped ();
 		return;
 	}
-	$status = qxx ("mount -o loop $module $tmpdir 2>&1");
+	$status = KIWIQX::qxx ("mount -o loop $module $tmpdir 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> warning ("Failed to loop mount ISO path: $status");

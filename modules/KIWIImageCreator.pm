@@ -32,7 +32,7 @@ use KIWIImageFormat;
 use KIWILocator;
 use KIWILog;
 use KIWIProfileFile;
-use KIWIQX qw (qxx);
+use KIWIQX;
 use KIWIRoot;
 use KIWIRuntimeChecker;
 use KIWIXML;
@@ -541,7 +541,7 @@ sub prepareImage {
 	# reasons. Thus at the beginning a a new prepare run we should clean
 	# up the repo files to match the new repos from the XML setup
 	# ----
-	qxx ("rm -f /var/cache/kiwi/zypper/repos/* 2>&1");
+	KIWIQX::qxx ("rm -f /var/cache/kiwi/zypper/repos/* 2>&1");
 	#==========================================
 	# Run prepare
 	#------------------------------------------
@@ -583,9 +583,9 @@ sub createBootImage {
 			# Needs to be copied...
 			#------------------------------------------
 			if ($this->{psplash}) {
-				qxx ("cp -a $this->{psplash} $destination 2>&1");
+				KIWIQX::qxx ("cp -a $this->{psplash} $destination 2>&1");
 			}
-			my $data = qxx ("cp -a $this->{pinitrd} $destination 2>&1");
+			my $data = KIWIQX::qxx ("cp -a $this->{pinitrd} $destination 2>&1");
 			my $code = $? >> 8;
 			if ($code != 0) {
 				$kiwi -> failed();
@@ -593,7 +593,7 @@ sub createBootImage {
 				$kiwi -> failed();
 				return;
 			} else {
-				$data = qxx ("cp -a $this->{plinux}* $destination 2>&1");
+				$data = KIWIQX::qxx ("cp -a $this->{plinux}* $destination 2>&1");
 				$code = $? >> 8;
 				if ($code != 0) {
 					$kiwi -> failed();
@@ -758,7 +758,7 @@ sub createImage {
 	}
 	$destination .= "/" . $workDirName;
 	if (-d $destination) {
-		qxx ("rm -rf $destination 2>&1");
+		KIWIQX::qxx ("rm -rf $destination 2>&1");
 	}
 	if ((! -d $destination) && (! mkdir $destination)) {
 		$kiwi -> error  ("Failed to create destination subdir: $!");
@@ -852,24 +852,24 @@ sub createImage {
 	# Cleanup the tree according to prev runs
 	#------------------------------------------
 	if (-f "$tree/rootfs.tar") {
-		qxx ("rm -f $tree/rootfs.tar");
+		KIWIQX::qxx ("rm -f $tree/rootfs.tar");
 	}
 	if (-f "$tree/recovery.tar.gz") {
-		qxx ("rm -f $tree/recovery.*");
+		KIWIQX::qxx ("rm -f $tree/recovery.*");
 	}
 	#==========================================
 	# Check for optional config-cdroot archive
 	#------------------------------------------
-	qxx ("rm -f $destination/config-cdroot.tgz");
+	KIWIQX::qxx ("rm -f $destination/config-cdroot.tgz");
 	if (-f "$tree/image/config-cdroot.tgz") {
-		qxx ("mv $tree/image/config-cdroot.tgz $destination");
+		KIWIQX::qxx ("mv $tree/image/config-cdroot.tgz $destination");
 	}
 	#==========================================
 	# Check for optional config-cdroot.sh
 	#------------------------------------------
-	qxx ("rm -f $destination/config-cdroot.sh");
+	KIWIQX::qxx ("rm -f $destination/config-cdroot.sh");
 	if (-f "$tree/image/config-cdroot.sh") {
-		qxx ("mv $tree/image/config-cdroot.sh $destination");
+		KIWIQX::qxx ("mv $tree/image/config-cdroot.sh $destination");
 	}
 	#==========================================
 	# Update .profile environment
@@ -902,10 +902,10 @@ sub createImage {
 		my $name  = KIWIGlobals
 			-> instance() -> generateBuildImageName($xml);
 		my $path = File::Spec->rel2abs ($tree);
-		qxx ("rpm --root $path -qa --qf \"$query\" &> $idest/$name.packages");
+		KIWIQX::qxx ("rpm --root $path -qa --qf \"$query\" &> $idest/$name.packages");
 		my $result = $? >> 8;
 		if ($result == 0) {
-			qxx ("rpm --root $path -Va &> $idest/$name.verified");
+			KIWIQX::qxx ("rpm --root $path -Va &> $idest/$name.verified");
 		}
 		if ($result != 0) {
 			my $msg;
@@ -1040,7 +1040,7 @@ sub createImage {
 		my $tarfile  = $imgName."-".$basesubd.".tgz";
 		if ($cmdL -> getArchiveImage()) {
 			$kiwi -> info ("Archiving image build result...");
-			my $status = qxx (
+			my $status = KIWIQX::qxx (
 				"cd $basedest && tar -czSf $tarfile $basesubd 2>&1"
 			);
 			my $result = $? >> 8;
@@ -1056,7 +1056,7 @@ sub createImage {
 		#==========================================
 		# Move build result(s) to destination dir
 		#------------------------------------------
-		my $status = qxx ("mv -f $buildResultDir/* $basedest 2>&1");
+		my $status = KIWIQX::qxx ("mv -f $buildResultDir/* $basedest 2>&1");
 		my $result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> error (
@@ -1279,7 +1279,7 @@ sub createImageDisk {
 		$kiwi -> failed ();
 		return;
 	}
-	qxx ( "file $sys | grep -q 'gzip compressed data'" );
+	KIWIQX::qxx ( "file $sys | grep -q 'gzip compressed data'" );
 	my $code = $? >> 8;
 	if ($code == 0) {
 		$kiwi -> failed ();
@@ -1425,7 +1425,7 @@ sub __checkImageIntegrity {
 	my $kiwi = $this -> {kiwi};
 	my $checkmdFile = $configDir . '/.checksum.md5';
 	if (-f $checkmdFile) {
-		my $data = qxx ("cd $configDir && md5sum -c .checksum.md5 2>&1");
+		my $data = KIWIQX::qxx ("cd $configDir && md5sum -c .checksum.md5 2>&1");
 		my $code = $? >> 8;
 		if ($code != 0) {
 			chomp $data;
@@ -2133,7 +2133,7 @@ sub __updateProfileEnvironment {
 	}
 	$configure -> quoteFile ("$tree/.profile");
 	if (-d "$tree/image") {
-		qxx ("cp $tree/.profile $tree/image/.profile");
+		KIWIQX::qxx ("cp $tree/.profile $tree/image/.profile");
 	}
 	$kiwi -> done();
 	return $this;

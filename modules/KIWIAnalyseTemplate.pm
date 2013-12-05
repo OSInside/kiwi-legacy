@@ -41,7 +41,7 @@ use JSON;
 #------------------------------------------
 use KIWIGlobals;
 use KIWILog;
-use KIWIQX qw (qxx);
+use KIWIQX;
 use KIWIXML;
 use KIWIXMLDescriptionData;
 use KIWIXMLPreferenceData;
@@ -229,12 +229,12 @@ sub writeKIWIXMLConfiguration {
 		return;
 	}
 	my $temp = "/tmp/pretty.xml";
-	my $data = qxx ("xsltproc -o $temp $this->{gdata}->{Pretty} $file");
+	my $data = KIWIQX::qxx ("xsltproc -o $temp $this->{gdata}->{Pretty} $file");
 	my $code = $? >> 8;
 	if ($code != 0) {
 		return;
 	}
-	qxx ("mv $temp $file");
+	KIWIQX::qxx ("mv $temp $file");
 	return $this;
 }
 
@@ -355,7 +355,7 @@ sub cloneLinuxConfigurationFiles {
 	my $locator = KIWILocator -> instance();
 	my $augtool = $locator -> getExecPath('augtool');
 	if ($augtool) {
-		qxx ("$augtool dump-xml /files/* > $dest/config-augeas.xml");
+		KIWIQX::qxx ("$augtool dump-xml /files/* > $dest/config-augeas.xml");
 		$kiwi -> done();
 	} else {
 		$kiwi -> skipped ();

@@ -27,7 +27,7 @@ use File::Basename;
 use Config::IniFiles;
 use KIWILog;
 use KIWILocator;
-use KIWIQX qw (qxx);
+use KIWIQX;
 
 #==========================================
 # Modules
@@ -58,7 +58,7 @@ sub new {
 	# Create config files/dirs
 	#------------------------------------------
 	if (! -d $dataDir) {
-		qxx ("mkdir -p $dataDir");
+		KIWIQX::qxx ("mkdir -p $dataDir");
 	}
 	#==========================================
 	# Store ensconce command parameters

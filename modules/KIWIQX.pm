@@ -8,7 +8,7 @@
 #               :
 # BELONGS TO    : Operating System images
 #               :
-# DESCRIPTION   : This module is used to provide the generic qxx
+# DESCRIPTION   : This module is used to provide the generic KIWIQX::qxx
 #               : method used for logging all exec calls
 #               :
 #               :
@@ -19,7 +19,6 @@ package KIWIQX;
 # Modules
 #------------------------------------------
 require Exporter;
-use Env;
 use Carp qw (cluck);
 use strict;
 use warnings;
@@ -28,97 +27,42 @@ use KIWITrace;
 #==========================================
 # Exports
 #------------------------------------------
-our @ISA       = qw (Exporter);
-our @EXPORT_OK = qw (qxx qxxLogOff qxxLogOn);
-our $QXXLOG = 1;
+our @ISA = qw (Exporter);
 
 #==========================================
-# Constructor
+# KIWIQX::qxx
 #------------------------------------------
-sub new {
+sub KIWIQX::qxx {
 	# ...
-	# Create a new KIWIQX object
-	# ---
-	#==========================================
-	# Object setup
-	#------------------------------------------
-	my $this  = {};
-	my $class = shift;
-	bless $this,$class;
-	return $this;
-}
-
-#==========================================
-# qxxLogOff
-#------------------------------------------
-sub qxxLogOff {
-	$QXXLOG = 0;
-	return;
-}
-
-#==========================================
-# qxxLogOff
-#------------------------------------------
-sub qxxLogOn {
-	$QXXLOG = 1;
-	return;
-}
-
-#==========================================
-# qxx
-#------------------------------------------
-sub qxx {
-	# ...
-	# Activate execution logging. The function also checks
-	# if the first name evaluated as program name can be
-	# found in the environment using the which command.
-	# Please note if a command chain is given only the first
-	# item is checked which means subsequent calls in the
-	# chain might fail unnoticed
+	# Central method to call commands. The command string
+	# will be logged with the prefix 'EXEC'
 	# ---
 	my $cmd   = shift;
-	my @prg   = "";
-	my $prog  = "";
 	my $kiwi  = KIWILog -> instance();
 	my $trace = KIWITrace -> instance();
 	#==========================================
-	# Extract command name from command string
+	# Extract waste from command string
 	#------------------------------------------
 	$cmd =~ s/^\n//g;
 	$cmd =~ s/^\s+//g;
 	$cmd =~ s/\s+$//g;
-	@prg = split (/[\s|&]+/,"$cmd");
-	$prog= $prg[0];
-	$prog=~ s/^\(//g;
 	#==========================================
 	# write command line to logfile
 	#------------------------------------------
-	if ($QXXLOG) {
-		$kiwi -> loginfo ("EXEC [$cmd]\n");
-	}
+	$kiwi -> loginfo ("EXEC [$cmd]\n");
 	#==========================================
-	# Try to find program name in PATH
+	# Call command line
 	#------------------------------------------
-	my $path = $ENV{PATH};
-	my $prog_check = qx (
-		bash -c "PATH=$path:/bin:/sbin:/usr/bin:/usr/sbin type -p $prog" 2>&1
-	);
-	my $exit = $?;
-	my $code = $exit >> 8;
-	if (($code != 0) || ($exit == -1)) {
-		$kiwi -> loginfo ("EXEC [Failed: $prog]\n");
+	my $output = qx($cmd);
+	if ($? == -1) {
+		$kiwi -> loginfo ("EXEC [Execution Failed: $!]\n");
 		if ($kiwi -> trace()) {
 			$trace->{BT}[$trace->{TL}] = eval {
 				Carp::longmess ($trace->{TT}.$trace->{TL}++)
 			};
 		}
-		$? = 0xffff; ## no critic
-		return "$prog: command not found";
 	}
-	#==========================================
-	# Call command line
-	#------------------------------------------
-	return qx ($cmd);
+	return $output;
 }
 
 1;

@@ -28,7 +28,7 @@ use KIWICommandLine;
 use KIWIGlobals;
 use KIWILocator;
 use KIWILog;
-use KIWIQX qw(qxx);
+use KIWIQX;
 use KIWIXML;
 use KIWIXMLTypeData;
 
@@ -180,7 +180,7 @@ sub __applyContainerConfig {
 	#------------------------------------------
 	my $rm = $locator -> getExecPath('rm');
 	my $cmd = "$rm $targetDir/etc/fstab";
-	my $data = qxx ($cmd);
+	my $data = KIWIQX::qxx ($cmd);
 	my $code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> failed();
@@ -190,7 +190,7 @@ sub __applyContainerConfig {
 	}
 	my $touch = $locator -> getExecPath('touch');
 	$cmd = "$touch $targetDir/etc/fstab";
-	$data = qxx ($cmd);
+	$data = KIWIQX::qxx ($cmd);
 	$code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> failed();
@@ -265,7 +265,7 @@ sub __cleanupWorkingDir {
 		$dirToRm = $this -> getBaseBuildDirectory() . '/' . $baseWork;
 	}
 	if ($dirToRm) {
-		my $data = qxx ("rm -rf $dirToRm");
+		my $data = KIWIQX::qxx ("rm -rf $dirToRm");
 		my $code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed();
@@ -294,7 +294,7 @@ sub __copyUnpackedTreeContent {
 	my $origin = $cmdL -> getConfigDir();
 	my $tar = $locator -> getExecPath('tar');
 	my $cmd = "rsync -aHXA --one-file-system $origin/ $targetDir 2>&1";
-	my $data = qxx ($cmd);
+	my $data = KIWIQX::qxx ($cmd);
 	my $code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> failed();
@@ -329,7 +329,7 @@ sub __createContainerBundle {
 	my $tar = $locator -> getExecPath('tar');
 	my $cmd = "cd $origin; "
 		. "$tar -cjf $baseBuildDir/$imgFlName etc var 2>&1";
-	my $data = qxx ($cmd);
+	my $data = KIWIQX::qxx ($cmd);
 	my $code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> failed();
@@ -394,7 +394,7 @@ sub __createDevNodes {
 	#------------------------------------------
 	my $mdir = $locator -> getExecPath('mkdir');
 	if (! -d "$targetDir/dev/net") {
-		my $data = qxx ("$mdir -m 755 $targetDir/dev/net");
+		my $data = KIWIQX::qxx ("$mdir -m 755 $targetDir/dev/net");
 		my $code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed();
@@ -405,7 +405,7 @@ sub __createDevNodes {
 		}
 	}
 	if (! -d "$targetDir/dev/pts") {
-		my $data = qxx ("$mdir -m 755 $targetDir/dev/pts");
+		my $data = KIWIQX::qxx ("$mdir -m 755 $targetDir/dev/pts");
 		my $code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed();
@@ -416,7 +416,7 @@ sub __createDevNodes {
 		}
 	}
 	if (! -d "$targetDir/dev/shm") {
-		my $data = qxx ("$mdir -m 1777 $targetDir/dev/shm");
+		my $data = KIWIQX::qxx ("$mdir -m 1777 $targetDir/dev/shm");
 		my $code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed();
@@ -462,7 +462,7 @@ sub __createDevNodes {
 		if (! -e "$targetDir/dev/$node") {
 			my $cmd = "$mnode -m 666 $targetDir/dev/$node "
 				. $nodes666NumMap{$node};
-			my $data = qxx ($cmd);
+			my $data = KIWIQX::qxx ($cmd);
 			my $code = $? >> 8;
 			if ($code != 0) {
 				$kiwi -> failed();
@@ -476,7 +476,7 @@ sub __createDevNodes {
 	}
 	if (! -e "$targetDir/dev/console") {
 		my $cmd = "$mnode -m 600 $targetDir/dev/console c 5 1";
-		my $data = qxx ($cmd);
+		my $data = KIWIQX::qxx ($cmd);
 		my $code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed();
@@ -493,7 +493,7 @@ sub __createDevNodes {
 	my $lnk = $locator -> getExecPath('ln');
 	if (! -e "$targetDir/dev/core") {
 		my $cmd = "$lnk -s /proc/kcore $targetDir/dev/core";
-		my $data = qxx ($cmd);
+		my $data = KIWIQX::qxx ($cmd);
 		my $code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed();
@@ -505,7 +505,7 @@ sub __createDevNodes {
 	}
 	if (! -e "$targetDir/dev/fd") {
 		my $cmd = "$lnk -s /proc/self/fd $targetDir/dev/fd";
-		my $data = qxx ($cmd);
+		my $data = KIWIQX::qxx ($cmd);
 		my $code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed();
@@ -517,7 +517,7 @@ sub __createDevNodes {
 	}
 	if (! -e "$targetDir/dev/tty10") {
 		my $cmd = "$lnk -s null $targetDir/dev/tty10";
-		my $data = qxx ($cmd);
+		my $data = KIWIQX::qxx ($cmd);
 		my $code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed();
@@ -625,7 +625,7 @@ sub __createWorkingDir {
 	}
 	my $dirPath = $basePath . '/' . $baseWork . '/' . $path;
 	my $mdir = $locator -> getExecPath('mkdir');
-	my $data = qxx ("$mdir -p $dirPath");
+	my $data = KIWIQX::qxx ("$mdir -p $dirPath");
 	my $code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> error("Could not create directory: $dirPath");
@@ -673,7 +673,7 @@ sub __disableServices {
 			my $name = $parts[-1];
 			my $cmd = "$croot $targetDir "
 				. "$sysctl disable $name";
-			my $data = qxx ($cmd);
+			my $data = KIWIQX::qxx ($cmd);
 			my $code = $? >> 8;
 			if ($code != 0) {
 				$kiwi -> failed();
@@ -693,7 +693,7 @@ sub __disableServices {
 			. 'boot.udev '
 			. 'kbd '
 			. '>/dev/null 2>&1';
-		my $data = qxx ($cmd);
+		my $data = KIWIQX::qxx ($cmd);
 		my $code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed();
@@ -721,7 +721,7 @@ sub __removeKiwiBuildInfo {
 	# Remove the shell scripts
 	my $rm = $locator -> getExecPath('rm');
 	my $cmd = "$rm $targetDir/{.kconfig,.profile}";
-	my $data = qxx ($cmd);
+	my $data = KIWIQX::qxx ($cmd);
 	my $code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> info("Unable to remove KIWI scripts in rootfs: $targetDir");
@@ -729,7 +729,7 @@ sub __removeKiwiBuildInfo {
 	}
 	# Remove the image build information
 	$cmd = "$rm -rf $targetDir/image";
-	$data = qxx ($cmd);
+	$data = KIWIQX::qxx ($cmd);
 	$code = $? >> 8;
 	if ($code != 0) {
 		my $msg = 'Unable to remove KIWI image information in rootfs: '

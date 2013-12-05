@@ -23,7 +23,7 @@ use Readonly;
 use base qw /Common::ktTestCase/;
 
 use KIWICommandLine;
-use KIWIQX qw (qxx);
+use KIWIQX;
 use KIWIXML;
 use KIWIXMLPackageArchiveData;
 use KIWIXMLDescriptionData;
@@ -6445,7 +6445,7 @@ sub test_setArchInvalid {
 	$this -> assert_str_equals('failed', $state);
 	$this -> assert_null($res);
 	my $arch = $xml -> getArch();
-	my $curArch = qxx ("uname -m");
+	my $curArch = KIWIQX::qxx ("uname -m");
 	chomp $curArch;
 	$this -> assert_str_equals($curArch, $arch);
 	$msg = $kiwi -> getMessage();

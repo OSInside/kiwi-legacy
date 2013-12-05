@@ -27,7 +27,7 @@ use File::Basename;
 use Config::IniFiles;
 use KIWILog;
 use KIWILocator;
-use KIWIQX qw (qxx);
+use KIWIQX;
 use KIWITrace;
 
 #==========================================
@@ -221,7 +221,7 @@ sub setupScreenCall {
 			$fd -> close();
 		}
 	}
-	qxx (" chmod 755 $screenCall ");
+	KIWIQX::qxx (" chmod 755 $screenCall ");
 	if ($logs) {
 		$kiwi -> closeRootChannel();
 	}
@@ -263,8 +263,8 @@ sub setupScreenCall {
 		#==========================================
 		# remove call and control files
 		#------------------------------------------
-		qxx (" rm -f $screenCall* ");
-		qxx (" rm -f $screenCtrl ");
+		KIWIQX::qxx (" rm -f $screenCall* ");
+		KIWIQX::qxx (" rm -f $screenCtrl ");
 	} else {
 		#==========================================
 		# do the job in the child process
@@ -477,32 +477,32 @@ sub setupPackageKeys {
 			return $this;
 		}
 		my $dump = $dumsigsExec . ' ' . $keyringFile;
-		$data = qxx ("mkdir -p $sigs && cd $sigs && $dump 2>&1");
+		$data = KIWIQX::qxx ("mkdir -p $sigs && cd $sigs && $dump 2>&1");
 		$code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> skipped ();
 			$kiwi -> error  ("Can't dump pubkeys: $data");
 			$kiwi -> failed ();
-			qxx ("rm -rf $sigs");
+			KIWIQX::qxx ("rm -rf $sigs");
 			return $this;
 		}
 	} else {
 		$sigs = $keydir;
 	}
-	$data.= qxx ("rpm -r $root --import $sigs/gpg-pubke* 2>&1");
+	$data.= KIWIQX::qxx ("rpm -r $root --import $sigs/gpg-pubke* 2>&1");
 	$code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> skipped ();
 		$kiwi -> error  ("Can't import pubkeys: $data");
 		$kiwi -> failed ();
 		if (-d "$root/rpm-sigs") {
-			qxx ("rm -rf $root/rpm-sigs");
+			KIWIQX::qxx ("rm -rf $root/rpm-sigs");
 		}
 		return $this;
 	}
 	$kiwi -> done();
 	if (-d "$root/rpm-sigs") {
-		qxx ("rm -rf $root/rpm-sigs");
+		KIWIQX::qxx ("rm -rf $root/rpm-sigs");
 	}
 	return $this;
 }
@@ -599,7 +599,7 @@ sub setLock {
 	my $lock = $this->{lock};
 	my $kiwi = $this->{kiwi};
 	$kiwi -> loginfo ("Set package manager lock\n");
-	qxx (" touch $lock ");
+	KIWIQX::qxx (" touch $lock ");
 	return 1;
 }
 
@@ -611,7 +611,7 @@ sub freeLock {
 	my $lock = $this->{lock};
 	my $kiwi = $this->{kiwi};
 	$kiwi -> loginfo ("Release package manager lock\n");
-	qxx (" rm -f $lock ");
+	KIWIQX::qxx (" rm -f $lock ");
 	return 1;
 }
 
@@ -637,8 +637,8 @@ sub removeCacheDir {
 	my $config  = dirname ($dataDir);
 	$this -> cleanChild();
 	$kiwi -> loginfo ("Removing cache directory: $dataDir\n");
-	qxx ("rm -rf $dataDir");
-	qxx ("rm -rf $config/config");
+	KIWIQX::qxx ("rm -rf $dataDir");
+	KIWIQX::qxx ("rm -rf $config/config");
 	return $this;
 }
 
@@ -661,7 +661,7 @@ sub cleanupRPMDatabase {
 	#==========================================
 	# try to initialize rpm database
 	#------------------------------------------
-	$data = qxx ("@kchroot /bin/rpm --initdb &>/dev/null");
+	$data = KIWIQX::qxx ("@kchroot /bin/rpm --initdb &>/dev/null");
 	$code = $? >> 8;
 	#==========================================
 	# try to rebuild DB on failed init
@@ -680,13 +680,13 @@ sub cleanupRPMDatabase {
 			$kiwi -> error ("db45_load tool required for rpm db rebuild\n");
 			return;
 		}
-		qxx ('mv '.$packIndex.' '.$packIndex.'.bak');
-		qxx ('mv '.$nameIndex.' '.$nameIndex.'.bak');
-		qxx ('db_dump '.$packIndex.'.bak | db45_load '.$packIndex);
-		qxx ('db_dump '.$nameIndex.'.bak | db45_load '.$nameIndex);
-		qxx ('rm -f '.$packIndex.'.bak');
-		qxx ('rm -f '.$nameIndex.'.bak');
-		$data = qxx ("@kchroot /bin/rpm --rebuilddb 2>&1");
+		KIWIQX::qxx ('mv '.$packIndex.' '.$packIndex.'.bak');
+		KIWIQX::qxx ('mv '.$nameIndex.' '.$nameIndex.'.bak');
+		KIWIQX::qxx ('db_dump '.$packIndex.'.bak | db45_load '.$packIndex);
+		KIWIQX::qxx ('db_dump '.$nameIndex.'.bak | db45_load '.$nameIndex);
+		KIWIQX::qxx ('rm -f '.$packIndex.'.bak');
+		KIWIQX::qxx ('rm -f '.$nameIndex.'.bak');
+		$data = KIWIQX::qxx ("@kchroot /bin/rpm --rebuilddb 2>&1");
 		$code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();
@@ -716,7 +716,7 @@ sub rpmLibs {
 	if (! $this -> cleanupRPMDatabase()) {
 		return;
 	}
-	qxx ("@kchroot ldconfig 2>&1");
+	KIWIQX::qxx ("@kchroot ldconfig 2>&1");
 	return $this;
 }
 
@@ -728,7 +728,7 @@ sub DESTROY {
 	my $meta   = $this->{dataDir};
 	my $zypperConf = "$meta/zypper.conf.$$";
 	my $zyppConf   = "$meta/zypp.conf.$$";
-	qxx ("rm -f $zypperConf $zyppConf");
+	KIWIQX::qxx ("rm -f $zypperConf $zyppConf");
 	return 1;
 }
 

@@ -31,7 +31,7 @@ use POSIX;
 #------------------------------------------
 use KIWILog;
 use KIWILocator;
-use KIWIQX qw (qxx);
+use KIWIQX;
 use KIWIXML;
 use KIWIXMLPreferenceData;
 
@@ -66,11 +66,11 @@ sub new {
 	#==========================================
 	# Create config files/dirs
 	#------------------------------------------
-	qxx ("mkdir -p $dataDir");
+	KIWIQX::qxx ("mkdir -p $dataDir");
 	my $zypperConf = "$dataDir/zypper.conf.$$";
 	my $zyppConf = "$dataDir/zypp.conf.$$";
-	qxx ("echo '[main]' > $zypperConf");
-	qxx ("echo '[main]' > $zyppConf");
+	KIWIQX::qxx ("echo '[main]' > $zypperConf");
+	KIWIQX::qxx ("echo '[main]' > $zyppConf");
 	local $ENV{ZYPP_CONF} = $zyppConf;
 	my $zconfig = Config::IniFiles -> new (
 		-file => $zyppConf, -allowedcommentchars => '#'
@@ -268,7 +268,7 @@ sub setupInstallationSource {
 		$stype = "public";
 	}
 	if ($chroot) {
-		$data = qxx ("@kchroot zypper --version 2>&1 | cut -c 8"); chomp $data;
+		$data = KIWIQX::qxx ("@kchroot zypper --version 2>&1 | cut -c 8"); chomp $data;
 		if ((! isdigit($data)) || ($data < 1)) {
 			$kiwi -> info ("image zypper version is too old, or not installed");
 			$kiwi -> skipped ();
@@ -336,15 +336,15 @@ sub setupInstallationSource {
 		if (! $chroot) {
 			if (! -f $repo) {
 				$kiwi -> info ("Adding bootstrap zypper service: $alias");
-				$data = qxx ("@zypper --root \"$root\" $sadd 2>&1");
+				$data = KIWIQX::qxx ("@zypper --root \"$root\" $sadd 2>&1");
 				$code = $? >> 8;
 			} else {
 				$kiwi -> info ("Updating bootstrap zypper service: $alias");
-				$data = qxx ("grep -q '^baseurl=file:/base-system' $repo");
+				$data = KIWIQX::qxx ("grep -q '^baseurl=file:/base-system' $repo");
 				$code = $? >> 8;
 				if ($code == 0) {
 					$sed = '@\(baseurl=file:/base-system\)@baseurl=file:@';
-					$data = qxx ('sed -i -e s"'.$sed.'" '.$repo);
+					$data = KIWIQX::qxx ('sed -i -e s"'.$sed.'" '.$repo);
 					$code = $? >> 8;
 				} else {
 					$code = 0;
@@ -360,15 +360,15 @@ sub setupInstallationSource {
 			my @zypper= @{$this->{zypper_chroot}};
 			if (! -f $repo) {
 				$kiwi -> info ("Adding chroot zypper service: $alias");
-				$data = qxx ("@kchroot @zypper $sadd 2>&1");
+				$data = KIWIQX::qxx ("@kchroot @zypper $sadd 2>&1");
 				$code = $? >> 8;
 			} else {
 				$kiwi -> info ("Updating chroot zypper service: $alias");
-				$data = qxx ("grep -q '^baseurl=file:/base-system' $repo");
+				$data = KIWIQX::qxx ("grep -q '^baseurl=file:/base-system' $repo");
 				$code = $? >> 8;
 				if ($code != 0) {
 					$sed = '@\(baseurl=file:/\)@\1base-system/@';
-					$data = qxx ('sed -i -e s"'.$sed.'" '.$repo);
+					$data = KIWIQX::qxx ('sed -i -e s"'.$sed.'" '.$repo);
 					$code = $? >> 8;
 				}
 			}
@@ -381,7 +381,7 @@ sub setupInstallationSource {
 			if (($source{$alias}{imgincl}) && (! -f $imgRepo)) {
 				$kiwi -> info ("Adding $alias repo to image");
 				$sadd =~ s/--keep-packages//;
-				$data = qxx ("@kchroot zypper $sadd 2>&1");
+				$data = KIWIQX::qxx ("@kchroot zypper $sadd 2>&1");
 				$code = $? >> 8;
 				if ($code != 0) {
 					$kiwi -> failed ();
@@ -389,7 +389,7 @@ sub setupInstallationSource {
 					return;
 				}
 				if ( $prio ) {
-					$data = qxx (
+					$data = KIWIQX::qxx (
 						"@kchroot zypper modifyrepo -p $prio $alias 2>&1"
 					);
 					$code = $? >> 8;
@@ -407,11 +407,11 @@ sub setupInstallationSource {
 			$kiwi -> info ("--> Set priority to: $prio");
 			my $modrepo = "modifyrepo -p $prio $alias";
 			if (! $chroot) {
-				$data = qxx ("@zypper --root \"$root\" $modrepo 2>&1");
+				$data = KIWIQX::qxx ("@zypper --root \"$root\" $modrepo 2>&1");
 				$code = $? >> 8;
 			} else {
 				my @zypper= @{$this->{zypper_chroot}};
-				$data = qxx ("@kchroot @zypper $modrepo 2>&1");
+				$data = KIWIQX::qxx ("@kchroot @zypper $modrepo 2>&1");
 				$code = $? >> 8;
 			}
 			if ($code != 0) {
@@ -924,11 +924,11 @@ sub setupPackageInfo {
 	my $str = "not installed";
 	if (! $chroot) {
 		$kiwi -> info ("Checking for package: $pack");
-		$data = qxx ("rpm --root $root -q \"$pack\" 2>&1");
+		$data = KIWIQX::qxx ("rpm --root $root -q \"$pack\" 2>&1");
 		$code = $? >> 8;
 	} else {
 		$kiwi -> info ("Checking for package: $pack");
-		$data= qxx ("@kchroot rpm -q \"$pack\" 2>&1 ");
+		$data= KIWIQX::qxx ("@kchroot rpm -q \"$pack\" 2>&1 ");
 		$code= $? >> 8;
 	}
 	if ($code != 0) {

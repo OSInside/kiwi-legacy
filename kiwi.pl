@@ -47,7 +47,7 @@ use KIWILog;
 use KIWIImage;
 use KIWIImageCreator;
 use KIWIBoot;
-use KIWIQX qw (qxx);
+use KIWIQX;
 use KIWIRuntimeChecker;
 use KIWIImageFormat;
 use KIWIXMLInfo;
@@ -105,7 +105,7 @@ sub main {
 	# remove pre-defined smart channels
 	#------------------------------------------
 	if (glob ("/etc/smart/channels/*")) {
-		qxx ( "rm -f /etc/smart/channels/*" );
+		KIWIQX::qxx ( "rm -f /etc/smart/channels/*" );
 	}
 	#==========================================
 	# Check for nocolor option
@@ -590,7 +590,7 @@ sub main {
 		# Create distri link for os-autoinst
 		#------------------------------------------
 		my $test = $tcase."/".$type;
-		my $data = qxx ("ln -s $test $suite/distri/$distri 2>&1");
+		my $data = KIWIQX::qxx ("ln -s $test $suite/distri/$distri 2>&1");
 		my $code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();
@@ -601,26 +601,26 @@ sub main {
 		#==========================================
 		# Create result mktemp directory
 		#------------------------------------------
-		my $out = qxx ("mktemp -q -d /tmp/kiwi-testrun-XXXXXX 2>&1");
+		my $out = KIWIQX::qxx ("mktemp -q -d /tmp/kiwi-testrun-XXXXXX 2>&1");
 		$code = $? >> 8; chomp $out;
 		if ($code != 0) {
 			$kiwi -> error  ("Couldn't create result directory: $out: $!");
 			$kiwi -> failed ();
-			qxx ("rm -f $suite/distri/$distri");
+			KIWIQX::qxx ("rm -f $suite/distri/$distri");
 			kiwiExit (1);
 		}
-		qxx ("chmod 755 $out 2>&1");
+		KIWIQX::qxx ("chmod 755 $out 2>&1");
 		#==========================================
 		# Copy environment to result directory
 		#------------------------------------------
-		$data = qxx ("cp $tcase/env.sh $out");
+		$data = KIWIQX::qxx ("cp $tcase/env.sh $out");
 		$code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Failed to copy test environment: $data");
 			$kiwi -> failed ();
-			qxx ("rm -f $suite/distri/$distri");
-			qxx ("rm -rf $out");
+			KIWIQX::qxx ("rm -f $suite/distri/$distri");
+			KIWIQX::qxx ("rm -rf $out");
 			kiwiExit (1);
 		}
 		#==========================================
@@ -636,8 +636,8 @@ sub main {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Failed to create run test script: $!");
 			$kiwi -> failed ();
-			qxx ("rm -f $suite/distri/$distri");
-			qxx ("rm -rf $out");
+			KIWIQX::qxx ("rm -f $suite/distri/$distri");
+			KIWIQX::qxx ("rm -rf $out");
 			kiwiExit (1);
 		}
 		#==========================================
@@ -650,8 +650,8 @@ sub main {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Failed to create screen ctrl file: $!");
 			$kiwi -> failed ();
-			qxx ("rm -f $suite/distri/$distri");
-			qxx ("rm -rf $out");
+			KIWIQX::qxx ("rm -f $suite/distri/$distri");
+			KIWIQX::qxx ("rm -rf $out");
 			kiwiExit (1);
 		}
 		#==========================================
@@ -660,10 +660,10 @@ sub main {
 		$kiwi -> done ();
 		$kiwi -> info ("Calling isotovideo, this can take some time...\n");
 		$kiwi -> info ("watch the screen session by: 'screen -r'");
-		qxx ("chmod u+x $out/run.sh");
-		qxx ("screen -L -D -m -c $out/run.ctrl $out/run.sh");
+		KIWIQX::qxx ("chmod u+x $out/run.sh");
+		KIWIQX::qxx ("screen -L -D -m -c $out/run.ctrl $out/run.sh");
 		$code = $? >> 8;
-		qxx ("rm -f $suite/distri/$distri");
+		KIWIQX::qxx ("rm -f $suite/distri/$distri");
 		if ($code == 0) {
 			$kiwi -> done ();
 		} else {
@@ -1918,7 +1918,7 @@ sub cloneImage {
 			chomp ($answer = <>);
 		}
 		if ($answer eq "yes") {
-			qxx ("mkdir -p $destination");
+			KIWIQX::qxx ("mkdir -p $destination");
 		} else {
 			kiwiExit (1);
 		}
@@ -1926,7 +1926,7 @@ sub cloneImage {
 	#==========================================
 	# Copy path to destination 
 	#------------------------------------------
-	my $data = qxx ("cp -a $clone/* $destination 2>&1");
+	my $data = KIWIQX::qxx ("cp -a $clone/* $destination 2>&1");
 	my $code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> failed ();
@@ -1948,7 +1948,7 @@ sub cloneImage {
 		$src = $clone."/".substr($file, length($destination."/"));
 		$src = Cwd::abs_path ($src);
 		unlink $file;
-		$data = qxx ("cp -L $src $dirn 2>&1");
+		$data = KIWIQX::qxx ("cp -L $src $dirn 2>&1");
 		$code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();
@@ -1961,7 +1961,7 @@ sub cloneImage {
 	# Remove checksum 
 	#------------------------------------------
 	if (-f $md5) {
-		qxx ("rm -f $md5 2>&1");
+		KIWIQX::qxx ("rm -f $md5 2>&1");
 	}
 	if ($answer ne "yes") {
 		$kiwi -> done();
@@ -2157,7 +2157,7 @@ sub createHash {
 		kiwiExit (1);
 	}
 	my $cmd  = "find -L -type f | grep -v .svn | grep -v .checksum.md5";
-	my $status = qxx (
+	my $status = KIWIQX::qxx (
 		"cd $idesc && $cmd | xargs md5sum > .checksum.md5"
 	);
 	my $result = $? >> 8;

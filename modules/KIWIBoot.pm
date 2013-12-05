@@ -36,7 +36,7 @@ use KIWIGlobals;
 use KIWILocator;
 use KIWILog;
 use KIWIIsoLinux;
-use KIWIQX qw (qxx);
+use KIWIQX;
 
 #==========================================
 # Exports
@@ -210,14 +210,14 @@ sub new {
 	#==========================================
 	# create tmp dir for operations
 	#------------------------------------------
-	$tmpdir = qxx ("mktemp -qdt kiwiboot.XXXXXX"); chomp $tmpdir;
+	$tmpdir = KIWIQX::qxx ("mktemp -qdt kiwiboot.XXXXXX"); chomp $tmpdir;
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> error  ("Couldn't create tmp dir: $tmpdir: $!");
 		$kiwi -> failed ();
 		return;
 	}
-	$loopdir = qxx ("mktemp -qdt kiwiloop.XXXXXX"); chomp $loopdir;
+	$loopdir = KIWIQX::qxx ("mktemp -qdt kiwiloop.XXXXXX"); chomp $loopdir;
 	$result  = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> error  ("Couldn't create tmp dir: $loopdir: $!");
@@ -391,7 +391,7 @@ sub new {
 		#------------------------------------------
 		if (-d $system) {
 			# System is specified as a directory...
-			$minInodes = qxx ("find $system | wc -l");
+			$minInodes = KIWIQX::qxx ("find $system | wc -l");
 			$sizeBytes = KIWIGlobals -> instance() -> dsize ($system);
 			$sizeBytes*= $fsoverhead;
 			chomp $minInodes;
@@ -459,7 +459,7 @@ sub new {
 	#==========================================
 	# find system architecture
 	#------------------------------------------
-	my $arch = qxx ("uname -m"); chomp $arch;
+	my $arch = KIWIQX::qxx ("uname -m"); chomp $arch;
 	if (defined $xml) {
 		#==========================================
 		# check framebuffer vga value
@@ -549,7 +549,7 @@ sub createBootStructure {
 		$zipped = 1;
 	}
 	$kiwi -> info ("Creating initial boot structure");
-	$status = qxx ( "mkdir -p $tmpdir/boot 2>&1" );
+	$status = KIWIQX::qxx ( "mkdir -p $tmpdir/boot 2>&1" );
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
@@ -558,9 +558,9 @@ sub createBootStructure {
 		return;
 	}
 	if ($zipped) {
-		$status = qxx ( "cp $initrd $tmpdir/boot/$iname 2>&1" );
+		$status = KIWIQX::qxx ( "cp $initrd $tmpdir/boot/$iname 2>&1" );
 	} else {
-		$status = qxx ( "cat $initrd | $zipper > $tmpdir/boot/$iname" );
+		$status = KIWIQX::qxx ( "cat $initrd | $zipper > $tmpdir/boot/$iname" );
 	}
 	$result = $? >> 8;
 	if ($result != 0) {
@@ -569,7 +569,7 @@ sub createBootStructure {
 		$kiwi -> failed ();
 		return;
 	}
-	$status = qxx ( "cp $kernel $tmpdir/boot/$lname 2>&1" );
+	$status = KIWIQX::qxx ( "cp $kernel $tmpdir/boot/$lname 2>&1" );
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
@@ -578,7 +578,7 @@ sub createBootStructure {
 		return;
 	}
 	if (($isxen) && ($xendomain eq "dom0")) {
-		$status = qxx ( "cp $xengz $tmpdir/boot/$xname 2>&1" );
+		$status = KIWIQX::qxx ( "cp $xengz $tmpdir/boot/$xname 2>&1" );
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -587,7 +587,7 @@ sub createBootStructure {
 			return;
 		}
 	}
-	qxx ("touch $tmpdir/boot/$this->{mbrid}");
+	KIWIQX::qxx ("touch $tmpdir/boot/$this->{mbrid}");
 	$kiwi -> done();
 	return $tmpdir;
 }
@@ -672,7 +672,7 @@ sub setupInstallCD {
 	} else {
 		$basedir = dirname ($initrd);
 	}
-	$tmpdir = qxx ( "mktemp -q -d $basedir/kiwicdinst.XXXXXX" ); chomp $tmpdir;
+	$tmpdir = KIWIQX::qxx ( "mktemp -q -d $basedir/kiwicdinst.XXXXXX" ); chomp $tmpdir;
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> error  ("Couldn't create tmp dir: $tmpdir: $!");
@@ -729,13 +729,13 @@ sub setupInstallCD {
 			# input file so we have to create a file from the device
 			# first and pass that to mksquashfs
 			# ----
-			$status = qxx (
+			$status = KIWIQX::qxx (
 				"qemu-img convert -f raw -O raw $haveDiskDevice $system"
 			);
 			$result = $? >> 8;
 		}
 		if ($result == 0) {
-			$status = qxx (
+			$status = KIWIQX::qxx (
 				"mksquashfs $system $md5name $system.squashfs -no-progress 2>&1"
 			);
 			$result = $? >> 8;
@@ -772,8 +772,8 @@ sub setupInstallCD {
 	if (! $this -> setupBootLoaderStages ($bootloader,'iso')) {
 		return;
 	}
-	qxx ("rm -rf $tmpdir/usr 2>&1");
-	qxx ("rm -rf $tmpdir/image 2>&1");
+	KIWIQX::qxx ("rm -rf $tmpdir/usr 2>&1");
+	KIWIQX::qxx ("rm -rf $tmpdir/image 2>&1");
 	$this->{initrd} = $oldird;
 	#==========================================
 	# Creating boot loader configuration
@@ -793,11 +793,11 @@ sub setupInstallCD {
 	my $cdrootData = "config-cdroot.tgz";
 	if (-f "$destdir/$cdrootData") {
 		$kiwi -> info ("Integrating CD root information...");
-		$status= qxx (
+		$status= KIWIQX::qxx (
 			"tar -C $tmpdir -xvf $destdir/$cdrootData"
 		);
 		$result= $? >> 8;
-		qxx ("rm -f $destdir/$cdrootData");
+		KIWIQX::qxx ("rm -f $destdir/$cdrootData");
 		if ($result != 0) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Failed to integrate CD root data: $status");
@@ -812,16 +812,16 @@ sub setupInstallCD {
 	my $cdrootScript = "config-cdroot.sh";
 	if (-x "$destdir/$cdrootScript") {
 		$kiwi -> info ("Calling CD root setup script...");
-		my $pwd = qxx ("pwd"); chomp $pwd;
+		my $pwd = KIWIQX::qxx ("pwd"); chomp $pwd;
 		my $script = "$destdir/$cdrootScript";
 		if ($script !~ /^\//) {
 			$script = $pwd."/".$script;
 		}
-		$status = qxx (
+		$status = KIWIQX::qxx (
 			"cd $tmpdir && bash -c $script 2>&1"
 		);
 		$result = $? >> 8;
-		qxx ("rm -f $script");
+		KIWIQX::qxx ("rm -f $script");
 		if ($result != 0) {
 			chomp $status;
 			$kiwi -> failed ();
@@ -846,7 +846,7 @@ sub setupInstallCD {
 		print $FD "IMAGE='".$namecd."'\n";
 		close $FD;
 		$kiwi -> info ("Importing system image: $system");
-		$status = qxx ("mv $system $tmpdir 2>&1");
+		$status = KIWIQX::qxx ("mv $system $tmpdir 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -861,25 +861,25 @@ sub setupInstallCD {
 	# copy grub2 config file to efi path too
 	#------------------------------------------
 	if (($firmware eq "efi") || ($firmware eq "uefi")) {
-		qxx ("mkdir -p $tmpdir/EFI/BOOT");
-		qxx ("cp $tmpdir/boot/grub2-efi/grub.cfg $tmpdir/EFI/BOOT");
+		KIWIQX::qxx ("mkdir -p $tmpdir/EFI/BOOT");
+		KIWIQX::qxx ("cp $tmpdir/boot/grub2-efi/grub.cfg $tmpdir/EFI/BOOT");
 	}
 	#==========================================
 	# make iso EFI bootable
 	#------------------------------------------
 	if (($firmware eq "efi") || ($firmware eq "uefi")) {
 		my $efi_fat = "$tmpdir/boot/$efi_arch/efi";
-		$status = qxx ("mkdir -p $tmpdir/boot/$efi_arch");
+		$status = KIWIQX::qxx ("mkdir -p $tmpdir/boot/$efi_arch");
 		$result = $? >> 8;
 		if ($result == 0) {
-			$status = qxx ("qemu-img create $efi_fat 4M 2>&1");
+			$status = KIWIQX::qxx ("qemu-img create $efi_fat 4M 2>&1");
 			$result = $? >> 8;
 		}
 		if ($result == 0) {
-			$status = qxx ("/sbin/mkdosfs -n 'BOOT' $efi_fat 2>&1");
+			$status = KIWIQX::qxx ("/sbin/mkdosfs -n 'BOOT' $efi_fat 2>&1");
 			$result = $? >> 8;
 			if ($result == 0) {
-				$status = qxx ("mcopy -Do -s -i $efi_fat $tmpdir/EFI :: 2>&1");
+				$status = KIWIQX::qxx ("mcopy -Do -s -i $efi_fat $tmpdir/EFI :: 2>&1");
 				$result = $? >> 8;
 			}
 		}
@@ -931,10 +931,10 @@ sub setupInstallCD {
 			$cfg_ext = "$tmpdir/boot/syslinux/extlinux.conf";
 		}
 		my $cfg_iso = "$tmpdir/boot/syslinux/isolinux.cfg";
-		qxx ("mv $cfg_ext $cfg_iso 2>&1");
-		qxx ("mv $tmpdir/boot/initrd $tmpdir/boot/syslinux");
-		qxx ("mv $tmpdir/boot/linux  $tmpdir/boot/syslinux");
-		qxx ("mv $tmpdir/boot/syslinux $tmpdir/boot/loader 2>&1");
+		KIWIQX::qxx ("mv $cfg_ext $cfg_iso 2>&1");
+		KIWIQX::qxx ("mv $tmpdir/boot/initrd $tmpdir/boot/syslinux");
+		KIWIQX::qxx ("mv $tmpdir/boot/linux  $tmpdir/boot/syslinux");
+		KIWIQX::qxx ("mv $tmpdir/boot/syslinux $tmpdir/boot/loader 2>&1");
 		$base = "-R -J -f -b boot/loader/isolinux.bin -no-emul-boot ";
 		$base.= "-V \"$volid\" -A \"$appid\"";
 		$opts = "-boot-load-size 4 -boot-info-table -udf -allow-limited-size ";
@@ -949,7 +949,7 @@ sub setupInstallCD {
 		$kiwi -> failed ();
 		return;
 	}
-	my $wdir = qxx ("pwd"); chomp $wdir;
+	my $wdir = KIWIQX::qxx ("pwd"); chomp $wdir;
 	if ($name !~ /^\//) {
 		$name = $wdir."/".$name;
 	}
@@ -989,7 +989,7 @@ sub setupInstallCD {
 	#==========================================
 	# Clean tmp
 	#------------------------------------------
-	qxx ("rm -rf $tmpdir");
+	KIWIQX::qxx ("rm -rf $tmpdir");
 	my $imgfile = basename $name;
 	$kiwi -> info ("Created $imgfile to be burned on CD");
 	$kiwi -> done ();
@@ -1068,7 +1068,7 @@ sub setupInstallStick {
 	#==========================================
 	# create tmp directory
 	#------------------------------------------
-	$tmpdir = qxx ( "mktemp -qdt kiwistickinst.XXXXXX" ); chomp $tmpdir;
+	$tmpdir = KIWIQX::qxx ( "mktemp -qdt kiwistickinst.XXXXXX" ); chomp $tmpdir;
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> error  ("Couldn't create tmp dir: $tmpdir: $!");
@@ -1120,13 +1120,13 @@ sub setupInstallStick {
 		$kiwi -> info ("Compressing installation image...");
 		$result = 0;
 		if ($haveDiskDevice) {
-			$status = qxx (
+			$status = KIWIQX::qxx (
 				"qemu-img convert -f raw -O raw $haveDiskDevice $system"
 			);
 			$result = $? >> 8;
 		}
 		if ($result == 0) {
-			$status = qxx (
+			$status = KIWIQX::qxx (
 				"mksquashfs $system $md5name $system.squashfs -no-progress 2>&1"
 			);
 			$result = $? >> 8;
@@ -1159,7 +1159,7 @@ sub setupInstallStick {
 	# Create virtual disk to be dumped on stick
 	#------------------------------------------
 	$kiwi -> info ("Creating virtual disk...");
-	$status = qxx ("qemu-img create $diskname $vmsize 2>&1");
+	$status = KIWIQX::qxx ("qemu-img create $diskname $vmsize 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
@@ -1247,7 +1247,7 @@ sub setupInstallStick {
 	# create bios_grub flag
 	#------------------------------------------
 	if ($needBiosP) {
-		$status = qxx ("parted $this->{loop} set 1 bios_grub on 2>&1");
+		$status = KIWIQX::qxx ("parted $this->{loop} set 1 bios_grub on 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -1332,7 +1332,7 @@ sub setupInstallStick {
 	#==========================================
 	# Import boot loader stages
 	#------------------------------------------
-	my $uuid = qxx("blkid $boot -s UUID -o value"); chomp $uuid;
+	my $uuid = KIWIQX::qxx("blkid $boot -s UUID -o value"); chomp $uuid;
 	if (! $this -> setupBootLoaderStages ($bootloader,'disk',$uuid)) {
 		return;
 	}
@@ -1372,11 +1372,11 @@ sub setupInstallStick {
 	my $cdrootData = "config-cdroot.tgz";
 	if (-f "$destdir/$cdrootData") {
 		$kiwi -> info ("Integrating CD root information...");
-		$status= qxx (
+		$status= KIWIQX::qxx (
 			"tar -C $loopdir -xvf $destdir/$cdrootData"
 		);
 		$result= $? >> 8;
-		qxx ("rm -f $destdir/$cdrootData");
+		KIWIQX::qxx ("rm -f $destdir/$cdrootData");
 		if ($result != 0) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Failed to integrate CD root data: $status");
@@ -1391,16 +1391,16 @@ sub setupInstallStick {
 	my $cdrootScript = "config-cdroot.sh";
 	if (-x "$destdir/$cdrootScript") {
 		$kiwi -> info ("Calling CD root setup script...");
-		my $pwd = qxx ("pwd"); chomp $pwd;
+		my $pwd = KIWIQX::qxx ("pwd"); chomp $pwd;
 		my $script = "$destdir/$cdrootScript";
 		if ($script !~ /^\//) {
 			$script = $pwd."/".$script;
 		}
-		$status = qxx (
+		$status = KIWIQX::qxx (
 			"cd $loopdir && bash -c $script 2>&1"
 		);
 		$result = $? >> 8;
-		qxx ("rm -f $script");
+		KIWIQX::qxx ("rm -f $script");
 		if ($result != 0) {
 			chomp $status;
 			$kiwi -> failed ();
@@ -1426,7 +1426,7 @@ sub setupInstallStick {
 			$this -> cleanStack ();
 			return;
 		}
-		$status = qxx ("mv $system $loopdir 2>&1");
+		$status = KIWIQX::qxx ("mv $system $loopdir 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -1584,13 +1584,13 @@ sub setupInstallPXE {
 	$sysname = $system;
 	$sysname =~ s/\.raw$/\.gz/;
 	if ($haveDiskDevice) {
-		$status = qxx (
+		$status = KIWIQX::qxx (
 			"qemu-img convert -f raw -O raw $haveDiskDevice $system"
 		);
 		$result = $? >> 8;
 	}
 	if ($result == 0) {
-		$status = qxx ("$zipper -c $system > $sysname 2>&1");
+		$status = KIWIQX::qxx ("$zipper -c $system > $sysname 2>&1");
 		$result = $? >> 8;
 	}
 	if ($result != 0) {
@@ -1624,7 +1624,7 @@ sub setupInstallPXE {
 	foreach my $file ($md5name,$sysname,$irdname,$krnname,$appname) {
 		push @packfiles, basename $file;
 	}
-	$status = qxx (
+	$status = KIWIQX::qxx (
 		"tar -C $destdir -czf $tarname @packfiles"
 	);
 	$result = $? >> 8;
@@ -2191,7 +2191,7 @@ sub setupBootDisk {
 			#==========================================
 			# Call custom image creation tool...
 			#------------------------------------------
-			$status = qxx ("$this->{gdata}->{StudioNode} $this->{vmsize} 2>&1");
+			$status = KIWIQX::qxx ("$this->{gdata}->{StudioNode} $this->{vmsize} 2>&1");
 			$result = $? >> 8;
 			chomp $status;
 			if (($result != 0) || (! -b $status)) {
@@ -2208,7 +2208,7 @@ sub setupBootDisk {
 			#==========================================
 			# loop setup a disk device as file...
 			#------------------------------------------
-			$status = qxx ("qemu-img create $diskname $this->{vmsize} 2>&1");
+			$status = KIWIQX::qxx ("qemu-img create $diskname $this->{vmsize} 2>&1");
 			$result = $? >> 8;
 			if ($result != 0) {
 				$kiwi -> failed ();
@@ -2302,7 +2302,7 @@ sub setupBootDisk {
 			return;
 		}
 		if ($needJumpP) {
-			$status = qxx ("parted $this->{loop} set 1 bios_grub on 2>&1");
+			$status = KIWIQX::qxx ("parted $this->{loop} set 1 bios_grub on 2>&1");
 			$result = $? >> 8;
 			if ($result != 0) {
 				$kiwi -> failed ();
@@ -2436,7 +2436,7 @@ sub setupBootDisk {
 	#------------------------------------------
 	if (! $haveTree) {
 		$kiwi -> info ("Dumping system image on disk");
-		$status = qxx ("dd if=$system of=$root bs=32k 2>&1");
+		$status = KIWIQX::qxx ("dd if=$system of=$root bs=32k 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -2466,7 +2466,7 @@ sub setupBootDisk {
 		if (($haveSplit) && (-f $splitfile)) {
 			$kiwi -> info ("Dumping split read/write part on disk");
 			$root = $deviceMap{readwrite};
-			$status = qxx ("dd if=$splitfile of=$root bs=32k 2>&1");
+			$status = KIWIQX::qxx ("dd if=$splitfile of=$root bs=32k 2>&1");
 			$result = $? >> 8;
 			if ($result != 0) {
 				$kiwi -> failed ();
@@ -2549,7 +2549,7 @@ sub setupBootDisk {
 						$lvname = 'LV'.$lvname;
 					}
 					my $device = "/dev/$VGroup/$lvname";
-					$status = qxx ("mkdir -p $loopdir/$pname 2>&1");
+					$status = KIWIQX::qxx ("mkdir -p $loopdir/$pname 2>&1");
 					$result = $? >> 8;
 					if ($result != 0) {
 						$kiwi -> error (
@@ -2605,7 +2605,7 @@ sub setupBootDisk {
 			# ----
 			$btrfs_sub_vol = '/@';
 		}
-		$status = qxx (
+		$status = KIWIQX::qxx (
 			$rsync_cmd.$system.'/ '.$loopdir.$btrfs_sub_vol.' 2>&1'
 		);
 		$result = $? >> 8;
@@ -2622,8 +2622,8 @@ sub setupBootDisk {
 			# fill disk device with zero bytes
 			#------------------------------------------
 			$kiwi -> info ("Filling target device with zero bytes...");
-			qxx ("dd if=/dev/zero of=$loopdir/abc 2>&1");
-			qxx ("rm -f $loopdir/abc");
+			KIWIQX::qxx ("dd if=/dev/zero of=$loopdir/abc 2>&1");
+			KIWIQX::qxx ("rm -f $loopdir/abc");
 			$kiwi -> done();
 		}
 		#==========================================
@@ -2640,7 +2640,7 @@ sub setupBootDisk {
 			my $cipher = $type->{luks};
 			my $name   = "luksReadWrite";
 			$kiwi -> info ("Creating LUKS->ext3 read-write filesystem");
-			$status = qxx ("echo $cipher|cryptsetup -q luksFormat $rw 2>&1");
+			$status = KIWIQX::qxx ("echo $cipher|cryptsetup -q luksFormat $rw 2>&1");
 			$result = $? >> 8;
 			if ($status != 0) {
 				$kiwi -> failed ();
@@ -2648,7 +2648,7 @@ sub setupBootDisk {
 				$kiwi -> failed ();
 				return;
 			}
-			$status = qxx ("echo $cipher|cryptsetup luksOpen $rw $name 2>&1");
+			$status = KIWIQX::qxx ("echo $cipher|cryptsetup luksOpen $rw $name 2>&1");
 			$result = $? >> 8;
 			if ($result != 0) {
 				$kiwi -> failed ();
@@ -2670,7 +2670,7 @@ sub setupBootDisk {
 			$fsopts = '';
 		}
 		my $fstool = "mkfs.ext3";
-		$status = qxx ("$fstool $fsopts $rw 2>&1");
+		$status = KIWIQX::qxx ("$fstool $fsopts $rw 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -2734,7 +2734,7 @@ sub setupBootDisk {
 	#==========================================
 	# Import boot loader stages
 	#------------------------------------------
-	my $uuid = qxx("blkid $boot -s UUID -o value"); chomp $uuid;
+	my $uuid = KIWIQX::qxx("blkid $boot -s UUID -o value"); chomp $uuid;
 	if (! $this -> setupBootLoaderStages ($bootloader,'disk',$uuid)) {
 		return;
 	}
@@ -2765,7 +2765,7 @@ sub setupBootDisk {
 		# Mount efi jump boot space on this disk
 		#------------------------------------------
 		my $jump = $deviceMap{jump};
-		qxx ("mkdir -p $loopdir/efi");
+		KIWIQX::qxx ("mkdir -p $loopdir/efi");
 		if (! KIWIGlobals -> instance() -> mount ($jump, "$loopdir/efi")) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't mount image jump device: $boot");
@@ -2785,7 +2785,7 @@ sub setupBootDisk {
 		#==========================================
 		# Adapt efi boot path on jump partition
 		#------------------------------------------
-		qxx ("mv $loopdir/EFI $loopdir/efi");
+		KIWIQX::qxx ("mv $loopdir/EFI $loopdir/efi");
 	}
 	#==========================================
 	# umount entire boot space
@@ -2809,7 +2809,7 @@ sub setupBootDisk {
 	#==========================================
 	# cleanup temp directory
 	#------------------------------------------
-	qxx ("rm -rf $tmpdir");
+	KIWIQX::qxx ("rm -rf $tmpdir");
 	if (($haveDiskDevice) && (! $this->{gdata}->{StudioNode})) {
 		if (
 			($type->{installiso}   ne "true") &&
@@ -2820,7 +2820,7 @@ sub setupBootDisk {
 			# create image file from disk device
 			#------------------------------------------
 			$kiwi -> info ("Dumping image file from $this->{loop}...");
-			$status = qxx (
+			$status = KIWIQX::qxx (
 				"qemu-img convert -f raw -O raw $this->{loop} $diskname 2>&1"
 			);
 			$result = $? >> 8;
@@ -2899,7 +2899,7 @@ sub setupInstallFlags {
 	my $zipper = $this->{gdata}->{IrdZipperCommand};
 	my $suf    = $this->{gdata}->{IrdZipperSuffix};
 	my $newird;
-	my $irddir = qxx ("mktemp -qdt kiwiird.XXXXXX"); chomp $irddir;
+	my $irddir = KIWIQX::qxx ("mktemp -qdt kiwiird.XXXXXX"); chomp $irddir;
 	my $result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
@@ -2911,13 +2911,13 @@ sub setupInstallFlags {
 	# unpack initrd files
 	#------------------------------------------
 	my $unzip  = "$zipper -cd $initrd 2>&1";
-	my $status = qxx ("$unzip | (cd $irddir && cpio -di 2>&1)");
+	my $status = KIWIQX::qxx ("$unzip | (cd $irddir && cpio -di 2>&1)");
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Failed to extract initrd data: $status");
 		$kiwi -> failed ();
-		qxx ("rm -rf $irddir");
+		KIWIQX::qxx ("rm -rf $irddir");
 		return;
 	}
 	#==========================================
@@ -2927,13 +2927,13 @@ sub setupInstallFlags {
 		my $destdir = dirname ($system);
 		my $recopart= "$destdir/recovery.partition.size";
 		if (-f $recopart) {
-			my $status = qxx ("cp $recopart $irddir 2>&1");
+			my $status = KIWIQX::qxx ("cp $recopart $irddir 2>&1");
 			my $result = $? >> 8;
 			if ($result != 0) {
 				$kiwi -> failed ();
 				$kiwi -> error  ("Failed to copy recovery metadata: $result");
 				$kiwi -> failed ();
-				qxx ("rm -rf $irddir");
+				KIWIQX::qxx ("rm -rf $irddir");
 				return;
 			}
 		}
@@ -2948,16 +2948,16 @@ sub setupInstallFlags {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't find partid metadata: $partidfile");
 			$kiwi -> failed ();
-			qxx ("rm -rf $irddir");
+			KIWIQX::qxx ("rm -rf $irddir");
 			return;
 		}
-		my $status = qxx ("cp $partidfile $irddir/config.partids 2>&1");
+		my $status = KIWIQX::qxx ("cp $partidfile $irddir/config.partids 2>&1");
 		my $result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Failed to copy partid metadata: $result");
 			$kiwi -> failed ();
-			qxx ("rm -rf $irddir");
+			KIWIQX::qxx ("rm -rf $irddir");
 			return;
 		}
 	}
@@ -2965,12 +2965,12 @@ sub setupInstallFlags {
 	# Include MBR ID to initrd
 	#------------------------------------------
 	my $FD;
-	qxx ("mkdir -p $irddir/boot");
+	KIWIQX::qxx ("mkdir -p $irddir/boot");
 	if (! open ($FD, '>', "$irddir/boot/mbrid")) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't create mbrid file: $!");
 		$kiwi -> failed ();
-		qxx ("rm -rf $irddir");
+		KIWIQX::qxx ("rm -rf $irddir");
 		return;
 	}
 	print $FD "$this->{mbrid}";
@@ -2981,13 +2981,13 @@ sub setupInstallFlags {
 	if (defined $system) {
 		my $imd5 = $system;
 		$imd5 =~ s/\.raw$/\.md5/;
-		my $status = qxx ("cp $imd5 $irddir/etc/image.md5 2>&1");
+		my $status = KIWIQX::qxx ("cp $imd5 $irddir/etc/image.md5 2>&1");
 		my $result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Failed importing md5 file: $status");
 			$kiwi -> failed ();
-			qxx ("rm -rf $irddir");
+			KIWIQX::qxx ("rm -rf $irddir");
 			return;
 		}
 		my $namecd = basename ($system);
@@ -2995,7 +2995,7 @@ sub setupInstallFlags {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't find md5 file");
 			$kiwi -> failed ();
-			qxx ("rm -rf $irddir");
+			KIWIQX::qxx ("rm -rf $irddir");
 			return;
 		}
 		my $FD;
@@ -3013,7 +3013,7 @@ sub setupInstallFlags {
 	#------------------------------------------
 	$newird = $initrd;
 	$newird =~ s/\.$suf/\.install\.$suf/;
-	$status = qxx (
+	$status = KIWIQX::qxx (
 		"(cd $irddir && find|cpio --quiet -oH newc | $zipper) > $newird"
 	);
 	$result = $? >> 8;
@@ -3021,10 +3021,10 @@ sub setupInstallFlags {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Failed to re-create initrd: $status");
 		$kiwi -> failed ();
-		qxx ("rm -rf $irddir");
+		KIWIQX::qxx ("rm -rf $irddir");
 		return;
 	}
-	qxx ("rm -rf $irddir");
+	KIWIQX::qxx ("rm -rf $irddir");
 	#==========================================
 	# recreate splash data to initrd
 	#------------------------------------------
@@ -3033,7 +3033,7 @@ sub setupInstallFlags {
 		$splash =~ s/$suf/spl/;
 	}
 	if (-f $splash) {
-		qxx ("cat $splash >> $newird");
+		KIWIQX::qxx ("cat $splash >> $newird");
 	}
 	return $newird;
 }
@@ -3048,7 +3048,7 @@ sub setupBootFlags {
 	my $zipper = $this->{gdata}->{IrdZipperCommand};
 	my $suf    = $this->{gdata}->{IrdZipperSuffix};
 	my $newird;
-	my $irddir = qxx ("mktemp -qdt kiwiird.XXXXXX"); chomp $irddir;
+	my $irddir = KIWIQX::qxx ("mktemp -qdt kiwiird.XXXXXX"); chomp $irddir;
 	my $result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> error  ("Couldn't create tmp dir: $irddir: $!");
@@ -3067,13 +3067,13 @@ sub setupBootFlags {
 	# unpack initrd files
 	#------------------------------------------
 	my $unzip  = "$zipper -cd $initrd 2>&1";
-	my $status = qxx ("$unzip | (cd $irddir && cpio -di 2>&1)");
+	my $status = KIWIQX::qxx ("$unzip | (cd $irddir && cpio -di 2>&1)");
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Failed to extract initrd data: $status");
 		$kiwi -> failed ();
-		qxx ("rm -rf $irddir");
+		KIWIQX::qxx ("rm -rf $irddir");
 		return;
 	}
 	#==========================================
@@ -3082,13 +3082,13 @@ sub setupBootFlags {
 	my $destdir = dirname ($initrd);
 	my $recopart= "$destdir/recovery.partition.size";
 	if (-f $recopart) {
-		my $status = qxx ("cp $recopart $irddir 2>&1");
+		my $status = KIWIQX::qxx ("cp $recopart $irddir 2>&1");
 		my $result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Failed to copy recovery metadata: $result");
 			$kiwi -> failed ();
-			qxx ("rm -rf $irddir");
+			KIWIQX::qxx ("rm -rf $irddir");
 			return;
 		}
 	}
@@ -3096,15 +3096,15 @@ sub setupBootFlags {
 	# Include Partition ID information
 	#------------------------------------------
 	if (! $this -> setupPartIDs ("$irddir/config.partids")) {
-		qxx ("rm -rf $irddir");
+		KIWIQX::qxx ("rm -rf $irddir");
 		return;
 	}
 	#==========================================
 	# Include mdadm.conf of mdraid is active
 	#------------------------------------------
 	if ($this->{mddev}) {
-		qxx ("mkdir -p $irddir/etc");
-		$status = qxx (
+		KIWIQX::qxx ("mkdir -p $irddir/etc");
+		$status = KIWIQX::qxx (
 			"mdadm -Db $this->{mddev} > $irddir/etc/mdadm.conf 2>&1"
 		);
 		$result = $? >> 8;
@@ -3112,7 +3112,7 @@ sub setupBootFlags {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Failed to extract raid configuration: $status");
 			$kiwi -> failed ();
-			qxx ("rm -rf $irddir");
+			KIWIQX::qxx ("rm -rf $irddir");
 			return;
 		}
 	}
@@ -3120,12 +3120,12 @@ sub setupBootFlags {
 	# Include MBR ID to initrd
 	#------------------------------------------
 	my $FD;
-	qxx ("mkdir -p $irddir/boot");
+	KIWIQX::qxx ("mkdir -p $irddir/boot");
 	if (! open ($FD, '>', "$irddir/boot/mbrid")) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't create mbrid file: $!");
 		$kiwi -> failed ();
-		qxx ("rm -rf $irddir");
+		KIWIQX::qxx ("rm -rf $irddir");
 		return;
 	}
 	print $FD "$this->{mbrid}";
@@ -3135,29 +3135,29 @@ sub setupBootFlags {
 	#------------------------------------------
 	$newird = $initrd;
 	$newird =~ s/\.$suf/\.mbrinfo\.$suf/;
-	$status = qxx (
+	$status = KIWIQX::qxx (
 		"(cd $irddir && find|cpio --quiet -oH newc | $zipper) > $newird"
 	);
 	$result = $? >> 8;
 	if ($result == 0) {
-		$status = qxx ("mv $newird $initrd 2>&1");
+		$status = KIWIQX::qxx ("mv $newird $initrd 2>&1");
 		$result = $? >> 8;
 	}
 	if ($result != 0) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Failed to re-create initrd: $status");
 		$kiwi -> failed ();
-		qxx ("rm -rf $irddir");
+		KIWIQX::qxx ("rm -rf $irddir");
 		return;
 	}
-	qxx ("rm -rf $irddir");
+	KIWIQX::qxx ("rm -rf $irddir");
 	#==========================================
 	# update splash initrd if required
 	#------------------------------------------
 	my $splashird = $initrd;
 	$splashird =~ s/\.$suf$/\.splash.$suf/;
 	if (($initrd !~ /splash\.$suf$/) && (-f $splashird)) {
-		qxx ("cp $initrd $splashird 2>&1");
+		KIWIQX::qxx ("cp $initrd $splashird 2>&1");
 		$initrd = $splashird;
 	}
 	#==========================================
@@ -3168,7 +3168,7 @@ sub setupBootFlags {
 		$splash =~ s/$suf/spl/;
 	}
 	if (-f $splash) {
-		qxx ("cat $splash >> $initrd");
+		KIWIQX::qxx ("cat $splash >> $initrd");
 	}
 	return $initrd;
 }
@@ -3321,14 +3321,14 @@ sub setupSplash {
 	my $spllink = 0;
 	if (-f $plymouth) {
 		$status = "--> plymouth splash system will be used";
-		qxx ("rm -f $plymouth");
+		KIWIQX::qxx ("rm -f $plymouth");
 		$spllink= 1;
 	} elsif ($isxen) {
 		$status = "--> skip splash initrd attachment for xen";
 		$spllink= 1;
-		qxx ("rm -f $splfile");
+		KIWIQX::qxx ("rm -f $splfile");
 	} elsif (-f $splfile) {
-		qxx ("cat $initrd $splfile > $newird");
+		KIWIQX::qxx ("cat $initrd $splfile > $newird");
 		$status = "--> kernel splash system will be used";
 		$spllink= 0;
 	} else {
@@ -3376,7 +3376,7 @@ sub setupSplashLink {
 	my $status;
 	my $result;
 	if ($initrd !~ /.(g|x)z$/) {
-		$status = qxx ("$this->{gdata}->{IrdZipperCommand} -f $initrd 2>&1");
+		$status = KIWIQX::qxx ("$this->{gdata}->{IrdZipperCommand} -f $initrd 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			return ("Failed to compress initrd: $status");
@@ -3386,7 +3386,7 @@ sub setupSplashLink {
 	my $dirname = dirname  $initrd;
 	my $curfile = basename $initrd;
 	my $newfile = basename $newird;
-	$status = qxx (
+	$status = KIWIQX::qxx (
 		"cd $dirname && rm -f $newfile && ln -s $curfile $newfile"
 	);
 	$result = $? >> 8;
@@ -3411,7 +3411,7 @@ sub cleanStack {
 	#==========================================
 	# make sure data is written
 	#------------------------------------------
-	qxx ("sync");
+	KIWIQX::qxx ("sync");
 	#==========================================
 	# umount from global space
 	#------------------------------------------
@@ -3421,7 +3421,7 @@ sub cleanStack {
 	#------------------------------------------
 	my @cStack = @{$cStack};
 	foreach my $cmd (reverse @cStack) {
-		$status = qxx ("$cmd 2>&1");
+		$status = KIWIQX::qxx ("$cmd 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> warning ("cleanStack failed: $cmd: $status\n");
@@ -3444,14 +3444,14 @@ sub buildMD5Sum {
 	my $kiwi = $this->{kiwi};
 	$kiwi -> info ("Creating image MD5 sum...");
 	my $size = KIWIGlobals -> instance() -> isize ($file);
-	my $primes = qxx ("factor $size"); $primes =~ s/^.*: //;
+	my $primes = KIWIQX::qxx ("factor $size"); $primes =~ s/^.*: //;
 	my $blocksize = 1;
 	for my $factor (split /\s/,$primes) {
 		last if ($blocksize * $factor > 8192);
 		$blocksize *= $factor;
 	}
 	my $blocks = $size / $blocksize;
-	my $sum  = qxx ("cat $file | md5sum - | cut -f 1 -d-");
+	my $sum  = KIWIQX::qxx ("cat $file | md5sum - | cut -f 1 -d-");
 	chomp $sum;
 	if ($outf) {
 		$file = $outf;
@@ -3459,7 +3459,7 @@ sub buildMD5Sum {
 	if ($file =~ /\.raw$/) {
 		$file =~ s/raw$/md5/;
 	}
-	qxx ("echo \"$sum $blocks $blocksize\" > $file");
+	KIWIQX::qxx ("echo \"$sum $blocks $blocksize\" > $file");
 	$kiwi -> done();
 	return $this;
 }
@@ -3488,14 +3488,14 @@ sub updateMD5File {
 		close $FD;
 		chomp $line;
 		my $size = KIWIGlobals -> instance() -> isize ($file);
-		my $primes = qxx ("factor $size"); $primes =~ s/^.*: //;
+		my $primes = KIWIQX::qxx ("factor $size"); $primes =~ s/^.*: //;
 		my $blocksize = 1;
 		for my $factor (split /\s/,$primes) {
 			last if ($blocksize * $factor > 65464);
 			$blocksize *= $factor;
 		}
 		my $blocks = $size / $blocksize;
-		qxx ("echo \"$line $blocks $blocksize\" > $outf");
+		KIWIQX::qxx ("echo \"$line $blocks $blocksize\" > $outf");
 		$kiwi -> done();
 	}
 	return $this;
@@ -3582,23 +3582,23 @@ sub setupBootLoaderStages {
 		if ($zipped) {
 			$test = $unzip;
 		}
-		$status = qxx ("$test | cpio -it --quiet | grep -q share/grub/ 2>&1");
+		$status = KIWIQX::qxx ("$test | cpio -it --quiet | grep -q share/grub/ 2>&1");
 		$result = $? >> 8;
 		if ($result == 0) {
 			$grub_share = 'grub';
 		}
-		$status = qxx ("$test | cpio -it --quiet | grep -q lib/grub2/ 2>&1");
+		$status = KIWIQX::qxx ("$test | cpio -it --quiet | grep -q lib/grub2/ 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$grub_bios = 'grub';
 			$grub_efi  = 'grub';
 		}
-		$status = qxx ("$test | cpio -it --quiet | grep -q lib/grub2-efi 2>&1");
+		$status = KIWIQX::qxx ("$test | cpio -it --quiet | grep -q lib/grub2-efi 2>&1");
 		$result = $? >> 8;
 		if ($result == 0) {
 			$grub_efi = 'grub2-efi';
 		}
-		$status = qxx ("$test | cpio -it --quiet | grep -q lib64/efi 2>&1");
+		$status = KIWIQX::qxx ("$test | cpio -it --quiet | grep -q lib64/efi 2>&1");
 		$result = $? >> 8;
 		if ($result == 0) {
 			$lib = 'lib64';
@@ -3654,7 +3654,7 @@ sub setupBootLoaderStages {
 			push @bootdir,"$tmpdir/boot/grub2/$efipc";
 			push @bootdir,"$tmpdir/EFI/BOOT";
 		}
-		$status = qxx ("mkdir -p @bootdir 2>&1");
+		$status = KIWIQX::qxx ("mkdir -p @bootdir 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -3711,12 +3711,12 @@ sub setupBootLoaderStages {
 			$s_bio = "";
 		}
 		if ($zipped) {
-			$status= qxx (
+			$status= KIWIQX::qxx (
 				"$unzip | \\
 				(cd $tmpdir && cpio -i -d $figure -d $s_bio -d $s_efi 2>&1)"
 			);
 		} else {
-			$status= qxx (
+			$status= KIWIQX::qxx (
 				"cat $initrd | \\
 				(cd $tmpdir && cpio -i -d $figure -d $s_bio -d $s_efi 2>&1)"
 			);
@@ -3726,7 +3726,7 @@ sub setupBootLoaderStages {
 		#------------------------------------------
 		foreach my $grub ('grub','grub2') {
 			if (-d "$tmpdir/usr/share/$grub/themes") {
-				$status = qxx (
+				$status = KIWIQX::qxx (
 					"mv $tmpdir/usr/share/$grub/themes $tmpdir/boot/grub2 2>&1"
 				);
 				last;
@@ -3746,7 +3746,7 @@ sub setupBootLoaderStages {
 			my $stageD = $stages{$stage}{stageSRC};
 			my $stageT = $stages{$stage}{stageDST};
 			if (-d $tmpdir.$stageD) {
-				$status = qxx (
+				$status = KIWIQX::qxx (
 					'cp '.$tmpdir.$stageD.'/* '.$tmpdir.$stageT.' 2>&1'
 				);
 				$result = $? >> 8;
@@ -3813,7 +3813,7 @@ sub setupBootLoaderStages {
 				$fo_bin = 'bootx32.efi';
 			}
 			my $core= "$tmpdir/EFI/BOOT/$fo_bin";
-			$status = qxx (
+			$status = KIWIQX::qxx (
 				"$grub2_uefi_mkimage -O $fo -o $core -c $bootefi @modules 2>&1"
 			);
 			$result = $? >> 8;
@@ -3840,11 +3840,11 @@ sub setupBootLoaderStages {
 			}
 			$result = 0;
 			if ($zipped) {
-				$status= qxx (
+				$status= KIWIQX::qxx (
 					"$unzip | (cd $tmpdir && cpio -i -d $s_data 2>&1)"
 				);
 			} else {
-				$status= qxx (
+				$status= KIWIQX::qxx (
 					"cat $initrd | (cd $tmpdir && cpio -i -d $s_data 2>&1)"
 				);
 			}
@@ -3866,12 +3866,12 @@ sub setupBootLoaderStages {
 				$kiwi -> failed ();
 				return;
 			}
-			$status = qxx (
+			$status = KIWIQX::qxx (
 				"cp $tmpdir/$s_shim_ms $tmpdir/EFI/BOOT/$fo_bin 2>&1"
 			);
 			$result = $? >> 8;
 			if ($result != 0) {
-				$status = qxx (
+				$status = KIWIQX::qxx (
 					"cp $tmpdir/$s_shim_suse $tmpdir/EFI/BOOT/$fo_bin 2>&1"
 				);
 				$result = $? >> 8;
@@ -3882,7 +3882,7 @@ sub setupBootLoaderStages {
 				$kiwi -> failed ();
 				return;
 			}
-			$status = qxx (
+			$status = KIWIQX::qxx (
 				"cp $tmpdir/$s_signed $tmpdir/EFI/BOOT/grub.efi 2>&1");
 			$result = $? >> 8;
 			if ($result != 0) {
@@ -3911,7 +3911,7 @@ sub setupBootLoaderStages {
 			my $cdimg    = "$tmpdir/boot/grub2/$format/eltorito.img";
 			my $cdcore   = "$tmpdir/boot/grub2/$format/cdboot.img";
 			my $mkimage  = $grub2_bios_mkimage;
-			my $status = qxx (
+			my $status = KIWIQX::qxx (
 				"$mkimage -O $format -o $core -c $bootconf @modules 2>&1"
 			);
 			my $result = $? >> 8;
@@ -3927,7 +3927,7 @@ sub setupBootLoaderStages {
 			#------------------------------------------
 			if ((defined $type) && ($type eq "iso")) {
 				$kiwi -> info ("Creating grub2 eltorito boot image");
-				$status = qxx ("cat $cdcore $core > $cdimg");
+				$status = KIWIQX::qxx ("cat $cdcore $core > $cdimg");
 				$result = $? >> 8;
 				if ($result != 0) {
 					$kiwi -> failed ();
@@ -3946,7 +3946,7 @@ sub setupBootLoaderStages {
 		my $stages = "'usr/lib/grub/*'";
 		my $figure = "'image/loader/message'";
 		my $unzip  = "$zipper -cd $initrd 2>&1";
-		$status = qxx ( "mkdir -p $tmpdir/boot/grub 2>&1" );
+		$status = KIWIQX::qxx ( "mkdir -p $tmpdir/boot/grub 2>&1" );
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -3959,16 +3959,16 @@ sub setupBootLoaderStages {
 		#------------------------------------------
 		$kiwi -> info ("Importing graphics boot message and stage files");
 		if ($zipped) {
-			$status= qxx (
+			$status= KIWIQX::qxx (
 				"$unzip | (cd $tmpdir && cpio -i -d $figure -d $stages 2>&1)"
 			);
 		} else {
-			$status= qxx (
+			$status= KIWIQX::qxx (
 				"cat $initrd|(cd $tmpdir && cpio -i -d $figure -d $stages 2>&1)"
 			);
 		}
 		if (-e $tmpdir."/image/loader/message") {
-			$status = qxx ("mv $tmpdir/$figure $tmpdir/boot/message 2>&1");
+			$status = KIWIQX::qxx ("mv $tmpdir/$figure $tmpdir/boot/message 2>&1");
 			$result = $? >> 8;
 			$kiwi -> done();
 		} else {
@@ -3978,26 +3978,26 @@ sub setupBootLoaderStages {
 		# check Grub stage files...
 		#------------------------------------------
 		if (glob($tmpdir."/usr/lib/grub/*")) {
-			$status = qxx (
+			$status = KIWIQX::qxx (
 				"mv $tmpdir/usr/lib/grub/* $tmpdir/boot/grub 2>&1"
 			);
 			$result = $? >> 8;
 			if (($result == 0) && (defined $type) && ($type eq "iso")) {
 				my $src = "$tmpdir/boot/grub/stage2_eltorito";
 				my $dst = "$tmpdir/boot/grub/stage2";
-				$status = qxx ("mv $src $dst 2>&1");
+				$status = KIWIQX::qxx ("mv $src $dst 2>&1");
 				$result = $? >> 8;
 			}
 		} else {
 			$kiwi -> warning ("No grub stage files found in boot image");
 			$kiwi -> skipped ();
 			$kiwi -> info    ("Trying to use grub stages from local machine");
-			$status = qxx ( "cp /usr/lib/grub/* $tmpdir/boot/grub 2>&1" );
+			$status = KIWIQX::qxx ( "cp /usr/lib/grub/* $tmpdir/boot/grub 2>&1" );
 			$result = $? >> 8;
 			if (($result == 0) && (defined $type) && ($type eq "iso")) {
 				my $src = "$tmpdir/boot/grub/stage2_eltorito";
 				my $dst = "$tmpdir/boot/grub/stage2";
-				$status = qxx ("mv $src $dst 2>&1");
+				$status = KIWIQX::qxx ("mv $src $dst 2>&1");
 				$result = $? >> 8;
 			}
 			if ($result != 0) {
@@ -4016,18 +4016,18 @@ sub setupBootLoaderStages {
 		#==========================================
 		# Create syslinux boot data directory
 		#------------------------------------------
-		qxx ("mkdir -p $tmpdir/boot/syslinux 2>&1");
+		KIWIQX::qxx ("mkdir -p $tmpdir/boot/syslinux 2>&1");
 		#==========================================
 		# Get syslinux graphics data
 		#------------------------------------------
 		$kiwi -> info ("Importing graphics boot message");
 		if ($zipped) {
-			$status= qxx ("$unzip | (cd $tmpdir && cpio -di $message 2>&1)");
+			$status= KIWIQX::qxx ("$unzip | (cd $tmpdir && cpio -di $message 2>&1)");
 		} else {
-			$status= qxx ("cat $initrd|(cd $tmpdir && cpio -di $message 2>&1)");
+			$status= KIWIQX::qxx ("cat $initrd|(cd $tmpdir && cpio -di $message 2>&1)");
 		}
 		if (-d $tmpdir."/image/loader") {
-			$status = qxx (
+			$status = KIWIQX::qxx (
 				"mv $tmpdir/image/loader/* $tmpdir/boot/syslinux 2>&1"
 			);
 			$result = $? >> 8;
@@ -4038,7 +4038,7 @@ sub setupBootLoaderStages {
 		#==========================================
 		# Cleanup tmpdir
 		#------------------------------------------
-		qxx ("rm -rf $tmpdir/image 2>&1");
+		KIWIQX::qxx ("rm -rf $tmpdir/image 2>&1");
 	}
 	#==========================================
 	# yaboot
@@ -4049,18 +4049,18 @@ sub setupBootLoaderStages {
 		#==========================================
 		# Create yaboot boot data directory
 		#------------------------------------------
-		qxx ("mkdir -p $tmpdir/boot 2>&1");
+		KIWIQX::qxx ("mkdir -p $tmpdir/boot 2>&1");
 		#==========================================
 		# Get lilo chrp data
 		#------------------------------------------
 		$kiwi -> info ("Importing yaboot.chrp file");
 		if ($zipped) {
-			$status= qxx ("$unzip | (cd $tmpdir && cpio -di $chrp 2>&1)");
+			$status= KIWIQX::qxx ("$unzip | (cd $tmpdir && cpio -di $chrp 2>&1)");
 		} else {
-			$status= qxx ("cat $initrd|(cd $tmpdir && cpio -di $chrp 2>&1)");
+			$status= KIWIQX::qxx ("cat $initrd|(cd $tmpdir && cpio -di $chrp 2>&1)");
 		}
 		if (-e $tmpdir."/lib/lilo/chrp/yaboot.chrp") {
-			qxx ("mv $tmpdir/lib/lilo/chrp/yaboot.chrp $tmpdir/boot/yaboot");
+			KIWIQX::qxx ("mv $tmpdir/lib/lilo/chrp/yaboot.chrp $tmpdir/boot/yaboot");
 		} else {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Failed to import yaboot.chrp file: $status");
@@ -4078,18 +4078,18 @@ sub setupBootLoaderStages {
 		#==========================================
 		# Create uboot boot data directory
 		#------------------------------------------
-		qxx ("mkdir -p $tmpdir/boot 2>&1");
+		KIWIQX::qxx ("mkdir -p $tmpdir/boot 2>&1");
 		#==========================================
 		# Get uboot/MLO loaders
 		#------------------------------------------
 		$kiwi -> info ("Importing uboot loaders");
 		if ($zipped) {
-			$status= qxx ("$unzip | (cd $tmpdir && cpio -di $loaders 2>&1)");
+			$status= KIWIQX::qxx ("$unzip | (cd $tmpdir && cpio -di $loaders 2>&1)");
 		} else {
-			$status= qxx ("cat $initrd|(cd $tmpdir && cpio -di $loaders 2>&1)");
+			$status= KIWIQX::qxx ("cat $initrd|(cd $tmpdir && cpio -di $loaders 2>&1)");
 		}
 		if (-d $tmpdir."/image/loader") {
-			$status = qxx (
+			$status = KIWIQX::qxx (
 				"mv $tmpdir/image/loader/* $tmpdir/boot 2>&1"
 			);
 			$result = $? >> 8;
@@ -4100,7 +4100,7 @@ sub setupBootLoaderStages {
 		#==========================================
 		# Cleanup tmpdir
 		#------------------------------------------
-		qxx ("rm -rf $tmpdir/image 2>&1");
+		KIWIQX::qxx ("rm -rf $tmpdir/image 2>&1");
 	}
 	#==========================================
 	# more boot managers to come...
@@ -4223,7 +4223,7 @@ sub setupBootLoaderConfiguration {
 	# Create MBR id file for boot device check
 	#------------------------------------------
 	$kiwi -> info ("Saving disk label boot/mbrid: $this->{mbrid}...");
-	qxx ("mkdir -p $tmpdir/boot");
+	KIWIQX::qxx ("mkdir -p $tmpdir/boot");
 	my $FD;
 	if (! open ($FD,'>',"$tmpdir/boot/mbrid")) {
 		$kiwi -> failed ();
@@ -4322,7 +4322,7 @@ sub setupBootLoaderConfiguration {
 			last if (-e $font);
 		}
 		if (($font) && (-e $font)) {
-			qxx ("cp $font $tmpdir/boot");
+			KIWIQX::qxx ("cp $font $tmpdir/boot");
 		} else {
 			$kiwi -> warning ("Can't find unicode font for grub2");
 			$kiwi -> skipped ();
@@ -4332,7 +4332,7 @@ sub setupBootLoaderConfiguration {
 		#------------------------------------------
 		$kiwi -> info ("Creating grub2 configuration file...");
 		foreach my $config (@config) {
-			qxx ("mkdir -p $tmpdir/boot/$config");
+			KIWIQX::qxx ("mkdir -p $tmpdir/boot/$config");
 			my $FD = FileHandle -> new();
 			if (! $FD -> open(">$tmpdir/boot/$config/grub.cfg")) {
 				$kiwi -> failed ();
@@ -4596,7 +4596,7 @@ sub setupBootLoaderConfiguration {
 			# copy grub2 config file to efi path too
 			#------------------------------------------
 			if ($config eq 'grub2-efi') {
-				qxx ("cp $tmpdir/boot/$config/grub.cfg $tmpdir/EFI/BOOT 2>&1");
+				KIWIQX::qxx ("cp $tmpdir/boot/$config/grub.cfg $tmpdir/EFI/BOOT 2>&1");
 			}
 		}
 		$kiwi -> done();
@@ -4616,7 +4616,7 @@ sub setupBootLoaderConfiguration {
 		# Create menu.lst file
 		#------------------------------------------
 		$kiwi -> info ("Creating grub menu list file...");
-		qxx ("mkdir -p $tmpdir/boot/grub");
+		KIWIQX::qxx ("mkdir -p $tmpdir/boot/grub");
 		my $FD = FileHandle -> new();
 		if (! $FD -> open (">$tmpdir/boot/grub/menu.lst")) {
 			$kiwi -> failed ();
@@ -4627,7 +4627,7 @@ sub setupBootLoaderConfiguration {
 		#==========================================
 		# Compat link
 		#------------------------------------------
-		qxx ("cd $tmpdir/boot/grub && ln -s menu.lst grub.conf");
+		KIWIQX::qxx ("cd $tmpdir/boot/grub && ln -s menu.lst grub.conf");
 		#==========================================
 		# General grub setup
 		#------------------------------------------
@@ -4992,7 +4992,7 @@ sub setupBootLoaderConfiguration {
 		#==========================================
 		# Create zipl.conf
 		#------------------------------------------
-		qxx ("mkdir -p $tmpdir/boot/zipl");
+		KIWIQX::qxx ("mkdir -p $tmpdir/boot/zipl");
 		$cmdline =~ s/\n//g;
 		my $ziplconfig = "zipl.conf";
 		$kiwi -> info ("Creating $ziplconfig config file...");
@@ -5184,7 +5184,7 @@ sub setupBootLoaderConfiguration {
 		my $mkopts = "-A arm -O linux -T ramdisk -C none -a 0x0 -e 0x0";
 		my $inputf = "$tmpdir/boot/initrd.vmx";
 		my $result = "$tmpdir/boot/initrd.uboot";
-		my $data = qxx ("mkimage $mkopts -n 'Initrd' -d $inputf $result");
+		my $data = KIWIQX::qxx ("mkimage $mkopts -n 'Initrd' -d $inputf $result");
 		my $code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();
@@ -5192,7 +5192,7 @@ sub setupBootLoaderConfiguration {
 			$kiwi -> failed ();
 			return;
 		}
-		qxx ("rm -f $inputf 2>&1");
+		KIWIQX::qxx ("rm -f $inputf 2>&1");
 		$kiwi -> done();
 		#==========================================
 		# Create boot.script
@@ -5288,7 +5288,7 @@ sub copyBootCode {
 	if (-l "$dest/boot/grub2-efi") {
 		unlink "$dest/boot/grub2-efi";
 	}
-	my $status   = qxx ("cp -dR $source/boot $dest 2>&1");
+	my $status   = KIWIQX::qxx ("cp -dR $source/boot $dest 2>&1");
 	my $result   = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> oops ();
@@ -5304,7 +5304,7 @@ sub copyBootCode {
 	# EFI
 	#------------------------------------------
 	if (($firmware eq "efi") || ($firmware eq "uefi")) {
-		$status = qxx ("cp -a $source/EFI $dest");
+		$status = KIWIQX::qxx ("cp -a $source/EFI $dest");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -5323,7 +5323,7 @@ sub copyBootCode {
 	# Uboot
 	#------------------------------------------
 	if ($loader eq "uboot") {
-		$status = qxx ("mv $dest/boot/boot.scr $dest");
+		$status = KIWIQX::qxx ("mv $dest/boot/boot.scr $dest");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -5331,13 +5331,13 @@ sub copyBootCode {
 			$kiwi -> failed ();
 			return;
 		}
-		qxx ("mv $dest/boot/*.bin $dest &>/dev/null");
-		qxx ("mv $dest/boot/*.img $dest &>/dev/null");
-		qxx ("mv $dest/boot/*.imx $dest &>/dev/null");
-		qxx ("mv $dest/boot/*.dtb $dest &>/dev/null");
-		qxx ("mv $dest/boot/*.elf $dest &>/dev/null");
+		KIWIQX::qxx ("mv $dest/boot/*.bin $dest &>/dev/null");
+		KIWIQX::qxx ("mv $dest/boot/*.img $dest &>/dev/null");
+		KIWIQX::qxx ("mv $dest/boot/*.imx $dest &>/dev/null");
+		KIWIQX::qxx ("mv $dest/boot/*.dtb $dest &>/dev/null");
+		KIWIQX::qxx ("mv $dest/boot/*.elf $dest &>/dev/null");
 		if (-f "$dest/boot/MLO") {
-			$status = qxx ("mv $dest/boot/MLO $dest");
+			$status = KIWIQX::qxx ("mv $dest/boot/MLO $dest");
 			$result = $? >> 8;
 		}
 		if ($result != 0) {
@@ -5353,7 +5353,7 @@ sub copyBootCode {
 	# YaBoot
 	#------------------------------------------
 	if ($loader eq "yaboot") {
-		$status = qxx ("mv $dest/boot/bootinfo.txt $dest");
+		$status = KIWIQX::qxx ("mv $dest/boot/bootinfo.txt $dest");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -5361,7 +5361,7 @@ sub copyBootCode {
 			$kiwi -> failed ();
 			return;
 		}
-		$status = qxx ("mv $dest/boot/yaboot.cnf $dest");
+		$status = KIWIQX::qxx ("mv $dest/boot/yaboot.cnf $dest");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -5369,7 +5369,7 @@ sub copyBootCode {
 			$kiwi -> failed ();
 			return;
 		}
-		$status = qxx ("mv $dest/boot/yaboot $dest");
+		$status = KIWIQX::qxx ("mv $dest/boot/yaboot $dest");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -5470,11 +5470,11 @@ sub installBootLoader {
 			} else {
 				$kiwi -> info ("--> on disk target: $loaderTarget\n");
 			}
-			$status = qxx (
+			$status = KIWIQX::qxx (
 				"$biosgrub -f -d $stages -m $dmfile $loaderTarget 2>&1"
 			);
 			$result = $? >> 8;
-			qxx ("umount /mnt");
+			KIWIQX::qxx ("umount /mnt");
 			if ($result != 0) {
 				$kiwi -> error  (
 					"Couldn't install $loader on $loaderTarget: $status"
@@ -5488,7 +5488,7 @@ sub installBootLoader {
 				"grub2-bios modules not found, legacy boot disabled"
 			);
 			$kiwi -> skipped ();
-			qxx ("umount /mnt");
+			KIWIQX::qxx ("umount /mnt");
 		}
 		#==========================================
 		# Clean loop maps
@@ -5510,7 +5510,7 @@ sub installBootLoader {
 			#==========================================
 			# write master-boot-code
 			#------------------------------------------
-			$status = qxx (
+			$status = KIWIQX::qxx (
 				"dd if=$mbr of=$diskname bs=1 count=446 $opt 2>&1"
 			);
 			$result= $? >> 8;
@@ -5526,7 +5526,7 @@ sub installBootLoader {
 			# write FDST flag
 			#------------------------------------------
 			$fdst = "perl -e \"printf '%s', pack 'A4', eval 'FDST';\"";
-			qxx (
+			KIWIQX::qxx (
 				"$fdst| \\
 				dd of=$diskname bs=1 count=4 seek=\$((0x190)) $opt 2>&1"
 			);
@@ -5592,10 +5592,10 @@ sub installBootLoader {
 		}
 		my $grubOptions = "--device-map $dmfile --no-floppy --batch";
 		if (-d "/boot/grub") {
-			qxx ("mount --bind $tmpdir/boot/grub /boot/grub");
+			KIWIQX::qxx ("mount --bind $tmpdir/boot/grub /boot/grub");
 		}
-		qxx ("$grub $grubOptions < $cmdfile &> $tmpdir/grub.log");
-		qxx ("umount /boot/grub &>/dev/null");
+		KIWIQX::qxx ("$grub $grubOptions < $cmdfile &> $tmpdir/grub.log");
+		KIWIQX::qxx ("umount /boot/grub &>/dev/null");
 		my $glog;
 		if ($dmfd -> open ("$tmpdir/grub.log")) {
 			my @glog = <$dmfd>; $dmfd -> close();
@@ -5618,7 +5618,7 @@ sub installBootLoader {
 		if ($result == 0) {
 			my $boot = "'boot sector'";
 			my $null = "/dev/null";
-			$status= qxx (
+			$status= KIWIQX::qxx (
 				"dd if=$diskname bs=512 count=1 2>$null|file - | grep -q $boot"
 			);
 			$result= $? >> 8;
@@ -5641,7 +5641,7 @@ sub installBootLoader {
 			#==========================================
 			# write master-boot-code
 			#------------------------------------------
-			$status = qxx (
+			$status = KIWIQX::qxx (
 				"dd if=$mbr of=$diskname bs=1 count=446 $opt 2>&1"
 			);
 			$result= $? >> 8;
@@ -5655,7 +5655,7 @@ sub installBootLoader {
 			# write backup MBR with partition table
 			#------------------------------------------
 			#my $bmbr= $diskname.".mbr";
-			#$status = qxx (
+			#$status = KIWIQX::qxx (
 			#	"dd if=$diskname of=$bmbr bs=1 count=512 2>&1"
 			#);
 			#$result= $? >> 8;
@@ -5665,7 +5665,7 @@ sub installBootLoader {
 			#	$kiwi -> failed ();
 			#	return;
 			#}
-			#$status = qxx (
+			#$status = KIWIQX::qxx (
 			#  "dd if=$bmbr of=$diskname bs=512 count=1 seek=3 skip=0 $opt 2>&1"
 			#);
 			#unlink $bmbr;
@@ -5673,7 +5673,7 @@ sub installBootLoader {
 			# write FDST flag
 			#------------------------------------------
 			my $fdst = "perl -e \"printf '%s', pack 'A4', eval 'FDST';\"";
-			qxx (
+			KIWIQX::qxx (
 				"$fdst|dd of=$diskname bs=1 count=4 seek=\$((0x190)) $opt 2>&1"
 			);
 		}
@@ -5688,15 +5688,15 @@ sub installBootLoader {
 		#------------------------------------------
 		if ($loader eq "syslinux") {
 			$kiwi -> info ("Installing syslinux on device: $bootdev");
-			$status = qxx ("syslinux $bootdev 2>&1");
+			$status = KIWIQX::qxx ("syslinux $bootdev 2>&1");
 			$result = $? >> 8;
 		} else {
 			$kiwi -> info ("Installing extlinux on device: $bootdev");
 			if (KIWIGlobals -> instance() -> mount ($bootdev, '/mnt')) {
-				$status = qxx ("extlinux --install /mnt/boot/syslinux 2>&1");
+				$status = KIWIQX::qxx ("extlinux --install /mnt/boot/syslinux 2>&1");
 				$result = $? >> 8;
 			}
-			$status = qxx ("umount /mnt 2>&1");
+			$status = KIWIQX::qxx ("umount /mnt 2>&1");
 		}
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -5713,7 +5713,7 @@ sub installBootLoader {
 		# Write syslinux master boot record
 		#------------------------------------------
 		my $syslmbr = "/usr/share/syslinux/mbr.bin";
-		$status = qxx (
+		$status = KIWIQX::qxx (
 			"dd if=$syslmbr of=$diskname bs=512 count=1 conv=notrunc 2>&1"
 		);
 		$result = $? >> 8;
@@ -5766,7 +5766,7 @@ sub installBootLoader {
 				$kiwi -> failed ();
 				$kiwi -> error  ("Can't open config file for reading: $!");
 				$kiwi -> failed ();
-				qxx ("umount $mount 2>&1");
+				KIWIQX::qxx ("umount $mount 2>&1");
 				$this -> cleanStack ();
 				return;
 			}
@@ -5777,7 +5777,7 @@ sub installBootLoader {
 				$kiwi -> failed ();
 				$kiwi -> error  ("Can't open config file for writing: $!");
 				$kiwi -> failed ();
-				qxx ("umount $mount 2>&1");
+				KIWIQX::qxx ("umount $mount 2>&1");
 				$this -> cleanStack ();
 				return;
 			}
@@ -5800,17 +5800,17 @@ sub installBootLoader {
 		#==========================================
 		# call zipl...
 		#------------------------------------------
-		$status = qxx ("cd $mount && zipl -c $config 2>&1");
+		$status = KIWIQX::qxx ("cd $mount && zipl -c $config 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't install zipl on $diskname: $status");
 			$kiwi -> failed ();
-			qxx ("umount $mount 2>&1");
+			KIWIQX::qxx ("umount $mount 2>&1");
 			$this -> cleanStack ();
 			return;
 		}
-		qxx ("umount $mount 2>&1");
+		KIWIQX::qxx ("umount $mount 2>&1");
 		$kiwi -> done();
 		#==========================================
 		# clean loop maps
@@ -5897,7 +5897,7 @@ sub bindDiskDevice {
 	#==========================================
 	# bind file to loop device
 	#------------------------------------------
-	$status = qxx ("/sbin/losetup -f --show $system 2>&1"); chomp $status;
+	$status = KIWIQX::qxx ("/sbin/losetup -f --show $system 2>&1"); chomp $status;
 	$result = $? >> 8;
 	if ($result != 0) {
 		# /.../
@@ -5909,7 +5909,7 @@ sub bindDiskDevice {
 		# ----
 		my $loopfound = 0;
 		for (my $id=0;$id<=7;$id++) {
-			$status.= qxx ( "/sbin/losetup /dev/loop$id $system 2>&1" );
+			$status.= KIWIQX::qxx ( "/sbin/losetup /dev/loop$id $system 2>&1" );
 			$result = $? >> 8;
 			if ($result == 0) {
 				$loopfound = 1;
@@ -5948,14 +5948,14 @@ sub bindDiskPartitions {
 	my $status;
 	my $result;
 	my $part;
-	$status = qxx ("/sbin/kpartx -sa $disk 2>&1");
+	$status = KIWIQX::qxx ("/sbin/kpartx -sa $disk 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> loginfo ("Failed mapping partition: $status");
 		return;
 	}
 	# wait for the mapping devices to finish
-	qxx ("udevadm settle --timeout=30 2>&1");
+	KIWIQX::qxx ("udevadm settle --timeout=30 2>&1");
 	push @cStack,"kpartx -sd $disk";
 	$this->{cleanupStack} = \@cStack;
 	$disk =~ s/dev\///;
@@ -5986,7 +5986,7 @@ sub getGeometry {
 	my $parted;
 	my $locator = KIWILocator -> instance();
 	my $parted_exec = $locator -> getExecPath("parted");
-	$status = qxx ("dd if=/dev/zero of=$disk bs=512 count=1 2>&1");
+	$status = KIWIQX::qxx ("dd if=/dev/zero of=$disk bs=512 count=1 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> loginfo ($status);
@@ -5998,14 +5998,14 @@ sub getGeometry {
 	) {
 		$label = 'gpt';
 	}
-	$status = qxx ("$parted_exec -s $disk mklabel $label 2>&1");
+	$status = KIWIQX::qxx ("$parted_exec -s $disk mklabel $label 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> loginfo ($status);
 		return;
 	}
 	$parted = "$parted_exec -m $disk unit s print";
-	$status = qxx (
+	$status = KIWIQX::qxx (
 		"$parted | head -n 3 | tail -n 1 | cut -f2 -d:"
 	);
 	$result = $? >> 8;
@@ -6101,7 +6101,7 @@ sub initGeometry {
 		sleep (1);
 		my $parted_exec = $locator -> getExecPath("parted");
 		my $parted = "$parted_exec -m $device unit s print";
-		my $status = qxx (
+		my $status = KIWIQX::qxx (
 			"$parted | grep :$this->{pStart} | cut -f3 -d:"
 		);
 		chomp $status;
@@ -6154,7 +6154,7 @@ sub setStoragePartition {
 			$kiwi -> loginfo (
 				"FDASD input: $device [@commands]"
 			);
-			$status = qxx ("dd if=/dev/zero of=$device bs=4096 count=10 2>&1");
+			$status = KIWIQX::qxx ("dd if=/dev/zero of=$device bs=4096 count=10 2>&1");
 			$result = $? >> 8;
 			if ($result != 0) {
 				$kiwi -> loginfo ($status);
@@ -6234,7 +6234,7 @@ sub setStoragePartition {
 					$this -> initGeometry ($device,$size);
 					$p_cmd = "mkpart $name $this->{pStart} $this->{pStopp}";
 					$kiwi -> loginfo ("PARTED input: $device [$p_cmd]\n");
-					$status = qxx (
+					$status = KIWIQX::qxx (
 						"$parted_exec -s $device unit s $p_cmd 2>&1"
 					);
 				}
@@ -6254,7 +6254,7 @@ sub setStoragePartition {
 						$p_cmd = "set $index type 0x$type";
 					}
 					$kiwi -> loginfo ("PARTED input: $device [$p_cmd]\n");
-					$status = qxx (
+					$status = KIWIQX::qxx (
 						"$parted_exec -s $device unit s $p_cmd 2>&1"
 					);
 				}
@@ -6262,7 +6262,7 @@ sub setStoragePartition {
 					my $index= $commands[$count+1];
 					$p_cmd = "set $index boot on";
 					$kiwi -> loginfo ("PARTED input: $device [$p_cmd]\n");
-					$status = qxx (
+					$status = KIWIQX::qxx (
 						"$parted_exec -s $device unit s $p_cmd 2>&1"
 					);
 				}
@@ -6290,7 +6290,7 @@ sub getStorageID {
 	my $this   = shift;
 	my $device = shift;
 	my $partid = shift;
-	my $status = qxx ("sfdisk --id $device $partid 2>&1");
+	my $status = KIWIQX::qxx ("sfdisk --id $device $partid 2>&1");
 	my $result = $? >> 8;
 	if ($result == 0) {
 		chomp  $status;
@@ -6313,7 +6313,7 @@ sub getStorageSize {
 	if ((! $pdev) || (! -e $pdev)) {
 		return -1;
 	}
-	my $status = qxx ("blockdev --getsize64 $pdev 2>&1");
+	my $status = KIWIQX::qxx ("blockdev --getsize64 $pdev 2>&1");
 	my $result = $? >> 8;
 	if ($result == 0) {
 		return int ($status / 1024);
@@ -6336,7 +6336,7 @@ sub setDefaultDeviceMap {
 		return;
 	}
 	# wait for udev to finish device creation
-	qxx ("udevadm settle --timeout=30 2>&1");
+	KIWIQX::qxx ("udevadm settle --timeout=30 2>&1");
 	for my $part
 		(qw(root readonly readwrite boot jump installroot installboot)
 	) {
@@ -6433,7 +6433,7 @@ sub setMD {
 	my $array = "--level=$level --raid-disks=2 $deviceMap{root} missing";
 	while ($mdcnt <= 9) {
 		$mddev  = '/dev/md'.$mdcnt;
-		$status = qxx ("mdadm --create --run $mddev $array 2>&1");
+		$status = KIWIQX::qxx ("mdadm --create --run $mddev $array 2>&1");
 		$result+= $? >> 8;
 		if ($result == 0) {
 			last;
@@ -6482,9 +6482,9 @@ sub setVolumeGroup {
 	my $status;
 	my $result;
 	my $allFree = 'LVRoot';
-	$status = qxx ("vgremove --force $VGroup 2>&1");
-	$status = qxx ("test -d /dev/$VGroup && rm -rf /dev/$VGroup 2>&1");
-	$status = qxx ("pvcreate $deviceMap{root} 2>&1");
+	$status = KIWIQX::qxx ("vgremove --force $VGroup 2>&1");
+	$status = KIWIQX::qxx ("test -d /dev/$VGroup && rm -rf /dev/$VGroup 2>&1");
+	$status = KIWIQX::qxx ("pvcreate $deviceMap{root} 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
@@ -6493,7 +6493,7 @@ sub setVolumeGroup {
 		$this -> cleanStack ();
 		return;
 	}
-	$status = qxx ("vgcreate $VGroup $deviceMap{root} 2>&1");
+	$status = KIWIQX::qxx ("vgcreate $VGroup $deviceMap{root} 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
@@ -6505,9 +6505,9 @@ sub setVolumeGroup {
 	push @cStack,"vgchange -an $VGroup";
 	$this->{cleanupStack} = \@cStack;
 	if (($syszip) || ($haveSplit)) {
-		$status = qxx ("lvcreate -L $syszip -n LVComp $VGroup 2>&1");
+		$status = KIWIQX::qxx ("lvcreate -L $syszip -n LVComp $VGroup 2>&1");
 		$result = $? >> 8;
-		$status.= qxx ("lvcreate -l +100%FREE -n LVRoot $VGroup 2>&1");
+		$status.= KIWIQX::qxx ("lvcreate -l +100%FREE -n LVRoot $VGroup 2>&1");
 		$result+= $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -6544,7 +6544,7 @@ sub setVolumeGroup {
 						$inodes = $this->{gdata}->{FSMinInodes};
 					}
 					$ihash{$lvdev} = $inodes;
-					$status = qxx (
+					$status = KIWIQX::qxx (
 						"lvcreate -L $lvsize -n $lvname $VGroup 2>&1"
 					);
 					$result = $? >> 8;
@@ -6558,15 +6558,15 @@ sub setVolumeGroup {
 		if ($result == 0) {
 			if (($lvmparts{'@root'}) && ($lvmparts{'@root'}->[3])) {
 				my $rootsize = $lvmparts{'@root'}->[3];
-				$status = qxx ("lvcreate -L $rootsize -n LVRoot $VGroup 2>&1");
+				$status = KIWIQX::qxx ("lvcreate -L $rootsize -n LVRoot $VGroup 2>&1");
 			} else {
-				$status = qxx ("lvcreate -l +100%FREE -n LVRoot $VGroup 2>&1");
+				$status = KIWIQX::qxx ("lvcreate -l +100%FREE -n LVRoot $VGroup 2>&1");
 			}
 			$result = $? >> 8;
 		}
 		if ($result == 0) {
 			if (($lvmparts{'@root'}) && ($lvmparts{'@root'}->[3])) {
-				$status = qxx (
+				$status = KIWIQX::qxx (
 					"lvextend -l +100%FREE /dev/$VGroup/$allFree 2>&1"
 				);
 				$result = $? >> 8;
@@ -6594,8 +6594,8 @@ sub deleteVolumeGroup {
 	my $lvm    = $this->{lvm};
 	my $VGroup = $this->{lvmgroup};
 	if ($lvm) {
-		qxx ("vgremove --force $VGroup 2>&1");
-		qxx ("test -d /dev/$VGroup && rm -rf /dev/$VGroup 2>&1");
+		KIWIQX::qxx ("vgremove --force $VGroup 2>&1");
+		KIWIQX::qxx ("test -d /dev/$VGroup && rm -rf /dev/$VGroup 2>&1");
 	}
 	return $this;
 }
@@ -6642,11 +6642,11 @@ sub luksResize {
 	# open luks device
 	#------------------------------------------
 	if ($cipher) {
-		$status = qxx (
+		$status = KIWIQX::qxx (
 			"echo $cipher | cryptsetup luksOpen $source $name 2>&1"
 		);
 	} else {
-		$status = qxx ("cryptsetup luksOpen $source $name 2>&1");
+		$status = KIWIQX::qxx ("cryptsetup luksOpen $source $name 2>&1");
 	}
 	$result = $? >> 8;
 	if ($result != 0) {
@@ -6659,7 +6659,7 @@ sub luksResize {
 	# resize luks header
 	#------------------------------------------
 	$this->{luks} = $name;
-	$status = qxx ("cryptsetup resize $name");
+	$status = KIWIQX::qxx ("cryptsetup resize $name");
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
@@ -6680,7 +6680,7 @@ sub luksResize {
 sub luksClose {
 	my $this = shift;
 	if ($this->{luks}) {
-		qxx ("cryptsetup luksClose $this->{luks} 2>&1");
+		KIWIQX::qxx ("cryptsetup luksClose $this->{luks} 2>&1");
 		undef $this->{luks};
 	}
 	return $this;
@@ -6712,7 +6712,7 @@ sub umountDevice {
 	for my $mount (@mounts) {
 		if ($mount =~ /^$disk/) {
 			my ($device, $mountpoint, $rest) = split / /, $mount, 3;
-			qxx ("umount $device 2>&1");
+			KIWIQX::qxx ("umount $device 2>&1");
 		}
 	}
 	return $this;
@@ -6775,10 +6775,10 @@ sub setupFilesystem {
 			if ($FSopts{extfstune}) {
 				$tuneopts .= $FSopts{extfstune};
 			}
-			$status = qxx ("$fstool $fsopts $device 2>&1");
+			$status = KIWIQX::qxx ("$fstool $fsopts $device 2>&1");
 			$result = $? >> 8;
 			if (!$result && $tuneopts) {
-				$status .= qxx ("/sbin/tune2fs $tuneopts $device 2>&1");
+				$status .= KIWIQX::qxx ("/sbin/tune2fs $tuneopts $device 2>&1");
 				$result = $? >> 8;
 			}
 			last SWITCH;
@@ -6796,7 +6796,7 @@ sub setupFilesystem {
 			if ($bootp) {
 				$fsopts.= " -n '".$bootp."'";
 			}
-			$status = qxx ("$fstool $fsopts $device 2>&1");
+			$status = KIWIQX::qxx ("$fstool $fsopts $device 2>&1");
 			$result = $? >> 8;
 			last SWITCH;
 		};
@@ -6807,7 +6807,7 @@ sub setupFilesystem {
 				$fsopts = '';
 			}
 			$fsopts.= " -f";
-			$status = qxx (
+			$status = KIWIQX::qxx (
 				"/sbin/mkreiserfs $fsopts $device 2>&1"
 			);
 			$result = $? >> 8;
@@ -6819,7 +6819,7 @@ sub setupFilesystem {
 			if (! $fsopts) {
 				$fsopts = '';
 			}
-			$status = qxx (
+			$status = KIWIQX::qxx (
 				"/sbin/mkfs.btrfs $fsopts $device 2>&1"
 			);
 			$result = $? >> 8;
@@ -6831,7 +6831,7 @@ sub setupFilesystem {
 			if (! $fsopts) {
 				$fsopts = '';
 			}
-			$status = qxx (
+			$status = KIWIQX::qxx (
 				"/sbin/mkfs.xfs $fsopts $device 2>&1"
 			);
 			$result = $? >> 8;
@@ -6840,9 +6840,9 @@ sub setupFilesystem {
 		/^zfs/          && do {
 			$kiwi -> info ("Creating zfs $name filesystem");
 			if ($opts) {
-				$status = qxx ("zpool create $opts kiwipool $device 2>&1");
+				$status = KIWIQX::qxx ("zpool create $opts kiwipool $device 2>&1");
 			} else {
-				$status = qxx ("zpool create kiwipool $device 2>&1");
+				$status = KIWIQX::qxx ("zpool create kiwipool $device 2>&1");
 			}
 			$result = $? >> 8;
 			if ($result == 0) {
@@ -6963,7 +6963,7 @@ sub DESTROY {
 	my $this = shift;
 	my $dirs = $this->{tmpdirs};
 	foreach my $dir (@{$dirs}) {
-		qxx ("rm -rf $dir 2>&1");
+		KIWIQX::qxx ("rm -rf $dir 2>&1");
 	}
 	return $this -> cleanStack ();
 }
@@ -7026,7 +7026,7 @@ sub __expandFS {
 				$kiwi -> failed ();
 				return;
 			}
-			$status = qxx ("$resize -f -F -p $mapper 2>&1");
+			$status = KIWIQX::qxx ("$resize -f -F -p $mapper 2>&1");
 			$result = $? >> 8;
 			last SWITCH;
 		};
@@ -7038,7 +7038,7 @@ sub __expandFS {
 				$kiwi -> failed ();
 				return;
 			}
-			$status = qxx ("$resize $mapper 2>&1");
+			$status = KIWIQX::qxx ("$resize $mapper 2>&1");
 			$result = $? >> 8;
 			last SWITCH;
 		};
@@ -7057,7 +7057,7 @@ sub __expandFS {
 			} else {
 				$btrfs_cmd = "$btrfs_ctrl -r max /mnt";
 			}
-			$status = qxx ("
+			$status = KIWIQX::qxx ("
 				mount $mapper /mnt && $btrfs_cmd; umount /mnt 2>&1"
 			);
 			$result = $? >> 8;
@@ -7071,7 +7071,7 @@ sub __expandFS {
 				$kiwi -> failed ();
 				return;
 			}
-			$status = qxx ("
+			$status = KIWIQX::qxx ("
 				mount $mapper /mnt && $xfsGrow /mnt; umount /mnt 2>&1"
 			);
 			$result = $? >> 8;

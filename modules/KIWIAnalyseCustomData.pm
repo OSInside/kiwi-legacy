@@ -40,7 +40,7 @@ use File::Slurp;
 #------------------------------------------
 use KIWIGlobals;
 use KIWILog;
-use KIWIQX qw (qxx);
+use KIWIQX;
 
 #==========================================
 # Constructor
@@ -176,7 +176,7 @@ sub createCustomFileTree {
 		# /.../
 		# The following code is more accurate but way too slow
 		# $binary = 1;
-		# my $magic = qxx ("file \"$file\" 2>&1");
+		# my $magic = KIWIQX::qxx ("file \"$file\" 2>&1");
 		# if ($magic =~ /text|character data/) {
 		#	$binary = 0;
 		# }
@@ -209,7 +209,7 @@ sub createCustomFileTree {
 	$done_percent = 0;
 	$done_previos = 0;
 	$done = 0;
-	qxx ("rm -rf $dest/custom 2>&1");
+	KIWIQX::qxx ("rm -rf $dest/custom 2>&1");
 	foreach my $dir (sort keys %filelist) {
 		next if ! %{$filelist{$dir}};
 		if (! -d "$dest/custom/$dir") {
@@ -257,9 +257,9 @@ sub diffChangedConfigFiles {
 	$kiwi -> info ("Create diff for changed config files...");
 	my $diff_file = "$dest/changed_config.diff";
 	if (-e $diff_file) {
-		qxx ("rm -rf '$diff_file' 2>&1");
+		KIWIQX::qxx ("rm -rf '$diff_file' 2>&1");
 	}
-	my $tmpdir = qxx ("mktemp -qdt kiwi-analyse.XXXXXX");
+	my $tmpdir = KIWIQX::qxx ("mktemp -qdt kiwi-analyse.XXXXXX");
 	chomp $tmpdir;
 	while ( my ($file, $entry) = each(%$original_conf) ) {
 		unless ($entry->{'content'}) {
@@ -270,12 +270,12 @@ sub diffChangedConfigFiles {
 		}
 		my $filename = "$tmpdir$file";
 		my $dirn     = dirname($filename);
-		qxx ("mkdir -p '$dirn'");
+		KIWIQX::qxx ("mkdir -p '$dirn'");
 		write_file( $filename, $entry->{'content'} );
 		utime($entry->{'atime'}, $entry->{'mtime'}, $filename);
-		qxx ("diff -uN '$tmpdir$file' '$file' >> '$diff_file'");
+		KIWIQX::qxx ("diff -uN '$tmpdir$file' '$file' >> '$diff_file'");
 	}
-	qxx ("rm -rf '$tmpdir' 2>&1");
+	KIWIQX::qxx ("rm -rf '$tmpdir' 2>&1");
 	if ($result == 0) {
 		$kiwi -> failed();
 		return;
@@ -337,7 +337,7 @@ sub createDatabaseDump {
 		#========================================
 		# check for running db
 		#----------------------------------------
-		$status = qxx ("$db_test_cmd 2>&1");
+		$status = KIWIQX::qxx ("$db_test_cmd 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> info (
@@ -350,7 +350,7 @@ sub createDatabaseDump {
 		# dump db content and compress it
 		#----------------------------------------
 		$kiwi -> info ("--> Found $db_type db, dumping contents...");
-		$status = qxx ("mkdir -p $dest && $dump_cmd > $target 2>&1");
+		$status = KIWIQX::qxx ("mkdir -p $dest && $dump_cmd > $target 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -360,7 +360,7 @@ sub createDatabaseDump {
 			$kiwi -> done();
 		}
 		$kiwi -> info ("--> Compressing database [ $target.gz ]...");
-		$status = qxx ("$this->{gdata}->{Gzip} -f $target 2>&1");
+		$status = KIWIQX::qxx ("$this->{gdata}->{Gzip} -f $target 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -403,7 +403,7 @@ sub __populateCustomFiles {
 	} else {
 		$checkopt = "--nodeps --nodigest --nosignature --nomtime ";
 		$checkopt.= "--nolinkto --nouser --nogroup --nomode";
-		my @rpmcheck = qxx ("rpm -Va $checkopt");
+		my @rpmcheck = KIWIQX::qxx ("rpm -Va $checkopt");
 		chomp @rpmcheck;
 		my $rpmsize = @rpmcheck;
 		my $spart = 100 / $rpmsize;
@@ -433,7 +433,7 @@ sub __populateCustomFiles {
 					$result{$file} = [$dir,$attr];
 					push (@modified,$file);
 					if (($has_changed) && ($is_config)) {
-						my $package = qxx ("rpm -qf '$file'");
+						my $package = KIWIQX::qxx ("rpm -qf '$file'");
 						chomp $package;
 						$original_conf->{$file}->{'package'} = $package;
 					}
@@ -468,7 +468,7 @@ sub __populateCustomFiles {
 		@rpmcheck = @{$cdata->{rpmlist}};
 	} else {
 		$kiwi -> info ("--> requesting RPM package list...");
-		@rpmcheck = qxx ("rpm -qlav");
+		@rpmcheck = KIWIQX::qxx ("rpm -qlav");
 		chomp @rpmcheck;
 		$cdata->{rpmlist} = \@rpmcheck;
 	}
@@ -515,7 +515,7 @@ sub __populateCustomFiles {
 	# ----
 	if ((! $this->{skipgem}) && (-x "/usr/bin/gem")) {
 		$kiwi -> info ("--> requesting GEM package list...");
-		my @gemcheck = qxx ("gem contents --all");
+		my @gemcheck = KIWIQX::qxx ("gem contents --all");
 		chomp @gemcheck;
 		foreach my $item (@gemcheck) {
 			my $name = basename $item;
@@ -823,18 +823,18 @@ sub __getOriginalConfigFiles {
 	my $status;
 	my $result = 1;
 	$kiwi -> cursorOFF();
-	my $tmpdir = qxx ("mktemp -qdt kiwi-analyse.XXXXXX");
+	my $tmpdir = KIWIQX::qxx ("mktemp -qdt kiwi-analyse.XXXXXX");
 	chomp $tmpdir;
 	my $cwd = cwd();
 	chdir $tmpdir;
 	foreach my $package (@packages) {
-		my $pck_path = qxx (
+		my $pck_path = KIWIQX::qxx (
 			"find /var/cache/zypp/packages/ -name '$package*'"
 		);
 		chomp $pck_path;
 		my $does_exist = (-e $pck_path) ? 1 : 0;
-		$status = qxx ("zypper install -dfy $package 2>&1");
-		$pck_path = qxx (
+		$status = KIWIQX::qxx ("zypper install -dfy $package 2>&1");
+		$pck_path = KIWIQX::qxx (
 			"find /var/cache/zypp/packages/ -name '$package*'"
 		);
 		chomp $pck_path;
@@ -845,9 +845,9 @@ sub __getOriginalConfigFiles {
 			$result = 0;
 			next;
 		}
-		qxx ("rpm2cpio '$pck_path' | cpio -idm 2>/dev/null");
+		KIWIQX::qxx ("rpm2cpio '$pck_path' | cpio -idm 2>/dev/null");
 		unless ($does_exist) {
-			qxx ("rm -f '$pck_path'");
+			KIWIQX::qxx ("rm -f '$pck_path'");
 		}
 		$done = int ($count * $spart);
 		if (($done_old) && ($done != $done_old)) {
@@ -872,7 +872,7 @@ sub __getOriginalConfigFiles {
 			$original_conf->{ $file }->{ 'content' } = $content;
 		}
 	}
-	qxx ("rm -rf '$tmpdir' 2>&1");
+	KIWIQX::qxx ("rm -rf '$tmpdir' 2>&1");
 	$cdata->{original_conf} = \%{$original_conf};
 	return $this;
 }

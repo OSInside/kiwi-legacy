@@ -26,7 +26,7 @@ use FileHandle;
 #------------------------------------------
 use KIWILocator;
 use KIWILog;
-use KIWIQX qw (qxx);
+use KIWIQX;
 
 #==========================================
 # Module Globals
@@ -119,7 +119,7 @@ sub setupAutoYaST {
 		$kiwi -> failed ();
 		return;
 	}
-	qxx (
+	KIWIQX::qxx (
 		"cp $imageDesc/config-yast-autoyast.xml $root/$autodir/$autocnf 2>&1"
 	);
 	my $INFFD = FileHandle -> new();
@@ -165,12 +165,12 @@ sub setupFirstBootAnaconda {
 	#==========================================
 	# touch/remove some files
 	#------------------------------------------
-	qxx ("touch $root/etc/reconfigSys 2>&1");
-	qxx ("rm -f /etc/sysconfig/firstboot 2>&1");
+	KIWIQX::qxx ("touch $root/etc/reconfigSys 2>&1");
+	KIWIQX::qxx ("rm -f /etc/sysconfig/firstboot 2>&1");
 	#==========================================
 	# activate service
 	#------------------------------------------
-	my $data = qxx ("chroot $root chkconfig --level 35 firstboot on 2>&1");
+	my $data = KIWIQX::qxx ("chroot $root chkconfig --level 35 firstboot on 2>&1");
 	my $code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> failed ();
@@ -214,7 +214,7 @@ sub setupFirstBootYaST {
 		return;
 	}
 	my $firstboot = "$root/etc/YaST2/firstboot.xml";
-	my $data = qxx ("cp $imageDesc/config-yast-firstboot.xml $firstboot 2>&1");
+	my $data = KIWIQX::qxx ("cp $imageDesc/config-yast-firstboot.xml $firstboot 2>&1");
 	my $code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> failed ();
@@ -232,7 +232,7 @@ sub setupFirstBootYaST {
 		if ( -e "$root/var/adm/fillup-templates/sysconfig.firstboot" ) {
 			my $template = "$root/var/adm/fillup-templates/"
 				. 'sysconfig.firstboot';
-			$data = qxx (
+			$data = KIWIQX::qxx (
 				"cp $template $root/etc/sysconfig/firstboot 2>&1"
 			);
 			$code = $? >> 8;
@@ -279,7 +279,7 @@ sub setupFirstBootYaST {
 			if (! -e "$root/etc/init.d/$service") {
 				next;
 			}
-			$data = qxx (
+			$data = KIWIQX::qxx (
 				"chroot $root /sbin/insserv /etc/init.d/$service 2>&1"
 			);
 			$code = $? >> 8;
@@ -290,7 +290,7 @@ sub setupFirstBootYaST {
 				return;
 			}
 		}
-		$data = qxx ("touch $root/etc/reconfig_system 2>&1");
+		$data = KIWIQX::qxx ("touch $root/etc/reconfig_system 2>&1");
 		$code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();
@@ -303,7 +303,7 @@ sub setupFirstBootYaST {
 		# current firstboot service works like yast second stage and
 		# is activated by touching /var/lib/YaST2/reconfig_system
 		# ----
-		$data = qxx ("touch $root/var/lib/YaST2/reconfig_system 2>&1");
+		$data = KIWIQX::qxx ("touch $root/var/lib/YaST2/reconfig_system 2>&1");
 		$code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();
@@ -389,7 +389,7 @@ sub setupAugeasImport {
 	#==========================================
 	# call augtool / apply configuration
 	#------------------------------------------
-	my $data = qxx ("chroot $root $augtool -f augeas.tmp 2>&1");
+	my $data = KIWIQX::qxx ("chroot $root $augtool -f augeas.tmp 2>&1");
 	my $code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> failed ();
@@ -463,7 +463,7 @@ sub setupGroups {
 		my $gid       = $user -> getGroupID();
 		if (defined $group) {
 			# create group if it does not exist
-			my $data = qxx (
+			my $data = KIWIQX::qxx (
 				"chroot $root grep -q ^$group: /etc/group 2>&1"
 			);
 			my $code = $? >> 8;
@@ -473,7 +473,7 @@ sub setupGroups {
 				if (defined $gid) {
 					$addgroup .= " -g $gid";
 				}
-				$data = qxx ("chroot $root $addgroup \"$group\"");
+				$data = KIWIQX::qxx ("chroot $root $addgroup \"$group\"");
 				$code = $? >> 8;
 				if ($code != 0) {
 					$kiwi -> failed ();
@@ -507,9 +507,9 @@ sub setupHWclock {
 	my $timectl = $locator -> getExecPath('timedatectl', $root);
 	if ($timectl) {
 		if ($hwClock eq 'utc') {
-			qxx("chroot $root $timectl set-local-rtc false 2>&1");
+			KIWIQX::qxx("chroot $root $timectl set-local-rtc false 2>&1");
 		} else {
-			qxx("chroot $root $timectl set-local-rtc true 2>&1");
+			KIWIQX::qxx("chroot $root $timectl set-local-rtc true 2>&1");
 		}
 		my $code = $? >> 8;
 		if ($code != 0) {
@@ -537,7 +537,7 @@ sub setupKeyboardMap {
 	}
 	my $localectl = $locator -> getExecPath('localectl', $root);
 	if ($localectl) {
-		qxx("chroot $root $localectl set-keymap $keymap 2>&1");
+		KIWIQX::qxx("chroot $root $localectl set-keymap $keymap 2>&1");
 		my $code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> loginfo ("warning: unable to set the keyboard map\n");
@@ -566,7 +566,7 @@ sub setupLocale {
 	my $primary = $locales[0];
 	my $localectl = $locator -> getExecPath('localectl', $root);
 	if ($localectl) {
-		qxx("chroot $root $localectl set-locale $primary 2>&1");
+		KIWIQX::qxx("chroot $root $localectl set-locale $primary 2>&1");
 		my $code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> loginfo ("warning: unable to set the locale\n");
@@ -608,7 +608,7 @@ sub setupRecoveryArchive {
 	my $excld  = "--exclude ./dev --exclude ./proc --exclude ./sys";
 	my $cmd = "cd $root && tar $topts $dest/.recovery.tar . $excld 2>&1 && "
 		. "mv $dest/.recovery.tar $root/recovery.tar";
-	my $status = qxx ($cmd);
+	my $status = KIWIQX::qxx ($cmd);
 	my $code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> failed ();
@@ -618,7 +618,7 @@ sub setupRecoveryArchive {
 	#==========================================
 	# Create file count information
 	#------------------------------------------
-	$status = qxx (
+	$status = KIWIQX::qxx (
 		"tar -tf $root/recovery.tar | wc -l > $root/recovery.tar.files"
 	);
 	$code = $? >> 8;
@@ -642,7 +642,7 @@ sub setupRecoveryArchive {
 	#==========================================
 	# Compress archive into .tar.gz
 	#------------------------------------------
-	$status = qxx (
+	$status = KIWIQX::qxx (
 		"$this->{gdata}->{Gzip} $root/recovery.tar 2>&1"
 	);
 	$code = $? >> 8;
@@ -666,7 +666,7 @@ sub setupRecoveryArchive {
 	$psize = sprintf ("%.0f", $psize);
 	print $SIZEFD $psize;
 	$SIZEFD -> close();
-	$status = qxx ("cp $root/recovery.partition.size $dest 2>&1");
+	$status = KIWIQX::qxx ("cp $root/recovery.partition.size $dest 2>&1");
 	$code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> failed ();
@@ -688,7 +688,7 @@ sub setupRecoveryArchive {
 	# Remove tarball for later recreation
 	#------------------------------------------
 	if (($inplace) && ("$inplace" eq "true")) {
-		qxx ("rm -f $root/recovery.tar.gz 2>&1");
+		KIWIQX::qxx ("rm -f $root/recovery.tar.gz 2>&1");
 	}
 	$kiwi -> done ();
 	return $this;
@@ -712,7 +712,7 @@ sub setupTimezone {
 	}
 	my $timectl = $locator -> getExecPath('timedatectl', $root);
 	if ($timectl) {
-		qxx("chroot $root $timectl set-timezone $tz 2>&1");
+		KIWIQX::qxx("chroot $root $timectl set-timezone $tz 2>&1");
 		my $code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> loginfo ("warning: unable to set the timezone\n");
@@ -792,15 +792,15 @@ sub setupUsers {
 			$adduser .= " -c \"$uRname\"";
 			$moduser .= " -c \"$uRname\"";
 		}
-		my $data = qxx ("chroot $root $grep -q ^$uName: /etc/passwd 2>&1");
+		my $data = KIWIQX::qxx ("chroot $root $grep -q ^$uName: /etc/passwd 2>&1");
 		my $code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> info ("Adding user: $uName [$group]");
-			$data = qxx ( "chroot $root $adduser $uName 2>&1" );
+			$data = KIWIQX::qxx ( "chroot $root $adduser $uName 2>&1" );
 			$code = $? >> 8;
 		} else {
 			$kiwi -> info ("Modifying user: $uName [$group]");
-			$data = qxx ( "chroot $root $moduser $uName 2>&1" );
+			$data = KIWIQX::qxx ( "chroot $root $moduser $uName 2>&1" );
 			$code = $? >> 8;
 		}
 		if ($code != 0) {
@@ -813,7 +813,7 @@ sub setupUsers {
 		if ((defined $uHome) && (-d "$root/$uHome")) {
 			my $iMsg = "Setting owner/group permissions $uName [$group]";
 			$kiwi -> info($iMsg);
-			$data = qxx("chroot $root $chown -R $uName:$group $uHome 2>&1");
+			$data = KIWIQX::qxx("chroot $root $chown -R $uName:$group $uHome 2>&1");
 			$code = $? >> 8;
 			if ($code != 0) {
 				$kiwi -> failed ();
@@ -855,7 +855,7 @@ sub quoteFile {
 	my $kiwi = $this->{kiwi};
 	my $FD;
 	my $data;
-	my $tmpc = qxx ("mktemp -q $file.XXXXXX"); chomp $tmpc;
+	my $tmpc = KIWIQX::qxx ("mktemp -q $file.XXXXXX"); chomp $tmpc;
 	my $result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> error  ("Failed to create tmp file");
@@ -870,7 +870,7 @@ sub quoteFile {
 	print $FD "source $this->{gdata}->{BasePath}/modules/KIWIConfig.sh"."\n";
 	print $FD "baseQuoteFile $file"."\n";
 	close $FD;
-	$data   = qxx ("bash $tmpc");
+	$data   = KIWIQX::qxx ("bash $tmpc");
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> error  ("Failed to quote $file: $data");

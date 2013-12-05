@@ -36,7 +36,7 @@ use KIWIBoot;
 use KIWICommandLine;
 use KIWIIsoLinux;
 use KIWILog;
-use KIWIQX qw (qxx);
+use KIWIQX;
 use KIWIXML;
 
 #==========================================
@@ -242,17 +242,17 @@ sub stripImage {
 	my $kiwi = $this->{kiwi};
 	my $imageTree = $this->{imageTree};
 	$kiwi -> info ("Stripping shared objects/executables...");
-	my @list = qxx ("find $imageTree -type f -perm -755");
+	my @list = KIWIQX::qxx ("find $imageTree -type f -perm -755");
 	foreach my $file (@list) {
 		chomp $file;
-		my $data = qxx ("file \"$file\"");
+		my $data = KIWIQX::qxx ("file \"$file\"");
 		chomp $data;
 		if ($data =~ /not stripped/) {
 		if ($data =~ /shared object/) {
-			qxx ("strip -p $file 2>&1");
+			KIWIQX::qxx ("strip -p $file 2>&1");
 		}
 		if ($data =~ /executable/) {
-			qxx ("strip -p $file 2>&1");
+			KIWIQX::qxx ("strip -p $file 2>&1");
 		}
 		}
 	}
@@ -281,7 +281,7 @@ sub createImageClicFS {
 		return;
 	}
 	if (defined $rename) {
-		$data = qxx (
+		$data = KIWIQX::qxx (
 			"mv $this->{imageDest}/$name $this->{imageDest}/$rename 2>&1"
 		);
 		$code = $? >> 8;
@@ -308,7 +308,7 @@ sub createImageClicFS {
 	#==========================================
 	# Rename filesystem loop file
 	#------------------------------------------
-	$data = qxx (
+	$data = KIWIQX::qxx (
 		"mv $this->{imageDest}/$name $this->{imageDest}/fsdata.ext4 2>&1"
 	);
 	$code = $? >> 8;
@@ -321,7 +321,7 @@ sub createImageClicFS {
 	#==========================================  
 	# Resize to minimum  
 	#------------------------------------------
-	my $rver= qxx (
+	my $rver= KIWIQX::qxx (
 		"resize2fs --version 2>&1 | head -n 1 | cut -f2 -d ' ' | cut -f1-2 -d."
 	); chomp $rver;
 	my $dfs = "/sbin/debugfs";
@@ -332,7 +332,7 @@ sub createImageClicFS {
 	my $blocks = 0;
 	$kiwi -> loginfo ("Using resize2fs version: $rver\n");
 	if ($rver >= 1.41) {
-		$data = qxx (
+		$data = KIWIQX::qxx (
 			"resize2fs $this->{imageDest}/fsdata.ext4 -M 2>&1"
 		);
 		$code = $? >> 8;
@@ -342,7 +342,7 @@ sub createImageClicFS {
 			return;
 		}
 	} else {
-		$data = qxx (
+		$data = KIWIQX::qxx (
 			"$dfs $req $src 2>/dev/null | grep $bcn | sed -e 's,.*: *,,'"
 		);
 		$code = $? >> 8;
@@ -353,7 +353,7 @@ sub createImageClicFS {
 		}
 		chomp $data;
 		$blocks = $data;  
-		$data = qxx (
+		$data = KIWIQX::qxx (
 			"$dfs $req $src 2>/dev/null | grep $bfr | sed -e 's,.*: *,,'"
 		);
 		$code = $? >> 8;
@@ -364,7 +364,7 @@ sub createImageClicFS {
 		}  
 		$kiwi -> info ("clicfs: blocks count=$blocks free=$data");
 		$blocks = $blocks - $data;  
-		$data = qxx (
+		$data = KIWIQX::qxx (
 			"resize2fs $this->{imageDest}/fsdata.ext4 $blocks 2>&1"
 		);
 		$code = $? >> 8;
@@ -384,10 +384,10 @@ sub createImageClicFS {
 	if (defined $ENV{MKCLICFS_COMPRESSION}) {
 		my $c = int $ENV{MKCLICFS_COMPRESSION};
 		my $d = $this->{imageDest};
-		$data = qxx ("$clicfs -c $c $d/fsdata.ext4 $d/$name 2>&1");
+		$data = KIWIQX::qxx ("$clicfs -c $c $d/fsdata.ext4 $d/$name 2>&1");
 	} else {
 		my $d = $this->{imageDest};
-		$data = qxx ("$clicfs $d/fsdata.ext4 $d/$name 2>&1");
+		$data = KIWIQX::qxx ("$clicfs $d/fsdata.ext4 $d/$name 2>&1");
 	}
 	$code = $? >> 8;
 	if ($code != 0) {
@@ -397,8 +397,8 @@ sub createImageClicFS {
 		$kiwi -> error  ($data);
 		return;
 	}
-	qxx ("mv -f $this->{imageDest}/$name.ext4 $this->{imageDest}/$name.clicfs");
-	qxx ("rm -f $this->{imageDest}/fsdata.ext4");
+	KIWIQX::qxx ("mv -f $this->{imageDest}/$name.ext4 $this->{imageDest}/$name.clicfs");
+	KIWIQX::qxx ("rm -f $this->{imageDest}/fsdata.ext4");
 	$kiwi -> done();
 	#==========================================
 	# Create image md5sum
@@ -539,7 +539,7 @@ sub createImageBTRFS {
 		$device = $this->{targetDevice};
 	}
 	if (defined $rename) {
-		my $data = qxx (
+		my $data = KIWIQX::qxx (
 			"mv $this->{imageDest}/$name $this->{imageDest}/$rename 2>&1"
 		);
 		my $code = $? >> 8;
@@ -716,7 +716,7 @@ sub createImageCPIO {
 	# PRE Create filesystem on extend
 	#------------------------------------------
 	$kiwi -> info ("Creating cpio archive...");
-	my $pwd  = qxx ("pwd"); chomp $pwd;
+	my $pwd  = KIWIQX::qxx ("pwd"); chomp $pwd;
 	my @cpio = ("--create", "--format=newc", "--quiet");
 	my $dest = $this->{imageDest}."/".$name.".".$suf;
 	my $dspl = $this->{imageDest}."/".$name.".splash.".$suf;
@@ -731,15 +731,15 @@ sub createImageCPIO {
 		$dspl = $pwd."/".$dspl;
 	}
 	if (-e $dspl) {
-		qxx ("rm -f $dspl 2>&1");
+		KIWIQX::qxx ("rm -f $dspl 2>&1");
 	}
 	if ($compress) {
-		$data = qxx (
+		$data = KIWIQX::qxx (
 			"cd $imageTree && find . | cpio @cpio | $zipper -f > $dest"
 		);
 	} else {
-		$data = qxx ("rm -f $dest && rm -f $dest.gz");
-		$data = qxx (
+		$data = KIWIQX::qxx ("rm -f $dest && rm -f $dest.gz");
+		$data = KIWIQX::qxx (
 			"cd $imageTree && find . | cpio @cpio > $dest"
 		);
 	}
@@ -782,7 +782,7 @@ sub createImageBootImage {
 	#==========================================
 	# Create tmp dir for boot image creation
 	#------------------------------------------
-	my $tmpdir = qxx ("mktemp -q -d $idest/boot-$text.XXXXXX");
+	my $tmpdir = KIWIQX::qxx ("mktemp -q -d $idest/boot-$text.XXXXXX");
 	my $result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> error  ("Couldn't create tmp dir: $tmpdir: $!");
@@ -801,7 +801,7 @@ sub createImageBootImage {
 	) {
 		undef $kic;
 		if (! -d $checkBase) {
-			qxx ("rm -rf $tmpdir");
+			KIWIQX::qxx ("rm -rf $tmpdir");
 		}
 		return;
 	}
@@ -813,14 +813,14 @@ sub createImageBootImage {
 	) {
 		undef $kic;
 		if (! -d $checkBase) {
-			qxx ("rm -rf $tmpdir");
+			KIWIQX::qxx ("rm -rf $tmpdir");
 		}
 		return;
 	}
 	#==========================================
 	# Clean up tmp directory
 	#------------------------------------------
-	qxx ("rm -rf $tmpdir");
+	KIWIQX::qxx ("rm -rf $tmpdir");
 	#==========================================
 	# Return boot image name
 	#------------------------------------------
@@ -1171,7 +1171,7 @@ sub createImageLiveCD {
 	#==========================================
 	# Store arch name used by iso
 	#------------------------------------------
-	my $isoarch = qxx ("uname -m"); chomp $isoarch;
+	my $isoarch = KIWIQX::qxx ("uname -m"); chomp $isoarch;
 	if ($isoarch =~ /i.86/) {
 		$isoarch = "i386";
 	}
@@ -1240,14 +1240,14 @@ sub createImageLiveCD {
 	#------------------------------------------
 	my $cdrootData = "config-cdroot.tgz";
 	if (-f $imageTree."/image/".$cdrootData) {
-		qxx ("mv $imageTree/image/$cdrootData $this->{imageDest}");
+		KIWIQX::qxx ("mv $imageTree/image/$cdrootData $this->{imageDest}");
 	}
 	#==========================================
 	# Check for config-cdroot.sh and move it
 	#------------------------------------------
 	my $cdrootScript = "config-cdroot.sh";
 	if (-x $imageTree."/image/".$cdrootScript) {
-		qxx ("mv $imageTree/image/$cdrootScript $this->{imageDest}");
+		KIWIQX::qxx ("mv $imageTree/image/$cdrootScript $this->{imageDest}");
 	}
 	#==========================================
 	# split physical extend into RW / RO part
@@ -1272,7 +1272,7 @@ sub createImageLiveCD {
 				if (! -d "$imageTree/$dir") {
 					next;
 				}
-				$data = qxx ("mv $imageTree/$dir $imageTreeReadOnly 2>&1");
+				$data = KIWIQX::qxx ("mv $imageTree/$dir $imageTreeReadOnly 2>&1");
 				$code = $? >> 8;
 				if ($code != 0) {
 					$kiwi -> failed ();
@@ -1368,7 +1368,7 @@ sub createImageLiveCD {
 					$this -> restoreSplitExtend ();
 					return;
 				}
-				$data = qxx ("btrfstune -S 1 $this->{imageDest}/$namero 2>&1");
+				$data = KIWIQX::qxx ("btrfstune -S 1 $this->{imageDest}/$namero 2>&1");
 				$code = $? >> 8;
 				if ($code != 0) {
 					$kiwi -> failed ();
@@ -1408,7 +1408,7 @@ sub createImageLiveCD {
 		#==========================================
 		# Checking RW file system
 		#------------------------------------------
-		qxx ("/sbin/e2fsck -f -y $this->{imageDest}/$namerw 2>&1");
+		KIWIQX::qxx ("/sbin/e2fsck -f -y $this->{imageDest}/$namerw 2>&1");
 
 		#==========================================
 		# Create image md5sum
@@ -1449,7 +1449,7 @@ sub createImageLiveCD {
 			if (! -d "$imageTree/$dir") {
 				next;
 			}
-			$data = qxx ("cp -a $imageTree/$dir $imageTreeReadOnly 2>&1");
+			$data = KIWIQX::qxx ("cp -a $imageTree/$dir $imageTreeReadOnly 2>&1");
 			$code = $? >> 8;
 			if ($code != 0) {
 				$kiwi -> failed ();
@@ -1500,7 +1500,7 @@ sub createImageLiveCD {
 	#------------------------------------------
 	my $CD = $idest."/CD";
 	$kiwi -> info ("Creating CD filesystem structure");
-	qxx ("mkdir -p $CD/boot");
+	KIWIQX::qxx ("mkdir -p $CD/boot");
 	push @{$this->{tmpdirs}},$CD;
 	$kiwi -> done ();
 	#==========================================
@@ -1508,7 +1508,7 @@ sub createImageLiveCD {
 	#------------------------------------------
 	if (-f $this->{imageDest}."/".$cdrootData) {
 		$kiwi -> info ("Integrating CD root information...");
-		my $data= qxx (
+		my $data= KIWIQX::qxx (
 			"tar -C $CD -xvf $this->{imageDest}/$cdrootData"
 		);
 		my $code= $? >> 8;
@@ -1526,7 +1526,7 @@ sub createImageLiveCD {
 	#------------------------------------------
 	if (-x $this->{imageDest}."/".$cdrootScript) {
 		$kiwi -> info ("Calling CD root setup script...");
-		my $pwd = qxx ("pwd"); chomp $pwd;
+		my $pwd = KIWIQX::qxx ("pwd"); chomp $pwd;
 		my $cdrootEnv = $imageTree."/.profile";
 		if ($cdrootEnv !~ /^\//) {
 			$cdrootEnv = $pwd."/".$cdrootEnv;
@@ -1535,7 +1535,7 @@ sub createImageLiveCD {
 		if ($script !~ /^\//) {
 			$script = $pwd."/".$script;
 		}
-		my $data = qxx (
+		my $data = KIWIQX::qxx (
 			"cd $CD && bash -c '. $cdrootEnv && . $script' 2>&1"
 		);
 		my $code = $? >> 8;
@@ -1564,17 +1564,17 @@ sub createImageLiveCD {
 		# don't symlink these file because in this old live iso
 		# mode we don't allow mkisofs to follow symlinks
 		# ----
-		qxx ("mv $this->{imageDest}/$namerw.md5 $CD");
-		qxx ("mv $this->{imageDest}/$namerw.gz  $CD");
-		qxx ("rm $this->{imageDest}/$namerw.*");
+		KIWIQX::qxx ("mv $this->{imageDest}/$namerw.md5 $CD");
+		KIWIQX::qxx ("mv $this->{imageDest}/$namerw.gz  $CD");
+		KIWIQX::qxx ("rm $this->{imageDest}/$namerw.*");
 	}
 	if (defined $gzip) {
-		#qxx ("mv $this->{imageDest}/$namero $CD");
-		#qxx ("rm $this->{imageDest}/$namero.*");
-		qxx ("ln -s $this->{imageDest}/$namero $CD/$namero");
+		#KIWIQX::qxx ("mv $this->{imageDest}/$namero $CD");
+		#KIWIQX::qxx ("rm $this->{imageDest}/$namero.*");
+		KIWIQX::qxx ("ln -s $this->{imageDest}/$namero $CD/$namero");
 	} else {
-		qxx ("mkdir -p $CD/read-only-system");
-		qxx ("mv $imageTreeReadOnly/* $CD/read-only-system");
+		KIWIQX::qxx ("mkdir -p $CD/read-only-system");
+		KIWIQX::qxx ("mv $imageTreeReadOnly/* $CD/read-only-system");
 		rmdir $imageTreeReadOnly;
 	}
 	$kiwi -> done ();
@@ -1583,15 +1583,15 @@ sub createImageLiveCD {
 	#------------------------------------------
 	$kiwi -> info ("Copying boot image and kernel [$isoarch]");
 	my $destination = "$CD/boot/$isoarch/loader";
-	qxx ("mkdir -p $destination");
-	$data = qxx ("cp $pinitrd $destination/initrd 2>&1");
+	KIWIQX::qxx ("mkdir -p $destination");
+	$data = KIWIQX::qxx ("cp $pinitrd $destination/initrd 2>&1");
 	$code = $? >> 8;
 	if ($code == 0) {
-		$data = qxx ("cp $plinux $destination/linux 2>&1");
+		$data = KIWIQX::qxx ("cp $plinux $destination/linux 2>&1");
 		$code = $? >> 8;
 	}
 	if (($code == 0) && ($isxen)) {
-		$data = qxx ("cp $pxboot $destination/xen.gz 2>&1");
+		$data = KIWIQX::qxx ("cp $pxboot $destination/xen.gz 2>&1");
 		$code = $? >> 8;
 	}
 	if ($code != 0) {
@@ -1605,7 +1605,7 @@ sub createImageLiveCD {
 	# check for graphics boot files
 	#------------------------------------------
 	$kiwi -> info ("Extracting initrd for boot graphics data lookup");
-	my $tmpdir = qxx ("mktemp -q -d $idest/boot-iso.XXXXXX");
+	my $tmpdir = KIWIQX::qxx ("mktemp -q -d $idest/boot-iso.XXXXXX");
 	$code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> failed();
@@ -1616,7 +1616,7 @@ sub createImageLiveCD {
 	chomp $tmpdir;
 	push @{$this->{tmpdirs}},$tmpdir;
 	my $zipper = $this->{gdata}->{IrdZipperCommand};
-	$data = qxx ("$zipper -cd $pinitrd | (cd $tmpdir && cpio -di 2>&1)");
+	$data = KIWIQX::qxx ("$zipper -cd $pinitrd | (cd $tmpdir && cpio -di 2>&1)");
 	$code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> failed();
@@ -1629,7 +1629,7 @@ sub createImageLiveCD {
 	# Include MBR ID to initrd
 	#------------------------------------------
 	$kiwi -> info ("Saving hybrid disk label in initrd: $this->{mbrid}...");
-	qxx ("mkdir -p $tmpdir/boot/grub");
+	KIWIQX::qxx ("mkdir -p $tmpdir/boot/grub");
 	my $MBRFD = FileHandle -> new();
 	if (! $MBRFD -> open (">$tmpdir/boot/mbrid")) {
 		$kiwi -> failed ();
@@ -1642,12 +1642,12 @@ sub createImageLiveCD {
 	#==========================================
 	# Store mbrid flag file on CD
 	#------------------------------------------
-	qxx ("touch $CD/boot/$this->{mbrid}");
+	KIWIQX::qxx ("touch $CD/boot/$this->{mbrid}");
 	#==========================================
 	# Repackage initrd
 	#------------------------------------------
 	my @cpio = ("--create", "--format=newc", "--quiet");
-	$data = qxx (
+	$data = KIWIQX::qxx (
 		"cd $tmpdir && find . | cpio @cpio | $zipper -f > $destination/initrd"
 	);
 	$code = $? >> 8;
@@ -1666,7 +1666,7 @@ sub createImageLiveCD {
 		$splash =~ s/(g|x)z/spl/;
 	}
 	if (-f $splash) {
-		qxx ("cat $splash >> $destination/initrd");
+		KIWIQX::qxx ("cat $splash >> $destination/initrd");
 	}
 	#==========================================
 	# check for boot firmware
@@ -1752,20 +1752,20 @@ sub createImageLiveCD {
 		#==========================================
 		# Create directory structure
 		#------------------------------------------
-		qxx ("mkdir -p $cd_modules");
-		qxx ("mkdir -p $efi_modules");
+		KIWIQX::qxx ("mkdir -p $cd_modules");
+		KIWIQX::qxx ("mkdir -p $efi_modules");
 		#==========================================
 		# Copy modules/fonts/themes on CD
 		#------------------------------------------
-		qxx ("cp $ir_modules/* $cd_modules 2>&1");
+		KIWIQX::qxx ("cp $ir_modules/* $cd_modules 2>&1");
 		if (-d $ir_themes) {
-			qxx ("mv $ir_themes $cd_loader 2>&1");
+			KIWIQX::qxx ("mv $ir_themes $cd_loader 2>&1");
 		}
 		if (-f $ir_bg) {
-			qxx ("cp $ir_bg $cd_bg 2>&1");
+			KIWIQX::qxx ("cp $ir_bg $cd_bg 2>&1");
 		}
 		if (-e $ir_font) {
-			qxx ("mv $ir_font $CD/boot");
+			KIWIQX::qxx ("mv $ir_font $CD/boot");
 		} else {
 			$kiwi -> warning ("Can't find unicode font for grub2");
 			$kiwi -> skipped ();
@@ -1801,7 +1801,7 @@ sub createImageLiveCD {
 			}
 			my $core    = "$CD/EFI/BOOT/$efi_bin";
 			my @modules = @efimods;
-			$status = qxx (
+			$status = KIWIQX::qxx (
 				"$grub2_mkimage -O $efi_fo -o $core -c $bootefi @modules 2>&1"
 			);
 			$result = $? >> 8;
@@ -1839,12 +1839,12 @@ sub createImageLiveCD {
 				$kiwi -> failed ();
 				return;
 			}
-			$status = qxx (
+			$status = KIWIQX::qxx (
 				"cp $s_shim_ms $CD/EFI/BOOT/$efi_bin 2>&1"
 			);
 			$result = $? >> 8;
 			if ($result != 0) {
-				$status = qxx (
+				$status = KIWIQX::qxx (
 					"cp $s_shim_suse $CD/EFI/BOOT/$efi_bin 2>&1"
 				);
 				$result = $? >> 8;
@@ -1855,7 +1855,7 @@ sub createImageLiveCD {
 				$kiwi -> failed ();
 				return;
 			}
-			$status = qxx ("cp $s_signed $CD/EFI/BOOT/grub.efi 2>&1");
+			$status = KIWIQX::qxx ("cp $s_signed $CD/EFI/BOOT/grub.efi 2>&1");
 			$result = $? >> 8;
 			if ($result != 0) {
 				$kiwi -> failed ();
@@ -2015,19 +2015,19 @@ sub createImageLiveCD {
 		#==========================================
 		# copy grub config to efi directory too
 		#------------------------------------------
-		qxx ("cp $CD/boot/grub2-efi/grub.cfg $CD/EFI/BOOT");
+		KIWIQX::qxx ("cp $CD/boot/grub2-efi/grub.cfg $CD/EFI/BOOT");
 		$kiwi -> done();
 		#==========================================
 		# make iso EFI bootable
 		#------------------------------------------
 		my $efi_fat = "$CD/boot/$isoarch/efi";
-		$status = qxx ("qemu-img create $efi_fat 4M 2>&1");
+		$status = KIWIQX::qxx ("qemu-img create $efi_fat 4M 2>&1");
 		$result = $? >> 8;
 		if ($result == 0) {
-			$status = qxx ("/sbin/mkdosfs -n 'BOOT' $efi_fat 2>&1");
+			$status = KIWIQX::qxx ("/sbin/mkdosfs -n 'BOOT' $efi_fat 2>&1");
 			$result = $? >> 8;
 			if ($result == 0) {
-				$status = qxx ("mcopy -Do -s -i $efi_fat $CD/EFI :: 2>&1");
+				$status = KIWIQX::qxx ("mcopy -Do -s -i $efi_fat $CD/EFI :: 2>&1");
 				$result = $? >> 8;
 			}
 		}
@@ -2043,7 +2043,7 @@ sub createImageLiveCD {
 	#------------------------------------------
 	$kiwi -> info ("Setting up isolinux boot CD [$isoarch]");
 	my $gfx = $tmpdir."/image/loader";
-	$data = qxx ("cp -a $gfx/* $destination");
+	$data = KIWIQX::qxx ("cp -a $gfx/* $destination");
 	$code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> failed ();
@@ -2077,8 +2077,8 @@ sub createImageLiveCD {
 		$kiwi -> error  ("Failed to create $destination/isolinux.cfg: $!");
 		$kiwi -> failed ();
 		if (! -d $checkBase) {
-			qxx ("rm -rf $cmdL->getRootTargetDir()");
-			qxx ("rm -rf $tmpdir");
+			KIWIQX::qxx ("rm -rf $cmdL->getRootTargetDir()");
+			KIWIQX::qxx ("rm -rf $tmpdir");
 		}
 		return;
 	}
@@ -2166,8 +2166,8 @@ sub createImageLiveCD {
 		$kiwi -> error  ("Failed to create isolinux.msg: $!");
 		$kiwi -> failed ();
 		if (! -d $checkBase) {
-			qxx ("rm -rf $cmdL->getRootTargetDir()");
-			qxx ("rm -rf $tmpdir");
+			KIWIQX::qxx ("rm -rf $cmdL->getRootTargetDir()");
+			KIWIQX::qxx ("rm -rf $tmpdir");
 		}
 		return;
 	}
@@ -2187,7 +2187,7 @@ sub createImageLiveCD {
 	#==========================================
 	# Cleanup tmpdir
 	#------------------------------------------
-	qxx ("rm -rf $tmpdir");
+	KIWIQX::qxx ("rm -rf $tmpdir");
 	#==========================================
 	# Create boot configuration
 	#------------------------------------------
@@ -2365,7 +2365,7 @@ sub createImageLiveCD {
 	#==========================================
 	# cleanup
 	#------------------------------------------
-	qxx ("rm -rf $CD 2>&1");
+	KIWIQX::qxx ("rm -rf $CD 2>&1");
 	return $this;
 }
 
@@ -2431,7 +2431,7 @@ sub createImageSplit {
 	# turn image path into absolute path
 	#------------------------------------------
 	if ($imageTree !~ /^\//) {
-		my $pwd = qxx ("pwd"); chomp $pwd;
+		my $pwd = KIWIQX::qxx ("pwd"); chomp $pwd;
 		$imageTree = $pwd."/".$imageTree;
 	}
 	#==========================================
@@ -2477,15 +2477,15 @@ sub createImageSplit {
 	$kiwi -> info ("Creating root tree clone for split operations");
 	$treebase = basename $imageTree;
 	if (-d $this->{imageDest}."/".$treebase) {
-		qxx ("rm -rf $this->{imageDest}/$treebase");
+		KIWIQX::qxx ("rm -rf $this->{imageDest}/$treebase");
 	}
-	$data = qxx ("cp -a -x $imageTree $this->{imageDest}");
+	$data = KIWIQX::qxx ("cp -a -x $imageTree $this->{imageDest}");
 	$code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Can't create copy of image tree: $data");
 		$kiwi -> failed ();
-		qxx ("rm -rf $imageTree");
+		KIWIQX::qxx ("rm -rf $imageTree");
 		return;
 	}
 	$kiwi -> done();
@@ -2494,7 +2494,7 @@ sub createImageSplit {
 	#------------------------------------------
 	$imageTree = $this->{imageDest}."/".$treebase;
 	if ($imageTree !~ /^\//) {
-		my $pwd = qxx ("pwd"); chomp $pwd;
+		my $pwd = KIWIQX::qxx ("pwd"); chomp $pwd;
 		$imageTree = $pwd."/".$imageTree;
 	}
 	$imageTreeTmp = $imageTree;
@@ -2510,7 +2510,7 @@ sub createImageSplit {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't create split tmp directory: $error");
 		$kiwi -> failed ();
-		qxx ("rm -rf $imageTree");
+		KIWIQX::qxx ("rm -rf $imageTree");
 		return;
 	}
 	#==========================================
@@ -2524,7 +2524,7 @@ sub createImageSplit {
 	foreach my $except_item (@{$tmp_except_list}) {
 		my $except = $except_item -> getName();
 		my $globsource = "${imageTree}${except}";
-		my @files = qxx ("find $globsource -xtype f 2>/dev/null");
+		my @files = KIWIQX::qxx ("find $globsource -xtype f 2>/dev/null");
 		my $code  = $? >> 8;
 		if ($code != 0) {
 			# excepted file(s) doesn't exist anyway
@@ -2557,7 +2557,7 @@ sub createImageSplit {
 			S_ISBLK($st->mode)  ||
 			S_ISLNK($st->mode)
 		) {
-			qxx ("cp -a $path $target");
+			KIWIQX::qxx ("cp -a $path $target");
 		} else {
 			$rerooted =~ s#/+#/#g;
 			symlink ($rerooted, $target);
@@ -2591,7 +2591,7 @@ sub createImageSplit {
 	if (@tempFiles) {
 		foreach my $temp (@tempFiles) {
 			my $globsource = "${imageTree}${temp}";
-			my @files = qxx ("find $globsource -xtype f 2>/dev/null");
+			my @files = KIWIQX::qxx ("find $globsource -xtype f 2>/dev/null");
 			my $code  = $? >> 8;
 			if ($code != 0) {
 				$kiwi -> warning ("file $globsource doesn't exist");
@@ -2612,8 +2612,8 @@ sub createImageSplit {
 			}
 			my $dest = $file;
 			$dest =~ s#$imageTree#$imageTreeTmp#;
-			qxx ("rm -rf $dest");
-			qxx ("mv $file $dest");
+			KIWIQX::qxx ("rm -rf $dest");
+			KIWIQX::qxx ("mv $file $dest");
 		}
 	}
 	#==========================================
@@ -2634,7 +2634,7 @@ sub createImageSplit {
 				"Couldn't create split read-write directory: $error"
 			);
 			$kiwi -> failed ();
-			qxx ("rm -rf $imageTree $imageTreeTmp");
+			KIWIQX::qxx ("rm -rf $imageTree $imageTreeTmp");
 			return;
 		}
 		#==========================================
@@ -2648,7 +2648,7 @@ sub createImageSplit {
 		foreach my $except_item (@{$persist_except_list}) {
 			my $except = $except_item -> getName();
 			my $globsource = "${imageTree}${except}";
-			my @files = qxx ("find $globsource -xtype f 2>/dev/null");
+			my @files = KIWIQX::qxx ("find $globsource -xtype f 2>/dev/null");
 			my $code  = $? >> 8;
 			if ($code != 0) {
 				# excepted file(s) doesn't exist anyway
@@ -2665,7 +2665,7 @@ sub createImageSplit {
 		my %expandedPersistFiles;
 		foreach my $persist (@persistFiles) {
 			my $globsource = "${imageTree}${persist}";
-			my @files = qxx ("find $globsource 2>/dev/null");
+			my @files = KIWIQX::qxx ("find $globsource 2>/dev/null");
 			my $code  = $? >> 8;
 			if ($code != 0) {
 				$kiwi -> warning ("file $globsource doesn't exist");
@@ -2696,7 +2696,7 @@ sub createImageSplit {
 				# recreate directory
 				#------------------------------------------
 				my $st = stat($file);
-				qxx ("mkdir -p $dest");
+				KIWIQX::qxx ("mkdir -p $dest");
 				chmod S_IMODE($st->mode), $dest;
 				chown $st->uid, $st->gid, $dest;
 			} else {
@@ -2705,16 +2705,16 @@ sub createImageSplit {
 				#------------------------------------------
 				my $st = stat(dirname $file);
 				my $destdir = dirname $dest;
-				qxx ("rm -rf $dest");
-				qxx ("mkdir -p $destdir");
+				KIWIQX::qxx ("rm -rf $dest");
+				KIWIQX::qxx ("mkdir -p $destdir");
 				chmod S_IMODE($st->mode), $destdir;
 				chown $st->uid, $st->gid, $destdir;
-				qxx ("mv $file $dest");
+				KIWIQX::qxx ("mv $file $dest");
 				#==========================================
 				# relink file to read-write area
 				#------------------------------------------
-				qxx ("rm -rf $link");
-				qxx ("ln -s $rlnk $link");
+				KIWIQX::qxx ("rm -rf $link");
+				KIWIQX::qxx ("ln -s $rlnk $link");
 			}
 		}
 		#==========================================
@@ -2735,15 +2735,15 @@ sub createImageSplit {
 				#==========================================
 				# relink directory to read-write area
 				#------------------------------------------
-				qxx ("rm -rf $link");
-				qxx ("ln -s $rlnk $link");
+				KIWIQX::qxx ("rm -rf $link");
+				KIWIQX::qxx ("ln -s $rlnk $link");
 			}
 		}
 	}
 	#==========================================
 	# Embed rootfs meta data into ro extend
 	#------------------------------------------
-	$minInodes = qxx ("find $imageTreeTmp | wc -l");
+	$minInodes = KIWIQX::qxx ("find $imageTreeTmp | wc -l");
 	$sizeBytes = KIWIGlobals -> instance() -> dsize ($imageTreeTmp);
 	$sizeBytes+= $minInodes * $inodesize;
 	$sizeBytes = sprintf ("%.0f", $sizeBytes);
@@ -2755,30 +2755,30 @@ sub createImageSplit {
 	} else {
 		$kiwi -> error  ("Failed to create rootfs meta data: $!");
 		$kiwi -> failed ();
-		qxx ("rm -rf $imageTreeRW");
-		qxx ("rm -rf $imageTreeTmp");
-		qxx ("rm -rf $imageTree");
+		KIWIQX::qxx ("rm -rf $imageTreeRW");
+		KIWIQX::qxx ("rm -rf $imageTreeTmp");
+		KIWIQX::qxx ("rm -rf $imageTree");
 		return;
 	}
 	#==========================================
 	# Embed rootfs.tar for tmpfs into ro extend
 	#------------------------------------------
-	$data = qxx (
+	$data = KIWIQX::qxx (
 		"cd $imageTreeTmp && tar -cf $imageTree/rootfs.tar * 2>&1"
 	);
 	$code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> error  ("Failed to create rootfs tarball: $data");
 		$kiwi -> failed ();
-		qxx ("rm -rf $imageTreeRW");
-		qxx ("rm -rf $imageTreeTmp");
-		qxx ("rm -rf $imageTree");
+		KIWIQX::qxx ("rm -rf $imageTreeRW");
+		KIWIQX::qxx ("rm -rf $imageTreeTmp");
+		KIWIQX::qxx ("rm -rf $imageTree");
 		return;
 	}
 	#==========================================
 	# Clean rootfs tmp tree
 	#------------------------------------------
-	qxx ("rm -rf $imageTreeTmp");
+	KIWIQX::qxx ("rm -rf $imageTreeTmp");
 	#==========================================
 	# Count disk space for extends
 	#------------------------------------------
@@ -2795,8 +2795,8 @@ sub createImageSplit {
 		if (defined $this->{imageTreeRW}) {
 			$kiwi -> info ("Image RW part requires $mbytesrw MB of disk space");
 			if (! $this -> buildLogicalExtend ($namerw,$mbytesrw."M")) {
-				qxx ("rm -rf $imageTreeRW");
-				qxx ("rm -rf $imageTree");
+				KIWIQX::qxx ("rm -rf $imageTreeRW");
+				KIWIQX::qxx ("rm -rf $imageTree");
 				return;
 			}
 			$kiwi -> done();
@@ -2835,14 +2835,14 @@ sub createImageSplit {
 			};
 			$kiwi -> error  ("Unsupported type: $FSTypeRW");
 			$kiwi -> failed ();
-			qxx ("rm -rf $imageTreeRW");
-			qxx ("rm -rf $imageTree");
+			KIWIQX::qxx ("rm -rf $imageTreeRW");
+			KIWIQX::qxx ("rm -rf $imageTree");
 			$this -> cleanLuks();
 			return;
 		}
 		if (! $ok) {
-			qxx ("rm -rf $imageTreeRW");
-			qxx ("rm -rf $imageTree");
+			KIWIQX::qxx ("rm -rf $imageTreeRW");
+			KIWIQX::qxx ("rm -rf $imageTree");
 			$this -> cleanLuks();
 			return;
 		}
@@ -2852,8 +2852,8 @@ sub createImageSplit {
 	#------------------------------------------
 	$kiwi -> info ("Image RO part requires $mbytesro MB of disk space");
 	if (! $this -> buildLogicalExtend ($namero,$mbytesro."M")) {
-		qxx ("rm -rf $imageTreeRW");
-		qxx ("rm -rf $imageTree");
+		KIWIQX::qxx ("rm -rf $imageTreeRW");
+		KIWIQX::qxx ("rm -rf $imageTree");
 		return;
 	}
 	$kiwi -> done();
@@ -2895,14 +2895,14 @@ sub createImageSplit {
 		};
 		$kiwi -> error  ("Unsupported type: $FSTypeRO");
 		$kiwi -> failed ();
-		qxx ("rm -rf $imageTreeRW");
-		qxx ("rm -rf $imageTree");
+		KIWIQX::qxx ("rm -rf $imageTreeRW");
+		KIWIQX::qxx ("rm -rf $imageTree");
 		$this -> cleanLuks();
 		return;
 	}
 	if (! $ok) {
-		qxx ("rm -rf $imageTreeRW");
-		qxx ("rm -rf $imageTree");
+		KIWIQX::qxx ("rm -rf $imageTreeRW");
+		KIWIQX::qxx ("rm -rf $imageTree");
 		$this -> cleanLuks();
 		return;
 	}
@@ -2932,8 +2932,8 @@ sub createImageSplit {
 			#------------------------------------------
 			my $extend = $this -> mountLogicalExtend ($name);
 			if (! defined $extend) {
-				qxx ("rm -rf $imageTreeRW");
-				qxx ("rm -rf $imageTree");
+				KIWIQX::qxx ("rm -rf $imageTreeRW");
+				KIWIQX::qxx ("rm -rf $imageTree");
 				$this -> cleanLuks();
 				return;
 			}
@@ -2941,8 +2941,8 @@ sub createImageSplit {
 			# copy physical to logical
 			#------------------------------------------
 			if (! $this -> installLogicalExtend ($extend,$source)) {
-				qxx ("rm -rf $imageTreeRW");
-				qxx ("rm -rf $imageTree");
+				KIWIQX::qxx ("rm -rf $imageTreeRW");
+				KIWIQX::qxx ("rm -rf $imageTree");
 				$this -> cleanLuks();
 				return;
 			}
@@ -2954,29 +2954,29 @@ sub createImageSplit {
 		$kiwi -> info ("Checking file system: $type...");
 		SWITCH: for ($type) {
 			/ext2/       && do {
-				qxx ("/sbin/e2fsck -f -y $this->{imageDest}/$name 2>&1");
+				KIWIQX::qxx ("/sbin/e2fsck -f -y $this->{imageDest}/$name 2>&1");
 				$kiwi -> done();
 				last SWITCH;
 			};
 			/ext3/       && do {
-				qxx ("/sbin/fsck.ext3 -f -y $this->{imageDest}/$name 2>&1");
-				qxx ("/sbin/tune2fs -j $this->{imageDest}/$name 2>&1");
+				KIWIQX::qxx ("/sbin/fsck.ext3 -f -y $this->{imageDest}/$name 2>&1");
+				KIWIQX::qxx ("/sbin/tune2fs -j $this->{imageDest}/$name 2>&1");
 				$kiwi -> done();
 				last SWITCH;
 			};
 			/ext4/       && do {
-				qxx ("/sbin/fsck.ext4 -f -y $this->{imageDest}/$name 2>&1");
-				qxx ("/sbin/tune2fs -j $this->{imageDest}/$name 2>&1");
+				KIWIQX::qxx ("/sbin/fsck.ext4 -f -y $this->{imageDest}/$name 2>&1");
+				KIWIQX::qxx ("/sbin/tune2fs -j $this->{imageDest}/$name 2>&1");
 				$kiwi -> done();
 				last SWITCH;
 			};
 			/reiserfs/   && do {
-				qxx ("/sbin/reiserfsck -y $this->{imageDest}/$name 2>&1");
+				KIWIQX::qxx ("/sbin/reiserfsck -y $this->{imageDest}/$name 2>&1");
 				$kiwi -> done();
 				last SWITCH;
 			};
 			/btrfs/      && do {
-				qxx ("/sbin/btrfsck $this->{imageDest}/$name 2>&1");
+				KIWIQX::qxx ("/sbin/btrfsck $this->{imageDest}/$name 2>&1");
 				$kiwi -> done();
 				last SWITCH;
 			};
@@ -2985,7 +2985,7 @@ sub createImageSplit {
 				last SWITCH;
 			};
 			/xfs/        && do {
-				qxx ("/sbin/mkfs.xfs $this->{imageDest}/$name 2>&1");
+				KIWIQX::qxx ("/sbin/mkfs.xfs $this->{imageDest}/$name 2>&1");
 				$kiwi -> done();
 				last SWITCH;
 			};
@@ -2996,8 +2996,8 @@ sub createImageSplit {
 			};
 			$kiwi -> error  ("Unsupported type: $type");
 			$kiwi -> failed ();
-			qxx ("rm -rf $imageTreeRW");
-			qxx ("rm -rf $imageTree");
+			KIWIQX::qxx ("rm -rf $imageTreeRW");
+			KIWIQX::qxx ("rm -rf $imageTree");
 			$this -> cleanLuks();
 			return;
 		}
@@ -3006,8 +3006,8 @@ sub createImageSplit {
 		#------------------------------------------
 		$this -> restoreImageDest();
 		if (! $this -> buildMD5Sum ($name)) {
-			qxx ("rm -rf $imageTreeRW");
-			qxx ("rm -rf $imageTree");
+			KIWIQX::qxx ("rm -rf $imageTreeRW");
+			KIWIQX::qxx ("rm -rf $imageTree");
 			$this -> cleanLuks();
 			return;
 		}
@@ -3019,15 +3019,15 @@ sub createImageSplit {
 	# Create network boot configuration
 	#------------------------------------------
 	if (! $this -> writeImageConfig ($namero)) {
-		qxx ("rm -rf $imageTreeRW");
-		qxx ("rm -rf $imageTree");
+		KIWIQX::qxx ("rm -rf $imageTreeRW");
+		KIWIQX::qxx ("rm -rf $imageTree");
 		return;
 	}
 	#==========================================
 	# Cleanup temporary data
 	#------------------------------------------
-	qxx ("rm -rf $imageTreeRW");
-	qxx ("rm -rf $imageTree");
+	KIWIQX::qxx ("rm -rf $imageTreeRW");
+	KIWIQX::qxx ("rm -rf $imageTree");
 	#==========================================
 	# build boot image only if specified
 	#------------------------------------------
@@ -3468,8 +3468,8 @@ sub postImage {
 		# Check EXT3 file system
 		#------------------------------------------
 		/ext3|ec2|clicfs/i && do {
-			qxx ("/sbin/fsck.ext3 -f -y $this->{imageDest}/$name 2>&1");
-			qxx ("/sbin/tune2fs -j $this->{imageDest}/$name 2>&1");
+			KIWIQX::qxx ("/sbin/fsck.ext3 -f -y $this->{imageDest}/$name 2>&1");
+			KIWIQX::qxx ("/sbin/tune2fs -j $this->{imageDest}/$name 2>&1");
 			$kiwi -> done();
 			last SWITCH;
 		};
@@ -3484,8 +3484,8 @@ sub postImage {
 		# Check EXT4 file system
 		#------------------------------------------
 		/ext4/i     && do {
-			qxx ("/sbin/fsck.ext4 -f -y $this->{imageDest}/$name 2>&1");
-			qxx ("/sbin/tune2fs -j $this->{imageDest}/$name 2>&1");
+			KIWIQX::qxx ("/sbin/fsck.ext4 -f -y $this->{imageDest}/$name 2>&1");
+			KIWIQX::qxx ("/sbin/tune2fs -j $this->{imageDest}/$name 2>&1");
 			$kiwi -> done();
 			last SWITCH;
 		};
@@ -3493,7 +3493,7 @@ sub postImage {
 		# Check EXT2 file system
 		#------------------------------------------
 		/ext2/i     && do {
-			qxx ("/sbin/e2fsck -f -y $this->{imageDest}/$name 2>&1");
+			KIWIQX::qxx ("/sbin/e2fsck -f -y $this->{imageDest}/$name 2>&1");
 			$kiwi -> done();
 			last SWITCH;
 		};
@@ -3501,7 +3501,7 @@ sub postImage {
 		# Check ReiserFS file system
 		#------------------------------------------
 		/reiserfs/i && do {
-			qxx ("/sbin/reiserfsck -y $this->{imageDest}/$name 2>&1");
+			KIWIQX::qxx ("/sbin/reiserfsck -y $this->{imageDest}/$name 2>&1");
 			$kiwi -> done();
 			last SWITCH;
 		};
@@ -3509,7 +3509,7 @@ sub postImage {
 		# Check BTRFS file system
 		#------------------------------------------
 		/btrfs/     && do {
-			qxx ("/sbin/btrfsck $this->{imageDest}/$name 2>&1");
+			KIWIQX::qxx ("/sbin/btrfsck $this->{imageDest}/$name 2>&1");
 			$kiwi -> done();
 			last SWITCH;
 		};
@@ -3517,7 +3517,7 @@ sub postImage {
 		# Check XFS file system
 		#------------------------------------------
 		/xfs/       && do {
-			qxx ("/sbin/fsck.xfs $this->{imageDest}/$name 2>&1");
+			KIWIQX::qxx ("/sbin/fsck.xfs $this->{imageDest}/$name 2>&1");
 			$kiwi -> done();
 			last SWITCH;
 		};
@@ -3616,7 +3616,7 @@ sub buildLogicalExtend {
 			#==========================================
 			# Call custom image creation tool...
 			#------------------------------------------
-			my $data = qxx ("$this->{gdata}->{StudioNode} $seek 2>&1");
+			my $data = KIWIQX::qxx ("$this->{gdata}->{StudioNode} $seek 2>&1");
 			my $code = $? >> 8;
 			chomp $data;
 			if (($code != 0) || (! -b $data)) {
@@ -3633,7 +3633,7 @@ sub buildLogicalExtend {
 			# loop setup a disk device as file...
 			#------------------------------------------
 			unlink ($out);
-			my $data = qxx ("qemu-img create $out $seek 2>&1");
+			my $data = KIWIQX::qxx ("qemu-img create $out $seek 2>&1");
 			my $code = $? >> 8;
 			if ($code != 0) {
 				$kiwi -> error  ("Couldn't create logical extend");
@@ -3673,7 +3673,7 @@ sub setupEncoding {
 		return;
 	}
 	if (! defined $device) {
-		$data = qxx ("/sbin/losetup -f --show $out 2>&1"); chomp $data;
+		$data = KIWIQX::qxx ("/sbin/losetup -f --show $out 2>&1"); chomp $data;
 		$code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> error  ("Couldn't loop bind logical extend: $data");
@@ -3690,7 +3690,7 @@ sub setupEncoding {
 	}
 	push @luksloop,$loop;
 	$this->{luksloop} = \@luksloop;
-	$data = qxx ("echo $cipher | cryptsetup -q luksFormat $loop 2>&1");
+	$data = KIWIQX::qxx ("echo $cipher | cryptsetup -q luksFormat $loop 2>&1");
 	$code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> error  ("Couldn't setup luks format: $loop");
@@ -3698,7 +3698,7 @@ sub setupEncoding {
 		$this -> cleanLuks ();
 		return;
 	}
-	$data = qxx ("echo $cipher | cryptsetup luksOpen $loop $name 2>&1");
+	$data = KIWIQX::qxx ("echo $cipher | cryptsetup luksOpen $loop $name 2>&1");
 	$code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> error  ("Couldn't open luks device: $data");
@@ -3738,9 +3738,9 @@ sub installLogicalExtend {
 	#------------------------------------------
 	my $name = basename ($source);
 	$kiwi -> info ("Copying physical to logical [$name]...");
-	my $free = qxx ("df -h $extend 2>&1");
+	my $free = KIWIQX::qxx ("df -h $extend 2>&1");
 	$kiwi -> loginfo ("getSize: mount: $free\n");
-	my $data = qxx ("rsync -aHXA --one-file-system $source/ $extend 2>&1");
+	my $data = KIWIQX::qxx ("rsync -aHXA --one-file-system $source/ $extend 2>&1");
 	my $code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> failed ();
@@ -3760,7 +3760,7 @@ sub installLogicalExtend {
 			-> generateBuildImageName($this->{xml});
 		my $dest = $this->{imageDest}."/".$name;
 		$kiwi -> info ("Dumping filesystem image from $device...");
-		$data = qxx ("qemu-img convert -f raw -O raw $device $dest 2>&1");
+		$data = KIWIQX::qxx ("qemu-img convert -f raw -O raw $device $dest 2>&1");
 		$code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();
@@ -3887,7 +3887,7 @@ sub mountLogicalExtend {
 	if (! $device) {
 		$opts .= ",loop";
 	}
-	my $fstype = qxx (
+	my $fstype = KIWIQX::qxx (
 		"/sbin/blkid -c /dev/null -s TYPE -o value $target"
 	);
 	chomp $fstype;
@@ -3905,12 +3905,12 @@ sub mountLogicalExtend {
 		#==========================================
 		# mount zfs filesystem
 		#------------------------------------------
-		$data = qxx ("zpool import -d $this->{imageDest} kiwipool 2>&1");
+		$data = KIWIQX::qxx ("zpool import -d $this->{imageDest} kiwipool 2>&1");
 		$code = $? >> 8;
 		if ($code == 0) {
 			push @clean,"zpool export kiwipool";
 			$this->{UmountStack} = \@clean;
-			$data = qxx ("mount --bind /kiwipool/ROOT/system-1 $dest 2>&1");
+			$data = KIWIQX::qxx ("mount --bind /kiwipool/ROOT/system-1 $dest 2>&1");
 		}
 	} else {
 		#==========================================
@@ -3918,9 +3918,9 @@ sub mountLogicalExtend {
 		#------------------------------------------
 		if ($opts) {
 			$opts =~ s/^,//;
-			$data = qxx ("mount -o $opts $target $dest 2>&1");
+			$data = KIWIQX::qxx ("mount -o $opts $target $dest 2>&1");
 		} else {
-			$data = qxx ("mount $target $dest 2>&1");
+			$data = KIWIQX::qxx ("mount $target $dest 2>&1");
 		}
 	}
 	#==========================================
@@ -3965,7 +3965,7 @@ sub extractSplash {
 	# check if plymouth is used and add flag
 	#------------------------------------------
 	if (-f "$imageTree/plymouth.splash.active") {
-		qxx ("touch $imageDest/plymouth.splash.active 2>&1");
+		KIWIQX::qxx ("touch $imageDest/plymouth.splash.active 2>&1");
 		return $this;
 	}
 	#==========================================
@@ -3973,7 +3973,7 @@ sub extractSplash {
 	#------------------------------------------
 	$kiwi -> info ("Extracting kernel splash files...");
 	mkdir $newspl;
-	my $status = qxx ("mv $imageTree/image/loader/*.spl $newspl 2>&1");
+	my $status = KIWIQX::qxx ("mv $imageTree/image/loader/*.spl $newspl 2>&1");
 	my $result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> skipped ();
@@ -3987,20 +3987,20 @@ sub extractSplash {
 	#------------------------------------------
 	while (my $splash = glob("$newspl/*.spl")) {
 		mkdir "$splash.dir";
-		qxx ("$zipper -cd $splash > $splash.bob");
+		KIWIQX::qxx ("$zipper -cd $splash > $splash.bob");
 		my $count = $this -> extractCPIO ( $splash.".bob" );
 		for (my $id=1; $id <= $count; $id++) {
-			qxx ("cat $splash.bob.$id |(cd $splash.dir && cpio -i 2>&1)");
+			KIWIQX::qxx ("cat $splash.bob.$id |(cd $splash.dir && cpio -i 2>&1)");
 		}
-		qxx ("cp -a $splash.dir/etc $newspl");
+		KIWIQX::qxx ("cp -a $splash.dir/etc $newspl");
 		$result = 1;
 		if (-e "$splash.dir/bootsplash") {
-			qxx ("cat $splash.dir/bootsplash >> $newspl/bootsplash");
+			KIWIQX::qxx ("cat $splash.dir/bootsplash >> $newspl/bootsplash");
 			$result = $? >> 8;
 		}
-		qxx ("rm -rf $splash.dir");
-		qxx ("rm -f  $splash.bob*");
-		qxx ("rm -f  $splash");
+		KIWIQX::qxx ("rm -rf $splash.dir");
+		KIWIQX::qxx ("rm -f  $splash.bob*");
+		KIWIQX::qxx ("rm -f  $splash");
 		if ($result != 0) {
 			my $splfile = basename ($splash);
 			$kiwi -> skipped ();
@@ -4009,10 +4009,10 @@ sub extractSplash {
 			return $this;
 		}
 	}
-	qxx ("(cd $newspl && \
+	KIWIQX::qxx ("(cd $newspl && \
 		find|cpio --quiet -oH newc | $zipper) > $imageDest/$name.spl"
 	);
-	qxx ("rm -rf $newspl");
+	KIWIQX::qxx ("rm -rf $newspl");
 	$kiwi -> done();
 	return $this;
 }
@@ -4085,14 +4085,14 @@ sub extractLinux {
 		#==========================================
 		# setup file names / cleanup...
 		#------------------------------------------
-		my $pwd = qxx ("pwd"); chomp $pwd;
+		my $pwd = KIWIQX::qxx ("pwd"); chomp $pwd;
 		my $shortfile = "$name.kernel";
 		my $file = "$dest/$shortfile";
 		if ($file !~ /^\//) {
 			$file = $pwd."/".$file;
 		}
 		if (-e $file) {
-			qxx ("rm -f $file");
+			KIWIQX::qxx ("rm -f $file");
 		}
 		# /.../
 		# the KIWIConfig::suseStripKernel() function provides the
@@ -4105,18 +4105,18 @@ sub extractLinux {
 			$kiwi -> failed ();
 			return;
 		}
-		qxx ("cp $src_kernel $file");
+		KIWIQX::qxx ("cp $src_kernel $file");
 		my $code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> error  ("Failed to extract kernel: $!");
 			$kiwi -> failed ();
 			return;
 		}
-		my $kernel = qxx ("kversion $file"); chomp $kernel;
+		my $kernel = KIWIQX::qxx ("kversion $file"); chomp $kernel;
 		if ($kernel eq "") {
 			$kernel = "no-version-found";
 		}
-		qxx ("mv -f $file $file.$kernel && ln -s $shortfile.$kernel $file");
+		KIWIQX::qxx ("mv -f $file $file.$kernel && ln -s $shortfile.$kernel $file");
 		$this -> buildMD5Sum ("$shortfile.$kernel");
 		# /.../
 		# check for the Xen hypervisor and extract them as well
@@ -4130,10 +4130,10 @@ sub extractLinux {
 		}
 		if (-f "$imageTree/boot/xen.gz") {
 			$file = "$dest/$name.kernel-xen";
-			qxx ("cp $imageTree/boot/xen.gz $file");
-			qxx ("mv $file $file.$kernel.'gz'");
+			KIWIQX::qxx ("cp $imageTree/boot/xen.gz $file");
+			KIWIQX::qxx ("mv $file $file.$kernel.'gz'");
 		}
-		qxx ("rm -rf $imageTree/boot/*");
+		KIWIQX::qxx ("rm -rf $imageTree/boot/*");
 	}
 	return $name;
 }
@@ -4181,10 +4181,10 @@ sub setupEXT2 {
 	if ($device) {
 		$target = $device;
 	}
-	my $data = qxx ("$fstool $fsopts $target 2>&1");
+	my $data = KIWIQX::qxx ("$fstool $fsopts $target 2>&1");
 	my $code = $? >> 8;
 	if (!$code && $tuneopts) {
-		$data = qxx ("/sbin/tune2fs $tuneopts $target 2>&1");
+		$data = KIWIQX::qxx ("/sbin/tune2fs $tuneopts $target 2>&1");
 		$code = $? >> 8;
 	}
 	if ($code != 0) {
@@ -4194,15 +4194,15 @@ sub setupEXT2 {
 		return;
 	}
 	if ($device) {
-		qxx ("touch $this->{imageDest}/$name");
+		KIWIQX::qxx ("touch $this->{imageDest}/$name");
 	}
 	$this -> restoreImageDest();
 	if ((defined $journal) && ($journal eq "journaled-ext3")) {
-		$data = qxx ("cd $this->{imageDest} && ln -vs $name $name.ext3 2>&1");
+		$data = KIWIQX::qxx ("cd $this->{imageDest} && ln -vs $name $name.ext3 2>&1");
 	} elsif ((defined $journal) && ($journal eq "journaled-ext4")) {
-		$data = qxx ("cd $this->{imageDest} && ln -vs $name $name.ext4 2>&1");
+		$data = KIWIQX::qxx ("cd $this->{imageDest} && ln -vs $name $name.ext4 2>&1");
 	} else {
-		$data = qxx ("cd $this->{imageDest} && ln -vs $name $name.ext2 2>&1");
+		$data = KIWIQX::qxx ("cd $this->{imageDest} && ln -vs $name $name.ext2 2>&1");
 	}
 	$this -> remapImageDest();
 	$kiwi -> loginfo ($data);
@@ -4229,7 +4229,7 @@ sub setupBTRFS {
 	if ($device) {
 		$target = $device;
 	}
-	my $data = qxx (
+	my $data = KIWIQX::qxx (
 		"/sbin/mkfs.btrfs $fsopts $target 2>&1"
 	);
 	my $code = $? >> 8;
@@ -4240,10 +4240,10 @@ sub setupBTRFS {
 		return;
 	}
 	if ($device) {
-		qxx ("touch $this->{imageDest}/$name");
+		KIWIQX::qxx ("touch $this->{imageDest}/$name");
 	}
 	$this -> restoreImageDest();
-	$data = qxx ("cd $this->{imageDest} && ln -vs $name $name.btrfs 2>&1");
+	$data = KIWIQX::qxx ("cd $this->{imageDest} && ln -vs $name $name.btrfs 2>&1");
 	$this -> remapImageDest();
 	$kiwi -> loginfo ($data);
 	return $name;
@@ -4267,7 +4267,7 @@ sub setupReiser {
 		$target = $device;
 	}
 	$fsopts.= "-f";
-	my $data = qxx (
+	my $data = KIWIQX::qxx (
 		"/sbin/mkreiserfs $fsopts $target 2>&1"
 	);
 	my $code = $? >> 8;
@@ -4278,10 +4278,10 @@ sub setupReiser {
 		return;
 	}
 	if ($device) {
-		qxx ("touch $this->{imageDest}/$name");
+		KIWIQX::qxx ("touch $this->{imageDest}/$name");
 	}
 	$this -> restoreImageDest();
-	$data = qxx ("cd $this->{imageDest} && ln -vs $name $name.reiserfs 2>&1");
+	$data = KIWIQX::qxx ("cd $this->{imageDest} && ln -vs $name $name.reiserfs 2>&1");
 	$this -> remapImageDest();
 	$kiwi -> loginfo ($data);
 	return $name;
@@ -4312,7 +4312,7 @@ sub setupSquashFS {
 	}
 	unlink ("$this->{imageDest}/$name");
 	my $squashfs_tool = $locator -> getExecPath("mksquashfs");
-	my $data = qxx ("$squashfs_tool $tree $this->{imageDest}/$name $opts 2>&1");
+	my $data = KIWIQX::qxx ("$squashfs_tool $tree $this->{imageDest}/$name $opts 2>&1");
 	my $code = $? >> 8; 
 	if ($code != 0) {
 		$kiwi -> failed ();
@@ -4328,7 +4328,7 @@ sub setupSquashFS {
 		my $outimg = $this->{imageDest}."/".$name;
 		my $squashimg = $outimg.".squashfs";
 		my $cipher = "$luks";
-		my $data = qxx ("mv $outimg $squashimg 2>&1");
+		my $data = KIWIQX::qxx ("mv $outimg $squashimg 2>&1");
 		my $code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();
@@ -4337,7 +4337,7 @@ sub setupSquashFS {
 			return;
 		}
 		my $bytes = int ((-s $squashimg) * 1.1);
-		$data = qxx (
+		$data = KIWIQX::qxx (
 			"dd if=/dev/zero of=$outimg bs=1 seek=$bytes count=1 2>&1"
 		);
 		$code = $? >> 8;
@@ -4350,7 +4350,7 @@ sub setupSquashFS {
 		if (! $this -> setupEncoding ($name.".squashfs",$outimg,$cipher)) {
 			return;
 		}
-		$data = qxx (
+		$data = KIWIQX::qxx (
 			"dd if=$squashimg of=$this->{imageDest}/$name.squashfs 2>&1"
 		);
 		$code = $? >> 8;
@@ -4363,9 +4363,9 @@ sub setupSquashFS {
 		}
 	}
 	$this -> restoreImageDest();
-	$data = qxx ("chmod 644 $this->{imageDest}/$name");
-	$data = qxx ("rm -f $this->{imageDest}/$name.squashfs");
-	$data = qxx ("cd $this->{imageDest} && ln -vs $name $name.squashfs 2>&1");
+	$data = KIWIQX::qxx ("chmod 644 $this->{imageDest}/$name");
+	$data = KIWIQX::qxx ("rm -f $this->{imageDest}/$name.squashfs");
+	$data = KIWIQX::qxx ("cd $this->{imageDest} && ln -vs $name $name.squashfs 2>&1");
 	$this -> remapImageDest();
 	$kiwi -> loginfo ($data);
 	return $name;
@@ -4388,9 +4388,9 @@ sub setupZFS {
 		$target = $device;
 	}
 	if ($opts) {
-		$data = qxx ("zpool create $opts kiwipool $target 2>&1");
+		$data = KIWIQX::qxx ("zpool create $opts kiwipool $target 2>&1");
 	} else {
-		$data = qxx ("zpool create kiwipool $target 2>&1");
+		$data = KIWIQX::qxx ("zpool create kiwipool $target 2>&1");
 	}
 	my $code = $? >> 8;
 	if ($code != 0) {
@@ -4403,10 +4403,10 @@ sub setupZFS {
 		return;
 	}
 	if ($device) {
-		qxx ("touch $this->{imageDest}/$name");
+		KIWIQX::qxx ("touch $this->{imageDest}/$name");
 	}
 	$this -> restoreImageDest();
-	$data = qxx ("cd $this->{imageDest} && ln -vs $name $name.zfs 2>&1");
+	$data = KIWIQX::qxx ("cd $this->{imageDest} && ln -vs $name $name.zfs 2>&1");
 	$this -> remapImageDest();
 	$kiwi -> loginfo ($data);
 	return $name;
@@ -4429,7 +4429,7 @@ sub setupXFS {
 	if ($device) {
 		$target = $device;
 	}
-	my $data = qxx (
+	my $data = KIWIQX::qxx (
 		"/sbin/mkfs.xfs $fsopts $target 2>&1"
 	);
 	my $code = $? >> 8;
@@ -4440,10 +4440,10 @@ sub setupXFS {
 		return;
 	}
 	if ($device) {
-		qxx ("touch $this->{imageDest}/$name");
+		KIWIQX::qxx ("touch $this->{imageDest}/$name");
 	}
 	$this -> restoreImageDest();
-	$data = qxx ("cd $this->{imageDest} && ln -vs $name $name.xfs 2>&1");
+	$data = KIWIQX::qxx ("cd $this->{imageDest} && ln -vs $name $name.xfs 2>&1");
 	$this -> remapImageDest();
 	$kiwi -> loginfo ($data);
 	return $name;
@@ -4474,7 +4474,7 @@ sub buildMD5Sum {
 	#------------------------------------------
 	$kiwi -> info ("Creating image MD5 sum...");
 	my $size = int KIWIGlobals -> instance() -> isize ($image);
-	my $primes = qxx ("factor $size");
+	my $primes = KIWIQX::qxx ("factor $size");
 	$primes =~ s/^.*: //;
 	my $blocksize = 1;
 	for my $factor (split /\s/,$primes) {
@@ -4485,10 +4485,10 @@ sub buildMD5Sum {
 		$blocksize *= $iFact;
 	}
 	my $blocks = $size / $blocksize;
-	my $sum  = qxx ("cat $image | md5sum - | cut -f 1 -d-");
+	my $sum  = KIWIQX::qxx ("cat $image | md5sum - | cut -f 1 -d-");
 	chomp $sum;
 	$name =~ s/\.$suf$//;
-	qxx ("echo \"$sum $blocks $blocksize\" > $this->{imageDest}/$name.md5");
+	KIWIQX::qxx ("echo \"$sum $blocks $blocksize\" > $this->{imageDest}/$name.md5");
 	$this->{md5file} = $this->{imageDest}."/".$name.".md5";
 	$kiwi -> done();
 	return $name;
@@ -4503,10 +4503,10 @@ sub restoreCDRootData {
 	my $cdrootData   = "config-cdroot.tgz";
 	my $cdrootScript = "config-cdroot.sh";
 	if (-f $this->{imageDest}."/".$cdrootData) {
-		qxx ("mv $this->{imageDest}/$cdrootData $imageTree/image");
+		KIWIQX::qxx ("mv $this->{imageDest}/$cdrootData $imageTree/image");
 	}
 	if (-f $this->{imageDest}."/".$cdrootScript) {
-		qxx ("mv $this->{imageDest}/$cdrootScript $imageTree/image");
+		KIWIQX::qxx ("mv $this->{imageDest}/$cdrootScript $imageTree/image");
 	}
 	return;
 }
@@ -4528,7 +4528,7 @@ sub restoreSplitExtend {
 		if (! -d "$imageTreeReadOnly/$dir") {
 			next;
 		}
-		my $data = qxx ("mv $imageTreeReadOnly/$dir $imageTree 2>&1");
+		my $data = KIWIQX::qxx ("mv $imageTreeReadOnly/$dir $imageTree 2>&1");
 		my $code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();
@@ -4559,7 +4559,7 @@ sub compressImage {
 	#------------------------------------------
 	$kiwi -> info ("Compressing image...");
 	my $suf = $this->{gdata}->{IrdZipperSuffix};
-	my $data = qxx (
+	my $data = KIWIQX::qxx (
 		"cat $image | $this->{gdata}->{IrdZipperCommand} > $this->{imageDest}/$name.$suf"
 	);
 	my $code = $? >> 8;
@@ -4576,8 +4576,8 @@ sub compressImage {
 	#------------------------------------------
 	my $fslink = $this->{imageDest}."/".$name.".".$fstype;
 	if (-l $fslink) {
-		qxx ("rm -f $fslink 2>&1");
-		qxx ("ln -vs $this->{imageDest}/$name.$suf $fslink 2>&1");
+		KIWIQX::qxx ("rm -f $fslink 2>&1");
+		KIWIQX::qxx ("ln -vs $this->{imageDest}/$name.$suf $fslink 2>&1");
 	}
 	return $name;
 }
@@ -4605,7 +4605,7 @@ sub updateMD5File {
 		close $FD;
 		chomp $line;
 		my $size = KIWIGlobals -> instance() -> isize ($image);
-		my $primes = qxx ("factor $size"); $primes =~ s/^.*: //;
+		my $primes = KIWIQX::qxx ("factor $size"); $primes =~ s/^.*: //;
 		my $blocksize = 1;
 		for my $factor (split /\s/,$primes) {
 			last if ($blocksize * $factor > 65464);
@@ -4613,7 +4613,7 @@ sub updateMD5File {
 		}
 		my $blocks = $size / $blocksize;
 		my $md5file= $this->{md5file};
-		qxx ("echo \"$line $blocks $blocksize\" > $md5file");
+		KIWIQX::qxx ("echo \"$line $blocks $blocksize\" > $md5file");
 		$kiwi -> done();
 	}
 	return $this;
@@ -4632,7 +4632,7 @@ sub getSize {
 	my $kiwi    = $this->{kiwi};
 	my $cmdL    = $this->{cmdL};
 	my $xml     = $this->{xml};
-	my $mini    = qxx ("find $extend | wc -l"); chomp $mini;
+	my $mini    = KIWIQX::qxx ("find $extend | wc -l"); chomp $mini;
 	my $minsize = KIWIGlobals -> instance() -> dsize ($extend);
 	my $spare   = 100 * 1024 * 1024;
 	my $files   = $mini;
@@ -4770,7 +4770,7 @@ sub checkKernel {
 		$cmd = "$zipper -cd $initrd";
 		$zip = 1;
 	}
-	my @status = qxx ("$cmd|cpio -it --quiet 'lib/modules/*'|cut -f1-3 -d/");
+	my @status = KIWIQX::qxx ("$cmd|cpio -it --quiet 'lib/modules/*'|cut -f1-3 -d/");
 	my $result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> error  ("Can't find any boot image kernel");
@@ -4814,12 +4814,12 @@ sub cleanLuks {
 	my $name = $this->{luksname};
 	if ($name) {
 		foreach my $luks (@{$name}) {
-			qxx ("cryptsetup luksClose $luks 2>&1");
+			KIWIQX::qxx ("cryptsetup luksClose $luks 2>&1");
 		}
 	}
 	if ($loop) {
 		foreach my $ldev (@{$loop}) {
-			qxx ("losetup -d $ldev 2>&1");
+			KIWIQX::qxx ("losetup -d $ldev 2>&1");
 		}
 	}
 	return;
@@ -4861,7 +4861,7 @@ sub cleanMount {
 	my $status;
 	my $result;
 	foreach my $cmd (reverse @UmountStack) {
-		$status = qxx ("$cmd 2>&1");
+		$status = KIWIQX::qxx ("$cmd 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> warning ("UmountStack failed: $cmd: $status\n");
@@ -4878,7 +4878,7 @@ sub cleanKernelFSMount {
 	my $this = shift;
 	my @kfs  = ("/proc/sys/fs/binfmt_misc","/proc","/dev/pts","/sys");
 	foreach my $system (@kfs) {
-		qxx ("umount $this->{imageTree}/$system 2>&1");
+		KIWIQX::qxx ("umount $this->{imageTree}/$system 2>&1");
 	}
 	return;
 }
@@ -4962,10 +4962,10 @@ sub DESTROY {
 	if ($imageDest) {
 		my $spldir    = $imageDest."/splash";
 		foreach my $dir (@{$dirs}) {
-			qxx ("rm -rf $dir 2>&1");
+			KIWIQX::qxx ("rm -rf $dir 2>&1");
 		}
 		if (-d $spldir) {
-			qxx ("rm -rf $spldir 2>&1");
+			KIWIQX::qxx ("rm -rf $spldir 2>&1");
 		}
 		$this -> cleanMount();
 		$this -> cleanLuks();

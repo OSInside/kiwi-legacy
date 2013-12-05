@@ -23,7 +23,7 @@ require Exporter;
 use XML::LibXML;
 use KIWILocator;
 use KIWILog;
-use KIWIQX qw (qxx);
+use KIWIQX;
 use Scalar::Util 'refaddr';
 
 #==========================================
@@ -1957,7 +1957,7 @@ sub __validateXML {
 		my $locator = KIWILocator -> instance();
 		my $jingExec = $locator -> getExecPath('jing');
 		if ($jingExec) {
-			qxx ("$jingExec $this->{schema} $upgradedContolFile 1>&2");
+			KIWIQX::qxx ("$jingExec $this->{schema} $upgradedContolFile 1>&2");
 			return;
 		} else {
 			$kiwi -> error ("$evaldata\n");

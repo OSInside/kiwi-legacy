@@ -38,7 +38,7 @@ use KIWIManagerYum;
 use KIWIManagerZypper;
 use KIWIOverlay;
 use KIWIProfileFile;
-use KIWIQX qw (qxx);
+use KIWIQX;
 use KIWIURL;
 
 #==========================================
@@ -253,7 +253,7 @@ sub new {
 	#==========================================
 	# Mark new root directory as broken
 	#------------------------------------------
-	qxx ("touch $root/.broken 2>&1");
+	KIWIQX::qxx ("touch $root/.broken 2>&1");
 	#==========================================
 	# Set root log file
 	#------------------------------------------
@@ -358,7 +358,7 @@ sub copyBroken {
 	my $root = $this->{root};
 	my $log  = $kiwi->getRootLog();	
 	if (-f $log) {
-		qxx ("cp $log $root/.broken 2>&1");
+		KIWIQX::qxx ("cp $log $root/.broken 2>&1");
 	}
 	return $this;
 }
@@ -386,7 +386,7 @@ sub init {
 	my $imageVersionFile = "$root/etc/ImageVersion";
 	my $imageVersion = $xml -> getPreferences() -> getVersion();
 	my $imageName    = $xml -> getImageName();
-	qxx ("mkdir -p $root/etc");
+	KIWIQX::qxx ("mkdir -p $root/etc");
 	if ( ! open ($FD, '>', "$imageVersionFile")) {
 		$kiwi -> error ("Failed to create version file: $!");
 		$kiwi -> failed ();
@@ -397,7 +397,7 @@ sub init {
 	#==================================
 	# Copy helper scripts to new root
 	#----------------------------------
-	qxx ("cp $this->{gdata}->{KConfig} $root/.kconfig 2>&1");
+	KIWIQX::qxx ("cp $this->{gdata}->{KConfig} $root/.kconfig 2>&1");
 	#==================================
 	# Return early if existing root
 	#----------------------------------
@@ -412,11 +412,11 @@ sub init {
 	# make sure DNS/proxy works
 	#----------------------------------
 	# need resolv.conf/hosts for internal chroot name resolution
-	qxx ("cp /etc/resolv.conf $root/etc 2>&1");
-	qxx ("cp /etc/hosts $root/etc 2>&1");
+	KIWIQX::qxx ("cp /etc/resolv.conf $root/etc 2>&1");
+	KIWIQX::qxx ("cp /etc/hosts $root/etc 2>&1");
 	# need /etc/sysconfig/proxy for internal chroot proxy usage
-	qxx ("mkdir -p $root/etc/sysconfig 2>&1");
-	qxx ("cp /etc/sysconfig/proxy $root/etc/sysconfig 2>&1");
+	KIWIQX::qxx ("mkdir -p $root/etc/sysconfig 2>&1");
+	KIWIQX::qxx ("cp /etc/sysconfig/proxy $root/etc/sysconfig 2>&1");
 	#==================================
 	# Return early if cache is used
 	#----------------------------------
@@ -459,43 +459,43 @@ sub init {
 	#----------------------------------
 	$kiwi -> info ("Creating default template files for new root system");
 	if (! defined $this->{cacheRoot}) {
-		qxx ("mkdir -p $root/dev");
-		qxx ("mkdir -m 755 -p $root/dev/pts");
-		qxx ("mknod -m 666 $root/dev/null c 1 3");
-		qxx ("mknod -m 666 $root/dev/zero c 1 5");
-		qxx ("mknod -m 622 $root/dev/full c 1 7");
-		qxx ("mknod -m 666 $root/dev/random c 1 8");
-		qxx ("mknod -m 644 $root/dev/urandom c 1 9");
-		qxx ("mknod -m 666 $root/dev/tty c 5 0");
-		qxx ("mknod -m 666 $root/dev/ptmx c 5 2");
-		qxx ("ln -s /proc/self/fd $root/dev/fd");
-		qxx ("ln -s fd/2 $root/dev/stderr");
-		qxx ("ln -s fd/0 $root/dev/stdin");
-		qxx ("ln -s fd/1 $root/dev/stdout");
-		qxx ("mknod -m 640 $root/dev/loop0 b 7 0");
-		qxx ("mknod -m 640 $root/dev/loop1 b 7 1");
-		qxx ("mknod -m 640 $root/dev/loop2 b 7 2");
-		qxx ("mknod -m 640 $root/dev/loop3 b 7 3");
-		qxx ("mkdir -p $root/etc/sysconfig");
+		KIWIQX::qxx ("mkdir -p $root/dev");
+		KIWIQX::qxx ("mkdir -m 755 -p $root/dev/pts");
+		KIWIQX::qxx ("mknod -m 666 $root/dev/null c 1 3");
+		KIWIQX::qxx ("mknod -m 666 $root/dev/zero c 1 5");
+		KIWIQX::qxx ("mknod -m 622 $root/dev/full c 1 7");
+		KIWIQX::qxx ("mknod -m 666 $root/dev/random c 1 8");
+		KIWIQX::qxx ("mknod -m 644 $root/dev/urandom c 1 9");
+		KIWIQX::qxx ("mknod -m 666 $root/dev/tty c 5 0");
+		KIWIQX::qxx ("mknod -m 666 $root/dev/ptmx c 5 2");
+		KIWIQX::qxx ("ln -s /proc/self/fd $root/dev/fd");
+		KIWIQX::qxx ("ln -s fd/2 $root/dev/stderr");
+		KIWIQX::qxx ("ln -s fd/0 $root/dev/stdin");
+		KIWIQX::qxx ("ln -s fd/1 $root/dev/stdout");
+		KIWIQX::qxx ("mknod -m 640 $root/dev/loop0 b 7 0");
+		KIWIQX::qxx ("mknod -m 640 $root/dev/loop1 b 7 1");
+		KIWIQX::qxx ("mknod -m 640 $root/dev/loop2 b 7 2");
+		KIWIQX::qxx ("mknod -m 640 $root/dev/loop3 b 7 3");
+		KIWIQX::qxx ("mkdir -p $root/etc/sysconfig");
 		# for zypper we need a yast log dir
 		if ($packager eq "zypper") {
-			qxx ("mkdir -p $root/var/log/YaST2");
+			KIWIQX::qxx ("mkdir -p $root/var/log/YaST2");
 		}
 		# for smart we need the dpkg default file
 		if ($packager eq "smart") {
-			qxx ("mkdir -p $root/var/lib/dpkg");
-			qxx ("touch $root/var/lib/dpkg/status");
-			qxx ("mkdir -p $root/var/lib/dpkg/updates");
-			qxx ("touch $root/var/lib/dpkg/available");
+			KIWIQX::qxx ("mkdir -p $root/var/lib/dpkg");
+			KIWIQX::qxx ("touch $root/var/lib/dpkg/status");
+			KIWIQX::qxx ("mkdir -p $root/var/lib/dpkg/updates");
+			KIWIQX::qxx ("touch $root/var/lib/dpkg/available");
 		}
 		# for building in suse autobuild we need the following file
 		if (-f '/.buildenv') {
-			qxx ("touch $root/.buildenv");
+			KIWIQX::qxx ("touch $root/.buildenv");
 		}
 		# need mtab link for mount calls
-		qxx ("ln -s /proc/self/mounts $root/etc/mtab");
+		KIWIQX::qxx ("ln -s /proc/self/mounts $root/etc/mtab");
 		# need sysconfig/bootloader to make post scripts happy
-		qxx ("touch $root/etc/sysconfig/bootloader");
+		KIWIQX::qxx ("touch $root/etc/sysconfig/bootloader");
 	}
 	# need user/group files as template
 	my $groupTemplate = "/etc/group"; 
@@ -517,8 +517,8 @@ sub init {
 			$paswdTemplate = $paswd; last;
 		}
 	}
-	qxx (" cp $groupTemplate $root/etc/group  2>&1 ");
-	qxx (" cp $paswdTemplate $root/etc/passwd 2>&1 ");
+	KIWIQX::qxx (" cp $groupTemplate $root/etc/group  2>&1 ");
+	KIWIQX::qxx (" cp $paswdTemplate $root/etc/passwd 2>&1 ");
 	$kiwi -> done();
 	#==========================================
 	# Create package keys
@@ -601,11 +601,11 @@ sub upgrade {
 	$this->{needResolvConf} = 0;
 	$this->{needHosts} = 0;
 	if (! -f "$root/etc/resolv.conf") {
-		qxx ("cp /etc/resolv.conf $root/etc 2>&1");
+		KIWIQX::qxx ("cp /etc/resolv.conf $root/etc 2>&1");
 		$this->{needResolvConf} = 1;
 	}
 	if (! -f "$root/etc/hosts") {
-		qxx ("cp /etc/hosts $root/etc 2>&1");
+		KIWIQX::qxx ("cp /etc/hosts $root/etc 2>&1");
 		$this->{needHosts} = 1;
 	}
 	#==========================================
@@ -613,7 +613,7 @@ sub upgrade {
 	#------------------------------------------
 	$this->{needProxy} = 0;
 	if (! -f "$root/etc/sysconfig/proxy") {
-		qxx ("cp /etc/sysconfig/proxy $root/etc/sysconfig 2>&1");
+		KIWIQX::qxx ("cp /etc/sysconfig/proxy $root/etc/sysconfig 2>&1");
 		$this->{needProxy} = 1;
 	}
 	#==========================================
@@ -666,11 +666,11 @@ sub prepareTestingEnvironment {
 	$this->{needResolvConf} = 0;
 	$this->{needHosts} = 0;
 	if (! -f "$root/etc/resolv.conf") {
-		qxx ("cp /etc/resolv.conf $root/etc 2>&1");
+		KIWIQX::qxx ("cp /etc/resolv.conf $root/etc 2>&1");
 		$this->{needResolvConf} = 1;
 	}
 	if (! -f "$root/etc/hosts") {
-		qxx ("cp /etc/hosts $root/etc 2>&1");
+		KIWIQX::qxx ("cp /etc/hosts $root/etc 2>&1");
 		$this->{needHosts} = 1;
 	}
 	#==========================================
@@ -678,7 +678,7 @@ sub prepareTestingEnvironment {
 	#------------------------------------------
 	$this->{needProxy} = 0;
 	if (! -f "$root/etc/sysconfig/proxy") {
-		qxx ("cp /etc/sysconfig/proxy $root/etc/sysconfig 2>&1");
+		KIWIQX::qxx ("cp /etc/sysconfig/proxy $root/etc/sysconfig 2>&1");
 		$this->{needProxy} = 1;
 	}
 	#==========================================
@@ -720,15 +720,15 @@ sub cleanupResolvConf {
 	my $needHosts = $this->{needHosts};
 	my $needProxy = $this->{needProxy};
 	if ($needResolvConf) {
-		qxx ("rm -f $root/etc/resolv.conf");
+		KIWIQX::qxx ("rm -f $root/etc/resolv.conf");
 		undef $this->{needResolvConf};
 	}
 	if ($needHosts) {
-		qxx ("rm -f $root/etc/hosts");
+		KIWIQX::qxx ("rm -f $root/etc/hosts");
 		undef $this->{needHosts};
 	}
 	if ($needProxy) {
-		qxx ("rm -f $root/etc/sysconfig/proxy");
+		KIWIQX::qxx ("rm -f $root/etc/sysconfig/proxy");
 		undef $this->{needProxy};
 	}
 	return;
@@ -960,7 +960,7 @@ sub fixupOverlayFilesOwnership {
 			}
 		}
 		next if ! $ok;
-		my $data = qxx ("chroot $root chown -c root:root '".$file."' 2>&1");
+		my $data = KIWIQX::qxx ("chroot $root chown -c root:root '".$file."' 2>&1");
 		my $code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> warning (
@@ -1015,9 +1015,9 @@ sub setup {
 	# copy license files if they exist
 	#----------------------------------------
 	if (-f "$root/license.tar.gz") {
-		qxx ("mkdir -p $root/etc/YaST2/licenses/base");
-		qxx ("tar -C $root/etc/YaST2/licenses/base -xf $root/license.tar.gz");
-		qxx ("rm -f $root/license.tar.gz");
+		KIWIQX::qxx ("mkdir -p $root/etc/YaST2/licenses/base");
+		KIWIQX::qxx ("tar -C $root/etc/YaST2/licenses/base -xf $root/license.tar.gz");
+		KIWIQX::qxx ("rm -f $root/license.tar.gz");
 	}
 	#========================================
 	# copy user defined files to image tree
@@ -1028,12 +1028,12 @@ sub setup {
 		# copy user defined files to tmproot
 		#----------------------------------------
 		if ((-l "$imageDesc/root/linuxrc") || (-l "$imageDesc/root/include")) {
-			$data = qxx (
+			$data = KIWIQX::qxx (
 				"cp -LR --force $imageDesc/root/ $root/tmproot 2>&1"
 			);
 		} else {
 			mkdir $root."/tmproot";
-			$data = qxx (
+			$data = KIWIQX::qxx (
 				"tar -cf - -C $imageDesc/root . | tar -x -C $root/tmproot 2>&1"
 			);
 		}
@@ -1050,7 +1050,7 @@ sub setup {
 		#========================================
 		# copy tmproot to real root (tar)
 		#----------------------------------------
-		$data = qxx ("tar -cf - -C $root/tmproot . | tar -x -C $root 2>&1");
+		$data = KIWIQX::qxx ("tar -cf - -C $root/tmproot . | tar -x -C $root 2>&1");
 		$code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();
@@ -1060,7 +1060,7 @@ sub setup {
 		#========================================
 		# cleanup tmproot
 		#----------------------------------------
-		qxx ("rm -rf $root/tmproot");
+		KIWIQX::qxx ("rm -rf $root/tmproot");
 		$kiwi -> done();
 	}
 	#========================================
@@ -1097,14 +1097,14 @@ sub setup {
 	if (-f "$root/linuxrc") {
 		$kiwi -> info ("Setting up linuxrc...");
 		unlink ("$root/init");
-		my $data = qxx ("ln $root/linuxrc $root/init 2>&1");
+		my $data = KIWIQX::qxx ("ln $root/linuxrc $root/init 2>&1");
 		my $code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();
 			$kiwi -> info   ($data);
 			return;
 		}
-		qxx ("chmod u+x $root/linuxrc $root/init 2>&1");
+		KIWIQX::qxx ("chmod u+x $root/linuxrc $root/init 2>&1");
 		$kiwi -> done ();
 	}
 	#========================================
@@ -1112,8 +1112,8 @@ sub setup {
 	#----------------------------------------
 	if (-d "$imageDesc/config") {
 		$kiwi -> info ("Preparing package setup scripts");
-		qxx (" mkdir -p $root/image/config ");
-		qxx (" cp $imageDesc/config/* $root/image/config 2>&1 ");
+		KIWIQX::qxx (" mkdir -p $root/image/config ");
+		KIWIQX::qxx (" cp $imageDesc/config/* $root/image/config 2>&1 ");
 		if (! opendir ($FD,"$root/image/config")) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't open script directory: $!");
@@ -1128,8 +1128,8 @@ sub setup {
 					next;
 				}
 				$kiwi -> info ("Calling package setup script: $script");
-				qxx (" chmod u+x $root/image/config/$script");
-				my $data = qxx (" chroot $root /image/config/$script 2>&1 ");
+				KIWIQX::qxx (" chmod u+x $root/image/config/$script");
+				my $data = KIWIQX::qxx (" chroot $root /image/config/$script 2>&1 ");
 				my $code = $? >> 8;
 				if ($code != 0) {
 					$kiwi -> failed ();
@@ -1139,7 +1139,7 @@ sub setup {
 				} else {
 					$kiwi -> loginfo ("$script: $data");
 				}
-				qxx ("rm -f $root/image/config/$script");
+				KIWIQX::qxx ("rm -f $root/image/config/$script");
 				$kiwi -> done ();
 			}
 		}
@@ -1149,17 +1149,17 @@ sub setup {
 	#========================================
 	# copy image description to image tree
 	#----------------------------------------
-	qxx (" mkdir -p $root/image ");
-	qxx (" cp $configFile $root/image 2>&1 ");
-	qxx (" cp $imageDesc/images.sh $root/image 2>&1 ");
-	qxx (" cp $imageDesc/config-cdroot.tgz $root/image 2>&1 ");
-	qxx (" cp $imageDesc/config-cdroot.sh  $root/image 2>&1 ");
-	qxx (" cp $root/.profile $root/image 2>&1 ");
-	qxx (" chmod u+x $root/image/images.sh 2>&1");
-	qxx (" chmod u+x $root/image/config-cdroot.sh 2>&1");
+	KIWIQX::qxx (" mkdir -p $root/image ");
+	KIWIQX::qxx (" cp $configFile $root/image 2>&1 ");
+	KIWIQX::qxx (" cp $imageDesc/images.sh $root/image 2>&1 ");
+	KIWIQX::qxx (" cp $imageDesc/config-cdroot.tgz $root/image 2>&1 ");
+	KIWIQX::qxx (" cp $imageDesc/config-cdroot.sh  $root/image 2>&1 ");
+	KIWIQX::qxx (" cp $root/.profile $root/image 2>&1 ");
+	KIWIQX::qxx (" chmod u+x $root/image/images.sh 2>&1");
+	KIWIQX::qxx (" chmod u+x $root/image/config-cdroot.sh 2>&1");
 	if (open ($FD, '>', "$root/image/main::Prepare")) {
 		if ($imageDesc !~ /^\//) {
-			my $pwd = qxx (" pwd "); chomp $pwd;
+			my $pwd = KIWIQX::qxx (" pwd "); chomp $pwd;
 			print $FD $pwd."/".$imageDesc;
 			close $FD;
 		} else {
@@ -1216,8 +1216,8 @@ sub setup {
 	#----------------------------------------
 	if ((! $initCache) && (-e "$imageDesc/config.sh")) {
 		$kiwi -> info ("Calling image script: config.sh");
-		qxx (" cp $imageDesc/config.sh $root/tmp ");
-		qxx (" chmod u+x $root/tmp/config.sh ");
+		KIWIQX::qxx (" cp $imageDesc/config.sh $root/tmp ");
+		KIWIQX::qxx (" chmod u+x $root/tmp/config.sh ");
 		my ($code,$data) = KIWIGlobals -> instance() -> callContained (
 			$root,"/tmp/config.sh"
 		);
@@ -1228,7 +1228,7 @@ sub setup {
 		} else {
 			$kiwi -> loginfo ("config.sh: $data");
 		}
-		qxx (" rm -f $root/tmp/config.sh ");
+		KIWIQX::qxx (" rm -f $root/tmp/config.sh ");
 		$kiwi -> done ();
 	}
 	#========================================
@@ -1272,11 +1272,11 @@ sub setup {
 	if (! -e "$imageDesc/root/etc/resolv.conf") {
 		# restore only if overlay tree doesn't contain a resolv.conf
 		if ((-f "$root/etc/resolv.conf") && (-f "/etc/resolv.conf")) {
-			my $data = qxx ("diff -q /etc/resolv.conf $root/etc/resolv.conf");
+			my $data = KIWIQX::qxx ("diff -q /etc/resolv.conf $root/etc/resolv.conf");
 			my $code = $? >> 8;
 			if ($code == 0) {
 				$kiwi -> info ("Cleanup temporary copy of resolv.conf");
-				qxx ("rm -f $root/etc/resolv.conf");
+				KIWIQX::qxx ("rm -f $root/etc/resolv.conf");
 				$kiwi -> done ();
 			}
 		}
@@ -1288,7 +1288,7 @@ sub setup {
 		# restore only if overlay tree doesn't contain a hosts
 		if (-f "$root/etc/hosts.rpmnew") {
 			$kiwi -> info ("Cleanup temporary copy of hosts");
-			qxx ("mv $root/etc/hosts.rpmnew $root/etc/hosts");
+			KIWIQX::qxx ("mv $root/etc/hosts.rpmnew $root/etc/hosts");
 			$kiwi -> done ();
 		}
 	}
@@ -1298,7 +1298,7 @@ sub setup {
 	if (! -e "$imageDesc/root/etc/sysconfig/proxy") {
 		# restore only if overlay tree doesn't contain a proxy setup
 		if ((-f "$root/etc/sysconfig/proxy") && (-f "/etc/sysconfig/proxy")) {
-			my $data = qxx (
+			my $data = KIWIQX::qxx (
 				"diff -q /etc/sysconfig/proxy $root/etc/sysconfig/proxy"
 			);
 			my $code = $? >> 8;
@@ -1306,9 +1306,9 @@ sub setup {
 				$kiwi -> info ("Cleanup temporary copy of sysconfig/proxy");
 				my $template = "$root/var/adm/fillup-templates/sysconfig.proxy";
 				if (! -f $template) {
-					qxx ("rm -f $root/etc/sysconfig/proxy");
+					KIWIQX::qxx ("rm -f $root/etc/sysconfig/proxy");
 				} else {
-					qxx ("cp $template $root/etc/sysconfig/proxy");
+					KIWIQX::qxx ("cp $template $root/etc/sysconfig/proxy");
 				}
 				$kiwi -> done ();
 			}
@@ -1318,7 +1318,7 @@ sub setup {
 	# cleanup temporary .buildenv
 	#----------------------------------------
 	if (-f "$root/.buildenv") {
-		qxx ("rm -f $root/.buildenv");
+		KIWIQX::qxx ("rm -f $root/.buildenv");
 	}
 	return $this;
 }
@@ -1362,28 +1362,28 @@ sub setupCacheMount {
 		@mountList = ();
 	}
 	if (! -e "$root/dev/console") {
-		qxx ("mkdir -p $root/dev");
-		qxx ("mount --bind /dev $root/dev");
+		KIWIQX::qxx ("mkdir -p $root/dev");
+		KIWIQX::qxx ("mount --bind /dev $root/dev");
 		push (@mountList,"$root/dev");
 	}
 	foreach my $cache (@cache) {
-		my $status = qxx ("cat /proc/mounts | grep ".$root.$cache." 2>&1");
+		my $status = KIWIQX::qxx ("cat /proc/mounts | grep ".$root.$cache." 2>&1");
 		my $result = $? >> 8;
 		if ($result == 0) {
 			next;
 		}
 		if (! -d $cache) {
-			qxx ("mkdir -p $cache");
+			KIWIQX::qxx ("mkdir -p $cache");
 		}
 		if (! -d "$root/$cache") {
-			qxx ("mkdir -p $root/$cache 2>&1");
+			KIWIQX::qxx ("mkdir -p $root/$cache 2>&1");
 		}
-		qxx ("mount --bind $cache $root/$cache 2>&1");
+		KIWIQX::qxx ("mount --bind $cache $root/$cache 2>&1");
 		push (@mountList,"$root/$cache");
 	}
 	if (! -e "$root/proc/mounts") {
-		qxx ("mkdir -p $root/proc");
-		qxx ("mount -t proc proc $root/proc");
+		KIWIQX::qxx ("mkdir -p $root/proc");
+		KIWIQX::qxx ("mount -t proc proc $root/proc");
 		push (@mountList,"$root/proc");
 	}
 	$this->{mountList} = \@mountList;
@@ -1424,30 +1424,30 @@ sub setupMount {
 		return;
 	}
 	if (! -e "$root/proc/mounts") {
-		qxx ("mkdir -p $root/proc");
-		qxx ("mount -t proc proc $root/proc");
+		KIWIQX::qxx ("mkdir -p $root/proc");
+		KIWIQX::qxx ("mount -t proc proc $root/proc");
 		push (@mountList,"$root/proc");
 	}
 	if (! -e "$root/dev/console") {
-		qxx ("mount --bind /dev $root/dev");
+		KIWIQX::qxx ("mount --bind /dev $root/dev");
 		push (@mountList,"$root/dev");
 	}
 	if (! -e "$root/var/run/dbus/pid") {
-		qxx ("mkdir -p $root/var/run/dbus");
-		qxx ("mount --bind /var/run/dbus $root/var/run/dbus");
+		KIWIQX::qxx ("mkdir -p $root/var/run/dbus");
+		KIWIQX::qxx ("mount --bind /var/run/dbus $root/var/run/dbus");
 		push (@mountList,"$root/var/run/dbus");
 	}
 	if (! -d "$root/sys/block") {
-		qxx ("mkdir -p $root/sys");
-		qxx ("mount -t sysfs sysfs $root/sys");
-		qxx ("mkdir -p $root/dev/pts");
-		qxx ("mount -t devpts -o mode=0620,gid=5 devpts $root/dev/pts");
+		KIWIQX::qxx ("mkdir -p $root/sys");
+		KIWIQX::qxx ("mount -t sysfs sysfs $root/sys");
+		KIWIQX::qxx ("mkdir -p $root/dev/pts");
+		KIWIQX::qxx ("mount -t devpts -o mode=0620,gid=5 devpts $root/dev/pts");
 		push (@mountList,"$root/sys");
 		push (@mountList,"$root/dev/pts");
 	}
 	if (! -e "$root/proc/sys/fs/binfmt_misc/register") {
-		qxx ("mkdir -p $root/proc/sys/fs/binfmt_misc");
-		qxx ("mount -t binfmt_misc binfmt_misc $root/proc/sys/fs/binfmt_misc");
+		KIWIQX::qxx ("mkdir -p $root/proc/sys/fs/binfmt_misc");
+		KIWIQX::qxx ("mount -t binfmt_misc binfmt_misc $root/proc/sys/fs/binfmt_misc");
 		push (@mountList,"$root/proc/sys/fs/binfmt_misc");
 	}
 	$this->{mountList} = \@mountList;
@@ -1466,16 +1466,16 @@ sub setupMount {
 		my $auopt = "dirs=$path=ro";
 		my $mount = $prefix.$path;
 		push (@mountList,$mount);
-		qxx ("mkdir -p \"$mount\"");
-		my $data = qxx ("touch $path/bob 2>&1");
+		KIWIQX::qxx ("mkdir -p \"$mount\"");
+		my $data = KIWIQX::qxx ("touch $path/bob 2>&1");
 		my $code = $? >> 8;
 		if ($code == 0) {
-			qxx ("rm -f $path/bob 2>&1");
+			KIWIQX::qxx ("rm -f $path/bob 2>&1");
 			$kiwi -> warning ("--> Status: read-write mounted");
 		} else {
 			$kiwi -> info ("--> Status: read-only mounted");
 		}
-		$data = qxx ("mount -o bind \"$path\" \"$mount\" 2>&1");
+		$data = KIWIQX::qxx ("mount -o bind \"$path\" \"$mount\" 2>&1");
 		$code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed();
@@ -1521,12 +1521,12 @@ sub cleanMount {
 		if (! -d $item) {
 			next;
 		}
-		my $data = qxx ("umount \"$item\" 2>&1");
+		my $data = KIWIQX::qxx ("umount \"$item\" 2>&1");
 		my $code = $? >> 8;
 		if (($code != 0) && ($data !~ "not mounted")) {
 			$kiwi -> loginfo ("Umount failed: $data");
 			$kiwi -> warning ("Umount of $item failed: calling lazy umount");
-			my $data = qxx ("umount -l \"$item\" 2>&1");
+			my $data = KIWIQX::qxx ("umount -l \"$item\" 2>&1");
 			my $code = $? >> 8;
 			if ($code != 0) {
 				$kiwi -> failed();
@@ -1535,10 +1535,10 @@ sub cleanMount {
 			}
 		}
 		if (($prefix) && ($item =~ /^$prefix/)) {
-			qxx ("rmdir -p \"$item\" 2>&1");
+			KIWIQX::qxx ("rmdir -p \"$item\" 2>&1");
 		}
 		if ($item =~ /^\/tmp\/kiwimount/) {
-			qxx ("rmdir -p \"$item\" 2>&1");
+			KIWIQX::qxx ("rmdir -p \"$item\" 2>&1");
 		}
 		
 	}

@@ -30,7 +30,7 @@ use KIWICommandLine;
 use KIWIConfigWriterFactory;
 use KIWILocator;
 use KIWILog;
-use KIWIQX qw(qxx);
+use KIWIQX;
 use KIWIXML;
 
 #==========================================

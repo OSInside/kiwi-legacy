@@ -28,7 +28,7 @@ use File::Spec;
 use KIWIGlobals;
 use KIWILocator;
 use KIWILog;
-use KIWIQX qw (qxx);
+use KIWIQX;
 
 #==========================================
 # Exports
@@ -785,7 +785,7 @@ sub setRootTargetDir {
 		return;
 	}
 	if ($rootTgt !~ /^\//) {
-		my $workingDir = qxx ('pwd');
+		my $workingDir = KIWIQX::qxx ('pwd');
 		chomp $workingDir;
 		$rootTgt = $workingDir . '/' . $rootTgt;
 		my $msg = 'Specified relative path for target directory; target is '

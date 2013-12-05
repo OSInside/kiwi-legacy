@@ -42,7 +42,7 @@ use JSON;
 #------------------------------------------
 use KIWIGlobals;
 use KIWILog;
-use KIWIQX qw (qxx);
+use KIWIQX;
 
 #==========================================
 # Constructor
@@ -71,10 +71,10 @@ sub new {
 	my $code;
 	my $data;
 	if (defined $fnr) {
-		qxx ("rm -rf $dest");
+		KIWIQX::qxx ("rm -rf $dest");
 	}
 	if (! defined $dest) {
-		$dest = qxx ("mktemp -qdt kiwi-analyse.XXXXXX");
+		$dest = KIWIQX::qxx ("mktemp -qdt kiwi-analyse.XXXXXX");
 		$code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();
@@ -87,7 +87,7 @@ sub new {
 		$kiwi -> done ();
 		$kiwi -> info ("Using already existing destination dir");
 	} else {
-		$data = qxx ("mkdir $dest 2>&1");
+		$data = KIWIQX::qxx ("mkdir $dest 2>&1");
 		$code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();
@@ -95,7 +95,7 @@ sub new {
 			$kiwi -> failed ();
 			return;
 		}
-		$data = qxx ("git init $dest 2>&1");
+		$data = KIWIQX::qxx ("git init $dest 2>&1");
 		$code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();
@@ -144,7 +144,7 @@ sub new {
 		} elsif ($cdata_cur->{rpmdbsum}) {
 			my $rpmdb = '/var/lib/rpm/Packages';
 			if (-e $rpmdb) {
-				my $dbsum = qxx ("cat $rpmdb | md5sum - | cut -f 1 -d-");
+				my $dbsum = KIWIQX::qxx ("cat $rpmdb | md5sum - | cut -f 1 -d-");
 				chomp $dbsum;
 				if ($dbsum ne $cdata_cur->{rpmdbsum}) {
 					$kiwi -> warning ("--> RPM database has changed");
@@ -179,10 +179,10 @@ sub commitTransaction {
 	my $dest = $this->{dest};
 	my $kiwi = $this->{kiwi};
 	my $text = '- automatic transaction commit';
-	my $data = qxx ("cd $dest && git add . 2>&1");
+	my $data = KIWIQX::qxx ("cd $dest && git add . 2>&1");
 	my $code = $? >> 8;
 	if ($code == 0) {
-		$data = qxx ("cd $dest && git commit -a -m \"$text\" 2>&1");
+		$data = KIWIQX::qxx ("cd $dest && git commit -a -m \"$text\" 2>&1");
 		$code = $? >> 8;
 	}
 	return $code;
@@ -218,7 +218,7 @@ sub writeCache {
 	$kiwi -> info ("Writing cache file...");
 	my $rpmdb = '/var/lib/rpm/Packages';
 	if (-e $rpmdb) {
-		my $dbsum = qxx ("cat $rpmdb | md5sum - | cut -f 1 -d-");
+		my $dbsum = KIWIQX::qxx ("cat $rpmdb | md5sum - | cut -f 1 -d-");
 		chomp $dbsum;
 		$cdata->{rpmdbsum} = $dbsum;
 	}

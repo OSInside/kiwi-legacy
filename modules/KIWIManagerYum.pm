@@ -27,7 +27,7 @@ use File::Basename;
 use Config::IniFiles;
 use KIWILog;
 use KIWILocator;
-use KIWIQX qw (qxx);
+use KIWIQX;
 
 #==========================================
 # Modules
@@ -57,7 +57,7 @@ sub new {
 	# Create config files/dirs
 	#------------------------------------------
 	if (! -d $dataDir) {
-		qxx ("mkdir -p $dataDir");
+		KIWIQX::qxx ("mkdir -p $dataDir");
 	}
 	#==========================================
 	# Store yum command parameters
@@ -187,7 +187,7 @@ sub setupInstallationSource {
 		#==========================================
 		# create new repo file and open it
 		#------------------------------------------
-		qxx ("echo '[$alias]' > $repo");
+		KIWIQX::qxx ("echo '[$alias]' > $repo");
 		$data = Config::IniFiles -> new (
 			-file => $repo, -allowedcommentchars => '#'
 		);
@@ -232,7 +232,7 @@ sub setupInstallationSource {
 	#------------------------------------------
 	if (! $chroot) {
 		$kiwi -> info ("Creating yum metadata cache...");
-		$data = qxx ("@yum makecache 2>&1");
+		$data = KIWIQX::qxx ("@yum makecache 2>&1");
 		$code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();
@@ -242,7 +242,7 @@ sub setupInstallationSource {
 		$kiwi -> done();
 	} else {
 		$kiwi -> info ('Rebuild RPM package db...');
-		$data = qxx ("@kchroot /bin/rpm --rebuilddb 2>&1");
+		$data = KIWIQX::qxx ("@kchroot /bin/rpm --rebuilddb 2>&1");
 		$kiwi -> done();
 	}
 	$this->{channelList} = \@channelList;
@@ -261,7 +261,7 @@ sub resetInstallationSource {
 	my $kiwi    = $this->{kiwi};
 	my $dataDir = $this->{dataDir};
 	$kiwi -> info ("Removing yum repo(s) in: $dataDir");
-	qxx ("rm -f $dataDir/*.repo 2>&1");
+	KIWIQX::qxx ("rm -f $dataDir/*.repo 2>&1");
 	$kiwi -> done ();
 	return $this;
 }
@@ -699,7 +699,7 @@ sub resetSource {
 	my $kiwi    = $this->{kiwi};
 	my $dataDir = $this->{dataDir};
 	$kiwi -> info ("Removing yum repo(s) in: $dataDir");
-	qxx ("rm -f $dataDir/*.repo 2>&1");
+	KIWIQX::qxx ("rm -f $dataDir/*.repo 2>&1");
 	$kiwi -> done();
 	return $this;
 }
@@ -723,11 +723,11 @@ sub setupPackageInfo {
 	my $str = "not installed";
 	if (! $chroot) {
 		$kiwi -> info ("Checking for package: $pack");
-		$data = qxx ("rpm --root $root -q \"$pack\" 2>&1");
+		$data = KIWIQX::qxx ("rpm --root $root -q \"$pack\" 2>&1");
 		$code = $? >> 8;
 	} else {
 		$kiwi -> info ("Checking for package: $pack");
-		$data= qxx ("@kchroot rpm -q \"$pack\" 2>&1 ");
+		$data= KIWIQX::qxx ("@kchroot rpm -q \"$pack\" 2>&1 ");
 		$code= $? >> 8;
 	}
 	if ($code != 0) {
@@ -748,17 +748,17 @@ sub createYumConfig {
 	my $root   = $this->{root};
 	my $meta   = $this->{dataDir};
 	my $config = $meta."/yum.conf";
-	qxx ("echo '[main]' > $config");
-	qxx ("echo 'cachedir=$meta' >> $config");
-	qxx ("echo 'reposdir=$meta' >> $config");
-	qxx ("echo 'keepcache=0' >> $config");
-	qxx ("echo 'debuglevel=2' >> $config");
-	qxx ("echo 'pkgpolicy=newest' >> $config");
-	qxx ("echo 'tolerant=1' >> $config");
-	qxx ("echo 'exactarch=1' >> $config");
-	qxx ("echo 'obsoletes=1' >> $config");
-	qxx ("echo 'plugins=1' >> $config");
-	qxx ("echo 'metadata_expire=1800' >> $config");
+	KIWIQX::qxx ("echo '[main]' > $config");
+	KIWIQX::qxx ("echo 'cachedir=$meta' >> $config");
+	KIWIQX::qxx ("echo 'reposdir=$meta' >> $config");
+	KIWIQX::qxx ("echo 'keepcache=0' >> $config");
+	KIWIQX::qxx ("echo 'debuglevel=2' >> $config");
+	KIWIQX::qxx ("echo 'pkgpolicy=newest' >> $config");
+	KIWIQX::qxx ("echo 'tolerant=1' >> $config");
+	KIWIQX::qxx ("echo 'exactarch=1' >> $config");
+	KIWIQX::qxx ("echo 'obsoletes=1' >> $config");
+	KIWIQX::qxx ("echo 'plugins=1' >> $config");
+	KIWIQX::qxx ("echo 'metadata_expire=1800' >> $config");
 	return $config;
 }
 

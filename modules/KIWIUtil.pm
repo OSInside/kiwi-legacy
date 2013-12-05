@@ -23,7 +23,7 @@ use warnings;
 use File::Glob ':glob';
 use File::Find;
 use File::Path;
-use KIWIQX qw (qxx);
+use KIWIQX;
 
 #==========================================
 # Constructor

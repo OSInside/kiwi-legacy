@@ -27,7 +27,7 @@ use File::Basename;
 use Config::IniFiles;
 use KIWILog;
 use KIWILocator;
-use KIWIQX qw (qxx);
+use KIWIQX;
 
 #==========================================
 # Modules
@@ -58,7 +58,7 @@ sub new {
 	# Create config files/dirs
 	#------------------------------------------
 	if (! -d $dataDir) {
-		qxx ("mkdir -p $dataDir");
+		KIWIQX::qxx ("mkdir -p $dataDir");
 	}
 	#==========================================
 	# Store smart command parameters
@@ -75,7 +75,7 @@ sub new {
 	];
 	$this->{smartroot} = ["-o rpm-root=$root"];
 	if (glob ("$root//etc/smart/channels/*")) {
-		qxx ( "rm -f $root/etc/smart/channels/*" );
+		KIWIQX::qxx ( "rm -f $root/etc/smart/channels/*" );
 	}
 	return $this;
 }
@@ -107,17 +107,17 @@ sub setupSignatureCheck {
 	#------------------------------------------
 	my @smart = @{$this->{smart}};
 	my $optionName  = "rpm-check-signatures";
-	my $curCheckSig = qxx ("@smart config --show $optionName|tr -d '\\n'");
+	my $curCheckSig = KIWIQX::qxx ("@smart config --show $optionName|tr -d '\\n'");
 	$this->{curCheckSig} = $curCheckSig;
 	if (defined $imgCheckSig) {
 		my $option = "$optionName=$imgCheckSig";
 		if (! $chroot) {
 			$kiwi -> info ("Setting RPM signature check to: $imgCheckSig");
-			$data = qxx ("@smart config --set $option 2>&1");
+			$data = KIWIQX::qxx ("@smart config --set $option 2>&1");
 		} else {
 			@smart= @{$this->{smart_chroot}};
 			$kiwi -> info ("Setting RPM signature check to: $imgCheckSig");
-			$data=qxx ("@kchroot @smart config --set $option 2>&1");
+			$data=KIWIQX::qxx ("@kchroot @smart config --set $option 2>&1");
 		}
 		$code = $? >> 8;
 		if ($code != 0) {
@@ -152,11 +152,11 @@ sub resetSignatureCheck {
 		my $option = "$optionName=$curCheckSig";
 		if (! $chroot) {
 			$kiwi -> info ("Reset RPM signature check to: $curCheckSig");
-			$data = qxx ("@smart config --set $option 2>&1");
+			$data = KIWIQX::qxx ("@smart config --set $option 2>&1");
 		} else {
 			@smart= @{$this->{smart_chroot}};
 			$kiwi -> info ("Reset RPM signature check to: $curCheckSig");
-			$data=qxx ("@kchroot @smart config --set $option 2>&1");
+			$data=KIWIQX::qxx ("@kchroot @smart config --set $option 2>&1");
 		}
 		$code = $? >> 8;
 		if ($code != 0) {
@@ -193,7 +193,7 @@ sub setupExcludeDocs {
 	$this->{imgExclDocs} = $imgExclDocs;
 	my @smart = @{$this->{smart}};
 	my $optionName  = "rpm-excludedocs";
-	my $curExclDocs = qxx (
+	my $curExclDocs = KIWIQX::qxx (
 		"@smart config --show $optionName 2>/dev/null | tr -d '\\n'"
 	);
 	$this->{curExclDocs} = $curExclDocs;
@@ -201,11 +201,11 @@ sub setupExcludeDocs {
 		my $option = "$optionName=$imgExclDocs";
 		if (! $chroot) {
 			$kiwi -> info ("Setting RPM doc exclusion to: $imgExclDocs");
-			$data = qxx ("@smart config --set $option 2>&1");
+			$data = KIWIQX::qxx ("@smart config --set $option 2>&1");
 		} else {
 			@smart= @{$this->{smart_chroot}};
 			$kiwi -> info ("Setting RPM doc exclusion to: $imgExclDocs");
-			$data=qxx ("@kchroot @smart config --set $option 2>&1");
+			$data=KIWIQX::qxx ("@kchroot @smart config --set $option 2>&1");
 		}
 		$code = $? >> 8;
 		if ($code != 0) {
@@ -240,11 +240,11 @@ sub resetExcludeDocs {
 		my $option = "$optionName=$curExclDocs";
 		if (! $chroot) {
 			$kiwi -> info ("Resetting RPM doc exclusion to: $curExclDocs");
-			$data = qxx ("@smart config --set $option 2>&1");
+			$data = KIWIQX::qxx ("@smart config --set $option 2>&1");
 		} else {
 			@smart= @{$this->{smart_chroot}};
 			$kiwi -> info ("Resetting RPM doc exclusion to: $curExclDocs");
-			$data=qxx ("@kchroot @smart config --set $option 2>&1");
+			$data=KIWIQX::qxx ("@kchroot @smart config --set $option 2>&1");
 		}
 		$code = $? >> 8;
 		if ($code != 0) {
@@ -280,9 +280,9 @@ sub setupInstallationSource {
 	#==========================================
 	# make sure channel list is clean
 	#------------------------------------------
-	my @chls = qxx ("@smart channel --show | grep ^\'\\[\'|tr -d [] 2>&1");
+	my @chls = KIWIQX::qxx ("@smart channel --show | grep ^\'\\[\'|tr -d [] 2>&1");
 	foreach my $c (@chls) {
-		chomp $c; qxx ("@smart channel --remove $c -y 2>&1");
+		chomp $c; KIWIQX::qxx ("@smart channel --remove $c -y 2>&1");
 	}
 	my $stype; # private or public channels
 	my $cmds;  # smart call in and outside of the chroot
@@ -302,11 +302,11 @@ sub setupInstallationSource {
 		@opts = map { if (defined $_) { $_ }  } @opts;
 		if (! $chroot) {
 			$kiwi -> info ("Adding bootstrap smart channel: $chl");
-			$data = qxx ("$cmds $chl @opts 2>&1");
+			$data = KIWIQX::qxx ("$cmds $chl @opts 2>&1");
 			$code = $? >> 8;
 		} else {
 			$kiwi -> info ("Adding chroot smart channel: $chl");
-			$data = qxx ("@kchroot $cmds $chl @opts 2>&1");
+			$data = KIWIQX::qxx ("@kchroot $cmds $chl @opts 2>&1");
 			$code = $? >> 8;
 		}
 		if ($code != 0) {
@@ -350,11 +350,11 @@ sub resetInstallationSource {
 	}
 	if (! $chroot) {
 		$kiwi -> info ("Removing smart channel(s): @channelList");
-		$data = qxx ("$cmds @list -y 2>&1");
+		$data = KIWIQX::qxx ("$cmds @list -y 2>&1");
 		$code = $? >> 8;
 	} else {
 		$kiwi -> info ("Removing smart channel(s): @channelList");
-		$data = qxx ("@kchroot $cmds @list -y 2>&1");
+		$data = KIWIQX::qxx ("@kchroot $cmds @list -y 2>&1");
 		$code = $? >> 8;
 	}
 	if ($code != 0) {
@@ -779,7 +779,7 @@ sub resetSource {
 	my @smart = @{$this->{smart}};
 	foreach my $channel (keys %{$source{public}}) {
 		$kiwi -> info ("Removing smart channel: $channel\n");
-		qxx ("@smart channel --remove $channel -y 2>&1");
+		KIWIQX::qxx ("@smart channel --remove $channel -y 2>&1");
 	}
 	return $this;
 }
@@ -804,12 +804,12 @@ sub setupPackageInfo {
 	my @rootdir= @{$this->{smartroot}};
 	if (! $chroot) {
 		$kiwi -> info ("Checking for package: $pack");
-		$data = qxx ("@smart @rootdir query --installed $pack 2>/dev/null");
+		$data = KIWIQX::qxx ("@smart @rootdir query --installed $pack 2>/dev/null");
 		$code = $? >> 8;
 	} else {
 		@smart= @{$this->{smart_chroot}};
 		$kiwi -> info ("Checking for package: $pack");
-		$data = qxx (
+		$data = KIWIQX::qxx (
 			"@kchroot @smart query --installed $pack 2>/dev/null"
 		);
 		$code = $? >> 8;

@@ -27,7 +27,7 @@ use File::Basename;
 use Config::IniFiles;
 use KIWILog;
 use KIWILocator;
-use KIWIQX qw (qxx);
+use KIWIQX;
 
 #==========================================
 # Modules
@@ -57,19 +57,19 @@ sub new {
 	# Create config files/dirs
 	#------------------------------------------
 	if (! -d $dataDir) {
-		qxx ("mkdir -p $dataDir");
+		KIWIQX::qxx ("mkdir -p $dataDir");
 	}
 	if (! -d "$dataDir/lists") {
-		qxx ("mkdir -p $dataDir/lists");
+		KIWIQX::qxx ("mkdir -p $dataDir/lists");
 	}
 	if (! -d "$dataDir/repos") {
-		qxx ("mkdir -p $dataDir/repos");
+		KIWIQX::qxx ("mkdir -p $dataDir/repos");
 	}
 	if (! -d "$dataDir/preferences.d") {
-		qxx ("mkdir -p $dataDir/preferences.d");
+		KIWIQX::qxx ("mkdir -p $dataDir/preferences.d");
 	}
 	if (! -d "$dataDir/sources.list.d") {
-		qxx ("mkdir -p $dataDir/sources.list.d");
+		KIWIQX::qxx ("mkdir -p $dataDir/sources.list.d");
 	}
 	#==========================================
 	# Store apt-get command parameters
@@ -274,7 +274,7 @@ sub setupInstallationSource {
 		# create apt cache
 		#------------------------------------------
 		$kiwi -> info ("Creating apt metadata cache...");
-		$data = qxx ("@kchroot @apt update 2>&1");
+		$data = KIWIQX::qxx ("@kchroot @apt update 2>&1");
 		$code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();
@@ -298,8 +298,8 @@ sub resetInstallationSource {
 	my $kiwi    = $this->{kiwi};
 	my $dataDir = $this->{dataDir};
 	$kiwi -> info ("Removing apt repo(s) in: $dataDir");
-	qxx ("rm -f $dataDir/repos/* 2>&1");
-	qxx ("rm -f $dataDir/lists/* 2>&1");
+	KIWIQX::qxx ("rm -f $dataDir/repos/* 2>&1");
+	KIWIQX::qxx ("rm -f $dataDir/lists/* 2>&1");
 	$kiwi -> done ();
 	return $this;
 }
@@ -660,8 +660,8 @@ sub resetSource {
 	my $kiwi    = $this->{kiwi};
 	my $dataDir = $this->{dataDir};
 	$kiwi -> info ("Removing apt repo(s) in: $dataDir");
-	qxx ("rm -f $dataDir/repos/* 2>&1");
-	qxx ("rm -f $dataDir/lists/* 2>&1");
+	KIWIQX::qxx ("rm -f $dataDir/repos/* 2>&1");
+	KIWIQX::qxx ("rm -f $dataDir/lists/* 2>&1");
 	$kiwi -> done();
 	return $this;
 }
@@ -685,11 +685,11 @@ sub setupPackageInfo {
 	my $str = "not installed";
 	if (! $chroot) {
 		$kiwi -> info ("Checking for package: $pack");
-		$data = qxx ("dpkg --root $root -s \"$pack\" 2>&1");
+		$data = KIWIQX::qxx ("dpkg --root $root -s \"$pack\" 2>&1");
 		$code = $? >> 8;
 	} else {
 		$kiwi -> info ("Checking for package: $pack");
-		$data= qxx ("@kchroot dpkg -s \"$pack\" 2>&1 ");
+		$data= KIWIQX::qxx ("@kchroot dpkg -s \"$pack\" 2>&1 ");
 		$code= $? >> 8;
 	}
 	if ($code != 0) {

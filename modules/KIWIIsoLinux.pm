@@ -29,7 +29,7 @@ use File::Basename;
 use KIWIGlobals;
 use KIWILocator;
 use KIWILog;
-use KIWIQX qw (qxx);
+use KIWIQX;
 
 my @EXPORT_OK = qw ();
 
@@ -177,7 +177,7 @@ sub new {
 	#==========================================
 	# create tmp files/directories 
 	#------------------------------------------
-	$sort = qxx ("mktemp -t kiso-sort-XXXXXX 2>&1"); chomp $sort;
+	$sort = KIWIQX::qxx ("mktemp -t kiso-sort-XXXXXX 2>&1"); chomp $sort;
 	$code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> error  ("Couldn't create sort file: $sort: $!");
@@ -185,7 +185,7 @@ sub new {
 		$this -> cleanISO();
 		return;
 	}
-	$ldir = qxx ("mktemp -qdt kiso-loader-XXXXXX 2>&1"); chomp $ldir;
+	$ldir = KIWIQX::qxx ("mktemp -qdt kiso-loader-XXXXXX 2>&1"); chomp $ldir;
 	$code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> error  ("Couldn't create tmp directory: $ldir: $!");
@@ -193,7 +193,7 @@ sub new {
 		$this -> cleanISO();
 		return;
 	}
-	qxx ("chmod 755 $ldir");
+	KIWIQX::qxx ("chmod 755 $ldir");
 	#==========================================
 	# Store object data
 	#------------------------------------------
@@ -418,12 +418,12 @@ sub addBootLive {
 	#==========================================
 	# update sort file
 	#------------------------------------------
-	qxx ("echo $src/boot/$arch/efi 1000001 >> $sort");
+	KIWIQX::qxx ("echo $src/boot/$arch/efi 1000001 >> $sort");
 	#==========================================
 	# add end-of-header marker
 	#------------------------------------------
-	qxx ("echo $magicID > $tmpdir/glump");
-	qxx ("echo $tmpdir/glump 1000000 >> $sort");
+	KIWIQX::qxx ("echo $magicID > $tmpdir/glump");
+	KIWIQX::qxx ("echo $tmpdir/glump 1000000 >> $sort");
 	#==========================================
 	# update parameter list
 	#------------------------------------------
@@ -455,7 +455,7 @@ sub callBootMethods {
 	foreach my $boot (@catalog) {
 		if ($boot =~ /(.*)_.*/) {
 			my $arch = $1;
-			qxx ("mkdir -p $ldir/".$base{$arch}{boot}."/loader");
+			KIWIQX::qxx ("mkdir -p $ldir/".$base{$arch}{boot}."/loader");
 			no strict 'refs'; ## no critic
 			&{$boot}($this,$arch);
 			use strict 'refs';
@@ -716,7 +716,7 @@ sub createISOLinuxConfig {
 		$this -> cleanISO();
 		return;
 	}
-	my $data = qxx (
+	my $data = KIWIQX::qxx (
 		"$isox --base $boot/loader $src/$boot/loader/isolinux.bin 2>&1"
 	);
 	my $code = $? >> 8;
@@ -725,10 +725,10 @@ sub createISOLinuxConfig {
 		# Could not set base directory to isolinux, therefore we
 		# create a compat directory /isolinux and hardlink all files
 		# ----
-		my $data = qxx ("mkdir -p $src/isolinux 2>&1");
+		my $data = KIWIQX::qxx ("mkdir -p $src/isolinux 2>&1");
 		my $code = $? >> 8;
 		if ($code == 0) {
-			$data = qxx ("ln $src/$boot/loader/* $src/isolinux/ 2>&1");
+			$data = KIWIQX::qxx ("ln $src/$boot/loader/* $src/isolinux/ 2>&1");
 			$code = $? >> 8;
 		};
 	}
@@ -880,7 +880,7 @@ sub createISO {
 	} else {
 		$cmdln = "$prog $para -o $dest $ldir $src 2>&1";
 	}
-	my $data = qxx ( $cmdln );
+	my $data = KIWIQX::qxx ( $cmdln );
 	my $code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> error  ("Failed to call $prog: $data");
@@ -903,7 +903,7 @@ sub createISO {
 		} else {
 			$cmdln = "$prog $para $addpara -o $dest $ldir $src 2>&1";
 		}
-		$data = qxx ( $cmdln );
+		$data = KIWIQX::qxx ( $cmdln );
 		$code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> error  ("Failed to call $prog: $data");
@@ -993,10 +993,10 @@ sub cleanISO {
 	my $sort = $this -> {tmpfile};
 	my $ldir = $this -> {tmpdir};
 	if (-f $sort) {
-		qxx ("rm -f $sort 2>&1");
+		KIWIQX::qxx ("rm -f $sort 2>&1");
 	}
 	if (-d $ldir) {
-		qxx ("rm -rf $ldir 2>&1");
+		KIWIQX::qxx ("rm -rf $ldir 2>&1");
 	}
 	return $this;
 }
@@ -1011,9 +1011,9 @@ sub checkImage {
 	my $check= $this -> {check};
 	my $data;
 	if (defined $this->{check}) {
-		$data = qxx ("tagmedia --md5 --check --pad 150 $dest 2>&1");
+		$data = KIWIQX::qxx ("tagmedia --md5 --check --pad 150 $dest 2>&1");
 	} else {
-		$data = qxx ("tagmedia --md5 $dest 2>&1");
+		$data = KIWIQX::qxx ("tagmedia --md5 $dest 2>&1");
 	}
 	my $code = $? >> 8;
 	if ($code != 0) {
@@ -1053,7 +1053,7 @@ sub createHybrid {
 	#==========================================
 	# Call isohybrid
 	#------------------------------------------
-	my $sysarch = qxx ("uname -m");
+	my $sysarch = KIWIQX::qxx ("uname -m");
 	chomp $sysarch;
 	if ($sysarch =~ /ppc|ia64/) {
 		$kiwi -> warning (
@@ -1103,7 +1103,7 @@ sub createHybrid {
 	if ($firmware eq 'efi' || $firmware eq 'uefi') {
 		$cmd.= " $uefiOpt";
 	}
-	$data = qxx ("$cmd $iso 2>&1");
+	$data = KIWIQX::qxx ("$cmd $iso 2>&1");
 	$code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> error  ("Failed to call isohybrid: $data");

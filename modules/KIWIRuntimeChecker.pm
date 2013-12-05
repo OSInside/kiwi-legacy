@@ -30,7 +30,7 @@ use base qw (Exporter);
 use KIWIGlobals;
 use KIWILocator;
 use KIWILog;
-use KIWIQX qw (qxx);
+use KIWIQX;
 use KIWIXML;
 use KIWIXMLRepositoryData;
 use KIWIXMLSystemdiskData;
@@ -999,7 +999,7 @@ sub __hasValidLVMName {
 		$kiwi -> failed ();
 		return;
 	}
-	my @hostGroups = qxx ("$vgsCmd --noheadings -o vg_name 2>/dev/null");
+	my @hostGroups = KIWIQX::qxx ("$vgsCmd --noheadings -o vg_name 2>/dev/null");
 	chomp @hostGroups;
 	foreach my $hostGroup (@hostGroups) {
 		$hostGroup =~ s/^\s+//xg;
@@ -1055,7 +1055,7 @@ sub __hasValidArchives {
 			$kiwi -> failed ();
 			return;
 		}
-		my $contents = qxx ("tar -tf $desc/$arName 2>&1");
+		my $contents = KIWIQX::qxx ("tar -tf $desc/$arName 2>&1");
 		for my $exp (@nogo) {
 			if (grep { /$exp/x } $contents ) {
 				$kiwi -> error  ("bogus archive contents in $ar");

@@ -28,7 +28,7 @@ use KIWIGlobals;
 use KIWIImage;
 use KIWIImageCreator;
 use KIWILog;
-use KIWIQX qw (qxx);
+use KIWIQX;
 use KIWIXMLInfo;
 
 #==========================================
@@ -220,7 +220,7 @@ sub createCache {
 	#==========================================
 	# setup variables for kiwi prepare call
 	#------------------------------------------
-	qxx ("mkdir -p $imageCacheDir 2>&1");
+	KIWIQX::qxx ("mkdir -p $imageCacheDir 2>&1");
 	my $CacheName = $xml -> getImageName();
 	$kiwi -> info (
 		"--> Building cache $CacheName...\n"
@@ -271,8 +271,8 @@ sub createCache {
 	# Cleanup non cache relevant data
 	#------------------------------------------
 	my $root   = $rootTarget;
-	qxx ("rm -f $root/image/config.xml");
-	qxx ("rm -f $root/image/*.kiwi");
+	KIWIQX::qxx ("rm -f $root/image/config.xml");
+	KIWIQX::qxx ("rm -f $root/image/*.kiwi");
 	#==========================================
 	# Reformat log file for human readers...
 	#------------------------------------------

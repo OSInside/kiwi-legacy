@@ -42,7 +42,7 @@ use JSON;
 #------------------------------------------
 use KIWIGlobals;
 use KIWILog;
-use KIWIQX qw (qxx);
+use KIWIQX;
 
 #==========================================
 # Constructor
@@ -282,7 +282,7 @@ sub createReport {
 	# Beautify report...
 	#------------------------------------------
 	mkdir "$dest/.report";
-	my $status = qxx (
+	my $status = KIWIQX::qxx (
 		"tar -C $dest/.report -xf $this->{gdata}->{KAnalyseCSS} 2>&1"
 	);
 	my $result = $? >> 8;
@@ -411,7 +411,7 @@ sub createReport {
 	print $FD 'attributes in the type section of the config.xml file';
 	print $FD '</p>'."\n";
 	print $FD '<hr>'."\n";
-	my $kernel = qxx ("uname -r");
+	my $kernel = KIWIQX::qxx ("uname -r");
 	chomp $kernel;
 	if (! -e "/lib/modules/$kernel") {
 		print $FD '<p>'."\n";
@@ -421,7 +421,7 @@ sub createReport {
 		print $FD '</p>'."\n";
 	} else {
 		print $FD '<table>'."\n";
-		my @list = qxx (
+		my @list = KIWIQX::qxx (
 			"rpm -qf --qf \"%{NAME}:%{VERSION}\\n\" /lib/modules/$kernel"
 		); chomp @list;
 		foreach my $item (sort @list) {
@@ -455,7 +455,7 @@ sub createReport {
 	print $FD '</p>'."\n";
 	print $FD '<hr>'."\n";
 	print $FD '<table>'."\n";
-	for (qxx ( "rpm -qa --qf '\n<%{name}>\n' --supplements" )) {
+	for (KIWIQX::qxx ( "rpm -qa --qf '\n<%{name}>\n' --supplements" )) {
 		chomp;
 		$pack = $1 if /^<(.+)>/;
 		push @{$modalias{$pack}}, $_ if /^modalias/;
@@ -511,7 +511,7 @@ sub createReport {
 		print $FD '</p>'."\n";
 		print $FD '<hr>'."\n";
 		print $FD '<table>'."\n";
-		for (qxx ( "gem list --local" )) {
+		for (KIWIQX::qxx ( "gem list --local" )) {
 			chomp;
 			push (@gems,$_);
 		}
@@ -539,7 +539,7 @@ sub createReport {
 		print $FD '</p>'."\n";
 		print $FD '<hr>'."\n";
 		print $FD '<table>'."\n";
-		my @list = qxx ("rpm -q @pacs --last");
+		my @list = KIWIQX::qxx ("rpm -q @pacs --last");
 		chomp @list;
 		foreach my $job (sort @list) {
 			if ($job =~ /([^\s]+)\s+([^\s].*)/) {
@@ -666,13 +666,13 @@ sub createReport {
 		print $FD '<hr>'."\n";
 		print $FD '<table>'."\n";
 		my @pacs = @{$failedJob2};
-		my @list = qxx ("rpm -q @pacs --last");
+		my @list = KIWIQX::qxx ("rpm -q @pacs --last");
 		chomp @list;
 		foreach my $job (sort @list) {
 			if ($job =~ /([^\s]+)\s+([^\s].*)/) {
 				my $pac  = $1;
 				my $date = $2;
-				my @rpm  = qxx (
+				my @rpm  = KIWIQX::qxx (
 					'rpm -q --qf "%{distribution}\n%{disturl}\n%{url}\n" '.$pac
 				); chomp @rpm;
 				my $distro  = $rpm[0];

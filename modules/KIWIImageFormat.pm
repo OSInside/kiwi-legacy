@@ -31,7 +31,7 @@ use KIWIBoot;
 use KIWIGlobals;
 use KIWILocator;
 use KIWILog;
-use KIWIQX qw (qxx);
+use KIWIQX;
 
 #==========================================
 # Constructor
@@ -167,7 +167,7 @@ sub createFormat {
 		$kiwi -> skipped ();
 		return $this;
 	} else {
-		my $data = qxx ("parted $image print 2>&1");
+		my $data = KIWIQX::qxx ("parted $image print 2>&1");
 		my $code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> error  ("system image is not a disk or filesystem");
@@ -308,12 +308,12 @@ sub createOVF {
 		$ovfdir =~ s/\.raw$/\.ovf/;
 	}
 	if (-d $ovfdir) {
-		qxx ("rm -f $ovfdir/*");
+		KIWIQX::qxx ("rm -f $ovfdir/*");
 	} else {
-		qxx ("mkdir -p $ovfdir");
+		KIWIQX::qxx ("mkdir -p $ovfdir");
 	}
 	my $img_base = basename $image;
-	qxx ("ln -s ../$img_base $ovfdir/$img_base");
+	KIWIQX::qxx ("ln -s ../$img_base $ovfdir/$img_base");
 	$this->{ovfdir} = $ovfdir;
 	return $ovfdir;
 }
@@ -354,7 +354,7 @@ sub createVMDK {
 			$convert .= " -o subformat=$diskMode";
 		}
 	}
-	$status = qxx ("qemu-img $convert $target 2>&1");
+	$status = KIWIQX::qxx ("qemu-img $convert $target 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
@@ -381,7 +381,7 @@ sub createVDI {
 	$kiwi -> info ("Creating $format image...");
 	$target  =~ s/\.raw$/\.$format/;
 	$convert = "convert -f raw $source -O $format";
-	$status = qxx ("qemu-img $convert $target 2>&1");
+	$status = KIWIQX::qxx ("qemu-img $convert $target 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
@@ -407,7 +407,7 @@ sub createVHD {
 	$kiwi -> info ("Creating vhd image...");
 	$target  =~ s/\.raw$/\.vhd/;
 	$convert = "convert -f raw $source -O vpc";
-	$status = qxx ("qemu-img $convert $target 2>&1");
+	$status = KIWIQX::qxx ("qemu-img $convert $target 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
@@ -434,7 +434,7 @@ sub createVHDSubFormatFixed {
 	$kiwi -> info ("Creating vhd-fixed image...");
 	$target  =~ s/\.raw$/\.vhdfixed/;
 	$convert = "convert -f raw -O vpc -o subformat=fixed";
-	$status = qxx ("qemu-img $convert $source $target 2>&1");
+	$status = KIWIQX::qxx ("qemu-img $convert $source $target 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
@@ -467,7 +467,7 @@ sub createQCOW2 {
 	$kiwi -> info ("Creating qcow2 image...");
 	$target  =~ s/\.raw$/\.qcow2/;
 	$convert = "convert -c -f raw $source -O qcow2";
-	$status = qxx ("qemu-img $convert $target 2>&1");
+	$status = KIWIQX::qxx ("qemu-img $convert $target 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
@@ -526,7 +526,7 @@ sub createEC2 {
 	$target  =~ s/\/$//;
 	$target .= ".$format";
 	$aminame.= ".ami";
-	my $arch = qxx ("uname -m"); chomp ( $arch );
+	my $arch = KIWIQX::qxx ("uname -m"); chomp ( $arch );
 	if ($arch =~ /i.86/) {
 		$arch = "i386";
 	}
@@ -538,7 +538,7 @@ sub createEC2 {
 	#==========================================
 	# loop mount root image and create config
 	#------------------------------------------
-	$tmpdir = qxx ("mktemp -q -d $destdir/ec2.XXXXXX"); chomp $tmpdir;
+	$tmpdir = KIWIQX::qxx ("mktemp -q -d $destdir/ec2.XXXXXX"); chomp $tmpdir;
 	$this->{tmpdir} = $tmpdir;
 	$result = $? >> 8;
 	if ($result != 0) {
@@ -547,9 +547,9 @@ sub createEC2 {
 		return;
 	}
 	if (($this->{targetDevice}) && (-b $this->{targetDevice})) {
-		$status = qxx ("mount $this->{targetDevice} $tmpdir 2>&1");
+		$status = KIWIQX::qxx ("mount $this->{targetDevice} $tmpdir 2>&1");
 	} else {
-		$status = qxx ("mount -o loop $source $tmpdir 2>&1");
+		$status = KIWIQX::qxx ("mount -o loop $source $tmpdir 2>&1");
 	}
 	$result = $? >> 8;
 	if ($result != 0) {
@@ -610,8 +610,8 @@ sub createEC2 {
 	print $IRDFD '    mv /tmp/61-multipath.sh /lib/mkinitrd/setup/'."\n";
 	print $IRDFD 'fi'."\n";
 	$IRDFD -> close();
-	qxx ("chmod u+x $tmpdir/create_initrd.sh");
-	$status = qxx ("chroot $tmpdir bash -c ./create_initrd.sh 2>&1");
+	KIWIQX::qxx ("chmod u+x $tmpdir/create_initrd.sh");
+	$status = KIWIQX::qxx ("chroot $tmpdir bash -c ./create_initrd.sh 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> error  ("Failed to create initrd: $status");
@@ -619,14 +619,14 @@ sub createEC2 {
 		$this -> __clean_loop ($tmpdir);
 		return;
 	}
-	qxx ("rm -f $tmpdir/create_initrd.sh");
+	KIWIQX::qxx ("rm -f $tmpdir/create_initrd.sh");
 	#==========================================
 	# create grub bootloader setup
 	#------------------------------------------
 	# setup directory for grub loader
-	qxx ("mkdir -p $tmpdir/boot/grub");
+	KIWIQX::qxx ("mkdir -p $tmpdir/boot/grub");
 	# copy grub image files
-	qxx ("cp $tmpdir/usr/lib/grub/* $tmpdir/boot/grub 2>&1");
+	KIWIQX::qxx ("cp $tmpdir/usr/lib/grub/* $tmpdir/boot/grub 2>&1");
 	# boot/grub/device.map
 	my $DMAPFD = FileHandle -> new();
 	if (! $DMAPFD -> open (">$tmpdir/boot/grub/device.map")) {
@@ -683,8 +683,8 @@ sub createEC2 {
 	print $GMFD '   done'."\n";
 	print $GMFD 'done'."\n";
 	$GMFD -> close();
-	qxx ("chmod u+x $tmpdir/create_bootmenu.sh");
-	$status = qxx ("chroot $tmpdir bash -c ./create_bootmenu.sh 2>&1");
+	KIWIQX::qxx ("chmod u+x $tmpdir/create_bootmenu.sh");
+	$status = KIWIQX::qxx ("chroot $tmpdir bash -c ./create_bootmenu.sh 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> error  ("Failed to create boot menu: $status");
@@ -692,7 +692,7 @@ sub createEC2 {
 		$this -> __clean_loop ($tmpdir);
 		return;
 	}
-	qxx ("rm -f $tmpdir/create_bootmenu.sh");
+	KIWIQX::qxx ("rm -f $tmpdir/create_bootmenu.sh");
 	# etc/sysconfig/bootloader
 	my $SYSBOOT_RFD = FileHandle -> new();
 	if ($SYSBOOT_RFD -> open ("$tmpdir/etc/sysconfig/bootloader")) {
@@ -830,9 +830,9 @@ sub createEC2 {
 			my $kernel = $ec2RegionKernelMap{"$region-$arch"};
 			$amiopts .= " --kernel $kernel";
 		}
-		qxx ("mkdir -p $regionTgt 2>&1");
-		qxx ("rm -rf $regionTgt/* 2>&1");
-		$status = qxx ( "$bundleCmd $amiopts -d $regionTgt -r $arch 2>&1" );
+		KIWIQX::qxx ("mkdir -p $regionTgt 2>&1");
+		KIWIQX::qxx ("rm -rf $regionTgt/* 2>&1");
+		$status = KIWIQX::qxx ( "$bundleCmd $amiopts -d $regionTgt -r $arch 2>&1" );
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> error  ("$bundleCmd: $status");
@@ -1637,9 +1637,9 @@ sub createOVFConfiguration {
 	}
 	my $base_image = basename $this->{image};
 	my $base_config= basename $ovf;
-	my $ovfsha1 = qxx ("sha1sum $ovf | cut -f1 -d ' ' 2>&1");
+	my $ovfsha1 = KIWIQX::qxx ("sha1sum $ovf | cut -f1 -d ' ' 2>&1");
 	chomp ($ovfsha1);
-	my $imagesha1 = qxx ("sha1sum $this->{image} | cut -f1 -d ' ' 2>&1");
+	my $imagesha1 = KIWIQX::qxx ("sha1sum $this->{image} | cut -f1 -d ' ' 2>&1");
 	chomp ($imagesha1);
 	print $MFFD "SHA1($base_config)= $ovfsha1"."\n";
 	print $MFFD "SHA1($base_image)= $imagesha1"."\n";
@@ -1660,12 +1660,12 @@ sub createOVFConfiguration {
 			if ($diskmode) {
 				$options = " --diskMode=$diskmode";
 			}
-			$status = qxx (
+			$status = KIWIQX::qxx (
 				"cd $ovfdir && ovftool $options $ovabasis.ovf $ovapath 2>&1"
 			);
 		} else {
 			my $files = "$ovabasis.ovf $ovabasis.mf $ovabasis.vmdk";
-			$status = qxx (
+			$status = KIWIQX::qxx (
 				"tar -h -C $ovfdir -cf $ovapath $files 2>&1"
 			);
 		}
@@ -1680,14 +1680,14 @@ sub createOVFConfiguration {
 			$kiwi -> info (
 				"Replacing qemu's vmdk file with version from generated OVA"
 			);
-			qxx ("rm -f $ovabasis.vmdk $ovfdir/$ovabasis.vmdk");
+			KIWIQX::qxx ("rm -f $ovabasis.vmdk $ovfdir/$ovabasis.vmdk");
 			my $extract = "$ovabasis-disk1.vmdk";
-			$status = qxx (
+			$status = KIWIQX::qxx (
 				"tar -h -C $ovfdir -xf $destdir/$ovaimage $extract 2>&1"
 			);
 			$result = $? >> 8;
 			if ($result == 0) {
-				$status = qxx ("mv $ovfdir/$extract $ovabasis.vmdk 2>&1");
+				$status = KIWIQX::qxx ("mv $ovfdir/$extract $ovabasis.vmdk 2>&1");
 				$result = $? >> 8;
 			}
 			if ($result != 0) {
@@ -1699,9 +1699,9 @@ sub createOVFConfiguration {
 			$kiwi -> info (
 				"Replacing kiwi's ovf file with version from generated OVA"
 			);
-			qxx ("rm -f $ovfdir/$ovabasis.ovf $ovfdir/$ovabasis.mf");
+			KIWIQX::qxx ("rm -f $ovfdir/$ovabasis.ovf $ovfdir/$ovabasis.mf");
 			$extract = "$ovabasis.ovf";
-			$status = qxx (
+			$status = KIWIQX::qxx (
 				"tar -h -C $ovfdir -xf $destdir/$ovaimage $extract"
 			);
 			$result = $? >> 8;
@@ -1898,9 +1898,9 @@ sub __copy_origin {
 	my $this = shift;
 	my $file = shift;
 	if (-f "$file.orig") {
-		qxx ("cp $file.orig $file 2>&1");
+		KIWIQX::qxx ("cp $file.orig $file 2>&1");
 	} else {
-		qxx ("cp $file $file.orig 2>&1");
+		KIWIQX::qxx ("cp $file $file.orig 2>&1");
 	}
 	return;
 }
@@ -1910,9 +1910,9 @@ sub __copy_origin {
 sub __clean_loop {
 	my $this = shift;
 	my $dir = shift;
-	qxx ("umount $dir/sys 2>&1");
-	qxx ("umount $dir 2>&1");
-	qxx ("rmdir  $dir 2>&1");
+	KIWIQX::qxx ("umount $dir/sys 2>&1");
+	KIWIQX::qxx ("umount $dir 2>&1");
+	KIWIQX::qxx ("rmdir  $dir 2>&1");
 	return;
 }
 
@@ -1923,7 +1923,7 @@ sub DESTROY {
 	my $this   = shift;
 	my $tmpdir = $this->{tmpdir};
 	if (($tmpdir) && (-d $tmpdir)) {
-		qxx ("rm -rf $tmpdir 2>&1");
+		KIWIQX::qxx ("rm -rf $tmpdir 2>&1");
 	}
 	return $this;
 }

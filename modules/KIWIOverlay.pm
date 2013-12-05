@@ -27,7 +27,7 @@ use File::stat;
 #------------------------------------------
 use KIWIGlobals;
 use KIWILog;
-use KIWIQX qw (qxx);
+use KIWIQX;
 
 #==========================================
 # Constructor
@@ -121,7 +121,7 @@ sub unionOverlay {
 	#==========================================
 	# Create tmpdir for mount point
 	#------------------------------------------
-	$tmpdir = qxx ("mktemp -qdt kiwiRootOverlay.XXXXXX"); chomp $tmpdir;
+	$tmpdir = KIWIQX::qxx ("mktemp -qdt kiwiRootOverlay.XXXXXX"); chomp $tmpdir;
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
@@ -139,7 +139,7 @@ sub unionOverlay {
 	# overlay mount both paths
 	#------------------------------------------
 	my $opts= "lowerdir=$baseRO,upperdir=$rootRW";
-	$status = qxx ("mount -t overlayfs -o $opts overlayfs $tmpdir 2>&1");
+	$status = KIWIQX::qxx ("mount -t overlayfs -o $opts overlayfs $tmpdir 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> error  ("Failed to overlay mount paths: $status");
@@ -156,8 +156,8 @@ sub unionOverlay {
 		# store the location of the base read-only cache file
 		# on invocation of an initial prepare call
 		# ----
-		qxx ("mkdir -p $rootRW/image");
-		qxx ("echo $this->{baseRO} > $rootRW/image/kiwi-root.cache");
+		KIWIQX::qxx ("mkdir -p $rootRW/image");
+		KIWIQX::qxx ("echo $this->{baseRO} > $rootRW/image/kiwi-root.cache");
 	}
 	return $tmpdir;
 }
@@ -175,11 +175,11 @@ sub resetOverlay {
 	my $code;
 	if ($mount) {
 		foreach my $cmd (reverse @{$mount}) {
-			qxx ("$cmd 2>&1");
+			KIWIQX::qxx ("$cmd 2>&1");
 		}
 	}
 	if (($tmpdir) && (-d $tmpdir)) {
-		qxx ("rmdir $tmpdir 2>&1");
+		KIWIQX::qxx ("rmdir $tmpdir 2>&1");
 	}
 	return $this;
 }

@@ -29,7 +29,7 @@ use XML::LibXML;
 use KIWICommandLine;
 use KIWIGlobals;
 use KIWILog;
-use KIWIQX qw (qxx);
+use KIWIQX;
 use KIWIXML;
 use KIWIXMLRepositoryData;
 
@@ -195,7 +195,7 @@ sub printXMLInfo {
 	if (! $infoRequests) {
 		return;
 	}
-	my $outfile = qxx ("mktemp -qt kiwi-xmlinfo-XXXXXX 2>&1");
+	my $outfile = KIWIQX::qxx ("mktemp -qt kiwi-xmlinfo-XXXXXX 2>&1");
 	my $code = $? >> 8; chomp $outfile;
 	if ($code != 0) {
 		$kiwi -> error  ("Couldn't create tmp file: $outfile: $!");
@@ -257,7 +257,7 @@ sub __solve {
 	%meta = $psolve -> getMetaData();
 	$solf = $psolve -> getSolfile();
 	@solp = $psolve -> getPackages();
-	@rpat = qxx (
+	@rpat = KIWIQX::qxx (
 		"dumpsolv $solf|grep 'solvable:name: pattern:'|cut -f4 -d :"
 	);
 	chomp @rpat;
@@ -619,7 +619,7 @@ sub __cleanMountPnts {
 
 	for my $dir (@mountPnts) {
 		next if ! defined $dir;
-		qxx ("umount $dir ; rmdir $dir 2>&1");
+		KIWIQX::qxx ("umount $dir ; rmdir $dir 2>&1");
 		my $code = $? >> 8;
 		if ($code != 0) {
 			my $msg = 'Could not clean mount point "'
@@ -898,7 +898,7 @@ sub __setupRepoMounts {
 			if (! -f $iso) {
 				return \@mountPnts;
 			}
-			my $data = qxx ("mkdir -p $uri; mount -o loop $iso $uri 2>&1");
+			my $data = KIWIQX::qxx ("mkdir -p $uri; mount -o loop $iso $uri 2>&1");
 			my $code = $? >> 8;
 			if ($code != 0) {
 				$kiwi -> error  ("Failed to loop mount ISO path: $data");

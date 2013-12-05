@@ -32,7 +32,7 @@ use XML::LibXML;
 use KIWIGlobals;
 use KIWILocator;
 use KIWILog;
-use KIWIQX qw (qxx);
+use KIWIQX;
 use KIWIURL;
 use KIWIXMLDescriptionData;
 use KIWIXMLDriverData;
@@ -5672,7 +5672,7 @@ sub getSingleInstSourceSatSolvable {
 	#==========================================
 	# common data variables
 	#------------------------------------------
-	my $arch     = qxx ("uname -m"); chomp $arch;
+	my $arch     = KIWIQX::qxx ("uname -m"); chomp $arch;
 	my $count    = 0;
 	my $index    = 0;
 	my @index    = ();
@@ -5701,7 +5701,7 @@ sub getSingleInstSourceSatSolvable {
 	#------------------------------------------
 	my $sdir = "/var/cache/kiwi/satsolver";
 	if (! -d $sdir) {
-		my $data = qxx ("mkdir -p $sdir 2>&1");
+		my $data = KIWIQX::qxx ("mkdir -p $sdir 2>&1");
 		my $code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();
@@ -5717,7 +5717,7 @@ sub getSingleInstSourceSatSolvable {
 	push (@index,$arch);
 	@index = sort (@index);
 	$index = join (":",@index);
-	$index = qxx ("echo $index | md5sum | cut -f1 -d-");
+	$index = KIWIQX::qxx ("echo $index | md5sum | cut -f1 -d-");
 	$index = $sdir."/".$index; chomp $index;
 	$index=~ s/ +$//;
 	if ((-f $index) && (! -f "$index.timestamp")) {
@@ -5852,7 +5852,7 @@ sub getSingleInstSourceSatSolvable {
 	}
 	if (! $foundDist) {
 		my $path = $repo; $path =~ s/dir:\/\///;
-		my $data = qxx ("rpms2solv $path/*.rpm > $sdir/primary-$count 2>&1");
+		my $data = KIWIQX::qxx ("rpms2solv $path/*.rpm > $sdir/primary-$count 2>&1");
 		my $code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();
@@ -5910,7 +5910,7 @@ sub getSingleInstSourceSatSolvable {
 	if (glob ("$sdir/distxml-*.gz")) {
 		foreach my $file (glob ("$sdir/distxml-*.gz")) {
 			$destfile = $sdir."/primary-".$count;
-			my $data = qxx ("gzip -cd $file | rpmmd2solv > $destfile 2>&1");
+			my $data = KIWIQX::qxx ("gzip -cd $file | rpmmd2solv > $destfile 2>&1");
 			my $code = $? >> 8;
 			if ($code != 0) {
 				$kiwi -> failed ();
@@ -5932,7 +5932,7 @@ sub getSingleInstSourceSatSolvable {
 		$scommand = "";
 		$destfile = $sdir."/primary-".$count;
 		foreach my $file (glob ("$sdir/packages-*")) {
-			qxx ("gzip -t $file &>/dev/null");
+			KIWIQX::qxx ("gzip -t $file &>/dev/null");
 			my $code = $? >> 8;
 			if ($code == 0) {
 				$gzicmd .= $file." ";
@@ -5941,7 +5941,7 @@ sub getSingleInstSourceSatSolvable {
 			}
 		}
 		foreach my $file (glob ("$sdir/*.pat*")) {
-			qxx ("gzip -t $file &>/dev/null");
+			KIWIQX::qxx ("gzip -t $file &>/dev/null");
 			my $code = $? >> 8;
 			if ($code == 0) {
 				$gzicmd .= $file." ";
@@ -5956,7 +5956,7 @@ sub getSingleInstSourceSatSolvable {
 			push @done,$stdcmd;
 		}
 		foreach my $cmd (@done) {
-			my $data = qxx ("$cmd | susetags2solv >> $destfile 2>/dev/null");
+			my $data = KIWIQX::qxx ("$cmd | susetags2solv >> $destfile 2>/dev/null");
 			my $code = $? >> 8;
 			if ($code != 0) {
 				$kiwi -> failed ();
@@ -5980,10 +5980,10 @@ sub getSingleInstSourceSatSolvable {
 			$destfile = $sdir."/primary-".$count;
 			if ($file =~ /\.gz$/) {
 				$gzicmd .= $file." ";
-				$data = qxx ("$gzicmd | rpmmd2solv > $destfile 2>&1");
+				$data = KIWIQX::qxx ("$gzicmd | rpmmd2solv > $destfile 2>&1");
 			} else {
 				$stdcmd .= $file." ";
-				$data = qxx ("$stdcmd | rpmmd2solv > $destfile 2>&1");
+				$data = KIWIQX::qxx ("$stdcmd | rpmmd2solv > $destfile 2>&1");
 			}
 			$code = $? >> 8;
 			if ($code != 0) {
@@ -6004,7 +6004,7 @@ sub getSingleInstSourceSatSolvable {
 			$kiwi -> failed ();
 			$error = 1;
 		} else {
-			my $data = qxx ("mergesolv $sdir/primary-* > $index");
+			my $data = KIWIQX::qxx ("mergesolv $sdir/primary-* > $index");
 			my $code = $? >> 8;
 			if ($code != 0) {
 				$kiwi -> failed ();
@@ -6017,17 +6017,17 @@ sub getSingleInstSourceSatSolvable {
 	#==========================================
 	# cleanup cache dir
 	#------------------------------------------
-	qxx ("rm -f $sdir/repomd.xml");
-	qxx ("rm -f $sdir/primary-*");
-	qxx ("rm -f $sdir/projectxml-*");
-	qxx ("rm -f $sdir/distxml-*");
-	qxx ("rm -f $sdir/packages-*");
-	qxx ("rm -f $sdir/*.pat*");
+	KIWIQX::qxx ("rm -f $sdir/repomd.xml");
+	KIWIQX::qxx ("rm -f $sdir/primary-*");
+	KIWIQX::qxx ("rm -f $sdir/projectxml-*");
+	KIWIQX::qxx ("rm -f $sdir/distxml-*");
+	KIWIQX::qxx ("rm -f $sdir/packages-*");
+	KIWIQX::qxx ("rm -f $sdir/*.pat*");
 	if (! $error) {
 		$kiwi -> done();
 		return $index;
 	} else {
-		qxx ("rm -f $index*");
+		KIWIQX::qxx ("rm -f $index*");
 	}
 	return;
 }
@@ -6153,9 +6153,9 @@ sub __resolveLink {
 	my $this = shift;
 	my $arch = shift;
 	my $data = $this -> __resolveArchitecture ($arch);
-	my $cdir = qxx ("pwd"); chomp $cdir;
+	my $cdir = KIWIQX::qxx ("pwd"); chomp $cdir;
 	if (chdir $data) {
-		my $pdir = qxx ("pwd"); chomp $pdir;
+		my $pdir = KIWIQX::qxx ("pwd"); chomp $pdir;
 		chdir $cdir;
 		return $pdir
 	}

@@ -40,7 +40,7 @@ use Cwd qw (abs_path cwd);
 #------------------------------------------
 use KIWIGlobals;
 use KIWILog;
-use KIWIQX qw (qxx);
+use KIWIQX;
 
 #==========================================
 # Constructor
@@ -277,7 +277,7 @@ sub __populateRepos {
 	# Obtain list from package manager
 	#------------------------------------------
 	# FIXME: move this into the KIWIManager backend
-	my @list    = qxx ("bash -c 'LANG=POSIX zypper lr --details 2>&1'");
+	my @list    = KIWIQX::qxx ("bash -c 'LANG=POSIX zypper lr --details 2>&1'");
 	chomp @list;
 	my $code    = $? >> 8;
 	if ($code != 0) {
@@ -307,7 +307,7 @@ sub __populateRepos {
 						$kiwi -> skipped ();
 						next;
 					}
-					my $mpoint = qxx ("mktemp -qdt kiwimpoint.XXXXXX");
+					my $mpoint = KIWIQX::qxx ("mktemp -qdt kiwimpoint.XXXXXX");
 					my $result = $? >> 8;
 					if ($result != 0) {
 						$kiwi -> warning ("DVD tmpdir failed: $mpoint: $!");
@@ -315,7 +315,7 @@ sub __populateRepos {
 						next;
 					}
 					chomp $mpoint;
-					my $data = qxx ("mount /dev/dvd $mpoint 2>&1");
+					my $data = KIWIQX::qxx ("mount /dev/dvd $mpoint 2>&1");
 					my $code = $? >> 8;
 					if ($code != 0) {
 						$kiwi -> warning ("DVD mount failed: $data");
@@ -336,7 +336,7 @@ sub __populateRepos {
 						$kiwi -> skipped ();
 						next;
 					}
-					my $mpoint = qxx ("mktemp -qdt kiwimpoint.XXXXXX");
+					my $mpoint = KIWIQX::qxx ("mktemp -qdt kiwimpoint.XXXXXX");
 					my $result = $? >> 8;
 					if ($result != 0) {
 						$kiwi -> warning ("ISO tmpdir failed: $mpoint: $!");
@@ -344,7 +344,7 @@ sub __populateRepos {
 						next;
 					}
 					chomp $mpoint;
-					my $data = qxx ("mount -o loop $iso $mpoint 2>&1");
+					my $data = KIWIQX::qxx ("mount -o loop $iso $mpoint 2>&1");
 					my $code = $? >> 8;
 					if ($code != 0) {
 						$kiwi -> warning ("ISO loop mount failed: $data");
@@ -416,7 +416,7 @@ sub __populatePackageList {
 		$kiwi -> done();
 	} else {
 		$kiwi -> info ("--> requesting from rpm database...");
-		@ilist = qxx ('rpm -qa --qf "%{NAME}\n" | sort');
+		@ilist = KIWIQX::qxx ('rpm -qa --qf "%{NAME}\n" | sort');
 		chomp @ilist;
 		$code = $? >> 8;
 		if ($code != 0) {
@@ -447,7 +447,7 @@ sub __populatePackageList {
 	}
 	foreach my $installed (sort keys %packages) {
 		if ($packages{$installed} > 1) {
-			my @list = qxx ("rpm -q $installed");
+			my @list = KIWIQX::qxx ("rpm -q $installed");
 			chomp @list;
 			push @twice,@list;
 		}
@@ -472,7 +472,7 @@ sub __populatePackageList {
 		$kiwi -> info ("Creating System solvable from active repos...\n");
 		# FIXME: move this into the KIWIManager backend
 		my $opts = '-n --no-refresh';
-		my @list = qxx (
+		my @list = KIWIQX::qxx (
 			"bash -c 'LANG=POSIX zypper $opts patterns --installed 2>&1'"
 		);
 		my $code = $? >> 8;
@@ -587,7 +587,7 @@ sub __cleanMount {
 	my $this   = shift;
 	my @mounts = @{$this->{mount}};
 	foreach my $mpoint (@mounts) {
-		qxx ("umount $mpoint 2>&1 && rmdir $mpoint");
+		KIWIQX::qxx ("umount $mpoint 2>&1 && rmdir $mpoint");
 	}
 	return $this;
 }

@@ -23,7 +23,7 @@ use strict;
 use warnings;
 use Carp qw (cluck);
 use KIWILog;
-use KIWIQX qw (qxx);
+use KIWIQX;
 
 #==========================================
 # Plugins
@@ -136,9 +136,9 @@ sub new {
 		my $merged= "/var/cache/kiwi/satsolver/merged.solv";
 		my @files = keys %{$solvable};
 		if (@files > 1) {
-			qxx ("mergesolv @files > $merged");
+			KIWIQX::qxx ("mergesolv @files > $merged");
 		} else {
-			qxx ("cp @files $merged 2>&1");
+			KIWIQX::qxx ("cp @files $merged 2>&1");
 		}
 		my $code = $? >> 8;
 		if ($code != 0) {

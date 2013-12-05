@@ -28,7 +28,7 @@ use KIWICommandLine;
 use KIWIGlobals;
 use KIWILocator;
 use KIWILog;
-use KIWIQX qw(qxx);
+use KIWIQX;
 use KIWIXML;
 
 use base qw /KIWIImageBuilderBase/;
@@ -120,7 +120,7 @@ sub __createTarArchive {
 	my $tar = $locator -> getExecPath('tar');
 	my $cmd = "cd $origin && "
 		. "$tar -cjf $tarDestDir/$imgFlName --exclude=image . 2>&1";
-	my $data = qxx ($cmd);
+	my $data = KIWIQX::qxx ($cmd);
 	my $code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> failed();
