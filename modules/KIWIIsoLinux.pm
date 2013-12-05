@@ -130,6 +130,10 @@ sub new {
 	$base{ppc64}{boot}    = "suseboot";
 	$base{ppc64}{loader}  = "undef";
 	$base{ppc64}{efi}     = "undef";
+	# ppc64le
+	$base{ppc64le}{boot}    = "suseboot";
+	$base{ppc64le}{loader}  = "undef";
+	$base{ppc64le}{efi}     = "undef";
 	#=======================================
 	# 1) search for legacy boot
 	#---------------------------------------
@@ -141,7 +145,7 @@ sub new {
 			if ($arch eq "ix86") {
 				$catalog[0] = "ix86_legacy";
 			}
-			if ($arch eq "ppc64") {
+			if ($arch =~ /ppc64|ppc64le/) {
 				$catalog[0] = "ppc64_default";
 			}
 			if ($arch eq "s390") {

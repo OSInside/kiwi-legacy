@@ -614,7 +614,7 @@ sub setupInstallCD {
 	my $appid     = $this->{mbrid};
 	my $type      = $this->{type};
 	my $bootloader;
-	if ($arch =~ /ppc|ppc64/) {
+	if ($arch =~ /ppc|ppc64|ppc64le/) {
 		$bootloader = "yaboot";
 	} elsif ($arch =~ /arm/) {
 		$bootloader = "uboot";
@@ -1024,7 +1024,7 @@ sub setupInstallStick {
 	my @commands  = ();
 	my $gotsys    = 1;
 	my $bootloader;
-	if ($arch =~ /ppc|ppc64/) {
+	if ($arch =~ /ppc|ppc64|ppc64le/) {
 		$bootloader = "yaboot";
 	} elsif ($arch =~ /arm/) {
 		$bootloader = "uboot";
@@ -1682,7 +1682,7 @@ sub setupBootDisk {
 	my $rawRW     = 0;
 	my $md        = 0;
 	my $bootloader;
-	if ($arch =~ /ppc|ppc64/) {
+	if ($arch =~ /ppc|ppc64|ppc64le/) {
 		$bootloader = "yaboot";
 	} elsif ($arch =~ /arm/) {
 		$bootloader = "uboot";
