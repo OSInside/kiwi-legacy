@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Thu Dec  5 10:07:53 CET 2013 - ms@suse.de
+
+- fixed partition alignment for image and repartitioning
+  images with more than one partition are not aligned
+  for optimal performance except for the first partition
+  This patch fixes this and also make sure the repartition
+  code creates an aligned table too (bnc #853253)
+
+-------------------------------------------------------------------
 Sun Sep 22 13:37:15 CEST 2013 - ms@suse.de
 
 - make sure systemIntegrity is set correctly to 'clean' for
