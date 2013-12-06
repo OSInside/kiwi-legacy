@@ -5335,22 +5335,20 @@ sub copyBootCode {
 		$kiwi -> warning ("Copy of boot data returned: $status");
 	}
 	#==========================================
-	# return early if no jump partition
-	#------------------------------------------
-	if (! $this->{needJumpP}) {
-		return $this;
-	}
-	#==========================================
 	# EFI
 	#------------------------------------------
-	if (($firmware eq "efi") || ($firmware eq "uefi")) {
-		$status = KIWIQX::qxx ("cp -a $source/EFI $dest");
-		$result = $? >> 8;
-		if ($result != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error ("Couldn't copy EFI loader to final path: $status");
-			$kiwi -> failed ();
-			return;
+	if ($this->{needJumpP}) {
+		if (($firmware eq "efi") || ($firmware eq "uefi")) {
+			$status = KIWIQX::qxx ("cp -a $source/EFI $dest");
+			$result = $? >> 8;
+			if ($result != 0) {
+				$kiwi -> failed ();
+				$kiwi -> error (
+					"Couldn't copy EFI loader to final path: $status"
+				);
+				$kiwi -> failed ();
+				return;
+			}
 		}
 	}
 	#==========================================
