@@ -162,7 +162,9 @@ sub setupScreen {
 		$this -> resetInstallationSource();
 		return;
 	}
-	print $cd "logfile $screenLogs\n";
+	if ($screenLogs) {
+		print $cd "logfile $screenLogs\n";
+	}
 	print $cd "logfile flush 1\n";
 	$cd -> close();
 	#==========================================
