@@ -5230,6 +5230,44 @@ sub setupBootLoaderConfiguration {
 		$kiwi -> done();
 	}
 	#==========================================
+	# berryboot
+	#------------------------------------------
+	if ($loader eq "berryboot") {
+		#==========================================
+		# Create config.txt
+		#------------------------------------------
+		$kiwi -> info ("Creating config|cmdline.txt berryboot config files...");
+		#==========================================
+		# Standard boot
+		#------------------------------------------
+		# this is only the generic part of the config.txt. The
+		# custom parts needs to be added via the editbootconfig
+		# script hook
+		# ----
+		my $FD = FileHandle -> new();
+		if (! $FD -> open (">$tmpdir/boot/config.txt")) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't create config.txt: $!");
+			$kiwi -> failed ();
+			return;
+		}
+		print $FD 'kernel=linux.vmx'."\n";
+		print $FD 'ramfsfile=initrd.vmx'."\n";
+		$FD -> close();
+		#==========================================
+		# Create cmdline.txt
+		#------------------------------------------
+		if (! $FD -> open (">$tmpdir/boot/cmdline.txt")) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't create cmdline.txt: $!");
+			$kiwi -> failed ();
+			return;
+		}
+		print $FD "$type->{cmdline}\n";
+		$FD -> close();
+		$kiwi -> done();
+	}
+	#==========================================
 	# more boot managers to come...
 	#------------------------------------------
 	#==========================================
@@ -5320,18 +5358,23 @@ sub copyBootCode {
 		return $this;
 	}
 	#==========================================
-	# Uboot
+	# Uboot / BerryBoot
 	#------------------------------------------
-	if ($loader eq "uboot") {
-		$status = KIWIQX::qxx ("mv $dest/boot/boot.scr $dest");
+	if (($loader eq "uboot") || ($loader eq "berryboot")) {
+		my $config = "$dest/boot/boot.scr";
+		if ($loader eq "berryboot") {
+			$config = "$dest/boot/config.txt";
+		}
+		$status = KIWIQX::qxx ("mv $config $dest");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
-			$kiwi -> error ("Couldn't move boot script: $status");
+			$kiwi -> error ("Couldn't move config script: $status");
 			$kiwi -> failed ();
 			return;
 		}
 		KIWIQX::qxx ("mv $dest/boot/*.bin $dest &>/dev/null");
+		KIWIQX::qxx ("mv $dest/boot/*.dat $dest &>/dev/null");
 		KIWIQX::qxx ("mv $dest/boot/*.img $dest &>/dev/null");
 		KIWIQX::qxx ("mv $dest/boot/*.imx $dest &>/dev/null");
 		KIWIQX::qxx ("mv $dest/boot/*.dtb $dest &>/dev/null");

@@ -1930,6 +1930,7 @@ sub __isValidBootloader {
 		syslinux
 		isolinux
 		uboot
+		berryboot
 		yaboot
 		zipl
 	);

@@ -854,7 +854,11 @@ function installBootLoaderUBoot {
 	# way because each arm board behaves differently.
 	# Thus we are only calling a hook script here
 	# ----
-	runHook installUBoot "$@"
+	if [ "$kiwi_bootloader" = "berryboot" ];then
+		runHook installBerryBoot "$@"
+	else
+		runHook installUBoot "$@"
+	fi
 }
 #======================================
 # installBootLoaderS390
@@ -1860,7 +1864,11 @@ function setupBootLoaderUBoot {
 	# differently. Thus we are only calling a hook
 	# script here
 	# ----
-	runHook setupUBoot "$@"
+	if [ "$kiwi_bootloader" = "berryboot" ];then
+		runHook setupBerryBoot "$@"
+	else
+		runHook setupUBoot "$@"
+	fi
 }
 #======================================
 # setupBootLoaderS390

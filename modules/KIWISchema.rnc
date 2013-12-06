@@ -1624,7 +1624,8 @@ div {
 		## Specifies the bootloader used for booting the image."
 		## At the moment grub, zipl and sys|extlinux are supported
 		attribute bootloader {
-			"extlinux" | "grub" | "grub2" | "syslinux" | "zipl" | "yaboot" | "uboot"
+			"extlinux" | "grub" | "grub2" | "syslinux" |
+			"zipl" | "yaboot" | "uboot" | "berryboot"
 		}
 	k.type.bootpartsize.attribute =
 		## For images with a separate boot partition this attribute

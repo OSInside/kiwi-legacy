@@ -2128,6 +2128,7 @@ At the moment grub, zipl and sys|extlinux are supported</a:documentation>
           <value>zipl</value>
           <value>yaboot</value>
           <value>uboot</value>
+          <value>berryboot</value>
         </choice>
       </attribute>
     </define>
