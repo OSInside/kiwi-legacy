@@ -1185,6 +1185,8 @@ sub setupInstallStick {
 		$bootfs = $type->{bootfilesystem};
 	} elsif ($bootloader eq 'syslinux') {
 		$bootfs = 'fat32';
+	} elsif ($bootloader eq 'berryboot') {
+		$bootfs = 'fat32';
 	} elsif ($bootloader eq 'yaboot') {
 		if ($lvm) {
 			$bootfs = 'fat16';
@@ -2014,7 +2016,7 @@ sub setupBootDisk {
 		$needBootP = 1;
 	} elsif ($type->{filesystem} =~ /btrfs|xfs|zfs/) {
 		$needBootP = 1;
-	} elsif ($bootloader =~ /(sys|ext)linux|yaboot|uboot/) {
+	} elsif ($bootloader =~ /(sys|ext)linux|yaboot|uboot|berryboot/) {
 		$needBootP = 1;
 	} elsif ($type->{luks}) {
 		$needBootP = 1;
@@ -4072,17 +4074,17 @@ sub setupBootLoaderStages {
 	#==========================================
 	# uboot stages
 	#------------------------------------------
-	if ($loader eq "uboot") {
+	if (($loader eq "uboot") || ($loader eq "berryboot")) {
 		my $loaders= "'image/loader/*'";
 		my $unzip  = "$zipper -cd $initrd 2>&1";
 		#==========================================
-		# Create uboot boot data directory
+		# Create boot data directory
 		#------------------------------------------
 		KIWIQX::qxx ("mkdir -p $tmpdir/boot 2>&1");
 		#==========================================
-		# Get uboot/MLO loaders
+		# Get MLO loaders
 		#------------------------------------------
-		$kiwi -> info ("Importing uboot loaders");
+		$kiwi -> info ("Importing $loader loaders");
 		if ($zipped) {
 			$status= KIWIQX::qxx ("$unzip | (cd $tmpdir && cpio -di $loaders 2>&1)");
 		} else {
@@ -5386,7 +5388,7 @@ sub copyBootCode {
 		if ($result != 0) {
 			$kiwi -> failed ();
 			$kiwi -> error (
-				"Couldn't move uboot/MLO loaders to final path: $status"
+				"Couldn't move $loader/MLO loaders to final path: $status"
 			);
 			$kiwi -> failed ();
 			return;
@@ -5870,6 +5872,12 @@ sub installBootLoader {
 	# install uboot
 	#------------------------------------------
 	if ($loader eq "uboot") {
+		# There is no generic way to do this, use editbootinstall script hook
+	}
+	#==========================================
+	# install berryboot
+	#------------------------------------------
+	if ($loader eq "berryboot") {
 		# There is no generic way to do this, use editbootinstall script hook
 	}
 	#==========================================
