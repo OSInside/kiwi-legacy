@@ -119,6 +119,21 @@ sub initialize {
 	$this->{configDir}        = $cmdL -> getConfigDir();
 	$this->{buildType}        = $cmdL -> getBuildType();
 	#==========================================
+	# Store default image type
+	#------------------------------------------
+	if (! $this->{buildType}) {
+		my $xml = KIWIXML -> new(
+			$this->{configDir},undef,
+			$this->{buildProfiles}, $this->{cmdL}
+		);
+		if ($xml) {
+			my $type = $xml -> getImageType();
+			if ($type) {
+				$this->{buildType} = $type -> getTypeName();
+			}
+		}
+	}
+	#==========================================
 	# Store selected image type
 	#------------------------------------------
 	if ($this->{buildType}) {
