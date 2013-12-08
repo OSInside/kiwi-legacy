@@ -248,9 +248,14 @@ sub prepareBootImage {
 	# Read boot image description
 	#------------------------------------------
 	$kiwi -> info ("--> Prepare boot image (initrd)...\n");
-	my $bootXML = KIWIXML -> new(
-		$configDir,undef,undef,$cmdL
-	);
+	my $bootXML;
+	if ($bootDescript) {
+		$bootXML = KIWIXML -> new(
+			$configDir,undef,undef,$cmdL
+		);
+	} else {
+		$bootXML = $systemXML;
+	}
 	if (! $bootXML) {
 		return;
 	}
@@ -306,90 +311,96 @@ sub prepareBootImage {
 		}
 	}
 	#==========================================
+	# Add default strip information
+	#------------------------------------------
+	$this -> __addDefaultStripData ($bootXML);
+	#==========================================
 	# Inherit system XML data to the boot
 	#------------------------------------------
-	#==========================================
-	# merge/update displayname
-	#------------------------------------------
-	my $displayname = $systemXML -> getImageDisplayName();
-	if ($displayname) {
-		$kiwi -> info (
-			"Updating image attribute: displayname: $displayname"
-		);
-		$bootXML -> setImageDisplayName ($displayname);
-		$kiwi -> done();
-	}
-	#==========================================
-	# merge/update repositories
-	#------------------------------------------
-	my $status = $bootXML -> discardReplacableRepos();
-	if (! $status) {
-		return;
-	}
-	my $repos = $systemXML -> getRepositories();
-	$status = $bootXML -> addRepositories($repos, 'default');
-	if (! $status) {
-		return;
-	}
-	#==========================================
-	# merge/update drivers
-	#------------------------------------------
-	my $drivers = $systemXML -> getDrivers();
-	if ($drivers) {
-		$status = $bootXML -> addDrivers($drivers, 'default');
+	if ($bootDescript) {
+		#==========================================
+		# merge/update displayname
+		#------------------------------------------
+		my $displayname = $systemXML -> getImageDisplayName();
+		if ($displayname) {
+			$kiwi -> info (
+				"Updating image attribute: displayname: $displayname"
+			);
+			$bootXML -> setImageDisplayName ($displayname);
+			$kiwi -> done();
+		}
+		#==========================================
+		# merge/update repositories
+		#------------------------------------------
+		my $status = $bootXML -> discardReplacableRepos();
 		if (! $status) {
 			return;
 		}
+		my $repos = $systemXML -> getRepositories();
+		$status = $bootXML -> addRepositories($repos, 'default');
+		if (! $status) {
+			return;
+		}
+		#==========================================
+		# merge/update drivers
+		#------------------------------------------
+		my $drivers = $systemXML -> getDrivers();
+		if ($drivers) {
+			$status = $bootXML -> addDrivers($drivers, 'default');
+			if (! $status) {
+				return;
+			}
+		}
+		#==========================================
+		# merge/update strip
+		#------------------------------------------
+		if (! $this -> __addStripDataToBootXML($systemXML, $bootXML)) {
+			return;
+		}
+		#==========================================
+		# merge/update preferences
+		#------------------------------------------
+		if (! $this -> __addPreferencesToBootXML ($systemXML, $bootXML)) {
+			return;
+		}
+		#==========================================
+		# merge/update boot incl. packages/archives
+		#------------------------------------------
+		if (! $this -> __addPackagesToBootXML ($systemXML, $bootXML)) {
+			return;
+		}
+		#==========================================
+		# merge/update type
+		#------------------------------------------
+		if (! $this -> __addTypeToBootXML ($systemXML, $bootXML)) {
+			return;
+		}
+		#==========================================
+		# merge/update systemdisk
+		#------------------------------------------
+		if (! $this -> __addSystemDiskToBootXML ($systemXML, $bootXML)) {
+			return;
+		}
+		#==========================================
+		# merge/update machine attribs in type
+		#------------------------------------------
+		if (! $this -> __addVMachineDomainToBootXML ($systemXML, $bootXML)) {
+			return;
+		}
+		#==========================================
+		# merge/update oemconfig
+		#------------------------------------------
+		if (! $this -> __addOEMConfigDataToBootXML ($systemXML, $bootXML)) {
+			return;
+		}
+		#==========================================
+		# update boot profiles
+		#------------------------------------------
+		$bootXML -> setBootProfiles (
+			$systemXML -> getBootProfile(),
+			$systemXML -> getBootKernel()
+		);
 	}
-	#==========================================
-	# merge/update strip
-	#------------------------------------------
-	if (! $this -> __addStripDataToBootXML($systemXML, $bootXML)) {
-		return;
-	}
-	#==========================================
-	# merge/update preferences
-	#------------------------------------------
-	if (! $this -> __addPreferencesToBootXML ($systemXML, $bootXML)) {
-		return;
-	}
-	#==========================================
-	# merge/update boot incl. packages/archives
-	#------------------------------------------
-	if (! $this -> __addPackagesToBootXML ($systemXML, $bootXML)) {
-		return;
-	}
-	#==========================================
-	# merge/update type
-	#------------------------------------------
-	if (! $this -> __addTypeToBootXML ($systemXML, $bootXML)) {
-		return;
-	}
-	#==========================================
-	# merge/update systemdisk
-	#------------------------------------------
-	if (! $this -> __addSystemDiskToBootXML ($systemXML, $bootXML)) {
-		return;
-	}
-	#==========================================
-	# merge/update machine attribs in type
-	#------------------------------------------
-	if (! $this -> __addVMachineDomainToBootXML ($systemXML, $bootXML)) {
-		return;
-	}
-	#==========================================
-	# merge/update oemconfig
-	#------------------------------------------
-	if (! $this -> __addOEMConfigDataToBootXML ($systemXML, $bootXML)) {
-		return;
-	}
-	#==========================================
-	# update boot profiles
-	#------------------------------------------
-	$bootXML -> setBootProfiles (
-		$systemXML -> getBootProfile(),
-		$systemXML -> getBootKernel()
-	);
 	$this -> __printProfileInfo ($bootXML,'Using boot profile(s):');
 	#==========================================
 	# Apply XML over rides from command line
@@ -2081,22 +2092,32 @@ sub __addVMachineDomainToBootXML {
 }
 
 #==========================================
+# __addDefaultStripData
+#------------------------------------------
+sub __addDefaultStripData {
+	# ...
+	# Add default strip data from KIWIConfig.txt
+	# ---
+	my $this = shift;
+	my $xml  = shift;
+	my $defStrip = KIWIXMLDefStripData -> new();
+	$xml -> addFilesToDelete($defStrip -> getFilesToDelete());
+	$xml -> addLibsToKeep($defStrip -> getLibsToKeep());
+	$xml -> addToolsToKeep($defStrip -> getToolsToKeep());
+	return $this;
+}
+
+#==========================================
 # __addStripDataToBootXML
 #------------------------------------------
 sub __addStripDataToBootXML {
 	# ...
-	# Add default strip data and the strip data from the user to the
+	# Add system XML strip data to the
 	# boot image description.
 	# ---
 	my $this = shift;
 	my $systemXML = shift;
 	my $bootXML = shift;
-	my $defStrip = KIWIXMLDefStripData -> new();
-	# Add the default strip data
-	$bootXML -> addFilesToDelete($defStrip -> getFilesToDelete());
-	$bootXML -> addLibsToKeep($defStrip -> getLibsToKeep());
-	$bootXML -> addToolsToKeep($defStrip -> getToolsToKeep());
-	# Add the user defined strip data
 	my $stripDelete = $systemXML -> getFilesToDelete();
 	if ($stripDelete) {
 		$bootXML -> addFilesToDelete ($stripDelete);
