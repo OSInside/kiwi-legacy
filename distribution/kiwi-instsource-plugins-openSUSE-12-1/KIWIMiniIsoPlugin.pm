@@ -41,8 +41,6 @@ use Data::Dumper;
 use Config::IniFiles;
 use File::Find;
 
-use KIWIQX qw (qxx);
-
 sub new
 {
   # ...
@@ -242,7 +240,7 @@ sub execute
     }
     close(OUT);
     close(IN); 
-    qxx("diff -u $grubcfg $grubcfg.new");
+    KIWIQX::qxx("diff -u $grubcfg $grubcfg.new");
     rename("$grubcfg.new", $grubcfg);
   } else {
     $this->logMsg("I", "no grub.cfg at <$grubcfg>");
