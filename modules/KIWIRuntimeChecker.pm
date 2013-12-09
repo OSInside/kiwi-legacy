@@ -744,11 +744,15 @@ sub __checkSystemDiskData {
 		if ($volIDs) {
 			for my $id (@{$volIDs}) {
 				my $name = $sysDisk -> getVolumeName ($id);
+				my $mount= $sysDisk -> getVolumeMountPoint($id);
 				my $size = $sysDisk -> getVolumeSize ($id);
 				my $freeSpace = $sysDisk -> getVolumeFreespace ($id);
 				my $lvsize = 0;
 				my $lvpath;
 				my $path = $name;
+				if ($mount) {
+					$path = $mount;
+				}
 				$path =~ s/_/\//g;
 				if ($name eq '@root') {
 					$rootsize = KIWIGlobals -> instance() -> dsize ($tree);
