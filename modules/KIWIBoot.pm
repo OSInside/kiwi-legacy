@@ -5253,8 +5253,8 @@ sub setupBootLoaderConfiguration {
 			$kiwi -> failed ();
 			return;
 		}
-		print $FD 'kernel=linux.vmx'."\n";
-		print $FD 'ramfsfile=initrd.vmx'."\n";
+		print $FD 'kernel=boot/linux.vmx'."\n";
+		print $FD 'ramfsfile=boot/initrd.vmx'."\n";
 		$FD -> close();
 		#==========================================
 		# Create cmdline.txt
