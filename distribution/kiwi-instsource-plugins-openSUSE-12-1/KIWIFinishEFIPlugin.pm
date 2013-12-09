@@ -41,7 +41,6 @@ use Data::Dumper;
 use Config::IniFiles;
 use File::Find;
 use File::Basename;
-use KIWIQX qw (qxx);
 
 
 sub new
@@ -133,9 +132,9 @@ sub execute
 
     my $efi = "$dir/boot/x86_64/efi";
     $this->logMsg("I", "creating $efi");
-    qxx("dd if=/dev/zero of=$efi bs=1M count=4");
-    qxx("/usr/sbin/mkdosfs -n 'BOOT' $efi");
-    qxx("mcopy -Do -s -i $efi $dir/EFI ::");
+    KIWIQX::qxx("dd if=/dev/zero of=$efi bs=1M count=4");
+    KIWIQX::qxx("/usr/sbin/mkdosfs -n 'BOOT' $efi");
+    KIWIQX::qxx("mcopy -Do -s -i $efi $dir/EFI ::");
   }
 
   return $retval;
