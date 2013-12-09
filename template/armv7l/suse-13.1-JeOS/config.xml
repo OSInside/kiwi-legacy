@@ -54,7 +54,7 @@
 		</type>
 	</preferences>
 	<preferences profiles="raspberryFlavour">
-		<type image="oem" filesystem="ext4" boot="oemboot/suse-13.1" bootloader="berryboot" fsmountoptions="noatime,nobarrier" bootfilesystem="fat32" kernelcmdline="dwc_otg.lpm_enable=0 console=ttyAMA0,115200 kgdboc=ttyAMA0,115200 console=tty1 root=/dev/mmcblk0p2 rootfstype=ext4 rootflags=commit=120,data=writeback rootwait rw" editbootconfig="berryboot-image-setup" editbootinstall="berryboot-image-install">
+		<type image="oem" filesystem="ext4" boot="oemboot/suse-13.1" bootloader="berryboot" fsmountoptions="noatime,nobarrier" bootfilesystem="fat32" kernelcmdline="dwc_otg.lpm_enable=0 console=ttyAMA0,115200 kgdboc=ttyAMA0,115200 console=tty1 root=/dev/mmcblk0p2 rootfstype=ext4 rootflags=commit=120,data=writeback rootwait rw" editbootconfig="berryboot-image-setup">
 			<systemdisk/>
 			<oemconfig>
 				<oem-swapsize>500</oem-swapsize>
