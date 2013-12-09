@@ -1016,7 +1016,7 @@ sub setupInstallStick {
 	my $cmdL      = $this->{cmdL};
 	my $firmware  = $this->{firmware};
 	my $type      = $this->{type};
-	my $irdsize   = KIWIGlobals -> instance() -> isize ($initrd);
+	my $bootsize  = $this -> __getBootSize ();
 	my $vmsize    = KIWIGlobals -> instance() -> isize ($system);
 	my $md5name   = $system;
 	my $destdir   = dirname ($initrd);
@@ -1144,9 +1144,7 @@ sub setupInstallStick {
 	#==========================================
 	# setup required disk size
 	#------------------------------------------
-	$irdsize= ($irdsize / 1e6) + 40;
-	$irdsize= sprintf ("%.0f", $irdsize);
-	$vmsize = ($vmsize / 1e6) * 1.3 + $irdsize;
+	$vmsize = ($vmsize / 1e6) * 1.3 + $bootsize;
 	$vmsize = sprintf ("%.0f", $vmsize);
 	$vmsize = $vmsize."M";
 	#==========================================
@@ -1222,7 +1220,7 @@ sub setupInstallStick {
 	# setup boot partition
 	#------------------------------------------
 	$pnr++;
-	push @commands,"n","p:lxboot",$pnr,".","+".$irdsize."M";
+	push @commands,"n","p:lxboot",$pnr,".","+".$bootsize."M";
 	push @commands,"t",$pnr,$partid;
 	push @commands,"a",$pnr;
 	$this->{partids}{installboot} = $pnr;
