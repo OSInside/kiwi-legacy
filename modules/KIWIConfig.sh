@@ -1285,11 +1285,12 @@ function suseGFXBoot {
 		if [ -f /boot/memtest* ];then 
 			mv /boot/memtest* /image/loader/memtest
 		fi
-	elif [ "$loader" = "uboot" ];then
+	elif [ "$loader" = "uboot" ] || [ "$loader" = "berryboot" ];then
 		# uboot loaders
 		if [ -f /boot/MLO ];then
 			mv /boot/MLO /image/loader
 		fi
+		mv /boot/*.dat /image/loader &>/dev/null
 		mv /boot/*.bin /image/loader &>/dev/null
 		mv /boot/*.img /image/loader &>/dev/null
 		mv /boot/*.imx /image/loader &>/dev/null

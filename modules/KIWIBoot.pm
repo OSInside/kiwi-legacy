@@ -5363,7 +5363,7 @@ sub copyBootCode {
 	if (($loader eq "uboot") || ($loader eq "berryboot")) {
 		my $config = "$dest/boot/boot.scr";
 		if ($loader eq "berryboot") {
-			$config = "$dest/boot/config.txt";
+			$config = "$dest/boot/config.txt $dest/boot/cmdline.txt";
 		}
 		$status = KIWIQX::qxx ("mv $config $dest");
 		$result = $? >> 8;
