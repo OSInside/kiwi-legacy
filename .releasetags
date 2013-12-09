@@ -1,12 +1,16 @@
 #!/bin/bash
 
-echo "last 3 released according to log:"
-git log --grep "- v.*released" --format=oneline |\
-	awk '{printf "--> git tag %s %s\n", $3, $1}'    |\
-	head -n 3
-
-echo
-
-echo "last tagged release:"
-echo -n '--> '
-git tag --list | tail -n 1
+for item in $(
+	git log --grep "- v.*released" --format=oneline |\
+	awk {'printf "%s,%s\n", $1,$3}'
+); do
+	commit=$(echo $item | cut -f1 -d,)
+	version=$(echo $item | cut -f2 -d,)
+	last_tagged=$(git tag --list --contains $commit 2>/dev/null)
+	if [ ! -z "$last_tagged" ];then
+		echo "Current tagged version: $last_tagged"
+		break
+	else
+		echo "--> git tag $version $commit"
+	fi
+done
