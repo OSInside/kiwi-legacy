@@ -3820,7 +3820,7 @@ function setupHybridPersistent {
 	# create a write partition for hybrid images if requested
 	# and store the device name in HYBRID_RW
 	# ----
-	if [ ! "$kiwi_hybridpersistent" = "yes" ];then
+	if [ ! "$kiwi_hybridpersistent" = "true" ];then
 		return
 	fi
 	local diskDevice=$(dn $biosBootDevice)
@@ -5832,8 +5832,8 @@ function mountSystemClicFS {
 		haveMByte=$((haveBytes / 1024 / 1024))
 		wantCowFS=0
 		if \
-			[ "$kiwi_hybrid" = "yes" ] && \
-			[ "$kiwi_hybridpersistent" = "yes" ]
+			[ "$kiwi_hybrid" = "true" ] && \
+			[ "$kiwi_hybridpersistent" = "true" ]
 		then
 			# write into a cow file on a filesystem, for hybrid iso's
 			wantCowFS=1
@@ -9715,7 +9715,7 @@ function updatePartitionTable {
 	#======================================
 	# check for hybrid iso
 	#--------------------------------------
-	if [ "$kiwi_hybridpersistent" = "yes" ];then
+	if [ "$kiwi_hybridpersistent" = "true" ];then
 		# /.../
 		# The partition table written into an iso doesn't
 		# like the resync, so we return early here
@@ -9871,7 +9871,7 @@ function setupKernelLinks {
 	#======================================
 	# setup if overlay filesystem is used
 	#--------------------------------------
-	if  [ "$OEM_KIWI_INITRD" = "yes" ] || \
+	if  [ "$OEM_KIWI_INITRD" = "true" ] || \
 		[ "$PXE_KIWI_INITRD" = "yes" ] || \
 		isFSTypeReadOnly
 	then
