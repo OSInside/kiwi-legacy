@@ -51,8 +51,8 @@ export haveRamDisk=0
 #======================================
 # Exports (clicfs usage)
 #--------------------------------------
-export kiwi_hybrid=yes
-export kiwi_hybridpersistent=yes
+export kiwi_hybrid=true
+export kiwi_hybridpersistent=true
 
 #======================================
 # Exports kernel options

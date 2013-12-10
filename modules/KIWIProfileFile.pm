@@ -344,22 +344,6 @@ sub __updateXMLType {
 		my $value = $data{$key};
 		next if ! $value;
 		next if ($value eq 'false');
-		if ($value eq 'true') {
-			if (($key eq 'kiwi_compressed') ||
-				($key eq 'kiwi_hybrid')     ||
-				($key eq 'kiwi_hybridpersistent') ||
-				($key eq 'kiwi_ramonly')
-			) {
-				# /.../
-				# the kiwi linuxrc code handles these variables with
-				# a yes|no value. This should be changed here and in
-				# the linuxrc code to a true|false evaluation like it
-				# is done for all other bool types in the next
-				# code cleanup process
-				# ----
-				$value = 'yes';
-			}
-		}
 		$this -> addEntry ($key,$value);
 	}
 	return $this;

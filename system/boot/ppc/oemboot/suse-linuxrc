@@ -325,7 +325,7 @@ if [ "$LOCAL_BOOT" = "no" ];then
 			resizeFilesystem $deviceResize
 		fi
 	fi
-	if [ "$OEM_KIWI_INITRD" = "yes" ];then
+	if [ "$OEM_KIWI_INITRD" = "true" ];then
 		if ! echo $KIWI_INITRD_PARAMS | grep -qi LOCAL_BOOT;then
 			KIWI_INITRD_PARAMS="$KIWI_INITRD_PARAMS LOCAL_BOOT=yes"
 		fi
