@@ -53,7 +53,7 @@ createFramebufferDevices
 #--------------------------------------
 if \
 	[ -z "$UNIONFS_CONFIG" ] && [ -z "$COMBINED_IMAGE" ] && \
-	[ ! "$OEM_KIWI_INITRD" = "yes" ]
+	[ ! "$OEM_KIWI_INITRD" = "true" ]
 then
 	#======================================
 	# use distro initrd via mkinitrd
