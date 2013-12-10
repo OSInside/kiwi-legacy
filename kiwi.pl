@@ -297,7 +297,7 @@ sub main {
 	# Migrate system to image description
 	#------------------------------------------
 	if ($cmdL->getOperationMode("migrate")) {
-		$kiwi -> info ("Starting system to image migration");
+		$kiwi -> info ("Starting system analysis");
 		my $destination = $cmdL->getOperationMode("migrate");
 		my $addlRepos   = $cmdL -> getAdditionalRepos();
 		my $migopts     = $cmdL -> getMigrationOptions();

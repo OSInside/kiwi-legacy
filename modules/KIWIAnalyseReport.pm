@@ -329,22 +329,41 @@ sub createReport {
 	print $FD ' src=".report/d3/kiwi.js"></script>'."\n";
 	print $FD '</head>'."\n";
 	#==========================================
+	# Hardware dependant packages
+	#------------------------------------------
+	my %modalias;
+	my $pack_call = KIWIQX::qxx ("rpm -qa --qf '\n<%{name}>\n' --supplements");
+	my @pack_list = split(/\n/,$pack_call);
+	my $cur_pack;
+	foreach my $item (@pack_list) {
+		if ($item =~ /^<(.+)>/) {
+			$cur_pack = $1;
+		}
+		if ($item =~ /^modalias/) {
+			push @{$modalias{$cur_pack}}, $item;
+		}
+	}
+	#==========================================
 	# Container Menu
 	#------------------------------------------
 	my %menu = ();
 	my $img  = '.report/d3/img/menu';
-	$menu{'RPM-packages'} = [
-		"$img/RPM-packages.jpg","Hardware Packages"
-	];
 	$menu{'kernel'} = [
 		"$img/kernel.jpg","Kernel"
 	];
-	$menu{'custom-files'} = [
-		"$img/custom-files.jpg","Custom Files"
-	];
-	$menu{'custom-files-visualisation'} = [
-		"$img/custom-files-visualisation.jpg","C. Files Visualisation"
-	];
+	if ($nopackage) {
+		$menu{'custom-files'} = [
+			"$img/custom-files.jpg","Custom Files"
+		];
+		$menu{'custom-files-visualisation'} = [
+			"$img/custom-files-visualisation.jpg","C. Files Visualisation"
+		];
+	}
+	if (%modalias) {
+		$menu{'RPM-packages'} = [
+			"$img/RPM-packages.jpg","Hardware Packages"
+		];
+	}
 	if ($twice) {
 		$menu{'multiple-RPM'} = [
 			"$img/multiple-RPM.jpg","Multiple RPM"
@@ -441,33 +460,28 @@ sub createReport {
 	#==========================================
 	# Hardware dependent packages report
 	#------------------------------------------
-	my $pack;
-	my %modalias;
-	print $FD '<div class="infoPanel">'."\n";
-	print $FD '<a name="RPM-packages"></a>'."\n";
-	print $FD '<h1>Hardware dependent RPM packages </h1>'."\n";
-	print $FD '<p>'."\n";
-	print $FD 'The table below shows packages that depend on specific ';
-	print $FD 'hardware Please note that it might be required to have a ';
-	print $FD 'different set of hardware dependent packages included into the ';
-	print $FD 'image description depending on the target hardware. If there ';
-	print $FD 'is the need for such packages make sure you add them as follows';
-	print $FD '<package name="name-of-package" bootinclude="true"/>';
-	print $FD '</p>'."\n";
-	print $FD '<hr>'."\n";
-	print $FD '<table>'."\n";
-	for (KIWIQX::qxx ( "rpm -qa --qf '\n<%{name}>\n' --supplements" )) {
-		chomp;
-		$pack = $1 if /^<(.+)>/;
-		push @{$modalias{$pack}}, $_ if /^modalias/;
+	if (%modalias) {
+		print $FD '<div class="infoPanel">'."\n";
+		print $FD '<a name="RPM-packages"></a>'."\n";
+		print $FD '<h1>Hardware dependent RPM packages </h1>'."\n";
+		print $FD '<p>'."\n";
+		print $FD 'The table below shows packages that depend on specific ';
+		print $FD 'hardware Please note that it might be required to have a ';
+		print $FD 'different set of hardware dependent packages included into the ';
+		print $FD 'image description depending on the target hardware. If there ';
+		print $FD 'is the need for such packages make sure you add them as follows';
+		print $FD '<package name="name-of-package" bootinclude="true"/>';
+		print $FD '</p>'."\n";
+		print $FD '<hr>'."\n";
+		print $FD '<table>'."\n";
+		foreach my $item (sort keys %modalias) {
+			print $FD '<tr valign="top">'."\n";
+			print $FD '<td>'.$item.'</td>'."\n";
+			print $FD '</tr>'."\n";
+		}
+		print $FD '</table>'."\n";
+		print $FD '</div>'."\n";
 	}
-	foreach my $item (sort keys %modalias) {
-		print $FD '<tr valign="top">'."\n";
-		print $FD '<td>'.$item.'</td>'."\n";
-		print $FD '</tr>'."\n";
-	}
-	print $FD '</table>'."\n";
-	print $FD '</div>'."\n";
 	#==========================================
 	# Local repository checkout(s)
 	#------------------------------------------
@@ -499,24 +513,22 @@ sub createReport {
 	# GEM packages report
 	#------------------------------------------
 	if (-x "/usr/bin/gem") {
-		my @gems;
 		print $FD '<div class="infoPanel">'."\n";
 		print $FD '<a name="gems"></a>'."\n";
-		print $FD '<h1>Installed GEM packages </h1>'."\n";
+		print $FD '<h1>Installed System GEM packages </h1>'."\n";
 		print $FD '<p>'."\n";
-		print $FD 'The table below shows GEM packages installed locally. ';
+		print $FD 'The table below shows GEM packages installed on the system. ';
 		print $FD 'In order to migrate them correctly make sure you either ';
 		print $FD 'have the corresponding rpm package for this gem in your ';
 		print $FD 'kiwi packages list or implement a mechanism to let the ';
-		print $FD 'gem package manager install this software ';
+		print $FD 'gem package manager install this software. gem packages ';
+		print $FD 'installed in home directories are not part of this list.';
 		print $FD '</p>'."\n";
 		print $FD '<hr>'."\n";
 		print $FD '<table>'."\n";
-		for (KIWIQX::qxx ( "gem list --local" )) {
-			chomp;
-			push (@gems,$_);
-		}
-		foreach my $item (sort @gems) {
+		my $gem_call = KIWIQX::qxx ("gem list --local");
+		my @gem_list = split(/\n/,$gem_call);
+		foreach my $item (sort @gem_list) {
 			print $FD '<tr valign="top">'."\n";
 			print $FD '<td>'.$item.'</td>'."\n";
 			print $FD '</tr>'."\n";
