@@ -280,7 +280,8 @@ sub setupInstallationSource {
 	#==========================================
 	# make sure channel list is clean
 	#------------------------------------------
-	my @chls = KIWIQX::qxx ("@smart channel --show | grep ^\'\\[\'|tr -d [] 2>&1");
+	my $chls = KIWIQX::qxx ("@smart channel --show | grep ^\'\\[\'|tr -d [] 2>&1");
+	my @chls = split(/\n/,$chls);
 	foreach my $c (@chls) {
 		chomp $c; KIWIQX::qxx ("@smart channel --remove $c -y 2>&1");
 	}

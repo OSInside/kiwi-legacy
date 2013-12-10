@@ -1003,8 +1003,8 @@ sub __hasValidLVMName {
 		$kiwi -> failed ();
 		return;
 	}
-	my @hostGroups = KIWIQX::qxx ("$vgsCmd --noheadings -o vg_name 2>/dev/null");
-	chomp @hostGroups;
+	my $hostGroups = KIWIQX::qxx ("$vgsCmd --noheadings -o vg_name 2>/dev/null");
+	my @hostGroups = split(/\n/,$hostGroups);
 	foreach my $hostGroup (@hostGroups) {
 		$hostGroup =~ s/^\s+//xg;
 		$hostGroup =~ s/\s+$//xg;

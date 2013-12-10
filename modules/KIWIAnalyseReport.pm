@@ -421,9 +421,10 @@ sub createReport {
 		print $FD '</p>'."\n";
 	} else {
 		print $FD '<table>'."\n";
-		my @list = KIWIQX::qxx (
+		my $list = KIWIQX::qxx (
 			"rpm -qf --qf \"%{NAME}:%{VERSION}\\n\" /lib/modules/$kernel"
-		); chomp @list;
+		);
+		my @list = split(/\n/,$list);
 		foreach my $item (sort @list) {
 			if ($item =~ /(.*):(.*)/) {
 				my $pac = $1;
@@ -539,8 +540,8 @@ sub createReport {
 		print $FD '</p>'."\n";
 		print $FD '<hr>'."\n";
 		print $FD '<table>'."\n";
-		my @list = KIWIQX::qxx ("rpm -q @pacs --last");
-		chomp @list;
+		my $list = KIWIQX::qxx ("rpm -q @pacs --last");
+		my @list = split(/\n/,$list);
 		foreach my $job (sort @list) {
 			if ($job =~ /([^\s]+)\s+([^\s].*)/) {
 				my $pac  = $1;
@@ -666,15 +667,16 @@ sub createReport {
 		print $FD '<hr>'."\n";
 		print $FD '<table>'."\n";
 		my @pacs = @{$failedJob2};
-		my @list = KIWIQX::qxx ("rpm -q @pacs --last");
-		chomp @list;
+		my $list = KIWIQX::qxx ("rpm -q @pacs --last");
+		my @list = split(/\n/,$list);
 		foreach my $job (sort @list) {
 			if ($job =~ /([^\s]+)\s+([^\s].*)/) {
 				my $pac  = $1;
 				my $date = $2;
-				my @rpm  = KIWIQX::qxx (
+				my $rpm  = KIWIQX::qxx (
 					'rpm -q --qf "%{distribution}\n%{disturl}\n%{url}\n" '.$pac
-				); chomp @rpm;
+				);
+				my @rpm = split(/\n/,$rpm);
 				my $distro  = $rpm[0];
 				my $disturl = $rpm[1];
 				my $srcurl  = $rpm[2];

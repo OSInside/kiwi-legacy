@@ -257,10 +257,10 @@ sub __solve {
 	%meta = $psolve -> getMetaData();
 	$solf = $psolve -> getSolfile();
 	@solp = $psolve -> getPackages();
-	@rpat = KIWIQX::qxx (
+	my $rpat = KIWIQX::qxx (
 		"dumpsolv $solf|grep 'solvable:name: pattern:'|cut -f4 -d :"
 	);
-	chomp @rpat;
+	@rpat = split(/\n/,$rpat);
 	$this->{meta}    = \%meta;
 	$this->{solfile} = $solf;
 	$this->{solved}  = \@solp;

@@ -242,7 +242,8 @@ sub stripImage {
 	my $kiwi = $this->{kiwi};
 	my $imageTree = $this->{imageTree};
 	$kiwi -> info ("Stripping shared objects/executables...");
-	my @list = KIWIQX::qxx ("find $imageTree -type f -perm -755");
+	my $list = KIWIQX::qxx ("find $imageTree -type f -perm -755");
+	my @list = split(/\n/,$list);
 	foreach my $file (@list) {
 		chomp $file;
 		my $data = KIWIQX::qxx ("file \"$file\"");
@@ -2524,13 +2525,13 @@ sub createImageSplit {
 	foreach my $except_item (@{$tmp_except_list}) {
 		my $except = $except_item -> getName();
 		my $globsource = "${imageTree}${except}";
-		my @files = KIWIQX::qxx ("find $globsource -xtype f 2>/dev/null");
+		my $files = KIWIQX::qxx("find $globsource -xtype f 2>/dev/null");
 		my $code  = $? >> 8;
 		if ($code != 0) {
 			# excepted file(s) doesn't exist anyway
 			next;
 		}
-		chomp @files;
+		my @files = split(/\n/,$files);
 		foreach my $file (@files) {
 			$exceptHash{$file} = $file;
 		}
@@ -2591,14 +2592,14 @@ sub createImageSplit {
 	if (@tempFiles) {
 		foreach my $temp (@tempFiles) {
 			my $globsource = "${imageTree}${temp}";
-			my @files = KIWIQX::qxx ("find $globsource -xtype f 2>/dev/null");
+			my $files = KIWIQX::qxx("find $globsource -xtype f 2>/dev/null");
 			my $code  = $? >> 8;
 			if ($code != 0) {
 				$kiwi -> warning ("file $globsource doesn't exist");
 				$kiwi -> skipped ();
 				next;
 			}
-			chomp @files;
+			my @files = split(/\n/,$files);
 			foreach (@files) {
 				$tempFiles_new{$_} = $_;
 			}
@@ -2648,13 +2649,13 @@ sub createImageSplit {
 		foreach my $except_item (@{$persist_except_list}) {
 			my $except = $except_item -> getName();
 			my $globsource = "${imageTree}${except}";
-			my @files = KIWIQX::qxx ("find $globsource -xtype f 2>/dev/null");
+			my $files = KIWIQX::qxx("find $globsource -xtype f 2>/dev/null");
 			my $code  = $? >> 8;
 			if ($code != 0) {
 				# excepted file(s) doesn't exist anyway
 				next;
 			}
-			chomp @files;
+			my @files = split(/\n/,$files);
 			foreach my $file (@files) {
 				$exceptHash{$file} = $file;
 			}
@@ -2665,14 +2666,14 @@ sub createImageSplit {
 		my %expandedPersistFiles;
 		foreach my $persist (@persistFiles) {
 			my $globsource = "${imageTree}${persist}";
-			my @files = KIWIQX::qxx ("find $globsource 2>/dev/null");
+			my $files = KIWIQX::qxx("find $globsource 2>/dev/null");
 			my $code  = $? >> 8;
 			if ($code != 0) {
 				$kiwi -> warning ("file $globsource doesn't exist");
 				$kiwi -> skipped ();
 				next;
 			}
-			chomp @files;
+			my @files = split(/\n/,$files);
 			foreach my $file (@files) {
 				if (defined $exceptHash{$file}) {
 					next;
@@ -4770,8 +4771,9 @@ sub checkKernel {
 		$cmd = "$zipper -cd $initrd";
 		$zip = 1;
 	}
-	my @status = KIWIQX::qxx ("$cmd|cpio -it --quiet 'lib/modules/*'|cut -f1-3 -d/");
+	$status = KIWIQX::qxx ("$cmd|cpio -it --quiet 'lib/modules/*'|cut -f1-3 -d/");
 	my $result = $? >> 8;
+	my @status = split(/\n/,$status);
 	if ($result != 0) {
 		$kiwi -> error  ("Can't find any boot image kernel");
 		$kiwi -> failed ();

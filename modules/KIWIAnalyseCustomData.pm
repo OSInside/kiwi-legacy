@@ -403,8 +403,8 @@ sub __populateCustomFiles {
 	} else {
 		$checkopt = "--nodeps --nodigest --nosignature --nomtime ";
 		$checkopt.= "--nolinkto --nouser --nogroup --nomode";
-		my @rpmcheck = KIWIQX::qxx ("rpm -Va $checkopt");
-		chomp @rpmcheck;
+		my $rpmcheck = KIWIQX::qxx ("rpm -Va $checkopt");
+		my @rpmcheck = split(/\n/,$rpmcheck);
 		my $rpmsize = @rpmcheck;
 		my $spart = 100 / $rpmsize;
 		my $count = 1;
@@ -464,12 +464,12 @@ sub __populateCustomFiles {
 	$kiwi -> info ("Inspecting package database(s) [unpackaged files]\n");
 	my @rpmcheck = ();
 	if (($cdata) && ($cdata->{rpmlist})) {
-		$kiwi -> info ("--> reading RPM package list from cache");
+		$kiwi -> info ("--> reading RPM package list from cache...");
 		@rpmcheck = @{$cdata->{rpmlist}};
 	} else {
 		$kiwi -> info ("--> requesting RPM package list...");
-		@rpmcheck = KIWIQX::qxx ("rpm -qlav");
-		chomp @rpmcheck;
+		my $rpmcheck = KIWIQX::qxx ("rpm -qlav");
+		@rpmcheck = split(/\n/,$rpmcheck);
 		$cdata->{rpmlist} = \@rpmcheck;
 	}
 	my @rpm_dir  = ();
@@ -477,8 +477,11 @@ sub __populateCustomFiles {
 	# /.../
 	# lookup rpm database files...
 	# ----
+	$kiwi -> done ();
+	$kiwi -> info ("--> resolving RPM items to absolute paths...");
 	foreach my $dir (@rpmcheck) {
 		if ($dir =~ /^d.*?\/(.*)$/) {
+			# applies to all directories from the rpm database
 			my $base = $1;
 			my $name = basename $base;
 			my $dirn = dirname  $base;
@@ -491,9 +494,9 @@ sub __populateCustomFiles {
 			$base =~ s/\/+/\//g;
 			$base =~ s/^\///;
 			next if $base eq './';
-			push @rpm_file,$base;
 			push @rpm_dir ,$base;
 		} elsif ($dir =~ /.*?\/(.*?)( -> .*)?$/) {
+			# applies to all files/link from the rpm database
 			my $base = $1;
 			my $name = basename $base;
 			my $dirn = dirname  $base;
@@ -515,8 +518,8 @@ sub __populateCustomFiles {
 	# ----
 	if ((! $this->{skipgem}) && (-x "/usr/bin/gem")) {
 		$kiwi -> info ("--> requesting GEM package list...");
-		my @gemcheck = KIWIQX::qxx ("gem contents --all");
-		chomp @gemcheck;
+		my $gemcheck = KIWIQX::qxx ("gem contents --all");
+		my @gemcheck = split(/\n/,$gemcheck);
 		foreach my $item (@gemcheck) {
 			my $name = basename $item;
 			my $dirn = dirname  $item;
@@ -528,7 +531,11 @@ sub __populateCustomFiles {
 		$kiwi -> done();
 	}
 	# /.../
-	# search files in packaged directories...
+	# find files in packaged directories:
+	# 1. convert directory list into dirs_cmp hash
+	# 2. create uniq and sorted directory list from dirs_cmp
+	# 3. apply deny expressions on the final directory list
+	# 4. call find and return %result hash
 	# ----
 	$kiwi -> info ("searching files in packaged directories...\n");
 	my %file_rpm;
@@ -556,13 +563,28 @@ sub __populateCustomFiles {
 		}
 	}
 	@packaged_dirs = @packaged_dirs_new;
-	$kiwi -> loginfo ("packaged directories: @packaged_dirs");
 	$kiwi -> snip ("--> Processing...");
 	my $wref = __generateWanted (\%result);
 	find({ wanted => $wref, follow => 0 }, @packaged_dirs);
+	# /.../
+	# reduce the amount of items in %result by the managed items
+	# from the %file_rom and %dirs_rpm hashes
+	# ----
+	foreach my $file (sort keys %result) {
+		if (exists $file_rpm{$file}) {
+			delete $result{$file};
+		}
+	}
+	foreach my $dir (sort keys %dirs_rpm) {
+		if (exists $result{$dir}) {
+			delete $result{$dir};
+		}
+	}
 	$kiwi -> snap();
 	# /.../
-	# search for unpackaged symlinks whose origin is packaged
+	# reduce the amount of item in %result by those symlinks
+	# whose origin is packaged because they are recreated on
+	# install of that package
 	# ----
 	$kiwi -> info ("--> searching symlinks whose origin is packaged...");
 	foreach my $file (sort keys %result) {
@@ -581,22 +603,9 @@ sub __populateCustomFiles {
 	}
 	$kiwi -> done();
 	# /.../
-	# search for unpackaged files in packaged directories...
-	# ----
-	$kiwi -> info ("--> searching unpackaged files in packaged dirs...");
-	foreach my $file (sort keys %result) {
-		if (exists $file_rpm{$file}) {
-			delete $result{$file};
-		}
-	}
-	foreach my $dir (sort keys %dirs_rpm) {
-		if (exists $result{$dir}) {
-			delete $result{$dir};
-		}
-	}
-	$kiwi -> done();
-	# /.../
-	# search for unpackaged directories...
+	# walk through the list of managed directories and check if
+	# there are subdirectories which does not belong to managed
+	# directories and add those to the %result hash
 	# ----
 	$kiwi -> info ("--> searching unpackaged directories...");
 	foreach my $dir (sort keys %dirs_cmp) {

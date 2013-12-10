@@ -277,9 +277,9 @@ sub __populateRepos {
 	# Obtain list from package manager
 	#------------------------------------------
 	# FIXME: move this into the KIWIManager backend
-	my @list    = KIWIQX::qxx ("bash -c 'LANG=POSIX zypper lr --details 2>&1'");
-	chomp @list;
-	my $code    = $? >> 8;
+	my $list = KIWIQX::qxx ("bash -c 'LANG=POSIX zypper lr --details 2>&1'");
+	my @list = split(/\n/,$list);
+	my $code = $? >> 8;
 	if ($code != 0) {
 		return;
 	}
@@ -416,8 +416,8 @@ sub __populatePackageList {
 		$kiwi -> done();
 	} else {
 		$kiwi -> info ("--> requesting from rpm database...");
-		@ilist = KIWIQX::qxx ('rpm -qa --qf "%{NAME}\n" | sort');
-		chomp @ilist;
+		my $ilist = KIWIQX::qxx ('rpm -qa --qf "%{NAME}\n" | sort');
+		@ilist = split(/\n/,$ilist);
 		$code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();
@@ -447,8 +447,8 @@ sub __populatePackageList {
 	}
 	foreach my $installed (sort keys %packages) {
 		if ($packages{$installed} > 1) {
-			my @list = KIWIQX::qxx ("rpm -q $installed");
-			chomp @list;
+			my $list = KIWIQX::qxx ("rpm -q $installed");
+			my @list = split(/\n/,$list);
 			push @twice,@list;
 		}
 	}
@@ -472,9 +472,10 @@ sub __populatePackageList {
 		$kiwi -> info ("Creating System solvable from active repos...\n");
 		# FIXME: move this into the KIWIManager backend
 		my $opts = '-n --no-refresh';
-		my @list = KIWIQX::qxx (
+		my $list = KIWIQX::qxx (
 			"bash -c 'LANG=POSIX zypper $opts patterns --installed 2>&1'"
 		);
+		my @list = split(/\n/,$list);
 		my $code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();
