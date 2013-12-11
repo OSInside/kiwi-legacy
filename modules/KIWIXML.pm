@@ -281,6 +281,10 @@ sub new {
 	#==========================================
 	# Check pre condition
 	#------------------------------------------
+	if (! $imageDesc) {
+		# image description pointer not initialized
+		return;
+	}
 	if (! -d $imageDesc) {
 		$kiwi -> error ("Couldn't locate configuration directory $imageDesc");
 		$kiwi -> failed ();
