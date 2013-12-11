@@ -672,7 +672,10 @@ sub setupInstallCD {
 	} else {
 		$basedir = dirname ($initrd);
 	}
-	$tmpdir = KIWIQX::qxx ( "mktemp -q -d $basedir/kiwicdinst.XXXXXX" ); chomp $tmpdir;
+	$tmpdir = KIWIQX::qxx (
+		"mktemp -q -d $basedir/kiwicdinst.XXXXXX"
+	);
+	chomp $tmpdir;
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> error  ("Couldn't create tmp dir: $tmpdir: $!");
@@ -879,7 +882,9 @@ sub setupInstallCD {
 			$status = KIWIQX::qxx ("/sbin/mkdosfs -n 'BOOT' $efi_fat 2>&1");
 			$result = $? >> 8;
 			if ($result == 0) {
-				$status = KIWIQX::qxx ("mcopy -Do -s -i $efi_fat $tmpdir/EFI :: 2>&1");
+				$status = KIWIQX::qxx (
+					"mcopy -Do -s -i $efi_fat $tmpdir/EFI :: 2>&1"
+				);
 				$result = $? >> 8;
 			}
 		}
@@ -903,7 +908,7 @@ sub setupInstallCD {
 	my $base;
 	my $opts;
 	if ($bootloader eq "grub2") {
-		# let mkisofs run grub2 efi or eltorito image...
+		# setup grub2 as eltorito boot image
 		$base = "-V \"$volid\" -A \"$appid\" -R -J -f ";
 		if ($firmware eq 'bios') {
 			$base.= "-b boot/grub2/i386-pc/eltorito.img -no-emul-boot ";
@@ -919,7 +924,7 @@ sub setupInstallCD {
 		}
 		$opts.= "-joliet-long ";
 	} elsif ($bootloader eq "grub") {
-		# let isolinux run grub second stage...
+		# setup grub as eltorito boot image (second stage loader)...
 		$base = "-R -J -f -b boot/grub/stage2 -no-emul-boot ";
 		$base.= "-V \"$volid\" -A \"$appid\"";
 		$opts = "-boot-load-size 4 -boot-info-table -udf -allow-limited-size ";
@@ -935,6 +940,7 @@ sub setupInstallCD {
 		KIWIQX::qxx ("mv $tmpdir/boot/initrd $tmpdir/boot/syslinux");
 		KIWIQX::qxx ("mv $tmpdir/boot/linux  $tmpdir/boot/syslinux");
 		KIWIQX::qxx ("mv $tmpdir/boot/syslinux $tmpdir/boot/loader 2>&1");
+		# setup isolinux.bin as eltorito boot image
 		$base = "-R -J -f -b boot/loader/isolinux.bin -no-emul-boot ";
 		$base.= "-V \"$volid\" -A \"$appid\"";
 		$opts = "-boot-load-size 4 -boot-info-table -udf -allow-limited-size ";
