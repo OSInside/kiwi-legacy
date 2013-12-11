@@ -86,6 +86,9 @@
 	<packages type="iso">
 		<package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
 	</packages>
+	<packages type="oem">
+		<package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
+	</packages>
 	<packages type="image" profiles="xenFlavour">
 		<package name="kernel-xen" replaces="kernel-default"/>
 		<package name="kernel-xen" replaces="kernel-desktop"/>

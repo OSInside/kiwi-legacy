@@ -94,6 +94,7 @@
 	</packages>
 	<packages type="oem">
 		<package name="grub2-branding-openSUSE" bootinclude="true"/>
+		<package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
 	</packages>
 	<packages type="image" profiles="xenFlavour">
 		<package name="kernel-xen" replaces="kernel-default"/>
