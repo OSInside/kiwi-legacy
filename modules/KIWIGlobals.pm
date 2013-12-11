@@ -1338,14 +1338,6 @@ sub checkType {
 		# isolinux as well
 		# ----
 		$type -> setBootLoader ('isolinux');
-	} elsif ($hybrid) {
-		# /.../
-		# if type is not iso but hybrid is specified for the
-		# creation of a hybrid install iso media we have to
-		# set the bootloader type to an isolinux compatible
-		# loader, in this case we use syslinux
-		# ----
-		$type -> setBootLoader ('syslinux');
 	}
 	#==========================================
 	# check tool/driver compatibility

@@ -606,6 +606,7 @@ sub setupInstallCD {
 	my $isxen     = $this->{isxen};
 	my $lvm       = $this->{lvm};
 	my $xml       = $this->{xml};
+	my $hybrid    = $xml -> getImageType() -> getHybrid();
 	my $firmware  = $this->{firmware};
 	my $md5name   = $system;
 	my $destdir   = dirname ($initrd);
@@ -613,17 +614,9 @@ sub setupInstallCD {
 	my $volid     = "KIWI CD/DVD Installation";
 	my $appid     = $this->{mbrid};
 	my $type      = $this->{type};
-	my $bootloader;
-	if ($arch =~ /ppc|ppc64|ppc64le/) {
-		$bootloader = "yaboot";
-	} elsif ($arch =~ /arm/) {
-		$bootloader = "uboot";
-	} elsif (($firmware eq "efi") || ($firmware eq "uefi")) {
-		$bootloader = "grub2";
-	} else {
-		$bootloader = "grub";
-	}
-	my $efi_arch= 'x86_64';
+	my $bootloader= "syslinux";
+	my $bootloadsize = 0;
+	my $efi_arch  = 'x86_64';
 	if ($arch ne 'x86_64') {
 		$efi_arch = 'i386';
 	}
@@ -656,12 +649,6 @@ sub setupInstallCD {
 	#------------------------------------------
 	if ($type->{volid}) {
 		$volid = $type->{volid};
-	}
-	#==========================================
-	# setup boot loader type
-	#------------------------------------------
-	if ($type->{bootloader}) {
-		$bootloader = $type->{bootloader};
 	}
 	#==========================================
 	# create tmp directory
@@ -775,6 +762,11 @@ sub setupInstallCD {
 	if (! $this -> setupBootLoaderStages ($bootloader,'iso')) {
 		return;
 	}
+	if (($firmware eq "efi") || ($firmware eq "uefi")) {
+		if (! $this -> setupBootLoaderStages ('grub2','iso')) {
+			return;
+		}
+	}
 	KIWIQX::qxx ("rm -rf $tmpdir/usr 2>&1");
 	KIWIQX::qxx ("rm -rf $tmpdir/image 2>&1");
 	$this->{initrd} = $oldird;
@@ -789,6 +781,13 @@ sub setupInstallCD {
 		$bootloader,$title,undef,"ISO")
 	) {
 		return;
+	}
+	if (($firmware eq "efi") || ($firmware eq "uefi")) {
+		if (! $this -> setupBootLoaderConfiguration (
+			'grub2',$title,undef,"ISO")
+		) {
+			return;
+		}
 	}
 	#==========================================
 	# Check for optional config-cdroot archive
@@ -894,11 +893,20 @@ sub setupInstallCD {
 			$kiwi -> failed ();
 			return;
 		}
+		$bootloadsize = -s $efi_fat;
+	}
+	#==========================================
+	# Store arch name used by iso
+	#------------------------------------------
+	my $isoarch = KIWIQX::qxx ("uname -m"); chomp $isoarch;
+	if ($isoarch =~ /i.86/) {
+		$isoarch = "i386";
 	}
 	#==========================================
 	# Create an iso image from the tree
 	#------------------------------------------
-	$kiwi -> info ("Creating ISO image...");
+	$kiwi -> info ("Creating install ISO image...\n");
+	my $isoerror = 1;
 	my $name = $system;
 	if ($gotsys) {
 		$name =~ s/raw$/install\.iso/;
@@ -907,87 +915,71 @@ sub setupInstallCD {
 	}
 	my $base;
 	my $opts;
-	if ($bootloader eq "grub2") {
-		# setup grub2 as eltorito boot image
-		$base = "-V \"$volid\" -A \"$appid\" -R -J -f ";
-		if ($firmware eq 'bios') {
-			$base.= "-b boot/grub2/i386-pc/eltorito.img -no-emul-boot ";
-			$base.= "-boot-load-size 4 -boot-info-table -udf ";
-			$base.= "-allow-limited-size ";
-		} elsif (($firmware eq 'efi') || ($firmware eq 'uefi')) {
-			if (-e "$tmpdir/boot/grub2/i386-pc/eltorito.img") {
-				$base.= "-b boot/grub2/i386-pc/eltorito.img -no-emul-boot ";
-				$base.= "-boot-load-size 4 -boot-info-table -udf ";
-				$base.= "-allow-limited-size -eltorito-alt-boot ";
-			}
-			$base.= "-b boot/$efi_arch/efi -no-emul-boot ";
-		}
-		$opts.= "-joliet-long ";
-	} elsif ($bootloader eq "grub") {
-		# setup grub as eltorito boot image (second stage loader)...
-		$base = "-R -J -f -b boot/grub/stage2 -no-emul-boot ";
-		$base.= "-V \"$volid\" -A \"$appid\"";
-		$opts = "-boot-load-size 4 -boot-info-table -udf -allow-limited-size ";
-		$opts.= "-pad -joliet-long";
-	} elsif ($bootloader =~ /(sys|ext)linux/) {
-		# turn sys/extlinux configuation into a isolinux configuration...
-		my $cfg_ext = "$tmpdir/boot/syslinux/syslinux.cfg";
-		if (! -f $cfg_ext) {
-			$cfg_ext = "$tmpdir/boot/syslinux/extlinux.conf";
-		}
-		my $cfg_iso = "$tmpdir/boot/syslinux/isolinux.cfg";
-		KIWIQX::qxx ("mv $cfg_ext $cfg_iso 2>&1");
-		KIWIQX::qxx ("mv $tmpdir/boot/initrd $tmpdir/boot/syslinux");
-		KIWIQX::qxx ("mv $tmpdir/boot/linux  $tmpdir/boot/syslinux");
-		KIWIQX::qxx ("mv $tmpdir/boot/syslinux $tmpdir/boot/loader 2>&1");
-		# setup isolinux.bin as eltorito boot image
-		$base = "-R -J -f -b boot/loader/isolinux.bin -no-emul-boot ";
-		$base.= "-V \"$volid\" -A \"$appid\"";
-		$opts = "-boot-load-size 4 -boot-info-table -udf -allow-limited-size ";
-		$opts.= "-pad -joliet-long";
-	} elsif ($bootloader eq "yaboot") {
-		$base = "-r";
-		$opts = "-U -chrp-boot -pad -joliet-long";
-	} else {
-		# don't know how to use this bootloader together with isolinux
-		$kiwi -> failed ();
-		$kiwi -> error  ("Bootloader not supported for CD inst: $bootloader");
-		$kiwi -> failed ();
-		return;
+	# turn sys/extlinux configuation into a isolinux configuration...
+	my $cfg_ext = "$tmpdir/boot/syslinux/syslinux.cfg";
+	if (! -f $cfg_ext) {
+		$cfg_ext = "$tmpdir/boot/syslinux/extlinux.conf";
 	}
-	my $wdir = KIWIQX::qxx ("pwd"); chomp $wdir;
+	# move files into suse official iso data structure
+	my $cfg_iso = "$tmpdir/boot/syslinux/isolinux.cfg";
+	KIWIQX::qxx ("mkdir -p $tmpdir/boot/$isoarch");
+	KIWIQX::qxx ("mv $cfg_ext $cfg_iso 2>&1");
+	KIWIQX::qxx ("ln $tmpdir/boot/initrd $tmpdir/boot/syslinux");
+	KIWIQX::qxx ("ln $tmpdir/boot/linux  $tmpdir/boot/syslinux");
+	KIWIQX::qxx ("mv $tmpdir/boot/syslinux $tmpdir/boot/$isoarch/loader");
+	#==========================================
+	# setup ISO options
+	#------------------------------------------
+	my $attr = "-R -J -f -pad -joliet-long";
+	$attr .= " -V \"$volid\"";
+	$attr .= " -A \"$this->{mbrid}\"";
+	$attr .= ' -p "'.$this->{gdata}->{Preparer}.'"';
+	#==========================================
+	# create ISO
+	#------------------------------------------
+	my $wdir = KIWIQX::qxx ("pwd");
+	chomp $wdir;
 	if ($name !~ /^\//) {
 		$name = $wdir."/".$name;
 	}
 	my $iso = KIWIIsoLinux -> new (
-		$tmpdir,$name,$base.' '.$opts,"checkmedia",
-		$this->{cmdL},$this->{xml}
+		$tmpdir,$name,$attr,"checkmedia",$this->{cmdL},$this->{xml}
 	);
-	if (! defined $iso) {
-		return;
+	if (defined $iso) {
+		$isoerror = 0;
+		if (! $iso -> callBootMethods()) {
+			$isoerror = 1;
+		}
+		if (! $iso -> addBootLive($bootloadsize)) {
+			$isoerror = 1;
+		}
+		if (! $iso -> createISO()) {
+			$isoerror = 1;
+		}
 	}
-	if ($bootloader =~ /(sys|ext)linux/) {
-		$iso -> createISOLinuxConfig ("/boot");
-	}
-	if (! $iso -> createISO()) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Failed creating ISO image: $status");
-		$kiwi -> failed ();
+	if ($isoerror) {
 		$iso  -> cleanISO ();
 		return;
 	}
-	$kiwi -> done ();
-	if ($bootloader =~ /(sys|ext)linux/) {
-		if (! $iso->createHybrid($this->{mbrid})) {
-			return;
-		}
+	#==========================================
+	# relocate boot catalog
+	#------------------------------------------
+	if (! $iso -> relocateCatalog ()) {
+		$iso  -> cleanISO ();
+		return;
 	}
-	if ($bootloader ne "yaboot") {
-		if (! $iso -> relocateCatalog ()) {
-			$iso  -> cleanISO ();
-			return;
-		}
-		if (! $iso -> fixCatalog()) {
+	if (! $iso -> fixCatalog()) {
+		$iso  -> cleanISO ();
+		return;
+	}
+	#==========================================
+	# Turn ISO into hybrid if requested
+	#------------------------------------------
+	if (($hybrid) && ($hybrid eq "true")) {
+		$kiwi -> info ("Setting up hybrid install ISO...\n");
+		if (! $iso -> createHybrid ($this->{mbrid})) {
+			$kiwi -> error  ("Failed to create hybrid ISO image");
+			$kiwi -> failed ();
 			$iso  -> cleanISO ();
 			return;
 		}
@@ -3588,23 +3580,31 @@ sub setupBootLoaderStages {
 		if ($zipped) {
 			$test = $unzip;
 		}
-		$status = KIWIQX::qxx ("$test | cpio -it --quiet | grep -q share/grub/ 2>&1");
+		$status = KIWIQX::qxx (
+			"$test | cpio -it --quiet | grep -q share/grub/ 2>&1"
+		);
 		$result = $? >> 8;
 		if ($result == 0) {
 			$grub_share = 'grub';
 		}
-		$status = KIWIQX::qxx ("$test | cpio -it --quiet | grep -q lib/grub2/ 2>&1");
+		$status = KIWIQX::qxx (
+			"$test | cpio -it --quiet | grep -q lib/grub2/ 2>&1"
+		);
 		$result = $? >> 8;
 		if ($result != 0) {
 			$grub_bios = 'grub';
 			$grub_efi  = 'grub';
 		}
-		$status = KIWIQX::qxx ("$test | cpio -it --quiet | grep -q lib/grub2-efi 2>&1");
+		$status = KIWIQX::qxx (
+			"$test | cpio -it --quiet | grep -q lib/grub2-efi 2>&1"
+		);
 		$result = $? >> 8;
 		if ($result == 0) {
 			$grub_efi = 'grub2-efi';
 		}
-		$status = KIWIQX::qxx ("$test | cpio -it --quiet | grep -q lib64/efi 2>&1");
+		$status = KIWIQX::qxx (
+			"$test | cpio -it --quiet | grep -q lib64/efi 2>&1"
+		);
 		$result = $? >> 8;
 		if ($result == 0) {
 			$lib = 'lib64';
@@ -4602,7 +4602,9 @@ sub setupBootLoaderConfiguration {
 			# copy grub2 config file to efi path too
 			#------------------------------------------
 			if ($config eq 'grub2-efi') {
-				KIWIQX::qxx ("cp $tmpdir/boot/$config/grub.cfg $tmpdir/EFI/BOOT 2>&1");
+				KIWIQX::qxx (
+					"cp $tmpdir/boot/$config/grub.cfg $tmpdir/EFI/BOOT 2>&1"
+				);
 			}
 		}
 		$kiwi -> done();
@@ -5190,7 +5192,9 @@ sub setupBootLoaderConfiguration {
 		my $mkopts = "-A arm -O linux -T ramdisk -C none -a 0x0 -e 0x0";
 		my $inputf = "$tmpdir/boot/initrd.vmx";
 		my $result = "$tmpdir/boot/initrd.uboot";
-		my $data = KIWIQX::qxx ("mkimage $mkopts -n 'Initrd' -d $inputf $result");
+		my $data = KIWIQX::qxx (
+			"mkimage $mkopts -n 'Initrd' -d $inputf $result"
+		);
 		my $code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();

@@ -1079,9 +1079,6 @@ function suseGFXBoot {
 	if [ ! -z "$kiwi_bootloader" ];then
 		loader=$kiwi_bootloader
 	fi
-	if [ ! -z "$kiwi_hybrid" ];then
-		loader="isolinux"
-	fi
 	if [ "$loader" = "extlinux" ] || [ "$loader" = "syslinux" ];then
 		# need the same data for sys|extlinux and for isolinux
 		loader="isolinux"
@@ -1202,8 +1199,8 @@ function suseGFXBoot {
 		echo "gfxboot devel not installed, custom branding skipped !"
 		echo "using gfxboot branding package"
 		test -d /image/loader || mkdir /image/loader
-		if [ $loader = "isolinux" ];then
-			# isolinux boot data...
+		if [ -e "/etc/bootsplash/themes/$loader_theme/cdrom/gfxboot.cfg" ];then
+			# isolinux boot graphics file (bootlogo)...
 			mv /etc/bootsplash/themes/$loader_theme/cdrom/* /image/loader
 			local gfxcfg=/image/loader/gfxboot.cfg
 			# tell the bootloader about live CD setup
@@ -1215,8 +1212,9 @@ function suseGFXBoot {
 			# tell the bootloader to hand over lang to cmdline
 			gfxboot --config-file $gfxcfg \
 				--change-config live::addopt.lang=1
-		else
-			# boot loader graphics image file...
+		fi
+		if [ -e /etc/bootsplash/themes/$loader_theme/bootloader/message ];then
+			# boot loader graphics image file (message)...
 			mv /etc/bootsplash/themes/$loader_theme/bootloader/message \
 				/image/loader
 			local archive=/image/loader/message
@@ -1263,29 +1261,7 @@ function suseGFXBoot {
 	#======================================
 	# copy bootloader binaries if required
 	#--------------------------------------
-	if [ "$loader" = "isolinux" ];then
-		# isolinux boot code...
-		if [ -f /usr/share/syslinux/isolinux.bin ];then
-			mv /usr/share/syslinux/isolinux.bin /image/loader
-		elif [ -f /usr/lib/syslinux/isolinux.bin ];then
-			mv /usr/lib/syslinux/isolinux.bin  /image/loader
-		fi
-		# use either gfxboot.com or gfxboot.c32
-		if [ -f /usr/share/syslinux/gfxboot.com ];then
-			mv /usr/share/syslinux/gfxboot.com /image/loader
-		elif [ -f /usr/share/syslinux/gfxboot.c32 ];then
-			mv /usr/share/syslinux/gfxboot.c32 /image/loader
-		fi
-		if [ -f /usr/share/syslinux/chain.c32 ];then
-			mv /usr/share/syslinux/chain.c32 /image/loader
-		fi
-		if [ -f /usr/share/syslinux/mboot.c32 ];then
-			mv /usr/share/syslinux/mboot.c32 /image/loader
-		fi
-		if [ -f /boot/memtest* ];then 
-			mv /boot/memtest* /image/loader/memtest
-		fi
-	elif [ "$loader" = "uboot" ] || [ "$loader" = "berryboot" ];then
+	if [ "$loader" = "uboot" ] || [ "$loader" = "berryboot" ];then
 		# uboot loaders
 		if [ -f /boot/MLO ];then
 			mv /boot/MLO /image/loader
@@ -1297,8 +1273,32 @@ function suseGFXBoot {
 		mv /boot/*.dtb /image/loader &>/dev/null
 		mv /boot/*.elf /image/loader &>/dev/null
 	else
-		# boot loader binary part of MBR
+		# boot loader binaries
 		:
+	fi
+	#======================================
+	# copy isolinux loader data
+	#--------------------------------------
+	# isolinux boot code...
+	if [ -f /usr/share/syslinux/isolinux.bin ];then
+		mv /usr/share/syslinux/isolinux.bin /image/loader
+	elif [ -f /usr/lib/syslinux/isolinux.bin ];then
+		mv /usr/lib/syslinux/isolinux.bin  /image/loader
+	fi
+	# use either gfxboot.com or gfxboot.c32
+	if [ -f /usr/share/syslinux/gfxboot.com ];then
+		mv /usr/share/syslinux/gfxboot.com /image/loader
+	elif [ -f /usr/share/syslinux/gfxboot.c32 ];then
+		mv /usr/share/syslinux/gfxboot.c32 /image/loader
+	fi
+	if [ -f /usr/share/syslinux/chain.c32 ];then
+		mv /usr/share/syslinux/chain.c32 /image/loader
+	fi
+	if [ -f /usr/share/syslinux/mboot.c32 ];then
+		mv /usr/share/syslinux/mboot.c32 /image/loader
+	fi
+	if [ -f /boot/memtest* ];then
+		mv /boot/memtest* /image/loader/memtest
 	fi
 	#======================================
 	# create splash screen

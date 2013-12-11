@@ -2295,6 +2295,7 @@ sub createImageLiveCD {
 		}
 	}
 	if ($isoerror) {
+		$isolinux -> cleanISO();
 		return;
 	}
 	#==========================================
@@ -2320,6 +2321,7 @@ sub createImageLiveCD {
 				if ($result != 0) {
 					$kiwi -> error ("Call failed, see console log");
 					$kiwi -> failed ();
+					$isolinux -> cleanISO();
 					return;
 				}
 			} else {
@@ -2334,19 +2336,22 @@ sub createImageLiveCD {
 	# relocate boot catalog
 	#------------------------------------------
 	if (! $isolinux -> relocateCatalog()) {
+		$isolinux -> cleanISO();
 		return;
 	}
 	if (! $isolinux -> fixCatalog()) {
+		$isolinux -> cleanISO();
 		return;
 	}
 	#==========================================
 	# Turn ISO into hybrid if requested
 	#------------------------------------------
-	if ($hybrid) {
+	if (($hybrid) && ($hybrid eq "true")) {
 		$kiwi -> info ("Setting up hybrid ISO...\n");
 		if (! $isolinux -> createHybrid ($this->{mbrid})) {
 			$kiwi -> error  ("Failed to create hybrid ISO image");
 			$kiwi -> failed ();
+			$isolinux -> cleanISO();
 			return;
 		}
 	}
@@ -2359,6 +2364,7 @@ sub createImageLiveCD {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Failed to tag ISO image");
 			$kiwi -> failed ();
+			$isolinux -> cleanISO();
 			return;
 		}
 		$kiwi -> done();
@@ -2367,6 +2373,7 @@ sub createImageLiveCD {
 	# cleanup
 	#------------------------------------------
 	KIWIQX::qxx ("rm -rf $CD 2>&1");
+	$isolinux -> cleanISO();
 	return $this;
 }
 
