@@ -5364,6 +5364,7 @@ sub copyBootCode {
 		KIWIQX::qxx ("mv $dest/boot/*.img $dest &>/dev/null");
 		KIWIQX::qxx ("mv $dest/boot/*.imx $dest &>/dev/null");
 		KIWIQX::qxx ("mv $dest/boot/*.dtb $dest &>/dev/null");
+		KIWIQX::qxx ("mv $dest/boot/dtb/  $dest &>/dev/null");
 		KIWIQX::qxx ("mv $dest/boot/*.elf $dest &>/dev/null");
 		if (-f "$dest/boot/MLO") {
 			$status = KIWIQX::qxx ("mv $dest/boot/MLO $dest");
