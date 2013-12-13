@@ -7977,9 +7977,17 @@ function dn {
 	# print disk name (device name) according to the
 	# linux device node specs: If the device matches "p"
 	# followed by a number remove pX else remove 
-	# the last number
+	# the last number. Exceptions:
+	# loop devices
 	# ----
 	local part=$(getDiskDevice $1)
+	if [[ $part =~ dev/loop[0-9] ]];then
+		echo $part
+		return
+	fi
+	if [[ $part =~ mapper/loop ]];then
+		part=$(echo $part | sed -e s@/mapper@@)
+	fi
 	local part_new=$(echo $part | sed -e 's@\(^.*\)\(p[0-9].*$\)@\1@')
 	if [ $part = $part_new ];then
 		part_new=$(echo $part | sed -e 's@\(^.*\)\([0-9].*$\)@\1@')
