@@ -6834,10 +6834,10 @@ sub setupFilesystem {
 			my $fsopts = '';
 			if ($fstype eq 'fat16') {
 				$kiwi -> info ("Creating DOS [Fat16] filesystem");
-				$fsopts.= " -F 16";
+				$fsopts.= " -F16 -I";
 			} else {
 				$kiwi -> info ("Creating DOS [Fat32] filesystem");
-				$fsopts.= " -F 32";
+				$fsopts.= " -F32 -I";
 			}
 			if ($bootp) {
 				$fsopts.= " -n '".$bootp."'";
