@@ -1245,7 +1245,9 @@ sub setupInstallStick {
 	# create bios_grub flag
 	#------------------------------------------
 	if ($needBiosP) {
-		$status = KIWIQX::qxx ("parted $this->{loop} set 1 bios_grub on 2>&1");
+		$status = KIWIQX::qxx (
+			"parted $this->{loop} set 1 bios_grub on 2>&1"
+		);
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -2300,7 +2302,9 @@ sub setupBootDisk {
 			return;
 		}
 		if ($needJumpP) {
-			$status = KIWIQX::qxx ("parted $this->{loop} set 1 bios_grub on 2>&1");
+			$status = KIWIQX::qxx (
+				"parted $this->{loop} set 1 bios_grub on 2>&1"
+			);
 			$result = $? >> 8;
 			if ($result != 0) {
 				$kiwi -> failed ();
@@ -6183,7 +6187,9 @@ sub setStoragePartition {
 			$kiwi -> loginfo (
 				"FDASD input: $device [@commands]"
 			);
-			$status = KIWIQX::qxx ("dd if=/dev/zero of=$device bs=4096 count=10 2>&1");
+			$status = KIWIQX::qxx (
+				"dd if=/dev/zero of=$device bs=4096 count=10 2>&1"
+			);
 			$result = $? >> 8;
 			if ($result != 0) {
 				$kiwi -> loginfo ($status);
@@ -6295,6 +6301,17 @@ sub setStoragePartition {
 						"$parted_exec -s $device unit s $p_cmd 2>&1"
 					);
 				}
+				$result = $? >> 8;
+				if ($result != 0) {
+					$kiwi -> loginfo ($status);
+					return;
+				}
+			}
+			if ($this->{arch} =~ /arm/) {
+				# make sure there is no x86 boot code in MBR
+				$status = KIWIQX::qxx (
+					"dd if=/dev/zero of=$device bs=440 count=1 2>&1"
+				);
 				$result = $? >> 8;
 				if ($result != 0) {
 					$kiwi -> loginfo ($status);
