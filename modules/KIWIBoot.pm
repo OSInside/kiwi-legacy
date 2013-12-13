@@ -3640,14 +3640,16 @@ sub setupBootLoaderStages {
 			'ext2','iso9660','chain','linux','echo','configfile',
 			'boot','search_label','search_fs_file','search',
 			'search_fs_uuid','ls','normal','gzio','multiboot',
-			'png','fat'
+			'png','fat','gettext','chain','font','minicmd'
 		);
 		my @bios_core_modules = (
 			'biosdisk','part_msdos','part_gpt','vga','vbe',
-			'video_bochs','video_cirrus','gfxterm','gfxmenu'
+			'video_bochs','video_cirrus','gfxterm','gfxmenu',
+			'part_msdos'
 		);
 		my @efi_core_modules = (
-			'part_gpt','efi_gop','video','video_fb'
+			'part_gpt','efi_gop','video','video_fb','video',
+			'video_bochs','video_cirrus','efi_uga'
 		);
 		push @efi_core_modules ,@core_modules;
 		push @bios_core_modules,@core_modules;
@@ -4274,22 +4276,6 @@ sub setupBootLoaderConfiguration {
 		);
 		my $font;
 		#==========================================
-		# BIOS modules
-		#------------------------------------------
-		my @x86mods = (
-			'fat','ext2','gettext','part_msdos','chain',
-			'vbe','vga','video_bochs','video_cirrus','gzio',
-			'search','configfile','png'
-		);
-		#==========================================
-		# EFI modules
-		#------------------------------------------
-		my @efimods = (
-			'fat','ext2','gettext','part_gpt','efi_gop',
-			'chain','video','video_bochs','video_cirrus',
-			'gzio','efi_uga','search','configfile','png'
-		);
-		#==========================================
 		# config file name
 		#------------------------------------------
 		my @config = ('grub2');
@@ -4349,18 +4335,6 @@ sub setupBootLoaderConfiguration {
 			#==========================================
 			# General grub2 setup
 			#------------------------------------------
-			if ($firmware ne "uefi") {
-				# load modules only if not in efi secure boot mode
-				if ($config eq "grub2") {
-					foreach my $module (@x86mods) {
-						print $FD "insmod $module"."\n";
-					}
-				} else {
-					foreach my $module (@efimods) {
-						print $FD "insmod $module"."\n";
-					}
-				}
-			}
 			if ($uuid) {
 				print $FD "search --fs-uuid --set=root $uuid"."\n";
 			} else {
@@ -4372,8 +4346,6 @@ sub setupBootLoaderConfiguration {
 				# support theme and graphics if not in efi secure boot mode
 				print $FD 'if loadfont $font ;then'."\n";
 				print $FD "\t"."set gfxmode=$gfx"."\n";
-				print $FD "\t".'insmod gfxterm'."\n";
-				print $FD "\t".'insmod gfxmenu'."\n";
 				print $FD "\t".'terminal_input gfxterm'."\n";
 				print $FD "\t".'if terminal_output gfxterm;then true;else'."\n";
 				print $FD "\t\t".'terminal gfxterm'."\n";
