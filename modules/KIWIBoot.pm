@@ -5236,8 +5236,9 @@ sub setupBootLoaderConfiguration {
 			$kiwi -> failed ();
 			return;
 		}
-		print $FD 'kernel=boot/linux.vmx'."\n";
-		print $FD 'ramfsfile=boot/initrd.vmx'."\n";
+		print $FD 'kernel=linux.vmx'."\n";
+		print $FD 'ramfsfile=initrd.vmx'."\n";
+		print $FD 'ramfsaddr=0x00a00000'."\n";
 		$FD -> close();
 		#==========================================
 		# Create cmdline.txt
@@ -5248,7 +5249,8 @@ sub setupBootLoaderConfiguration {
 			$kiwi -> failed ();
 			return;
 		}
-		print $FD "$type->{cmdline}\n";
+		my $initrd_size = sprintf ("0x%x",-s $initrd);
+		print $FD "$type->{cmdline} initrd=0xa00000,$initrd_size\n";
 		$FD -> close();
 		$kiwi -> done();
 	}
@@ -5346,7 +5348,8 @@ sub copyBootCode {
 	if (($loader eq "uboot") || ($loader eq "berryboot")) {
 		my $config = "$dest/boot/boot.scr";
 		if ($loader eq "berryboot") {
-			$config = "$dest/boot/config.txt $dest/boot/cmdline.txt";
+			$config = "$dest/boot/config.txt $dest/boot/cmdline.txt ";
+			$config.= "$dest/boot/linux.vmx $dest/boot/initrd.vmx";
 		}
 		$status = KIWIQX::qxx ("mv $config $dest");
 		$result = $? >> 8;
