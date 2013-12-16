@@ -3644,16 +3644,15 @@ sub setupBootLoaderStages {
 			'ext2','iso9660','chain','linux','echo','configfile',
 			'boot','search_label','search_fs_file','search',
 			'search_fs_uuid','ls','normal','gzio','multiboot',
-			'png','fat','gettext','chain','font','minicmd'
+			'png','fat','gettext','chain','font','minicmd',
+			'gfxterm','gfxmenu','video_bochs','video_cirrus',
+			'video','video_fb'
 		);
 		my @bios_core_modules = (
-			'biosdisk','part_msdos','part_gpt','vga','vbe',
-			'video_bochs','video_cirrus','gfxterm','gfxmenu',
-			'part_msdos'
+			'biosdisk','part_msdos','part_gpt','vga','vbe'
 		);
 		my @efi_core_modules = (
-			'part_gpt','efi_gop','video','video_fb','video',
-			'video_bochs','video_cirrus','efi_uga'
+			'part_gpt','efi_gop','efi_uga'
 		);
 		push @efi_core_modules ,@core_modules;
 		push @bios_core_modules,@core_modules;
