@@ -131,6 +131,8 @@ sub runQuery {
 sub createCustomFileTree {
 	# ...
 	# create directory with hard/soft links to custom files
+	# create a JSON file containing information information
+	# about these files and their attributes
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
@@ -210,6 +212,9 @@ sub createCustomFileTree {
 	$done_previos = 0;
 	$done = 0;
 	KIWIQX::qxx ("rm -rf $dest/custom 2>&1");
+	KIWIQX::qxx ("rm -f $dest/custom.json 2>&1");
+	my %json;
+	$json{customfiles} = [];
 	foreach my $dir (sort keys %filelist) {
 		next if ! %{$filelist{$dir}};
 		if (! -d "$dest/custom/$dir") {
@@ -218,9 +223,20 @@ sub createCustomFileTree {
 		next if ! chdir "$dest/custom/$dir";
 		foreach my $file (sort keys %{$filelist{$dir}}) {
 			if (-e "$dir/$file") {
+				my $fattr = $filelist{$dir}{$file};
 				if (! link "$dir/$file", "$file") {
 					symlink "$dir/$file", "$file";
 				}
+				my %item;
+				$item{name} = $file;
+				$item{dir}  = $dir;
+				$item{permission} = sprintf("%04o",$fattr->mode & oct(7777));
+				if ($fattr->[13]) {
+					$item{binary} = 'true';
+				} else {
+					$item{binary} = 'false';
+				}
+				push $json{customfiles}, \%item;
 				$done_percent = int ($factor * $done);
 				if ($done_percent > $done_previos) {
 					$kiwi -> step ($done_percent);
@@ -230,6 +246,18 @@ sub createCustomFileTree {
 			}
 		}
 	}
+	my $FD = FileHandle -> new();
+	if (! $FD -> open (">$dest/custom.json")) {
+		$kiwi -> error  (
+			"KIWIAnalyseCustomData: Couldn't open $dest/custom.json: $!"
+		);
+		$kiwi -> failed ();
+		return;
+	}
+	my $json_obj = JSON->new->allow_nonref;
+	my $json_out = $json_obj->pretty->encode( \%json );
+	print $FD $json_out;
+	$FD -> close();
 	$kiwi -> note ("\n");
 	$kiwi -> doNorm ();
 	$kiwi -> cursorON();
@@ -690,6 +718,9 @@ sub __populateCustomFiles {
 		my $locator = KIWILocator -> instance();
 		my $augtool = $locator -> getExecPath('augtool');
 		if ($augtool) {
+			$kiwi -> info (
+				"Building deny patterns for files managed by augeas..."
+			);
 			my %aug_files;
 			my $fd = FileHandle -> new();
 			if ($fd -> open ("$augtool print /files/*|")) {
@@ -706,6 +737,7 @@ sub __populateCustomFiles {
 			foreach my $file (sort keys %aug_files) {
 				push @custom_deny,$file;
 			}
+			$kiwi -> done();
 		}
 	}
 	#==========================================
