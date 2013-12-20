@@ -37,7 +37,6 @@ export systemIntegrity="clean"
 #--------------------------------------
 export VMX_SYSTEM="/config.vmxsystem"
 export PART_IDS="/config.partids"
-export LIVECD_CONFIG="/cdrom/config.isoclient"
 export OEM_PARTITION_CONFIG="/config.oempartition"
 
 #======================================
