@@ -5560,28 +5560,28 @@ function kiwiMount {
 		FSTYPE_SAVE=$FSTYPE
 	fi
 	#======================================
-	# probe filesystem
-	#--------------------------------------
-	if [ ! "$FSTYPE" = "nfs" ];then
-		if [ ! -z "$lop" ];then
-			probeFileSystem $lop
-		else
-			probeFileSystem $src
-		fi
-	fi
-	if [ -z "$FSTYPE" ] || [ "$FSTYPE" = "unknown" ];then
-		FSTYPE="auto"
-	fi
-	#======================================
 	# decide for a mount method
 	#--------------------------------------
 	if [ ! -z "$lop" ];then
 		# /.../
 		# if loop mount is requested a fixed loop7 device
-		# was set as src parameter. Because this fixed loop
-		# name is used later too we stick to this device name
+		# was set as device parameter in config.isoclient.
+		# Because this fixed loop name is used later too we
+		# stick to this device name
 		# ----
-		losetup /dev/loop7 $lop
+		if ! losetup /dev/loop7 $lop;then
+			return 1
+		fi
+		src=/dev/loop7
+	fi
+	#======================================
+	# probe filesystem
+	#--------------------------------------
+	if [ ! "$FSTYPE" = "nfs" ];then
+		probeFileSystem $src
+	fi
+	if [ -z "$FSTYPE" ] || [ "$FSTYPE" = "unknown" ];then
+		FSTYPE="auto"
 	fi
 	if [ "$FSTYPE" = "zfs" ];then
 		if [ -b $src ];then
