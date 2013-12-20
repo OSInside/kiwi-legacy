@@ -5563,16 +5563,18 @@ function kiwiMount {
 	# decide for a mount method
 	#--------------------------------------
 	if [ ! -z "$lop" ];then
-		# /.../
-		# if loop mount is requested a fixed loop7 device
-		# was set as device parameter in config.isoclient.
-		# Because this fixed loop name is used later too we
-		# stick to this device name
-		# ----
-		if ! losetup /dev/loop7 $lop;then
+		src=$(losetup -f --show $lop)
+		if [ ! -e $src ]; then
 			return 1
 		fi
-		src=/dev/loop7
+		# /.../
+		# for iso images the root device name is set via
+		# config.isoclient. But in case of a filename the
+		# root device must be loop mounted and the loop
+		# setup creates the root device which is stored
+		# in imageDevice for the isoboot code
+		# ----
+		imageDevice=$src
 	fi
 	#======================================
 	# probe filesystem

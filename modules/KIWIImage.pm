@@ -2201,15 +2201,15 @@ sub createImageLiveCD {
 	if ((! defined $gzip) || ($gzip =~ /^clic/)) {
 		print $CFD "IMAGE='/dev/ram1;$namecd'\n";
 	} else {
-		print $CFD "IMAGE='/dev/loop7;$namecd'\n";
+		print $CFD "IMAGE='loop;$namecd'\n";
 	}
 	if (defined $gzip) {
 		if ($gzip =~ /^clic/) {
-			print $CFD "UNIONFS_CONFIG='/dev/ram1,/dev/loop7,clicfs'\n";
+			print $CFD "UNIONFS_CONFIG='/dev/ram1,loop,clicfs'\n";
 		} elsif ($gzip =~ /^seed/) {
-			print $CFD "UNIONFS_CONFIG='/dev/ram1,/dev/loop7,seed'\n";
+			print $CFD "UNIONFS_CONFIG='/dev/ram1,loop,seed'\n";
 		} elsif ($gzip =~ /^overlay/) {
-			print $CFD "UNIONFS_CONFIG='/dev/ram1,/dev/loop7,overlay'\n";
+			print $CFD "UNIONFS_CONFIG='/dev/ram1,loop,overlay'\n";
 		} else {
 			print $CFD "COMBINED_IMAGE=yes\n";
 		}
