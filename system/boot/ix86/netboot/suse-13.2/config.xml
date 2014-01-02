@@ -220,7 +220,7 @@
 		<package name="glibc-locale"/>
 		<package name="rsync"/>
 		<package name="timezone"/>
-		<package name="module-init-tools"/>
+		<package name="kmod-compat"/>
 		<package name="which"/>
 		<package name="udev"/>
 	</packages>
