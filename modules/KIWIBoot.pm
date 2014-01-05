@@ -382,8 +382,8 @@ sub new {
 		my $sizeXMLBytes = 0;
 		my $fsoverhead   = 1.2;
 		my $fsopts       = $cmdL -> getFilesystemOptions();
-		my $inodesize    = $fsopts->[1];
-		my $inoderatio   = $fsopts->[2];
+		my $inodesize    = $fsopts -> getInodeSize();
+		my $inoderatio   = $fsopts -> getInodeRatio();
 		my $kernelSize   = KIWIGlobals -> instance() -> isize ($kernel);
 		my $initrdSize   = KIWIGlobals -> instance() -> isize ($initrd);
 		#==========================================
@@ -2664,15 +2664,10 @@ sub setupBootDisk {
 		} else {
 			$kiwi -> info ("Creating ext3 read-write filesystem");
 		}
-		my %FSopts = KIWIGlobals -> instance() -> checkFSOptions(
-			@{$cmdL -> getFilesystemOptions()}
-		);
-		my $fsopts = $FSopts{ext3};
-		if (! $fsopts) {
-			$fsopts = '';
-		}
+		my $fsOpts = $cmdL -> getFilesystemOptions();
+		my $createArgs = $fsOpts -> getOptionsStrExt();
 		my $fstool = "mkfs.ext3";
-		$status = KIWIQX::qxx ("$fstool $fsopts $rw 2>&1");
+		$status = KIWIQX::qxx ("$fstool $createArgs $rw 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -6526,7 +6521,7 @@ sub setVolumeGroup {
 	my %lvmparts  = %{$parts};
 	my $VGroup    = $this->{lvmgroup};
 	my $fsopts    = $cmdL -> getFilesystemOptions();
-	my $inoderatio= $fsopts->[2];
+	my $inoderatio= $fsopts -> getInodeRatio();
 	my %newmap;
 	my $status;
 	my $result;
@@ -6789,9 +6784,7 @@ sub setupFilesystem {
 	if (! $type->{fsnocheck}) {
 		$type->{fsnocheck} = 'true';
 	}
-	my %FSopts = KIWIGlobals -> instance() -> checkFSOptions(
-		@{$cmdL -> getFilesystemOptions()}
-	);
+	my $fsOpts = $cmdL -> getFilesystemOptions();
 	my $iorig  = $this->{inodes};
 	my $result;
 	my $status;
@@ -6805,26 +6798,19 @@ sub setupFilesystem {
 	SWITCH: for ($fstype) {
 		/^ext[234]/     && do {
 			$kiwi -> info ("Creating $_ $name filesystem");
-			my $fsopts = $FSopts{$_};
-			if (! $fsopts) {
-				$fsopts = '';
-			}
+			my $createArgs = $fsOpts -> getOptionsStrExt();
 			my $fstool = "mkfs.".$fstype;
 			if (($this->{inodes}) && (! $bootp)) {
-				$fsopts.= " -N $this->{inodes}";
+				$createArgs .= " -N $this->{inodes}";
 			}
+			my $tuneopts = $fsOpts -> getTuneOptsExt();
 			if ($bootp) {
-				$fsopts.= " -L '".$bootp."'";
-				$type->{fsnocheck} = 'true';
+				$createArgs .= " -L '".$bootp."'";
+				if (! $tuneopts) {
+					$tuneopts = "-c 0 -i 0 ";
+				}
 			}
-			my $tuneopts = '';
-			if (($type->{fsnocheck}) && ($type->{fsnocheck} eq "true")) {
-				$tuneopts = "-c 0 -i 0 ";
-			}
-			if ($FSopts{extfstune}) {
-				$tuneopts .= $FSopts{extfstune};
-			}
-			$status = KIWIQX::qxx ("$fstool $fsopts $device 2>&1");
+			$status = KIWIQX::qxx ("$fstool $createArgs $device 2>&1");
 			$result = $? >> 8;
 			if (!$result && $tuneopts) {
 				$status .= KIWIQX::qxx ("/sbin/tune2fs $tuneopts $device 2>&1");
@@ -6851,37 +6837,28 @@ sub setupFilesystem {
 		};
 		/^reiserfs/     && do {
 			$kiwi -> info ("Creating reiserfs $name filesystem");
-			my $fsopts = $FSopts{reiserfs};
-			if (! $fsopts) {
-				$fsopts = '';
-			}
-			$fsopts.= " -f";
+			my $createArgs = $fsOpts -> getOptionsStrReiser();
+			$createArgs .= " -f";
 			$status = KIWIQX::qxx (
-				"/sbin/mkreiserfs $fsopts $device 2>&1"
+				"/sbin/mkreiserfs $createArgs $device 2>&1"
 			);
 			$result = $? >> 8;
 			last SWITCH;
 		};
 		/^btrfs/        && do {
 			$kiwi -> info ("Creating btrfs $name filesystem");
-			my $fsopts = $FSopts{btrfs};
-			if (! $fsopts) {
-				$fsopts = '';
-			}
+			my $createArgs = $fsOpts -> getOptionsStrBtrfs();
 			$status = KIWIQX::qxx (
-				"/sbin/mkfs.btrfs $fsopts $device 2>&1"
+				"/sbin/mkfs.btrfs $createArgs $device 2>&1"
 			);
 			$result = $? >> 8;
 			last SWITCH;
 		};
 		/^xfs/          && do {
 			$kiwi -> info ("Creating xfs $name filesystem");
-			my $fsopts = $FSopts{xfs};
-			if (! $fsopts) {
-				$fsopts = '';
-			}
+			my $createArgs = $fsOpts -> getOptionsStrXFS();
 			$status = KIWIQX::qxx (
-				"/sbin/mkfs.xfs $fsopts $device 2>&1"
+				"/sbin/mkfs.xfs $createArgs $device 2>&1"
 			);
 			$result = $? >> 8;
 			last SWITCH;

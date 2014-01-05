@@ -4158,38 +4158,32 @@ sub setupEXT2 {
 	my $kiwi    = $this->{kiwi};
 	my $xml     = $this->{xml};
 	my $xmltype = $xml -> getImageType();
-	my $fsopts;
-	my $tuneopts;
-	my %FSopts = KIWIGlobals -> instance() -> checkFSOptions(
-		@{$cmdL->getFilesystemOptions()}
-	);
+	my $fsOpts = $cmdL -> getFilesystemOptions();
+	my $createArgs = $fsOpts -> getOptionsStrExt();
+	my $tuneopts = $fsOpts -> getTuneOptsExt();
 	my $fstool;
 	my $target = "$this->{imageDest}/$name";
 	if ((defined $journal) && ($journal eq "journaled-ext3")) {
-		$fsopts = $FSopts{ext3};
 		$fstool = "mkfs.ext3";
 	} elsif ((defined $journal) && ($journal eq "journaled-ext4")) {
-		$fsopts = $FSopts{ext4};
 		$fstool = "mkfs.ext4";
 	} else {
-		$fsopts = $FSopts{ext2};
 		$fstool = "mkfs.ext2";
 	}
 	if ($this->{inodes}) {
-		$fsopts.= " -N $this->{inodes}";
-	}
-	$tuneopts = "";
-	if ($FSopts{extfstune}) {
-		$tuneopts = $FSopts{extfstune};
+		$createArgs .= " -N $this->{inodes}";
 	}
 	my $fsnocheck = $xmltype -> getFSNoCheck();
 	if (($fsnocheck) && ($fsnocheck eq 'true')) {
-		$tuneopts .= " -c 0 -i 0";
+		if ($tuneopts) {
+			$kiwi -> info ('Overwrite ext tune options to nocheck per XML');
+		}
+		$tuneopts = " -c 0 -i 0";
 	}
 	if ($device) {
 		$target = $device;
 	}
-	my $data = KIWIQX::qxx ("$fstool $fsopts $target 2>&1");
+	my $data = KIWIQX::qxx ("$fstool $createArgs $target 2>&1");
 	my $code = $? >> 8;
 	if (!$code && $tuneopts) {
 		$data = KIWIQX::qxx ("/sbin/tune2fs $tuneopts $target 2>&1");
@@ -4226,19 +4220,14 @@ sub setupBTRFS {
 	my $device = shift;
 	my $cmdL   = $this->{cmdL};
 	my $kiwi   = $this->{kiwi};
-	my $fsopts = '';
-	my %FSopts = KIWIGlobals -> instance() -> checkFSOptions(
-		@{$cmdL->getFilesystemOptions()}
-	);
-	if ($FSopts{btrfs}) {
-		$fsopts = $FSopts{btrfs};
-	}
+	my $fsOpts = $cmdL -> getFilesystemOptions();
+	my $createArgs = $fsOpts -> getOptionsStrBtrfs();
 	my $target = "$this->{imageDest}/$name";
 	if ($device) {
 		$target = $device;
 	}
 	my $data = KIWIQX::qxx (
-		"/sbin/mkfs.btrfs $fsopts $target 2>&1"
+		"/sbin/mkfs.btrfs $createArgs $target 2>&1"
 	);
 	my $code = $? >> 8;
 	if ($code != 0) {
@@ -4266,17 +4255,15 @@ sub setupReiser {
 	my $device = shift;
 	my $cmdL   = $this->{cmdL};
 	my $kiwi   = $this->{kiwi};
-	my %FSopts = KIWIGlobals -> instance() -> checkFSOptions(
-		@{$cmdL->getFilesystemOptions()}
-	);
-	my $fsopts = $FSopts{reiserfs};
+	my $fsOpts = $cmdL -> getFilesystemOptions();
+	my $createArgs = $fsOpts -> getOptionsStrReiser();
 	my $target = "$this->{imageDest}/$name";
 	if ($device) {
 		$target = $device;
 	}
-	$fsopts.= "-f";
+	$createArgs .= "-f";
 	my $data = KIWIQX::qxx (
-		"/sbin/mkreiserfs $fsopts $target 2>&1"
+		"/sbin/mkreiserfs $createArgs $target 2>&1"
 	);
 	my $code = $? >> 8;
 	if ($code != 0) {
@@ -4429,16 +4416,14 @@ sub setupXFS {
 	my $device = shift;
 	my $cmdL   = $this->{cmdL};
 	my $kiwi   = $this->{kiwi};
-	my %FSopts = KIWIGlobals -> instance() -> checkFSOptions(
-		@{$cmdL->getFilesystemOptions()}
-	);
-	my $fsopts = $FSopts{xfs};
+	my $fsOpts = $cmdL -> getFilesystemOptions();
+	my $createArgs = $fsOpts -> getOptionsStrXFS();
 	my $target = $this->{imageDest}."/".$name;
 	if ($device) {
 		$target = $device;
 	}
 	my $data = KIWIQX::qxx (
-		"/sbin/mkfs.xfs $fsopts $target 2>&1"
+		"/sbin/mkfs.xfs $createArgs $target 2>&1"
 	);
 	my $code = $? >> 8;
 	if ($code != 0) {
@@ -4645,8 +4630,8 @@ sub getSize {
 	my $spare   = 100 * 1024 * 1024;
 	my $files   = $mini;
 	my $fsopts  = $cmdL -> getFilesystemOptions();
-	my $isize   = $fsopts->[1];
-	my $iratio  = $fsopts->[2];
+	my $isize   = $fsopts -> getInodeSize();
+	my $iratio  = $fsopts -> getInodeRatio();
 	my $xmltype = $xml -> getImageType();
 	my $fstype  = $xmltype -> getTypeName();
 	my $xmlfs   = $xmltype -> getFilesystem();
