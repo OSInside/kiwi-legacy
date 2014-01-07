@@ -236,7 +236,7 @@ sub createCustomFileTree {
 				} else {
 					$item{binary} = 'false';
 				}
-				push $json{customfiles}, \%item;
+				push @{$json{customfiles}}, \%item;
 				$done_percent = int ($factor * $done);
 				if ($done_percent > $done_previos) {
 					$kiwi -> step ($done_percent);
