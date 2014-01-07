@@ -11,7 +11,7 @@ for i in `find . -name "*.converted.xml"`;do \
 	rm $i ;\
 done
 
-grep kiwi /proc/mounts >& /dev/null
+grep kiwiDevTests /proc/mounts >& /dev/null
 if [ $? -ne 0 ]; then
 	rm -rf /tmp/kiwiDevTests
 else
