@@ -199,7 +199,7 @@ test:
 	for i in `find -name "*.t" | cut -d/ -f4`;do \
 		touch tests/.timestamps/$$i's';\
 	done
-	cd tests/unit && ${NONETWORKTEST} /usr/bin/prove ${TESTVERBOSE} -f .
+	cd tests/unit && ${NONETWORKTEST} /usr/bin/prove ${TESTVERBOSE} .
 	rm -f .revision
 
 %.t:
@@ -211,7 +211,7 @@ test:
 		mkdir tests/.timestamps; \
 	fi
 	touch tests/.timestamps/$@s
-	cd tests/unit && /usr/bin/prove ${TESTVERBOSE} -f $@
+	cd tests/unit && /usr/bin/prove ${TESTVERBOSE} $@
 
 clean:
 	(cd system/boot && find -type f | grep -v .svn | xargs chmod u+w)
