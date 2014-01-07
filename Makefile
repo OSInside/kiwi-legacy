@@ -203,7 +203,7 @@ test:
 		mkdir tests/.timestamps; \
 	fi
 	touch tests/.timestamps/$@s
-	cd tests/unit && /usr/bin/prove ${TESTVERBOSE} -f $@
+	cd tests/unit && /usr/bin/prove ${TESTVERBOSE} $@
 
 clean:
 	(cd system/boot && find -type f | grep -v .svn | xargs chmod u+w)
