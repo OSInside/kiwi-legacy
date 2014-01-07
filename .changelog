@@ -3,6 +3,7 @@
 my $ignore = 0;
 my $indent_l1 = "  ";
 my $indent_l2 = $indent_l1.$indent_l1;
+my $indent;
 
 $ENV{LC_ALL} = "C";
 
@@ -35,10 +36,14 @@ while (my $line = <>) {
 		push @out, "$date - $name\@suse.de\n";
 		undef $date;
 		$ignore = 0;
+		$count = 0;
 	} else {
 		$line =~ s/^ +//;
 		if ($line =~ /^-/) {
 			push @out, $line;
+			$indent = $indent_l1;
+		} elsif (($line =~ /^[a-zA-Z]/) && ($count == 1)) {
+			push @out, "- ".$line;
 			$indent = $indent_l1;
 		} elsif ($line =~ /^[\*,\+]/) {
 			push @out, $indent_l1.$line;
@@ -46,5 +51,6 @@ while (my $line = <>) {
 		} else {
 			push @out, $indent.$line;
 		}
+		$count++;
 	}
 }
