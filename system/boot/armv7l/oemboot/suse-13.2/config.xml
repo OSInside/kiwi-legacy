@@ -106,7 +106,7 @@
 		<package name="kpartx"/>
 		<package name="lvm2"/>
 		<package name="make"/>
-		<package name="module-init-tools"/>
+		<package name="kmod-compat"/>
 		<package name="net-tools"/>
 		<package name="netcfg"/>
 		<package name="parted"/>
