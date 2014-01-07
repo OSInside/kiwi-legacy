@@ -51,21 +51,36 @@ sub assert_array_equal {
 	my $this           = shift;
 	my $base_array_ref = shift;
 	my $cmp_array_ref  = shift;
-
 	my @base_array = @{$base_array_ref};
 	my @cmp_array  = @{$cmp_array_ref};
-
+	my $text;
 	if (scalar @base_array != scalar @cmp_array) {
-		$this -> assert(0, 'Did not get the expected list of names.');
+		$text = 'Did not get the expected list of names: got: ';
+		$text.= "\(@base_array\) and \(@cmp_array\)";
+		$this -> assert(0, $text);
 	}
-
 	my %baseEntryMap = map { ("$_" => 1) } @base_array;
 	for my $item (@cmp_array) {
 		if (! $baseEntryMap{"$item"}) {
-			my $msg = 'Did not get the expected list of names. '
-			    .'Mismatch content.';
-			$this -> assert(0, $msg);
+			$text = 'Did not get the expected list of names. ';
+			$text.= 'Mismatch content.';
+			$this -> assert(0, $text);
 		}
+	}
+	return;
+}
+
+#==========================================
+# assert_dir_exists
+#------------------------------------------
+sub assert_dir_exists {
+	# ...
+	# Test for file existence
+	# ---
+	my $this = shift;
+	my $dir   = shift;
+	if (! -d $dir) {
+		$this -> assert(0, "Directory $dir not found.");
 	}
 	return;
 }
@@ -132,12 +147,23 @@ sub removeTestTmpDir {
 	my $this = shift;
 	# Before removing anything make sure there are no dangling mounts that
 	# might have a negative imapct on the system we run on
-	my $mounts;
-	if (! open $mounts, '<', '/proc/mounts' ) {
-		return 0;
+	my @mountInfo;
+	if (! -f '/proc/mounts') {
+	    my $chld_in;
+	    my $chld_out;
+	    my $pid = open2($chld_out, $chld_in, 'mount');
+	    waitpid $pid, 0;
+	    while (<$chld_out>) {
+			push @mountInfo, $_;
+	    }
+	} else {
+	    my $mounts;
+	    if (! open $mounts, '<', '/proc/mounts' ) {
+			return 0;
+	    }
+	    @mountInfo = <$mounts>;
+	    close $mounts;
 	}
-	my @mountInfo = <$mounts>;
-	close $mounts;
 	for my $line (@mountInfo) {
 		if ($line =~ /.*kiwiDevTests.*/x) {
 			next if $line =~ /tmpfs/;
