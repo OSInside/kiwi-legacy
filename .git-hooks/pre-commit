@@ -23,6 +23,7 @@ my @kiwiModules = qw (
 	KIWIContentPlugin.pm
 	KIWIDescrPlugin.pm
 	KIWIEulaPlugin.pm
+	KIWIFilesystemOptions.pm
 	KIWIGlobals.pm
 	KIWIImageBuilderBase.pm
 	KIWIImageBuildFactory.pm
@@ -98,6 +99,7 @@ my @kiwiModules = qw (
 	KTConfigWriterFactory.t
 	KTContainerBuilder.t
 	KTContainerConfigWriter.t
+	KTFilesystemOptions.t
 	KTImage.t
 	KTImageBuilderBase.t
 	KTImageBuildFactory.t
@@ -144,6 +146,7 @@ my @kiwiModules = qw (
 	kiwiConfigWriterFactory.pm
 	kiwiContainerBuilder.pm
 	kiwiContainerConfigWriter.pm
+	kiwiFilesystemOptions.pm
 	kiwiLocator.pm
 	kiwiImage.pm
 	kiwiImageBuilderBase.pm
@@ -204,6 +207,7 @@ my @notClean1 = qw (
 	KIWIContentPlugin.pm
 	KIWIDescrPlugin.pm
 	KIWIEulaPlugin.pm
+	KIWIFilesystemOptions.pm
 	KIWIGlobals.pm
 	KIWIImageBuilderBase.pm
 	KIWIImageBuildFactory.pm
@@ -279,6 +283,7 @@ my @notClean1 = qw (
 	KTConfigWriterFactory.t
 	KTContainerBuilder.t
 	KTContainerConfigWriter.t
+	KTFilesystemOptions.t
 	KTImage.t
 	KTImageBuilderBase.t
 	KTImageBuildFactory.t
@@ -325,6 +330,7 @@ my @notClean1 = qw (
 	kiwiConfigWriterFactory.pm
 	kiwiContainerBuilder.pm
 	kiwiContainerConfigWriter.pm
+	kiwiFilesystemOptions.pm
 	kiwiLocator.pm
 	kiwiImage.pm
 	kiwiImageBuilderBase.pm

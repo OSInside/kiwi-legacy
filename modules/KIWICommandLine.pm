@@ -937,29 +937,19 @@ sub getDefaultAnswer {
 #------------------------------------------
 sub setFilesystemOptions {
 	# ...
-	# Store the list of filesystem specific options
+	# Store the filesystem options object
 	# ---
 	my $this   = shift;
-	my $FSBlockSize     = shift;
-	my $FSInodeSize     = shift;
-	my $FSInodeRatio    = shift;
-	my $FSJournalSize   = shift;
-	my $FSMaxMountCount = shift;
-	my $FSCheckInterval = shift;
-	my @result;
-	if (! defined $FSInodeRatio) {
-		$FSInodeRatio = $this->{gdata}->{FSInodeRatio};
+	my $fsOpts = shift;
+	if (! $fsOpts || ref($fsOpts) ne 'KIWIFilesystemOptions') {
+		my $kiwi = $this->{kiwi};
+		my $msg = 'setFilesystemOptions: expecting KIWIFilesystemOptions '
+			. 'object as argument.';
+		$kiwi -> error ($msg);
+		$kiwi -> failed();
+		return;
 	}
-	if (! defined $FSInodeSize) {
-		$FSInodeSize = $this->{gdata}->{FSInodeSize};
-	}
-	push @result,$FSBlockSize;
-	push @result,$FSInodeSize;
-	push @result,$FSInodeRatio;
-	push @result,$FSJournalSize;
-	push @result,$FSMaxMountCount;
-	push @result,$FSCheckInterval;
-	$this->{fsoptions} = \@result;
+	$this->{fsoptions} = $fsOpts;
 	return 1;
 }
 

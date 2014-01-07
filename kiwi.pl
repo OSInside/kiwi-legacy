@@ -33,27 +33,33 @@ use Carp qw (cluck);
 use Getopt::Long;
 use File::Spec;
 use File::Find;
+
+#==========================================
+# KIWIModules
+#------------------------------------------
 use KIWIAnalyse;
 use KIWIAnalyseCustomData;
 use KIWIAnalyseManagedSoftware;
 use KIWIAnalyseReport;
 use KIWIAnalyseTemplate;
-use KIWICommandLine;
+use KIWIBoot;
 use KIWICache;
-use KIWIRoot;
-use KIWIXML;
-use KIWILocator;
-use KIWILog;
+use KIWICommandLine;
+use KIWIFilesystemOptions;
+use KIWIGlobals;
 use KIWIImage;
 use KIWIImageCreator;
-use KIWIBoot;
-use KIWIQX;
-use KIWIRuntimeChecker;
 use KIWIImageFormat;
+use KIWILocator;
+use KIWILog;
+use KIWIQX;
+use KIWIRoot;
+use KIWIRuntimeChecker;
+use KIWIXML;
 use KIWIXMLInfo;
 use KIWIXMLRepositoryData;
 use KIWIXMLValidator;
-use KIWIGlobals;
+
 
 #============================================
 # UTF-8 for output to stdout
@@ -909,10 +915,22 @@ sub init {
 	#========================================
 	# set list of filesystem options
 	#----------------------------------------
-	$cmdL -> setFilesystemOptions (
-		$FSBlockSize,$FSInodeSize,$FSInodeRatio,$FSJournalSize,
-		$FSMaxMountCount,$FSCheckInterval
+	my %init = (
+		blocksize     => $FSBlockSize,
+		checkinterval => $FSCheckInterval,
+		inodesize     => $FSInodeSize,
+		inoderatio    => $FSInodeRatio,
+		journalsize   => $FSJournalSize,
+		maxmountcnt   => $FSMaxMountCount
 	);
+	my $fsOpts = KIWIFilesystemOptions -> new(\%init);
+	if (! $fsOpts) {
+		kiwiExit (1);
+	}
+	my $status = $cmdL -> setFilesystemOptions ($fsOpts);
+	if (! $status)  {
+		kiwiExit (1);
+	}
 	#========================================
 	# set list of migration options
 	#----------------------------------------
@@ -1079,7 +1097,10 @@ sub init {
 	# check if targetdevice is specified
 	#----------------------------------------
 	if (defined $targetDevice) {
-		$cmdL -> setImageTargetDevice ($targetDevice);
+		my $status = $cmdL -> setImageTargetDevice ($targetDevice);
+		if (! $status) {
+			kiwiExit(1);
+		}
 	}
 	#========================================
 	# check if packages are to be added
