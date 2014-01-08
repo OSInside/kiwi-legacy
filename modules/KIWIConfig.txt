@@ -21,6 +21,8 @@
 	locations except for the ones listed here
 	-->
 	<strip type="tools">
+		<file name="mountpoint"/>
+		<file name="checkproc"/>
 		<file name="date"/>
 		<file name="dbus-uuidgen"/>
 		<file name="ifup"/>
