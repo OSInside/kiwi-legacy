@@ -30,6 +30,7 @@
 <xsl:import href="convert56to57.xsl"/>
 <xsl:import href="convert57to58.xsl"/>
 <xsl:import href="convert58to59.xsl"/>
+<xsl:import href="convert59to60.xsl"/>
 <xsl:import href="pretty.xsl"/>
 
 
@@ -136,8 +137,12 @@
 		<xsl:apply-templates select="exslt:node-set($v58)" mode="conv58to59"/>
 	</xsl:variable>
 
+	<xsl:variable name="v60">
+		<xsl:apply-templates select="exslt:node-set($v59)" mode="conv59to60"/>
+	</xsl:variable>
+
 	<xsl:apply-templates
-		select="exslt:node-set($v59)" mode="pretty"
+		select="exslt:node-set($v60)" mode="pretty"
 	/>
 </xsl:template>
 
