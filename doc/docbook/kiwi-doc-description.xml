@@ -850,15 +850,6 @@
             <variablelist>
               <varlistentry>
                 <term><sgmltag class="starttag"
-                    >oem-align-partition</sgmltag>>true|false<sgmltag
-                    class="endtag">oem-align-partition</sgmltag></term>
-                <listitem>
-                  <para>Kiwi attempts to align the start sector of the disk
-                      partition on a 4K boundary.</para>
-                </listitem>
-              </varlistentry>
-              <varlistentry>
-                <term><sgmltag class="starttag"
                     >oem-boot-title</sgmltag>text<sgmltag class="endtag"
                     >oem-boot-title</sgmltag></term>
                 <listitem>
