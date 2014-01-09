@@ -2346,7 +2346,7 @@ sub createImageLiveCD {
 	#==========================================
 	# Turn ISO into hybrid if requested
 	#------------------------------------------
-	if (($hybrid) && ($hybrid eq "true")) {
+	if ($hybrid) {
 		$kiwi -> info ("Setting up hybrid ISO...\n");
 		if (! $isolinux -> createHybrid ($this->{mbrid})) {
 			$kiwi -> error  ("Failed to create hybrid ISO image");
