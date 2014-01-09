@@ -40,7 +40,6 @@ sub new {
 	# Internal data structure
 	#
 	# this = {
-	#    oem_align_partition      = ''
 	#    oem_ataraid_scan         = ''
 	#    oem_boot_title           = ''
 	#    oem_bootwait             = ''
@@ -78,7 +77,6 @@ sub new {
 	# Argument checking and object data store
 	#------------------------------------------
 	my %keywords = map { ($_ => 1) } qw(
-		oem_align_partition
 		oem_ataraid_scan
 		oem_boot_title
 		oem_bootwait
@@ -104,7 +102,6 @@ sub new {
 	);
 	$this->{supportedKeywords} = \%keywords;
 	my %boolKW = map { ($_ => 1) } qw(
-		oem_align_partition
 		oem_ataraid_scan
 		oem_bootwait
 		oem_inplace_recovery
@@ -161,17 +158,6 @@ sub getDataReport {
 		}
 	}
 	return \%result;
-}
-
-#==========================================
-# getAlignPartition
-#------------------------------------------
-sub getAlignPartition {
-	# ...
-	# Return the setting for the oem-align-partition configuration
-	# ---
-	my $this = shift;
-	return $this->{oem_align_partition};
 }
 
 #==========================================
@@ -422,12 +408,6 @@ sub getXMLElement {
 	# ---
 	my $this = shift;
 	my $element = XML::LibXML::Element -> new('oemconfig');
-	my %initAlign = (
-		parent    => $element,
-		childName => 'oem-align-partition',
-		text      => $this -> getAlignPartition ()
-	);
-	$element = $this -> p_addElement(\%initAlign);
 	my %initAtaRaidScan = (
 		parent    => $element,
 		childName => 'oem-ataraid-scan',
@@ -562,24 +542,6 @@ sub getXMLElement {
 	);
 	$element = $this -> p_addElement(\%initUnatID);
 	return $element;
-}
-
-#==========================================
-# setAlignPartition
-#------------------------------------------
-sub setAlignPartition {
-	# ...
-	# Set the oem_align_partition attribute, if called with no argument the
-	# value is set to false.
-	# ---
-	my $this = shift;
-	my $val  = shift;
-	my %settings = (
-		attr   => 'oem_align_partition',
-		value  => $val,
-		caller => 'setAlignPartition'
-	);
-	return $this -> p_setBooleanValue(\%settings);
 }
 
 #==========================================

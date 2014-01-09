@@ -615,27 +615,6 @@ div {
 }
 
 #==========================================
-# common element <oem-align-partition>
-#
-div {
-	k.oem-align-partition.content = xsd:boolean
-	k.oem-align-partition.attlist = empty
-	k.oem-align-partition =
-		## For oemboot driven images: align start sectors.
-		## For parted the option -a is passed
-		[
-		db:para [
-			"For oemboot driven images: align start sectors.\x{a}"~
-			"For parted the option -a is passed."
-		]
-		]
-		element oem-align-partition {
-			k.oem-align-partition.attlist,
-			k.oem-align-partition.content
-		}
-}
-
-#==========================================
 # common element <oem-boot-title>
 #
 div {
@@ -2550,7 +2529,6 @@ div {
 		]
 		element oemconfig {
 			k.oemconfig.attlist &
-			k.oem-align-partition? &
 			k.oem-ataraid-scan? &
 			k.oem-boot-title? &
 			k.oem-bootwait? &

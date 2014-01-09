@@ -4663,7 +4663,6 @@ sub test_getOEMConfig {
 	$this -> assert_str_equals('none', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
-	my $align   = $oemConfObj -> getAlignPartition();
 	my $booT    = $oemConfObj -> getBootTitle();
 	my $bootW   = $oemConfObj -> getBootwait();
 	my $inplRec = $oemConfObj -> getInplaceRecovery();
@@ -4681,7 +4680,6 @@ sub test_getOEMConfig {
 	my $sysS    = $oemConfObj -> getSystemSize();
 	my $unat    = $oemConfObj -> getUnattended();
 	my $unatI   = $oemConfObj -> getUnattendedID();
-	$this -> assert_str_equals('true', $align);
 	$this -> assert_str_equals('Unit Test', $booT);
 	$this -> assert_str_equals('false', $bootW);
 	$this -> assert_str_equals('true', $kInit);

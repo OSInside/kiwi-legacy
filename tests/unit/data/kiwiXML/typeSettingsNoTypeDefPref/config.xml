@@ -28,7 +28,6 @@
 		<type image="oem" primary="true" filesystem="ext4" boot="oemboot/suse-12.1">
 			<size unit="G">20</size>
 			<oemconfig>
-				<oem-align-partition>true</oem-align-partition>
 				<oem-boot-title>Unit Test</oem-boot-title>
 				<oem-bootwait>false</oem-bootwait>
 				<oem-inplace-recovery>true</oem-inplace-recovery>

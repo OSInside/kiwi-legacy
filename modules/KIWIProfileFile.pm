@@ -81,7 +81,6 @@ sub new {
 		kiwi_luks
 		kiwi_lvm
 		kiwi_lvmgroup
-		kiwi_oemalign
 		kiwi_oemataraid_scan
 		kiwi_oembootwait
 		kiwi_oemkboot
@@ -566,7 +565,6 @@ sub __updateXMLOEMConfig {
 		$oem{kiwi_oemswapMB}             = $oemconf -> getSwapSize();
 		$oem{kiwi_oemrootMB}             = $oemconf -> getSystemSize();
 		$oem{kiwi_oemswap}               = $oemconf -> getSwap();
-		$oem{kiwi_oemalign}              = $oemconf -> getAlignPartition();
 		$oem{kiwi_oempartition_install}  = $oemconf -> getPartitionInstall();
 		$oem{kiwi_oemtitle}              = $oemconf -> getBootTitle();
 		$oem{kiwi_oemkboot}              = $oemconf -> getKiwiInitrd();

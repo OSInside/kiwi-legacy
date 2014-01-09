@@ -269,10 +269,6 @@ function baseSetupOEMPartition {
 		echo "Setting up OEM_SKIPVERIFY=1"
 		echo "OEM_SKIPVERIFY=1" >> $oemfile
 	fi
-	if [ ! -z "$kiwi_oemalign" ];then
-		echo "Setting up OEM_ALIGN=1"
-		echo "OEM_ALIGN=1" >> $oemfile
-	fi
 	if [ ! -z "$kiwi_oembootwait" ];then
 		echo "Setting up OEM_BOOTWAIT=1"
 		echo "OEM_BOOTWAIT=1" >> $oemfile

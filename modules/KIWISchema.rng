@@ -862,29 +862,6 @@ archive is extracted in a specific way.</db:para>
   </div>
   <!--
     ==========================================
-    common element <oem-align-partition>
-    
-  -->
-  <div>
-    <define name="k.oem-align-partition.content">
-      <data type="boolean"/>
-    </define>
-    <define name="k.oem-align-partition.attlist">
-      <empty/>
-    </define>
-    <define name="k.oem-align-partition">
-      <element name="oem-align-partition">
-        <a:documentation>For oemboot driven images: align start sectors.
-For parted the option -a is passed</a:documentation>
-        <db:para>For oemboot driven images: align start sectors.
-For parted the option -a is passed.</db:para>
-        <ref name="k.oem-align-partition.attlist"/>
-        <ref name="k.oem-align-partition.content"/>
-      </element>
-    </define>
-  </div>
-  <!--
-    ==========================================
     common element <oem-boot-title>
     
   -->
@@ -3596,9 +3573,6 @@ configuration options which are used to repartition
 and setup the system disk</db:para>
         <interleave>
           <ref name="k.oemconfig.attlist"/>
-          <optional>
-            <ref name="k.oem-align-partition"/>
-          </optional>
           <optional>
             <ref name="k.oem-ataraid-scan"/>
           </optional>

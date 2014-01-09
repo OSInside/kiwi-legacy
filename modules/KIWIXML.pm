@@ -2912,8 +2912,6 @@ sub __createOEMConfig {
 	}
 	my $config = $oemConfNode -> get_node(1);
 	my %oemConfig;
-	$oemConfig{oem_align_partition}      =
-		$this -> __getChildNodeTextValue($config, 'oem-align-partition');
 	$oemConfig{oem_ataraid_scan}         =
 		$this -> __getChildNodeTextValue($config, 'oem-ataraid-scan');
 	$oemConfig{oem_boot_title}           =

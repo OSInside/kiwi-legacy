@@ -307,36 +307,6 @@ sub test_ctor_wInit {
 }
 
 #==========================================
-# test_getAlignPartition
-#------------------------------------------
-sub test_getAlignPartition {
-	# ...
-	# Test the getAlignPartition method
-	# ---
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $init = $this -> __getBaseInitHash();
-	my $confDataObj = KIWIXMLOEMConfigData -> new($init);
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	# Test this condition last to get potential error messages
-	$this -> assert_not_null($confDataObj);
-	my $align = $confDataObj -> getAlignPartition();
-	$msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	$msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	$state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('true', $align);
-	return;
-}
-
-#==========================================
 # test_getAtaRaidScan
 #------------------------------------------
 sub test_getAtaRaidScan {
@@ -1031,7 +1001,6 @@ sub test_getXMLElement{
 	$this -> assert_not_null($elem);
 	my $xmlstr = $elem -> toString();
 	my $expected = '<oemconfig>'
-		. '<oem-align-partition>true</oem-align-partition>'
 		. '<oem-ataraid-scan>true</oem-ataraid-scan>'
 		. '<oem-boot-title>test build</oem-boot-title>'
 		. '<oem-inplace-recovery>true</oem-inplace-recovery>'
@@ -1053,91 +1022,6 @@ sub test_getXMLElement{
 	return;
 }
 
-#==========================================
-# test_setAlignPartition
-#------------------------------------------
-sub test_setAlignPartition {
-	# ...
-	# Test the setAlignPartition method
-	# ---
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $confDataObj = KIWIXMLOEMConfigData -> new();
-	$confDataObj = $confDataObj -> setAlignPartition('false');
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	# Test this condition last to get potential error messages
-	$this -> assert_not_null($confDataObj);
-	my $align = $confDataObj -> getAlignPartition();
-	$msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	$msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	$state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('false', $align);
-	return;
-}
-
-#==========================================
-# test_setAlignPartitionInvalidArg
-#------------------------------------------
-sub test_setAlignPartitionInvalidArg {
-	# ...
-	# Test the setAlignPartition method with an unrecognized bool value
-	# ---
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $confDataObj = KIWIXMLOEMConfigData -> new();
-	my $res = $confDataObj -> setAlignPartition(1);
-	my $msg = $kiwi -> getMessage();
-	my $expected = 'KIWIXMLOEMConfigData:setAlignPartition: unrecognized '
-		. 'argument expecting "true" or "false".';
-	$this -> assert_str_equals($expected, $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('error', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('failed', $state);
-	# Test this condition last to get potential error messages
-	$this -> assert_null($res);
-	return;
-}
-
-#==========================================
-# test_setAlignPartitionNoArg
-#------------------------------------------
-sub test_setAlignPartitionNoArg {
-	# ...
-	# Test the setAlignPartition method
-	# ---
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $init = $this -> __getBaseInitHash();
-	my $confDataObj = KIWIXMLOEMConfigData -> new($init);
-	$confDataObj = $confDataObj -> setAlignPartition();
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	# Test this condition last to get potential error messages
-	$this -> assert_not_null($confDataObj);
-	my $align = $confDataObj -> getAlignPartition();
-	$msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	$msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	$state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	$this -> assert_str_equals('false', $align);
-	return;
-}
-#RJS
 #==========================================
 # test_setAtaRaidScan
 #------------------------------------------
@@ -3136,7 +3020,6 @@ sub __getBaseInitHash {
 	# ---
 	my $this = shift;
 	my %init = (
-				oem_align_partition       => 'true',
 				oem_ataraid_scan          => 'true',
 				oem_boot_title            => 'test build',
 				oem_inplace_recovery      => 'true',
