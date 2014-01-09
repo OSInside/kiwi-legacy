@@ -3751,7 +3751,7 @@ function searchImageISODevice {
 		if [[ $isofrom_device =~ nfs: ]];then
 			setupNetwork
 			isofrom_device=$(echo $isofrom_device | cut -c 5-)
-			mount -t nfs $isofrom_device /isofrom
+			mount -t nfs -o nolock $isofrom_device /isofrom
 		else
 			waitForStorageDevice $isofrom_device
 			mount $isofrom_device /isofrom
