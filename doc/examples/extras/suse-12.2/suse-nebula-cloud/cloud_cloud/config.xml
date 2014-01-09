@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="5.9" name="suse-12.2-OpenNebula-Cloud-Node">
+<image schemaversion="6.0" name="suse-12.2-OpenNebula-Cloud-Node">
 	<description type="system">
 		<author>Robert Schweikert</author>
 		<contact>rjschwei@suse.com</contact>

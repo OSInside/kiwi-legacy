@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="5.9" name="LimeJeOS-RHEL-06.2">
+<image schemaversion="6.0" name="LimeJeOS-RHEL-06.2">
 	<description type="system">
 		<author>Marcus Schäfer</author>
 		<contact>ms@suse.com</contact>

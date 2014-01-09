@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="5.9" name="LimeJeOS-SLE12">
+<image schemaversion="6.0" name="LimeJeOS-SLE12">
 	<description type="system">
 		<author>Marcus Schäfer</author>
 		<contact>ms@novell.com</contact>
@@ -21,8 +21,6 @@
 		<timezone>Europe/Berlin</timezone>
 		<hwclock>utc</hwclock>
 		<rpm-excludedocs>true</rpm-excludedocs>
-		<bootsplash-theme>openSUSE</bootsplash-theme>
-		<bootloader-theme>openSUSE</bootloader-theme>
 	</preferences>
 	<preferences profiles="xenFlavour">
 		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES12" bootprofile="xen" bootkernel="xenk" bootloader="grub2">
