@@ -4338,6 +4338,7 @@ sub setupBootLoaderConfiguration {
 			} else {
 				print $FD "search --file /boot/$this->{mbrid} --set"."\n";
 			}
+			# print $FD "set debug=all\n";
 			print $FD "set default=$defaultBootNr\n";
 			print $FD "set font=/boot/unicode.pf2"."\n";
 			if ($firmware ne "uefi") {
