@@ -275,6 +275,33 @@ sub setupInstallationSource {
 			return $this;
 		}
 	}
+	#==========================================
+	# search list of .repo files in dataDir
+	#------------------------------------------
+	my %repo_file_hash = ();
+	if (opendir (my $RD,"$root/$dataDir/repos/")) {
+		while (my $repo = readdir $RD) {
+			next if $repo eq "." || $repo eq "..";
+			$repo_file_hash{$repo} = "$root/$dataDir/repos/$repo"
+		}
+		closedir $RD;
+	}
+	#==========================================
+	# check for .repo files we need for build
+	#------------------------------------------
+	foreach my $alias (keys %{$source{$stype}}) {
+		$alias =~ s/\//_/g;
+		delete $repo_file_hash{$alias.".repo"};
+	}
+	#==========================================
+	# Remove all non relevant .repo files
+	#------------------------------------------
+	foreach my $repo (keys %repo_file_hash) {
+		unlink $repo_file_hash{$repo};
+	}
+	#==========================================
+	# Add/Update repos
+	#------------------------------------------
 	foreach my $alias (keys %{$source{$stype}}) {
 		my @sopts = @{$source{$stype}{$alias}};
 		my @zopts = ();
