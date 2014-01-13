@@ -289,11 +289,10 @@ sub diffChangedConfigFiles {
 	my $kiwi  = $this->{kiwi};
 	my $cdata = $this->{cdata};
 	my $original_conf = $cdata->{original_conf};
-	my $result = 1;
 	if (! %$original_conf) {
 		return $this;
 	}
-	$kiwi -> info ("Create diff for changed config files...");
+	$kiwi -> info ("Create diff for changed config files...\n");
 	my $diff_file = "$dest/changed_config.diff";
 	if (-e $diff_file) {
 		KIWIQX::qxx ("rm -rf '$diff_file' 2>&1");
@@ -302,9 +301,10 @@ sub diffChangedConfigFiles {
 	chomp $tmpdir;
 	while ( my ($file, $entry) = each(%$original_conf) ) {
 		unless ($entry->{'content'}) {
-			$kiwi -> failed();
-			$kiwi -> info("--> Couldn't create diff for $file");
-			$result = 0;
+			$kiwi -> warning(
+				"--> Content for $file is empty, diff skipped"
+			);
+			$kiwi -> skipped();
 			next;
 		}
 		my $filename = "$tmpdir$file";
@@ -315,11 +315,6 @@ sub diffChangedConfigFiles {
 		KIWIQX::qxx ("diff -uN '$tmpdir$file' '$file' >> '$diff_file'");
 	}
 	KIWIQX::qxx ("rm -rf '$tmpdir' 2>&1");
-	if ($result == 0) {
-		$kiwi -> failed();
-		return;
-	}
-	$kiwi -> done();
 	return $this;
 }
 
