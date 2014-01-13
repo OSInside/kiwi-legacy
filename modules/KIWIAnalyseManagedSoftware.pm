@@ -276,7 +276,7 @@ sub __populateRepos {
 	#==========================================
 	# Obtain list from package manager
 	#------------------------------------------
-	# FIXME: move this into the KIWIManager backend
+	# TODO: move this into the KIWIManager backend
 	my $list = KIWIQX::qxx ("bash -c 'LANG=POSIX zypper lr --details 2>&1'");
 	my @list = split(/\n/,$list);
 	my $code = $? >> 8;
@@ -470,7 +470,7 @@ sub __populatePackageList {
 	#------------------------------------------
 	if (@urllist) {
 		$kiwi -> info ("Creating System solvable from active repos...\n");
-		# FIXME: move this into the KIWIManager backend
+		# TODO: move this into the KIWIManager backend
 		my $opts = '-n --no-refresh';
 		my $list = KIWIQX::qxx (
 			"bash -c 'LANG=POSIX zypper $opts patterns --installed 2>&1'"
@@ -546,7 +546,7 @@ sub __populatePackageList {
 		# package list and the result is returned
 		# ----
 		if (@result) {
-			my @rest = ();
+			my @solved_packages = ();
 			my $pool = $psolve -> getPool();
 			my $xsolve = KIWISatSolver -> new (
 				\@result,\@urllist,"solve-packages",
@@ -563,23 +563,84 @@ sub __populatePackageList {
 				$kiwi -> warning ("Package problems found check in report !\n");
 			}
 			@result = $xsolve -> getPackages();
-			foreach my $p (@result) {
+			foreach my $package (@result) {
 				my $inpattern = 0;
 				foreach my $tobeinstalled (@packageList) {
-					if ($tobeinstalled eq $p) {
+					if ($tobeinstalled eq $package) {
 						$inpattern = 1; last;
 					}
 				}
 				if (! $inpattern) {
-					push (@rest,$p);
+					push (@solved_packages,$package);
 				}
 			}
-			$this->{packages} = \@rest;
+			# /.../
+			# reduce list of packages to the minimum needed list
+			# packages which are required by others doesn't have
+			# to be explicitly listed
+			# ----
+			$kiwi -> info ("Reducing package list to minimum...");
+			my @reduced_packages = ();
+			my $tasks = @solved_packages;
+			my $factor = 100.0 / $tasks;
+			my $done_percent = 0;
+			my $done_previos = 0;
+			my $done = 0;
+			$kiwi -> cursorOFF();
+			while (@solved_packages > 0) {
+				my $package = pop @solved_packages;
+				my $xsolve = KIWISatSolver -> new (
+					[$package],\@urllist,"solve-packages",
+					$pool,"quiet","plusRecommended","merged-solvable"
+				);
+				my @single_package_solved_list = $xsolve -> getPackages();
+				@solved_packages = $this -> __strip_list (
+					\@solved_packages, \@single_package_solved_list
+				);
+				push @reduced_packages, $package;
+				$done = $tasks - @solved_packages;
+				$done_percent = int ($factor * $done);
+				if ($done_percent > $done_previos) {
+					$kiwi -> step ($done_percent);
+				}
+				$done_previos = $done_percent;
+			}
+			$kiwi -> note ("\n");
+			$kiwi -> doNorm ();
+			$kiwi -> cursorON();
+			$this->{packages} = \@reduced_packages;
 		}
 	}
 	return $this;
 }
 
+#==========================================
+# __strip_list
+#------------------------------------------
+sub __strip_list {
+	# ...
+	# remove items specified in @del from the list
+	# given in @in and return a new sorted list
+	# ---
+	my $this = shift;
+	my $in   = shift;
+	my $del  = shift;
+	my @result;
+	foreach my $in_item(@{$in}) {
+		my $found = 0;
+		foreach my $del_item (@{$del}) {
+			if ($del_item eq $in_item) {
+				$found = 1;
+				last;
+			}
+		}
+		if ($found == 0) {
+			push @result, $in_item;
+		}
+	}
+	@result = sort @result;
+	return @result;
+}
 
 #==========================================
 # __cleanMount

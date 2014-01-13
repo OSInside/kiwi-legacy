@@ -151,7 +151,7 @@ sub createCustomFileTree {
 	my @dirslist;
 	my @itemlist = sort keys %result;
 	my $tasks = @itemlist;
-	my $factor = 100 / $tasks;
+	my $factor = 100.0 / $tasks;
 	my $done_percent = 0;
 	my $done_previos = 0;
 	my $done = 0;
@@ -207,19 +207,30 @@ sub createCustomFileTree {
 	$kiwi -> cursorON();
 	$kiwi -> info ("Creating custom/unpackaged files tree...");
 	$kiwi -> cursorOFF();
-	$factor = 100 / $tasks;
+	$tasks = 0;
 	$done_percent = 0;
 	$done_previos = 0;
 	$done = 0;
+	my %json;
 	KIWIQX::qxx ("rm -rf $dest/custom 2>&1");
 	KIWIQX::qxx ("rm -f $dest/custom.json 2>&1");
-	my %json;
-	$json{customfiles} = [];
+	$kiwi -> step ($done_percent);
 	foreach my $dir (sort keys %filelist) {
 		next if ! %{$filelist{$dir}};
 		if (! -d "$dest/custom/$dir") {
 			mkpath ("$dest/custom/$dir", {verbose => 0});
 		}
+		next if ! chdir "$dest/custom/$dir";
+		foreach my $file (sort keys %{$filelist{$dir}}) {
+			if (-e "$dir/$file") {
+				$tasks++;
+			}
+		}
+	}
+	$factor = 100.0 / $tasks;
+	$json{customfiles} = [];
+	foreach my $dir (sort keys %filelist) {
+		next if ! %{$filelist{$dir}};
 		next if ! chdir "$dest/custom/$dir";
 		foreach my $file (sort keys %{$filelist{$dir}}) {
 			if (-e "$dir/$file") {
@@ -434,7 +445,7 @@ sub __populateCustomFiles {
 		my $rpmcheck = KIWIQX::qxx ("rpm -Va $checkopt");
 		my @rpmcheck = split(/\n/,$rpmcheck);
 		my $rpmsize = @rpmcheck;
-		my $spart = 100 / $rpmsize;
+		my $spart = 100.0 / $rpmsize;
 		my $count = 1;
 		my $done;
 		my $done_old;
@@ -799,7 +810,7 @@ sub __populateCustomFiles {
 	if ($tasks == 0) {
 		$tasks = 1;
 	}
-	my $factor = 100 / $tasks;
+	my $factor = 100.0 / $tasks;
 	my $done_percent = 0;
 	my $done_previos = 0;
 	my $done = 0;
@@ -857,7 +868,7 @@ sub __getOriginalConfigFiles {
 	# Download and extract packages
 	#------------------------------------------
 	my $packages = @packages;
-	my $spart = 100 / $packages;
+	my $spart = 100.0 / $packages;
 	my $count = 1;
 	my $done;
 	my $done_old;

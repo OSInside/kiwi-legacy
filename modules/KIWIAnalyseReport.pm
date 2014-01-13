@@ -149,7 +149,7 @@ sub createViews {
 		my $filenr = @files;
 		next if ! $filenr;
 		$kiwi -> info ("Creating JSON $mode parse tree...");
-		my $factor = 100 / $filenr;
+		my $factor = 100.0 / $filenr;
 		my $done_percent = 0;
 		my $done_previos = 0;
 		my $done = 0;
