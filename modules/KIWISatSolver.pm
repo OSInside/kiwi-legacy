@@ -190,7 +190,9 @@ sub new {
 	if ($ptype ne "plusRecommended") {
 		$solver -> set_dont_install_recommended(1);
 	}
-	$pool -> prepare();
+	if (! defined $pool) {
+		$pool -> prepare();
+	}
 	$job = $pool->create_request();
 	my %jobs = ();
 	foreach my $p (@{$pref}) {
@@ -209,9 +211,11 @@ sub new {
 			next;
 		}
 		my $item = $pool->find($name);
-		if ((! $item) && (! $quiet)) {
-			$kiwi -> warning ("--> Failed to queue job: $name");
-			$kiwi -> skipped ();
+		if (! $item) {
+			if (! $quiet) {
+				$kiwi -> warning ("--> Failed to queue job: $name");
+				$kiwi -> skipped ();
+			}
 			push @jobFailed, $name;
 			next;
 		}
