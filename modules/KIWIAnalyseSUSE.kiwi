@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="5.8" name="migration-template">
+<image schemaversion="6.0" name="migration-template">
 	<description type="system">
-		<author>Bob</author>
-		<contact>bob@bob.com</contact>
+		<author>John Doe</author>
+		<contact>john@example.com</contact>
 		<specification>
 			migration-template
 		</specification>
