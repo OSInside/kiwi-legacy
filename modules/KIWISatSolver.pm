@@ -68,7 +68,7 @@ sub new {
 	my $pool    = shift;
 	my $quiet   = shift;
 	my $ptype   = shift;
-	my $merge   = shift;
+	my $solvtype= shift;
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
@@ -126,19 +126,60 @@ sub new {
 	# Create and cache sat solvable
 	#------------------------------------------
 	if (! defined $pool) {
-		my $solvable = KIWIXML::getInstSourceSatSolvable ($urlref);
-		if (! defined $solvable) {
-			return;
+		#==========================================
+		# Create list of solvables
+		#------------------------------------------
+		my @files     = ();
+		my $our_solve = '/var/cache/kiwi/satsolver/merged.solv';
+		if (($solvtype) && ($solvtype eq "system-solvable")) {
+			#==========================================
+			# read solv files locally stored by zypper
+			#------------------------------------------
+			my $solv_fd;
+			my $sys_solve = '/var/cache/zypp/solv/';
+			if (opendir ($solv_fd,$sys_solve)) {
+				while (my $repo_dir = readdir $solv_fd) {
+					if ($repo_dir eq "."  ||
+						$repo_dir eq ".." ||
+						$repo_dir eq '@System'
+					) {
+						next;
+					}
+					my $repo_fd;
+					if (opendir ($repo_fd,$sys_solve.$repo_dir)) {
+						while (my $f = readdir $repo_fd) {
+							if ($f eq 'solv') {
+								push @files,$sys_solve.$repo_dir.'/solv';
+								last;
+							}
+						}
+						closedir $repo_fd;
+					}
+				}
+			}
+			closedir $solv_fd;
+		} else {
+			#==========================================
+			# download repo metadata and turn into solv
+			#------------------------------------------
+			my $solvable = KIWIXML::getInstSourceSatSolvable ($urlref);
+			if (! defined $solvable) {
+				return;
+			}
+			@files = keys %{$solvable};
 		}
 		#==========================================
-		# merge all solvables into one
+		# merge solvables into one
 		#------------------------------------------
-		my $merged= "/var/cache/kiwi/satsolver/merged.solv";
-		my @files = keys %{$solvable};
+		if (! @files) {
+			$kiwi -> error  ("--> No repository solvables found");
+			$kiwi -> failed ();
+			return;
+		}
 		if (@files > 1) {
-			KIWIQX::qxx ("mergesolv @files > $merged");
+			KIWIQX::qxx ("mergesolv @files > $our_solve");
 		} else {
-			KIWIQX::qxx ("cp @files $merged 2>&1");
+			KIWIQX::qxx ("cp @files $our_solve 2>&1");
 		}
 		my $code = $? >> 8;
 		if ($code != 0) {
@@ -146,11 +187,7 @@ sub new {
 			$kiwi -> failed ();
 			return;
 		}
-		if ($merge) {
-			undef $solvable;
-			$solvable->{$merged} = "merged-repo";
-		}
-		$this->{solfile} = $merged;
+		$this->{solfile} = $our_solve;
 		#==========================================
 		# Create SaT repository
 		#------------------------------------------
@@ -169,19 +206,22 @@ sub new {
 			$arch = $ENV{KIWI_REPO_INFO_ARCH};
 		}
 		$pool -> set_arch ($arch);
-		foreach my $solv (keys %{$solvable}) {
-			my $FD;
-			if (! open ($FD, '<' ,$solv)) {
-				$kiwi -> error  ("--> Couldn't open solvable: $solv");
-				$kiwi -> failed ();
-				return;
-			}
-			close $FD;
-			my $repo = $pool -> create_repo(
-				$solvable->{$solv}
-			);
-			$repo -> add_solv ($solv);
+		#==========================================
+		# check and add solvable
+		#------------------------------------------
+		my $solv_fd = FileHandle -> new();
+		if (! $solv_fd -> open($this->{solfile})) {
+			$kiwi -> error  ("--> Couldn't open solvable: $this->{solfile}");
+			$kiwi -> failed ();
+			return;
 		}
+		$solv_fd -> close();
+		my $repo = $pool -> create_repo(
+			$this->{solfile}
+		);
+		$repo -> add_solv(
+			$this->{solfile}
+		);
 	}
 	#==========================================
 	# Create SaT Solver and jobs

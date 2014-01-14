@@ -497,7 +497,7 @@ sub __populatePackageList {
 		$this->{patterns} = \@patlist;
 		my $psolve = KIWISatSolver -> new (
 			\@patlist,\@urllist,"solve-patterns",
-			undef,undef,"plusRecommended","merged-solvable"
+			undef,undef,"plusRecommended","system-solvable"
 		);
 		my @result = ();
 		if (! defined $psolve) {
@@ -550,7 +550,7 @@ sub __populatePackageList {
 			my $pool = $psolve -> getPool();
 			my $xsolve = KIWISatSolver -> new (
 				\@result,\@urllist,"solve-packages",
-				$pool,undef,"plusRecommended","merged-solvable"
+				$pool,undef,"plusRecommended","system-solvable"
 			);
 			if (! defined $xsolve) {
 				$kiwi -> error  ("Failed to solve packages");
@@ -591,7 +591,7 @@ sub __populatePackageList {
 				my $package = pop @solved_packages;
 				my $xsolve = KIWISatSolver -> new (
 					[$package],\@urllist,"solve-packages",
-					$pool,"quiet","plusRecommended","merged-solvable"
+					$pool,"quiet","plusRecommended","system-solvable"
 				);
 				my @single_package_solved_list = $xsolve -> getPackages();
 				@solved_packages = $this -> __strip_list (
