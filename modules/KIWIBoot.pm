@@ -4363,6 +4363,12 @@ sub setupBootLoaderConfiguration {
 			} else {
 				print $FD "search --file /boot/$this->{mbrid} --set"."\n";
 			}
+			if (($firmware eq "efi") || ($firmware eq "uefi")) {
+				print $FD 'set prefix=($root)/boot/grub2-efi'."\n";
+			} else {
+				print $FD 'set prefix=($root)/boot/grub2'."\n";
+			}
+			# print $FD "set debug=all\n";
 			print $FD "set default=$defaultBootNr\n";
 			print $FD "set font=/boot/unicode.pf2"."\n";
 			if ($firmware ne "uefi") {
@@ -5466,6 +5472,29 @@ sub installBootLoader {
 			return;
 		}
 		#==========================================
+		# Copy bios core modules to tmpdir
+		#------------------------------------------
+		if (-e "$stages/core.img") {
+			$status = qxx (
+				"cp -a $stages $tmpdir/boot/grub2/ 2>&1"
+			);
+			$result = $? >> 8;
+			if ($result != 0) {
+				$kiwi -> failed ();
+				$kiwi -> error  (
+					"Couldn't copy grub2-bios modules: $status"
+				);
+				$kiwi -> failed ();
+				$this -> cleanStack ();
+				return;
+			}
+			$stages = "$tmpdir/boot/grub2/i386-pc";
+		}
+		#==========================================
+		# Clean loop maps
+		#------------------------------------------
+		$this -> cleanStack ();
+		#==========================================
 		# Install grub2
 		#------------------------------------------
 		if (-e "$stages/core.img") {
@@ -5482,13 +5511,11 @@ sub installBootLoader {
 				"$biosgrub -f -d $stages -m $dmfile $loaderTarget 2>&1"
 			);
 			$result = $? >> 8;
-			qxx ("umount /mnt");
 			if ($result != 0) {
 				$kiwi -> error  (
 					"Couldn't install $loader on $loaderTarget: $status"
 				);
 				$kiwi -> failed ();
-				$this -> cleanStack ();
 				return;
 			}
 		} else {
@@ -5496,12 +5523,7 @@ sub installBootLoader {
 				"grub2-bios modules not found, legacy boot disabled"
 			);
 			$kiwi -> skipped ();
-			qxx ("umount /mnt");
 		}
-		#==========================================
-		# Clean loop maps
-		#------------------------------------------
-		$this -> cleanStack ();
 		#==========================================
 		# Check for chainloading
 		#------------------------------------------
