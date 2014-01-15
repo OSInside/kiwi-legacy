@@ -865,6 +865,8 @@ sub setupInstallCD {
 	if (($firmware eq "efi") || ($firmware eq "uefi")) {
 		KIWIQX::qxx ("mkdir -p $tmpdir/EFI/BOOT");
 		KIWIQX::qxx ("cp $tmpdir/boot/grub2-efi/grub.cfg $tmpdir/EFI/BOOT");
+		# add compatibility link for non standard EFI firmware
+		KIWIQX::qxx ("ln -s $tmpdir/EFI/BOOT $tmpdir/EFI/Boot");
 	}
 	#==========================================
 	# make iso EFI bootable
