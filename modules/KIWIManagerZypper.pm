@@ -769,6 +769,10 @@ sub setupRootSystem {
 	if (! defined $fd) {
 		return;
 	}
+	#==========================================
+	# check for packages to ignore
+	#------------------------------------------
+	my $ignorePckgs = $xml -> getPackagesToIgnore();
 	if (! $chroot) {
 		#==========================================
 		# setup install options outside of chroot
@@ -820,6 +824,19 @@ sub setupRootSystem {
 		print $fd "export YAST_IS_RUNNING=true\n";
 		print $fd "export ZYPP_CONF=".$root."/".$this->{zyppconf}."\n";
 		print $fd "export ZYPP_LOCKFILE_ROOT=$root\n";
+		if ($ignorePckgs) {
+			print $fd "mkdir -p $root/etc/zypp"."\n";
+			for my $ignoreP (@{$ignorePckgs}) {
+				my $name = $ignoreP -> getName();
+				print $fd "@zypper --root $root al $name &\n";
+				print $fd "SPID=\$!;wait \$SPID\n";
+				print $fd "ECODE=\$?\n";
+				print $fd 'if [ ! $ECODE = 0 ];then'."\n";
+				print $fd "echo \$ECODE > $screenCall.exit\n";
+				print $fd "exit \$ECODE\n";
+				print $fd 'fi'."\n";
+			}
+		}
 		if (@newprods) {
 			foreach my $p (@newprods) {
 				push @institems,"product:$p";
@@ -882,6 +899,19 @@ sub setupRootSystem {
 		print $fd "export ZYPP_MODALIAS_SYSFS=/tmp\n";
 		print $fd "export YAST_IS_RUNNING=true\n";
 		print $fd "export ZYPP_CONF=".$this->{zyppconf}."\n";
+		if ($ignorePckgs) {
+			print $fd "@kchroot mkdir -p /etc/zypp"."\n";
+			for my $ignoreP (@{$ignorePckgs}) {
+				my $name = $ignoreP -> getName();
+				print $fd "@kchroot @zypper al $name &\n";
+				print $fd "SPID=\$!;wait \$SPID\n";
+				print $fd "ECODE=\$?\n";
+				print $fd 'if [ ! $ECODE = 0 ];then'."\n";
+				print $fd "echo \$ECODE > $screenCall.exit\n";
+				print $fd "exit \$ECODE\n";
+				print $fd 'fi'."\n";
+			}
+		}
 		if (@newprods) {
 			foreach my $p (@newprods) {
 				push @institems,"product:$p";

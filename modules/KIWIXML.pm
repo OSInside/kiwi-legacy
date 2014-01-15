@@ -1220,6 +1220,19 @@ sub getArchives {
 }
 
 #==========================================
+# getPackagesToIgnore
+#------------------------------------------
+sub getPackagesToIgnore {
+	# ...
+	# Return an array ref containing IgnorePackageData objects
+	# The method is private as it is needed for filtering only. Clients
+	# of the XML object should not do any filtering on the data received.
+	# ---
+	my $this = shift;
+	return $this -> __getInstallData('ignorePkgs');
+}
+
+#==========================================
 # getBootDeletePackages
 #------------------------------------------
 sub getBootDeletePackages {
@@ -1600,7 +1613,7 @@ sub getPackages {
 		}
 	}
 	# Any packages that are marked to be ignored need to be removed
-	my $ignorePckgs = $this -> __getPackagesToIgnore();
+	my $ignorePckgs = $this -> getPackagesToIgnore();
 	for my $ignoreP (@{$ignorePckgs}) {
 		my $name = $ignoreP -> getName();
 		$pckgFilter{$name} = 1;
@@ -4056,19 +4069,6 @@ sub __getInstallData {
 		}
 	}
 	return \@names;
-}
-
-#==========================================
-# __getPackagesToIgnore
-#------------------------------------------
-sub __getPackagesToIgnore {
-	# ...
-	# Return an array ref containing IgnorePackageData objects
-	# The method is private as it is needed for filtering only. Clients
-	# of the XML object should not do any filtering on the data received.
-	# ---
-	my $this = shift;
-	return $this -> __getInstallData('ignorePkgs');
 }
 
 #==========================================
