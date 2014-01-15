@@ -53,7 +53,7 @@
 
   <para>For an EBS backed AMI the procedure to get to a working AMI requires
     more manual steps when compared to the S3 backed AMI approach. KIWI does
-    not provide any automation for this process at this time. The KIWI
+    not provide any automation for this process. The KIWI
     created image needs to be uploaded to EC2 and then it needs to be dumped
     to an EBS volume. This implies that you need to have a running AMI in
     EC2</para>
@@ -293,99 +293,99 @@
             <tbody>
               <row>
                 <entry>AP-Northeast</entry>
-                <entry>aki-ec5df7ed</entry>
+                <entry>aki-196bf518</entry>
                 <entry>x86</entry>
-                <entry><filename>ec2-public-images-ap-northeast-1/pv-grub-hd0-V1.02-i386.gz.manifest.xml</filename></entry>
+                <entry><filename>ec2-public-images-ap-northeast-1/pv-grub-hd00-V1.04-i386.gz.manifest.xml</filename></entry>
               </row>
               <row>
                 <entry>AP-Northeast</entry>
-                <entry>aki-ee5df7ef</entry>
+                <entry>aki-1f6bf51e</entry>
                 <entry>x86-64</entry>
-                <entry><filename>ec2-public-images-ap-northeast-1/pv-grub-hd0-V1.02-x86_64.gz.manifest.xml</filename></entry>
+                <entry><filename>ec2-public-images-ap-northeast-1/pv-grub-hd00-V1.04-x86_64.gz.manifest.xml</filename></entry>
               </row>
               <row>
                 <entry>AP-Southeast</entry>
-                <entry>aki-a4225af6</entry>
+                <entry>aki-563e7404</entry>
                 <entry>x86</entry>
-                <entry><filename>ec2-public-images-ap-southeast-1/pv-grub-hd0-V1.02-i386.gz.manifest.xml</filename></entry>
+                <entry><filename>ec2-public-images-ap-southeast-1/pv-grub-hd00-V1.04-i386.gz.manifest.xml</filename></entry>
               </row>
               <row>
                 <entry>AP-Southeast</entry>
-                <entry>aki-aa225af8</entry>
+                <entry>aki-5e3e740c</entry>
                 <entry>x86-64</entry>
-                <entry><filename>ec2-public-images-ap-southeast-1/pv-grub-hd0-V1.02-x86_64.gz.manifest.xml</filename></entry>
+                <entry><filename>ec2-public-images-ap-southeast-1/pv-grub-hd00-V1.04-x86_64.gz.manifest.xml</filename></entry>
               </row>
               <row>
                 <entry>AP-Southeast2</entry>
-                <entry>aki-33990e09</entry>
+                <entry>aki-c162fffb</entry>
                 <entry>x86</entry>
-                <entry><filename>ec2-public-images-ap-southeast-1/pv-grub-hd0-V1.02-i386.gz.manifest.xml</filename></entry>
+                <entry><filename>ec2-public-images-ap-southeast-1/pv-grub-hd00-V1.04-i386.gz.manifest.xml</filename></entry>
               </row>
               <row>
                 <entry>AP-Southeast2</entry>
-                <entry>aki-31990e0b</entry>
+                <entry>aki-3b1d8001</entry>
                 <entry>x86-64</entry>
-                <entry><filename>ec2-public-images-ap-southeast-1/pv-grub-hd0-V1.02-x86_64.gz.manifest.xml</filename></entry>
+                <entry><filename>ec2-public-images-ap-southeast-1/pv-grub-hd00-V1.04-x86_64.gz.manifest.xml</filename></entry>
               </row>
               <row>
                 <entry>EU-West</entry>
-                <entry>aki-64695810</entry>
+                <entry>aki-5ea34529</entry>
                 <entry>x86</entry>
-                <entry><filename>ec2-public-images-eu/pv-grub-hd0-V1.02-i386.gz.manifest.xml</filename></entry>
+                <entry><filename>ec2-public-images-eu/pv-grub-hd00-V1.04-i386.gz.manifest.xml</filename></entry>
               </row>
               <row>
                 <entry>EU-West</entry>
-                <entry>aki-62695816</entry>
+                <entry>aki-58a3452f</entry>
                 <entry>x86-64</entry>
-                <entry><filename>ec2-public-images-eu/pv-grub-hd0-V1.02-x86_64.gz.manifest.xml</filename></entry>
+                <entry><filename>ec2-public-images-eu/pv-grub-hd00-V1.04-x86_64.gz.manifest.xml</filename></entry>
               </row>
               <row>
                 <entry>SA-East</entry>
-                <entry>aki-bc3ce3a1</entry>
+                <entry>aki-5753f44a</entry>
                 <entry>x86</entry>
-                <entry><filename>ec2-public-images-sa/pv-grub-hd0-V1.02-i386.gz.manifest.xml</filename></entry>
+                <entry><filename>ec2-public-images-sa/pv-grub-hd00-V1.04-i386.gz.manifest.xml</filename></entry>
               </row>
               <row>
                 <entry>SA-East</entry>
-                <entry>aki-cc3ce3d1</entry>
+                <entry>aki-5153f44c</entry>
                 <entry>x86-64</entry>
-                <entry><filename>ec2-public-images-sa/pv-grub-hd0-V1.02-x86_64.gz.manifest.xml</filename></entry>
+                <entry><filename>ec2-public-images-sa/pv-grub-hd00-V1.04-x86_64.gz.manifest.xml</filename></entry>
               </row>
               <row>
                 <entry>US-East</entry>
-                <entry>aki-805ea7e9</entry>
+                <entry>aki-659ccb0c</entry>
                 <entry>x86</entry>
-                <entry><filename>ec2-public-images/pv-grub-hd0-V1.02-i386.gz.manifest.xml</filename></entry>
+                <entry><filename>ec2-public-images/pv-grub-hd00-V1.04-i386.gz.manifest.xml</filename></entry>
               </row>
               <row>
                 <entry>US-East</entry>
-                <entry>aki-825ea7eb</entry>
+                <entry>aki-499ccb20</entry>
                 <entry>x86-64</entry>
-                <entry><filename>ec2-public-images/pv-grub-hd0-V1.02-x86_64.gz.manifest.xml</filename></entry>
+                <entry><filename>ec2-public-images/pv-grub-hd00-V1.04-x86_64.gz.manifest.xml</filename></entry>
               </row>
               <row>
                 <entry>US-West</entry>
-                <entry>aki-83396bc6</entry>
+                <entry>aki-960531d3</entry>
                 <entry>x86</entry>
-                <entry><filename>ec2-public-images-us-west-1/pv-grub-hd0-V1.02-x86_64.gz.manifest.xml</filename></entry>
+                <entry><filename>ec2-public-images-us-west-1/pv-grub-hd00-V1.04-x86_64.gz.manifest.xml</filename></entry>
               </row>
               <row>
                 <entry>US-West</entry>
-                <entry>aki-8d396bc8</entry>
+                <entry>aki-920531d7</entry>
                 <entry>x86-64</entry>
-                <entry><filename>ec2-public-images-us-west-1/pv-grub-hd0-V1.02-x86_64.gz.manifest.xml</filename></entry>
+                <entry><filename>ec2-public-images-us-west-1/pv-grub-hd00-V1.04-x86_64.gz.manifest.xml</filename></entry>
               </row>
               <row>
                 <entry>US-West2</entry>
-                <entry>aki-c2e26ff2</entry>
+                <entry>aki-e28f11d2</entry>
                 <entry>x86</entry>
-                <entry><filename>ec2-public-images-us-west-2/pv-grub-hd0-V1.02-x86_64.gz.manifest.xml</filename></entry>
+                <entry><filename>ec2-public-images-us-west-2/pv-grub-hd00-V1.04-x86_64.gz.manifest.xml</filename></entry>
               </row>
               <row>
                 <entry>US-West2</entry>
-                <entry>aki-98e26fa8</entry>
+                <entry>aki-e68f11d6</entry>
                 <entry>x86-64</entry>
-                <entry><filename>ec2-public-images-us-west-2/pv-grub-hd0-V1.02-x86_64.gz.manifest.xml</filename></entry>
+                <entry><filename>ec2-public-images-us-west-2/pv-grub-hd00-V1.04-x86_64.gz.manifest.xml</filename></entry>
               </row>
             </tbody>
           </tgroup>

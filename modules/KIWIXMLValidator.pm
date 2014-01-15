@@ -374,30 +374,26 @@ sub __checkDisplaynameValid {
 }
 
 #==========================================
-# __checkEC2IsFsysType
+# __checkEC2IsVmxType
 #------------------------------------------
-sub __checkEC2IsFsysType {
+sub __checkEC2IsVmxType {
 	# ...
-	# When building an EC2 image we expect the type to be a file system image.
+	# When building an EC2 image we expect the type to be a Virtual
+	# system image. This changed and we previously expected a filesystem
+	# type. The check is now somewhat superfluous, but we'll keep it in place
+	# for a transition period.
 	# ---
 	my $this = shift;
-	# TODO:
-	# Excluding btrfs, xfs and zfs, needs testing first. There are issues
-	# with these file systems as they require a boot partition and our current
-	# setup for EC2 is to not have a boot partition.
-	# Excluding clicfs and squashfs, they appear to be impractical for EC2,
-	# can be enabled if someone complains
-	my @supportedFSTypes = qw /ext2 ext3 ext4 reiserfs/;
 	my @typeNodes = $this->{systemTree}->getElementsByTagName('type');
 	for my $type (@typeNodes) {
 		my $format = $type -> getAttribute('format');
 		if ($format && $format eq 'ec2') {
 			my $imgType = $type -> getAttribute('image');
-			if (! grep { /^$imgType$/x } @supportedFSTypes) {
+			if ($imgType ne 'vmx') {
 				my $kiwi = $this->{kiwi};
 				my $msg = 'For EC2 image creation the image type must be '
-					. 'one of the following supported file systems: '
-					. "@supportedFSTypes";
+					. 'of vmx type. Unless you are building an HVM image '
+					. 'supply the bootprofile and bootkernel attributes. ';
 				$kiwi -> error ( $msg );
 				$kiwi -> failed ();
 				return;
@@ -1815,7 +1811,7 @@ sub __validateConsistency {
 	if (! $this -> __checkDisplaynameValid()) {
 		return;
 	}
-	if (! $this -> __checkEC2IsFsysType()) {
+	if (! $this -> __checkEC2IsVmxType()) {
 		return;
 	}
 	if (! $this -> __checkEC2Regions()) {
