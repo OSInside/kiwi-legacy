@@ -4847,6 +4847,7 @@ sub setupBootLoaderConfiguration {
 		if ($topic =~ /^KIWI (CD|USB)/) {
 			$title = $this -> makeLabel ("Boot from Hard Disk");
 			print $FD "label $title\n";
+			push @labels,$title;
 			print $FD "localboot 0x80\n";
 			$title = $this -> makeLabel ("Install $label");
 		} else {
