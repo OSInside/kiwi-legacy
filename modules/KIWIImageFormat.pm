@@ -347,7 +347,7 @@ sub createVMDK {
 		# vmdk format. Thus we skip the format parameters in this
 		# case
 		# -----
-		if ($diskCnt) {
+		if (($diskCnt) && ($diskCnt ne 'ide')) {
 			$convert .= " -o adapter_type=$diskCnt";
 		}
 		if ($diskMode) {
