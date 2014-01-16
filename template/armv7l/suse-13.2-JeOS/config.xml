@@ -1,18 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="6.0" name="LimeJeOS-13.2">
+<image schemaversion="5.9" name="LimeJeOS-13.2">
 	<description type="system">
 		<author>Marcus Schäfer</author>
 		<contact>ms@novell.com</contact>
 		<specification>
-			13.2 JeOS image for arm (panda/beagle/efika) boards
+			13.2 JeOS image for arm boards
 		</specification>
 	</description>
 	<profiles>
-		<profile name="pandaFlavour" description="Kernel/Tools setup for panda boards" import="true"/>
-		<profile name="efikaFlavour" description="Kernel/Tools setup for efika boards"/>
-		<profile name="beagleFlavour" description="Kernel/Tools setup for beagle boards"/>
+		<profile name="raspberryFlavour" description="Kernel/Tools setup for raspberry boards"/>
 	</profiles>
+	<drivers>
+		<file name="drivers/gpio/*"/>
+		<!-- Needed for TWL6040 GPO for MMC boot on pandaboard -->
+		<file name="drivers/mmc/*"/>
+	</drivers>
 	<preferences>
 		<type image="tbz" primary="true"/>
 		<version>1.13.2</version>
@@ -25,26 +28,8 @@
 		<bootsplash-theme>openSUSE</bootsplash-theme>
 		<bootloader-theme>openSUSE</bootloader-theme>
 	</preferences>
-	<preferences profiles="pandaFlavour">
-		<type image="oem" filesystem="ext3" boot="oemboot/suse-13.2" bootloader="uboot" kernelcmdline="console=ttyO2 vram=16M" editbootconfig="uboot-image-setup" editbootinstall="uboot-image-install">
-			<systemdisk/>
-			<oemconfig>
-				<oem-swapsize>500</oem-swapsize>
-				<oem-swap>true</oem-swap>
-			</oemconfig>
-		</type>
-	</preferences>
-	<preferences profiles="efikaFlavour">
-		<type image="oem" filesystem="ext3" boot="oemboot/suse-13.2" bootloader="uboot" kernelcmdline="console=ttymxc0,115200 vram=16M" editbootconfig="uboot-image-setup" editbootinstall="uboot-image-install">
-			<systemdisk/>
-			<oemconfig>
-				<oem-swapsize>500</oem-swapsize>
-				<oem-swap>true</oem-swap>
-			</oemconfig>
-		</type>
-	</preferences>
-	<preferences profiles="beagleFlavour">
-		<type image="oem" filesystem="ext3" boot="oemboot/suse-13.2" bootloader="uboot" kernelcmdline="console=ttyO2 vram=16M" editbootconfig="uboot-image-setup" editbootinstall="uboot-image-install">
+	<preferences profiles="raspberryFlavour">
+		<type image="oem" filesystem="ext4" boot="oemboot/suse-13.2" firmware="vboot" bootloader="berryboot" fsmountoptions="noatime,nobarrier" bootfilesystem="fat16" kernelcmdline="dwc_otg.lpm_enable=0 console=ttyAMA0,115200 kgdboc=ttyAMA0,115200 console=tty1 rootfstype=ext4 rootflags=commit=120,data=writeback rootwait rw" editbootconfig="berryboot-image-setup">
 			<systemdisk/>
 			<oemconfig>
 				<oem-swapsize>500</oem-swapsize>
@@ -55,33 +40,24 @@
 	<users group="root">
 		<user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
 	</users>
-	<repository type="yast2">
-		<source path="http://download.opensuse.org/ports/armv7hl/distribution/13.2/repo/oss"/>
+	<repository type="yast2" profiles="raspberryFlavour">
+		<source path="obs://openSUSE:Factory:ARM/standard"/>
 	</repository>
-	<repository type="rpm-md">
-		<source path="obs://openSUSE:13.2:Ports/ports"/>
+	<repository type="rpm-md" priority="5" profiles="raspberryFlavour">
+		<source path="obs://devel:ARM:Factory:Contrib:RaspberryPi/standard"/>
 	</repository>
-	<packages type="bootstrap" profiles="pandaFlavour">
+	<repository type="rpm-md" priority="10" profiles="raspberryFlavour">
+		<source path="obs://devel:ARM:Factory:Contrib:RaspberryPi:upstream/standard"/>
+	</repository>
+	<packages type="bootstrap" profiles="raspberryFlavour">
 		<package name="kernel-default" bootinclude="true"/>
-		<package name="u-boot-omap4panda" bootinclude="true"/>
+		<package name="raspberrypi-firmware" bootinclude="true"/>
+		<package name="u-boot-rpib" bootinclude="true"/>
+		<package name="dtb-bcm2835" bootinclude="true"/>
+		<package name="raspberrypi-gfx"/>
+		<archive name="berryboot-setup.tgz" bootinclude="true"/>
 	</packages>
-	<packages type="bootstrap" profiles="efikaFlavour">
-		<package name="kernel-imx51" bootinclude="true"/>
-	</packages>
-	<packages type="bootstrap" profiles="beagleFlavour">
-		<package name="kernel-default" bootinclude="true"/>
-		<package name="u-boot-omap3beagle" bootinclude="true"/>
-		<package name="x-loader-omap3beagle" bootinclude="true"/>
-	</packages>
-<!-- don't remove qemu binfmt helpers from initrd -->
-	<strip type="tools">
-		<file name="qemu-arm-binfmt"/>
-		<file name="qemu-arm"/>
-	</strip>
 	<packages type="bootstrap">
-<!-- for building in emulated environment -->
-		<package name="qemu-linux-user-arm" bootinclude="true"/>
-<!-- standard packages -->
 		<package name="ifplugd"/>
 		<package name="iputils"/>
 		<package name="vim"/>
@@ -107,7 +83,8 @@
 		<package name="u-boot-tools"/>
 		<package name="less"/>
 		<package name="zypper"/>
-<!-- custom hook scripts for uboot -->
-		<archive name="uboot-setup.tgz" bootinclude="true"/>
+		<package name="nfs-client"/>
+		<package name="wicked"/>
+		<package name="wicked-service"/>
 	</packages>
 </image>

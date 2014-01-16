@@ -12,7 +12,6 @@
 		<profile name="pandaFlavour" description="Kernel/Tools setup for panda boards" import="true"/>
 		<profile name="efikaFlavour" description="Kernel/Tools setup for efika boards"/>
 		<profile name="beagleFlavour" description="Kernel/Tools setup for beagle boards"/>
-		<profile name="raspberryFlavour" description="Kernel/Tools setup for raspberry boards"/>
 	</profiles>
 	<preferences>
 		<type image="tbz" primary="true"/>
@@ -53,26 +52,11 @@
 			</oemconfig>
 		</type>
 	</preferences>
-	<preferences profiles="raspberryFlavour">
-		<type image="oem" filesystem="ext4" boot="oemboot/suse-13.1" bootloader="berryboot" fsmountoptions="noatime,nobarrier" bootfilesystem="fat32" kernelcmdline="dwc_otg.lpm_enable=0 console=ttyAMA0,115200 kgdboc=ttyAMA0,115200 console=tty1 root=/dev/mmcblk0p2 rootfstype=ext4 rootflags=commit=120,data=writeback rootwait rw" editbootconfig="berryboot-image-setup">
-			<systemdisk/>
-			<oemconfig>
-				<oem-swapsize>500</oem-swapsize>
-				<oem-swap>true</oem-swap>
-			</oemconfig>
-		</type>
-	</preferences>
 	<users group="root">
 		<user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
 	</users>
-	<repository type="yast2" profiles="raspberryFlavour">
-		<source path="http://download.opensuse.org/ports/armv6hl/distribution/13.1/repo/oss"/>
-	</repository>
 	<repository type="yast2" profiles="pandaFlavour,efikaFlavour,beagleFlavour">
 		<source path="http://download.opensuse.org/ports/armv7hl/distribution/13.1/repo/oss"/>
-	</repository>
-	<repository type="rpm-md" profiles="raspberryFlavour">
-		<source path="http://download.opensuse.org/repositories/devel:/ARM:/13.1:/Contrib:/RaspberryPi/standard/"/>
 	</repository>
 	<packages type="bootstrap" profiles="pandaFlavour">
 		<package name="kernel-default" bootinclude="true"/>
@@ -89,20 +73,7 @@
 		<package name="x-loader-omap3beagle" bootinclude="true"/>
 		<archive name="uboot-setup.tgz" bootinclude="true"/>
 	</packages>
-	<packages type="bootstrap" profiles="raspberryFlavour">
-		<package name="kernel-raspberrypi" bootinclude="true"/>
-		<package name="raspberrypi-firmware" bootinclude="true"/>
-		<archive name="berryboot-setup.tgz" bootinclude="true"/>
-	</packages>
-<!-- don't remove qemu binfmt helpers from initrd -->
-	<strip type="tools">
-		<file name="qemu-arm-binfmt"/>
-		<file name="qemu-arm"/>
-	</strip>
 	<packages type="bootstrap">
-<!-- for building in emulated environment -->
-		<package name="qemu-linux-user-arm" bootinclude="true"/>
-<!-- standard packages -->
 		<package name="ifplugd"/>
 		<package name="iputils"/>
 		<package name="vim"/>

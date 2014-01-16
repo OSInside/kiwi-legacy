@@ -72,7 +72,7 @@ suseConfig
 #======================================
 # Add Factory repo
 #--------------------------------------
-baseRepo="http://download.opensuse.org/ports/armv7hl/distribution/13.2/repo/oss/"
+baseRepo="http://download.opensuse.org/openSUSE:Factory:ARM/standard"
 baseName="suse-13.2"
 zypper ar $baseRepo $baseName
 
