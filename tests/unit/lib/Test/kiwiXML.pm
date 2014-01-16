@@ -1517,7 +1517,7 @@ sub test_addPackages {
 	for my $collect (@{$packages}) {
 		push @pckgNames, $collect -> getName();
 	}
-	my @expected = ( 'ed', 'kernel-default', 'python', 'xemacs', 'utils' );
+	my @expected = ( 'kernel-default', 'python', 'xemacs', 'utils' );
 	my $arch = $xml -> getArch();
 	if ($arch eq 'ppc64') {
 		push @expected, 'vim';
@@ -1739,7 +1739,6 @@ $state = $kiwi -> getState();
 	for my $pckg (@{$packages}) {
 		push @profPckgNames, $pckg -> getName();
 	}
-	push @expected, 'ed';
 	push @expected, 'libtiff';
 	push @expected, 'python';
 	push @expected, 'gzip';
@@ -1845,7 +1844,6 @@ $state = $kiwi -> getState();
 	}
 	push @expected, 'perl';
 	push @expected, 'postgresql';
-	push @expected, 'vi';
 	push @expected, 'utils';
 	my $arch = $xml -> getArch();
 	if ($arch eq 'ppc64') {
@@ -4010,7 +4008,7 @@ sub test_getBootstrapPackages {
 	for my $pckg (@{$pckgs}) {
 		push @pckgNames, $pckg -> getName();
 	}
-	my @expected = ('filesystem', 'glibc-locale');
+	my @expected = ('filesystem', 'glibc-locale', 'python', 'vim');
 	$this -> assert_array_equal(\@expected, \@pckgNames);
 	return;
 }
@@ -4729,10 +4727,9 @@ sub test_getPackages {
 	my @expected = qw(
 		ed
 		kernel-default
-		kernel-firmware
-		python
-		sane
 		vim
+		kernel-firmware
+		sane
 	);
 	$this -> assert_array_equal(\@expected, \@pckgNames);
 	return;

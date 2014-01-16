@@ -1306,10 +1306,16 @@ sub getBootIncludePackageCollections {
 sub getBootstrapPackages {
 	# ...
 	# Return an array ref containing PackageData objects for the packages
-	# that should be used to bootstrap the image.
+	# that should be used to bootstrap the image. The packages marked
+	# to become bootincluded will also be handled in the bootstrap phase
 	# ---
 	my $this = shift;
-	return $this -> __getInstallData('bootStrapPckgs');
+	my $pckgs = $this -> __getInstallData('bootStrapPckgs');
+	my $bPckgs = $this -> getBootIncludePackages();
+	if ($bPckgs) {
+		push @{$pckgs}, @{$bPckgs};
+	}
+	return $pckgs;
 }
 
 #==========================================
@@ -1602,8 +1608,6 @@ sub getPackages {
 	# ---
 	my $this = shift;
 	my $pckgs = $this -> __getInstallData('pkgs');
-	my $bPckgs = $this -> getBootIncludePackages();
-	push @{$pckgs}, @{$bPckgs};
 	my %pckgFilter;
 	# Any packages that are marked to be replaced need to be removed
 	for my $pckg (@{$pckgs}) {
