@@ -121,6 +121,34 @@ sub getInodeSize {
 }
 
 #==========================================
+# getFSBlockSize
+#------------------------------------------
+sub getFSBlockSize {
+	# ...
+	# Return the configured filesystem blocksize
+	# ---
+	my $this = shift;
+	return $this->{blocksize};
+}
+
+#==========================================
+# setFSBlockSize
+#------------------------------------------
+sub setFSBlockSize {
+	# ...
+	# Set the given filesystem blocksize value
+	# ---
+	my $this = shift;
+	my $blocksize = shift;
+	if (! $blocksize) {
+		undef $this->{blocksize};
+	} else {
+		$this->{blocksize} = $blocksize;
+	}
+	return $this;
+}
+
+#==========================================
 # getMinNumInodes
 #------------------------------------------
 sub getMinNumInodes {

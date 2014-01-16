@@ -1306,11 +1306,10 @@ sub createImageLiveCD {
 		#------------------------------------------
 		my $setBlockSize = 0;
 		my $fsopts       = $cmdL -> getFilesystemOptions();
-		my $blocksize    = $fsopts->[0];
+		my $blocksize    = $fsopts -> getFSBlockSize();
 		if (! defined $blocksize) {
-			$fsopts->[0] = 4096;
+			$fsopts -> setFSBlockSize(4096);
 			$setBlockSize = 1;
-			$cmdL -> setFilesystemOptions (@{$fsopts});
 		}
 		if (! $this -> setupEXT2 ( $namerw )) {
 			$this -> restoreSplitExtend ();
@@ -1318,8 +1317,11 @@ sub createImageLiveCD {
 			return;
 		}
 		if ($setBlockSize) {
-			undef $fsopts->[0];
-			$cmdL -> setFilesystemOptions (@{$fsopts});
+			# /.../
+			# reset blocksize to default value if previosly
+			# set to the default RW blocksize of 4k
+			# ----
+			$fsopts -> setFSBlockSize();
 		}
 		#==========================================
 		# mount logical extend for data transfer
@@ -2399,7 +2401,7 @@ sub createImageSplit {
 	my $xml          = $this->{xml};
 	my $idest        = $cmdL->getImageIntermediateTargetDir();
 	my $fsopts       = $cmdL -> getFilesystemOptions();
-	my $inodesize    = $fsopts->[1];
+	my $inodesize    = $fsopts -> getInodeSize();
 	my $FSTypeRW;
 	my $FSTypeRO;
 	my $error;
