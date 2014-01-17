@@ -1,19 +1,23 @@
 # /.../
-# Ec2 region table for correct Amazon kernel (aki) assignment
+# EC2 region table for correct Amazon kernel (aki) assignment
+# EC2 images are derived from VMX images, thus we have a partition and use
+# akis designated with hd00
+# Amzaon publishes AKI ids here:
+# http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/UserProvidedKernels.html#AmazonKernelImageIDs
 # ----
-AP-Northeast-i386=aki-ec5df7ed
-AP-Northeast-x86_64=aki-ee5df7ef
-AP-Southeast-i386=aki-a4225af6
-AP-Southeast-x86_64=aki-aa225af8
-AP-Southeast2-i386=aki-33990e09
-AP-Southeast2-x86_64=aki-31990e0b
-EU-West-i386=aki-64695810
-EU-West-x86_64=aki-62695816
-SA-East-i386=aki-bc3ce3a1
-SA-East-x86_64=aki-cc3ce3d1
-US-East-i386=aki-805ea7e9
-US-East-x86_64=aki-825ea7eb
-US-West-i386=aki-83396bc6
-US-West-x86_64=aki-8d396bc8
-US-West2-i386=aki-c2e26ff2
-US-West2-x86_64=aki-98e26fa8
+AP-Northeast-i386=aki-196bf518
+AP-Northeast-x86_64=aki-1f6bf51e
+AP-Southeast-i386=aki-563e7404
+AP-Southeast-x86_64=aki-5e3e740c
+AP-Southeast2-i386=aki-c162fffb
+AP-Southeast2-x86_64=aki-3b1d8001
+EU-West-i386=aki-5ea34529
+EU-West-x86_64=aki-58a3452f
+SA-East-i386=aki-5753f44a
+SA-East-x86_64=aki-5153f44c
+US-East-i386=aki-659ccb0c
+US-East-x86_64=aki-499ccb20
+US-West-i386=aki-960531d3
+US-West-x86_64=aki-920531d7
+US-West2-i386=aki-e28f11d2
+US-West2-x86_64=aki-e68f11d6
