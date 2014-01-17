@@ -11,11 +11,6 @@
 	<profiles>
 		<profile name="raspberryFlavour" description="Kernel/Tools setup for raspberry boards"/>
 	</profiles>
-	<drivers>
-		<file name="drivers/gpio/*"/>
-		<!-- Needed for TWL6040 GPO for MMC boot on pandaboard -->
-		<file name="drivers/mmc/*"/>
-	</drivers>
 	<preferences>
 		<type image="tbz" primary="true"/>
 		<version>1.13.2</version>
@@ -41,7 +36,7 @@
 		<user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
 	</users>
 	<repository type="yast2" profiles="raspberryFlavour">
-		<source path="obs://openSUSE:Factory:ARM/standard"/>
+		<source path="obs://devel:ARM:Factory:Contrib:RaspberryPi:upstream/standard"/>
 	</repository>
 	<repository type="rpm-md" priority="5" profiles="raspberryFlavour">
 		<source path="obs://devel:ARM:Factory:Contrib:RaspberryPi/standard"/>
