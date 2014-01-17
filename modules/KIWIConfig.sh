@@ -1646,6 +1646,9 @@ function suseStripKernel {
 			elif [ -f image-$VERSION ];then
 				# dedicated to kernels on s390
 				mv image-$VERSION vmlinuz
+			elif [ -f vmlinuz ];then
+				# nothing to map, vmlinuz already there
+				:
 			else
 				echo "Failed to find a mapping kernel"
 			fi
