@@ -110,7 +110,7 @@ sub new {
 	#==========================================
 	# find image type...
 	#------------------------------------------
-	if (! defined $cmdL->getBuildType()) {
+	if (($system) && (! defined $cmdL->getBuildType())) {
 		if ($initrd =~ /oemboot/) {
 			$cmdL -> setBuildType ("oem");
 		}
