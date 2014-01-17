@@ -1243,7 +1243,7 @@ sub setup {
 	if ((! $initCache) && (@delete_packs)) {
 		$kiwi -> info ("Removing packages marked for deletion:\n");
 		foreach my $p (@delete_packs) {
-			$kiwi -> info (" --> $p\n");
+			$kiwi -> info ("--> $p\n");
 		}
 		if (! $manager -> removePackages (\@delete_packs)) {
 			$manager -> freeLock();
