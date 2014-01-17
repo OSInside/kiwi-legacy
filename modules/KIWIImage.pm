@@ -4111,22 +4111,27 @@ sub extractLinux {
 		# ----
 		my $src_kernel = "$imageTree/boot/vmlinuz";
 		if (! -e $src_kernel) {
-			$kiwi -> error  ("Can't find kernel for extraction: $!");
+			$kiwi -> error  ("--> Can't find kernel for extraction: $!");
 			$kiwi -> failed ();
 			return;
 		}
 		KIWIQX::qxx ("cp $src_kernel $file");
 		my $code = $? >> 8;
 		if ($code != 0) {
-			$kiwi -> error  ("Failed to extract kernel: $!");
+			$kiwi -> error  ("--> Failed to extract kernel: $!");
 			$kiwi -> failed ();
 			return;
 		}
-		my $kernel = KIWIQX::qxx ("kversion $file"); chomp $kernel;
+		my $kernel = KIWIQX::qxx ("kversion $file");
+		chomp $kernel;
 		if ($kernel eq "") {
 			$kernel = "no-version-found";
 		}
-		KIWIQX::qxx ("mv -f $file $file.$kernel && ln -s $shortfile.$kernel $file");
+		KIWIQX::qxx (
+			"mv -f $file $file.$kernel && ln -s $shortfile.$kernel $file"
+		);
+		$kiwi -> info("--> Found $kernel");
+		$kiwi -> done();
 		$this -> buildMD5Sum ("$shortfile.$kernel");
 		# /.../
 		# check for the Xen hypervisor and extract them as well
