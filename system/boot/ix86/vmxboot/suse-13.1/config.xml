@@ -68,7 +68,7 @@
 		<file name="lib/libcrc32c.ko"/>
 		<file name="lib/zlib_deflate/zlib_deflate.ko"/>
 	</drivers>
-	<drivers profiles="xen">
+	<drivers profiles="ec2,xen">
 		<file name="drivers/xen/*"/>
 	</drivers>
 	<repository type="yast2" status="replaceable">
@@ -89,8 +89,6 @@
 	</packages>
 	<packages type="image" profiles="ec2">
 		<package name="kernel-ec2"/>
-<!-- xen dom0 support only on x86_64 -->
-		<package name="xen" arch="x86_64"/>
 	</packages>
 	<packages type="image" profiles="desktop">
 		<package name="kernel-desktop" arch="x86_64"/>

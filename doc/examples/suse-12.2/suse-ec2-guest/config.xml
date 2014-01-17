@@ -7,13 +7,13 @@
 		<specification>openSUSE 12.2 ec2 guest system</specification>
 	</description>
 	<preferences>
-		<version>1.1.2</version>
+		<version>2.0.0</version>
 		<packagemanager>zypper</packagemanager>
 		<rpm-check-signatures>false</rpm-check-signatures>
 		<rpm-force>true</rpm-force>
 		<locale>en_US</locale>
 		<keytable>us.map.gz</keytable>
-		<type image="ext3" format="ec2">
+		<type image="vmx" filesystem="ext4" boot="vmxboot/suse-12.3" bootloader="grub" bootprofile="ec2" bootkernel="ec2" format="ec2">
 			<ec2config>
 				<ec2privatekeyfile>Path to EC2 private key file</ec2privatekeyfile>
 				<ec2certfile>Path to EC2 public certificate file</ec2certfile>

@@ -6048,9 +6048,15 @@ sub getGeometry {
 		$kiwi -> loginfo ($status);
 		return;
 	}
-	if (($firmware eq "efi")  ||
-		($firmware eq "uefi") ||
-		($firmware eq "vboot")
+	my $buildType = $xml -> getImageType();
+	my $imgFormat = $buildType -> getFormat();
+	if (! $imgFormat) {
+		$imgFormat = 'NA';
+	}
+	if (($firmware eq "efi")   ||
+		($firmware eq "uefi")  ||
+		($firmware eq "vboot") ||
+		($imgFormat eq "ec2")
 	) {
 		$label = 'gpt';
 	}
