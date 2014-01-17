@@ -134,29 +134,29 @@
 	<repository type="rpm-md" status="replaceable">
 		<source path="obs://SUSE:SLE-11:GA/standard"/>
 	</repository>
-	<packages type="image" profiles="std">
+	<packages type="bootstrap" profiles="std">
 		<package name="kernel-default"/>
 		<package name="kernel-default-base"/>
 	</packages>
-	<packages type="image" profiles="pae">
+	<packages type="bootstrap" profiles="pae">
 		<package name="kernel-pae" arch="i686"/>
 		<package name="kernel-pae-base" arch="i686"/>
 		<package name="kernel-pae" arch="i586"/>
 		<package name="kernel-pae-base" arch="i586"/>
 	</packages>
-	<packages type="image" profiles="rt">
+	<packages type="bootstrap" profiles="rt">
 		<package name="kernel-rt"/>
 		<package name="kernel-rt-base"/>
 	</packages>
-	<packages type="image" profiles="xenk">
+	<packages type="bootstrap" profiles="xenk">
 		<package name="kernel-xen"/>
 		<package name="kernel-xen-base"/>
 	</packages>
-	<packages type="image" profiles="xen">
+	<packages type="bootstrap" profiles="xen">
 <!-- xen dom0 support only on x86_64 -->
 		<package name="xen" arch="x86_64"/>
 	</packages>
-	<packages type="image" profiles="default,xen">
+	<packages type="bootstrap" profiles="default,xen">
 		<package name="atftp"/>
 		<package name="bc"/>
 		<package name="bind-libs"/>
@@ -189,7 +189,7 @@
 		<package name="tar"/>
 		<package name="util-linux"/>
 	</packages>
-	<packages type="image" profiles="diskless">
+	<packages type="bootstrap" profiles="diskless">
 		<package name="atftp"/>
 		<package name="bc"/>
 		<package name="bootsplash"/>
@@ -210,7 +210,7 @@
 		<package name="tar"/>
 		<package name="util-linux"/>
 	</packages>
-	<packages type="image" profiles="custom"><!-- empty custom section to allow bootincluding custom kernel --></packages>
+	<packages type="bootstrap" profiles="custom"><!-- empty custom section to allow bootincluding custom kernel --></packages>
 	<packages type="bootstrap">
 		<package name="dialog"/>
 		<package name="fbiterm"/>
