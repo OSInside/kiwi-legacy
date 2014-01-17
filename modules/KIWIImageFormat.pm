@@ -449,9 +449,9 @@ sub createEC2 {
 	#==========================================
 	# Default kernel modules
 	#------------------------------------------
-	# Building ec2 image the type must be a filesystem
-	my $fsType = $xml -> getImageType() -> getTypeName();
-	my $mods = "$fsType jbd xenblk";
+#	# Building ec2 image the type must be a filesystem
+#	my $fsType = $xml -> getImageType() -> getTypeName();
+#	my $mods = "$fsType jbd xenblk";
 	#==========================================
 	# Import AWS region kernel map
 	#------------------------------------------
@@ -496,16 +496,70 @@ sub createEC2 {
 		$kiwi -> failed ();
 		return;
 	}
+	my $loop;
 	if (($this->{targetDevice}) && (-b $this->{targetDevice})) {
 		$status = qxx ("mount $this->{targetDevice} $tmpdir 2>&1");
+		$status = KIWIQX::qxx ("mount $this->{targetDevice} $tmpdir 2>&1");
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> error  ("Couldn't loop mount $source: $status");
+			$kiwi -> failed ();
+			return;
+		}
 	} else {
-		$status = qxx ("mount -o loop $source $tmpdir 2>&1");
+		# Lots of hard coded assumptions needs to be cleaned up
+		$status = KIWIQX::qxx ("losetup -f --show $source 2>&1");
+		chomp $status;
+		$loop = $status;
+		$result = $? >> 8;
+		if ($result != 0) {
+			my $msg = 'Could not set up loop device ' . $status;
+			$kiwi -> error ($msg);
+			$kiwi -> failed ();
+			return;
+		}
+		$status = KIWIQX::qxx ("kpartx -sa $loop 2>&1");
+		$result = $? >> 8;
+		if ($result != 0) {
+			my $msg = 'Could not set up partitions on loop device ' . $status;
+			$kiwi -> error ($msg);
+			$kiwi -> failed ();
+			$this -> __clean_loop ($tmpdir, $loop);
+			return;
+		}
+		my $loopName = basename $loop;
+		my $mntCmd = "mount /dev/mapper/$loopName" . 'p1' . " $tmpdir 2>&1";
+		$status = KIWIQX::qxx ($mntCmd);
+		$result = $? >> 8;
+		if ($result != 0) {
+			my $msg = 'Could not mount the loop device: ' . $status;
+			$kiwi -> error ($msg);
+			$kiwi -> failed ();
+			$this -> __clean_loop ($tmpdir, $loop);
+			return;
+		}
 	}
-	$result = $? >> 8;
-	if ($result != 0) {
-		$kiwi -> error  ("Couldn't loop mount $source: $status");
+	#==========================================
+	# Some basic consistency checks
+	#------------------------------------------
+	if (! -f "$tmpdir/boot/linux.vmx") {
+		$kiwi -> error ('Could not find the kernel (linux.vmx) in the image');
 		$kiwi -> failed ();
+		$this -> __clean_loop ($tmpdir, $loop);
 		return;
+	}
+	if (! -f "$tmpdir/boot/initrd.vmx") {
+		$kiwi -> error ('Could not find the initrd (initrd.vmx) in the image');
+		$kiwi -> failed ();
+		$this -> __clean_loop ($tmpdir, $loop);
+		return;
+	}
+	#==========================================
+	# Remove stuff left behind by the EC2 kernel install
+	#------------------------------------------
+	my @ec2Files = glob "$tmpdir/boot/*ec2*";
+	for my $item (@ec2Files) {
+		unlink $item;
 	}
 	#==========================================
 	# setup Xen console as serial tty
@@ -515,7 +569,7 @@ sub createEC2 {
 	if (! $ITABFD -> open (">>$tmpdir/etc/inittab")) {
 		$kiwi -> error  ("Failed to open $tmpdir/etc/inittab: $!");
 		$kiwi -> failed ();
-		$this -> __clean_loop ($tmpdir);
+		$this -> __clean_loop ($tmpdir, $loop);
 		return;
 	}
 	print $ITABFD "\n";
@@ -525,124 +579,39 @@ sub createEC2 {
 	if (! $STTYFD -> open (">>$tmpdir/etc/securetty")) {
 		$kiwi -> error  ("Failed to open $tmpdir/etc/securetty: $!");
 		$kiwi -> failed ();
-		$this -> __clean_loop ($tmpdir);
+		$this -> __clean_loop ($tmpdir, $loop);
 		return;
 	}
 	print $STTYFD "\n";
 	print $STTYFD 'xvc0'."\n";
 	$STTYFD -> close();
+	my $title = $xml -> getImageDisplayName();
+	# Deliberately ignoring any additional user kernel arguments
+	my $args = 'xencons=xvc0 console=xvc0 multipath=off splash=silent '
+		. 'showopts';
 	#==========================================
-	# create initrd
+	# Setup menu.lst
 	#------------------------------------------
-	my $IRDFD = FileHandle -> new();
-	if (! $IRDFD -> open (">$tmpdir/create_initrd.sh")) {
-		$kiwi -> error  ("Failed to open $tmpdir/create_initrd.sh: $!");
+	my $MENULST = FileHandle -> new();
+	if (! $MENULST -> open (">$tmpdir/boot/grub/menu.lst")) {
+		kiwi -> error ("Could not create $tmpdir/boot/grub/menu.lst");
 		$kiwi -> failed ();
-		$this -> __clean_loop ($tmpdir);
+		$this -> __clean_loop ($tmpdir, $loop);
 		return;
 	}
-	print $IRDFD 'export rootdev=/dev/sda1'."\n";
-	print $IRDFD 'export rootfstype='.$fsType."\n";
-	print $IRDFD 'mknod /dev/sda1 b 8 1'."\n";
-	print $IRDFD 'touch /boot/.rebuild-initrd'."\n";
-	print $IRDFD 'if [ -f /lib/mkinitrd/setup/61-multipath.sh ]; then'."\n";
-	print $IRDFD '    mv /lib/mkinitrd/setup/61-multipath.sh /tmp'."\n";
-	print $IRDFD 'fi'."\n";
-	print $IRDFD 'sed -i -e \'s@^';
-	print $IRDFD $kmod;
-	print $IRDFD '="\(.*\)"@'.$kmod.'="\1 ';
-	print $IRDFD $mods;
-	print $IRDFD '"@\' ';
-	print $IRDFD $sysk;
-	print $IRDFD "\n";
-	print $IRDFD 'mkinitrd -A -B'."\n";
-	print $IRDFD 'if [ -f /tmp/61-multipath.sh ]; then'."\n";
-	print $IRDFD '    mv /tmp/61-multipath.sh /lib/mkinitrd/setup/'."\n";
-	print $IRDFD 'fi'."\n";
-	$IRDFD -> close();
-	qxx ("chmod u+x $tmpdir/create_initrd.sh");
-	$status = qxx ("chroot $tmpdir bash -c ./create_initrd.sh 2>&1");
-	$result = $? >> 8;
-	if ($result != 0) {
-		$kiwi -> error  ("Failed to create initrd: $status");
-		$kiwi -> failed ();
-		$this -> __clean_loop ($tmpdir);
-		return;
-	}
-	qxx ("rm -f $tmpdir/create_initrd.sh");
+	print $MENULST "serial --unit=0 --speed=9600\n";
+	print $MENULST "terminal --dumb serial\n";
+	print $MENULST "default 0\n";
+	print $MENULST "timeout 0\n";
+	print $MENULST "hiddenmenu\n";
+	print $MENULST "title $title\n";
+	print $MENULST "  root (hd0,0)\n";
+	print $MENULST "  kernel /boot/linux.vmx root=/dev/sda1 $args\n";
+	print $MENULST "  initrd /boot/initrd.vmx\n";
+	$MENULST -> close();
 	#==========================================
-	# create grub bootloader setup
+	# Setup bootloader config to properly generate initrd un kernel update
 	#------------------------------------------
-	# setup directory for grub loader
-	qxx ("mkdir -p $tmpdir/boot/grub");
-	# copy grub image files
-	qxx ("cp $tmpdir/usr/lib/grub/* $tmpdir/boot/grub 2>&1");
-	# boot/grub/device.map
-	my $DMAPFD = FileHandle -> new();
-	if (! $DMAPFD -> open (">$tmpdir/boot/grub/device.map")) {
-		$kiwi -> error  ("Failed to open $tmpdir/boot/grub/device.map: $!");
-		$kiwi -> failed ();
-		$this -> __clean_loop ($tmpdir);
-		return;
-	}
-	print $DMAPFD '(hd0)'."\t".'/dev/sda1'."\n";
-	$DMAPFD -> close();
-	# etc/grub.conf
-	my $GCFD = FileHandle -> new();
-	if (! $GCFD -> open (">$tmpdir/etc/grub.conf")) {
-		$kiwi -> error  ("Failed to open $tmpdir/etc/grub.conf: $!");
-		$kiwi -> failed ();
-		$this -> __clean_loop ($tmpdir);
-		return;
-	}
-	print $GCFD 'setup --stage2=/boot/grub/stage2 --force-lba (hd0) (hd0)'
-		. "\n";
-	print $GCFD 'quit'."\n";
-	$GCFD -> close();
-	# boot/grub/menu.lst
-	my $title= $xml -> getImageDisplayName();
-	my $args = "xencons=xvc0 console=xvc0 splash=silent showopts";
-	my $GMFD = FileHandle -> new();
-	if (! $GMFD -> open (">$tmpdir/create_bootmenu.sh")) {
-		$kiwi -> error  ("Failed to open $tmpdir/create_bootmenu.sh: $!");
-		$kiwi -> failed ();
-		return;
-	}
-	print $GMFD 'file=/boot/grub/menu.lst'."\n";
-	print $GMFD 'args="'.$args.'"'."\n";
-	print $GMFD 'echo "serial --unit=0 --speed=9600" > $file'."\n";
-	print $GMFD 'echo "terminal --dumb serial" >> $file'."\n";
-	print $GMFD 'echo "default 0" >> $file'."\n";
-	print $GMFD 'echo "timeout 0" >> $file'."\n";
-	print $GMFD 'echo "hiddenmenu" >> $file'."\n";
-	print $GMFD 'ls /lib/modules | while read D; do'."\n";
-	print $GMFD '   [ -d "/lib/modules/$D" ] || continue'."\n";
-	print $GMFD '   echo "$D"'."\n";
-	print $GMFD 'done | /usr/lib/rpm/rpmsort | tac | while read D; do'."\n";
-	print $GMFD '   for K in /boot/vmlinu[zx]-$D; do'."\n";
-	print $GMFD '      [ -f "$K" ] || continue'."\n";
-	print $GMFD '      echo >> $file'."\n";
-	print $GMFD '      echo "title '.$title.'" >> $file'."\n";
-	print $GMFD '      echo "    root (hd0)" >> $file'."\n";
-	print $GMFD '      echo "    kernel $K root=/dev/sda1 $args" >> $file';
-	print $GMFD "\n";
-	print $GMFD '      if [ -f "/boot/initrd-$D" ]; then'."\n";
-	print $GMFD '         echo "    initrd /boot/initrd-$D" >> $file'."\n";
-	print $GMFD '      fi'."\n";
-	print $GMFD '   done'."\n";
-	print $GMFD 'done'."\n";
-	$GMFD -> close();
-	qxx ("chmod u+x $tmpdir/create_bootmenu.sh");
-	$status = qxx ("chroot $tmpdir bash -c ./create_bootmenu.sh 2>&1");
-	$result = $? >> 8;
-	if ($result != 0) {
-		$kiwi -> error  ("Failed to create boot menu: $status");
-		$kiwi -> failed ();
-		$this -> __clean_loop ($tmpdir);
-		return;
-	}
-	qxx ("rm -f $tmpdir/create_bootmenu.sh");
-	# etc/sysconfig/bootloader
 	my $SYSBOOT_RFD = FileHandle -> new();
 	if ($SYSBOOT_RFD -> open ("$tmpdir/etc/sysconfig/bootloader")) {
 		my @lines = <$SYSBOOT_RFD>;
@@ -660,38 +629,16 @@ sub createEC2 {
 		if (! $SYSBOOT_WFD -> open (">$tmpdir/etc/sysconfig/bootloader")) {
 			$kiwi -> error  ("Failed to create sysconfig/bootloader: $!");
 			$kiwi -> failed ();
-			$this -> __clean_loop ($tmpdir);
+			$this -> __clean_loop ($tmpdir, $loop);
 			return;
 		}
 		print $SYSBOOT_WFD @lines;
 		$SYSBOOT_WFD -> close();
 	}
 	#==========================================
-	# setup fstab
-	#------------------------------------------
-	$this -> __copy_origin ("$tmpdir/etc/fstab");
-	my $FSTABFD = FileHandle -> new();
-	if (! $FSTABFD -> open  ("+<$tmpdir/etc/fstab")) {
-		$kiwi -> error  ("Failed to open $tmpdir/etc/fstab: $!");
-		$kiwi -> failed ();
-		$this -> __clean_loop ($tmpdir);
-		return;
-	}
-	my $rootfs=0;
-	while (my $line = <$FSTABFD>) {
-		my @entries = split (/\s+/,$line);
-		if ($entries[1] eq "/") {
-			$rootfs=1; last;
-		}
-	}
-	if (! $rootfs) {
-		print $FSTABFD "/dev/sda1 / $fsType defaults 0 0"."\n";
-	}
-	$FSTABFD -> close();
-	#==========================================
 	# cleanup loop
 	#------------------------------------------
-	$this -> __clean_loop ($tmpdir);
+	$this -> __clean_loop ($tmpdir, $loop);
 	#==========================================
 	# Rebuild md5 sum
 	#------------------------------------------
@@ -765,7 +712,7 @@ sub createEC2 {
 		. "-c $certFl "
 		. "-u $acctNo "
 		. "-p $aminame "
-		. '--block-device-mapping ami=sda1,root=/dev/sda1';
+		. '--block-device-mapping ami=sda,root=/dev/sda1';
 	my $ec2Regions = $ec2Config -> getRegions();
 	my @regions;
 	if (! $ec2Regions) {
@@ -1758,9 +1705,15 @@ sub __copy_origin {
 sub __clean_loop {
 	my $this = shift;
 	my $dir = shift;
-	qxx ("umount $dir/sys 2>&1");
-	qxx ("umount $dir 2>&1");
-	qxx ("rmdir  $dir 2>&1");
+	my $loop = shift;
+	KIWIQX::qxx ("umount $dir/sys 2>&1");
+	KIWIQX::qxx ("umount $dir 2>&1");
+	# ugly hack to prevent breakage, clean up needed
+	if ($loop) {
+		KIWIQX::qxx ("kpartx -sd $loop 2>&1");
+		KIWIQX::qxx ("losetup -d $loop 2>&1");
+	}
+	KIWIQX::qxx ("rmdir  $dir 2>&1");
 	return;
 }
 

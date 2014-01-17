@@ -455,23 +455,22 @@ sub test_displayName {
 }
 
 #==========================================
-# test_ec2IsFileSys
+# test_ec2IsVMX
 #------------------------------------------
-sub test_ec2IsFileSys {
+sub test_ec2IsVMX {
 	# ...
-	# Test that the image type for the EC2 format is a file system image
+	# Test that the image type for the EC2 format is a vmx image
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my @invalidConfigs = $this -> __getInvalidFiles('ec2IsFS');
+	my @invalidConfigs = $this -> __getInvalidFiles('ec2IsVMX');
 	for my $iConfFile (@invalidConfigs) {
 		my $validator = $this -> __getValidator($iConfFile);
 		$validator -> validate();
 		my $msg = $kiwi -> getMessage();
 		my $expectedMsg = 'For EC2 image creation the image type must be '
-			. 'one of the following supported file systems: ext2 ext3 '
-			. 'ext4 reiserfs';
-		my @supportedFS = qw /ext2 ext3 ext4 reiserfs/;
+			. 'of vmx type. Unless you are building an HVM image '
+			. 'supply the bootprofile and bootkernel attributes. ';;
 		$this -> assert_str_equals($expectedMsg, $msg);
 		my $msgT = $kiwi -> getMessageType();
 		$this -> assert_str_equals('error', $msgT);
@@ -480,7 +479,7 @@ sub test_ec2IsFileSys {
 		# Test this condition last to get potential error messages
 		$this -> assert_not_null($validator);
 	}
-	my @validConfigs = $this -> __getValidFiles('ec2IsFS');
+	my @validConfigs = $this -> __getValidFiles('ec2IsVMX');
 	$this -> __verifyValid(@validConfigs);
 	return;
 }

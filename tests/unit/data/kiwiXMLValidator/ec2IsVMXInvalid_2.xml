@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="5.8" name="suse-12.3-ec2-guest">
+<image schemaversion="5.7" name="suse-11.3-ec2-guest">
 	<description type="system">
-		<author>Marcus Schäfer</author>
-		<contact>ms@novell.com</contact>
-		<specification>openSUSE 12.3 ec2 guest system</specification>
+		<author>Robert Schweikert</author>
+		<contact>rjschwei@suse.com</contact>
+		<specification>test ec2 type specification</specification>
 	</description>
 	<preferences>
-		<version>2.0.0</version>
+		<version>1.1.2</version>
 		<packagemanager>zypper</packagemanager>
 		<rpm-check-signatures>false</rpm-check-signatures>
 		<rpm-force>true</rpm-force>
 		<locale>en_US</locale>
 		<keytable>us.map.gz</keytable>
-		<type image="vmx" filesystem="ext4" boot="vmxboot/suse-12.3" bootloader="grub" bootprofile="ec2" bootkernel="ec2" format="ec2">
+		<type image="ext3" format="ec2">
 			<ec2config>
 				<ec2privatekeyfile>Path to EC2 private key file</ec2privatekeyfile>
 				<ec2certfile>Path to EC2 public certificate file</ec2certfile>
 				<ec2accountnr>12345678911</ec2accountnr>
-				<ec2region>EU-West</ec2region>
+				<ec2region>US-West</ec2region>
 			</ec2config>
 		</type>
 	</preferences>
@@ -26,24 +26,24 @@
 		<user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
 	</users>
 	<repository type="yast2">
-		<source path="opensuse://12.3/repo/oss/"/>
+		<source path="/tmp"/>
 	</repository>
-	<repository type="yast2">
-		<source path="opensuse://12.3/repo/non-oss"/>
+	<repository type="rpm-md">
+		<source path="/tmp"/>
 	</repository>
 	<packages type="image">
+		<package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>
+		<package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
 		<package name="ifplugd"/>
 		<package name="kernel-ec2"/>
 		<package name="suse-ami-tools"/>
 		<package name="vim"/>
 		<package name="xen-tools-domU"/>
 		<package name="xen"/>
-		<package name="grub"/>
 		<namedCollection name="base"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>
 		<package name="glibc-locale"/>
-		<package name="module-init-tools"/>
 	</packages>
 </image>

@@ -4024,6 +4024,17 @@ function searchBIOSBootDevice {
 	local mbrMB
 	local mbrI
 	local try_count=0
+    #======================================
+    # Check root variable
+    #--------------------------------------
+    if [ ! -z "$root" ];then
+        export biosBootDevice=$(dn $root)
+        export LOCAL_BOOT=yes
+        if [ ! -e /config.partids ];then
+            echo "kiwi_RootPart=1" > /config.partids
+        fi
+        return 0
+    fi
 	#======================================
 	# Read mbrid from initrd
 	#--------------------------------------
