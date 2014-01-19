@@ -488,6 +488,7 @@ sub createEC2 {
 	my $kiwi   = $this->{kiwi};
 	my $source = $this->{image};
 	my $format = $this->{format};
+	my $cmdl   = $this->{cmdL};
 	my $target = $source;
 	my $kmod   = "INITRD_MODULES";
 	my $sysk   = "/etc/sysconfig/kernel";
@@ -584,42 +585,62 @@ sub createEC2 {
 	#==========================================
 	# create initrd
 	#------------------------------------------
-	my $IRDFD = FileHandle -> new();
-	if (! $IRDFD -> open (">$tmpdir/create_initrd.sh")) {
-		$kiwi -> error  ("Failed to open $tmpdir/create_initrd.sh: $!");
-		$kiwi -> failed ();
-		$this -> __clean_loop ($tmpdir);
-		return;
-	}
-	print $IRDFD 'export rootdev=/dev/sda1'."\n";
-	print $IRDFD 'export rootfstype='.$fsType."\n";
-	print $IRDFD 'mknod /dev/sda1 b 8 1'."\n";
-	print $IRDFD 'touch /boot/.rebuild-initrd'."\n";
-	print $IRDFD 'if [ -f /lib/mkinitrd/setup/61-multipath.sh ]; then'."\n";
-	print $IRDFD '    mv /lib/mkinitrd/setup/61-multipath.sh /tmp'."\n";
-	print $IRDFD 'fi'."\n";
-	print $IRDFD 'sed -i -e \'s@^';
-	print $IRDFD $kmod;
-	print $IRDFD '="\(.*\)"@'.$kmod.'="\1 ';
-	print $IRDFD $mods;
-	print $IRDFD '"@\' ';
-	print $IRDFD $sysk;
-	print $IRDFD "\n";
-	print $IRDFD 'mkinitrd -A -B'."\n";
-	print $IRDFD 'if [ -f /tmp/61-multipath.sh ]; then'."\n";
-	print $IRDFD '    mv /tmp/61-multipath.sh /lib/mkinitrd/setup/'."\n";
-	print $IRDFD 'fi'."\n";
-	$IRDFD -> close();
-	KIWIQX::qxx ("chmod u+x $tmpdir/create_initrd.sh");
-	$status = KIWIQX::qxx ("chroot $tmpdir bash -c ./create_initrd.sh 2>&1");
+	my $global  = KIWIGlobals -> instance();
+	#==========================================
+	# Create tmp dir for boot image creation
+	#------------------------------------------
+	my $irddir = KIWIQX::qxx ("mktemp -q -d $destdir/boot-ec2.XXXXXX");
 	$result = $? >> 8;
 	if ($result != 0) {
-		$kiwi -> error  ("Failed to create initrd: $status");
+		$kiwi -> error  ("Couldn't create tmp dir: $irddir: $!");
 		$kiwi -> failed ();
 		$this -> __clean_loop ($tmpdir);
 		return;
 	}
-	KIWIQX::qxx ("rm -f $tmpdir/create_initrd.sh");
+	chomp $irddir;
+	#==========================================
+	# Setup prepare
+	#------------------------------------------
+	my $rootTarget = "$irddir/kiwi-ec2boot-$$";
+	my $kic = KIWIImageCreator -> new ($cmdl);
+	if (! $kic -> prepareBootImage(
+		$xml,$rootTarget,$destdir
+	)) {
+		$this -> __clean_loop ($tmpdir);
+		KIWIQX::qxx ("rm -rf $irddir");
+		return;
+	}
+	#==========================================
+	# Setup create
+	#------------------------------------------
+	if (! $kic -> createBootImage(
+		$xml,$rootTarget,$destdir
+	)) {
+		$this -> __clean_loop ($tmpdir);
+		KIWIQX::qxx ("rm -rf $irddir");
+		return;
+	}
+	#==========================================
+	# Copy initrd into ec2 rootfs
+	#------------------------------------------
+	my $bootImageName = $kic -> getBootImageName();
+	my $kernelImage = $destdir."/".$bootImageName.".kernel";
+	my $initrdImage = $destdir."/".$bootImageName.".gz";
+	my $kernelVersion = KIWIQX::qxx ("kversion $kernelImage");
+	chomp $kernelVersion;
+	my $initrdDestination = $tmpdir."/boot/initrd-".$kernelVersion;
+	$status = KIWIQX::qxx ("cp $initrdImage $initrdDestination 2>&1");
+	$result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> error  (
+			"Couldn't copy initrd to EC2 root filesystem: $status"
+		);
+		$kiwi -> failed ();
+		$this -> __clean_loop ($tmpdir);
+		KIWIQX::qxx ("rm -rf $irddir");
+		return;
+	}
+	KIWIQX::qxx ("rm -rf $irddir");
 	#==========================================
 	# create grub bootloader setup
 	#------------------------------------------
@@ -746,6 +767,7 @@ sub createEC2 {
 	#==========================================
 	# Rebuild md5 sum
 	#------------------------------------------
+	$kiwi -> info ("Rebuilding system image MD5 sum, content has changed\n");
 	my $file = $source;
 	if (($this->{targetDevice}) && (-b $this->{targetDevice})) {
 		$file = $this->{targetDevice};
