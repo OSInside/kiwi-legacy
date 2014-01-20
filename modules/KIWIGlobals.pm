@@ -171,19 +171,24 @@ sub mount {
 	# Check for DISK file / device
 	#------------------------------------------
 	if ((-f $source) || (-b $source)) {
-		$status= KIWIQX::qxx ("blkid $source 2>&1");
-		$result= $? >> 8;
-		if ($result != 0) {
+		$this->{isdisk} = 0;
+		$status= KIWIQX::qxx ("blkid $source -s TYPE -o value 2>/dev/null");
+		if (! $status) {
 			# no block id information, check deeper for filesystem
 			%fsattr = $this -> checkFileSystem ($source);
 			$type   = $fsattr{type};
 			if (($type) && ($type ne "auto")) {
-				$result = 0;
+				$status = $type;
 			}
 		}
-		if ($result != 0) {
-			# no block id information, handle this as a disk 
-			$this->{isdisk} = 1;
+		if (! $status) {
+			$status= KIWIQX::qxx ("blkid $source -s PTTYPE -o value 2>/dev/null");
+			if ($status) {
+				# got partition table ID, handle source as disk
+				$this->{isdisk} = 1;
+			}
+		}
+		if ($this->{isdisk}) {
 			if (-b $source) {
 				my $pdev = $this -> getPartDevice ($source,2);
 				if (! -b $pdev) {
