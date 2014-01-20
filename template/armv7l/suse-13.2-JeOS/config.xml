@@ -35,8 +35,8 @@
 	<users group="root">
 		<user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
 	</users>
-	<repository type="yast2" profiles="raspberryFlavour">
-		<source path="obs://devel:ARM:Factory:Contrib:RaspberryPi:upstream/standard"/>
+	<repository type="rpm-md" profiles="raspberryFlavour">
+		<source path="http://download.opensuse.org/repositories/devel:/ARM:/Factory:/Contrib:/RaspberryPi/standard"/>
 	</repository>
 	<repository type="rpm-md" priority="5" profiles="raspberryFlavour">
 		<source path="obs://devel:ARM:Factory:Contrib:RaspberryPi/standard"/>
