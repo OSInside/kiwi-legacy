@@ -4000,7 +4000,7 @@ sub setupBootLoaderStages {
 			$kiwi -> warning ("No grub stage files found in boot image");
 			$kiwi -> skipped ();
 			$kiwi -> info    ("Trying to use grub stages from local machine");
-			$status = KIWIQX::qxx ( "cp /usr/lib/grub/* $tmpdir/boot/grub 2>&1" );
+			$status = KIWIQX::qxx ("cp /usr/lib/grub/* $tmpdir/boot/grub 2>&1");
 			$result = $? >> 8;
 			if (($result == 0) && (defined $type) && ($type eq "iso")) {
 				my $src = "$tmpdir/boot/grub/stage2_eltorito";
@@ -4013,6 +4013,7 @@ sub setupBootLoaderStages {
 				$kiwi -> failed ();
 				return;
 			}
+			$kiwi -> done();
 		}
 	}
 	#==========================================
