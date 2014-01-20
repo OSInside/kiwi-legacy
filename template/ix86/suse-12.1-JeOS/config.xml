@@ -10,6 +10,7 @@
 	</description>
 	<profiles>
 		<profile name="xenFlavour" description="VMX with Xen kernel"/>
+		<profile name="ec2Flavour" description="VMX with EC2/Xen kernel"/>
 		<profile name="vmxFlavour" description="VMX with default kernel" import="true"/>
 	</profiles>
 	<preferences>
@@ -23,6 +24,9 @@
 		<rpm-excludedocs>true</rpm-excludedocs>
 		<bootsplash-theme>openSUSE</bootsplash-theme>
 		<bootloader-theme>openSUSE</bootloader-theme>
+	</preferences>
+	<preferences profiles="ec2Flavour">
+		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-13.2" bootprofile="ec2" bootkernel="ec2k" bootloader="grub" kernelcmdline="xencons=xvc0 console=xvc0 multipath=off splash=silent showopts"/>
 	</preferences>
 	<preferences profiles="xenFlavour">
 		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-12.1" bootprofile="xen" bootkernel="xenk">
@@ -77,13 +81,21 @@
 		<namedCollection name="base"/>
 		<opensuseProduct name="openSUSE"/>
 	</packages>
+	<packages type="image" profiles="ec2Flavour">
+		<package name="kernel-ec2" replaces="kernel-default"/>
+		<package name="kernel-ec2" replaces="kernel-xen"/>
+		<package name="xen-tools" arch="x86_64" replaces=""/>
+		<package name="xen" arch="x86_64" replaces=""/>
+	</packages>
 	<packages type="image" profiles="xenFlavour">
 		<package name="kernel-xen" replaces="kernel-default"/>
+		<package name="kernel-xen" replaces="kernel-ec2"/>
 		<package name="xen-tools" arch="x86_64" replaces=""/>
 		<package name="xen" arch="x86_64" replaces=""/>
 	</packages>
 	<packages type="image" profiles="vmxFlavour">
 		<package name="kernel-default" replaces="kernel-xen"/>
+		<package name="kernel-default" replaces="kernel-ec2"/>
 		<package name="kernel-default" replaces="xen-tools"/>
 		<package name="kernel-default" replaces="xen"/>
 	</packages>

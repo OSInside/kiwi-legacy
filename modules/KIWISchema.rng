@@ -469,79 +469,6 @@ the directory is not specified on the command line</a:documentation>
   </div>
   <!--
     ==========================================
-    common element <ec2accountnr>
-    
-  -->
-  <div>
-    <define name="k.ec2accountnr.attlist">
-      <empty/>
-    </define>
-    <define name="k.ec2accountnr">
-      <element name="ec2accountnr">
-        <a:documentation>The user's EC2 user ID (Note: AWS account number, NOT Access Key ID)</a:documentation>
-        <ref name="k.ec2accountnr.attlist"/>
-        <data type="nonNegativeInteger"/>
-      </element>
-    </define>
-  </div>
-  <!--
-    ==========================================
-    common element <ec2certfile>
-    
-  -->
-  <div>
-    <define name="k.ec2certfile.attlist">
-      <empty/>
-    </define>
-    <define name="k.ec2certfile">
-      <element name="ec2certfile">
-        <a:documentation>Path to the AWS user's PEM encoded RSA pubkey certificate file
-cert-*.pem</a:documentation>
-        <ref name="k.ec2certfile.attlist"/>
-        <text/>
-      </element>
-    </define>
-  </div>
-  <!--
-    ==========================================
-    common element <ec2privatekeyfile>
-    
-  -->
-  <div>
-    <define name="k.ec2privatekeyfile.attlist">
-      <empty/>
-    </define>
-    <define name="k.ec2privatekeyfile">
-      <element name="ec2privatekeyfile">
-        <a:documentation>Path to the AWS user's PEM encoded RSA private key file pk-*.pem</a:documentation>
-        <ref name="k.ec2privatekeyfile.attlist"/>
-        <text/>
-      </element>
-    </define>
-  </div>
-  <!--
-    ==========================================
-    common element <ec2region>
-    
-  -->
-  <div>
-    <define name="k.ec2region.attlist">
-      <empty/>
-    </define>
-    <define name="k.ec2region">
-      <element name="ec2region">
-        <a:documentation>Specify the region/availability zone</a:documentation>
-        <db:para>Specify the region/availability zone in EC2 for this image.
-Values are limited to the EC2 recognized zones:
-AP-Northeast, AP-Southeast, AP-Southeast2, EU-West,,
- SA-East, US-East, US-West, and US-West2</db:para>
-        <ref name="k.ec2region.attlist"/>
-        <text/>
-      </element>
-    </define>
-  </div>
-  <!--
-    ==========================================
     common element <except>
     
   -->
@@ -2230,6 +2157,7 @@ the disk layout and the partition table type. By default
 the standard x86 bios firmware setup is used</a:documentation>
         <choice>
           <value>bios</value>
+          <value>ec2</value>
           <value>efi</value>
           <value>uefi</value>
           <value>vboot</value>
@@ -2265,7 +2193,11 @@ or clic and applies to the iso type only</a:documentation>
     </define>
     <define name="k.type.format.attribute">
       <attribute name="format">
-        <a:documentation>Specifies the format of the virtual disk.</a:documentation>
+        <a:documentation>Specifies the format of the virtual disk.
+The ec2 value is deprecated and no longer supported
+It remains in the schema to allow us to print a better
+Error message than we receive from the parser.
+To be remove from here by the end of 2014</a:documentation>
         <choice>
           <value>ec2</value>
           <value>ovf</value>
@@ -2572,9 +2504,6 @@ into the master block. There is space for 32 characters.</a:documentation>
         <a:documentation>The Image Type of the Logical Extend</a:documentation>
         <interleave>
           <ref name="k.type.attlist"/>
-          <optional>
-            <ref name="k.ec2config"/>
-          </optional>
           <optional>
             <ref name="k.machine"/>
           </optional>
@@ -3379,38 +3308,6 @@ carriage return or combinations are converted to spaces
         <interleave>
           <ref name="k.chroot.attlist"/>
           <text/>
-        </interleave>
-      </element>
-    </define>
-  </div>
-  <!--
-    ==========================================
-    main block: <ec2config>
-    
-  -->
-  <div>
-    <define name="k.ec2config.attlist">
-      <empty/>
-    </define>
-    <define name="k.ec2config">
-      <element name="ec2config">
-        <a:documentation>Specifies the AWS EC2 configuration section</a:documentation>
-        <db:para>The ec2config element specifies the EC2 image
-configuration options.</db:para>
-        <interleave>
-          <ref name="k.ec2config.attlist"/>
-          <optional>
-            <ref name="k.ec2accountnr"/>
-          </optional>
-          <optional>
-            <ref name="k.ec2certfile"/>
-          </optional>
-          <optional>
-            <ref name="k.ec2privatekeyfile"/>
-          </optional>
-          <zeroOrMore>
-            <ref name="k.ec2region"/>
-          </zeroOrMore>
         </interleave>
       </element>
     </define>

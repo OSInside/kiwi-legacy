@@ -28,7 +28,6 @@ use KIWIXML;
 use KIWIXMLPackageArchiveData;
 use KIWIXMLDescriptionData;
 use KIWIXMLDriverData;
-use KIWIXMLEC2ConfigData;
 use KIWIXMLOEMConfigData;
 use KIWIXMLPackageData;
 use KIWIXMLPackageCollectData;
@@ -780,10 +779,10 @@ sub test_addDriversNoArgs {
 # test_addDriversNoDups
 #------------------------------------------
 sub test_addDriversNoDups {
-    # ...
-    # Verify that no duplicates are added
-    # ---
-    my $this = shift;
+	# ...
+	# Verify that no duplicates are added
+	# ---
+	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $confDir = $this->{dataDir} . 'driversConfig';
 	my $xml = KIWIXML -> new(
@@ -797,26 +796,26 @@ sub test_addDriversNoDups {
 	}
 	$xml = $xml -> addDrivers(\@drvsToAdd, 'default');
 	my $msg = $kiwi -> getMessage();
-    my $expected = "Added following drivers:\n"
-        . "  --> epat\n"
-        . "  --> e100\n";
+	my $expected = "Added following drivers:\n"
+		. "  --> epat\n"
+		. "  --> e100\n";
 	$this -> assert_str_equals($expected, $msg);
-    my $msgT = $kiwi -> getMessageType();
+	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('info', $msgT);
 	my $state = $kiwi -> getState();
 	$this -> assert_not_null($xml);
 	# Verify this has the expected results
 	my @defDrvs = qw /e1000 rs232 usb/;
 	my @expectedDrvs = @defDrvs;
-    push @expectedDrvs, 'epat';
-    push @expectedDrvs, 'e100';
+	push @expectedDrvs, 'epat';
+	push @expectedDrvs, 'e100';
 	my @drvsUsed = @{$xml -> getDrivers()};
 	my @drvNamesUsed = ();
 	for my $drv (@drvsUsed) {
 		push @drvNamesUsed, $drv -> getName();
 	}
 	$this -> assert_array_equal(\@drvNamesUsed, \@expectedDrvs);
-    return;
+	return;
 }
 
 #==========================================
@@ -853,10 +852,10 @@ sub test_addDriversToCurrentProf {
 	}
 	$xml = $xml -> addDrivers(\@drvsToAdd);
 	$msg = $kiwi -> getMessage();
-    $expected = "Added following drivers:\n"
-        . "  --> vboxsf\n"
-        . "  --> epat\n"
-        . "  --> dcdbas\n";
+	$expected = "Added following drivers:\n"
+		. "  --> vboxsf\n"
+		. "  --> epat\n"
+		. "  --> dcdbas\n";
 	$this -> assert_str_equals($expected, $msg);
 	$msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('info', $msgT);
@@ -922,10 +921,10 @@ sub test_addDriversToDefault {
 	}
 	$xml = $xml -> addDrivers(\@drvsToAdd, 'default');
 	my $msg = $kiwi -> getMessage();
-    my $expected = "Added following drivers:\n"
-        . "  --> vboxsf\n"
-        . "  --> epat\n"
-        . "  --> dcdbas\n";
+	my $expected = "Added following drivers:\n"
+		. "  --> vboxsf\n"
+		. "  --> epat\n"
+		. "  --> dcdbas\n";
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('info', $msgT);
@@ -3690,7 +3689,7 @@ sub test_discardReplacableRepos {
 	$this -> assert_str_equals('completed', $state);
 	$repos = $xml -> getRepositories();
 	# Check that the fixed repo remains
-	@expectedAlia = ('ec2');
+	@expectedAlia = ('ola');
 	@alia = ();
 	for my $repo (@{$repos}) {
 		push @alia, $repo -> getAlias();
@@ -3707,7 +3706,7 @@ sub test_discardReplacableRepos {
 	$this -> assert_str_equals('completed', $state);
 	$repos = $xml -> getRepositories();
 	# VErify no additional repo is present
-	@expectedAlia = ('ec2');
+	@expectedAlia = ('ola');
 	@alia = ();
 	for my $repo (@{$repos}) {
 		push @alia, $repo -> getAlias();
@@ -4268,35 +4267,6 @@ sub test_getDUPackages {
 		push @names, $pkg -> getName();
 	}
 	$this -> assert_array_equal(\@expected, \@names);
-	return;
-}
-
-#==========================================
-# test_getEC2Config
-#------------------------------------------
-sub test_getEC2Config {
-	# ...
-	# Verify proper return of EC2 configuration settings
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my $confDir = $this->{dataDir} . 'ec2ConfigSettings';
-	my $xml = KIWIXML -> new(
-		$confDir, undef, undef,$this->{cmdL}
-	);
-	my $ec2ConfObj = $xml -> getEC2Config();
-	my $msg = $kiwi -> getMessage();
-	$this -> assert_str_equals('No messages set', $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('none', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('No state set', $state);
-	# Test these conditions last to get potential error messages
-	my $acctNr = $ec2ConfObj -> getAccountNumber();
-	$this -> assert_str_equals('12345678911', $acctNr);
-	my $regions = $ec2ConfObj -> getRegions();
-	my @expectedRegions = qw / EU-West US-West /;
-	$this -> assert_array_equal(\@expectedRegions, $regions);
 	return;
 }
 
