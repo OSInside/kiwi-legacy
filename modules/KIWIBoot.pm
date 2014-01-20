@@ -928,6 +928,9 @@ sub setupInstallCD {
 	KIWIQX::qxx ("mv $cfg_ext $cfg_iso 2>&1");
 	KIWIQX::qxx ("ln $tmpdir/boot/initrd $tmpdir/boot/syslinux");
 	KIWIQX::qxx ("ln $tmpdir/boot/linux  $tmpdir/boot/syslinux");
+	if (-e "$tmpdir/boot/xen.gz") {
+		KIWIQX::qxx ("ln $tmpdir/boot/xen.gz  $tmpdir/boot/syslinux");
+	}
 	KIWIQX::qxx ("mv $tmpdir/boot/syslinux $tmpdir/boot/$isoarch/loader");
 	#==========================================
 	# setup ISO options
@@ -4875,25 +4878,30 @@ sub setupBootLoaderConfiguration {
 				print $FD "append initrd=/boot/initrd ";
 				print $FD "vga=$vga splash=silent";
 			}
+			print $FD $cmdline;
 		} else {
+			chomp $cmdline;
 			if ($iso) {
-				$kiwi -> failed ();
-				$kiwi -> error  ("*** syslinux: Xen cdinst not supported ***");
-				$kiwi -> failed ();
-				return;
+				print $FD "kernel mboot.c32\n";
+				print $FD "append xen.gz --- linux ";
+				print $FD "vga=$vga splash=silent ";
+				print $FD "ramdisk_size=512000 ramdisk_blocksize=4096 ";
+				print $FD "cdinst=1 kiwi_hybrid=1${cmdline} ";
+				print $FD "--- initrd showopts"."\n";
 			} elsif (($topic=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
-				$kiwi -> failed ();
-				$kiwi -> error  ("*** syslinux: Xen boot not supported ***");
-				$kiwi -> failed ();
-				return;
+				print $FD "kernel mboot.c32\n";
+				print $FD "append boot/xen.gz --- boot/linux.vmx ";
+				print $FD "ramdisk_size=512000 ramdisk_blocksize=4096 ";
+				print $FD "vga=$vga splash=silent${cmdline} ";
+				print $FD "--- boot/initrd.vmx showopts"."\n";
 			} else {
-				$kiwi -> failed ();
-				$kiwi -> error  ("*** syslinux: Xen boot not supported ***");
-				$kiwi -> failed ();
-				return;
+				print $FD "kernel mboot.c32\n";
+				print $FD "append boot/xen.gz --- boot/linux ";
+				print $FD "ramdisk_size=512000 ramdisk_blocksize=4096 ";
+				print $FD "vga=$vga splash=silent${cmdline} ";
+				print $FD "--- boot/initrd showopts"."\n";
 			}
 		}
-		print $FD $cmdline;
 		#==========================================
 		# Failsafe boot
 		#------------------------------------------
@@ -4926,32 +4934,30 @@ sub setupBootLoaderConfiguration {
 					print $FD "vga=$vga splash=silent";
 				}
 				print $FD " @failsafe";
+				print $FD $cmdline;
 			} else {
+				chomp $cmdline;
 				if ($iso) {
-					$kiwi -> failed ();
-					$kiwi -> error  (
-						"*** syslinux: Xen cdinst not supported ***"
-					);
-					$kiwi -> failed ();
-					return;
+					print $FD "kernel mboot.c32\n";
+					print $FD "append xen.gz --- linux ";
+					print $FD "vga=$vga splash=silent ";
+					print $FD "ramdisk_size=512000 ramdisk_blocksize=4096 ";
+					print $FD "cdinst=1 kiwi_hybrid=1 @failsafe${cmdline} ";
+					print $FD "--- initrd showopts"."\n";
 				} elsif (($topic=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
-					$kiwi -> failed ();
-					$kiwi -> error  (
-						"*** syslinux: Xen boot not supported ***"
-					);
-					$kiwi -> failed ();
-					return;
+					print $FD "kernel mboot.c32\n";
+					print $FD "append boot/xen.gz --- boot/linux.vmx ";
+					print $FD "ramdisk_size=512000 ramdisk_blocksize=4096 ";
+					print $FD "vga=$vga splash=silent @failsafe${cmdline} ";
+					print $FD "--- boot/initrd.vmx showopts"."\n";
 				} else {
-					$kiwi -> failed ();
-					$kiwi -> error  (
-						"*** syslinux: Xen boot not supported ***"
-					);
-					$kiwi -> failed ();
-					return;
+					print $FD "kernel mboot.c32\n";
+					print $FD "append boot/xen.gz --- boot/linux ";
+					print $FD "ramdisk_size=512000 ramdisk_blocksize=4096 ";
+					print $FD "vga=$vga splash=silent @failsafe${cmdline} ";
+					print $FD "--- boot/initrd showopts"."\n";
 				}
-				print $FD " @failsafe";
 			}
-			print $FD $cmdline;
 		}
 		$FD -> close();
 		#==========================================
