@@ -8,6 +8,7 @@
 	</description>
 	<profiles>
 		<profile name="vmxFlavour" description="VMX with default kernel" import="true"/>
+		<profile name="ec2Flavour" description="VMX with EC2/Xen kernel"/>
 		<profile name="vmxFlavour-uefi" description="VMX with default kernel and UEFI support"/>
 		<profile name="xenFlavour" description="VMX with Xen kernel"/>
 		<profile name="xenFlavour-uefi" description="VMX with Xen kernel and UEFI support"/>
@@ -23,6 +24,9 @@
 		<keytable>us.map.gz</keytable>
 		<timezone>Europe/Berlin</timezone>
 		<hwclock>utc</hwclock>
+	</preferences>
+	<preferences profiles="ec2Flavour">
+		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES11" bootprofile="xen" bootkernel="ec2" bootloader="grub" kernelcmdline="xencons=xvc0 console=xvc0 multipath=off splash=silent showopts"/>
 	</preferences>
 	<preferences profiles="xenFlavour">
 		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES11" bootprofile="xen" bootkernel="xenk">
@@ -169,14 +173,26 @@
 	<packages type="image" profiles="vmxFlavour-s390">
 		<package name="zipl"/>
 	</packages>
+	<packages type="image" profiles="ec2Flavour">
+		<package name="kernel-ec2" replaces="kernel-xen"/>
+		<package name="kernel-ec2" replaces="kernel-xen-base"/>
+		<package name="kernel-ec2" replaces="kernel-default"/>
+		<package name="kernel-ec2-base" replaces="kernel-default-base"/>
+		<package name="xen-tools-domU" arch="x86_64" replaces=""/>
+		<package name="xen" arch="x86_64" replaces=""/>
+	</packages>
 	<packages type="image" profiles="xenFlavour,xenFlavour-uefi">
+		<package name="kernel-xen" replaces="kernel-ec2"/>
+		<package name="kernel-xen" replaces="kernel-ec2-base"/>
 		<package name="kernel-xen" replaces="kernel-default"/>
 		<package name="kernel-xen-base" replaces="kernel-default-base"/>
 		<package name="xen-tools-domU" replaces=""/>
 		<package name="xen" replaces=""/>
 	</packages>
 	<packages type="image" profiles="vmxFlavour,vmxFlavour-s390,vmxFlavour-uefi">
+		<package name="kernel-default" replaces="kernel-ec2"/>
 		<package name="kernel-default" replaces="kernel-xen"/>
+		<package name="kernel-default-base" replaces="kernel-ec2-base"/>
 		<package name="kernel-default-base" replaces="kernel-xen-base"/>
 		<package name="kernel-default-base" replaces="xen-tools-domU"/>
 		<package name="kernel-default-base" replaces="xen"/>
