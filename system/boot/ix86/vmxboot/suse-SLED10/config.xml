@@ -15,10 +15,14 @@
 	<profiles>
 		<profile name="default" description="Boot with default setup"/>
 		<profile name="xen" description="Boot with xen mboot.c32 setup"/>
+		<profile name="ec2" description="Boot using EC2 system"/>
 		<profile name="std" description="KERNEL: Default"/>
 		<profile name="xenk" description="KERNEL: Xen kernel/mboot.c32"/>
 		<profile name="smp" description="KERNEL: smp kernel"/>
 		<profile name="custom" description="KERNEL: specified by bootinclude in system XML"/>
+		<profile name="pae" description="KERNEL: pae kernel"/>
+		<profile name="ec2k" description="KERNEL: EC2 kernel"/>
+		<profile name="desktop" description="KERNEL: Desktop kernel"/>
 	</profiles>
 	<drivers>
 		<file name="drivers/ata/*"/>
@@ -48,7 +52,7 @@
 		<file name="net/ipv6/*"/>
 		<file name="net/packet/*"/>
 	</drivers>
-	<drivers profiles="xen">
+	<drivers profiles="xen,ec2">
 		<file name="drivers/xen/*"/>
 	</drivers>
 	<repository type="rpm-md" status="replaceable">
@@ -65,6 +69,16 @@
 		<package name="kernel-xenpae" arch="i686"/>
 		<package name="kernel-xenpae" arch="i586"/>
 		<package name="xen"/>
+<!-- xen dom0 support only on x86_64 -->
+		<package name="xen" arch="x86_64"/>
+	</packages>
+	<packages type="image" profiles="ec2k">
+		<package name="kernel-ec2"/>
+	</packages>
+	<packages type="image" profiles="desktop">
+		<package name="kernel-desktop" arch="x86_64"/>
+		<package name="kernel-desktop" arch="i686"/>
+		<package name="kernel-default" arch="i586"/>
 	</packages>
 	<packages type="image" profiles="custom"><!-- empty custom section to allow bootincluding custom kernel --></packages>
 	<packages type="bootstrap">

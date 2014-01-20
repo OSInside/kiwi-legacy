@@ -4013,6 +4013,8 @@ function searchBIOSBootDevice {
 	# is used here but not trusted. Trusted is the MBR disk
 	# disk label which is compared with the kiwi written
 	# mbrid file in /boot/grub/ of the system image
+	# If we got a root device set via cmdline this value
+	# takes precedence over everything else though
 	# ----
 	IFS=$IFS_ORIG
 	local file=/boot/mbrid
@@ -4024,6 +4026,17 @@ function searchBIOSBootDevice {
 	local mbrMB
 	local mbrI
 	local try_count=0
+	#======================================
+	# Check root variable
+	#--------------------------------------
+	if [ ! -z "$root" ];then
+		export biosBootDevice=$(dn $root)
+		export LOCAL_BOOT=yes
+		if [ ! -e /config.partids ];then
+			echo "kiwi_RootPart=1" > /config.partids
+		fi
+		return 0
+	fi
 	#======================================
 	# Read mbrid from initrd
 	#--------------------------------------

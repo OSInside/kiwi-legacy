@@ -31,7 +31,11 @@ echo "Configure image: [$kiwi_iname]..."
 #--------------------------------------
 suseSetupProduct
 
-baseUpdateSysConfig /etc/sysconfig/kernel INITRD_MODULES "xenblk jbd ext3"
+#======================================
+# Basic configuration
+#--------------------------------------
+baseUpdateSysConfig /etc/sysconfig/kernel INITRD_MODULES "xenblk jbd ext4"
+echo 'SUBSYSTEM=="net", ACTION=="add", DRIVERS="?*", ATTR{dev_id}=="0x0", ATTR{type}=="1", KERNEL=="eth*", NAME="eth0"' >> /etc/udev/rules.d/70-persistent-net.rules
 
 #======================================
 # Activate services
@@ -46,17 +50,13 @@ suseInsertService sces-client
 #======================================
 # Let the DHCP server set the hostname
 #--------------------------------------
+suseConfig
 baseUpdateSysConfig /etc/sysconfig/network/dhcp DHCLIENT_SET_HOSTNAME yes
 
 #======================================
 # From suse-ami-tools
 #--------------------------------------
 suse-ec2-configure --norefresh
-
-#======================================
-# SuSEconfig
-#--------------------------------------
-suseConfig
 
 #======================================
 # clone runlevel 3 to 4

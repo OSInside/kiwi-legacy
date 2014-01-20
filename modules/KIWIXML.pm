@@ -36,7 +36,6 @@ use KIWIQX qw (qxx);
 use KIWIURL;
 use KIWIXMLDescriptionData;
 use KIWIXMLDriverData;
-use KIWIXMLEC2ConfigData;
 use KIWIXMLInstRepositoryData;
 use KIWIXMLOEMConfigData;
 use KIWIXMLPackageData;
@@ -97,7 +96,6 @@ sub new {
 	# this = {
 	#     availableProfiles = ('',....)
 	#     defaultType = {
-	#         ec2config  = KIWIXMLEC2ConfigData
 	#         machine    = KIWIXMLVMachineData
 	#         oemconfig  = KIWIXMLOEMConfigData
 	#         pxeconfig  = (KIWIXMLPXEDeployConfigData,...)
@@ -108,7 +106,6 @@ sub new {
 	#     },
 	#     selectedProfiles = ('',....,'kiwi_default')
 	#     selectedType = {
-	#         ec2config  = KIWIXMLEC2ConfigData
 	#         machine    = KIWIXMLVMachineData
 	#         oemconfig  = KIWIXMLOEMConfigData
 	#         pxeconfig  = (KIWIXMLPXEDeployConfigData,...)
@@ -193,7 +190,6 @@ sub new {
 	#                types {
 	#                    defaultType = ''
 	#                    <typename>[+] {
-	#                        ec2config  = KIWIXMLEC2ConfigData
 	#                        machine    = KIWIXMLVMachineData
 	#                        oemconfig  = KIWIXMLOEMConfigData
 	#                        pxeconfig  = (KIWIXMLPXEDeployConfigData,...)
@@ -1427,18 +1423,6 @@ sub getDUDPackages {
 		return $this->{imageConfig}->{productSettings}->{dudPkgs};
 	}
 	return;
-}
-
-#==========================================
-# getEC2Config
-#------------------------------------------
-sub getEC2Config {
-	# ...
-	# Return an EC2ConfigData object for the EC2 configuration of the current
-	# build type.
-	# ---
-	my $this = shift;
-	return $this->{selectedType}->{ec2config};
 }
 
 #==========================================
@@ -2846,46 +2830,6 @@ sub __convertSizeStrToMBVal {
 }
 
 #==========================================
-# __createEC2Config
-#------------------------------------------
-sub __createEC2Config {
-	# ...
-	# Return a ref to a hash that contains the EC2 configuration data for the
-	# given XML:ELEMENT object. Build a data structure that matches the
-	# structure defined in KIWIXMLEC2ConfigData
-	# ---
-	my $this = shift;
-	my $node = shift;
-	my $kiwi = $this->{kiwi};
-	my $ec2Config = $node -> getChildrenByTagName('ec2config') -> get_node(1);
-	if (! $ec2Config ) {
-		return;
-	}
-	my %ec2ConfigData;
-	$ec2ConfigData{ec2accountnr} = $this -> __getChildNodeTextValue(
-		$ec2Config, 'ec2accountnr'
-	);
-	$ec2ConfigData{ec2certfile}  = $this -> __getChildNodeTextValue(
-		$ec2Config, 'ec2certfile'
-	);
-	$ec2ConfigData{ec2privatekeyfile} =	$this -> __getChildNodeTextValue(
-		$ec2Config, 'ec2privatekeyfile'
-	);
-	my @ec2Regions = $ec2Config -> getChildrenByTagName('ec2region');
-	my @regions;
-	for my $regNode (@ec2Regions) {
-		push @regions, $regNode -> textContent();
-	}
-	my $selectedRegions;
-	if (@regions) {
-		$selectedRegions = \@regions;
-	}
-	$ec2ConfigData{ec2region} = $selectedRegions;
-	my $ec2Obj = KIWIXMLEC2ConfigData -> new(\%ec2ConfigData);
-	return $ec2Obj;
-}
-
-#==========================================
 # __createOEMConfig
 #------------------------------------------
 sub __createOEMConfig {
@@ -3838,10 +3782,6 @@ sub __genTypeHash {
 			$typeData{$attr} = $type -> getAttribute($attr);
 		}
 		#==========================================
-		# store <ec2config> child
-		#------------------------------------------
-		my $ec2Config = $this -> __createEC2Config($type);
-		#==========================================
 		# store <machine> child
 		#------------------------------------------
 		my $vmConfig = $this -> __createVMachineConfig($type);
@@ -3889,7 +3829,6 @@ sub __genTypeHash {
 		#------------------------------------------
 		my $typeObj = KIWIXMLTypeData -> new(\%typeData);
 		my %curType = (
-			ec2config  => $ec2Config,
 			machine    => $vmConfig,
 			oemconfig  => $oemConfig,
 			pxeconfig  => $pxeConfigData,
@@ -4100,7 +4039,6 @@ sub __getPreferencesXMLElement {
 			}
 			# Process all children of the <type> element
 			my @typeChildren = qw (
-				ec2config
 				machine
 				oemconfig
 				split

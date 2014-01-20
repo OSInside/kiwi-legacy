@@ -32,7 +32,7 @@
 	<repository type="rpm-md" alias="update" status="replaceable">
 		<source path="/tmp/b"/>
 	</repository>
-	<repository type="rpm-md" alias="ec2" status="fixed" profiles="profA">
+	<repository type="rpm-md" alias="ola" status="fixed" profiles="profA">
 		<source path="/tmp/c"/>
 	</repository>
 	<repository type="rpm-md" alias="python" profiles="ProfA">

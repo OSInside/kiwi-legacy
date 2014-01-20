@@ -2041,7 +2041,7 @@ sub __isValidFirmware {
 		return;
 	}
 	my %supported = map { ($_ => 1) } qw(
-		bios efi uefi vboot
+		bios ec2 efi uefi vboot
 	);
 	if (! $supported{$firmware} ) {
 		my $msg = "$caller: specified firmware value '$firmware' is not "
