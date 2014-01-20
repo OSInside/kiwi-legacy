@@ -73,7 +73,7 @@
 		<file name="fs/xfs/*"/>
 		<file name="net/packet/*"/>
 	</drivers>
-	<drivers profiles="xen">
+	<drivers profiles="xen,ec2">
 		<file name="drivers/xen/*"/>
 	</drivers>
 	<repository type="rpm-md" status="replaceable">
@@ -98,8 +98,6 @@
 	<packages type="bootstrap" profiles="ec2">
 		<package name="kernel-ec2"/>
 		<package name="kernel-ec2-base"/>
-<!-- xen dom0 support only on x86_64 -->
-		<package name="xen" arch="x86_64"/>
 	</packages>
 	<packages type="bootstrap" profiles="rt">
 		<package name="kernel-rt"/>
