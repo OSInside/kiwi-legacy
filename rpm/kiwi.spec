@@ -209,8 +209,10 @@ License:        GPL-2.0+
 Group:          System/Management
 
 %description -n kiwi-tools
-This package contains the openSUSE - KIWI tools set usable in and
-outside of operating system images
+This package contains a small set of helper tools used for the
+kiwi created initial ramdisk which is used to control the very
+first boot of an appliance. The tools are not meant to be used
+outside of the scope of kiwi appliance building
 
 Authors:
 --------
