@@ -172,9 +172,9 @@ sub mount {
 	#------------------------------------------
 	if ((-f $source) || (-b $source)) {
 		$this->{isdisk} = 0;
-		$status= KIWIQX::qxx ("blkid $source -s TYPE -o value 2>/dev/null");
+		$status = KIWIQX::qxx ("blkid $source -s TYPE -o value 2>/dev/null");
 		if (! $status) {
-			# no block id information, check deeper for filesystem
+			# no blkid filesystem id, do another filesystem check
 			%fsattr = $this -> checkFileSystem ($source);
 			$type   = $fsattr{type};
 			if (($type) && ($type ne "auto")) {
@@ -182,9 +182,16 @@ sub mount {
 			}
 		}
 		if (! $status) {
-			$status= KIWIQX::qxx ("blkid $source -s PTTYPE -o value 2>/dev/null");
+			# no filesystem detected, check for PTTYPE
+			$status= KIWIQX::qxx (
+				"blkid $source -s PTTYPE -o value 2>/dev/null"
+			);
 			if ($status) {
 				# got partition table ID, handle source as disk
+				$this->{isdisk} = 1;
+			} else {
+				# got no information about the type of this source
+				# we assume this is a disk
 				$this->{isdisk} = 1;
 			}
 		}
