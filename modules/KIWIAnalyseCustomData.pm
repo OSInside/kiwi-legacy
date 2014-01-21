@@ -314,7 +314,7 @@ sub createDatabaseDump {
 	my $status;
 	$dest .= "/root/var/cache/dbs";
 	$kiwi -> info ("Checking for running databases...\n");
-	foreach my $db_type ('mysql') {
+	foreach my $db_type ('mysql','postgresql') {
 		#========================================
 		# initialize db values
 		#----------------------------------------
@@ -322,7 +322,11 @@ sub createDatabaseDump {
 			$db_test_cmd = "mysqladmin ping";
 			$dump_cmd    = "mysqldump -p -u root --all-databases --events";
 			$dump_ext    = 'sql';
-		} else { 
+		} elsif ($db_type eq 'postgresql') {
+			$db_test_cmd = 'su - postgres -c "psql -l"';
+			$dump_cmd    = 'su - postgres -c "pg_dumpall -U postgres"';
+			$dump_ext    = 'sql';
+		} else {
 			$kiwi -> error  ("DB $db_type unknown.");
 			$kiwi -> failed ();
 			return;
