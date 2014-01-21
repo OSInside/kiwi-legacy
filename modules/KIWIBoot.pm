@@ -196,6 +196,10 @@ sub new {
 		$xengz =~ s/\.$suf$//;
 		$xengz =~ s/\.splash$//;
 		foreach my $xen (glob ("$xengz*xen*.$suf")) {
+			if ($xen =~ /-ec2/) {
+				# EC2 does not get a xen setup
+				next;
+			}
 			$isxen = 1;
 			$xengz = $xen;
 			last;
@@ -6055,7 +6059,8 @@ sub getGeometry {
 		$kiwi -> loginfo ($status);
 		return;
 	}
-	if (($firmware eq "efi")  ||
+	if (($firmware eq "ec2")  ||
+		($firmware eq "efi")  ||
 		($firmware eq "uefi") ||
 		($firmware eq "vboot")
 	) {

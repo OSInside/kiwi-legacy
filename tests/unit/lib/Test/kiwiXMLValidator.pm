@@ -455,23 +455,23 @@ sub test_displayName {
 }
 
 #==========================================
-# test_ec2IsFileSys
+# test_isFormatEC2
 #------------------------------------------
-sub test_ec2IsFileSys {
+sub test_isFormatEC2 {
 	# ...
 	# Test that the image type for the EC2 format is a file system image
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
-	my @invalidConfigs = $this -> __getInvalidFiles('ec2IsFS');
+	my @invalidConfigs = $this -> __getInvalidFiles('ec2Is');
 	for my $iConfFile (@invalidConfigs) {
 		my $validator = $this -> __getValidator($iConfFile);
 		$validator -> validate();
 		my $msg = $kiwi -> getMessage();
-		my $expectedMsg = 'For EC2 image creation the image type must be '
-			. 'one of the following supported file systems: ext2 ext3 '
-			. 'ext4 reiserfs';
-		my @supportedFS = qw /ext2 ext3 ext4 reiserfs/;
+		my $expectedMsg = 'The EC2 image creation definition has changed '
+			. 'in an incompatible way. Please refer to the EC2 examples '
+			. 'or the JeOS template to understand the new <type> '
+			. 'definition for EC2 image creation';
 		$this -> assert_str_equals($expectedMsg, $msg);
 		my $msgT = $kiwi -> getMessageType();
 		$this -> assert_str_equals('error', $msgT);
@@ -480,52 +480,7 @@ sub test_ec2IsFileSys {
 		# Test this condition last to get potential error messages
 		$this -> assert_not_null($validator);
 	}
-	my @validConfigs = $this -> __getValidFiles('ec2IsFS');
-	$this -> __verifyValid(@validConfigs);
-	return;
-}
-
-#==========================================
-# test_ec2Regions
-#------------------------------------------
-sub test_ec2Regions {
-	# ...
-	# Test that the region names and uniqueness conditions are properly
-	# enforced.
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my @invalidConfigs = $this -> __getInvalidFiles('ec2Region');
-	for my $iConfFile (@invalidConfigs) {
-		my $validator = $this -> __getValidator($iConfFile);
-		$validator -> validate();
-		my $msg = $kiwi -> getMessage();
-		my $expectedMsg;
-		my @supportedRegions = qw(
-		    AP-Northeast
-			AP-Southeast
-			AP-Southeast2
-			EU-West
-			SA-East
-			US-East
-		    US-West
-			US-West2
-		);
-		if ( $iConfFile =~ 'ec2RegionInvalid_1.xml' ) {
-			$expectedMsg = 'Specified region EU-West not unique';
-		} else {
-			$expectedMsg = "Only one of @supportedRegions may be specified "
-			. 'as ec2region';
-		}
-		$this -> assert_str_equals($expectedMsg, $msg);
-		my $msgT = $kiwi -> getMessageType();
-		$this -> assert_str_equals('error', $msgT);
-		my $state = $kiwi -> getState();
-		$this -> assert_str_equals('failed', $state);
-		# Test this condition last to get potential error messages
-		$this -> assert_not_null($validator);
-	}
-	my @validConfigs = $this -> __getValidFiles('ec2Region');
+	my @validConfigs = $this -> __getValidFiles('ec2Is');
 	$this -> __verifyValid(@validConfigs);
 	return;
 }
