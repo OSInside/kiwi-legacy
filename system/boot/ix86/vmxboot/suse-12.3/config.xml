@@ -19,7 +19,7 @@
 		<profile name="std" description="KERNEL: Default"/>
 		<profile name="xenk" description="KERNEL: Xen kernel/mboot.c32"/>
 		<profile name="pae" description="KERNEL: pae kernel"/>
-		<profile name="ec2" description="KERNEL: Ec2 kernel"/>
+		<profile name="ec2" description="KERNEL: EC2 kernel"/>
 		<profile name="desktop" description="KERNEL: Desktop kernel"/>
 	</profiles>
 	<drivers>
