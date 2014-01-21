@@ -374,82 +374,28 @@ sub __checkDisplaynameValid {
 }
 
 #==========================================
-# __checkEC2IsFsysType
+# __checkIsFormatEC2
 #------------------------------------------
-sub __checkEC2IsFsysType {
+sub __checkIsFormatEC2 {
 	# ...
-	# When building an EC2 image we expect the type to be a file system image.
+	# We changed the EC2 build in an incompatible way we need to allert
+	# users if they still have the old setup.
 	# ---
 	my $this = shift;
-	# TODO:
-	# Excluding btrfs, xfs and zfs, needs testing first. There are issues
-	# with these file systems as they require a boot partition and our current
-	# setup for EC2 is to not have a boot partition.
-	# Excluding clicfs and squashfs, they appear to be impractical for EC2,
-	# can be enabled if someone complains
-	my @supportedFSTypes = qw /ext2 ext3 ext4 reiserfs/;
 	my @typeNodes = $this->{systemTree}->getElementsByTagName('type');
 	for my $type (@typeNodes) {
 		my $format = $type -> getAttribute('format');
 		if ($format && $format eq 'ec2') {
-			my $imgType = $type -> getAttribute('image');
-			if (! grep { /^$imgType$/x } @supportedFSTypes) {
-				my $kiwi = $this->{kiwi};
-				my $msg = 'For EC2 image creation the image type must be '
-					. 'one of the following supported file systems: '
-					. "@supportedFSTypes";
-				$kiwi -> error ( $msg );
-				$kiwi -> failed ();
-				return;
-			}
-		}
-	}
-	return 1;
-}
-
-#==========================================
-# __checkEC2Regions
-#------------------------------------------
-sub __checkEC2Regions {
-	# ...
-	# If a region is specified for an EC2 image creation it must only be
-	# specified once.
-	# ---
-	my $this = shift;
-	my @ec2ConfNodes = $this->{systemTree}->getElementsByTagName('ec2config');
-	if (! @ec2ConfNodes) {
-		return 1;
-	}
-	my @regions = $ec2ConfNodes[0] -> getElementsByTagName('ec2region');
-	my @supportedRegions = qw(
-		AP-Northeast
-		AP-Southeast
-		AP-Southeast2
-		EU-West
-		SA-East
-		US-East
-		US-West
-		US-West2
-	);
-	my @selectedRegions = ();
-	for my $region (@regions) {
-		my $regionStr = $region -> textContent();
-		if (! grep { /$regionStr/x } @supportedRegions) {
-			my $msg = "Only one of @supportedRegions may be specified "
-			. 'as ec2region';
+			my $msg = 'The EC2 image creation definition has changed in an '
+				. 'incompatible way. Please refer to the ec2Flavour profile '
+				. 'used in the JeOS templates provided by the kiwi-templates '
+				. 'package to understand the new <type> definition for EC2 '
+				. 'image creation';
 			my $kiwi = $this->{kiwi};
 			$kiwi -> error ( $msg );
 			$kiwi -> failed ();
 			return;
 		}
-		if (grep { /$regionStr/x } @selectedRegions) {
-			my $msg = "Specified region $regionStr not unique";
-			my $kiwi = $this->{kiwi};
-			$kiwi -> error ( $msg );
-			$kiwi -> failed ();
-			return;
-		}
-		push @selectedRegions, $regionStr
 	}
 	return 1;
 }
@@ -1271,7 +1217,6 @@ sub __checkTypeConfigConsist {
 	# relevant inside the initrd
 	# ----
 	my %typeChildDeps = (
-		'ec2config'  => 'format:cpio,ec2',
 		'machine'    => 'image:cpio,lxc,oem,vmx,split',
 		'oemconfig'  => 'image:cpio,oem,split',
 		'pxedeploy'  => 'image:cpio,pxe',
@@ -1815,10 +1760,7 @@ sub __validateConsistency {
 	if (! $this -> __checkDisplaynameValid()) {
 		return;
 	}
-	if (! $this -> __checkEC2IsFsysType()) {
-		return;
-	}
-	if (! $this -> __checkEC2Regions()) {
+	if (! $this -> __checkIsFormatEC2()) {
 		return;
 	}
 	if (! $this -> __checkFilesysSpec()) {

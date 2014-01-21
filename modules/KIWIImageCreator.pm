@@ -1979,6 +1979,15 @@ sub __addTypeToBootXML {
 		$kiwi -> done();
 	}
 	#==========================================
+	# boottimeout
+	#------------------------------------------
+	my $boottimeout = $systemType -> getBootTimeout();
+	if ($boottimeout) {
+		$kiwi -> info ("--> boottimout: $boottimeout");
+		$bootType -> setBootTimeout($boottimeout);
+		$kiwi -> done();
+	}
+	#==========================================
 	# devicepersistency
 	#------------------------------------------
 	my $devicepersistency = $systemType -> getDevicePersistent();
