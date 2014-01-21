@@ -24,7 +24,7 @@
 		<rpm-excludedocs>true</rpm-excludedocs>
 	</preferences>
 	<preferences profiles="ec2Flavour">
-		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES12" bootprofile="xen" bootkernel="ec2" bootloader="grub" kernelcmdline="xencons=xvc0 console=xvc0 multipath=off splash=silent showopts"/>
+		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES12" bootprofile="ec2" bootkernel="ec2k" bootloader="grub" kernelcmdline="xencons=xvc0 console=xvc0 multipath=off splash=silent showopts"/>
 	</preferences>
 	<preferences profiles="xenFlavour">
 		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES12" bootprofile="xen" bootkernel="xenk" bootloader="grub2">
