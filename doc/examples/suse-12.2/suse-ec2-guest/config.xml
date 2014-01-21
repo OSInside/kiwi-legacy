@@ -13,7 +13,7 @@
 		<rpm-force>true</rpm-force>
 		<locale>en_US</locale>
 		<keytable>us.map.gz</keytable>
-		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-12.2" bootprofile="ec2" bootkernel="ec2k" bootloader="grub" kernelcmdline="xencons=xvc0 console=xvc0 multipath=off splash=silent showopts"/>
+		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-12.2" bootprofile="ec2" bootkernel="ec2k" bootloader="grub" kernelcmdline="xencons=xvc0 console=xvc0 multipath=off splash=silent showopts" firmware="ec2" boottimeout="1" vga="normal" installprovidefailsafe="false"/>
 	</preferences>
 	<users group="root">
 		<user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
