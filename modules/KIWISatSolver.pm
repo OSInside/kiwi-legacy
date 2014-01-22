@@ -69,6 +69,7 @@ sub new {
 	my $quiet   = shift;
 	my $ptype   = shift;
 	my $solvtype= shift;
+	my $aliases = shift;
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
@@ -119,6 +120,11 @@ sub new {
 		$kiwi -> failed ();
 		return;
 	}
+	if (($solvtype) && ($solvtype eq "system-solvable") && (! $aliases)) {
+		$kiwi -> error ("--> Need repo aliases in system-solvable mode");
+		$kiwi -> failed ();
+		return;
+	}
 	if (! defined $ptype) {
 		$ptype = "onlyRequired";
 	}
@@ -135,29 +141,18 @@ sub new {
 			#==========================================
 			# read solv files locally stored by zypper
 			#------------------------------------------
-			my $solv_fd;
 			my $sys_solve = '/var/cache/zypp/solv/';
-			if (opendir ($solv_fd,$sys_solve)) {
-				while (my $repo_dir = readdir $solv_fd) {
-					if ($repo_dir eq "."  ||
-						$repo_dir eq ".." ||
-						$repo_dir eq '@System'
-					) {
-						next;
-					}
-					my $repo_fd;
-					if (opendir ($repo_fd,$sys_solve.$repo_dir)) {
-						while (my $f = readdir $repo_fd) {
-							if ($f eq 'solv') {
-								push @files,$sys_solve.$repo_dir.'/solv';
-								last;
-							}
-						}
-						closedir $repo_fd;
-					}
+			foreach my $alias (@{$aliases}) {
+				my $solv_file = $sys_solve.$alias.'/solv';
+				if (! -e $solv_file) {
+					$kiwi -> error  ("--> Solvable for $alias not found");
+					$kiwi -> failed ();
+					$kiwi -> error  ("--> Run zypper refresh first");
+					$kiwi -> failed ();
+					return;
 				}
+				push @files, $solv_file;
 			}
-			closedir $solv_fd;
 		} else {
 			#==========================================
 			# download repo metadata and turn into solv

@@ -294,7 +294,7 @@ sub __populateRepos {
 			$enabled =~ s/^ +//; $enabled =~ s/ +$//;
 			$source  =~ s/^ +//; $source  =~ s/ +$//;
 			$type    =~ s/^ +//; $type    =~ s/ +$//;
-			$alias   =~ s/^ +//; $alias   =~ s/ +$//; $alias =~ s/ $/-/g;
+			$alias   =~ s/^ +//; $alias   =~ s/ +$//; $alias =~ s/ $/:/g;
 			$prio    =~ s/^ +//; $prio    =~ s/ +$//;
 			my $origsrc = $source;
 			if ($enabled eq "Yes") {
@@ -397,6 +397,7 @@ sub __populatePackageList {
 	my %osc     = %{$this->{source}};
 	my $cdata   = $this->{cdata};
 	my @urllist = ();
+	my @alias   = ();
 	my @patlist = ();
 	my @ilist   = ();
 	my @rpmsort = ();
@@ -464,6 +465,7 @@ sub __populatePackageList {
 	#------------------------------------------
 	foreach my $source (sort keys %{$osc{$product}}) {
 		push (@urllist,$source);
+		push (@alias,$osc{$product}{$source}{alias});
 	}
 	#==========================================
 	# find all patterns and packs of patterns 
@@ -497,7 +499,7 @@ sub __populatePackageList {
 		$this->{patterns} = \@patlist;
 		my $psolve = KIWISatSolver -> new (
 			\@patlist,\@urllist,"solve-patterns",
-			undef,undef,"plusRecommended","system-solvable"
+			undef,undef,"plusRecommended","system-solvable",\@alias
 		);
 		my @result = ();
 		if (! defined $psolve) {
@@ -550,7 +552,7 @@ sub __populatePackageList {
 			my $pool = $psolve -> getPool();
 			my $xsolve = KIWISatSolver -> new (
 				\@result,\@urllist,"solve-packages",
-				$pool,undef,"plusRecommended","system-solvable"
+				$pool,undef,"plusRecommended","system-solvable",\@alias
 			);
 			if (! defined $xsolve) {
 				$kiwi -> error  ("Failed to solve packages");
@@ -591,7 +593,7 @@ sub __populatePackageList {
 				my $package = pop @solved_packages;
 				my $xsolve = KIWISatSolver -> new (
 					[$package],\@urllist,"solve-packages",
-					$pool,"quiet","plusRecommended","system-solvable"
+					$pool,"quiet","plusRecommended","system-solvable",\@alias
 				);
 				my @single_package_solved_list = $xsolve -> getPackages();
 				@solved_packages = $this -> __strip_list (
