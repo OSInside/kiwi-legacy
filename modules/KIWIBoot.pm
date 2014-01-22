@@ -4180,6 +4180,18 @@ sub setupBootLoaderConfiguration {
 	if ($type->{cmdline}) {
 		$cmdline  = $type->{cmdline};
 	}
+	if ($firmware eq 'ec2') {
+		# /.../
+		# EC2 requires to specifiy the root device in the bootloader
+		# configuration. EC2 extracts this information via pygrub and
+		# use it for the guest configuration which has an impact on
+		# the devices attached to the guest. With the current EC2
+		# implementation and linux kernel the storage device allways
+		# appears as /dev/sda1. Thus this value is set as fixed
+		# kernel commandline parameter
+		# ----
+		$cmdline .= " root=/dev/sda1";
+	}
 	if ($topic =~ /^KIWI (CD|USB) Boot/) {
 		# /.../
 		# use predefined set of parameters for simple boot CD
@@ -4595,6 +4607,11 @@ sub setupBootLoaderConfiguration {
 	# Grub
 	#------------------------------------------
 	if ($loader eq "grub") {
+		if (($type->{installprovidefailsafe}) &&
+			($type->{installprovidefailsafe} eq 'false')
+		) {
+			$failsafe = 0;
+		}
 		#==========================================
 		# boot id in grub context
 		#------------------------------------------
