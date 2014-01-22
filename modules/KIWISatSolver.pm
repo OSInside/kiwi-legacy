@@ -192,6 +192,7 @@ sub new {
 		# Create SaT repository
 		#------------------------------------------
 		$pool = satsolver::Pool -> new();
+		$pool -> set_allow_self_conflicts(1);
 		$arch = qx (uname -m); chomp $arch;
 		if ($arch eq "armv7l") {
 			$arch = "armv7hl";
