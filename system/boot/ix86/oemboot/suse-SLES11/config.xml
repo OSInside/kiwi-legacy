@@ -19,7 +19,7 @@
 		<profile name="std" description="KERNEL: Default"/>
 		<profile name="xenk" description="KERNEL: Xen kernel/mboot.c32"/>
 		<profile name="pae" description="KERNEL: pae kernel"/>
-		<profile name="ec2k" description="KERNEL: Ec2 kernel"/>
+		<profile name="ec2k" description="KERNEL: EC2 kernel"/>
 		<profile name="rt" description="KERNEL: RealTime kernel"/>
 		<profile name="custom" description="KERNEL: specified by bootinclude in system XML"/>
 	</profiles>

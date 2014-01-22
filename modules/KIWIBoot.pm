@@ -4595,6 +4595,11 @@ sub setupBootLoaderConfiguration {
 	# Grub
 	#------------------------------------------
 	if ($loader eq "grub") {
+		if (($type->{installprovidefailsafe}) &&
+			($type->{installprovidefailsafe} eq 'false')
+		) {
+			$failsafe = 0;
+		}
 		#==========================================
 		# boot id in grub context
 		#------------------------------------------
@@ -4672,6 +4677,7 @@ sub setupBootLoaderConfiguration {
 		#==========================================
 		# Standard boot
 		#------------------------------------------
+		my $firmware = $this->{firmware};
 		if ((! $isxen) || ($isxen && $xendomain eq "domU")) {
 			if ($iso) {
 				print $FD " kernel (cd)/boot/linux vga=$vga splash=silent";
@@ -4681,6 +4687,10 @@ sub setupBootLoaderConfiguration {
 				print $FD " root (hd0,$boot_id)\n";
 				print $FD " kernel /boot/linux.vmx vga=$vga";
 				print $FD " splash=silent";
+				if ($firmware eq 'ec2') {
+					# Currently only support ext FS on EC2
+					print $FD " root=/dev/sda1";
+				}
 			} else {
 				print $FD " root (hd0,$boot_id)\n";
 				print $FD " kernel /boot/linux vga=$vga";

@@ -31,6 +31,8 @@ echo "Configure image: [$kiwi_iname]..."
 #--------------------------------------
 suseSetupProduct
 
+baseUpdateSysConfig /etc/sysconfig/kernel INITRD_MODULES "xenblk jbd ext3"
+
 #======================================
 # Activate services
 #--------------------------------------
