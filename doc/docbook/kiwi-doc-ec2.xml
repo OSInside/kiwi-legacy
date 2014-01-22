@@ -451,7 +451,7 @@
         <replaceable>AWS_secret_Key_ID</replaceable> with
         your Amazon key information. Also you may want to choose a different
         name for your bucket than <filename>myImages</filename>.
-        If the bucket does not exist in S3 it will be created.</para>
+        If the bucket does not exist in S3 it will be created.
     
       <!-- formating is ugly here but looks reasonably good in the html-->
       <screen><command>ec2-upload-bundle</command> <!--
@@ -471,7 +471,9 @@
         <xref  linkend="sec.ec2.using.general" xrefstyle="select:title"/>
         section.</para>
 
-      <screen><command>aws ec2 register-image --image-location</command> <replaceable>myImages/MANIFEST_NAME</replaceable>ARCH</replaceable>-</screen>
+      <screen><command>aws ec2 register-image</command>
+		--image-location <replaceable>myImages/MANIFEST_NAME</replaceable>
+		<replaceable>ARCH</replaceable></screen>
 
       <para>This completes the S3 specific setup. The next section
         explains the use of the disk image file created by KIWI to create
@@ -662,7 +664,7 @@
         contains your image. The <command>aws ec2 create-snapshot</command> command returns a snapshot ID that you want to remember and will be
         referred to as <replaceable>SNAP_ID</replaceable> in this example.
 
-        <screen><command>aws ec2 create-snapshot</command> <option>--description</option? <replaceable>A_SHORT_DESCRIPTION</replaceable> <option>--volume-id</option> <replaceable>VOL_ID</replaceable></screen>
+        <screen><command>aws ec2 create-snapshot</command> <option>--description</option><replaceable>A_SHORT_DESCRIPTION</replaceable> <option>--volume-id</option> <replaceable>VOL_ID</replaceable></screen>
 
         The process of creating the snapshot will take a while and depends on
         the size of your volume. Check the status of the snapshot creation
