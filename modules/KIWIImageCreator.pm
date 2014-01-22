@@ -2006,6 +2006,15 @@ sub __addTypeToBootXML {
 		$kiwi -> done();
 	}
 	#==========================================
+	# installfailsafe
+	#------------------------------------------
+	my $installfailsafe = $systemType -> getInstallFailsafe();
+	if ($installfailsafe) {
+		$kiwi -> info ("--> installfailsafe: $installfailsafe");
+		$bootType -> setInstallFailsafe ($installfailsafe);
+		$kiwi -> done();
+	}
+	#==========================================
 	# bootkernel
 	#------------------------------------------
 	my $bootkernel = $systemType -> getBootKernel();
