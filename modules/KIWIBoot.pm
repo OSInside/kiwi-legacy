@@ -1186,8 +1186,6 @@ sub setupInstallStick {
 		$bootfs = $type->{bootfilesystem};
 	} elsif ($bootloader eq 'syslinux') {
 		$bootfs = 'fat32';
-	} elsif ($bootloader eq 'berryboot') {
-		$bootfs = 'fat32';
 	} elsif ($bootloader eq 'yaboot') {
 		if ($lvm) {
 			$bootfs = 'fat16';
@@ -1200,6 +1198,7 @@ sub setupInstallStick {
 	} else {
 		$bootfs = 'ext3';
 	}
+	$type->{bootfilesystem} = $bootfs;
 	#==========================================
 	# setup boot partition type
 	#------------------------------------------
@@ -2066,6 +2065,7 @@ sub setupBootDisk {
 			$bootfs = 'ext3';
 		}
 	}
+	$type->{bootfilesystem} = $bootfs;
 	#==========================================
 	# setup boot partition type
 	#------------------------------------------
@@ -2196,7 +2196,9 @@ sub setupBootDisk {
 			#==========================================
 			# Call custom image creation tool...
 			#------------------------------------------
-			$status = KIWIQX::qxx ("$this->{gdata}->{StudioNode} $this->{vmsize} 2>&1");
+			$status = KIWIQX::qxx (
+				"$this->{gdata}->{StudioNode} $this->{vmsize} 2>&1"
+			);
 			$result = $? >> 8;
 			chomp $status;
 			if (($result != 0) || (! -b $status)) {
@@ -2213,7 +2215,9 @@ sub setupBootDisk {
 			#==========================================
 			# loop setup a disk device as file...
 			#------------------------------------------
-			$status = KIWIQX::qxx ("qemu-img create $diskname $this->{vmsize} 2>&1");
+			$status = KIWIQX::qxx (
+				"qemu-img create $diskname $this->{vmsize} 2>&1"
+			);
 			$result = $? >> 8;
 			if ($result != 0) {
 				$kiwi -> failed ();
@@ -2252,6 +2256,7 @@ sub setupBootDisk {
 		if ($needJumpP) {
 			$pnr++;
 			push @commands,"n","p:UEFI",$pnr,".","+".$this->{jumpsize}."M";
+			push @commands,"t",$pnr,"c";
 			$this->{partids}{jump} = $pnr;
 			$active = $pnr;
 		}
@@ -2306,7 +2311,7 @@ sub setupBootDisk {
 			$this -> cleanStack ();
 			return;
 		}
-		if ($needJumpP) {
+		if (($needJumpP) && ($arch =~ /i.86|x86_64/)) {
 			$status = KIWIQX::qxx (
 				"parted $this->{loop} set 1 bios_grub on 2>&1"
 			);
@@ -2762,13 +2767,17 @@ sub setupBootDisk {
 		$this -> cleanStack ();
 		return;
 	}
-	if (($firmware eq "efi") || ($firmware eq "uefi")) {
+	if ($firmware =~ /efi|uefi|vboot/) {
 		#==========================================
-		# Mount efi jump boot space on this disk
+		# Mount jump boot space on this disk
 		#------------------------------------------
+		my $subdir = 'efi';
+		if ($firmware eq 'vboot') {
+			$subdir = 'vboot';
+		}
 		my $jump = $deviceMap{jump};
-		KIWIQX::qxx ("mkdir -p $loopdir/efi");
-		if (! KIWIGlobals -> instance() -> mount ($jump, "$loopdir/efi")) {
+		KIWIQX::qxx ("mkdir -p $loopdir/$subdir");
+		if (! KIWIGlobals -> instance() -> mount ($jump, "$loopdir/$subdir")) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't mount image jump device: $boot");
 			$kiwi -> failed ();
@@ -5184,9 +5193,9 @@ sub setupBootLoaderConfiguration {
 		$kiwi -> done ();
 	}
 	#==========================================
-	# uboot
+	# uboot / berryboot
 	#------------------------------------------
-	if ($loader eq "uboot") {
+	if (($loader eq "uboot") || ($loader eq "berryboot")) {
 		#==========================================
 		# Create uboot image file from initrd
 		#------------------------------------------
@@ -5249,7 +5258,7 @@ sub setupBootLoaderConfiguration {
 		#==========================================
 		# Create config.txt
 		#------------------------------------------
-		$kiwi -> info ("Creating config|cmdline.txt berryboot config files...");
+		$kiwi -> info ("Creating config.txt chainloading uboot...");
 		#==========================================
 		# Standard boot
 		#------------------------------------------
@@ -5264,21 +5273,7 @@ sub setupBootLoaderConfiguration {
 			$kiwi -> failed ();
 			return;
 		}
-		print $FD 'kernel=linux.vmx'."\n";
-		print $FD 'ramfsfile=initrd.vmx'."\n";
-		print $FD 'ramfsaddr=0x00a00000'."\n";
-		$FD -> close();
-		#==========================================
-		# Create cmdline.txt
-		#------------------------------------------
-		if (! $FD -> open (">$tmpdir/boot/cmdline.txt")) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Couldn't create cmdline.txt: $!");
-			$kiwi -> failed ();
-			return;
-		}
-		my $initrd_size = sprintf ("0x%x",-s $initrd);
-		print $FD "$type->{cmdline} initrd=0xa00000,$initrd_size\n";
+		print $FD 'kernel=u-boot.bin'."\n";
 		$FD -> close();
 		$kiwi -> done();
 	}
@@ -5374,38 +5369,35 @@ sub copyBootCode {
 	# Uboot / BerryBoot
 	#------------------------------------------
 	if (($loader eq "uboot") || ($loader eq "berryboot")) {
-		my $config = "$dest/boot/boot.scr";
-		if ($loader eq "berryboot") {
-			$config = "$dest/boot/config.txt $dest/boot/cmdline.txt ";
-			$config.= "$dest/boot/linux.vmx $dest/boot/initrd.vmx";
-		}
-		$status = KIWIQX::qxx ("mv $config $dest");
-		$result = $? >> 8;
-		if ($result != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error ("Couldn't move config script: $status");
-			$kiwi -> failed ();
-			return;
-		}
-		KIWIQX::qxx ("mv $dest/boot/*.bin $dest &>/dev/null");
-		KIWIQX::qxx ("mv $dest/boot/*.dat $dest &>/dev/null");
-		KIWIQX::qxx ("mv $dest/boot/*.img $dest &>/dev/null");
-		KIWIQX::qxx ("mv $dest/boot/*.imx $dest &>/dev/null");
-		KIWIQX::qxx ("mv $dest/boot/*.dtb $dest &>/dev/null");
-		KIWIQX::qxx ("mv $dest/boot/dtb/  $dest &>/dev/null");
-		KIWIQX::qxx ("mv $dest/boot/*.elf $dest &>/dev/null");
+		my $target = $dest;
+		KIWIQX::qxx ("mv $dest/boot/boot.scr $target &>/dev/null");
+		KIWIQX::qxx ("mv $dest/boot/*.dtb $target &>/dev/null");
+		KIWIQX::qxx ("mv $dest/boot/dtb/  $target &>/dev/null");
 		if (-f "$dest/boot/MLO") {
-			$status = KIWIQX::qxx ("mv $dest/boot/MLO $dest");
+			$status = KIWIQX::qxx ("mv $dest/boot/MLO $target");
 			$result = $? >> 8;
+			if ($result != 0) {
+				$kiwi -> failed ();
+				$kiwi -> error (
+					"Couldn't move $loader/MLO loaders to final path: $status"
+				);
+				$kiwi -> failed ();
+				return;
+			}
 		}
-		if ($result != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error (
-				"Couldn't move $loader/MLO loaders to final path: $status"
-			);
-			$kiwi -> failed ();
-			return;
+		if ($firmware eq 'vboot') {
+			# if vboot firmware is used we copy all first stage
+			# loader files to the jump partition
+			$target .= '/vboot';
 		}
+		if ($loader eq "berryboot") {
+			KIWIQX::qxx ("mv $dest/boot/config.txt $target &>/dev/null");
+		}
+		KIWIQX::qxx ("mv $dest/boot/*.bin $target &>/dev/null");
+		KIWIQX::qxx ("mv $dest/boot/*.dat $target &>/dev/null");
+		KIWIQX::qxx ("mv $dest/boot/*.img $target &>/dev/null");
+		KIWIQX::qxx ("mv $dest/boot/*.imx $target &>/dev/null");
+		KIWIQX::qxx ("mv $dest/boot/*.elf $target &>/dev/null");
 	}
 	#==========================================
 	# YaBoot
@@ -5977,8 +5969,11 @@ sub bindDiskDevice {
 	#==========================================
 	# bind file to loop device
 	#------------------------------------------
-	$status = KIWIQX::qxx ("/sbin/losetup -f --show $system 2>&1"); chomp $status;
+	$status = KIWIQX::qxx (
+		"/sbin/losetup -f --show $system 2>&1"
+	);
 	$result = $? >> 8;
+	chomp $status;
 	if ($result != 0) {
 		# /.../
 		# first losetup call has failed, try to find free loop
@@ -6075,7 +6070,7 @@ sub getGeometry {
 	if (($firmware eq "ec2")  ||
 		($firmware eq "efi")  ||
 		($firmware eq "uefi") ||
-		($firmware eq "vboot")
+		(($firmware eq "vboot") && ($loader ne "berryboot"))
 	) {
 		$label = 'gpt';
 	}
