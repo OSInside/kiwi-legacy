@@ -12,6 +12,7 @@
 <h2>Public methods</h2>
 <p>
 <ul>
+<li><a href="#getFSBlockSize">getFSBlockSize</a></li>
 <li><a href="#getInodeRatio">getInodeRatio</a></li>
 <li><a href="#getInodeSize">getInodeSize</a></li>
 <li><a href="#getMinNumInodes">getMinNumInodes</a></li>
@@ -21,8 +22,18 @@
 <li><a href="#getOptionsStrXFS">getOptionsStrXFS</a></li>
 <li><a href="#getTuneOptsExt">getTuneOptsExt</a></li>
 <li><a href="#new">new</a></li>
+<li><a href="#setFSBlockSize">setFSBlockSize</a></li>
 </ul>
 <hr>
+<a name="getFSBlockSize"><h2>getFSBlockSize</h2></a>
+<p>
+ Return the configured filesystem blocksize
+<p>
+Defined on line: 126
+<p>
+Called in
+<ul>
+<li><a href="KIWIImage.html">KIWIImage</a> : 1309</li></ul>
 <a name="getInodeRatio"><h2>getInodeRatio</h2></a>
 <p>
  Return the configured inode ratio
@@ -31,7 +42,7 @@ Defined on line: 104
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 386</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 6524</li><li><a href="KIWIImage.html">KIWIImage</a> : 4634</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 386</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 6574</li><li><a href="KIWIImage.html">KIWIImage</a> : 4641</li></ul>
 <a name="getInodeSize"><h2>getInodeSize</h2></a>
 <p>
  Return the configured inode size
@@ -40,64 +51,73 @@ Defined on line: 115
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 385</li><li><a href="KIWIImage.html">KIWIImage</a> : 4633</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 385</li><li><a href="KIWIImage.html">KIWIImage</a> : 2404</li><li><a href="KIWIImage.html">KIWIImage</a> : 4640</li></ul>
 <a name="getMinNumInodes"><h2>getMinNumInodes</h2></a>
 <p>
  Return the minimum number of inodes a filesystem should have
 <p>
-Defined on line: 126
+Defined on line: 154
 <a name="getOptionsStrBtrfs"><h2>getOptionsStrBtrfs</h2></a>
 <p>
  Return an options string for btrfs filesystems based on the
  defined options.
 <p>
-Defined on line: 137
+Defined on line: 165
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 6850</li><li><a href="KIWIImage.html">KIWIImage</a> : 4224</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 6900</li><li><a href="KIWIImage.html">KIWIImage</a> : 4231</li></ul>
 <a name="getOptionsStrExt"><h2>getOptionsStrExt</h2></a>
 <p>
  Return an options string for ext filesystems based on the
  defined options.
 <p>
-Defined on line: 153
+Defined on line: 181
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 2668</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 6801</li><li><a href="KIWIImage.html">KIWIImage</a> : 4162</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 2673</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 6851</li><li><a href="KIWIImage.html">KIWIImage</a> : 4169</li></ul>
 <a name="getOptionsStrReiser"><h2>getOptionsStrReiser</h2></a>
 <p>
  Return an options string for the reiser filesystem based on the
  defined options.
 <p>
-Defined on line: 179
+Defined on line: 207
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 6840</li><li><a href="KIWIImage.html">KIWIImage</a> : 4259</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 6890</li><li><a href="KIWIImage.html">KIWIImage</a> : 4266</li></ul>
 <a name="getOptionsStrXFS"><h2>getOptionsStrXFS</h2></a>
 <p>
  Return an options string for xfs filesystems based on the
  defined options.
 <p>
-Defined on line: 198
+Defined on line: 226
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 6859</li><li><a href="KIWIImage.html">KIWIImage</a> : 4420</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 6909</li><li><a href="KIWIImage.html">KIWIImage</a> : 4427</li></ul>
 <a name="getTuneOptsExt"><h2>getTuneOptsExt</h2></a>
 <p>
  Return a tune options string for ext filesystems based on the
  defined options.
 <p>
-Defined on line: 220
+Defined on line: 248
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 6806</li><li><a href="KIWIImage.html">KIWIImage</a> : 4163</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 6856</li><li><a href="KIWIImage.html">KIWIImage</a> : 4170</li></ul>
 <a name="new"><h2>new</h2></a>
 <p>
  Create the KIWIFilesystemOptions object
 <p>
 Defined on line: 45
+<a name="setFSBlockSize"><h2>setFSBlockSize</h2></a>
+<p>
+ Set the given filesystem blocksize value
+<p>
+Defined on line: 137
+<p>
+Called in
+<ul>
+<li><a href="KIWIImage.html">KIWIImage</a> : 1311</li><li><a href="KIWIImage.html">KIWIImage</a> : 1324</li></ul>
