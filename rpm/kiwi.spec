@@ -104,9 +104,6 @@ Requires:       satsolver-tools
 %endif
 %ifarch %ix86 x86_64
 Requires:       master-boot-code
-%if 0%{?suse_version} > 1110
-Requires:       clicfs >= 1.3.9
-%endif
 %endif
 # recommended to run kiwi
 %if 0%{?suse_version}
@@ -114,6 +111,7 @@ Recommends:     perl-satsolver >= 0.42
 Recommends:     jing
 Recommends:     zypper
 Recommends:     lxc
+Recommends:     clicfs
 %endif
 %if 0%{?suse_version} > 1140
 Recommends:     db45-utils
