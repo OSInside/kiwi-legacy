@@ -92,12 +92,15 @@ Requires:       util-linux
 Requires:       squashfs
 Requires:       master-boot-code
 %endif
-%if 0%{?suse_version} > 1030
+%if 0%{?suse_version} >= 1210
+Requires:       libsolv-tools
+Requires:       perl-solv
+%else
 Requires:       satsolver-tools
+Requires:       perl-satsolver >= 0.42
 %endif
 # recommended to run kiwi
 %if 0%{?suse_version}
-Recommends:     perl-satsolver >= 0.42
 Recommends:     jing
 Recommends:     zypper
 Recommends:     lxc
