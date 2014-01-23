@@ -95,15 +95,11 @@ Requires:       rsync
 Requires:       screen
 Requires:       util-linux
 %ifarch %ix86 x86_64
-%if 0%{?suse_version} > 1010
 Requires:       squashfs
-%endif
+Requires:       master-boot-code
 %endif
 %if 0%{?suse_version} > 1030
 Requires:       satsolver-tools
-%endif
-%ifarch %ix86 x86_64
-Requires:       master-boot-code
 %endif
 # recommended to run kiwi
 %if 0%{?suse_version}
