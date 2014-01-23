@@ -114,6 +114,7 @@ Source4:        %{name}-find-boot-requires.sh
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 
 # find out about the name scheme of the local system for -requieres packages
+# in terms of problems with this magic ask adrian@suse.de for details
 %if 0%{?suse_version}
 %if 0%{?sles_version}
 %define mysystems suse-SLES%{sles_version} suse-SLED%{sles_version}
@@ -137,9 +138,10 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 %endif
 
 %description
-The openSUSE KIWI Image System provides a complete operating system
-image solution for Linux supported hardware platforms as well as for
-virtualization systems like Xen.
+The KIWI Image System provides an operating system image builder
+for Linux supported hardware platforms as well as for virtualization
+and cloud systems like Xen, KVM, VMware, EC2 and more. The online
+documentation can be found here: http://doc.opensuse.org
 
 Authors:
 --------
@@ -178,8 +180,8 @@ BuildArch:      noarch
 %endif
 
 %description -n kiwi-doc
-This package contains the documentation and manual pages for the KIWI
-Image System
+This package contains the documentation and manual pages for
+the KIWI image builder.
 
 Authors:
 --------
@@ -195,7 +197,7 @@ Group:          System/Management
 This package contains a small set of helper tools used for the
 kiwi created initial ramdisk which is used to control the very
 first boot of an appliance. The tools are not meant to be used
-outside of the scope of kiwi appliance building
+outside of the scope of kiwi appliance building.
 
 Authors:
 --------
@@ -221,7 +223,8 @@ BuildArch:      noarch
 %endif
 
 %description -n kiwi-pxeboot
-PXE basic directory structure and pre-build boot images
+This package contains the basic PXE directory structure which is
+needed to serve kiwi built images via PXE.
 
 Authors:
 --------
@@ -252,7 +255,8 @@ BuildArch:      noarch
 %endif
 
 %description -n kiwi-desc-isoboot
-kiwi boot (initrd) image for activating system images on ISO media
+This package contains kiwi boot (initrd) descriptions for booting
+live ISO images.
 
 Authors:
 --------
@@ -266,7 +270,7 @@ License:        GPL-2.0+
 Group:          System/Management
 
 %description -n kiwi-desc-isoboot-requires
-Meta-package to pull in all requires to build a isoboot media.
+Meta-package to pull in all requires to build an isoboot media.
 
 %endif
 
@@ -301,7 +305,8 @@ BuildArch:      noarch
 %endif
 
 %description -n kiwi-desc-vmxboot
-kiwi boot (initrd) image for activating system images on virtual disk
+This package contains kiwi boot (initrd) descriptions for booting
+virtual disk images.
 
 Authors:
 --------
@@ -338,7 +343,7 @@ BuildArch:      noarch
 %endif
 
 %description -n kiwi-desc-netboot
-kiwi boot (initrd) image for activating system images via TFTP
+kiwi boot (initrd) image for booting PXE images.
 
 Authors:
 --------
@@ -391,9 +396,8 @@ BuildArch:      noarch
 %endif
 
 %description -n kiwi-desc-oemboot
-This package contains the openSUSE - KIWI image descriptions. Each
-image description exists in a single directory and contains an oemboot
-image description
+This package contains kiwi boot (initrd) descriptions for booting
+expandable virtual disk images.
 
 Authors:
 --------
