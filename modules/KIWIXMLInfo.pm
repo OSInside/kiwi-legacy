@@ -243,7 +243,7 @@ sub __solve {
 		$items,$urllist,"solve-patterns"
 	);
 	if (! defined $psolve) {
-		$kiwi -> error ("SaT solver setup failed");
+		$kiwi -> error ("SaT solver setup failed\n");
 		return;
 	}
 	if ($psolve -> getProblemsCount()) {

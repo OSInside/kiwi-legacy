@@ -30,15 +30,27 @@ use KIWIQX;
 #------------------------------------------
 BEGIN {
 	$KIWISatSolver::haveSaT = 1;
+	$KIWISatSolver::libsatsolver = 1;
+	$KIWISatSolver::libsolv = 1;
+	eval {
+		require solv;
+		solv -> import;
+	};
+	if ($@) {
+		# OK: no libsolv binding
+		$KIWISatSolver::libsolv = 0;
+	}
 	eval {
 		require satsolver;
 		satsolver -> import;
 	};
 	if ($@) {
-		$KIWISatSolver::haveSaT = 0;
+		# OK: no libsatsolver binding
+		$KIWISatSolver::libsatsolver = 0;
 	}
-	if (! $KIWISatSolver::haveSaT) {
-		package satsolver; ## no critic
+	if ((! $KIWISatSolver::libsatsolver) && (! $KIWISatSolver::libsolv)) {
+		# No solver bindings at all, no fun
+		$KIWISatSolver::haveSaT = 0;
 	}
 }
 
@@ -82,12 +94,19 @@ sub new {
 	if (! defined $pool) {
 		if (! defined $quiet) {
 			$kiwi -> info ("Setting up SaT solver...\n");
+			if ($KIWISatSolver::libsolv) {
+				$kiwi -> info ("--> Using libsolv binding\n");
+			} elsif ($KIWISatSolver::libsatsolver) {
+				$kiwi -> info ("--> Using libsatsolver binding\n");
+			}
 		}
 	}
 	if (! $KIWISatSolver::haveSaT) {
-		$kiwi -> error ("--> No SaT plugin installed");
+		$kiwi -> error ("--> No SaT plugin found");
 		$kiwi -> failed ();
-		$kiwi -> error ("--> Make sure you have perl-satsolver installed");
+		$kiwi -> error (
+			"--> Check if perl-solv or perl-satsolver is installed"
+		);
 		$kiwi -> failed ();
 		return;
 	} else {
@@ -152,8 +171,8 @@ sub new {
 		#==========================================
 		# Create list of solvables
 		#------------------------------------------
-		my @files     = ();
-		my $our_solve = '/var/cache/kiwi/satsolver/merged.solv';
+		my @files   = ();
+		my $solfile = '/var/cache/kiwi/satsolver/merged.solv';
 		if (($solvtype) && ($solvtype eq "system-solvable")) {
 			#==========================================
 			# read solv files locally stored by zypper
@@ -189,9 +208,9 @@ sub new {
 			return;
 		}
 		if (@files > 1) {
-			KIWIQX::qxx ("mergesolv @files > $our_solve");
+			KIWIQX::qxx ("mergesolv @files > $solfile");
 		} else {
-			KIWIQX::qxx ("cp @files $our_solve 2>&1");
+			KIWIQX::qxx ("cp @files $solfile 2>&1");
 		}
 		my $code = $? >> 8;
 		if ($code != 0) {
@@ -199,17 +218,7 @@ sub new {
 			$kiwi -> failed ();
 			return;
 		}
-		$this->{solfile} = $our_solve;
-		#==========================================
-		# Check if we can open the solvable
-		#------------------------------------------
-		my $solv_fd = FileHandle -> new();
-		if (! $solv_fd -> open($this->{solfile})) {
-			$kiwi -> error  ("--> Couldn't open solvable: $this->{solfile}");
-			$kiwi -> failed ();
-			return;
-		}
-		$solv_fd -> close();
+		$this->{solfile} = $solfile;
 		#==========================================
 		# Create SaT pool
 		#------------------------------------------
@@ -217,7 +226,13 @@ sub new {
 		#==========================================
 		# Create SaT repos
 		#------------------------------------------
-		$this -> __createRepo($pool);
+		if (($solvtype) && ($solvtype =~ /merged|system/)) {
+			$this -> __createRepo($pool,$solfile);
+		} else {
+			foreach my $solfile (@files) {
+				$this -> __createRepo($pool,$solfile);
+			}
+		}
 	}
 	#==========================================
 	# Create SaT Solver
@@ -238,7 +253,7 @@ sub new {
 	#==========================================
 	# Solve the job(s)
 	#------------------------------------------
-	$this -> __solveJobs($job,$solver);
+	$this->{problems} = $this -> __solveJobs($job,$solver);
 	#==========================================
 	# Check for problems
 	#------------------------------------------
@@ -254,6 +269,9 @@ sub new {
 	$this->{kiwi}    = $kiwi;
 	$this->{solver}  = $solver;
 	$this->{failed}  = $failed;
+	if ($problems) {
+		return $this;
+	}
 	#==========================================
 	# Handle result lists
 	#------------------------------------------
@@ -452,9 +470,7 @@ sub __createPool {
 	# Create a new solver Pool
 	# ----
 	my $this = shift;
-	my $pool = satsolver::Pool -> new();
-	$pool -> set_allow_self_conflicts(1);
-	my $arch = qx (uname -m);
+	my $arch = qx(uname -m);
 	chomp $arch;
 	if ($arch eq "armv7l") {
 		$arch = "armv7hl";
@@ -462,14 +478,19 @@ sub __createPool {
 	if ($arch eq "armv6l") {
 		$arch = "armv6hl";
 	}
-	#==========================================
-	# allow arch overwrite
-	#------------------------------------------
+	my $pool;
 	if ($ENV{KIWI_REPO_INFO_ARCH}) {
 		$arch = $ENV{KIWI_REPO_INFO_ARCH};
 	}
-	$pool -> set_arch ($arch);
-	$pool -> prepare();
+	if ($KIWISatSolver::libsolv) {
+		$pool = solv::Pool -> new();
+		$pool->setarch ($arch);
+	} elsif ($KIWISatSolver::libsatsolver) {
+		$pool = satsolver::Pool -> new();
+		$pool->set_allow_self_conflicts(1);
+		$pool->set_arch ($arch);
+		$pool->prepare();
+	}
 	return $pool;
 }
 
@@ -479,12 +500,17 @@ sub __createPool {
 sub __createRepo {
 	my $this = shift;
 	my $pool = shift;
-	my $repo = $pool -> create_repo(
-		$this->{solfile}
-	);
-	$repo -> add_solv(
-		$this->{solfile}
-	);
+	my $solv = shift;
+	my $repo;
+	if ($KIWISatSolver::libsolv) {
+		$repo = $pool->add_repo($solv);
+		$repo->add_solv($solv);
+		$pool->addfileprovides();
+		$pool->createwhatprovides();
+	} elsif ($KIWISatSolver::libsatsolver) {
+		$repo = $pool->create_repo($solv);
+		$repo->add_solv($solv);
+	}
 	return $repo;
 }
 
@@ -495,9 +521,19 @@ sub __createSolver {
 	my $this = shift;
 	my $pool = shift;
 	my $ptype= shift;
-	my $solver = satsolver::Solver->new($pool);
+	my $solvRecommends = 1;
+	my $solver;
 	if ($ptype ne "plusRecommended") {
-		$solver->set_dont_install_recommended(1);
+		$solvRecommends = 0;
+	}
+	if ($KIWISatSolver::libsolv) {
+		# TODO: set_dont_install_recommended does not exist in libsolv
+		$solver = $pool->Solver();
+	} elsif ($KIWISatSolver::libsatsolver) {
+		$solver = satsolver::Solver->new($pool);
+		if (! $solvRecommends) {
+			$solver->set_dont_install_recommended(1);
+		}
 	}
 	return $solver;
 }
@@ -510,14 +546,28 @@ sub __createJobs {
 	my $pool = shift;
 	my $jobs = shift;
 	my @fail;
-	my $job = $pool->create_request();
-	foreach my $name (sort keys %{$jobs}) {
-		my $item = $pool->find($name);
-		if (! $item) {
-			push @fail,$name;
-			next;
+	my $job;
+	if ($KIWISatSolver::libsolv) {
+		my @job_list = ();
+		foreach my $name (sort keys %{$jobs}) {
+			my $item = $pool->select($name, $solv::Selection::SELECTION_NAME);
+			if ($item->isempty()) {
+				push @fail, $name;
+				next;
+			}
+			push @job_list, $item->jobs($solv::Job::SOLVER_INSTALL);
 		}
-		$job -> install ($item);
+		$job = \@job_list;
+	} elsif ($KIWISatSolver::libsatsolver) {
+		$job = $pool->create_request();
+		foreach my $name (sort keys %{$jobs}) {
+			my $item = $pool->find($name);
+			if (! $item) {
+				push @fail,$name;
+				next;
+			}
+			$job->install ($item);
+		}
 	}
 	return ($job,\@fail);
 }
@@ -529,7 +579,13 @@ sub __solveJobs {
 	my $this   = shift;
 	my $job    = shift;
 	my $solver = shift;
-	return $solver -> solve ($job);
+	my @result;
+	if ($KIWISatSolver::libsolv) {
+		@result = $solver->solve($job);
+	} elsif ($KIWISatSolver::libsatsolver) {
+		@result = $solver->solve ($job);
+	}
+	return \@result;
 }
 
 #==========================================
@@ -539,26 +595,47 @@ sub __getProblems {
 	my $this   = shift;
 	my $solver = shift;
 	my $job    = shift;
-	my $problems = $solver->problems_count();
-	if (! $problems) {
-		return;
-	}
-	my @problem_list = $solver->problems ($job);
-	my $count = 1;
-	my $info_string;
-	foreach my $p (@problem_list) {
-		$info_string .= sprintf "\nProblem $count:\n";
-		$info_string .= sprintf "====================================\n";
-		my $problem_string = $p->string();
-		$info_string .= sprintf "$problem_string\n";
-		my @solutions = $p->solutions();
-		foreach my $s (@solutions) {
-			my $solution_string = $s->string();
-			$info_string .= sprintf "$solution_string\n";
+	my $infotext;
+	if ($KIWISatSolver::libsolv) {
+		return if ! $this->{problems};
+		my @p_list  = @{$this->{problems}};
+		my $p_count = @p_list;
+		for my $problem (@p_list) {
+			my $p_id = $problem->{id};
+			$infotext .= sprintf "\nProblem $p_id/$p_count:\n";
+			$infotext .= sprintf "====================================\n";
+			my $problem_string = $problem->findproblemrule()
+				->info()->problemstr();
+			$infotext .= sprintf "$problem_string\n";
+			my @solutions = $problem->solutions();
+			for my $solution (@solutions) {
+				$infotext .= sprintf "  Solution $solution->{id}:\n";
+				for my $element ($solution->elements(1)) {
+					$infotext .= sprintf "  - ".$element->str()."\n";
+				}
+			}
 		}
-		$count++;
+	} elsif ($KIWISatSolver::libsatsolver) {
+		my $problems = $solver->problems_count();
+		if (! $problems) {
+			return;
+		}
+		my @problem_list = $solver->problems ($job);
+		my $count = 1;
+		foreach my $p (@problem_list) {
+			$infotext .= sprintf "\nProblem $count:\n";
+			$infotext .= sprintf "====================================\n";
+			my $problem_string = $p->string();
+			$infotext .= sprintf "$problem_string\n";
+			my @solutions = $p->solutions();
+			foreach my $s (@solutions) {
+				my $solution_string = $s->string();
+				$infotext .= sprintf "$solution_string\n";
+			}
+			$count++;
+		}
 	}
-	return $info_string;
+	return $infotext;
 }
 
 #==========================================
@@ -567,7 +644,15 @@ sub __getProblems {
 sub __getProblemsCount {
 	my $this   = shift;
 	my $solver = shift;
-	return $solver->problems_count();
+	my $count  = 0;
+	if ($KIWISatSolver::libsolv) {
+		if ($this->{problems}) {
+			$count = @{$this->{problems}}
+		}
+	} elsif ($KIWISatSolver::libsatsolver) {
+		$count = $solver->problems_count();
+	}
+	return $count;
 }
 
 #==========================================
@@ -577,41 +662,73 @@ sub __getPackageAttributes {
 	my $this   = shift;
 	my $solver = shift;
 	my %result = ();
-	my @a = $solver->installs(1);
-	for my $solvable (@a) {
-		my $arch = $solvable->attr_values("solvable:arch");
-		my $size = $solvable->attr_values("solvable:installsize");
-		my $ver  = $solvable->attr_values("solvable:evr");
-		my $name = $solvable->attr_values("solvable:name");
-		my $chs  = $solvable->attr_values("solvable:checksum");
-		my $url  = $solvable->repo->name();
-		my $chst = "unknown";
-		my $di   = satsolver::Dataiterator -> new (
-			$solvable->repo->pool,$solvable->repo,
-			undef,0,$solvable,"solvable:checksum"
-		);
-		while ($di->step() != 0) {
-			$chst = $di->key()->type_id();
-			if ($chst == $satsolver::REPOKEY_TYPE_SHA256) {
-				$chst = "sha256";
-			} elsif ($chst == $satsolver::REPOKEY_TYPE_MD5) {
-				$chst = "md5";
-			} elsif ($chst == $satsolver::REPOKEY_TYPE_SHA1) {
-				$chst = "sha1";
+	if ($KIWISatSolver::libsolv) {
+		my $transaction = $solver->transaction();
+		if ($transaction->isempty()) {
+			return %result;
+		}
+		for my $solvable ($transaction->newpackages()) {
+			my $name = $solvable->lookup_str($solv::SOLVABLE_NAME);
+			$result{$name}{url} = $solvable->{repo}{name};
+			$result{$name}{installsize}
+				= $solvable->lookup_num($solv::SOLVABLE_INSTALLSIZE);
+			$result{$name}{arch}
+				= $solvable->lookup_str($solv::SOLVABLE_ARCH);
+			$result{$name}{evr}
+				= $solvable->lookup_str($solv::SOLVABLE_EVR);
+			my $checksum
+				= $solvable->lookup_checksum($solv::SOLVABLE_CHECKSUM);
+			my $chst = $checksum->{type};
+			if ($chst) {
+				if ($chst == $solv::REPOKEY_TYPE_SHA256) {
+					$chst = "sha256";
+				} elsif ($chst == $solv::REPOKEY_TYPE_MD5) {
+					$chst = "md5";
+				} elsif ($chst == $solv::REPOKEY_TYPE_SHA1) {
+					$chst = "sha1";
+				}
+				$result{$name}{checksum} = $chst."=".$checksum->hex();
+			} else {
+				$result{$name}{checksum} = "unknown";
 			}
 		}
-		if (! $chs) {
-			$chs = "unknown";
+	} elsif ($KIWISatSolver::libsatsolver) {
+		my @a = $solver->installs(1);
+		for my $solvable (@a) {
+			my $arch = $solvable->attr_values("solvable:arch");
+			my $size = $solvable->attr_values("solvable:installsize");
+			my $ver  = $solvable->attr_values("solvable:evr");
+			my $name = $solvable->attr_values("solvable:name");
+			my $chs  = $solvable->attr_values("solvable:checksum");
+			my $url  = $solvable->repo->name();
+			my $chst = "unknown";
+			my $di   = satsolver::Dataiterator -> new (
+				$solvable->repo->pool,$solvable->repo,
+				undef,0,$solvable,"solvable:checksum"
+			);
+			while ($di->step() != 0) {
+				$chst = $di->key()->type_id();
+				if ($chst == $satsolver::REPOKEY_TYPE_SHA256) {
+					$chst = "sha256";
+				} elsif ($chst == $satsolver::REPOKEY_TYPE_MD5) {
+					$chst = "md5";
+				} elsif ($chst == $satsolver::REPOKEY_TYPE_SHA1) {
+					$chst = "sha1";
+				}
+			}
+			if (! $chs) {
+				$chs = "unknown";
+			}
+			if (! $size) {
+				$size = 0;
+			}
+			$chs = $chst."=".$chs;
+			$result{$name}{installsize} = $size;
+			$result{$name}{arch} = $arch;
+			$result{$name}{evr} = $ver;
+			$result{$name}{checksum} = $chs;
+			$result{$name}{url} = $url;
 		}
-		if (! $size) {
-			$size = 0;
-		}
-		$chs = $chst."=".$chs;
-		$result{$name}{installsize} = $size;
-		$result{$name}{arch} = $arch;
-		$result{$name}{evr} = $ver;
-		$result{$name}{checksum} = $chs;
-		$result{$name}{url} = $url;
 	}
 	return %result;
 }
