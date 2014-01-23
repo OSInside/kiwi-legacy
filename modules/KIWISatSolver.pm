@@ -91,6 +91,9 @@ sub new {
 	my $failed;    # failed jobs
 	my $job;       # job queue
 	my $problems;  # solver problems
+	if (! -d "/var/cache/kiwi/satsolver") {
+		KIWIQX::qxx ("mkdir -p /var/cache/kiwi/satsolver");
+	}
 	if (! defined $pool) {
 		if (! defined $quiet) {
 			$kiwi -> info ("Setting up SaT solver...\n");
