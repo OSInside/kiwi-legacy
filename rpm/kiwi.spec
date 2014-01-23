@@ -39,23 +39,7 @@ BuildRequires:  module-init-tools
 BuildRequires:  rsync
 BuildRequires:  screen
 BuildRequires:  zlib-devel
-%if 0%{?suse_version} > 1020
 BuildRequires:  fdupes
-%endif
-%ifarch %ix86 x86_64
-BuildRequires:  syslinux
-%endif
-%if 0%{?suse_version} > 1030
-BuildRequires:  libexpat-devel
-BuildRequires:  rpm-devel
-%endif
-%if 0%{?suse_version} > 1140
-BuildRequires:  btrfsprogs
-BuildRequires:  cdrkit-cdrtools-compat
-BuildRequires:  genisoimage
-BuildRequires:  squashfs
-BuildRequires:  zypper
-%endif
 BuildRequires:  perl-Class-Singleton
 BuildRequires:  perl-Config-IniFiles
 BuildRequires:  perl-Digest-SHA1
@@ -67,6 +51,16 @@ BuildRequires:  perl-XML-LibXML-Common
 BuildRequires:  perl-XML-SAX
 BuildRequires:  perl-libwww-perl
 BuildRequires:  perl-Test-Unit-Lite
+%ifarch %ix86 x86_64
+BuildRequires:  syslinux
+%endif
+%if 0%{?suse_version} > 1140
+BuildRequires:  btrfsprogs
+BuildRequires:  cdrkit-cdrtools-compat
+BuildRequires:  genisoimage
+BuildRequires:  squashfs
+BuildRequires:  zypper
+%endif
 # requirements to run kiwi
 Requires:       perl >= %{perl_version}
 Requires:       checkmedia
