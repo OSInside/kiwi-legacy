@@ -108,8 +108,6 @@ Recommends:     jing
 Recommends:     zypper
 Recommends:     lxc
 Recommends:     clicfs
-%endif
-%if 0%{?suse_version} > 1140
 Recommends:     db45-utils
 %endif
 # obsoletes
