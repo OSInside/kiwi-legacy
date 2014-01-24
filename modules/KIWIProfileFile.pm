@@ -59,7 +59,7 @@ sub new {
 		kiwi_bootloader
 		kiwi_bootprofile
 		kiwi_bootkernel
-		KIWI_BOOT_TIMEOUT
+		kiwi_boot_timeout
 		kiwi_cmdline
 		kiwi_compressed
 		kiwi_cpio_name
@@ -325,7 +325,7 @@ sub __updateXMLType {
 	#------------------------------------------
 	$data{kiwi_type}             = $type -> getTypeName();
 	$data{kiwi_compressed}       = $type -> getCompressed();
-	$data{KIWI_BOOT_TIMEOUT}     = $type -> getBootTimeout();
+	$data{kiwi_boot_timeout}     = $type -> getBootTimeout();
 	$data{kiwi_hybrid}           = $type -> getHybrid();
 	$data{kiwi_hybridpersistent} = $type -> getHybridPersistent();
 	$data{kiwi_ramonly}          = $type -> getRAMOnly();

@@ -3372,11 +3372,11 @@ sub writeImageConfig {
 				. "'\n";
 		}
 		#==========================================
-		# KIWI_BOOT_TIMEOUT information
+		# kiwi_boot_timeout information
 		#------------------------------------------
 		my $timeout = $pxeConfig -> getTimeout();
 		if (defined $timeout) {
-			print $FD "KIWI_BOOT_TIMEOUT=$timeout\n";
+			print $FD "kiwi_boot_timeout=$timeout\n";
 		}
 		#==========================================
 		# KIWI_KERNEL_OPTIONS information

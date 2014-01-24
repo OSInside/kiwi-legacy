@@ -1528,7 +1528,7 @@ function setupBootLoaderSyslinuxRecovery {
 	#--------------------------------------
 	echo "implicit 1"                   > $conf
 	echo "prompt   1"                  >> $conf
-	echo "TIMEOUT $KIWI_BOOT_TIMEOUT"  >> $conf
+	echo "TIMEOUT $kiwi_boot_timeout"  >> $conf
 	echo "display isolinux.msg"        >> $conf
 	if [ -f "$mountPrefix/boot/syslinux/bootlogo" ];then
 		if \
@@ -1925,8 +1925,8 @@ function setupBootLoaderS390 {
 	#======================================
 	# check for boot TIMEOUT
 	#--------------------------------------
-	if [ -z "$KIWI_BOOT_TIMEOUT" ];then
-		KIWI_BOOT_TIMEOUT=100;
+	if [ -z "$kiwi_boot_timeout" ];then
+		kiwi_boot_timeout=100;
 	fi
 	#======================================
 	# create directory structure
@@ -1946,7 +1946,7 @@ function setupBootLoaderS390 {
 	echo "    default = 1"                   >> $conf
 	echo "    prompt = 1"                    >> $conf
 	echo "    target = /boot/zipl"           >> $conf
-	echo "    timeout = $KIWI_BOOT_TIMEOUT"  >> $conf
+	echo "    timeout = $kiwi_boot_timeout"  >> $conf
 	count=1
 	IFS="," ; for i in $KERNEL_LIST;do
 		if test -z "$i";then
@@ -2124,8 +2124,8 @@ function setupBootLoaderSyslinux {
 	#======================================
 	# check for boot TIMEOUT
 	#--------------------------------------
-	if [ -z "$KIWI_BOOT_TIMEOUT" ];then
-		KIWI_BOOT_TIMEOUT=100;
+	if [ -z "$kiwi_boot_timeout" ];then
+		kiwi_boot_timeout=100;
 	fi
 	#======================================
 	# create directory structure
@@ -2138,7 +2138,7 @@ function setupBootLoaderSyslinux {
 	#--------------------------------------
 	echo "implicit 1"                   > $conf
 	echo "prompt   1"                  >> $conf
-	echo "TIMEOUT $KIWI_BOOT_TIMEOUT"  >> $conf
+	echo "TIMEOUT $kiwi_boot_timeout"  >> $conf
 	echo "display isolinux.msg"        >> $conf
 	if [ -f "$mountPrefix/boot/syslinux/bootlogo" ];then
 		if \
@@ -2340,8 +2340,8 @@ function setupBootLoaderGrub {
 	#======================================
 	# check for boot TIMEOUT
 	#--------------------------------------
-	if [ -z "$KIWI_BOOT_TIMEOUT" ];then
-		KIWI_BOOT_TIMEOUT=10;
+	if [ -z "$kiwi_boot_timeout" ];then
+		kiwi_boot_timeout=10;
 	fi
 	#======================================
 	# create directory structure
@@ -2356,7 +2356,7 @@ function setupBootLoaderGrub {
 	#======================================
 	# create menu.lst file
 	#--------------------------------------
-	echo "timeout $KIWI_BOOT_TIMEOUT"  > $menu
+	echo "timeout $kiwi_boot_timeout"  > $menu
 	if [ -f $mountPrefix/boot/grub/splash.xpm.gz ];then
 		echo "splashimage=$gdev/boot/grub/splash.xpm.gz" >> $menu
 	elif [ -f /image/loader/message ] || [ -f /boot/message ];then
@@ -2641,7 +2641,7 @@ function setupBootLoaderGrub2 {
 	#======================================
 	# check for boot TIMEOUT
 	#--------------------------------------
-	if [ -z "$KIWI_BOOT_TIMEOUT" ];then
+	if [ -z "$kiwi_boot_timeout" ];then
 		timeout=10;
 	fi
 	#======================================
@@ -2703,6 +2703,12 @@ function setupBootLoaderGrub2 {
 		local bgpng=/boot/grub2/themes/$kiwi_loader_theme/background.png
 		echo "GRUB_THEME=\"$theme\""      >> $inst_default_grub
 		echo "GRUB_BACKGROUND=\"$bgpng\"" >> $inst_default_grub
+	fi
+	#======================================
+	# write bootloader timeout setup
+	#--------------------------------------
+	if [ ! -z "$kiwi_boot_timeout" ];then
+		echo "GRUB_TIMEOUT=\"$kiwi_boot_timeout\"" >> $inst_default_grub
 	fi
 	#======================================
 	# create sysconfig/bootloader
@@ -2791,8 +2797,8 @@ function setupBootLoaderYaboot {
 	#======================================
 	# check for boot TIMEOUT
 	#--------------------------------------
-	if [ -z "$KIWI_BOOT_TIMEOUT" ];then
-		KIWI_BOOT_TIMEOUT=10;
+	if [ -z "$kiwi_boot_timeout" ];then
+		kiwi_boot_timeout=10;
 	fi
 	#======================================
 	# setup lilo boot device
@@ -2811,7 +2817,7 @@ function setupBootLoaderYaboot {
 	#======================================
 	# create lilo.conf file
 	#--------------------------------------
-	local timeout=$((KIWI_BOOT_TIMEOUT * 10))
+	local timeout=$((kiwi_boot_timeout * 10))
 	echo "boot=$rdev"                                        >  $conf
 	echo "activate"                                          >> $conf
 	echo "timeout=$timeout"                                  >> $conf
