@@ -825,11 +825,11 @@ function OEMInstall {
 		fi
 		Echo "Image checksum test: fine :-)"
 		Echo "System installation has finished"
-		#======================================
-		# Run user script
-		#--------------------------------------
-		runHook postImageDump
 	fi
+	#======================================
+	# Run user script
+	#--------------------------------------
+	runHook postImageDump
 	#======================================
 	# Umount CD/DVD USB
 	#--------------------------------------
