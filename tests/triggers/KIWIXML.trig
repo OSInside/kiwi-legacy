@@ -8,7 +8,6 @@ KTTarArchiveBuilder.t
 KTXML.t
 KTXMLDescriptionData.t
 KTXMLDriverData.t
-KTXMLEC2ConfigData.t
 KTXMLFileData.t
 KTXMLPackageIgnoreData.t
 KTImageBuilderBase.t

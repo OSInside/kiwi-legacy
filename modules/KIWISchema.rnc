@@ -311,67 +311,6 @@ div {
 }
 
 #==========================================
-# common element <ec2accountnr>
-#
-div {
-	k.ec2accountnr.attlist = empty
-	k.ec2accountnr =
-		## The user's EC2 user ID (Note: AWS account number, NOT Access Key ID)
-		element ec2accountnr {
-			k.ec2accountnr.attlist,
-			xsd:nonNegativeInteger
-		}
-}
-
-#==========================================
-# common element <ec2certfile>
-#
-div {
-	k.ec2certfile.attlist = empty
-	k.ec2certfile =
-		## Path to the AWS user's PEM encoded RSA pubkey certificate file
-		## cert-*.pem
-		element ec2certfile {
-			k.ec2certfile.attlist,
-			text
-		}
-}
-
-#==========================================
-# common element <ec2privatekeyfile>
-#
-div {
-	k.ec2privatekeyfile.attlist = empty
-	k.ec2privatekeyfile =
-		## Path to the AWS user's PEM encoded RSA private key file pk-*.pem
-		element ec2privatekeyfile {
-			k.ec2privatekeyfile.attlist,
-			text
-		}
-}
-
-#==========================================
-# common element <ec2region>
-#
-div {
-	k.ec2region.attlist = empty
-	k.ec2region =
-		## Specify the region/availability zone
-		[
-		db:para [
-			"Specify the region/availability zone in EC2 for this image.\x{a}"~
-			"Values are limited to the EC2 recognized zones:\x{a}"~
-			"AP-Northeast, AP-Southeast, AP-Southeast2, EU-West,,\x{a}"~
-            " SA-East, US-East, US-West, and US-West2"
-		]
-		]
-		element ec2region {
-			k.ec2region.attlist,
-			text
-		}
-}
-
-#==========================================
 # common element <except>
 #
 div {
@@ -1685,7 +1624,7 @@ div {
 		## the disk layout and the partition table type. By default
 		## the standard x86 bios firmware setup is used
 		attribute firmware {
-			"bios" | "efi" | "uefi" | "vboot"
+			"bios" | "ec2" | "efi" | "uefi" | "vboot"
 		}
 	k.type.bootfilesystem.attribute =
 		## if an extra boot partition is required this attribute
@@ -1703,6 +1642,10 @@ div {
 		}
 	k.type.format.attribute =
 		## Specifies the format of the virtual disk.
+		## The ec2 value is deprecated and no longer supported
+		## It remains in the schema to allow us to print a better
+		## Error message than we receive from the parser.
+		## To be remove from here by the end of 2014
 		attribute format {
 			"ec2" | "ovf" | "ova" | "qcow2" | "vmdk" | "vhd" | "vhd-fixed"
 		}
@@ -1844,7 +1787,6 @@ div {
 		## The Image Type of the Logical Extend
 		element type { 
 			k.type.attlist &
-			k.ec2config? &
 			k.machine? &
 			k.oemconfig? &
 			k.pxedeploy? &
@@ -2382,28 +2324,6 @@ div {
 		element chroot {
 			k.chroot.attlist &
 			text
-		}
-}
-
-#==========================================
-# main block: <ec2config>
-#
-div {
-	k.ec2config.attlist = empty
-	k.ec2config =
-		## Specifies the AWS EC2 configuration section
-		[
-		db:para [
-			"The ec2config element specifies the EC2 image\x{a}"~
-			"configuration options."
-		]
-		]
-		element ec2config {
-			k.ec2config.attlist &
-			k.ec2accountnr? &
-			k.ec2certfile? &
-			k.ec2privatekeyfile? &
-			k.ec2region*
 		}
 }
 

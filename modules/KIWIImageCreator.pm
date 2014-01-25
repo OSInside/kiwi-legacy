@@ -1942,6 +1942,15 @@ sub __addTypeToBootXML {
 		$kiwi -> done();
 	}
 	#==========================================
+	# boottimeout
+	#------------------------------------------
+	my $boottimeout = $systemType -> getBootTimeout();
+	if ($boottimeout) {
+		$kiwi -> info ("--> boottimout: $boottimeout");
+		$bootType -> setBootTimeout($boottimeout);
+		$kiwi -> done();
+	}
+	#==========================================
 	# devicepersistency
 	#------------------------------------------
 	my $devicepersistency = $systemType -> getDevicePersistent();
@@ -1957,6 +1966,15 @@ sub __addTypeToBootXML {
 	if ($installboot) {
 		$kiwi -> info ("--> installboot: $installboot");
 		$bootType -> setInstallBoot ($installboot);
+		$kiwi -> done();
+	}
+	#==========================================
+	# installfailsafe
+	#------------------------------------------
+	my $installfailsafe = $systemType -> getInstallFailsafe();
+	if ($installfailsafe) {
+		$kiwi -> info ("--> installfailsafe: $installfailsafe");
+		$bootType -> setInstallFailsafe ($installfailsafe);
 		$kiwi -> done();
 	}
 	#==========================================

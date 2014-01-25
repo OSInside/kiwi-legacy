@@ -16,10 +16,11 @@
 		<profile name="default" description="Booting default setup"/>
 		<profile name="custom" description="KERNEL: specified by bootinclude in system XML"/>
 		<profile name="xen" description="Boot with xen mboot.c32 setup"/>
+		<profile name="ec2" description="Boot using EC2 system"/>
 		<profile name="std" description="KERNEL: Default"/>
 		<profile name="xenk" description="KERNEL: Xen kernel/mboot.c32"/>
 		<profile name="pae" description="KERNEL: pae kernel"/>
-		<profile name="ec2" description="KERNEL: Ec2 kernel"/>
+		<profile name="ec2k" description="KERNEL: EC2 kernel"/>
 		<profile name="desktop" description="KERNEL: Desktop kernel"/>
 	</profiles>
 	<drivers>
@@ -68,7 +69,7 @@
 		<file name="lib/libcrc32c.ko"/>
 		<file name="lib/zlib_deflate/zlib_deflate.ko"/>
 	</drivers>
-	<drivers profiles="xen">
+	<drivers profiles="xen,ec2">
 		<file name="drivers/xen/*"/>
 	</drivers>
 	<repository type="yast2" status="replaceable">
@@ -87,10 +88,8 @@
 <!-- xen dom0 support only on x86_64 -->
 		<package name="xen" arch="x86_64"/>
 	</packages>
-	<packages type="image" profiles="ec2">
+	<packages type="image" profiles="ec2k">
 		<package name="kernel-ec2"/>
-<!-- xen dom0 support only on x86_64 -->
-		<package name="xen" arch="x86_64"/>
 	</packages>
 	<packages type="image" profiles="desktop">
 		<package name="kernel-desktop" arch="x86_64"/>
