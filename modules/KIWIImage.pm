@@ -1904,7 +1904,7 @@ sub createImageLiveCD {
 		print $FD 'fi'."\n";
 		my $bootTimeout = 10;
 		my $xmlboottimeout = $xmltype -> getBootTimeout();
-		if ($xmlboottimeout) {
+		if (defined $xmlboottimeout) {
 			$bootTimeout = $xmlboottimeout;
 		}
 		print $FD "set timeout=$bootTimeout\n";
@@ -2068,7 +2068,7 @@ sub createImageLiveCD {
 	my $syslinux_new_format = 0;
 	my $bootTimeout = 200;
 	my $xmlboottimeout = $xmltype -> getBootTimeout();
-	if ($xmlboottimeout) {
+	if (defined $xmlboottimeout) {
 		$bootTimeout = $xmlboottimeout;
 	}
 	if (-f "$gfx/gfxboot.com" || -f "$gfx/gfxboot.c32") {
