@@ -703,14 +703,15 @@ sub createVMwareConfiguration {
 	if (! $diskID) {
 		$diskID = '0';
 	}
-	my $device = $diskController . $diskID;
 	if ($diskController eq "ide") {
+		my $device = $diskController . $diskID;
 		# IDE Interface...
 		print $VMWFD $device.':0.present = "true"'."\n";
 		print $VMWFD $device.':0.fileName= "'.$image.'.vmdk"'."\n";
 		print $VMWFD $device.':0.redo = ""'."\n";
 	} else {
 		# SCSI Interface...
+		my $device = 'scsi' . $diskID;
 		print $VMWFD $device.'.present = "true"'."\n";
 		print $VMWFD $device.'.sharedBus = "none"'."\n";
 		print $VMWFD $device.'.virtualDev = "' . $diskController . '"' . "\n";
