@@ -21,7 +21,6 @@
 		<profile name="xenk" description="KERNEL: Xen kernel/mboot.c32"/>
 		<profile name="pae" description="KERNEL: pae kernel"/>
 		<profile name="ec2k" description="KERNEL: EC2 kernel"/>
-		<profile name="desktop" description="KERNEL: Desktop kernel"/>
 	</profiles>
 	<drivers>
 		<file name="crypto/*"/>
@@ -90,11 +89,6 @@
 	</packages>
 	<packages type="image" profiles="ec2k">
 		<package name="kernel-ec2"/>
-	</packages>
-	<packages type="image" profiles="desktop">
-		<package name="kernel-desktop" arch="x86_64"/>
-		<package name="kernel-desktop" arch="i686"/>
-		<package name="kernel-default" arch="i586"/>
 	</packages>
 	<packages type="image" profiles="custom"><!-- empty custom section to allow bootincluding custom kernel --></packages>
 	<packages type="bootstrap">
