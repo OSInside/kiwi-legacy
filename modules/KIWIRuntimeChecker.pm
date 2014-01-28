@@ -37,6 +37,8 @@ use KIWIXMLSystemdiskData;
 use KIWIXMLTypeData;
 use KIWIXMLVMachineData;
 use Readonly;
+use File::stat;
+use Fcntl;
 
 #==========================================
 # constants
@@ -101,6 +103,9 @@ sub createChecks {
 	# Runtime checks specific to the create step
 	# ---
 	my $this = shift;
+	if (! $this -> __checkCorrectRootFSPermissons()) {
+		return;
+	}
 	if (! $this -> __checkContainerHasLXC()) {
 		return;
 	}
@@ -1238,6 +1243,39 @@ sub __isoHybridCapable {
 		if (! $cmdOpt{'status'}) {
 			my $msg = 'Attempting to build EFI capable hybrid ISO image, but '
 				. 'installed isohybrid binary does not support this option.';
+			$kiwi -> error ($msg);
+			$kiwi -> failed ();
+			return;
+		}
+	}
+	return 1;
+}
+
+#==========================================
+# __correctRootFSPermissons
+#------------------------------------------
+sub __checkCorrectRootFSPermissons {
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $cmdL = $this -> {cmdArgs};
+	my $tree = $cmdL -> getConfigDir();
+	my @dirs = qw(bin etc lib proc root sbin usr var);
+	my $msg;
+	if (! $tree) {
+		return 1;
+	}
+	foreach my $dir (@dirs) {
+		my $path = $tree.'/'.$dir;
+		next if ! -d $path;
+		my $st = stat($path);
+		my $uid = $st->uid;
+		my $gid = $st->gid;
+		my $user_name = getpwuid($uid);
+		my $group_name = getgrgid($gid);
+		if (($uid != 0) || ($gid != 0)) {
+			$msg = "Image tree not LSB compatible, check for $path ";
+			$msg.= "returned owner/group '$user_name/$group_name' ";
+			$msg.= "and not 'root/root'";
 			$kiwi -> error ($msg);
 			$kiwi -> failed ();
 			return;

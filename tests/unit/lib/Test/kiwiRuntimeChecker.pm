@@ -34,6 +34,17 @@ use KIWIXML;
 #------------------------------------------
 Readonly my $MEGABYTE => 1048576;
 
+if ($< != 0) {
+	# /.../
+	# stub the runtime check for the LSB root ownership if
+	# unit tests are called as normal user
+	# ----
+	no warnings; ## no critic
+	sub KIWIRuntimeChecker::__checkCorrectRootFSPermissons {
+		return 1;
+	}
+}
+
 #==========================================
 # Constructor
 #------------------------------------------
