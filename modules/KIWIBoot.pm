@@ -1836,9 +1836,16 @@ sub setupBootDisk {
 				#------------------------------------------
 				my $pname  = $vol; $pname =~ s/_/\//g;
 				if (! -d "$system/$pname") {
-					$kiwi -> error ("LVM: No such directory $system/$pname");
-					$kiwi -> failed ();
-					return;
+					$kiwi -> info (
+						"Creating volume mount point $system/$pname"
+					);
+					$status = KIWIQX::qxx ("mkdir -p $system/$pname 2>&1");
+					$result = $? >> 8;
+					if ($result != 0) {
+						$kiwi -> failed();
+						return;
+					}
+					$kiwi -> done ();
 				}
 				#==========================================
 				# calculate size required by volume

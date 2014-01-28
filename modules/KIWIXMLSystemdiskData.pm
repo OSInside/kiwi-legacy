@@ -581,16 +581,17 @@ sub __isNameValid {
 			. 'argument.';
 		$kiwi -> info($msg);
 		$kiwi -> oops();
+		return;
 	}
 	if (! $name ) {
 		my $msg = 'Internal error __isNameValid called without name '
 			. 'argument.';
 		$kiwi -> info($msg);
 		$kiwi -> oops();
-		return 1;
+		return;
 	}
-	if ($name !~ /^[A-Za-z0-9_\+][A-Za-z0-9_\/\+\-]*$|^\@root$/smx) {
-		my $msg = "$caller: improper LVM volume name found.";
+	if ($name !~ /^[A-Za-z0-9_\+\.][A-Za-z0-9_\/\+\-]*$|^\@root$/smx) {
+		my $msg = "$caller: improper volume name found.";
 		$kiwi -> error($msg);
 		$kiwi -> failed();
 		return;
