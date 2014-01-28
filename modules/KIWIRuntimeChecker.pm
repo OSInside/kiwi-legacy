@@ -500,16 +500,14 @@ sub __checkFilesystemTool {
 # __checkHaveTypeToBuild
 #------------------------------------------
 sub __checkHaveTypeToBuild {
-	# ...
-	# Check that there is a type to build:
-	# 1.) config file must have <preferences> without profile
-	# or
-	# 2.) one profile on a <preferences> element is marked as default
-	# or
-	# 3.) one profile on a <preferences> element specified on the command line
-	# ---
-	#TODO
-	# implement when XML becomes a dumb container and looses notion of state
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $xml  = $this -> {xml};
+	if (! $xml -> getImageType()) {
+		$kiwi -> error('No build type selected');
+		$kiwi -> failed();
+		return;
+	}
 	return 1;
 }
 
