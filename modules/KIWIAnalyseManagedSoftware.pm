@@ -168,6 +168,14 @@ sub getPackageNames {
 }
 
 #==========================================
+# getPackagesToDelete
+#------------------------------------------
+sub getPackagesToDelete {
+	my $this = shift;
+	return $this->{delete_packages};
+}
+
+#==========================================
 # getPackageCollections
 #------------------------------------------
 sub getPackageCollections {
@@ -499,7 +507,7 @@ sub __populatePackageList {
 		$this->{patterns} = \@patlist;
 		my $psolve = KIWISatSolver -> new (
 			\@patlist,\@urllist,"solve-patterns",
-			undef,undef,"plusRecommended","system-solvable",\@alias
+			undef,undef,"onlyRequired","system-solvable",\@alias
 		);
 		my @result = ();
 		if (! defined $psolve) {
@@ -517,8 +525,9 @@ sub __populatePackageList {
 		$this->{solverFailedJobs1} = $psolve -> getFailedJobs();
 		if ($psolve -> getProblemsCount()) {
 			$kiwi -> warning ("Pattern problems found check in report !\n");
+			$kiwi -> info ($this->{solverProblem1});
 		}
-		my @packageList = $psolve -> getPackages();
+		my @patternPackages = $psolve -> getPackages();
 		foreach my $installed (@ilist) {
 			if (defined $skip) {
 				my $inskip = 0;
@@ -530,7 +539,7 @@ sub __populatePackageList {
 				next if $inskip;
 			}
 			my $inpattern = 0;
-			foreach my $p (@packageList) {
+			foreach my $p (@patternPackages) {
 				if ($installed eq $p) {
 					$inpattern = 1; last;
 				}
@@ -547,12 +556,12 @@ sub __populatePackageList {
 		# The solved list is again checked with the pattern
 		# package list and the result is returned
 		# ----
+		my @solved_packages = ();
+		my $pool = $psolve -> getPool();
 		if (@result) {
-			my @solved_packages = ();
-			my $pool = $psolve -> getPool();
 			my $xsolve = KIWISatSolver -> new (
 				\@result,\@urllist,"solve-packages",
-				$pool,undef,"plusRecommended","system-solvable",\@alias
+				$pool,undef,"onlyRequired","system-solvable",\@alias
 			);
 			if (! defined $xsolve) {
 				$kiwi -> error  ("Failed to solve packages");
@@ -563,11 +572,12 @@ sub __populatePackageList {
 			$this->{solverFailedJobs2} = $xsolve -> getFailedJobs();
 			if ($xsolve -> getProblemsCount()) {
 				$kiwi -> warning ("Package problems found check in report !\n");
+				$kiwi -> info ($this->{solverProblem2});
 			}
 			@result = $xsolve -> getPackages();
 			foreach my $package (@result) {
 				my $inpattern = 0;
-				foreach my $tobeinstalled (@packageList) {
+				foreach my $tobeinstalled (@patternPackages) {
 					if ($tobeinstalled eq $package) {
 						$inpattern = 1; last;
 					}
@@ -593,7 +603,7 @@ sub __populatePackageList {
 				my $package = pop @solved_packages;
 				my $xsolve = KIWISatSolver -> new (
 					[$package],\@urllist,"solve-packages",
-					$pool,"quiet","plusRecommended","system-solvable",\@alias
+					$pool,"quiet","onlyRequired","system-solvable",\@alias
 				);
 				my @single_package_solved_list = $xsolve -> getPackages();
 				@solved_packages = $this -> __strip_list (
@@ -607,11 +617,39 @@ sub __populatePackageList {
 				}
 				$done_previos = $done_percent;
 			}
+			my $reduced = $tasks - @reduced_packages;
 			$kiwi -> note ("\n");
 			$kiwi -> doNorm ();
 			$kiwi -> cursorON();
 			$this->{packages} = \@reduced_packages;
+			$kiwi -> info ("--> reduced by $reduced packages");
+			$kiwi -> done();
 		}
+		# /.../
+		# Walk through the list of installed packages and compare them
+		# with the list of solved required packages. packages which are
+		# not installed but part of the solved required list seems to
+		# be unwanted and should be added to the delete section
+		# ----
+		my @delete_packages = ();
+		my $zsolve = KIWISatSolver -> new (
+			\@ilist,\@urllist,"solve-packages",
+			$pool,"quiet","onlyRequired","system-solvable",\@alias
+		);
+		my @installed_solved = $zsolve -> getPackages();
+		foreach my $solved (@installed_solved) {
+			my $found = 0;
+			foreach my $installed (@ilist) {
+				if ($installed eq $solved) {
+					$found = 1;
+					last;
+				}
+			}
+			if (! $found) {
+				push @delete_packages, $solved;
+			}
+		}
+		$this->{delete_packages} = \@delete_packages;
 	}
 	return $this;
 }

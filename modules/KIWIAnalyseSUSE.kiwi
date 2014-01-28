@@ -20,4 +20,6 @@
 	</users>
 	<packages patternType="plusRecommended">
 	</packages>
+	<packages type="delete">
+	</packages>
 </image>

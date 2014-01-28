@@ -261,10 +261,6 @@ sub new {
 	# Check for problems
 	#------------------------------------------
 	$problems = $this -> __getProblems($solver,$job);
-	if ($problems) {
-		$kiwi -> warning ("--> Solver Problems ! Here are the solutions:\n");
-		print $problems;
-	}
 	#==========================================
 	# Store object data
 	#------------------------------------------
@@ -272,9 +268,6 @@ sub new {
 	$this->{kiwi}    = $kiwi;
 	$this->{solver}  = $solver;
 	$this->{failed}  = $failed;
-	if ($problems) {
-		return $this;
-	}
 	#==========================================
 	# Handle result lists
 	#------------------------------------------

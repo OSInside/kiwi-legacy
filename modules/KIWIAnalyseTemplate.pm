@@ -73,6 +73,7 @@ sub new {
 	my $product = shift;
 	my $patterns= shift;
 	my $packages= shift;
+	my $delpacks= shift;
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
@@ -104,6 +105,7 @@ sub new {
 	$this->{product} = $product;
 	$this->{packages}= $packages;
 	$this->{patterns}= $patterns;
+	$this->{delpacks}= $delpacks;
 	return $this;
 }
 
@@ -120,6 +122,7 @@ sub writeKIWIXMLConfiguration {
 	my $product = $this->{product};
 	my $pats    = $this->{patterns};
 	my $pacs    = $this->{packages};
+	my $del     = $this->{delpacks};
 	my %osc     = %{$this->{source}};
 	#==========================================
 	# read template
@@ -191,8 +194,19 @@ sub writeKIWIXMLConfiguration {
 			my $p = KIWIXMLPackageData -> new (\%pack_data);
 			push @xml_pack, $p;
 		}
+		$xml -> addBootstrapPackages (\@xml_pack);
 	}
-	$xml -> addBootstrapPackages (\@xml_pack);
+	@xml_pack = ();
+	if (defined $del) {
+		foreach my $package (sort @{$del}) {
+			my %pack_data = (
+				'name' => $package
+			);
+			my $p = KIWIXMLPackageData -> new (\%pack_data);
+			push @xml_pack, $p;
+        }
+		$xml -> addPackagesToDelete (\@xml_pack);
+	}
 	#==========================================
 	# KIWIXMLPackageCollectData
 	#------------------------------------------

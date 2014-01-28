@@ -364,7 +364,8 @@ sub main {
 			$analysePackages -> getRepositories(),
 			$analysePackages -> getOS(),
 			$analysePackages -> getPackageCollections(),
-			$analysePackages -> getPackageNames()
+			$analysePackages -> getPackageNames(),
+			$analysePackages -> getPackagesToDelete()
 		);
 		if (! $notempl) {
 			$analyseTemplate -> writeKIWIXMLConfiguration();
