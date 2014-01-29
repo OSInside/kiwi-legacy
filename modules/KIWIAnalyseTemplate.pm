@@ -289,7 +289,7 @@ sub writeKIWIScripts {
 			next;
 		}
 		# FIXME: do this packagemanager related
-		print $FD "zypper ar \\\n\t\"".$url."\" \\\n\t\"".$alias."\"\n";
+		print $FD "zypper ar \\\n\t'".$url."' \\\n\t'".$alias."'\n";
 	}
 	#==========================================
 	# Product repo...
