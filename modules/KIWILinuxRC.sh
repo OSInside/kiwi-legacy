@@ -4714,9 +4714,10 @@ function setupNetwork {
 		# name is assigned.
 		# ----
 		index=0
-		BOOTIF=`echo $BOOTIF | cut -f2- -d - | tr "-" ":"`
+		BOOTIF=$(echo $BOOTIF | cut -f2- -d - | tr "-" ":")
 		for i in ${mac_list[*]};do
-			if [ $i = $BOOTIF ];then
+			list_iface=$(echo $i | tr [:upper:] [:lower:])
+			if [ $list_iface = $BOOTIF ];then
 				prefer_iface=${dev_list[$index]}
 			fi
 			index=$((index + 1))
