@@ -2665,6 +2665,20 @@ sub setupBootDisk {
 			if (($dist) && ($dist eq 'sle11')) {
 				$opts = $this->{gdata}->{LuksDist}->{sle11};
 			}
+			my $size_bt = KIWIGlobals -> instance() -> isize ($rw);
+			my $size_mb = int ($size_bt / 1048576);
+			$status = KIWIQX::qxx (
+				"dd if=/dev/urandom bs=1M count=$size_mb of=$rw 2>&1"
+			);
+			$result = $? >> 8;
+			if ($status != 0) {
+				$kiwi -> failed ();
+				$kiwi -> error  (
+					"Couldn't fill image with random data: $status"
+				);
+				$kiwi -> failed ();
+				return;
+			}
 			$status = KIWIQX::qxx (
 				"echo $cipher|cryptsetup -q $opts luksFormat $rw 2>&1"
 			);
