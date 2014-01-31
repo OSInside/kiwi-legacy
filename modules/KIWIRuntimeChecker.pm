@@ -148,6 +148,9 @@ sub createChecks {
 	if (! $this -> __checkSystemDiskData()) {
 		return;
 	}
+	if (! $this -> __hasBootLoaderTools()) {
+		return;
+	}
 	return 1;
 }
 
@@ -193,6 +196,9 @@ sub prepareChecks {
 		return;
 	}
 	if (! $this -> __checkVMControllerCapable()) {
+		return;
+	}
+	if (! $this -> __hasBootLoaderTools()) {
 		return;
 	}
 	return 1;
@@ -1176,6 +1182,52 @@ sub __isFsToolAvailable {
 	if ($fsType eq 'zfs' ) {
 		return $locator -> getExecPath('zpool');
 	}
+}
+
+#==========================================
+# __hasBootLoaderTools
+#------------------------------------------
+sub __hasBootLoaderTools {
+	# ...
+	# Check if the selected bootloader can be installed
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $locator = $this->{locator};
+	my $xml = $this->{xml};
+	my $bldType = $xml -> getImageType();
+	if (! $bldType) {
+		return 1;
+	}
+	my $imgType = $bldType -> getTypeName();
+	if ($imgType !~ /oem|vmx|iso/) {
+		return 1;
+	}
+	my $bootloader = $bldType -> getBootLoader();
+	my $loader_check;
+	if ($imgType eq 'iso') {
+		$loader_check = 'genisoimage';
+	} elsif (! $bootloader) {
+		$loader_check = 'grub-install';
+	} elsif ($bootloader eq 'grub2') {
+		$loader_check = 'grub2-install';
+	} elsif ($bootloader eq 'syslinux') {
+		$loader_check = 'syslinux';
+	} elsif ($bootloader eq 'extlinux') {
+		$loader_check = 'extlinux';
+	} elsif ($bootloader eq 'zipl') {
+		$loader_check = 'zipl';
+	} elsif ($bootloader eq 'yaboot') {
+		$loader_check = 'yaboot';
+	}
+	if ($loader_check) {
+		my $locator = KIWILocator -> instance();
+		my $loaderTool = $locator -> getExecPath($loader_check);
+		if (! $loaderTool || ! -x $loaderTool) {
+			return 0;
+		}
+	}
+	return 1;
 }
 
 #==========================================
