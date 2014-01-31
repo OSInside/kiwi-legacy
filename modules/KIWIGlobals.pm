@@ -1581,6 +1581,13 @@ sub _new_instance {
 	$KnownFS{cpio}{ro}        = 0;
 	$data{KnownFS} = \%KnownFS;
 	#==========================================
+	# Globals (luks options)
+	#------------------------------------------
+	my %LuksDist;
+	$LuksDist{sle11} =
+		'--cipher aes-cbc-essiv:sha256 --key-size 256 --hash sha1';
+	$data{LuksDist} = \%LuksDist;
+	#==========================================
 	# Store object data
 	#------------------------------------------
 	$this->{data} = \%data;

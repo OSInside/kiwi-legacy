@@ -341,6 +341,7 @@ sub new {
 		$type{installpxe}             = $xmltype -> getInstallPXE();
 		$type{installstick}           = $xmltype -> getInstallStick();
 		$type{luks}                   = $xmltype -> getLuksPass();
+		$type{luksOS}                 = $xmltype -> getLuksOS();
 		$type{lvm}                    = $xmltype -> useLVM();
 		$type{mdraid}                 = $xmltype -> getMDRaid();
 		$type{type}                   = $xmltype -> getTypeName();
@@ -2636,9 +2637,16 @@ sub setupBootDisk {
 		my $rw = $deviceMap{readwrite};
 		if ($haveluks) {
 			my $cipher = $type->{luks};
-			my $name   = "luksReadWrite";
+			my $dist   = $type->{luksOS};
+			my $name   = 'luksReadWrite';
+			my $opts   = '';
 			$kiwi -> info ("Creating LUKS->ext3 read-write filesystem");
-			$status = qxx ("echo $cipher|cryptsetup -q luksFormat $rw 2>&1");
+			if (($dist) && ($dist eq 'sle11')) {
+				$opts = $this->{gdata}->{LuksDist}->{sle11};
+			}
+			$status = KIWIQX::qxx (
+				"echo $cipher|cryptsetup -q $opts luksFormat $rw 2>&1"
+			);
 			$result = $? >> 8;
 			if ($status != 0) {
 				$kiwi -> failed ();
@@ -2646,7 +2654,9 @@ sub setupBootDisk {
 				$kiwi -> failed ();
 				return;
 			}
-			$status = qxx ("echo $cipher|cryptsetup luksOpen $rw $name 2>&1");
+			$status = KIWIQX::qxx (
+				"echo $cipher|cryptsetup luksOpen $rw $name 2>&1"
+			);
 			$result = $? >> 8;
 			if ($result != 0) {
 				$kiwi -> failed ();

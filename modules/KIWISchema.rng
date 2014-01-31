@@ -2340,6 +2340,15 @@ represents the password string used to be able to
 mount that filesystem while booting</a:documentation>
       </attribute>
     </define>
+    <define name="k.type.luksOS.attribute">
+      <attribute name="luksOS">
+        <a:documentation>With the luksOS value a predefined set of ciper, keysize
+and hash format options is passed to the cryptsetup call
+in order to create a format compatible to the specified
+distribution</a:documentation>
+        <value>sle11</value>
+      </attribute>
+    </define>
     <define name="k.type.mdraid.attribute">
       <attribute name="mdraid">
         <a:documentation>Setup software raid in degraded mode with one disk
@@ -2478,6 +2487,9 @@ into the master block. There is space for 32 characters.</a:documentation>
         </optional>
         <optional>
           <ref name="k.type.luks.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.type.luksOS.attribute"/>
         </optional>
         <optional>
           <ref name="k.type.mdraid.attribute"/>

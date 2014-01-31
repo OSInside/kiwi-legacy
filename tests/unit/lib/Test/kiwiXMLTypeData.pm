@@ -76,24 +76,24 @@ sub test_ctor_initInvalidCheckprebuiltValue {
 	# that contains an unrecognized boolean initialization for
 	# the checkprebuilt value
 	# ----
-	 my $this = shift;
-	 my $kiwi = $this -> {kiwi};
-	 my %init = (
-				checkprebuilt => 'foo',
-				image         => 'iso'
-				);
-	 my $typeDataObj = KIWIXMLTypeData -> new(\%init);
-	 my $msg = $kiwi -> getMessage();
-	 my $expected = 'KIWIXMLTypeData: Unrecognized value for boolean '
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my %init = (
+		checkprebuilt => 'foo',
+		image         => 'iso'
+	);
+	my $typeDataObj = KIWIXMLTypeData -> new(\%init);
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'KIWIXMLTypeData: Unrecognized value for boolean '
 		. "'checkprebuilt' in initialization structure.";
-	 $this -> assert_str_equals($expected, $msg);
-	 my $msgT = $kiwi -> getMessageType();
-	 $this -> assert_str_equals('error', $msgT);
-	 my $state = $kiwi -> getState();
-	 $this -> assert_str_equals('failed', $state);
-	 # Test this condition last to get potential error messages
-	 $this -> assert_null($typeDataObj);
-	 return;
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_null($typeDataObj);
+	return;
 }
 
 #==========================================
@@ -1496,6 +1496,27 @@ sub test_getLuksPass {
 }
 
 #==========================================
+# test_getLuksOS
+#------------------------------------------
+sub test_getLuksOS {
+	# ...
+	# Test the getLuksOS method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $typeDataObj = $this -> __getTypeObj();
+	my $dist = $typeDataObj -> getLuksOS();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('sle11', $dist);
+	return;
+}
+
+#==========================================
 # test_getMDRaid
 #------------------------------------------
 sub test_getMDRaid {
@@ -1807,6 +1828,7 @@ sub test_getXMLElement{
 		. 'installstick="true" '
 		. 'kernelcmdline="kiwidebug=1" '
 		. 'luks="notApass" '
+		. 'luksOS="sle11" '
 		. 'mdraid="striping" '
 		. 'primary="true" '
 		. 'ramonly="true" '
@@ -5013,6 +5035,7 @@ sub __getTypeObj {
 				installstick           => 'true',
 				kernelcmdline          => 'kiwidebug=1',
 				luks                   => 'notApass',
+				luksOS                 => 'sle11',
 				mdraid                 => 'striping',
 				primary                => 'true',
 				ramonly                => 'true',
