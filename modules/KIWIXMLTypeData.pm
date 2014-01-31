@@ -86,6 +86,7 @@ sub new {
 	#     installstick           = ''
 	#     kernelcmdline          = ''
 	#     luks                   = ''
+	#     luksOS                 = ''
 	#     mdraid                 = ''
 	#     primary                = ''
 	#     ramonly                = ''
@@ -148,6 +149,7 @@ sub new {
 		installstick
 		kernelcmdline
 		luks
+		luksOS
 		mdraid
 		primary
 		ramonly
@@ -207,6 +209,7 @@ sub new {
 	$this->{installboot}            = $init->{installboot};
 	$this->{kernelcmdline}          = $init->{kernelcmdline};
 	$this->{luks}                   = $init->{luks};
+	$this->{luksOS}                 = $init->{luksOS};
 	$this->{mdraid}                 = $init->{mdraid};
 	$this->{size}                   = $init->{size};
 	$this->{sizeadd}                = $init->{sizeadd};
@@ -614,6 +617,17 @@ sub getLuksPass {
 }
 
 #==========================================
+# getLuksOS
+#------------------------------------------
+sub getLuksOS {
+	# ...
+	# Return the configured luks target operating system name
+	# ---
+	my $this = shift;
+	return $this->{luksOS};
+}
+
+#==========================================
 # getMDRaid
 #------------------------------------------
 sub getMDRaid {
@@ -947,6 +961,10 @@ sub getXMLElement {
 	my $luks = $this -> getLuksPass();
 	if ($luks) {
 		$element -> setAttribute('luks', $luks);
+	}
+	my $luksOS = $this -> getLuksOS();
+	if ($luksOS) {
+		$element -> setAttribute('luksOS', $luksOS);
 	}
 	my $mdraid = $this -> getMDRaid();
 	if ($mdraid) {
@@ -1570,6 +1588,27 @@ sub setLuksPass {
 		return;
 	}
 	$this->{luks} = $pass;
+	return $this;
+}
+
+#==========================================
+# setLuksOS
+#------------------------------------------
+sub setLuksOS {
+	# ...
+	# Set the configuration for the luks target distribution
+	# ---
+	my $this = shift;
+	my $dist = shift;
+	if (! $dist ) {
+		my $kiwi = $this->{kiwi};
+		my $msg = 'setLuksOS: no OS value given, retaining '
+			. 'current data.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	$this->{luksOS} = $dist;
 	return $this;
 }
 

@@ -3608,6 +3608,7 @@ sub buildLogicalExtend {
 	# Check if luks encoding is requested
 	#------------------------------------------
 	my $luks = $xmltype -> getLuksPass();
+	my $dist = $xmltype -> getLuksOS();
 	if ($luks) {
 		$encode = 1;
 		$cipher = "$luks";
@@ -3657,7 +3658,7 @@ sub buildLogicalExtend {
 	# Setup encoding
 	#------------------------------------------
 	if ($encode) {
-		$this -> setupEncoding ($name,$out,$cipher,$device);
+		$this -> setupEncoding($name,$out,$cipher,$dist,$device);
 	}
 	return $name;
 }
@@ -3675,6 +3676,7 @@ sub setupEncoding {
 	my $name   = shift;
 	my $out    = shift;
 	my $cipher = shift;
+	my $dist   = shift;
 	my $device = shift;
 	my $kiwi   = $this->{kiwi};
 	my $data;
@@ -3700,7 +3702,13 @@ sub setupEncoding {
 	}
 	push @luksloop,$loop;
 	$this->{luksloop} = \@luksloop;
-	$data = KIWIQX::qxx ("echo $cipher | cryptsetup -q luksFormat $loop 2>&1");
+	my $opts = '';
+	if (($dist) && ($dist eq 'sle11')) {
+		$opts = $this->{gdata}->{LuksDist}->{sle11};
+	}
+	$data = KIWIQX::qxx (
+		"echo $cipher | cryptsetup -q $opts luksFormat $loop 2>&1"
+	);
 	$code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> error  ("Couldn't setup luks format: $loop");
@@ -4306,6 +4314,7 @@ sub setupSquashFS {
 		$tree = $imageTree;
 	}
 	my $luks = $xmltype -> getLuksPass();
+	my $dist = $xmltype -> getLuksOS();
 	if ($luks) {
 		$this -> restoreImageDest();
 	}
@@ -4349,7 +4358,7 @@ sub setupSquashFS {
 			$kiwi -> failed ();
 			return;
 		}
-		if (! $this -> setupEncoding ($name.".squashfs",$outimg,$cipher)) {
+		if (! $this -> setupEncoding($name.".squashfs",$outimg,$cipher,$dist)) {
 			return;
 		}
 		$data = KIWIQX::qxx (

@@ -3775,6 +3775,7 @@ sub __genTypeHash {
 		'installstick',
 		'kernelcmdline',
 		'luks',
+		'luksOS',
 		'ramonly',
 		'mdraid',
 		'vga',

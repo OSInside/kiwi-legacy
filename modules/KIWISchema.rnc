@@ -1699,6 +1699,14 @@ div {
 		## represents the password string used to be able to
 		## mount that filesystem while booting
 		attribute luks { text }
+	k.type.luksOS.attribute =
+		## With the luksOS value a predefined set of ciper, keysize
+		## and hash format options is passed to the cryptsetup call
+		## in order to create a format compatible to the specified
+		## distribution
+		attribute luksOS {
+			"sle11"
+		}
 	k.type.mdraid.attribute =
 		## Setup software raid in degraded mode with one disk
 		## Thus only mirroring and striping is possible
@@ -1758,6 +1766,7 @@ div {
 		k.type.installpxe.attribute? &
 		k.type.kernelcmdline.attribute? &
 		k.type.luks.attribute? &
+		k.type.luksOS.attribute? &
 		k.type.mdraid.attribute? &
 		k.type.primary.attribute? &
 		k.type.ramonly.attribute? &
