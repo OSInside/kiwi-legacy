@@ -44,20 +44,29 @@ function baseSystemdServiceInstalled {
 	"
 	local dir
 	for dir in ${sd_dirs} ; do
-		if [ -f "${dir}/$service" ];then
-			return 0
+		if [ -f "${dir}/${service}.service" ];then
+			echo ${dir}/${service}.service
+			return
+		fi
+		if [ -f "${dir}/${service}.mount" ];then
+			echo ${dir}/${service}.mount
+			return
 		fi
 	done
-	test -x "/etc/init.d/${service%.service}"
+	if [ -x "/etc/init.d/${service}" ];then
+		echo "/etc/init.d/${service}"
+	fi
 }
 
 #======================================
 # baseSystemctlCall
 #--------------------------------------
 function baseSystemdCall {
-	local service=$1; shift
-	baseSystemdServiceInstalled "$service" && \
+	local service_name=$1; shift
+	local service=$(baseSystemdServiceInstalled "$service_name")
+	if [ ! -z "$service" ];then
 		systemctl "$@" "$service"
+	fi
 }
 #======================================
 # suseInsertService
@@ -69,7 +78,7 @@ function suseInsertService {
 	# -----
 	local service=$1
 	if [ -f /bin/systemd ];then
-		baseSystemdCall "$service.service" "enable"
+		baseSystemdCall "$service" "enable"
 	else
 		if /sbin/insserv $service;then
 			echo "Service $service inserted"
@@ -91,7 +100,7 @@ function suseRemoveService {
 	# ----
 	local service=$1
 	if [ -f /bin/systemd ];then
-		baseSystemdCall "$service.service" "disable"
+		baseSystemdCall "$service" "disable"
 	else
 		service=/etc/init.d/$service
 		if /sbin/insserv -r $service;then
