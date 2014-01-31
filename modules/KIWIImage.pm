@@ -3636,7 +3636,9 @@ sub buildLogicalExtend {
 	# Setup encoding
 	#------------------------------------------
 	if ($encode) {
-		$this -> setupEncoding($name,$out,$cipher,$dist,$device);
+		if (! $this -> setupEncoding($name,$out,$cipher,$dist,$device)) {
+			return;
+		}
 	}
 	return $name;
 }
@@ -3684,6 +3686,17 @@ sub setupEncoding {
 	if (($dist) && ($dist eq 'sle11')) {
 		$opts = $this->{gdata}->{LuksDist}->{sle11};
 	}
+	my $size_bt = KIWIGlobals -> instance() -> isize ($loop);
+	my $size_mb = int ($size_bt / 1048576);
+	$data = KIWIQX::qxx (
+		"dd if=/dev/urandom bs=1M count=$size_mb of=$loop 2>&1"
+	);
+	$code = $? >> 8;
+	if ($code != 0) {
+		$kiwi -> error  ("Couldn't fill image with random data: $data");
+		$kiwi -> failed ();
+		return;
+	}
 	$data = KIWIQX::qxx (
 		"echo $cipher | cryptsetup -q $opts luksFormat $loop 2>&1"
 	);
@@ -3691,7 +3704,6 @@ sub setupEncoding {
 	if ($code != 0) {
 		$kiwi -> error  ("Couldn't setup luks format: $loop");
 		$kiwi -> failed ();
-		$this -> cleanLuks ();
 		return;
 	}
 	$data = qxx ("echo $cipher | cryptsetup luksOpen $loop $name 2>&1");
