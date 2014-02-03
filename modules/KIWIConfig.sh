@@ -1818,14 +1818,15 @@ function baseSetupBuildDay {
 function importDatabases {
 	# /.../
 	# This function allows the import of databases
-	# exported by the KIWIAnalyseCustomData
-	# createDatabaseDump
+	# whose export is stored in /var/cache/dbs/
 	# ----
 	local dir="/var/cache/dbs"
 	local db_type=""
-	for file in $dir/*
-	do
-		if [[ -f $file ]]; then
+	if [ ! -d $dir ];then
+		return
+	fi
+	for file in $dir/*;	do
+		if [ -f $file ]; then
 			db_type=$(basename "$file" | cut -d. -f1)
 		else
 			echo "No database found!"
@@ -1845,6 +1846,7 @@ function importDatabases {
 			# import content
 			if zcat $file | mysql -u root; then
 				echo "Import of $db_type successfull!"
+				rm -f $file
 			else
 				echo "Import of $db_type failed!"
 			fi
@@ -1855,7 +1857,6 @@ function importDatabases {
 		;;
 		esac
 	done
-	rm -rf "$dir"
 }
 
 # vim: set noexpandtab:

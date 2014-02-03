@@ -180,40 +180,13 @@
       The system requires the zypper backend in order to work properly.
     </para>
     <para>
-      The process creates a cache file so that subsequent calls
-      of the analysis runs much faster. The option <option>--nofiles</option>
-      will prevent the system from looking up unmanaged files. These are
-      files which does not belong to any management system like
-      rpm, gem, git, svn, osc. Whereas --nofiles will switch off the
-      creation of the unmanaged files tree completely it's possible to
-      influence the creation of the unmnaaged files with the further
-      options <option>--skip-gem-lookup</option>,
-      <option>--skip-rcs-lookup</option> and
-      <option>--skip-augeas-lookup</option>. If checking for managed files
-      by gem is skipped they will all be treated as unmanaged. If checking
-      for revision control systems is skipped all those files will also
-      be treated as unmanaged and if checkking for files known to augeas
-      is skipped these files will also be treated as unmanaged. By default
-      KIWI checks for all of these file management systems. 
-      The option <option>--notemplate</option> will prevent the creation
-      of the KIWI image description files which are needed if you want to
-      use KIWI to
-      create a clone image from the result of the analysis.
-      With the options <option>--exclude</option> and <option>--skip</option> 
-      you can tell the system to ignore
-      specific directories and/or skip specified packages. This makes sense
-      if you know
-      before that some data is not worth to become handled or can be
-      restored easily later inside the cloned image.
-    </para>
-    <para>
       The process will always place it's result into the
       <filename>/tmp/$OptionValueOf--describe</filename> directory. The reason for
       this is because
       <filename class="directory">/tmp</filename> is always excluded from
       the analysis and therefore
       we can safely place new files there without influencing the
-      process itself. You should have at least 50&nbsp;MB free space for
+      process itself. You should have at least 100&nbsp;MB free space for
       the cache file and the image description all the rest are just
       hard links.
     </para>
@@ -228,7 +201,7 @@
       the repository selection and the unmanaged files along with the
       configuration details of your currently running operating system.
       You should understand the module as a helper to analyse running
-      servers.
+      linux systems.
     </para>    
     <cmdsynopsis><command>kiwi</command> 
       <group choice="req">

@@ -68,17 +68,20 @@ sub new {
 	#==========================================
 	# Module Parameters
 	#------------------------------------------
-	my $dest    = shift;
-	my $source  = shift;
-	my $product = shift;
-	my $patterns= shift;
-	my $packages= shift;
-	my $delpacks= shift;
+	my $dest     = shift;
+	my $cmdL     = shift;
+	my $system   = shift;
+	my $software = shift; 
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
-	my $kiwi   = KIWILog -> instance();
-	my $global = KIWIGlobals -> instance();
+	my $kiwi    = KIWILog -> instance();
+	my $global  = KIWIGlobals -> instance();
+	my $source  = $software -> getRepositories();
+	my $product = $software -> getOS();
+	my $patterns= $software -> getPackageCollections();
+	my $packages= $software -> getPackageNames();
+	my $delpacks= $software -> getPackagesToDelete();
 	if (! defined $source) {
 		$kiwi -> error  ("KIWIAnalyseTemplate: No sourceref specified");
 		$kiwi -> failed ();
@@ -106,6 +109,7 @@ sub new {
 	$this->{packages}= $packages;
 	$this->{patterns}= $patterns;
 	$this->{delpacks}= $delpacks;
+	$this->{cmdL}    = $cmdL;
 	return $this;
 }
 
@@ -212,7 +216,6 @@ sub writeKIWIXMLConfiguration {
 	#------------------------------------------
 	my @xml_patt = ();
 	if (defined $pats) {
-		# FIXME: I don't have a solution for the problem below
 		# /.../
 		# the migration put a set of packages to matching patterns
 		# I found out that it might be a problem if a pattern provides
@@ -288,7 +291,6 @@ sub writeKIWIScripts {
 		if ($flag ne "remote") {
 			next;
 		}
-		# FIXME: do this packagemanager related
 		print $FD "zypper ar \\\n\t'".$url."' \\\n\t'".$alias."'\n";
 	}
 	#==========================================
@@ -324,9 +326,8 @@ sub writeKIWIScripts {
 						}
 					}
 					if (! $alreadyThere) {
-						# FIXME: do this packagemanager related
-						print $FD "zypper ar \\\n\t\"";
-						print $FD $url."\" \\\n\t\"".$alias."\"\n";
+						print $FD "zypper ar \\\n\t'";
+						print $FD $url."' \\\n\t'".$alias."'\n";
 					}
 				}
 			}
@@ -352,30 +353,6 @@ sub writeKIWIScripts {
 	print $FD 'exit 0'."\n";
 	$FD -> close();
 	chmod 0755, "$dest/config.sh";
-	return $this;
-}
-
-#==========================================
-# cloneLinuxConfigurationFiles
-#------------------------------------------
-sub cloneLinuxConfigurationFiles {
-	# ...
-	# use augeas to export the current config file values
-	# ---
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $dest = $this->{dest};
-	$kiwi -> info ("Creating augeas system configuration export...");
-	my $locator = KIWILocator -> instance();
-	my $augtool = $locator -> getExecPath('augtool');
-	if ($augtool) {
-		KIWIQX::qxx ("$augtool dump-xml /files/* > $dest/config-augeas.xml");
-		$kiwi -> done();
-	} else {
-		$kiwi -> skipped ();
-		$kiwi -> info ("Required augtool command not found");
-		$kiwi -> skipped ();
-	}
 	return $this;
 }
 

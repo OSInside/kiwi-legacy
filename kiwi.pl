@@ -37,11 +37,10 @@ use File::Find;
 #==========================================
 # KIWIModules
 #------------------------------------------
-use KIWIAnalyse;
-use KIWIAnalyseCustomData;
-use KIWIAnalyseManagedSoftware;
+use KIWIAnalyseSystem;
 use KIWIAnalyseReport;
 use KIWIAnalyseTemplate;
+use KIWIAnalyseSoftware;
 use KIWIBoot;
 use KIWICache;
 use KIWICommandLine;
@@ -79,7 +78,6 @@ $kiwi -> setLogServer (
 #============================================
 # Variables (operation mode)
 #--------------------------------------------
-my $migrate;    # Migration
 my $kic;        # Image preparation / creation
 my $icache;     # Image Cache creation
 my $cmdL;       # Command line data container
@@ -300,111 +298,42 @@ sub main {
 	}
 
 	#==========================================
-	# Migrate system to image description
+	# Inspect system and create description
 	#------------------------------------------
-	if ($cmdL->getOperationMode("migrate")) {
-		$kiwi -> info ("Starting system analysis");
-		my $destination = $cmdL->getOperationMode("migrate");
-		my $addlRepos   = $cmdL -> getAdditionalRepos();
-		my $migopts     = $cmdL -> getMigrationOptions();
-		my $exclude     = $migopts->[0];
-		my $skip        = $migopts->[1];
-		my $nofiles     = $migopts->[2];
-		my $notempl     = $migopts->[3];
-		my $skipgem     = $migopts->[4];
-		my $skiprcs     = $migopts->[5];
-		my $skipaug     = $migopts->[6];
-		$destination    = "/tmp/".$destination;
-		#==========================================
-		# create main analyser
-		#------------------------------------------
-		my $analyse = KIWIAnalyse -> new (
-			$destination,$cmdL->getForceNewRoot()
-		);
-		#==========================================
-		# analyse custom/modified files
-		#------------------------------------------
-		my $analyseCustom = KIWIAnalyseCustomData -> new (
-			$analyse->getDestination(),$exclude,
-			$skipgem,$skiprcs,$skipaug,
-			$analyse->getCache()
-		);
-		if (! $nofiles) {
-			if (! $analyseCustom -> runQuery()) {
-				return;
-			}
-			$analyseCustom -> createCustomFileTree();
-		}
-		#==========================================
-		# analyse packages
-		#------------------------------------------
-		my $analysePackages = KIWIAnalyseManagedSoftware -> new (
-			$addlRepos->{repositories},
-			$addlRepos->{repositoryTypes},
-			$addlRepos->{repositoryAlia},
-			$addlRepos->{repositoryPriorities},
-			$skip,
-			$analyse->getCache()
-		);
-		#==========================================
-		# get OS, repos, packages
-		#------------------------------------------
-		if (! $analysePackages -> runQuery()) {
+	if ($cmdL->getOperationMode("analyse")) {
+		$kiwi -> info ("Starting system analysis\n");
+		my $destination = $cmdL->getOperationMode("analyse");
+		$destination = "/tmp/".$destination;
+		my $system = KIWIAnalyseSystem -> new (
+            $destination,$cmdL
+        );
+		if (! $system) {
 			return;
 		}
-		#==========================================
-		# write cache
-		#------------------------------------------
-		$analyse -> writeCache();
-		#==========================================
-		# create image description template
-		#------------------------------------------
-		my $analyseTemplate = KIWIAnalyseTemplate -> new (
-			$analyse         -> getDestination(),
-			$analysePackages -> getRepositories(),
-			$analysePackages -> getOS(),
-			$analysePackages -> getPackageCollections(),
-			$analysePackages -> getPackageNames(),
-			$analysePackages -> getPackagesToDelete()
+		$system -> createCustomDataTree();
+		$kiwi -> info ("Creating base description files\n");
+		my $software = KIWIAnalyseSoftware -> new (
+			$system,$cmdL
 		);
-		if (! $notempl) {
-			$analyseTemplate -> writeKIWIXMLConfiguration();
-			$analyseTemplate -> writeKIWIScripts();
+		if (! $software) {
+			return;
 		}
-		#==========================================
-		# create augeas config files XML dump
-		#------------------------------------------
-		if (! $skipaug) {
-			$analyseTemplate -> cloneLinuxConfigurationFiles();
-		}
-		#==========================================
-		# diff all changed configuration files
-		#------------------------------------------
-		if (! $nofiles) {
-			$analyseCustom -> diffChangedConfigFiles();
-		}
-		#==========================================
-		# check for databases and export them
-		#------------------------------------------
-		if (! $nofiles) {
-			$analyseCustom -> createDatabaseDump();
-		}
-		#==========================================
-		# create report page / worksheet
-		#------------------------------------------
-		my $analyseReport = KIWIAnalyseReport -> new (
-			$analyse         -> getDestination(),
-			$analysePackages -> getMultipleInstalledPackages(),
-			$analyseCustom   -> getLocalRepositories(),
-			$analyseCustom   -> getCustomFiles(),
-			$analysePackages -> getSolverProblems()
+		my $template = KIWIAnalyseTemplate -> new (
+			$destination,$cmdL,$system,$software
 		);
-		$analyseReport -> createViews();
-		$analyseReport -> createReport();
-		#==========================================
-		# commit transaction
-		#------------------------------------------
-		$analyse -> commitTransaction();
+		if (! $template) {
+			return;
+		}
+		$template -> writeKIWIXMLConfiguration();
+		$template -> writeKIWIScripts();
+		$kiwi -> info ("Creating system report\n");
+		my $report = KIWIAnalyseReport -> new (
+			$destination,$cmdL,$system,$software
+		);
+		if (! $report) {
+			return;
+		}
+		$report -> createReport();
 	}
 
 	#==========================================
@@ -716,7 +645,7 @@ sub init {
 	my $TestImage;             # call end-to-end testsuite if installed
 	my $InstallStick;          # Installation initrd booting from USB stick
 	my $SetupSplash;           # setup kernel splash screen
-	my $Migrate;               # migrate running system to image description
+	my $Analyse;               # inspect running system and create a description
 	my $Convert;               # convert image into given format/configuration
 	my $MBRID;                 # custom mbrid value
 	my @RemovePackage;         # remove pack by adding them to the remove list
@@ -743,8 +672,6 @@ sub init {
 	my $InstallStickSystem;    # disk system image to be installed on disk
 	my $InstallPXE;            # Installation initrd booting via network
 	my $InstallPXESystem;      # disk system image to be installed on disk
-	my @Exclude;               # exclude directories in migrate search
-	my @Skip;                  # skip this package in migration mode
 	my @Profiles;              # list of profiles to include in image
 	my $ForceBootstrap;        # force bootstrap, checked for recycle-root mode
 	my $ForceNewRoot;          # force creation of new root directory
@@ -755,11 +682,6 @@ sub init {
 	my $Verbosity;             # control the verbosity level
 	my $TargetArch;            # target architecture -> writes zypp.conf
 	my $Debug;                 # activates the internal stack trace output
-	my $MigrateNoFiles;        # migrate: don't create overlay files
-	my $MigrateNoTemplate;     # migrate: don't create image description
-	my $SkipGemCheck;          # migrate: don't lookup files managed by gem
-	my $SkipRCS;               # migrate: don't lookup files managed by git,osc
-	my $SkipAugeasCheck;       # migrate: don't lookup files known to augeas
 	my $Format;                # format to convert to, vmdk, ovf, etc...
 	my $defaultAnswer;         # default answer to any questions
 	my $targetDevice;          # alternative device instead of a loop device
@@ -822,7 +744,6 @@ sub init {
 		"debug"                 => \$Debug,
 		"del-package=s"         => \@RemovePackage,
 		"destdir|d=s"           => \$Destination,
-		"exclude|e=s"           => \@Exclude,
 		"fat-storage=i"         => \$FatStorage,
 		"force-bootstrap"       => \$ForceBootstrap,
 		"force-new-root"        => \$ForceNewRoot,
@@ -853,14 +774,8 @@ sub init {
 		"logfile=s"             => \$LogFile,
 		"lvm"                   => \$LVM,
 		"mbrid=o"               => \$MBRID,
-		"migrate|m=s"           => \$Migrate,
-		"describe=s"            => \$Migrate,
+		"describe=s"            => \$Analyse,
 		"nocolor"               => \$NoColor,
-		"nofiles"               => \$MigrateNoFiles,
-		"notemplate"            => \$MigrateNoTemplate,
-		"skip-gem-lookup"       => \$SkipGemCheck,
-		"skip-rcs-lookup"       => \$SkipRCS,
-		"skip-augeas-lookup"    => \$SkipAugeasCheck,
 		"package-manager=s"     => \$PackageManager,
 		"partitioner=s"         => \$Partitioner,
 		"prebuiltbootimage=s"   => \$PrebuiltBootImage,
@@ -873,7 +788,6 @@ sub init {
 		"set-repopriority=i"    => \$SetRepositoryPriority,
 		"set-repotype=s"        => \$SetRepositoryType,
 		"setup-splash=s"        => \$SetupSplash,
-		"skip=s"                => \@Skip,
 		"strip|s"               => \$StripImage,
 		"target-arch=s"         => \$TargetArch,
 		"targetdevice=s"        => \$targetDevice,
@@ -932,13 +846,6 @@ sub init {
 	if (! $status)  {
 		kiwiExit (1);
 	}
-	#========================================
-	# set list of migration options
-	#----------------------------------------
-	$cmdL -> setMigrationOptions (
-		\@Exclude,\@Skip,$MigrateNoFiles,$MigrateNoTemplate,
-		$SkipGemCheck,$SkipRCS,$SkipAugeasCheck
-	);
 	#========================================
 	# check if archive-image option is set
 	#----------------------------------------
@@ -1334,8 +1241,8 @@ sub init {
 	if (defined $InitCache) {
 		$cmdL -> setOperationMode ("initCache",$InitCache);
 	}
-	if (defined $Migrate) {
-		$cmdL -> setOperationMode ("migrate",$Migrate);
+	if (defined $Analyse) {
+		$cmdL -> setOperationMode ("analyse",$Analyse);
 	}
 	if (defined $SetupSplash) {
 		$cmdL -> setOperationMode ("setupSplash",$SetupSplash);
@@ -1457,7 +1364,7 @@ sub init {
 		(! defined $Upgrade)            &&
 		(! defined $SetupSplash)        &&
 		(! defined $BootVMDisk)         &&
-		(! defined $Migrate)            &&
+		(! defined $Analyse)            &&
 		(! defined $InstallStick)       &&
 		(! defined $InstallPXE)         &&
 		(! defined $ListXMLInfo)        &&
@@ -1584,13 +1491,6 @@ sub usage {
 	print "       [ --add-package <name> --add-pattern <name> ]\n";
 	print "System Analysis/Migration:\n";
 	print "    kiwi -D | --describe <name>\n";
-	print "       [ --exclude <directory> --exclude <...> ]\n";
-	print "       [ --skip <package> --skip <...> ]\n";
-	print "       [ --nofiles ]\n";
-	print "       [ --notemplate ]\n";
-	print "       [ --skip-gem-lookup ]\n";
-	print "       [ --skip-rcs-lookup ]\n";
-	print "       [ --skip-augeas-lookup ]\n";
 	print "Testsuite (requires os-autoinst package):\n";
 	print "    kiwi --test-image <image> --test-case <path>\n";
 	print "         --type <image-type>\n";
@@ -1774,28 +1674,6 @@ sub usage {
 	print "    [ --mbrid <number>]\n";
 	print "      Sets the disk id to the given value. The default is to\n";
 	print "      generate a random id.\n";
-	print "\n";
-	print "Image Analyse/Describe Options:\n";
-	print "    [ --notemplate ]\n";
-	print "      Don't create kiwi image description files\n";
-	print "      They are required in order to build an image from the\n";
-	print "      analysed system\n";
-	print "\n";
-	print "    [ --nofiles ]\n";
-	print "      Don't create custom/unmanaged files tree\n";
-	print "\n";
-	print "    [ --skip-gem-lookup ]\n";
-	print "      Don't check for files managed by gem. Files managed\n";
-	print "      by gem will then appear as unmanaged files.\n";
-	print "\n";
-	print "    [ --skip-rcs-lookup ]\n";
-	print "      Don't check for files managed by revision control systems\n";
-	print "      like git, svn, osc, etc... Files from such repositories\n";
-	print "      will then appear as unmanaged files.\n";
-	print "\n";
-	print "    [ --skip-augeas-lookup ]\n";
-	print "      Don't check for files known to augeas. Files managed\n";
-	print "      by augeas will then appear as unmanaged files.\n";
 	print "--\n";
 	version ($exit);
 	return;
@@ -2080,9 +1958,6 @@ sub cleanup {
 	}
 	if ($icache) {
 		undef $icache;
-	}
-	if (defined $migrate) {
-		$migrate -> cleanMount ();
 	}
 	return;
 }
