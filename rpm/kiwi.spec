@@ -17,7 +17,7 @@
 
 
 #perl_verion is not defined in centos/RHEL yet
-%if 0%{?rhel_version}
+%if 0%{?rhel_version} || 0%{?fedora}
 %define perl_version    %(eval "`%{__perl} -V:version`"; echo $version)
 %endif
 
@@ -210,7 +210,11 @@ PreReq:         coreutils
 %if 0%{?suse_version} > 1220
 PreReq:         shadow
 %else
+%if 0%{?fedora}
+Requires:	shadow-utils
+%else
 PreReq:         pwdutils
+%endif
 %endif
 %ifarch %ix86 x86_64
 Requires:       syslinux
@@ -244,7 +248,7 @@ Requires:       dosfstools
 Requires:       genisoimage
 Requires:       virt-utils
 %endif
-%if 0%{?rhel_version}
+%if 0%{?rhel_version} || 0%{?fedora}
 Requires:       qemu-img
 %endif
 Summary:        openSUSE - KIWI Image System ISO boot
@@ -285,7 +289,7 @@ Requires:       parted
 Requires:       multipath-tools
 Requires:       virt-utils
 %endif
-%if 0%{?rhel_version}
+%if 0%{?rhel_version} || 0%{?fedora}
 Requires:       device-mapper-multipath
 Requires:       qemu-img
 %endif
@@ -373,7 +377,7 @@ Requires:       genisoimage
 Requires:       multipath-tools
 Requires:       virt-utils
 %endif
-%if 0%{?rhel_version}
+%if 0%{?rhel_version} || 0%{?fedora}
 Requires:       device-mapper-multipath
 Requires:       qemu-img
 %endif
