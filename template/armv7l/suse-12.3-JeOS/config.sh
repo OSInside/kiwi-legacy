@@ -77,9 +77,9 @@ baseName="suse-12.3"
 zypper ar $baseRepo $baseName
 
 #======================================
-# Remove unneeded packages
+# Remove yast if not in use
 #--------------------------------------
-rpm -qa | grep yast | xargs rpm -e --nodeps
+suseRemoveYaST
 
 #======================================
 # Umount kernel filesystems

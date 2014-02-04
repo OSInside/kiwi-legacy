@@ -70,9 +70,9 @@ sed -i -e's/^syntax on/" syntax on/' /etc/vimrc
 suseConfig
 
 #======================================
-# Remove yast packages
+# Remove yast if not in use
 #--------------------------------------
-rpm -qa | grep yast | xargs rpm -e --nodeps
+suseRemoveYaST
 
 #======================================
 # Umount kernel filesystems

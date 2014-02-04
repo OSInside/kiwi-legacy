@@ -1753,6 +1753,19 @@ function suseRemovePackagesMarkedForDeletion {
 }
 
 #======================================
+# suseRemoveYaST
+#--------------------------------------
+function suseRemoveYaST {
+	if [ -e /etc/YaST2/firstboot.xml ];then
+		return
+	fi
+	if [ -e /var/lib/autoinstall/autoconf/autoconf.xml ];then
+		return
+	fi
+	rpm -qa | grep yast | xargs rpm -e --nodeps
+}
+
+#======================================
 # baseDisableCtrlAltDel
 #--------------------------------------
 function baseDisableCtrlAltDel {
