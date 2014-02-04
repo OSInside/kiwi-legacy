@@ -162,6 +162,9 @@ sub prepareChecks {
 	# Runtime checks specific to the prepare step
 	# ---
 	my $this = shift;
+	if (! $this -> __checkYaSTenvironment()) {
+		return;
+	}
 	if (! $this -> __haveValidTypeString()) {
 		return;
 	}
@@ -207,6 +210,52 @@ sub prepareChecks {
 #==========================================
 # Private helper methods
 #------------------------------------------
+#==========================================
+# __checkYaSTenvironment
+#------------------------------------------
+sub __checkYaSTenvironment {
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $xml  = $this -> {xml};
+	my $cmdL = $this -> {cmdArgs};
+	my $conf = $cmdL -> getConfigDir();
+	my $check= 0;
+	my $tool;
+	my $message;
+	if (-e "$conf/config-yast-autoyast.xml") {
+		$tool  = "AutoYaST";
+		$check = 1;
+	} elsif (-e "$conf/config-yast-firstboot.xml") {
+		$tool  = "YaST Firstboot";
+		$check = 1;
+	}
+	if (! $check) {
+		return 1;
+	}
+	my @packList;
+	my $imagePackages = $xml -> getPackages();
+	my $bootstrapPackages = $xml -> getBootstrapPackages();
+	if ($imagePackages) {
+		push @packList, @{$imagePackages};
+	}
+	if ($bootstrapPackages) {
+		push @packList, @{$bootstrapPackages};
+	}
+	for my $package (@packList) {
+		my $name = $package -> getName();
+		if ($name =~ /^yast2/) {
+			return 1;
+		}
+	}
+	$message = "Description provides a $tool profile. ";
+	$message.= "But no yast2* packages were given for install. ";
+	$message.= "Make sure you have added all required yast2 client ";
+	$message.= "packages needed to solve the tasks from the $tool ";
+	$message.= "profile";
+	$kiwi -> error($message);
+	$kiwi -> failed();
+	return;
+}
 #==========================================
 # __checkSwapRecommended
 #------------------------------------------
