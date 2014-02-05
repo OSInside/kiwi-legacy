@@ -155,7 +155,12 @@ kernelCheck
 createOriginSnapshot
 
 #======================================
-# 16) kill udev
+# 16) Run user script
+#--------------------------------------
+runHook preCallInit
+
+#======================================
+# 17) kill udev
 #--------------------------------------
 udevSystemStop
 umountSystemFilesystems
