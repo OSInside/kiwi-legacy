@@ -1374,6 +1374,7 @@ sub __checkCorrectRootFSPermissons {
 		if (($uid != 0) || ($gid != 0)) {
 			$msg = "Image tree not LSB compatible, check for $path ";
 			$msg.= "returned owner/group '$user_name/$group_name' ";
+			$msg.= "returned owner/group IDs '$uid/$gid' ";
 			$msg.= "and not 'root/root'";
 			$kiwi -> error ($msg);
 			$kiwi -> failed ();
