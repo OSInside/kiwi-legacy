@@ -369,7 +369,7 @@ sub ppc64_default {
 	$para.= " -l";
 	$para.= " --macbin";
 	$para.= " -map $this->{gdata}->{BasePath}";
-	$para.= "/modules/KIWIIsoLinux-AppleFileMapping.txt";
+	$para.= "/metadata/KIWIIsoLinux-AppleFileMapping.map";
 	$para.= " --netatalk";
 	$para.= " -part";
 	$para.= " -T";
