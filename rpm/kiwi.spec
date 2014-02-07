@@ -624,7 +624,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/kiwi/locale
 %{_datadir}/kiwi/repo
 %{_datadir}/emacs/site-lisp
-%exclude %{_datadir}/kiwi/modules/KIWIIsoLinux-AppleFileMapping.txt
+%exclude %{_datadir}/kiwi/metadata/KIWIIsoLinux-AppleFileMapping.map
 %exclude %{_datadir}/kiwi/modules/KIWICollect.pm
 %exclude %{_datadir}/kiwi/modules/KIWIRepoMetaHandler.pm
 %exclude %{_datadir}/kiwi/modules/KIWIUtil.pm
@@ -651,7 +651,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files -n kiwi-instsource
 %defattr(-, root, root)
-%{_datadir}/kiwi/modules/KIWIIsoLinux-AppleFileMapping.txt
+%{_datadir}/kiwi/metadata/KIWIIsoLinux-AppleFileMapping.map
 %{_datadir}/kiwi/modules/KIWICollect.pm
 %{_datadir}/kiwi/modules/KIWIUtil.pm
 %{_datadir}/kiwi/modules/KIWIRepoMetaHandler.pm
