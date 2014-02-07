@@ -1,5 +1,5 @@
 #================
-# FILE          : KIWIAnalyseManagedSoftware.pm
+# FILE          : KIWIAnalyseSoftware.pm
 #----------------
 # PROJECT       : openSUSE Build-Service
 # COPYRIGHT     : (c) 2006 SUSE LINUX Products GmbH, Germany
@@ -17,7 +17,7 @@
 #               :
 # STATUS        : Development
 #----------------
-package KIWIAnalyseManagedSoftware;
+package KIWIAnalyseSoftware;
 #==========================================
 # Modules
 #------------------------------------------
@@ -47,7 +47,7 @@ use KIWIQX;
 #------------------------------------------
 sub new {
 	# ...
-	# Create a new KIWIAnalyseManagedSoftware object which
+	# Create a new KIWIAnalyseSoftware object which
 	# is used to gather information about software
 	# ---
 	#==========================================
@@ -59,59 +59,34 @@ sub new {
 	#==========================================
 	# Module Parameters
 	#------------------------------------------
-	my $addr  = shift; # add repo list reference
-	my $addt  = shift; # add repotype list reference
-	my $adda  = shift; # add repoalias list reference
-	my $addp  = shift; # add repoprio list reference
-	my $skip  = shift; # skip package list reference
-	my $cdata = shift; # cache data reference
+	my $system_analyser = shift;
+	my $cmdL = shift;
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
 	my $kiwi   = KIWILog -> instance();
 	my $global = KIWIGlobals -> instance();
-	#==========================================
-	# Store default packages to skip
-	#------------------------------------------
-	my @denyPacks = (
-		'gpg-pubkey.*'
-	);
-	foreach my $s (@denyPacks) {
-		push (@{$skip},$s);
-	}
+	my $addlRepos = $cmdL -> getAdditionalRepos();
 	#==========================================
 	# Store object data
 	#------------------------------------------
 	$this->{gdata}       = $global -> getKiwiConfig();
 	$this->{kiwi}        = $kiwi;
-	$this->{skip}        = $skip;
+	$this->{addrepo}     = $addlRepos->{repositories};
+	$this->{addrepotype} = $addlRepos->{repositoryTypes};
+	$this->{addrepoalias}= $addlRepos->{repositoryAlias};
+	$this->{addrepoprio} = $addlRepos->{repositoryPriorities};
+	$this->{sys_analyser}= $system_analyser;
 	$this->{mount}       = [];
-	$this->{cdata}       = $cdata;
-	$this->{addrepo}     = $addr;
-	$this->{addrepotype} = $addt;
-	$this->{addrepoalias}= $adda;
-	$this->{addrepoprio} = $addp;
+	#==========================================
+	# Initialize
+	#------------------------------------------
+	if (! $this -> __dumpSoftwareStack()) {
+		return;
+	}
 	return $this;
 }
 
-#==========================================
-# runQuery
-#------------------------------------------
-sub runQuery {
-	# ...
-	# Start the query for package managed software
-	# ---
-	my $this = shift;
-	my $product = $this -> __populateOperatingSystemVersion();
-	if (! $product) {
-		return;
-	}
-	if (! $this -> __populateRepos()) {
-		$this -> __cleanMount();
-		return;
-    }
-	return $this -> __populatePackageList();
-}
 
 #==========================================
 # getOS
@@ -130,25 +105,35 @@ sub getRepositories {
 }
 
 #==========================================
-# getSolverProblems
+# getSolverPatternConflict
 #------------------------------------------
-sub getSolverProblems {
+sub getSolverPatternConflict {
 	my $this = shift;
-	my @result;
-	if ((! $this->{solverProblem1})    &&
-		(! $this->{solverFailedJobs1}) &&
-		(! $this->{solverProblem2})    &&
-		(! $this->{solverFailedJobs2})
-	) {
-		return;
-	}
-	@result = (
-		$this->{solverProblem1},
-		$this->{solverFailedJobs1},
-		$this->{solverProblem2},
-		$this->{solverFailedJobs2}
-	);
-	return \@result;
+	return $this->{solverProblem1};
+}
+
+#==========================================
+# getSolverPatternNotFound
+#------------------------------------------
+sub getSolverPatternNotFound {
+	my $this = shift;
+	return $this->{solverFailedJobs1};
+}
+
+#==========================================
+# getSolverPackageConflict
+#------------------------------------------
+sub getSolverPackageConflict {
+	my $this = shift;
+	return $this->{solverProblem2};
+}
+
+#==========================================
+# getSolverPackageNotFound
+#------------------------------------------
+sub getSolverPackageNotFound {
+	my $this = shift;
+	return $this->{solverFailedJobs2};
 }
 
 #==========================================
@@ -284,7 +269,6 @@ sub __populateRepos {
 	#==========================================
 	# Obtain list from package manager
 	#------------------------------------------
-	# TODO: move this into the KIWIManager backend
 	my $list = KIWIQX::qxx ("bash -c 'LANG=POSIX zypper lr --details 2>&1'");
 	my @list = split(/\n/,$list);
 	my $code = $? >> 8;
@@ -390,9 +374,9 @@ sub __populateRepos {
 }
 
 #==========================================
-# __populatePackageList
+# __populatePackagesAndPatterns
 #------------------------------------------
-sub __populatePackageList {
+sub __populatePackagesAndPatterns {
 	# ...
 	# Find all packages installed on the system which doesn't
 	# belong to any of the installed patterns. This works
@@ -401,13 +385,11 @@ sub __populatePackageList {
 	my $this    = shift;
 	my $product = $this->{product};
 	my $kiwi    = $this->{kiwi};
-	my $skip    = $this->{skip};
 	my %osc     = %{$this->{source}};
-	my $cdata   = $this->{cdata};
+	my $system  = $this->{sys_analyser};
 	my @urllist = ();
 	my @alias   = ();
 	my @patlist = ();
-	my @ilist   = ();
 	my @rpmsort = ();
 	my $code;
 	#==========================================
@@ -416,46 +398,19 @@ sub __populatePackageList {
 	undef $this->{patterns};
 	undef $this->{packages};
 	#==========================================
-	# search installed packages if not yet done
+	# get installed packages
 	#------------------------------------------
-	$kiwi -> info ("Searching installed packages...\n");
-	if (($cdata) && ($cdata->{rpmsort})) {
-		$kiwi -> info ("--> reading from cache data");
-		@ilist = @{$cdata->{rpmsort}};
-		$kiwi -> done();
-	} else {
-		$kiwi -> info ("--> requesting from rpm database...");
-		my $ilist = KIWIQX::qxx ('rpm -qa --qf "%{NAME}\n" | sort');
-		@ilist = split(/\n/,$ilist);
-		$code = $? >> 8;
-		if ($code != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Failed to obtain installed packages");
-			$kiwi -> failed ();
-			return;
-		}
-		$kiwi -> done();
-		@rpmsort = @ilist;
-		$cdata->{rpmsort} = \@rpmsort;
+	my $ilist = $system -> getInstalledPackages();
+	if (! $ilist) {
+		return;
 	}
 	#==========================================
 	# find packages installed n times n > 1
 	#------------------------------------------
-	my %packages = ();
 	my @twice = ();
-	for (my $i=0;$i<@ilist;$i++) {
-		my $p = $ilist[$i];
-		my $inskip = 0;
-		foreach my $s (@{$skip}) {
-			if ($p =~ /$s/) {
-				$inskip = 1; last;
-			}
-		}
-		next if $inskip;
-		$packages{$p}++;
-	}
-	foreach my $installed (sort keys %packages) {
-		if ($packages{$installed} > 1) {
+	my @ilist = sort keys %{$ilist};
+	foreach my $installed (@ilist) {
+		if ($ilist->{$installed}{count} > 1) {
 			my $list = KIWIQX::qxx ("rpm -q $installed");
 			my @list = split(/\n/,$list);
 			push @twice,@list;
@@ -465,10 +420,6 @@ sub __populatePackageList {
 		$this->{twice} = \@twice;
 	}
 	#==========================================
-	# use uniq pac list for further processing
-	#------------------------------------------
-	@ilist = sort keys %packages;
-	#==========================================
 	# create URL list to lookup solvables
 	#------------------------------------------
 	foreach my $source (sort keys %{$osc{$product}}) {
@@ -476,11 +427,10 @@ sub __populatePackageList {
 		push (@alias,$osc{$product}{$source}{alias});
 	}
 	#==========================================
-	# find all patterns and packs of patterns 
+	# find all patterns and packs of patterns
 	#------------------------------------------
 	if (@urllist) {
 		$kiwi -> info ("Creating System solvable from active repos...\n");
-		# TODO: move this into the KIWIManager backend
 		my $opts = '-n --no-refresh';
 		my $list = KIWIQX::qxx (
 			"bash -c 'LANG=POSIX zypper $opts patterns --installed 2>&1'"
@@ -507,7 +457,7 @@ sub __populatePackageList {
 		$this->{patterns} = \@patlist;
 		my $psolve = KIWISatSolver -> new (
 			\@patlist,\@urllist,"solve-patterns",
-			undef,undef,"onlyRequired","system-solvable",\@alias
+			undef,"quiet","onlyRequired","system-solvable",\@alias
 		);
 		my @result = ();
 		if (! defined $psolve) {
@@ -529,15 +479,6 @@ sub __populatePackageList {
 		}
 		my @patternPackages = $psolve -> getPackages();
 		foreach my $installed (@ilist) {
-			if (defined $skip) {
-				my $inskip = 0;
-				foreach my $s (@{$skip}) {
-					if ($installed =~ /$s/) {
-						$inskip = 1; last;
-					}
-				}
-				next if $inskip;
-			}
 			my $inpattern = 0;
 			foreach my $p (@patternPackages) {
 				if ($installed eq $p) {
@@ -561,7 +502,7 @@ sub __populatePackageList {
 		if (@result) {
 			my $xsolve = KIWISatSolver -> new (
 				\@result,\@urllist,"solve-packages",
-				$pool,undef,"onlyRequired","system-solvable",\@alias
+				$pool,"quiet","onlyRequired","system-solvable",\@alias
 			);
 			if (! defined $xsolve) {
 				$kiwi -> error  ("Failed to solve packages");
@@ -586,6 +527,7 @@ sub __populatePackageList {
 					push (@solved_packages,$package);
 				}
 			}
+			$this->{packages} = \@solved_packages;
 			# /.../
 			# reduce list of packages to the minimum needed list
 			# packages which are required by others doesn't have
@@ -618,6 +560,7 @@ sub __populatePackageList {
 				$done_previos = $done_percent;
 			}
 			my $reduced = $tasks - @reduced_packages;
+			$kiwi -> step (100);
 			$kiwi -> note ("\n");
 			$kiwi -> doNorm ();
 			$kiwi -> cursorON();
@@ -680,6 +623,27 @@ sub __strip_list {
 	}
 	@result = sort @result;
 	return @result;
+}
+
+#==========================================
+# __dumpSoftwareStack
+#------------------------------------------
+sub __dumpSoftwareStack {
+	# ...
+	# Collect information about packages, patterns and
+	# repositories suitable to generate an system
+	# description from it
+	# ---
+	my $this = shift;
+	my $product = $this -> __populateOperatingSystemVersion();
+	if (! $product) {
+		return;
+	}
+	if (! $this -> __populateRepos()) {
+		$this -> __cleanMount();
+		return;
+    }
+	return $this -> __populatePackagesAndPatterns();
 }
 
 #==========================================

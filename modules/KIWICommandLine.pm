@@ -1036,31 +1036,23 @@ sub getNoColor {
 }
 
 #==========================================
-# setMigrationOptions
+# setAnalyserOptions
 #------------------------------------------
-sub setMigrationOptions {
+sub setAnalyserOptions {
 	my $this    = shift;
-	my $exclude = shift;
-	my $skip    = shift;
-	my $nofiles = shift;
-	my $notempl = shift;
-	my $skipgem = shift;
-	my $skiprcs = shift;
-	my $skipaug = shift;
-	my @result;
-	push @result,(
-		$exclude,$skip,$nofiles,$notempl,$skipgem,$skiprcs,$skipaug
-	);
-	$this->{migrationOptions} = \@result;
+	my $hashref = shift;
+	if ($hashref) {
+		$this->{analyserOptions} = $hashref;
+	}
 	return 1;
 }
 
 #==========================================
-# getMigrationOptions
+# getAnalyserOptions
 #------------------------------------------
-sub getMigrationOptions {
+sub getAnalyserOptions {
 	my $this = shift;
-	return $this->{migrationOptions};
+	return $this->{analyserOptions};
 }
 
 #==========================================

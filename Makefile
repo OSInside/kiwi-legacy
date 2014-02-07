@@ -29,6 +29,7 @@ emacs_prefix= ${buildroot}/usr/share/emacs
 #--------------------------------------------
 KIWIBINVZ   = ${buildroot}/usr/sbin
 KIWIMODVZ   = ${kiwi_prefix}/modules
+KIWIMETAVZ  = ${kiwi_prefix}/metadata
 KIWILOCVZ   = ${kiwi_prefix}/locale
 KIWIXSLVZ   = ${kiwi_prefix}/xsl
 TOOLSVZ     = ${bin_prefix}
@@ -74,7 +75,7 @@ install:
 	#--------------------------------------------
 	install -d -m 755 ${KIWIBINVZ} ${KIWIMODVZ} ${KIWIIMAGE} ${KIWIXSLVZ}
 	install -d -m 755 ${TFTPKIWI} ${TFTPBOOT} ${TFTPBOOTCONF} ${TFTPIMAGE}
-	install -d -m 755 ${TFTPBOOTBOOT} ${KIWILOCVZ} ${KIWIKEYVZ}
+	install -d -m 755 ${TFTPBOOTBOOT} ${KIWILOCVZ} ${KIWIKEYVZ} ${KIWIMETAVZ}
 	install -d -m 755 ${TFTPUPLOAD} ${KIWIREPO}
 	install -d -m 755 ${PACKDOCVZ} ${MANVZ}
 	install -d -m 755 ${TOOLSVZ} ${INITVZ} ${LIVESTICKVZ}
@@ -129,8 +130,16 @@ install:
 	#--------------------------------------------
 	install -m 755 ./kiwi.pl       ${KIWIBINVZ}/kiwi
 	install -m 644 ./xsl/*         ${KIWIXSLVZ}
-	for i in `find modules -type f | grep -v -E ".svn|.test"`;do \
+	for i in `find modules -type f | grep -v -E '\.test'`;do \
 		install -m 644 $$i ${KIWIMODVZ} ;\
+	done
+
+	#============================================
+	# Install KIWI metadata files
+	#--------------------------------------------
+	tar -C metadata -czf ${KIWIMETAVZ}/KIWIAnalyse.tgz d3
+	for i in `find metadata -type f | grep -v -E 'd3'`;do \
+		install -m 644 $$i ${KIWIMETAVZ} ;\
 	done
 
 	#============================================

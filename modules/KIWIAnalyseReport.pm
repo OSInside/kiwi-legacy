@@ -22,20 +22,9 @@ package KIWIAnalyseReport;
 #------------------------------------------
 use strict;
 use warnings;
-use Carp qw (cluck);
 use XML::LibXML;
-use Data::Dumper;
 use FileHandle;
-use File::Find;
-use File::stat;
 use File::Basename;
-use File::Path;
-use File::Copy;
-use Storable;
-use File::Spec;
-use Fcntl ':mode';
-use Cwd qw (abs_path cwd);
-use JSON;
 
 #==========================================
 # KIWI Modules
@@ -61,19 +50,18 @@ sub new {
 	#==========================================
 	# Module Parameters
 	#------------------------------------------
-	my $dest      = shift;
-	my $multiple  = shift;
-	my $localrepos= shift;
-	my $custom    = shift;
-	my $solverstat= shift;
+	my $destdir  = shift;
+	my $cmdL     = shift;
+	my $system   = shift;
+	my $software = shift;
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
 	my $kiwi   = KIWILog -> instance();
 	my $global = KIWIGlobals -> instance();
-	if ((! defined $dest) || (! -d $dest)) {
+	if ((! $destdir) || (! -d $destdir)) {
 		$kiwi -> error  (
-			"KIWIAnalyseReport: Couldn't find destination dir: $dest"
+			"KIWIAnalyseReport: Couldn't find destination dir: $destdir"
 		);
 		$kiwi -> failed ();
 		return;
@@ -81,181 +69,12 @@ sub new {
 	#==========================================
 	# Store object data
 	#------------------------------------------
-	$this->{gdata}     = $global -> getKiwiConfig();
-	$this->{kiwi}      = $kiwi;
-	$this->{dest}      = $dest;
-	$this->{twice}     = $multiple;
-	$this->{localrepos}= $localrepos;
-	$this->{nopackage} = $custom;
-	#==========================================
-	# Store object data
-	#------------------------------------------
-	if ($solverstat) {
-		$this->{solverProblem1}    = $solverstat->[0];
-		$this->{solverFailedJobs1} = $solverstat->[1];
-		$this->{solverProblem2}    = $solverstat->[2];
-		$this->{solverFailedJobs2} = $solverstat->[3];
-	}
-	return $this;
-}
-
-#==========================================
-# createViews
-#------------------------------------------
-sub createViews {
-	# ...
-	# use the d3 data visualization framework to show
-	# the tree of custom files in a browser
-	# ---
-	my $this       = shift;
-	my $kiwi       = $this->{kiwi};
-	my $nopackage  = $this->{nopackage};
-	my $dest       = $this->{dest};
-	if (! $nopackage) {
-		return;
-	}
-	#==========================================
-	# we need a JSON ready perl data structure
-	#------------------------------------------
-	# split into binary and text data...
-	my $tree_binary;
-	my $tree_text;
-	my @files_binary = ();
-	my @files_text   = ();
-	my @files  = sort keys %{$nopackage};
-	foreach my $file (@files) {
-		my $fattr = $nopackage->{$file}->[1];
-		my $type  = $fattr->[13];
-		my $is_binary = 0;
-		if (($type) && ($type == 1)) {
-			$is_binary = 1;
-		}
-		if ($is_binary) {
-			push @files_binary,$file;
-		} else {
-			push @files_text,$file;
-		}
-	}
-	# run twice for binary and text data...
-	foreach my $file_ref (\@files_binary,\@files_text) {
-		my $mode;
-		my $tree;
-		if ($file_ref == \@files_binary) {
-			$mode = 'binary data';
-		} else {
-			$mode = 'text data';
-		}
-		my @files  = @{$file_ref};
-		my $filenr = @files;
-		next if ! $filenr;
-		$kiwi -> info ("Creating JSON $mode parse tree...");
-		my $factor = 100.0 / $filenr;
-		my $done_percent = 0;
-		my $done_previos = 0;
-		my $done = 0;
-		$kiwi -> cursorOFF();
-		foreach my $file (@files) {
-			my $fattr = $nopackage->{$file}->[1];
-			my @ori_items = split (/\//,$file);
-			$ori_items[0] = '/';
-			my $u_fpath = join ('_',@ori_items);
-			my @new_items = ();
-			my $isdir = 0;
-			my $filename;
-			if (($fattr) && (S_ISDIR($fattr->mode))) {
-				$isdir = 1;
-			}
-			if (! $isdir) {
-				$filename = pop @ori_items;
-			}
-			#==========================================
-			# update progress
-			#------------------------------------------
-			$done_percent = int ($factor * $done);
-			if ($done_percent > $done_previos) {
-				$kiwi -> step ($done_percent);
-			}
-			$done_previos = $done_percent;
-			$done++;
-			#==========================================
-			# create file node first
-			#------------------------------------------
-			my $file_node;
-			if ($filename) {
-				$file_node->{name} = $filename;
-			}
-			#==========================================
-			# search for nodes in current tree
-			#------------------------------------------
-			my @node_list = $this -> __searchNode ($tree,\@ori_items);
-			#==========================================
-			# walk through the tree and create/add data
-			#------------------------------------------
-			my $pre_node;
-			for (my $i=@ori_items-1; $i >= 0; $i--) {
-				my $dir_name = $ori_items[$i];
-				my $dir_node = $node_list[$i];
-				if (! $dir_node) {
-					$dir_node->{name} = $dir_name;
-					if ($filename) {
-						$dir_node->{children} = [ $file_node ];
-					} elsif ($pre_node) {
-						$dir_node->{children} = [ $pre_node ];
-					}
-				} else {
-					my $children = $dir_node->{children};
-					my @children = ();
-					if ($children) {
-						@children = @{$children};
-					}
-					my $add_node;
-					if ($filename) {
-						$add_node = $file_node;
-					} elsif ($pre_node) {
-						$add_node = $pre_node;
-					}
-					if ($add_node) {
-						my $added = 0;
-						foreach my $c (@children) {
-							if ($c == $add_node) {
-								$added = 1; last;
-							}
-						}
-						if (! $added) {
-							push @children,$add_node;
-							$dir_node->{children} = \@children;
-						}
-					}
-				}
-				if ($filename) {
-					undef $filename;
-				}
-				if ((! $tree) && ($dir_name eq '/') && ($dir_node)) {
-					$tree = $dir_node;
-				}
-				$pre_node = $dir_node;
-			}
-		}
-		if ($file_ref == \@files_binary) {
-			$tree_binary = $tree;
-		} else {
-			$tree_text = $tree;
-		}
-		$kiwi -> step (100);
-		$kiwi -> note ("\n");
-		$kiwi -> doNorm ();
-		$kiwi -> cursorON();
-	}
-	#==========================================
-	# store JSON data
-	#------------------------------------------
-	$kiwi -> info ("Storing D3 data stream...");
-	my $json = JSON->new->allow_nonref;
-	my $binary = $json->pretty->encode( $tree_binary );
-	$this->{jsontree_binary} = $binary;
-	my $text = $json->pretty->encode( $tree_text );
-	$this->{jsontree_text} = $text;
-	$kiwi -> done();
+	$this->{gdata}    = $global -> getKiwiConfig();
+	$this->{kiwi}     = $kiwi;
+	$this->{dest}     = $destdir;
+	$this->{system}   = $system;
+	$this->{software} = $software;
+	$this->{cmdL}     = $cmdL;
 	return $this;
 }
 
@@ -268,16 +87,70 @@ sub createReport {
 	# user to solve outstanding problems in order to allow a
 	# clean migration of the system into an image description
 	# ---
-	my $this       = shift;
-	my $kiwi       = $this->{kiwi};
-	my $dest       = $this->{dest};
-	my $problem1   = $this->{solverProblem1};
-	my $problem2   = $this->{solverProblem2};
-	my $failedJob1 = $this->{solverFailedJobs1};
-	my $failedJob2 = $this->{solverFailedJobs2};
-	my $nopackage  = $this->{nopackage};
-	my $repos      = $this->{localrepos};
-	my $twice      = $this->{twice};
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $dest = $this->{dest};
+	my $software = $this->{software};
+	my $system   = $this->{system};
+	my %gems;
+	my %repo;
+	my $jsontree_text = $system
+		-> createCustomDataForType('file');
+	my $jsontree_binary = $system
+		-> createCustomDataForType('elfbin');
+	my $custom = $system
+		-> getCustomData();
+	my $multiple = $software
+		-> getMultipleInstalledPackages();
+	my $problem1 = $software
+		-> getSolverPatternConflict();
+	my $problem2 = $software
+		-> getSolverPackageConflict();
+	my $failedJob1 = $software
+		-> getSolverPatternNotFound();
+	my $failedJob2 = $software
+		-> getSolverPackageNotFound();
+	my $packages = $system
+		-> getInstalledPackages();
+	my $modalias = $system
+		-> getHardwareDependantPackages();
+	my $kernel = $system
+		-> getKernelVersion();
+	my @kernelPackages = $system
+		-> getKernelPackages();
+	my $svnbase;
+	foreach my $item (sort keys %{$custom}) {
+		my $type = $custom->{$item}->[0];
+		if (($svnbase) && ($item !~ /$svnbase/)) {
+			undef $svnbase;
+		}
+		if ($type eq 'rubygems') {
+			next if (-d $item);
+			if ($item =~ /(.*\/gems)\/(.*)\/Rakefile$/) {
+				my $gempath = $1;
+				my @gemname = split(/\//,$2);
+				$gems{$gempath}{$gemname[0]} = $type;
+			}
+		}
+		if ($type eq 'git') {
+			if (-d "$item/.git") {
+				$repo{$item} = $type;
+			}
+		}
+		if ($type eq 'osc') {
+			if (-d "$item/.osc") {
+				$repo{$item} = $type;
+			}
+		}
+		if ($type eq 'svn') {
+			if (-d "$item/.svn") {
+				if (! defined $svnbase) {
+					$svnbase = $item;
+					$repo{$item} = $type;
+				}
+			}
+		}
+	}
 	#==========================================
 	# Beautify report...
 	#------------------------------------------
@@ -329,21 +202,6 @@ sub createReport {
 	print $FD ' src=".report/d3/kiwi.js"></script>'."\n";
 	print $FD '</head>'."\n";
 	#==========================================
-	# Hardware dependant packages
-	#------------------------------------------
-	my %modalias;
-	my $pack_call = KIWIQX::qxx ("rpm -qa --qf '\n<%{name}>\n' --supplements");
-	my @pack_list = split(/\n/,$pack_call);
-	my $cur_pack;
-	foreach my $item (@pack_list) {
-		if ($item =~ /^<(.+)>/) {
-			$cur_pack = $1;
-		}
-		if ($item =~ /^modalias/) {
-			push @{$modalias{$cur_pack}}, $item;
-		}
-	}
-	#==========================================
 	# Container Menu
 	#------------------------------------------
 	my %menu = ();
@@ -351,20 +209,20 @@ sub createReport {
 	$menu{'kernel'} = [
 		"$img/kernel.jpg","Kernel"
 	];
-	if ($nopackage) {
+	if ($custom) {
 		$menu{'custom-files'} = [
 			"$img/custom-files.jpg","Custom Files"
 		];
 		$menu{'custom-files-visualisation'} = [
-			"$img/custom-files-visualisation.jpg","C. Files Visualisation"
+			"$img/custom-files-visualisation.jpg","Visualisation"
 		];
 	}
-	if (%modalias) {
+	if ($modalias) {
 		$menu{'RPM-packages'} = [
 			"$img/RPM-packages.jpg","Hardware Packages"
 		];
 	}
-	if ($twice) {
+	if ($multiple) {
 		$menu{'multiple-RPM'} = [
 			"$img/multiple-RPM.jpg","Multiple RPM"
 		];
@@ -389,12 +247,12 @@ sub createReport {
 			"$img/RPM-lost.jpg","RPM not found"
 		];
 	}
-	if ($repos) {
+	if (%repo) {
 		$menu{'local-repositories'} = [
 			"$img/local-repositories.jpg","Repositories"
 		];
 	}
-	if (-x "/usr/bin/gem") {
+	if (%gems) {
 		$menu{'gems'} = [
 			"$img/gems.jpg","GEMs"
 		];
@@ -430,8 +288,6 @@ sub createReport {
 	print $FD 'attributes in the type section of the config.xml file';
 	print $FD '</p>'."\n";
 	print $FD '<hr>'."\n";
-	my $kernel = KIWIQX::qxx ("uname -r");
-	chomp $kernel;
 	if (! -e "/lib/modules/$kernel") {
 		print $FD '<p>'."\n";
 		print $FD "Sorry no kernel package found for running kernel: $kernel ";
@@ -440,11 +296,7 @@ sub createReport {
 		print $FD '</p>'."\n";
 	} else {
 		print $FD '<table>'."\n";
-		my $list = KIWIQX::qxx (
-			"rpm -qf --qf \"%{NAME}:%{VERSION}\\n\" /lib/modules/$kernel"
-		);
-		my @list = split(/\n/,$list);
-		foreach my $item (sort @list) {
+		foreach my $item (sort @kernelPackages) {
 			if ($item =~ /(.*):(.*)/) {
 				my $pac = $1;
 				my $ver = $2;
@@ -460,21 +312,21 @@ sub createReport {
 	#==========================================
 	# Hardware dependent packages report
 	#------------------------------------------
-	if (%modalias) {
+	if ($modalias) {
 		print $FD '<div class="infoPanel">'."\n";
 		print $FD '<a name="RPM-packages"></a>'."\n";
 		print $FD '<h1>Hardware dependent RPM packages </h1>'."\n";
 		print $FD '<p>'."\n";
 		print $FD 'The table below shows packages that depend on specific ';
 		print $FD 'hardware Please note that it might be required to have a ';
-		print $FD 'different set of hardware dependent packages included into the ';
-		print $FD 'image description depending on the target hardware. If there ';
-		print $FD 'is the need for such packages make sure you add them as follows';
-		print $FD '<package name="name-of-package" bootinclude="true"/>';
+		print $FD 'different set of hardware dependent packages included into ';
+		print $FD 'the image description depending on the target hardware. ';
+		print $FD 'If there is the need for such packages make sure you add ';
+		print $FD 'them as package name="name-of-package" bootinclude="true"';
 		print $FD '</p>'."\n";
 		print $FD '<hr>'."\n";
 		print $FD '<table>'."\n";
-		foreach my $item (sort keys %modalias) {
+		foreach my $item (sort keys %{$modalias}) {
 			print $FD '<tr valign="top">'."\n";
 			print $FD '<td>'.$item.'</td>'."\n";
 			print $FD '</tr>'."\n";
@@ -485,7 +337,7 @@ sub createReport {
 	#==========================================
 	# Local repository checkout(s)
 	#------------------------------------------
-	if ($repos) {
+	if (%repo) {
 		print $FD '<div class="infoPanel">'."\n";
 		print $FD '<a name="local-repositories"></a>'."\n";
 		print $FD '<h1>Local repository checkout paths </h1>'."\n";
@@ -500,10 +352,10 @@ sub createReport {
 		print $FD '</p>'."\n";
 		print $FD '<hr>'."\n";
 		print $FD '<table>'."\n";
-		foreach my $repo (sort keys %{$repos}) {
+		foreach my $repopath (sort keys %repo) {
 			print $FD '<tr valign="top">'."\n";
-			print $FD '<td>'.$repo.'</td>'."\n";
-			print $FD '<td> type: '.$repos->{$repo}.'</td>'."\n";
+			print $FD '<td>'.$repopath.'</td>'."\n";
+			print $FD '<td> type: '.$repo{$repopath}.'</td>'."\n";
 			print $FD '</tr>'."\n";
 		}
 		print $FD '</table>'."\n";
@@ -512,35 +364,35 @@ sub createReport {
 	#==========================================
 	# GEM packages report
 	#------------------------------------------
-	if (-x "/usr/bin/gem") {
+	if (%gems) {
 		print $FD '<div class="infoPanel">'."\n";
 		print $FD '<a name="gems"></a>'."\n";
-		print $FD '<h1>Installed System GEM packages </h1>'."\n";
+		print $FD '<h1>Installed GEM packages </h1>'."\n";
 		print $FD '<p>'."\n";
-		print $FD 'The table below shows GEM packages installed on the system. ';
-		print $FD 'In order to migrate them correctly make sure you either ';
-		print $FD 'have the corresponding rpm package for this gem in your ';
-		print $FD 'kiwi packages list or implement a mechanism to let the ';
-		print $FD 'gem package manager install this software. gem packages ';
-		print $FD 'installed in home directories are not part of this list.';
+		print $FD 'The table(s) below shows GEM packages found on the system ';
+		print $FD 'and installed by gem manually. In order to migrate them ';
+		print $FD 'correctly make sure you either have the corresponding ';
+		print $FD 'rpm package for this gem in your kiwi packages list or ';
+		print $FD 'implement a mechanism to let the gem package manager ';
+		print $FD 'install this software.';
 		print $FD '</p>'."\n";
 		print $FD '<hr>'."\n";
-		print $FD '<table>'."\n";
-		my $gem_call = KIWIQX::qxx ("gem list --local");
-		my @gem_list = split(/\n/,$gem_call);
-		foreach my $item (sort @gem_list) {
-			print $FD '<tr valign="top">'."\n";
-			print $FD '<td>'.$item.'</td>'."\n";
-			print $FD '</tr>'."\n";
+		foreach my $gempath (sort keys %gems) {
+			print $FD "<h2>$gempath</h2>"."\n";
+			print $FD '<table>'."\n";
+			foreach my $gem (sort keys %{$gems{$gempath}}) {
+				print $FD '<tr valign="top">'."\n";
+				print $FD '<td>'.$gem.'</td>'."\n";
+				print $FD '</tr>'."\n";
+			}
+			print $FD '</table>'."\n";
 		}
-		print $FD '</table>'."\n";
 		print $FD '</div>'."\n";
 	}
 	#==========================================
 	# Package/Pattern report
 	#------------------------------------------
-	if ($twice) {
-		my @pacs = @{$twice};
+	if ($multiple) {
 		print $FD '<div class="infoPanel">'."\n";
 		print $FD '<a name="multiple-RPM"></a>'."\n";
 		print $FD '<h1>RPM Package(s) installed multiple times</h1>'."\n";
@@ -552,17 +404,10 @@ sub createReport {
 		print $FD '</p>'."\n";
 		print $FD '<hr>'."\n";
 		print $FD '<table>'."\n";
-		my $list = KIWIQX::qxx ("rpm -q @pacs --last");
-		my @list = split(/\n/,$list);
-		foreach my $job (sort @list) {
-			if ($job =~ /([^\s]+)\s+([^\s].*)/) {
-				my $pac  = $1;
-				my $date = $2;
-				print $FD '<tr valign="top">'."\n";
-				print $FD '<td>'.$pac.'</td>'."\n";
-				print $FD '<td>'.$date.'</td>'."\n";
-				print $FD '</tr>'."\n";
-			}
+		foreach my $pac (sort @{$multiple}) {
+			print $FD '<tr valign="top">'."\n";
+			print $FD '<td>'.$pac.'</td>'."\n";
+			print $FD '</tr>'."\n";
 		}
 		print $FD '</table>'."\n";
 		print $FD '</div>'."\n";
@@ -678,38 +523,28 @@ sub createReport {
 		print $FD '</p>'."\n";
 		print $FD '<hr>'."\n";
 		print $FD '<table>'."\n";
-		my @pacs = @{$failedJob2};
-		my $list = KIWIQX::qxx ("rpm -q @pacs --last");
-		my @list = split(/\n/,$list);
-		foreach my $job (sort @list) {
-			if ($job =~ /([^\s]+)\s+([^\s].*)/) {
-				my $pac  = $1;
-				my $date = $2;
-				my $rpm  = KIWIQX::qxx (
-					'rpm -q --qf "%{distribution}\n%{disturl}\n%{url}\n" '.$pac
-				);
-				my @rpm = split(/\n/,$rpm);
-				my $distro  = $rpm[0];
-				my $disturl = $rpm[1];
-				my $srcurl  = $rpm[2];
-				if ($disturl !~ s:/[^/]*$::) {
-					$disturl = $srcurl;
-				}
-				if ($distro =~ /^(\s*|\(none\))$/) {
-					$distro = "No distribution";
-				}
-				if ($disturl =~ /^(\s*|\(none\))$/) {
-					$disturl = "No URL";
-				}
-				print $FD '<tr valign="top">'."\n";
-				print $FD '<td><nobr>'.$pac.'</nobr></td>'."\n";
-				print $FD '<td>';
-				print $FD '<nobr>'.$date.'</nobr><br>';
-				print $FD '<nobr>'.$distro.'</nobr><br>';
-				print $FD '<nobr>'.$disturl.'</nobr>';
-				print $FD '</td>'."\n";
-				print $FD '</tr>'."\n";
+		foreach my $pac (@{$failedJob2}) {
+			my $date    = $packages->{$pac}{installdate};
+			my $distro  = $packages->{$pac}{distribution};
+			my $disturl = $packages->{$pac}{disturl};
+			my $srcurl  = $packages->{$pac}{url};
+			if ($disturl !~ s:/[^/]*$::) {
+				$disturl = $srcurl;
 			}
+			if ($distro =~ /^(\s*|\(none\))$/) {
+				$distro = "No distribution";
+			}
+			if ($disturl =~ /^(\s*|\(none\))$/) {
+				$disturl = "No URL";
+			}
+			print $FD '<tr valign="top">'."\n";
+			print $FD '<td><nobr>'.$pac.'</nobr></td>'."\n";
+			print $FD '<td>';
+			print $FD '<nobr>'.$date.'</nobr><br>';
+			print $FD '<nobr>'.$distro.'</nobr><br>';
+			print $FD '<nobr>'.$disturl.'</nobr>';
+			print $FD '</td>'."\n";
+			print $FD '</tr>'."\n";
 		}
 		print $FD '</table>'."\n";
 		print $FD '</div>'."\n";
@@ -717,7 +552,7 @@ sub createReport {
 	#==========================================
 	# Custom files report...
 	#------------------------------------------
-	if ($nopackage) {
+	if ($custom) {
 		print $FD '<div class="infoPanel">'."\n";
 		print $FD '<a name="custom-files"></a>'."\n";
 		print $FD '<h1>Custom files</h1>'."\n";
@@ -743,7 +578,7 @@ sub createReport {
 		print $FD 'Custom directory</a>.'."\n";
 		print $FD '</div>'."\n";
 		print $FD '</div>'."\n";
-		foreach my $tree ($this->{jsontree_binary},$this->{jsontree_text}) {
+		foreach my $tree ($jsontree_binary,$jsontree_text) {
 			#==========================================
 			# Run only with data
 			#------------------------------------------
@@ -753,7 +588,7 @@ sub createReport {
 			#------------------------------------------
 			my $file;
 			my $title;
-			if ($tree eq $this->{jsontree_binary}) {
+			if ($tree eq $jsontree_binary) {
 				$file = "$dest/report-binary.html";
 				$title = "Custom binary data report";
 			} else {
@@ -808,7 +643,7 @@ sub createReport {
 			# Intro
 			#------------------------------------------
 			print $JD '<p>'."\n";
-			if ($tree eq $this->{jsontree_binary}) {
+			if ($tree eq $jsontree_binary) {
 				print $JD 'The visualisation of the data below shows ';
 				print $JD 'the unmanaged binary data tree.'."\n";
 			} else {
@@ -896,45 +731,6 @@ sub createReport {
 	$kiwi -> info ("--> Please check the migration report !!\n");
 	$kiwi -> note ("\n\tfile://$dest/report.html\n\n");
 	return $this;
-}
-
-#==========================================
-# __searchNode
-#------------------------------------------
-sub __searchNode {
-	my $this   = shift;
-	my $tree   = shift;
-	my $search = shift;
-	my @result;
-	my @search_list = @{$search};
-	foreach my $item (@search_list) {
-		push @result,undef;
-	}
-	if ((! $tree) || (ref $tree ne 'HASH') || (! $tree->{name})) {
-		return @result;
-	}
-	my $count = 0;
-	foreach my $item (@search_list) {
-		if (($count == 0) && ($tree->{name} eq $item)) {
-			$result[$count] = $tree;
-		} elsif ($tree->{children}) {
-			my @child_list = @{$tree->{children}};
-			my $found = 0;
-			foreach my $child (@child_list) {
-				if ($child->{name} eq $item) {
-					$result[$count] = $child;
-					$tree  = $child;
-					$found = 1;
-					last;
-				}
-			}
-			if (! $found) {
-				return @result;
-			}
-		}
-		$count++;
-	}
-	return @result;
 }
 
 1;

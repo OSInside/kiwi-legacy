@@ -222,6 +222,9 @@ sub __checkYaSTenvironment {
 	my $check= 0;
 	my $tool;
 	my $message;
+	if (! $conf) {
+		return 1;
+	}
 	if (-e "$conf/config-yast-autoyast.xml") {
 		$tool  = "AutoYaST";
 		$check = 1;

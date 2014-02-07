@@ -618,6 +618,7 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 %{_datadir}/kiwi/.revision
 %{_datadir}/kiwi/modules
+%{_datadir}/kiwi/metadata
 %{_datadir}/kiwi/livestick
 %{_datadir}/kiwi/editing
 %{_datadir}/kiwi/locale

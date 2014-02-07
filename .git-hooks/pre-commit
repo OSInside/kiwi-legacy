@@ -40,9 +40,8 @@ my @kiwiModules = qw (
 	KIWIManagerYum.pm
 	KIWIManagerZypper.pm
 	KIWIManagerEnsconce.pm
-	KIWIAnalyse.pm
-	KIWIAnalyseCustomData.pm
-	KIWIAnalyseManagedSoftware.pm
+	KIWIAnalyseSystem.pm
+	KIWIAnalyseSoftware.pm
 	KIWIAnalyseReport.pm
 	KIWIAnalyseTemplate.pm
 	KIWIMiniIsoPlugin.pm
@@ -224,9 +223,8 @@ my @notClean1 = qw (
 	KIWIManagerYum.pm
 	KIWIManagerZypper.pm
 	KIWIManagerEnsconce.pm
-	KIWIAnalyse.pm
-	KIWIAnalyseCustomData.pm
-	KIWIAnalyseManagedSoftware.pm
+	KIWIAnalyseSystem.pm
+	KIWIAnalyseSoftware.pm
 	KIWIAnalyseReport.pm
 	KIWIAnalyseTemplate.pm
 	KIWIMiniIsoPlugin.pm
@@ -403,9 +401,8 @@ my @notClean2 = qw (
 	KIWIManagerYum.pm
 	KIWIManagerZypper.pm
 	KIWIManagerEnsconce.pm
-	KIWIAnalyse.pm
-	KIWIAnalyseCustomData.pm
-	KIWIAnalyseManagedSoftware.pm
+	KIWIAnalyseSystem.pm
+	KIWIAnalyseSoftware.pm
 	KIWIAnalyseReport.pm
 	KIWIAnalyseTemplate.pm
 	KIWIMiniIsoPlugin.pm
@@ -467,9 +464,8 @@ my @notClean3 = qw (
 	KIWIManagerYum.pm
 	KIWIManagerZypper.pm
 	KIWIManagerEnsconce.pm
-	KIWIAnalyse.pm
-	KIWIAnalyseCustomData.pm
-	KIWIAnalyseManagedSoftware.pm
+	KIWIAnalyseSystem.pm
+	KIWIAnalyseSoftware.pm
 	KIWIAnalyseReport.pm
 	KIWIAnalyseTemplate.pm
 	KIWIMiniIsoPlugin.pm
