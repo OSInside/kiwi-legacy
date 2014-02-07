@@ -2,12 +2,12 @@
 .\"     Title: kiwi
 .\"    Author: Marcus Schaefer <ms (AT) suse.de>
 .\" Generator: DocBook XSL Stylesheets v1.78.0 <http://docbook.sf.net/>
-.\"      Date: Created: 01/22/2014
+.\"      Date: Created: 02/07/2014
 .\"    Manual: KIWI Manualpage
 .\"    Source: KIWI 5.06
 .\"  Language: English
 .\"
-.TH "KIWI" "1" "Created: 01/22/2014" "KIWI 5\&.06" "KIWI Manualpage"
+.TH "KIWI" "1" "Created: 02/07/2014" "KIWI 5\&.06" "KIWI Manualpage"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -76,27 +76,13 @@ includes this update channel as repository, it is useful to store the image root
 .PP
 KIWI provides a module which allows you to analyse the running system and create a report and an image description representing the current state of the machine\&. Among others this allows you to clone your currently running system into an image\&. The system requires the zypper backend in order to work properly\&.
 .PP
-The process creates a cache file so that subsequent calls of the analysis runs much faster\&. The option
-\fB\-\-nofiles\fR
-will prevent the system from looking up unmanaged files\&. These are files which does not belong to any management system like rpm, gem, git, svn, osc\&. Whereas \-\-nofiles will switch off the creation of the unmanaged files tree completely it\*(Aqs possible to influence the creation of the unmnaaged files with the further options
-\fB\-\-skip\-gem\-lookup\fR,
-\fB\-\-skip\-rcs\-lookup\fR
-and
-\fB\-\-skip\-augeas\-lookup\fR\&. If checking for managed files by gem is skipped they will all be treated as unmanaged\&. If checking for revision control systems is skipped all those files will also be treated as unmanaged and if checkking for files known to augeas is skipped these files will also be treated as unmanaged\&. By default KIWI checks for all of these file management systems\&. The option
-\fB\-\-notemplate\fR
-will prevent the creation of the KIWI image description files which are needed if you want to use KIWI to create a clone image from the result of the analysis\&. With the options
-\fB\-\-exclude\fR
-and
-\fB\-\-skip\fR
-you can tell the system to ignore specific directories and/or skip specified packages\&. This makes sense if you know before that some data is not worth to become handled or can be restored easily later inside the cloned image\&.
-.PP
 The process will always place it\*(Aqs result into the
 /tmp/$OptionValueOf\-\-describe
 directory\&. The reason for this is because
 /tmp
-is always excluded from the analysis and therefore we can safely place new files there without influencing the process itself\&. You should have at least 50\ \&MB free space for the cache file and the image description all the rest are just hard links\&.
+is always excluded from the analysis and therefore we can safely place new files there without influencing the process itself\&. You should have at least 100\ \&MB free space for the cache file and the image description all the rest are just hard links\&.
 .PP
-As one result a HTML based report file is created which contains important information about the system\&. You are free to ignore that information but with the risk that the image from that description does not represent the same system which is running at the moment\&. The less issues left in the report the better is the result\&. In most cases a manual fine tuning is required\&. This includes the repository selection and the unmanaged files along with the configuration details of your currently running operating system\&. You should understand the module as a helper to analyse running servers\&.
+As one result a HTML based report file is created which contains important information about the system\&. You are free to ignore that information but with the risk that the image from that description does not represent the same system which is running at the moment\&. The less issues left in the report the better is the result\&. In most cases a manual fine tuning is required\&. This includes the repository selection and the unmanaged files along with the configuration details of your currently running operating system\&. You should understand the module as a helper to analyse running linux systems\&.
 .HP \w'\fBkiwi\fR\ 'u
 \fBkiwi\fR {\-\-describe} \fIname\fR [\-\-exclude\ \fIdirectory\fR...] [\-\-skip\ \fIpackage\fR...] [\-\-nofiles] [\-\-notemplate] [\-\-skip\-gem\-lookup] [\-\-skip\-rcs\-lookupk] [\-\-skip\-augeas\-lookup]
 .SH "IMAGE POSTPROCESSING MODES"
