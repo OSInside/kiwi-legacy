@@ -703,18 +703,25 @@ sub createReport {
 		print $FD '<div>'."\n";
 		my $binary_report = $dest.'/report-binary.html';
 		my $text_report   = $dest.'/report-text.html';
+		my $link;
+		print $FD '<table>'."\n";
 		if (-e $binary_report) {
-			print $FD '<p>'."\n";
-			print $FD "Open <a href=\"report-binary.html\" target=\"_blank\">";
-			print $FD 'Custom binary data</a>.'."\n";
-			print $FD '</p>'."\n";
+			$link = "Open <a href=\"report-binary.html\" target=\"_blank\">";
+			$link.= 'Report</a>.';
+			print $FD '<tr valign="top">'."\n";
+			print $FD '<td>'.'Binary files'.'</td>'."\n";
+			print $FD '<td>'.$link.'</td>'."\n";
+			print $FD '</tr>'."\n";
 		}
 		if (-e $text_report) {
-			print $FD '<p>'."\n";
-			print $FD "Open <a href=\"report-text.html\" target=\"_blank\">";
-			print $FD 'Custom text data</a>.'."\n";
-			print $FD '</p>'."\n";
+			$link = "Open <a href=\"report-text.html\" target=\"_blank\">";
+			$link.= 'Report</a>.';
+			print $FD '<tr valign="top">'."\n";
+			print $FD '<td>'.'Text files'.'</td>'."\n";
+			print $FD '<td>'.$link.'</td>'."\n";
+			print $FD '</tr>'."\n";
 		}
+		print $FD '</table>'."\n";
 		print $FD '</div>'."\n";
 		print $FD '</div>'."\n";
 	}
