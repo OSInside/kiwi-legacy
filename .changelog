@@ -14,7 +14,7 @@ while (my $line = <>) {
 	if ($line =~ /^commit/) {
 		$ignore = 1;
 	}
-	if ($line =~ /^Merge:/) {
+	if ($line =~ /^Merge|Conflicts/) {
 		$ignore = 2;
 	}
 	if (($ignore < 2) && ($line =~ /^Author: .*<(.*)@.*>/)) {
