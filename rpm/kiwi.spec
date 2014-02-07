@@ -116,10 +116,14 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 # find out about the name scheme of the local system for -requieres packages
 # in terms of problems with this magic ask adrian@suse.de for details
 %if 0%{?suse_version}
+%if %suse_version == 1315
+%define mysystems suse-SLES12 suse-SLED12
+%else
 %if 0%{?sles_version}
 %define mysystems suse-SLES%{sles_version} suse-SLED%{sles_version}
 %else
 %define mysystems %(echo `export VER=%{suse_version}; echo "suse-${VER:0:2}.${VER:2:1}"`)
+%endif
 %endif
 %endif
 %if 0%{?rhel_version}
