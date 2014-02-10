@@ -1820,6 +1820,24 @@ function importDatabases {
 			fi
 			mysqladmin shutdown
 		;;
+		'postgresql')
+			# bring up db
+			su - postgres -c 'initdb'
+			su - postgres -c "pg_ctl start -o '-h \"\"' "
+			local i
+			for((i=0; i<150; i++)); do
+				sleep 0.2
+				su - postgres -c 'psql -l' 2>/dev/null && break
+			done
+			# import content
+			if su - postgres -c "zcat $file | psql -U postgres"; then
+				echo "Import of $db_type successfull!"
+			else
+				echo "Import of $db_type failed!"
+			fi
+			# stop db
+			su - postgres -c "pg_ctl stop"
+		;;
 		*)
 			echo "Ignoring unknown database type $db_type!"
 		;;
