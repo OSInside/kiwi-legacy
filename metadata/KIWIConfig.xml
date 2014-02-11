@@ -146,6 +146,7 @@
 		<file name="mkfs.xfs"/>
 		<file name="xfs_growfs"/>
 		<file name="xfs_check"/>
+		<file name="xfs_db"/>
 		<file name="mkinitrd"/>
 		<file name="mknod"/>
 		<file name="mkreiserfs"/>
