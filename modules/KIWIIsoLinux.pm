@@ -364,7 +364,7 @@ sub ppc64_default {
 	my $volid = $this -> createVolumeID();
 
 	$para.= " -chrp-boot";
-	$para.= " -hfs-bless $src/$boot"; # CHECK: maybe $src is not necessary
+	$para.= " -hfs-bless $src/$boot/grub2-ieee1275"; # CHECK: maybe $src is not necessary
 	$para.= " -hfs-volid '$volid'";
 	$para.= " -l";
 	$para.= " --macbin";
