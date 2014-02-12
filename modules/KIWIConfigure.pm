@@ -130,6 +130,7 @@ sub setupAutoYaST {
 		return;
 	}
 	print $INFFD "AutoYaST: http://192.168.100.99/part2.xml\n";
+	print $INFFD "Textmode: 0\n";
 	$INFFD -> close();
 	my $AUTOFD = FileHandle -> new();
 	if ( ! $AUTOFD -> open (">$root/var/lib/YaST2/runme_at_boot")) {
