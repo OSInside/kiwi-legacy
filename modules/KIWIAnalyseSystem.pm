@@ -159,10 +159,10 @@ sub new {
 	# Store object data
 	#------------------------------------------
 	$this->{cdata} = $cdata;
-	$this->{rpm_dump} = '/var/run/rpm_dump';
-	$this->{rpm_pack} = '/var/run/rpm_packages';
-	$this->{rpm_modc} = '/var/run/rpm_modified';
-	$this->{custom}   = '/var/run/rpm_unmanaged';
+	$this->{rpm_dump} = '/tmp/rpm_dump';
+	$this->{rpm_pack} = '/tmp/rpm_packages';
+	$this->{rpm_modc} = '/tmp/rpm_modified';
+	$this->{custom}   = '/tmp/rpm_unmanaged';
 	#==========================================
 	# Initialize
 	#------------------------------------------
