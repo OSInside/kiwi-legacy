@@ -56,9 +56,9 @@ if \
 	[ ! "$OEM_KIWI_INITRD" = "true" ]
 then
 	#======================================
-	# use distro initrd via mkinitrd
+	# use distro initrd tool
 	#--------------------------------------
-	setupSUSEInitrd
+	setupInitrd
 else
 	#======================================
 	# use kiwi initrd from RW partition
