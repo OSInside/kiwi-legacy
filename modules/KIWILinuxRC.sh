@@ -1156,12 +1156,24 @@ function updateModuleDependencies {
 		systemIntegrity=unknown
 	fi
 }
+
 #======================================
-# setupRHELInitrd
+# setupInitrd
 #--------------------------------------
-function setupRHELInitrd {
+function setupInitrd {
+	if [ -e /usr/bin/dracut ];then
+		setupDracutInitrd
+	else
+		setupMakeInitrd
+	fi
+}
+
+#======================================
+# setupDracutInitrd
+#--------------------------------------
+function setupDracutInitrd {
 	# /.../
-	# call mkinitrd/dracut on RHEL systems to create the distro initrd.
+	# call dracut to create the distro initrd.
 	# ----
 	bootLoaderOK=1
 	local umountProc=0
@@ -1244,12 +1256,11 @@ function setupRHELInitrd {
 	fi
 }
 #======================================
-# setupSUSEInitrd
+# setupMakeInitrd
 #--------------------------------------
-function setupSUSEInitrd {
+function setupMakeInitrd {
 	# /.../
-	# call mkinitrd on suse systems to create the distro initrd
-	# based on /etc/sysconfig/kernel
+	# call mkinitrd to create the distro initrd
 	# ----
 	bootLoaderOK=1
 	local umountProc=0
@@ -7144,9 +7155,6 @@ function activateImage {
 	if ! cp /include /mnt;then
 		systemException "Failed to copy include code" "reboot"
 	fi
-	if [ ! -x /lib/mkinitrd/bin/run-init ];then
-		systemException "Can't find run-init program" "reboot"
-	fi
 }
 #======================================
 # cleanImage
@@ -7433,7 +7441,7 @@ function bootImage {
 	#--------------------------------------
 	if [ $reboot = "yes" ];then
 		Echo "Reboot requested... rebooting after preinit"
-		exec /lib/mkinitrd/bin/run-init -c ./dev/console /mnt /sbin/reboot -f -i
+		exec chroot . /sbin/reboot -f -i
 	fi
 	if [ "$rebootinter" = "yes" ];then
 		Echo "Reboot requested... rebooting after preinit"
@@ -7447,11 +7455,11 @@ function bootImage {
 			--msgbox "\"$TEXT_DUMP\"" 5 70
 		clear
 		Echo "Prepare for reboot"
-		exec /lib/mkinitrd/bin/run-init -c ./dev/console /mnt /sbin/reboot -f -i
+		exec chroot . /sbin/reboot -f -i
 	fi
 	if [ "$shutdown" = "yes" ];then
 		Echo "Shutdown  requested... system shutdown after preinit"
-		exec /lib/mkinitrd/bin/run-init -c ./dev/console /mnt /sbin/halt -fihp
+		exec chroot . /sbin/halt -fihp
 	fi
 	if [ "$shutdowninter" = "yes" ];then
 		Echo "Shutdown  requested... system shutdown after preinit"
@@ -7465,19 +7473,9 @@ function bootImage {
 			--msgbox "\"$TEXT_DUMP\"" 5 70
 		clear
 		Echo "Prepare for shutdown"
-		exec /lib/mkinitrd/bin/run-init -c ./dev/console /mnt /sbin/halt -fihp
+		exec chroot . /sbin/halt -fihp
 	fi
-	if \
-		[ ! "$haveClicFS" = "yes" ] && \
-		[ -z "$NFSROOT" ]           && \
-		[[ $kiwi_cpio_name =~ initrd-.*-suse ]]
-	then
-		# for systemd debugging set: --log-level=debug --log-target=kmsg
-		exec /lib/mkinitrd/bin/run-init -c ./dev/console /mnt $init $option
-	else
-		# FIXME: clicfs / nfsroot / non-suse doesn't like run-init
-		exec chroot . $init $option
-	fi
+	exec chroot . $init $option
 }
 #======================================
 # setupUnionFS

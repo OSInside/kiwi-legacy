@@ -59,9 +59,9 @@ if  [ ! -z "$imageDiskDevice" ]      && \
 then
 	if [ -z "$UNIONFS_CONFIG" ] && [ -z "$COMBINED_IMAGE" ];then
 		#======================================
-		# use distro initrd via mkinitrd
+		# use distro initrd tool
 		#--------------------------------------
-		setupSUSEInitrd
+		setupInitrd
 	else
 		#======================================
 		# use kiwi initrd downloaded before
