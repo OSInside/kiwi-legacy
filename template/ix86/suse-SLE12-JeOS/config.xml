@@ -64,14 +64,16 @@
 	<users group="root">
 		<user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
 	</users>
-	<repository type="yast2">
-		<source path="obs://SUSE:SLE-12:GA/standard"/>
+	<repository type="rpm-md">
+		<source path="http://download.suse.de/ibs/SUSE:/SLE-12:/GA/standard/"/>
 	</repository>
 	<packages type="image">
-		<namedCollection name="base"/>
+<!-- Patterns seems broken atm, e,g wants yast2-mouse but does not exist -->
+<!--		<namedCollection name="base"/>-->
 		<opensuseProduct name="SUSE_SLES"/>
-		<package name="plymouth-branding-openSUSE" bootinclude="true"/>
-		<package name="grub2-branding-openSUSE" bootinclude="true"/>
+<!-- The following packages does not exist on the DVD -->
+<!--		<package name="plymouth-branding-SLES" bootinclude="true"/>-->
+<!--		<package name="grub2-branding-SLES" bootinclude="true"/>-->
 		<package name="ifplugd"/>
 		<package name="iputils"/>
 		<package name="vim"/>
@@ -83,6 +85,9 @@
 		<package name="fonts-config"/>
 		<package name="tar"/>
 		<package name="parted"/>
+		<package name="systemd"/>
+		<package name="systemd-sysvinit"/>
+		<package name="dracut"/>
 	</packages>
 	<packages type="iso">
 		<package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
