@@ -334,6 +334,7 @@ sub main {
 			return;
 		}
 		$report -> createReport();
+		$system -> commitTransaction();
 	}
 
 	#==========================================
