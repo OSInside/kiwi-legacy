@@ -88,7 +88,7 @@ sub new {
 			return;
 		}
 		$data = KIWIQX::qxx (
-			"cd $destdir && git config user.mail \"$mail\" 2>&1"
+			"cd $destdir && git config user.email \"$mail\" 2>&1"
 		);
 		$code = $? >> 8;
 		if ($code != 0) {
@@ -417,6 +417,7 @@ sub getCustomData {
 		$done_previos = $done_percent;
 		$done++;
 	}
+	$modifiedfd -> close();
 	while (my $item = <$customfd>) {
 		chomp $item;
 		my @path = split(/\//,$item);
