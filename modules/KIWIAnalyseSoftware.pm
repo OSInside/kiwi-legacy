@@ -273,6 +273,8 @@ sub __populateRepos {
 	my @list = split(/\n/,$list);
 	my $code = $? >> 8;
 	if ($code != 0) {
+		$kiwi -> error ("Failed to detect repository list: $list");
+		$kiwi -> failed();
 		return;
 	}
 	foreach my $repo (@list) {
@@ -370,6 +372,10 @@ sub __populateRepos {
 		}
 	}
 	$this->{source} = \%osc;
+	if (! %osc) {
+		$kiwi -> warning("No enabled repository found");
+		$kiwi -> skipped();
+	}
 	return $this;
 }
 
