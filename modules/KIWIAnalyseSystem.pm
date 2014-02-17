@@ -681,7 +681,7 @@ sub createCustomDataForType {
 	$kiwi -> cursorON();
 	$kiwi -> info ("Encoding D3 data stream...");
 	my $json_obj = JSON->new->allow_nonref;
-	my $json = $json_obj-> pretty->encode($tree);
+	my $json = $json_obj->canonical->pretty->encode($tree);
 	$kiwi -> done();
 	return $json;
 }
