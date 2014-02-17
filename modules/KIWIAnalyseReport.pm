@@ -263,7 +263,7 @@ sub createReport {
 	print $FD '<body class="files">'."\n";
 	print $FD '<header>'."\n";
 	print $FD '<div class="container menu">'."\n";
-	foreach my $item (keys %menu) {
+	foreach my $item (sort keys %menu) {
 		print $FD '<a href="#'.$item.'">'."\n";
 		print $FD '<img src="'.$menu{$item}->[0].'">'."\n";
 		print $FD '<h3>'.$menu{$item}->[1].'</h3>'."\n";
@@ -581,7 +581,7 @@ sub createReport {
 		print $FD 'Custom directory</a>.'."\n";
 		print $FD '</div>'."\n";
 		print $FD '</div>'."\n";
-		foreach my $type (keys %json) {
+		foreach my $type (sort keys %json) {
 			#==========================================
 			# Run only with data
 			#------------------------------------------

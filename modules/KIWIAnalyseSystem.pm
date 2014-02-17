@@ -779,7 +779,7 @@ sub __dumpRPMDatabase {
 		foreach my $package (split(/\n/,$packlist)) {
 			$checkpack{$package} = 1;
 		}
-		my @checklist = keys %checkpack;
+		my @checklist = sort keys %checkpack;
 		my $rpmcheck = KIWIQX::qxx ("rpm -V $checkopt @checklist 2>/dev/null");
 		foreach my $check (split(/\n/,$rpmcheck)) {
 			if ($check =~ /^..(.).+\s+(.)\s(\/.*)$/) {
