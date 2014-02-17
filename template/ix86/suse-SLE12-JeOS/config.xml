@@ -71,7 +71,7 @@
 <!-- Patterns seems broken atm, e,g wants yast2-mouse but does not exist -->
 <!--		<namedCollection name="base"/>-->
 		<opensuseProduct name="SUSE_SLES"/>
-<!-- The following packages does not exist on the DVD -->
+<!-- The following packages does not yet exist for SLE12 -->
 <!--		<package name="plymouth-branding-SLES" bootinclude="true"/>-->
 <!--		<package name="grub2-branding-SLES" bootinclude="true"/>-->
 		<package name="ifplugd"/>
@@ -88,9 +88,11 @@
 		<package name="systemd"/>
 		<package name="systemd-sysvinit"/>
 		<package name="dracut"/>
+		<package name="kiwi"/>
 	</packages>
 	<packages type="iso">
-		<package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
+<!-- The following packages does not yet exist for SLE12 -->
+<!--		<package name="gfxboot-branding-SLES" bootinclude="true" bootdelete="true"/>-->
 	</packages>
 	<packages type="image" profiles="ec2Flavour">
 		<package name="kernel-ec2" replaces="kernel-default"/>
