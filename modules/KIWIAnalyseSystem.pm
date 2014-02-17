@@ -525,6 +525,12 @@ sub createCustomDataForType {
 			push @items, $item;
 		}
 	}
+	if (! @items) {
+		$kiwi -> skipped();
+		$kiwi -> info ("--> No $type custom data found");
+		$kiwi -> skipped();
+		return;
+	}
 	my $factor = 100.0 / @items;
 	my $done_percent = 0;
 	my $done_previos = 0;

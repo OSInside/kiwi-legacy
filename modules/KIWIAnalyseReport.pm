@@ -94,9 +94,10 @@ sub createReport {
 	my $system   = $this->{system};
 	my %gems;
 	my %repo;
-	my $jsontree_text = $system
+	my %json;
+	$json{files} = $system
 		-> createCustomDataForType('file');
-	my $jsontree_binary = $system
+	$json{binaries} = $system
 		-> createCustomDataForType('elfbin');
 	my $custom = $system
 		-> getCustomData();
@@ -578,17 +579,18 @@ sub createReport {
 		print $FD 'Custom directory</a>.'."\n";
 		print $FD '</div>'."\n";
 		print $FD '</div>'."\n";
-		foreach my $tree ($jsontree_binary,$jsontree_text) {
+		foreach my $type (keys %json) {
 			#==========================================
 			# Run only with data
 			#------------------------------------------
+			my $tree = $json{$type};
 			next if ! $tree;
 			#==========================================
 			# Setup title and outfile
 			#------------------------------------------
 			my $file;
 			my $title;
-			if ($tree eq $jsontree_binary) {
+			if ($type eq 'binaries') {
 				$file = "$dest/report-binary.html";
 				$title = "Custom binary data report";
 			} else {
@@ -643,7 +645,7 @@ sub createReport {
 			# Intro
 			#------------------------------------------
 			print $JD '<p>'."\n";
-			if ($tree eq $jsontree_binary) {
+			if ($type eq 'binaries') {
 				print $JD 'The visualisation of the data below shows ';
 				print $JD 'the unmanaged binary data tree.'."\n";
 			} else {
