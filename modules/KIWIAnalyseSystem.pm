@@ -362,17 +362,31 @@ sub getCustomData {
 	my $this  = shift;
 	my $kiwi  = $this->{kiwi};
 	my $custom= $this->{custom};
+	my $modified = $this->{rpm_modc};
 	my %result= ();
 	if ($this->{getCustomData_result}) {
 		return $this->{getCustomData_result};
 	}
-	if (! -f $custom) {
+	my @files;
+	if (-f $custom) {
+		push @files, $custom;
+	}
+	if (-f $modified) {
+		push @files, $modified;
+	}
+	if (! @files) {
 		return;
 	}
-	my $customfiles = int (KIWIQX::qxx ("cat $custom | wc -l"));
+	my $customfiles = int (KIWIQX::qxx ("cat @files | wc -l"));
 	my $customfd = FileHandle -> new();
 	if (! $customfd -> open ($custom)) {
 		$kiwi -> error  ("Couldn't read $custom: $!");
+		$kiwi -> failed ();
+		return;
+	}
+	my $modifiedfd = FileHandle -> new();
+	if (! $modifiedfd -> open ($modified)) {
+		$kiwi -> error  ("Couldn't read $modified: $!");
 		$kiwi -> failed ();
 		return;
 	}
@@ -385,6 +399,24 @@ sub getCustomData {
 	$kiwi-> step($done_percent);
 	my $rule;
 	my $type;
+	while (my $item = <$modifiedfd>) {
+		chomp $item;
+		my $attr;
+		if (-l $item) {
+			$attr = lstat ($item);
+		} else {
+			$attr = stat ($item);
+		}
+		if ($attr) {
+			$result{$item} = ['modified',$attr];
+		}
+		$done_percent = int ($factor * $done);
+		if ($done_percent > $done_previos) {
+			$kiwi -> step ($done_percent);
+		}
+		$done_previos = $done_percent;
+		$done++;
+	}
 	while (my $item = <$customfd>) {
 		chomp $item;
 		my @path = split(/\//,$item);

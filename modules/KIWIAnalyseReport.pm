@@ -99,6 +99,8 @@ sub createReport {
 		-> createCustomDataForType('file');
 	$json{binaries} = $system
 		-> createCustomDataForType('elfbin');
+	$json{modified} = $system
+		-> createCustomDataForType('modified');
 	my $custom = $system
 		-> getCustomData();
 	my $multiple = $software
@@ -593,6 +595,9 @@ sub createReport {
 			if ($type eq 'binaries') {
 				$file = "$dest/report-binary.html";
 				$title = "Custom binary data report";
+			} elsif ($type eq 'modified') {
+				$file = "$dest/report-modified.html";
+				$title = "RPM modified files data report";
 			} else {
 				$file = "$dest/report-text.html";
 				$title = "Custom text data report";
@@ -648,6 +653,9 @@ sub createReport {
 			if ($type eq 'binaries') {
 				print $JD 'The visualisation of the data below shows ';
 				print $JD 'the unmanaged binary data tree.'."\n";
+			} elsif ($type eq 'modified') {
+				print $JD 'The visualisation of the data below shows ';
+				print $JD 'the RPM modified files data tree.'."\n";
 			} else {
 				print $JD 'The visualisation of the data below shows ';
 				print $JD 'the unmanaged text data tree.'."\n";
