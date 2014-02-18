@@ -711,23 +711,25 @@ sub createReport {
 		print $FD 'were created';
 		print $FD '</p>'."\n";
 		print $FD '<div>'."\n";
-		my $binary_report = $dest.'/report-binary.html';
-		my $text_report   = $dest.'/report-text.html';
-		my $link;
 		print $FD '<table>'."\n";
-		if (-e $binary_report) {
-			$link = "Open <a href=\"report-binary.html\" target=\"_blank\">";
-			$link.= 'Report</a>.';
+		foreach my $type (sort keys %json) {
+			my $title;
+			my $link;
+			if ($type eq 'binaries') {
+				$title = "Binary files";
+				$link = "Open <a href=\"report-binary.html\" ";
+				$link.= "target=\"_blank\"> Report</a>.";
+			} elsif ($type eq 'modified') {
+				$title = "Modified files";
+				$link = "Open <a href=\"report-modified.html\" ";
+				$link.= "target=\"_blank\"> Report</a>.";
+			} else {
+				$title = "Text files";
+				$link = "Open <a href=\"report-text.html\" ";
+				$link.= "target=\"_blank\"> Report</a>.";
+			}
 			print $FD '<tr valign="top">'."\n";
-			print $FD '<td>'.'Binary files'.'</td>'."\n";
-			print $FD '<td>'.$link.'</td>'."\n";
-			print $FD '</tr>'."\n";
-		}
-		if (-e $text_report) {
-			$link = "Open <a href=\"report-text.html\" target=\"_blank\">";
-			$link.= 'Report</a>.';
-			print $FD '<tr valign="top">'."\n";
-			print $FD '<td>'.'Text files'.'</td>'."\n";
+			print $FD '<td>'."$title".'</td>'."\n";
 			print $FD '<td>'.$link.'</td>'."\n";
 			print $FD '</tr>'."\n";
 		}
