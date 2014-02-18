@@ -310,7 +310,7 @@ sub main {
 		if (! $system) {
 			return;
 		}
-		$system -> createCustomDataTree();
+		$system -> createCustomDataSyncScript();
 		$kiwi -> info ("Creating base description files\n");
 		my $software = KIWIAnalyseSoftware -> new (
 			$system,$cmdL
