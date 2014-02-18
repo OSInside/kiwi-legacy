@@ -440,15 +440,21 @@ sub getCustomData {
 				} elsif ($item =~ /\/gems/) {
 					$rule = '^\\'.$item;
 					$type = 'rubygems';
+				} elsif ($file =~ /^\./) {
+					$type = 'hidden-directory';
 				} else {
 					$type = 'directory';
 				}
 			} elsif ($file =~ /^\./) {
 				$attr = stat ($item);
-				$type = 'hidden';
+				$type = 'hidden-file';
 			} else {
 				$attr = stat ($item);
-				$type = 'file';
+				if ($item =~ /\/\./) {
+					$type = 'file-in-hidden-path';
+				} else {
+					$type = 'file';
+				}
 				# try to check for binary data in a fast way by
 				# reading only the ELF bytes and by guessing that
 				# such evil data somehow lives in path names
