@@ -88,6 +88,8 @@
 		<package name="systemd"/>
 		<package name="systemd-sysvinit"/>
 		<package name="dracut"/>
+		<package name="wicked"/>
+		<package name="iproute2"/>
 		<package name="kiwi"/>
 	</packages>
 	<packages type="iso">
