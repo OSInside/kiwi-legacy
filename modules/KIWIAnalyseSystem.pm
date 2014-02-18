@@ -105,14 +105,6 @@ sub new {
 			$kiwi -> failed ();
 			return;
 		}
-		my $FD = FileHandle -> new();
-		if (! $FD -> open (">$destdir/.gitignore")) {
-			$kiwi -> error  ("Couldn't create .gitignore: $!");
-			$kiwi -> failed ();
-			return;
-		}
-		print $FD 'custom'."\n";
-		$FD -> close();
 	}
 	$destdir =~ s/\/$//;
 	$kiwi -> info ("Results will be written to: $destdir");
@@ -494,66 +486,48 @@ sub getCustomData {
 }
 
 #==========================================
-# createCustomDataTree
+# createCustomDataSyncScript
 #------------------------------------------
-sub createCustomDataTree {
+sub createCustomDataSyncScript {
 	my $this  = shift;
 	my $kiwi  = $this->{kiwi};
 	my $dest  = $this->{destdir};
-	my $result= $this-> getCustomData();
-	if (! $result) {
+	my $custom = $this->{custom};
+	my $modified = $this->{rpm_modc};
+	my $sync_source = "$dest/custom.files";
+	my $status;
+	my $result;
+	$kiwi -> info ("Creating custom/unpackaged source files...");
+	KIWIQX::qxx ("touch $sync_source");
+	if (-f $custom) {
+		$status = KIWIQX::qxx ("cp $custom $sync_source 2>&1");
+		$result = $? >> 8;
+	}
+	if (($result == 0) && (-f $modified)) {
+		$status = KIWIQX::qxx ("cat $modified >> $sync_source 2>&1");
+		$result = $? >> 8;
+	}
+	if ($result != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ($status);
 		return;
 	}
-	$kiwi -> info ("Creating custom/unpackaged data tree...");
-	my $factor;
-	my $done_percent = 0;
-	my $done_previos = 0;
-	my $done = 0;
-	$kiwi -> cursorOFF();
-	if (! -d "$dest/custom") {
-		KIWIQX::qxx ("mkdir -p $dest/custom 2>&1");
-	} else {
-		KIWIQX::qxx ("rm -rf $dest/custom 2>&1");
+	if (! -d "$dest/root") {
+		KIWIQX::qxx ("mkdir -p $dest/root 2>&1");
 	}
-	my @dirs = ();
-	my @files= ();
-	foreach my $item (sort keys %{$result}) {
-		if ($result->{$item}->[0] eq 'directory') {
-			push @dirs, $item;
-		} else {
-			push @files, $item;
-		}
+	my $sync = FileHandle -> new();
+	if (! $sync -> open (">$dest/custom.sync")) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Couldn't create sync script: $!");
+		$kiwi -> failed ();
+		return;
 	}
-	$factor = 100.0 / (@dirs + @files);
-	$kiwi-> step($done_percent);
-	foreach my $dir (@dirs) {
-		if (! -d "$dest/custom/$dir") {
-			mkpath ("$dest/custom/$dir", {verbose => 0});
-		}
-		$done_percent = int ($factor * $done);
-		if ($done_percent > $done_previos) {
-			$kiwi -> step ($done_percent);
-		}
-		$done_previos = $done_percent;
-		$done++;
-	}
-	foreach my $file (@files) {
-		if (-e $file) {
-			if (! link $file, "$dest/custom/$file") {
-				symlink $file, "$dest/custom/$file";
-			}
-		}
-		$done_percent = int ($factor * $done);
-		if ($done_percent > $done_previos) {
-			$kiwi -> step ($done_percent);
-		}
-		$done_previos = $done_percent;
-		$done++;
-	}
-	$kiwi -> step(100);
-	$kiwi -> note ("\n");
-	$kiwi -> doNorm ();
-	$kiwi -> cursorON();
+	print $sync "#!/bin/bash"."\n";
+	print $sync "rsync -zavh --progress --numeric-ids --delete \\"."\n";
+	print $sync "  --files-from=$sync_source / $dest/root"."\n";
+	$sync -> close();
+	KIWIQX::qxx ("chmod 755 $dest/custom.sync 2>&1");
+	$kiwi -> done();
 	return $this;
 }
 

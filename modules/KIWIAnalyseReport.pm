@@ -560,7 +560,7 @@ sub createReport {
 		print $FD '<a name="custom-files"></a>'."\n";
 		print $FD '<h1>Custom files</h1>'."\n";
 		print $FD '<p>'."\n";
-		print $FD 'Below the current custom files directory you will ';
+		print $FD 'Within the current custom.files sync source file you will ';
 		print $FD 'find files/directories which are not part of any package.';
 		print $FD 'For binary files, including executables and libraries, ';
 		print $FD 'you should try to find and include a package that ';
@@ -571,14 +571,14 @@ sub createReport {
 		print $FD 'pictures, movies, etc. and decide to either skip them ';
 		print $FD 'if they can be easily restored later or store them in ';
 		print $FD 'the overlay files tree but keep in mind that the size ';
-		print $FD 'of the image could become big. Move all of the files you ';
-		print $FD 'want to be part of the image into the root ';
-		print $FD 'directory. you can browse the tree on the filesystem ';
-		print $FD 'level here:'."\n";
+		print $FD 'of the image could become big. Update the created sync ';
+		print $FD 'source file with the files/directories you want to be ';
+		print $FD "part of the image and call $dest/custom.sync when done.";
+		print $FD 'You can watch the complete custom source file here: '."\n";
 		print $FD '</p>'."\n";
 		print $FD '<div>'."\n";
-		print $FD 'Open <a href="custom" target="_blank">';
-		print $FD 'Custom directory</a>.'."\n";
+		print $FD 'Open <a href="custom.files" target="_blank">';
+		print $FD 'Custom sync source file</a>.'."\n";
 		print $FD '</div>'."\n";
 		print $FD '</div>'."\n";
 		foreach my $type (sort keys %json) {
