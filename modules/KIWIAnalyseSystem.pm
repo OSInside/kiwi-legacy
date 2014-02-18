@@ -588,26 +588,13 @@ sub createCustomDataForType {
 	my $done_previos = 0;
 	my $done = 0;
 	$kiwi -> cursorOFF();
-	my %filecount = ();
+	my $files = 0;
+	my $max_child = 5;
 	foreach my $item (@items) {
 		my @path_elements = ();
 		@path_elements = split (/\//,$item);
 		$path_elements[0] = '/';
 		my $filename = pop @path_elements;
-		my $dirname  = join ("/",@path_elements);
-		if (! $filecount{$dirname}) {
-			$filecount{$dirname} = 1;
-		} else {
-			$filecount{$dirname}++;
-		}
-		#==========================================
-		# add a more flag and stop after 5 entries
-		#------------------------------------------
-		if ($filecount{$dirname} == 6) {
-			$filename = "THERE IS MORE...";
-		} elsif ($filecount{$dirname} > 6) {
-			next;
-		}
 		#==========================================
 		# update progress
 		#------------------------------------------
@@ -661,7 +648,15 @@ sub createCustomDataForType {
 						}
 					}
 					if (! $added) {
-						push @children,$add_node;
+						if (($filename) && (@children >= $max_child)) {
+							$files++;
+							$add_node->{name} =
+								"THERE ARE ($files) MORE ITEMS NOT DISPLAYED";
+							$children[$max_child] = $add_node;
+						} else {
+							$files = 0;
+							push @children,$add_node;
+						}
 						$dir_node->{children} = \@children;
 					}
 				}
