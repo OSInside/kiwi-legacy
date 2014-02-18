@@ -553,9 +553,21 @@ sub createCustomDataForType {
 		return;
 	}
 	$kiwi -> info ("Creating D3 view for custom $type data...");
+	my %filecount = ();
 	foreach my $item (sort keys %{$result}) {
 		if ($result->{$item}->[0] eq $type) {
 			push @items, $item;
+			if ($max_child) {
+				my @path_elements = split (/\//,$item);
+				$path_elements[0] = '/';
+				pop @path_elements;
+				my $dirname = join ("/",@path_elements);
+				if (! $filecount{$dirname}) {
+					$filecount{$dirname} = 1;
+				} else {
+					$filecount{$dirname}++;
+				}
+			}
 		}
 	}
 	if (! @items) {
@@ -569,12 +581,29 @@ sub createCustomDataForType {
 	my $done_previos = 0;
 	my $done = 0;
 	$kiwi -> cursorOFF();
-	my $files = 0;
+	my %curcount = ();
 	foreach my $item (@items) {
 		my @path_elements = ();
 		@path_elements = split (/\//,$item);
 		$path_elements[0] = '/';
 		my $filename = pop @path_elements;
+		my $dirname  = join ("/",@path_elements);
+		if (! $curcount{$dirname}) {
+			$curcount{$dirname} = 1;
+		} else {
+			$curcount{$dirname}++;
+		}
+		#==========================================
+		# add a more flag and stop after max_count
+		#------------------------------------------
+		if ($max_child) {
+			if ($curcount{$dirname} == $max_child + 1) {
+				my $rest = $filecount{$dirname} - $max_child;
+				$filename = "THERE ARE [ $rest ] MORE ITEMS NOT DISPLAYED";
+			} elsif ($curcount{$dirname} > $max_child + 1) {
+				next;
+			}
+		}
 		#==========================================
 		# update progress
 		#------------------------------------------
@@ -628,17 +657,7 @@ sub createCustomDataForType {
 						}
 					}
 					if (! $added) {
-						if (($max_child) &&	($filename) &&
-							(@children >= $max_child)
-						) {
-							$files++;
-							$add_node->{name} =
-								"THERE ARE ($files) MORE ITEMS NOT DISPLAYED";
-							$children[$max_child] = $add_node;
-						} else {
-							$files = 0;
-							push @children,$add_node;
-						}
+						push @children,$add_node;
 						$dir_node->{children} = \@children;
 					}
 				}
