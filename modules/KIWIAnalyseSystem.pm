@@ -537,6 +537,7 @@ sub createCustomDataSyncScript {
 sub createCustomDataForType {
 	my $this  = shift;
 	my $type  = shift;
+	my $max_child = shift;
 	my $kiwi  = $this->{kiwi};
 	my $result= $this-> getCustomData();
 	my @items = ();
@@ -563,7 +564,6 @@ sub createCustomDataForType {
 	my $done = 0;
 	$kiwi -> cursorOFF();
 	my $files = 0;
-	my $max_child = 5;
 	foreach my $item (@items) {
 		my @path_elements = ();
 		@path_elements = split (/\//,$item);
@@ -622,7 +622,9 @@ sub createCustomDataForType {
 						}
 					}
 					if (! $added) {
-						if (($filename) && (@children >= $max_child)) {
+						if (($max_child) &&	($filename) &&
+							(@children >= $max_child)
+						) {
 							$files++;
 							$add_node->{name} =
 								"THERE ARE ($files) MORE ITEMS NOT DISPLAYED";

@@ -96,7 +96,7 @@ sub createReport {
 	my %repo;
 	my %json;
 	$json{files} = $system
-		-> createCustomDataForType('file');
+		-> createCustomDataForType('file',5);
 	$json{binaries} = $system
 		-> createCustomDataForType('elfbin');
 	$json{modified} = $system
