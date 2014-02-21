@@ -534,45 +534,6 @@ sub __populatePackagesAndPatterns {
 				}
 			}
 			$this->{packages} = \@solved_packages;
-			# /.../
-			# reduce list of packages to the minimum needed list
-			# packages which are required by others doesn't have
-			# to be explicitly listed
-			# ----
-			$kiwi -> info ("Reducing package list to minimum...");
-			my @reduced_packages = ();
-			my $tasks = @solved_packages;
-			my $factor = 100.0 / $tasks;
-			my $done_percent = 0;
-			my $done_previos = 0;
-			my $done = 0;
-			$kiwi -> cursorOFF();
-			while (@solved_packages > 0) {
-				my $package = pop @solved_packages;
-				my $xsolve = KIWISatSolver -> new (
-					[$package],\@urllist,"solve-packages",
-					$pool,"quiet","onlyRequired","system-solvable",\@alias
-				);
-				my @single_package_solved_list = $xsolve -> getPackages();
-				@solved_packages = $this -> __strip_list (
-					\@solved_packages, \@single_package_solved_list
-				);
-				push @reduced_packages, $package;
-				$done = $tasks - @solved_packages;
-				$done_percent = int ($factor * $done);
-				if ($done_percent > $done_previos) {
-					$kiwi -> step ($done_percent);
-				}
-				$done_previos = $done_percent;
-			}
-			my $reduced = $tasks - @reduced_packages;
-			$kiwi -> step (100);
-			$kiwi -> note ("\n");
-			$kiwi -> doNorm ();
-			$kiwi -> cursorON();
-			$this->{packages} = \@reduced_packages;
-			$kiwi -> info ("--> reduced by $reduced packages");
-			$kiwi -> done();
 		}
 		# /.../
 		# Walk through the list of installed packages and compare them
