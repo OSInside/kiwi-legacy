@@ -95,6 +95,7 @@ sub createReport {
 	my %gems;
 	my %repo;
 	my %json;
+	my $ip = $system -> getIPAddress();
 	$json{files} = $system
 		-> createCustomDataForType('file',5);
 	$json{binaries} = $system
@@ -747,8 +748,13 @@ sub createReport {
 	#==========================================
 	# Print report note...
 	#------------------------------------------
-	$kiwi -> info ("--> Please check the migration report !!\n");
-	$kiwi -> note ("\n\tfile://$dest/report.html\n\n");
+	$kiwi -> info ("--> Created report: file://$dest/report.html\n");
+	$kiwi -> info ("--> Clone this system description with:\n");
+	if ($ip) {
+		$kiwi -> note ("\n\tgit clone root\@$ip:$dest\n\n");
+	} else {
+		$kiwi -> note ("\n\tgit clone root\@<ip-address>:$dest\n\n");
+	}
 	return $this;
 }
 

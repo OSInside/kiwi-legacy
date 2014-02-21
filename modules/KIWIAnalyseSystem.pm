@@ -271,6 +271,44 @@ sub getKernelPackages {
 }
 
 #==========================================
+# getIPAddress
+#------------------------------------------
+sub getIPAddress {
+	my $this = shift;
+	my $routing_table = KIWIQX::qxx ("ip route show | grep default 2>&1");
+	my $code = $? >> 8;
+	if (($code != 0) || (! $routing_table)) {
+		# no routing table output
+		return;
+	}
+	my @routes = split(/ +/,$routing_table);
+	if (! $routes[4]) {
+		# no default interface name
+		return;
+	}
+	my $iface = $routes[4];
+	my $addr = KIWIQX::qxx ("ip -f inet -o addr show $iface 2>&1");
+	$code = $? >> 8;
+	if (($code != 0) || (! $addr)) {
+		# no inet addr information
+		return;
+	}
+	my @addr_list = split(/ +/,$addr);
+	if (! $addr_list[3]) {
+		# no ip address information
+		return;
+	}
+	my $ip = $addr_list[3];
+	if ($ip =~ /(.*)\//) {
+		$ip = $1;
+	} else {
+		# unknown ip format
+		return;
+	}
+	return $ip;
+}
+
+#==========================================
 # getHardwareDependantPackages
 #------------------------------------------
 sub getHardwareDependantPackages {
@@ -503,7 +541,8 @@ sub createCustomDataSyncScript {
 	my $dest  = $this->{destdir};
 	my $custom = $this->{custom};
 	my $modified = $this->{rpm_modc};
-	my $sync_source = "$dest/custom.files";
+	my $sync_source = 'custom.files';
+	my $ip = $this->getIPAddress();
 	my $status;
 	my $result;
 	$kiwi -> info ("Creating custom/unpackaged source files...");
@@ -531,9 +570,14 @@ sub createCustomDataSyncScript {
 		$kiwi -> failed ();
 		return;
 	}
+	my $machine = '<ip-address>';
+	if ($ip) {
+		$machine = $ip;
+	}
 	print $sync "#!/bin/bash"."\n";
+	print $sync "mkdir -p root"."\n";
 	print $sync "rsync -zavh --progress --numeric-ids --delete \\"."\n";
-	print $sync "  --files-from=$sync_source / $dest/root"."\n";
+	print $sync "  --files-from=$sync_source -e ssh root\@$machine:/ root"."\n";
 	$sync -> close();
 	KIWIQX::qxx ("chmod 755 $dest/custom.sync 2>&1");
 	$kiwi -> done();
