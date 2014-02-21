@@ -198,7 +198,7 @@ sub writeKIWIXMLConfiguration {
 			my $p = KIWIXMLPackageData -> new (\%pack_data);
 			push @xml_pack, $p;
 		}
-		$xml -> addBootstrapPackages (\@xml_pack);
+		$xml -> addPackages (\@xml_pack);
 	}
 	@xml_pack = ();
 	if (defined $del) {
@@ -206,10 +206,10 @@ sub writeKIWIXMLConfiguration {
 			my %pack_data = (
 				'name' => $package
 			);
-			my $p = KIWIXMLPackageData -> new (\%pack_data);
+			my $p = KIWIXMLPackageIgnoreData -> new (\%pack_data);
 			push @xml_pack, $p;
         }
-		$xml -> addPackagesToDelete (\@xml_pack);
+		$xml -> addPackagesToIgnore (\@xml_pack);
 	}
 	#==========================================
 	# KIWIXMLPackageCollectData

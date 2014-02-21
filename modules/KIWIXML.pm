@@ -952,6 +952,55 @@ sub addPackagesToDelete {
 }
 
 #==========================================
+# addPackagesToIgnore
+#------------------------------------------
+sub addPackagesToIgnore {
+	# ...
+	# Add the given packages to
+	#   - the currently active profiles (not default)
+	#       ~ if the second argument is undefined
+	#   - the default profile
+	#       ~ if second argument is the keyword "default"
+	#   - the specified profiles
+	#       ~ if the second argument is a reference to an array
+	# ---
+	my $this       = shift;
+	my $packages   = shift;
+	my $profNames  = shift;
+	my $sectionType= shift;
+	my %verifyData = (
+		caller       => 'addPackagesToIgnore',
+		expectedType => 'KIWIXMLPackageIgnoreData',
+		itemName     => 'packages',
+		itemsToAdd   => $packages,
+		profNames    => $profNames
+	);
+	if (! $this -> __verifyAddInstallDataArgs(\%verifyData)) {
+		return;
+	}
+	my @profsToUse = $this -> __getProfsToModify($profNames, 'package(s)');
+	if (! $sectionType) {
+		$sectionType = 'bootstrap';
+	}
+	for my $prof (@profsToUse) {
+		for my $pckgObj (@{$packages}) {
+			my $arch = $pckgObj -> getArch();
+			my %storeData = (
+				accessID => 'ignorePkgs',
+				arch     => $arch,
+				dataObj  => $pckgObj,
+				profName => $prof,
+				type     => $sectionType
+			);
+			if (! $this -> __storeInstallData(\%storeData)) {
+				return;
+			}
+		}
+	}
+	return $this;
+}
+
+#==========================================
 # addRepositories
 #------------------------------------------
 sub addRepositories {
@@ -2424,6 +2473,7 @@ sub writeXML {
 		pkgs
 		bootPkgs
 		bootDelPkgs
+		ignorePkgs
 	);
 	for my $collect (@collectData) {
 		my $data = $this -> __collectDefaultData($collect);
