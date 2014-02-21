@@ -2470,16 +2470,22 @@ sub writeXML {
 		pkgsCollect
 		bootPkgsCollect
 		products
-		pkgs
 		bootPkgs
 		bootDelPkgs
-		ignorePkgs
 	);
 	for my $collect (@collectData) {
 		my $data = $this -> __collectDefaultData($collect);
 		if ($data) {
 			push @pckgsItems, @{$data};
 		}
+	}
+	my $packages = $this -> getPackages();
+	if ($packages) {
+		push @pckgsItems, @{$packages};
+	}
+	my $ignore_packages = $this -> getPackagesToIgnore();
+	if ($ignore_packages) {
+		push @pckgsItems, @{$ignore_packages};
 	}
 	if (@pckgsItems) {
 		$xml .= '<packages type="image"';
