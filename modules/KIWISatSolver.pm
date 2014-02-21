@@ -112,7 +112,7 @@ sub new {
 		);
 		$kiwi -> failed ();
 		return;
-	} else {
+	} elsif ($KIWISatSolver::libsatsolver) {
 		my $satsolver = (glob ("/usr/lib/perl5/vendor_perl/*/satsolver.pm"))[0];
 		my $legacy    = 1;
 		if ($satsolver) {
