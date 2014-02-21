@@ -80,7 +80,7 @@ sub new {
 			$kiwi -> failed ();
 			return;
 		}
-		$data = KIWIQX::qxx ("git init $destdir 2>&1");
+		$data = KIWIQX::qxx ("cd $destdir && git init 2>&1");
 		$code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> error  ("git init failed: $data");
