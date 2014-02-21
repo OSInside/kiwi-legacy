@@ -68,7 +68,6 @@ Requires:       coreutils
 Requires:       kiwi-tools >= %{version}
 Requires:       libxslt
 Requires:       git
-Requires:       lvm2
 Requires:       perl-Class-Singleton
 Requires:       perl-Config-IniFiles
 Requires:       perl-Digest-SHA1
@@ -82,10 +81,6 @@ Requires:       perl-libwww-perl
 Requires:       rsync
 Requires:       screen
 Requires:       util-linux
-%ifarch %ix86 x86_64
-Requires:       squashfs
-Requires:       master-boot-code
-%endif
 %if 0%{?suse_version} >= 1210
 Requires:       libsolv-tools
 Requires:       perl-solv
@@ -97,8 +92,6 @@ Requires:       perl-satsolver >= 0.42
 %if 0%{?suse_version}
 Recommends:     jing
 Recommends:     zypper
-Recommends:     lxc
-Recommends:     clicfs
 Recommends:     db45-utils
 %endif
 # obsoletes
@@ -285,6 +278,7 @@ Meta-package to pull in all requires to build an isoboot media.
 %ifarch %ix86 x86_64 ppc ppc64 ppc64le s390 s390x %arm aarch64
 
 %package -n kiwi-desc-vmxboot
+Requires:       lvm2
 Requires:       dosfstools
 Requires:       e2fsprogs
 Requires:       kiwi = %{version}
@@ -299,6 +293,8 @@ Requires:       qemu-img
 %endif
 %ifarch %ix86 x86_64
 Requires:       syslinux
+Requires:       squashfs
+Requires:       master-boot-code
 %if 0%{?suse_version} >= 1220
 Requires:       grub2
 %else
@@ -372,6 +368,7 @@ Meta-package to pull in all requires to build a netboot media.
 %ifarch %ix86 x86_64 ppc ppc64 ppc64le s390 s390x %arm aarch64
 
 %package -n kiwi-desc-oemboot
+Requires:       lvm2
 Requires:       dosfstools
 Requires:       e2fsprogs
 Requires:       kiwi = %{version}
@@ -387,6 +384,8 @@ Requires:       qemu-img
 %endif
 %ifarch %ix86 x86_64
 Requires:       syslinux
+Requires:       squashfs
+Requires:       master-boot-code
 %if 0%{?suse_version} >= 1220
 Requires:       grub2
 %else
@@ -458,7 +457,6 @@ Recommends:     busybox
 Recommends:     atftp
 Recommends:     gfxboot
 Recommends:     memtest86+
-Recommends:     lxc
 %if 0%{?suse_version} > 1210
 Recommends:     grub2-branding-openSUSE
 %endif
