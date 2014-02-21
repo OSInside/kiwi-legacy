@@ -248,10 +248,12 @@ sub __solve {
 	}
 	if ($psolve -> getProblemsCount()) {
 		$kiwi -> error ("SaT solver problems found !\n");
+		$kiwi -> error ($psolve -> getProblemInfo());
 		return;
 	}
 	if (@{$psolve -> getFailedJobs()}) {
 		$kiwi -> error ("SaT solver failed jobs found !");
+		$kiwi -> error ($psolve -> getProblemInfo());
 		return;
 	}
 	%meta = $psolve -> getMetaData();
@@ -613,11 +615,12 @@ sub __cleanMountPnts {
 	# Clean up any mount points, i.e. unmount and remove the directory
 	# ---
 	my $this   = shift;
-	my $mounts = shift;
-	my @mountPnts = @{$mounts};
+	my $mountPnts = $this->{mountDirs};
 	my $kiwi = $this->{kiwi};
-
-	for my $dir (@mountPnts) {
+	if (! $mountPnts) {
+		return 1;
+	}
+	for my $dir (@{$mountPnts}) {
 		next if ! defined $dir;
 		KIWIQX::qxx ("umount $dir ; rmdir $dir 2>&1");
 		my $code = $? >> 8;
@@ -646,8 +649,7 @@ sub __getTree {
 	if (! $xml) {
 		return;
 	}
-	my $mountDirs = $this -> __setupRepoMounts($xml);
-	if (! $mountDirs) {
+	if (! $this -> __setupRepoMounts($xml)) {
 		return;
 	}
 	my @infoRequests = @{$requests};
@@ -675,6 +677,7 @@ sub __getTree {
 				my %result = $this -> __getOverlayFiles();
 				if (! %result) {
 					$kiwi -> info ("No overlay files found\n");
+					return;
 				} else {
 					foreach my $file (sort keys %result) {
 						my $overlay = XML::LibXML::Element->new("overlay");
@@ -691,6 +694,7 @@ sub __getTree {
 				my @rpat = $this -> __getRepoPatterns();
 				if (! @rpat) {
 					$kiwi -> info ("No patterns in repo solvable\n");
+					return;
 				} else {
 					foreach my $p (@rpat) {
 						my $pattern = XML::LibXML::Element->new("repopattern");
@@ -707,6 +711,7 @@ sub __getTree {
 				my @patterns = $this -> __getPatterns();
 				if (! @patterns) {
 					$kiwi -> info ("No packages/patterns solved\n");
+					return;
 				} else {
 					foreach my $name (@patterns) {
 						my $pattern = XML::LibXML::Element->new("pattern");
@@ -723,6 +728,7 @@ sub __getTree {
 				my @tNames = $this -> __getImageTypes();
 				if (! @tNames) {
 					$kiwi -> info ("No image type(s) configured\n");
+					return;
 				} else {
 					# output default or primary built type first
 					my $tData = shift @tNames;
@@ -756,6 +762,7 @@ sub __getTree {
 				my @repos = $this -> __getRepoURI();
 				if (! @repos) {
 					$kiwi -> info ("No repository configured\n");
+					return;
 				} else {
 					for my $repo (@repos) {
 						my $source = XML::LibXML::Element -> new('source');
@@ -782,6 +789,7 @@ sub __getTree {
 				my @sizeinfo = $this -> __getSizeEstimation();
 				if (! @sizeinfo) {
 					$kiwi -> info ("Can't calculate size estimation\n");
+					return;
 				} else {
 					my $sizenode = XML::LibXML::Element -> new("size");
 					$sizenode -> setAttribute ("rootsizeKB",$sizeinfo[0]);
@@ -801,6 +809,7 @@ sub __getTree {
 				my @packages = $this -> __getPackages();
 				if (! @packages) {
 					$kiwi -> info ("No packages/patterns solved\n");
+					return;
 				} else {
 					foreach my $p (@packages) {
 						my $repo = $p->[4]; $repo =~ s/ /:/g;
@@ -822,6 +831,7 @@ sub __getTree {
 				my @archives = $this -> __getArchives();
 				if (! @archives) {
 					$kiwi -> info ("No archives available\n");
+					return;
 				} else {
 					for my $archive (@archives) {
 						my $anode = XML::LibXML::Element -> new("archive");
@@ -838,6 +848,7 @@ sub __getTree {
 				my @profiles = $this -> __getProfiles();
 				if (! @profiles) {
 					$kiwi -> info ("No profiles available\n");
+					return;
 				} else {
 					for my $profile (@profiles) {
 						my $name = $profile -> getName();
@@ -857,6 +868,7 @@ sub __getTree {
 				my @vinfo = $this -> __getImageVersion();
 				if (! @vinfo) {
 					$kiwi -> info ("No image version/name found\n");
+					return;
 				} else {
 					my $vnode = XML::LibXML::Element -> new("image");
 					$vnode -> setAttribute ('version', $vinfo[0]);
@@ -866,7 +878,6 @@ sub __getTree {
 			};
 		}
 	}
-	$this -> __cleanMountPnts($mountDirs);
 	return $scan;
 }
 
@@ -889,30 +900,29 @@ sub __setupRepoMounts {
 		my $source = $repo -> getPath();
 		my $urlHandler  = KIWIURL -> new ($cmdL,undef,$user,$pwd);
 		my $uri = $urlHandler -> normalizePath ($source);
-
 		#==========================================
 		# iso:// sources
 		#------------------------------------------
 		if ($source =~ /^iso:\/\/(.*\.iso)/) {
 			my $iso  = $1;
 			if (! -f $iso) {
-				return \@mountPnts;
+				return;
 			}
-			my $data = KIWIQX::qxx ("mkdir -p $uri; mount -o loop $iso $uri 2>&1");
+			my $data = KIWIQX::qxx (
+				"mkdir -p $uri; mount -o loop $iso $uri 2>&1"
+			);
 			my $code = $? >> 8;
 			if ($code != 0) {
 				$kiwi -> error  ("Failed to loop mount ISO path: $data");
 				$kiwi -> failed ();
 				rmdir $uri;
-				if (@mountPnts) {
-					$this -> __cleanMountPnts(\@mountPnts);
-				}
 				return;
 			}
 			push @mountPnts, $uri;
 		}
 	}
-	return \@mountPnts;
+	$this->{mountDirs} = \@mountPnts;
+	return $this;
 }
 
 #==========================================
@@ -969,6 +979,15 @@ sub __xmlSetup {
 		$xml -> addRepositories($this->{addlRepos}, 'default');
 	}
 	return $xml;
+}
+
+#==========================================
+# Destructor
+#------------------------------------------
+sub DESTROY {
+	my $this = shift;
+	$this -> __cleanMountPnts();
+	return;
 }
 
 1;
