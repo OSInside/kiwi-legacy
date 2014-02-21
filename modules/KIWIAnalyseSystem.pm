@@ -292,6 +292,9 @@ sub getHardwareDependantPackages {
 			push @{$modalias{$cur_pack}}, $item;
 		}
 	}
+	if (! %modalias) {
+		return;
+	}
 	$this->{getHardwareDependantPackages_result} = \%modalias;
 	return \%modalias;
 }
