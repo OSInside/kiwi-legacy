@@ -541,7 +541,7 @@ sub createCustomDataSyncScript {
 	my $dest  = $this->{destdir};
 	my $custom = $this->{custom};
 	my $modified = $this->{rpm_modc};
-	my $sync_source = 'custom.files';
+	my $sync_source = "$dest/custom.files";
 	my $ip = $this->getIPAddress();
 	my $status;
 	my $result;
@@ -577,7 +577,7 @@ sub createCustomDataSyncScript {
 	print $sync "#!/bin/bash"."\n";
 	print $sync "mkdir -p root"."\n";
 	print $sync "rsync -zavh --progress --numeric-ids --delete \\"."\n";
-	print $sync "  --files-from=$sync_source -e ssh root\@$machine:/ root"."\n";
+	print $sync "  --files-from=custom.files -e ssh root\@$machine:/ root"."\n";
 	$sync -> close();
 	KIWIQX::qxx ("chmod 755 $dest/custom.sync 2>&1");
 	$kiwi -> done();
