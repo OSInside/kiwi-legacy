@@ -7298,7 +7298,9 @@ function bootImage {
 	#======================================
 	# run resetBootBind
 	#--------------------------------------
-	resetBootBind /mnt
+	if [ -z "$NETBOOT_ONLY" ];then
+		resetBootBind /mnt
+	fi
 	#======================================
 	# setup warpclock for local time setup
 	#--------------------------------------
