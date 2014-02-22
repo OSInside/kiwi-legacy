@@ -9448,7 +9448,19 @@ function setupBootPartitionPXE {
 		# check happens as early as possible and at that time
 		# the root device variable is not set, so we use this
 		# as the trigger to return
+		#
+		return
+	fi
+	if [ ! -e "$imageRootDevice" ];then
+		# /.../
+		# the device does not exist case happens if NFSROOT is used.
+		# In this situation the variable holds the nfs root path
+		# and options and not a local device. For this setup we
+		# also don't need a boot partition because the client will
+		# always boot from the network, so we use this as return
+		# trigger too
 		# ----
+		export NETBOOT_ONLY=yes
 		return
 	fi
 	#======================================
