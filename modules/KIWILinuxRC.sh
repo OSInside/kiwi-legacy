@@ -7351,8 +7351,9 @@ function bootImage {
 	# copy initrd to /run/initramfs
 	#--------------------------------------
 	mkdir -p /mnt/run/initramfs
+	match='mnt|lost\+found|dev|boot|tmp|run|proc|sys|read-only|read-write'
 	for dir in /*;do
-		if [[ $dir =~ mnt|lost\+found|dev|boot|tmp|run|proc|sys ]];then
+		if [[ $dir =~ $match ]]; then
 			mkdir -p /mnt/run/initramfs/$dir
 			continue
 		fi
