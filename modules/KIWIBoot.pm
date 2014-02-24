@@ -616,7 +616,6 @@ sub setupInstallCD {
 	my $appid     = $this->{mbrid};
 	my $type      = $this->{type};
 	my $bootloader= "syslinux";
-	my $bootloadsize = 0;
 	my $efi_arch  = 'x86_64';
 	if ($arch ne 'x86_64') {
 		$efi_arch = 'i386';
@@ -870,35 +869,6 @@ sub setupInstallCD {
 		KIWIQX::qxx ("ln -s $tmpdir/EFI/BOOT $tmpdir/EFI/Boot");
 	}
 	#==========================================
-	# make iso EFI bootable
-	#------------------------------------------
-	if (($firmware eq "efi") || ($firmware eq "uefi")) {
-		my $efi_fat = "$tmpdir/boot/$efi_arch/efi";
-		$status = KIWIQX::qxx ("mkdir -p $tmpdir/boot/$efi_arch");
-		$result = $? >> 8;
-		if ($result == 0) {
-			$status = KIWIQX::qxx ("qemu-img create $efi_fat 4M 2>&1");
-			$result = $? >> 8;
-		}
-		if ($result == 0) {
-			$status = KIWIQX::qxx ("/sbin/mkdosfs -n 'BOOT' $efi_fat 2>&1");
-			$result = $? >> 8;
-			if ($result == 0) {
-				$status = KIWIQX::qxx (
-					"mcopy -Do -s -i $efi_fat $tmpdir/EFI :: 2>&1"
-				);
-				$result = $? >> 8;
-			}
-		}
-		if ($result != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Failed creating efi fat image: $status");
-			$kiwi -> failed ();
-			return;
-		}
-		$bootloadsize = -s $efi_fat;
-	}
-	#==========================================
 	# Store arch name used by iso
 	#------------------------------------------
 	my $isoarch = KIWIQX::qxx ("uname -m"); chomp $isoarch;
@@ -953,10 +923,13 @@ sub setupInstallCD {
 	);
 	if (defined $iso) {
 		$isoerror = 0;
+		if (! $iso -> makeIsoEFIBootable()) {
+			$isoerror = 1;
+		}
 		if (! $iso -> callBootMethods()) {
 			$isoerror = 1;
 		}
-		if (! $iso -> addBootLive($bootloadsize)) {
+		if (! $iso -> addBootLive()) {
 			$isoerror = 1;
 		}
 		if (! $iso -> createISO()) {

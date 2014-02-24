@@ -383,7 +383,7 @@ sub ppc64_default {
 #------------------------------------------
 sub addBootLive {
 	my $this    = shift;
-	my $size    = shift;
+	my $size    = $this->{bootloadsize};
 	my $para    = $this->{params};
 	my $sort    = $this->{sortfile};
 	my $src     = $this->{source};
@@ -1231,6 +1231,56 @@ sub relocateCatalog {
 	close $ISO;
 	$kiwi -> note ("from sector $boot_catalog to $new_location");
 	$kiwi -> done();
+	return $this;
+}
+
+#==========================================
+# makeIsoEFIBootable
+#------------------------------------------
+sub makeIsoEFIBootable {
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $xml  = $this->{xml};
+	my $source = $this->{source};
+	my $arch = KIWIQX::qxx ("uname -m");
+	my $efi_arch  = 'x86_64';
+	my $firmware = 'bios';
+	if ($xml) {
+		my $type = $xml -> getImageType();
+		my $xmlFirmWare = $type -> getFirmwareType();
+		if ($xmlFirmWare) {
+			$firmware = $xmlFirmWare;
+		}
+	}
+	if ($firmware eq 'bios') {
+		return $this;
+	}
+	if ($arch ne 'x86_64') {
+		$efi_arch = 'i386';
+	}
+	my $efi_fat = "$source/boot/$efi_arch/efi";
+	my $status = KIWIQX::qxx ("mkdir -p $source/boot/$efi_arch");
+	my $result = $? >> 8;
+	if ($result == 0) {
+		$status = KIWIQX::qxx ("qemu-img create $efi_fat 4M 2>&1");
+		$result = $? >> 8;
+	}
+	if ($result == 0) {
+		$status = KIWIQX::qxx ("/sbin/mkdosfs -n 'BOOT' $efi_fat 2>&1");
+		$result = $? >> 8;
+		if ($result == 0) {
+			$status = KIWIQX::qxx (
+				"mcopy -Do -s -i $efi_fat $source/EFI :: 2>&1"
+			);
+			$result = $? >> 8;
+		}
+	}
+	if ($result != 0) {
+		$kiwi -> error  ("Failed creating efi fat image: $status");
+		$kiwi -> failed ();
+		return;
+	}
+	$this->{bootloadsize} = -s $efi_fat;
 	return $this;
 }
 
