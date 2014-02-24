@@ -1143,7 +1143,6 @@ sub createImageLiveCD {
 	my $hybrid = 0;
 	my $isxen  = 0;
 	my $hybridpersistent = 0;
-	my $bootloadsize = 0;
 	my $cmdline = "";
 	my $rootTarget = $cmdL->getRootTargetDir();
 	if (! $rootTarget) {
@@ -2020,26 +2019,6 @@ sub createImageLiveCD {
 		#------------------------------------------
 		KIWIQX::qxx ("cp $CD/boot/grub2-efi/grub.cfg $CD/EFI/BOOT");
 		$kiwi -> done();
-		#==========================================
-		# make iso EFI bootable
-		#------------------------------------------
-		my $efi_fat = "$CD/boot/$isoarch/efi";
-		$status = KIWIQX::qxx ("qemu-img create $efi_fat 4M 2>&1");
-		$result = $? >> 8;
-		if ($result == 0) {
-			$status = KIWIQX::qxx ("/sbin/mkdosfs -n 'BOOT' $efi_fat 2>&1");
-			$result = $? >> 8;
-			if ($result == 0) {
-				$status = KIWIQX::qxx ("mcopy -Do -s -i $efi_fat $CD/EFI :: 2>&1");
-				$result = $? >> 8;
-			}
-		}
-		if ($result != 0) {
-			$kiwi -> error  ("Failed creating efi fat image: $status");
-			$kiwi -> failed ();
-			return;
-		}
-		$bootloadsize = -s $efi_fat;
 	}
 	#==========================================
 	# copy base graphics boot CD files
@@ -2286,10 +2265,13 @@ sub createImageLiveCD {
 	);
 	if (defined $isolinux) {
 		$isoerror = 0;
+		if (! $isolinux -> makeIsoEFIBootable()) {
+			$isoerror = 1;
+		}
 		if (! $isolinux -> callBootMethods()) {
 			$isoerror = 1;
 		}
-		if (! $isolinux -> addBootLive($bootloadsize)) {
+		if (! $isolinux -> addBootLive()) {
 			$isoerror = 1;
 		}
 		if (! $isolinux -> createISO()) {
