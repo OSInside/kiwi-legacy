@@ -69,85 +69,6 @@
 <li><a href="#__updateDiskSize">__updateDiskSize</a></li>
 </ul>
 <hr>
-<a name="__expandFS"><h2>__expandFS</h2></a>
-<p>
- Expand the file system to its maximum size
-<p>
-Defined on line: 7107
-<p>
-Called in
-<ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 2480</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2512</li></ul>
-<a name="__getBootSize"><h2>__getBootSize</h2></a>
-<p>
- set minimum boot size or the specified value from the
- XML description. The function returns the size in
- M-Bytes
-<p>
-Defined on line: 7079
-<p>
-Called in
-<ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 1023</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2162</li></ul>
-<a name="__getPartBase"><h2>__getPartBase</h2></a>
-<p>
- find the correct partition device for a
- given disk device by checking for the first
- two partitions
-<p>
-Defined on line: 7345
-<p>
-Called in
-<ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 5497</li></ul>
-<a name="__getPartDevice"><h2>__getPartDevice</h2></a>
-<p>
- find the correct partition device according
- to the disk device and partition number
-<p>
-Defined on line: 7375
-<p>
-Called in
-<ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 6464</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 6490</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 6522</li></ul>
-<a name="__getPartID"><h2>__getPartID</h2></a>
-<p>
- try to find the partition number which references
- the provided flag like "boot" or "lvm"
-<p>
-Defined on line: 7322
-<a name="__initDiskSize"><h2>__initDiskSize</h2></a>
-<p>
- setup initial disk size value
-<p>
-Defined on line: 7202
-<p>
-Called in
-<ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 424</li></ul>
-<a name="__updateCustomDiskSize"><h2>__updateCustomDiskSize</h2></a>
-<p>
- if a custom disk size is set via the commandline
- or the <size> element from XML, this function uses
- the custom value if it is smaller than the currently
- calculcated disk size value
-<p>
-Defined on line: 7259
-<p>
-Called in
-<ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 2188</li></ul>
-<a name="__updateDiskSize"><h2>__updateDiskSize</h2></a>
-<p>
- increase the current virtual disk size value
- by the specified value. value is treated as
- number in MB
-<p>
-Defined on line: 7236
-<p>
-Called in
-<ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 1916</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1976</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2005</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2015</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2124</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2137</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2183</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2425</li></ul>
 <a name="DESTROY"><h2>DESTROY</h2></a>
 <p>
 Missing<p>
@@ -541,3 +462,82 @@ Defined on line: 3549
 Called in
 <ul>
 <li><a href="KIWIBoot.html">KIWIBoot</a> : 5981</li></ul>
+<a name="__expandFS"><h2>__expandFS</h2></a>
+<p>
+ Expand the file system to its maximum size
+<p>
+Defined on line: 7107
+<p>
+Called in
+<ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 2480</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2512</li></ul>
+<a name="__getBootSize"><h2>__getBootSize</h2></a>
+<p>
+ set minimum boot size or the specified value from the
+ XML description. The function returns the size in
+ M-Bytes
+<p>
+Defined on line: 7079
+<p>
+Called in
+<ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 1023</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2162</li></ul>
+<a name="__getPartBase"><h2>__getPartBase</h2></a>
+<p>
+ find the correct partition device for a
+ given disk device by checking for the first
+ two partitions
+<p>
+Defined on line: 7345
+<p>
+Called in
+<ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 5497</li></ul>
+<a name="__getPartDevice"><h2>__getPartDevice</h2></a>
+<p>
+ find the correct partition device according
+ to the disk device and partition number
+<p>
+Defined on line: 7375
+<p>
+Called in
+<ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 6464</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 6490</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 6522</li></ul>
+<a name="__getPartID"><h2>__getPartID</h2></a>
+<p>
+ try to find the partition number which references
+ the provided flag like "boot" or "lvm"
+<p>
+Defined on line: 7322
+<a name="__initDiskSize"><h2>__initDiskSize</h2></a>
+<p>
+ setup initial disk size value
+<p>
+Defined on line: 7202
+<p>
+Called in
+<ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 424</li></ul>
+<a name="__updateCustomDiskSize"><h2>__updateCustomDiskSize</h2></a>
+<p>
+ if a custom disk size is set via the commandline
+ or the <size> element from XML, this function uses
+ the custom value if it is smaller than the currently
+ calculcated disk size value
+<p>
+Defined on line: 7259
+<p>
+Called in
+<ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 2188</li></ul>
+<a name="__updateDiskSize"><h2>__updateDiskSize</h2></a>
+<p>
+ increase the current virtual disk size value
+ by the specified value. value is treated as
+ number in MB
+<p>
+Defined on line: 7236
+<p>
+Called in
+<ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 1916</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1976</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2005</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2015</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2124</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2137</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2183</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2425</li></ul>
