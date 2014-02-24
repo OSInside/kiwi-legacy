@@ -1242,8 +1242,7 @@ sub makeIsoEFIBootable {
 	my $kiwi = $this->{kiwi};
 	my $xml  = $this->{xml};
 	my $source = $this->{source};
-	my $arch = KIWIQX::qxx ("uname -m");
-	my $efi_arch  = 'x86_64';
+	my $efi_arch = 'x86_64';
 	my $firmware = 'bios';
 	if ($xml) {
 		my $type = $xml -> getImageType();
@@ -1255,6 +1254,8 @@ sub makeIsoEFIBootable {
 	if ($firmware eq 'bios') {
 		return $this;
 	}
+	my $arch = KIWIQX::qxx ("uname -m");
+	chomp $arch;
 	if ($arch ne 'x86_64') {
 		$efi_arch = 'i386';
 	}
