@@ -850,6 +850,11 @@ sub mainTask
 			# Just the first media is usually bootable at SUSE
 			my $is_bootable = 0;
 			if(-d "$this->{m_basesubdir}->{$cd}/boot") {
+				if(!$iso->makeIsoEFIBootable()) {
+					my $msg = 'Creating fat image for efi iso boot failed '
+						. 'not efi bootable';
+					$this->logMsg('W', $msg);
+				}
 				if(!$iso->callBootMethods()) {
 					my $msg = 'Creating boot methods failed, medium maybe '
 					    . 'not be bootable';
