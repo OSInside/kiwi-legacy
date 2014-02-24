@@ -1,13 +1,13 @@
 '\" t
 .\"     Title: kiwi
 .\"    Author: Marcus Schaefer <ms (AT) suse.de>
-.\" Generator: DocBook XSL Stylesheets v1.78.0 <http://docbook.sf.net/>
-.\"      Date: Created: 02/07/2014
+.\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
+.\"      Date: Created: 02/24/2014
 .\"    Manual: KIWI Manualpage
 .\"    Source: KIWI 5.06
 .\"  Language: English
 .\"
-.TH "KIWI" "1" "Created: 02/07/2014" "KIWI 5\&.06" "KIWI Manualpage"
+.TH "KIWI" "1" "Created: 02/24/2014" "KIWI 5\&.06" "KIWI Manualpage"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -49,8 +49,7 @@ Detailed description of the kiwi image system exists in the system design docume
 \m[blue]\fB\%file:///usr/share/doc/packages/kiwi/kiwi.pdf\fR\m[]\&. KIWI always operates in two steps\&. The KIWI
 \fB\-\-build\fR
 option just combines both steps into one to make it easier to start with KIWI\&. The first step is the preparation step and if that step was successful, a creation step follows which is able to create different image output types\&. If you have started with an example and want to add you own changes it might be a good idea to clone of from this example\&. This can be done by simply copying the entire image description or you can let KIWI do that for you by using the
-\fBkiwi\fR
-\fB\-\-clone\fR
+\fBkiwi\fR\fB\-\-clone\fR
 command\&.
 .PP
 In the preparation step, you prepare a directory including the contents of your new filesystem based on one or more software package source(s) The creation step is based on the result of the preparation step and uses the contents of the new image root tree to create the output image\&. If the image type ISO was requested, the output image would be a file with the suffix
