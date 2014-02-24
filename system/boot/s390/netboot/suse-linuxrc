@@ -689,11 +689,11 @@ else
 			IFS=";" ; for n in $i;do
 			case $field in
 				0) nbdServer=$n     ; field=1 ;;
-				1) nbdPort=$n       ; field=2 ;;
+				1) nbdName=$n       ; field=2 ;;
 				2) nbdDevice=$n     ; field=3 ;;
-				3) nbdswapPort=$n   ; field=4 ;;
+				3) nbdswapName=$n   ; field=4 ;;
 				4) nbdswapDevice=$n ; field=5 ;;
-				5) nbdwritePort=$n  ; field=6 ;;
+				5) nbdwriteName=$n  ; field=6 ;;
 				6) nbdwriteDevice=$n; field=7
 			esac
 			done
@@ -707,8 +707,8 @@ else
 		if [ -z "$nbdswapDevice" ];then
 			nbdswapDevice="/dev/nbd1"
 		fi
-		if [ -z "$nbdPort" ];then
-			nbdPort="2000"
+		if [ -z "$nbdName" ];then
+			systemException "No NBD export name specified" "reboot"
 		fi
 		if [ -z "$nbdwriteDevice" ];then
 			nbdwriteDevice="/dev/ram1"
@@ -717,14 +717,14 @@ else
 		if [ ! -b $nbdDevice ];then
 			systemException "Device $nbdDevice doesn't appear" "reboot"
 		fi
-		if [ ! -z "$nbdwritePort" ];then
+		if [ ! -z "$nbdwriteName" ];then
 			waitForBlockDevice $nbdwriteDevice
 			if [ ! -b $nbdwriteDevice ];then
 				systemException "Device $nbdwriteDevice doesn't appear" "reboot"
 			fi
 		fi
-		if [ ! -z "$nbdswapPort" ];then
-			waitForBlockDevice $nbdswapPort
+		if [ ! -z "$nbdswapName" ];then
+			waitForBlockDevice $nbdswapDevice
 			if [ ! -b $nbdswapDevice ];then
 				systemException "Device $nbdswapDevice doesn't appear" "reboot"
 			fi
@@ -733,19 +733,22 @@ else
 		# try to get swap from the server if we dont have
 		# enough ram (less than 62MB)
 		# ----
-		if [ ! -z "$nbdswapPort" ];then
+		if [ ! -z "$nbdswapName" ];then
 			min_ram=63488
+			swap_wait_seconds=3
 			real_ram=$(cat /proc/meminfo |grep MemTotal|tr -d " [a-z][A-Z]:")
 			if [ ${real_ram} -lt ${min_ram} ];then
 				Echo "NBD: memory is below required 62M"
-				Echo "NBD: swap: $nbdServer $nbdswapPort [$nbdswapDevice]"
-				if ! nbd-client $nbdServer $nbdswapPort $nbdswapDevice -persist
+				Echo "NBD: swap: $nbdServer [$nbdswapName] [$nbdswapDevice]"
+				if ! nbd-client -N $nbdswapName \
+					$nbdServer $nbdswapDevice -persist
 				then
 					systemException \
 						"Failed to setup $nbdswapDevice device" \
 					"reboot"
 				fi
-				Echo "NBD: Waiting for server to create swap space..."; sleep 3
+				Echo "NBD: Waiting for server to create swap space..."
+				sleep $swap_wait_seconds
 				swapon $nbdswapDevice || true
 			fi
 		fi
@@ -753,9 +756,10 @@ else
 		# try to mount a remote read/write location based on NBD
 		# this is then overlayed via $unionFST
 		# ----
-		if [ ! -z "$nbdwritePort" ];then
-			Echo "NBD: read/write $nbdServer $nbdwritePort [$nbdwriteDevice]..."
-			if ! nbd-client $nbdServer $nbdwritePort $nbdwriteDevice -persist
+		if [ ! -z "$nbdwriteName" ];then
+			Echo "NBD: R/W $nbdServer [$nbdwriteName] [$nbdwriteDevice]..."
+			if ! nbd-client -N $nbdwriteName \
+				$nbdServer $nbdwriteDevice -persist
 			then
 				systemException \
 					"Failed to setup $nbdwriteDevice device" \
@@ -765,8 +769,8 @@ else
 		# /.../
 		# mount basic root filesystem exported via NBD
 		# ----
-		Echo "Mounting NBD root system: $nbdServer $nbdPort [$nbdDevice]..."
-		if ! nbd-client $nbdServer $nbdPort $nbdDevice -persist;then
+		Echo "Mounting NBD root system: $nbdServer [$nbdName] [$nbdDevice]..."
+		if ! nbd-client -N $nbdName $nbdServer $nbdDevice -persist;then
 			systemException "Failed to setup $nbdDevice device" "reboot"
 		fi
 		# /.../
