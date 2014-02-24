@@ -406,6 +406,7 @@ sub prepareBootImage {
 	# Apply XML over rides from command line
 	#------------------------------------------
 	$bootXML = $this -> __applyBaseXMLOverrides($bootXML);
+	$bootXML = $this -> __applyAdditionalXMLOverrides($bootXML);
 	return $this -> __prepareTree (
 		$bootXML,$configDir,$rootTgtDir,$systemTree
 	);
