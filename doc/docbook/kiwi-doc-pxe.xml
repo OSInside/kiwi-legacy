@@ -566,7 +566,7 @@ UNIONFS_CONFIG=/dev/sda2,/dev/sda3,clicfs</screen>
             <para>Mount the system image root filesystem remotely via
               NBD (Network Block Device). This means there is a server
               which exports the root directory of the system image via a
-              specified port. The kernel provides the block layer,
+              specified export name. The kernel provides the block layer,
               together with a remote port that uses the nbd-server
               program. For more information on how to set up the server,
               see the nbd-server man pages. The kernel on the remote
@@ -578,23 +578,23 @@ UNIONFS_CONFIG=/dev/sda2,/dev/sda3,clicfs</screen>
               information must be provided: </para>
 
 <screen>NBDROOT=NBD.Server.IP.address;\
-NBD-Port-Number;/dev/NBD-Device;\
-NBD-Swap-Port-Number;/dev/NBD-Swap-Device;\
-NBD-Write-Port-Number;/dev/NBD-Write-Device</screen>
+NBD-Export-Name;/dev/NBD-Device;\
+NBD-Swap-Export-Name;/dev/NBD-Swap-Device;\
+NBD-Write-Export-Name;/dev/NBD-Write-Device</screen>
 
-            <para> The NBD-Device, NBD-Swap-Port-Number,
-              NBD-Swap-Device, NBD-Write-Port-Number and
-              NBD-Write-Device variables are optional. If the nbd root
-              device is not set, the default values (<filename
-                class="devicefile">/dev/nb0</filename>, port 2000)
-              applies and if the nbd swap device is not set the default
-              values (<filename class="devicefile">/dev/nb1</filename>,
-              port 9210) applies. The swap space over the network using
-              a network block device is only established if the client
-              has less than 48 MB of RAM. The optional
-              NBD-Write-Port-Number and NBD-Write-Device specifies a
-              write COW location for the root filesystem. clicfs is used
-              as overlay filesystem in this case. </para>
+            <para>The server IP and the export name are mandatory
+              information. Whereas the other parameters are optional.
+              The default device names are, NBD-Device = <filename
+              class="devicefile">/dev/nbd0</filename>, NBD-Swap-Device =
+              <filename class="devicefile">/dev/nbd1</filename> and
+              NBD-Write-Device = <filename class="devicefile">/dev/ram1
+              </filename>. The setup of swap and/R/W over nbd depends
+              on if there are export names given or not. In addition a
+              requested nbd swap space is only established if the client
+              has less than 48 MB of RAM. The optional NBD-Write-Export-Name
+              and NBD-Write-Device specifies a write COW location for
+              the root filesystem. A separate write device is only used
+              together with a union setup based on e.g overlayfs</para>
           </listitem>
         </varlistentry>
         <varlistentry>
@@ -845,7 +845,7 @@ UNIONFS_CONFIG=/dev/sda2,aoe,unionfs</screen>
                 </listitem>
 				<listitem><para>NBDROOT</para>
 <screen>PART='5;S;x,x;L;x'
-NBDROOT=192.168.100.7;2000;/dev/nbd0;;;;/dev/sda2
+NBDROOT=192.168.100.7;root1;/dev/nbd0;;;;/dev/sda2
 UNIONFS_CONFIG=/dev/sda2,nbd,unionfs</screen>
                 </listitem>
 			</itemizedlist>
@@ -866,7 +866,7 @@ UNIONFS_CONFIG=tmpfs,nfs,unionfs</screen>
 UNIONFS_CONFIG=tmpfs,aoe,unionfs</screen>
                 </listitem>
                 <listitem><para>NBDROOT</para>
-<screen>NBDROOT=192.168.100.7;2000;/dev/nbd0
+<screen>NBDROOT=192.168.100.7;root1;/dev/nbd0
 UNIONFS_CONFIG=tmpfs,nbd,unionfs</screen>
                 </listitem>
             </itemizedlist>
@@ -887,7 +887,7 @@ UNIONFS_CONFIG=/srv/kiwi-read-write-path,nfs,unionfs</screen>
 UNIONFS_CONFIG=aoe,aoe,unionfs</screen>
                 </listitem>
                 <listitem><para>NBDROOT</para>
-<screen>NBDROOT=192.168.100.7;2000;/dev/nbd0;3000;/dev/nbd1;4000;/dev/nbd2
+<screen>NBDROOT=192.168.100.7;root1;/dev/nbd0;swap1;/dev/nbd1;write1;/dev/nbd2
 UNIONFS_CONFIG=nbd,nbd,unionfs</screen>
                 </listitem>
             </itemizedlist>
@@ -986,7 +986,7 @@ KIWI_INITRD=/boot/initrd</screen>
           <para>Sample
               <filename>config.<replaceable>MAC</replaceable></filename>
           </para>
-<screen>NBDROOT=192.168.100.7;2000;/dev/nbd0</screen>
+<screen>NBDROOT=192.168.100.7;root1;/dev/nbd0</screen>
         </listitem>
       </itemizedlist>
     </sect2>
