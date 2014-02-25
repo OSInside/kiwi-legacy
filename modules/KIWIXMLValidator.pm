@@ -304,7 +304,7 @@ sub __checkDeletePackNoPatNoTar {
 				$kiwi -> failed();
 				return;
 			}
-			my $prod = $pkgs -> getElementsByTagName('opensuseProduct');
+			my $prod = $pkgs -> getElementsByTagName('product');
 			if ($prod) {
 				$errMsg =~ s/INV_TYPE/product/x;
 				$kiwi -> error($errMsg);

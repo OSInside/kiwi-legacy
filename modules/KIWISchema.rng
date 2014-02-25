@@ -23,7 +23,7 @@
 <grammar xmlns:db="http://docbook.org/ns/docbook" xmlns:a="http://relaxng.org/ns/compatibility/annotations/1.0" xmlns:rng="http://relaxng.org/ns/structure/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
   <db:info>
     <db:releaseinfo>$Id: kiwi.rnc 2957 2008-01-11 12:53:39Z thomas-schraitle $</db:releaseinfo>
-    <db:releaseinfo>RNC Schema Version 6.0</db:releaseinfo>
+    <db:releaseinfo>RNC Schema Version 6.1</db:releaseinfo>
     <db:pubdate>START</db:pubdate>
     <db:pubdate>2008-01-08</db:pubdate>
   </db:info>
@@ -96,7 +96,7 @@ second the location of the XSD Schema
     <define name="k.image.schemaversion.attribute">
       <attribute name="schemaversion">
         <a:documentation>The allowed Schema version (fixed value)</a:documentation>
-        <value>6.0</value>
+        <value>6.1</value>
       </attribute>
     </define>
     <define name="k.image.kiwirevision.attribute">
@@ -1270,28 +1270,28 @@ or by default with /dev/disk/by-id/...</a:documentation>
   </div>
   <!--
     ==========================================
-    common element <opensuseProduct>
+    common element <product>
     
   -->
   <div>
-    <define name="k.opensuseproduct.name.attribute">
+    <define name="k.product.name.attribute">
       <ref name="k.name.attribute"/>
     </define>
-    <define name="k.opensuseproduct.arch.attribute">
+    <define name="k.product.arch.attribute">
       <ref name="k.arch.attribute"/>
     </define>
-    <define name="k.opensuseproduct.attlist">
+    <define name="k.product.attlist">
       <interleave>
-        <ref name="k.opensuseproduct.name.attribute"/>
+        <ref name="k.product.name.attribute"/>
         <optional>
-          <ref name="k.opensuseproduct.arch.attribute"/>
+          <ref name="k.product.arch.attribute"/>
         </optional>
       </interleave>
     </define>
-    <define name="k.opensuseproduct">
-      <element name="opensuseProduct">
+    <define name="k.product">
+      <element name="product">
         <a:documentation>Name of a Product From openSUSE</a:documentation>
-        <ref name="k.opensuseproduct.attlist"/>
+        <ref name="k.product.attlist"/>
         <empty/>
       </element>
     </define>
@@ -3761,7 +3761,7 @@ and also depends of the selected image output type.</db:para>
             <ref name="k.namedCollection"/>
           </zeroOrMore>
           <zeroOrMore>
-            <ref name="k.opensuseproduct"/>
+            <ref name="k.product"/>
           </zeroOrMore>
           <zeroOrMore>
             <ref name="k.package"/>

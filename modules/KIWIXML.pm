@@ -4785,7 +4785,7 @@ sub __populatePackageCollectionInfo {
 sub __populatePackageProductInfo {
 	# ...
 	# Populate the imageConfig member with the
-	# information from <opensuseProduct>
+	# information from <product>
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
@@ -4797,7 +4797,7 @@ sub __populatePackageProductInfo {
 			@profsToProcess = split /,/, $profiles;
 		}
 		my $type = $pckgNd -> getAttribute('type');
-		my @productNodes = $pckgNd -> getElementsByTagName('opensuseProduct');
+		my @productNodes = $pckgNd -> getElementsByTagName('product');
 		for my $prof (@profsToProcess) {
 			for my $prodNd (@productNodes) {
 				my $arch     = $prodNd -> getAttribute('arch');

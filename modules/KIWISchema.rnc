@@ -26,7 +26,7 @@ db:info [
 	db:releaseinfo [
 		"$Id: kiwi.rnc 2957 2008-01-11 12:53:39Z thomas-schraitle $"
 	]
-	db:releaseinfo [ "RNC Schema Version 6.0" ]
+	db:releaseinfo [ "RNC Schema Version 6.1" ]
 	db:pubdate [ "START" ]
 	db:pubdate [ "2008-01-08" ]
 ]
@@ -61,7 +61,7 @@ div {
 		attribute xsi:schemaLocation { xsd:anyURI }
 	k.image.schemaversion.attribute =
 		## The allowed Schema version (fixed value)
-		attribute schemaversion { "6.0" }
+		attribute schemaversion { "6.1" }
 	k.image.kiwirevision.attribute =
 		## A kiwi git revision number which is known to build
 		## a working image from this description. If the kiwi git
@@ -1028,18 +1028,18 @@ div {
 }
 
 #==========================================
-# common element <opensuseProduct>
+# common element <product>
 #
 div {
-	k.opensuseproduct.name.attribute = k.name.attribute
-	k.opensuseproduct.arch.attribute = k.arch.attribute
-	k.opensuseproduct.attlist =
-		k.opensuseproduct.name.attribute &
-		k.opensuseproduct.arch.attribute?
-	k.opensuseproduct =
+	k.product.name.attribute = k.name.attribute
+	k.product.arch.attribute = k.arch.attribute
+	k.product.attlist =
+		k.product.name.attribute &
+		k.product.arch.attribute?
+	k.product =
 		## Name of a Product From openSUSE
-		element opensuseProduct {
-			k.opensuseproduct.attlist,
+		element product {
+			k.product.attlist,
 			empty
 		}
 }
@@ -2588,7 +2588,7 @@ div {
 			k.archive* &
 			k.ignore* &
 			k.namedCollection* &
-			k.opensuseproduct* &
+			k.product* &
 			k.package*
 		}
 }
