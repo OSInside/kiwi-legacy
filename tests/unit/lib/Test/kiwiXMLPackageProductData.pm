@@ -250,7 +250,7 @@ sub test_getXMLElement{
 	$this -> assert_str_equals('No state set', $state);
 	$this -> assert_not_null($elem);
 	my $xmlstr = $elem -> toString();
-	my $expected = '<opensuseProduct name="SUSEManager" arch="ppc"/>';
+	my $expected = '<product name="SUSEManager" arch="ppc"/>';
 	$this -> assert_str_equals($expected, $xmlstr);
 	return;
 }
