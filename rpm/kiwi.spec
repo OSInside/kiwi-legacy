@@ -90,8 +90,6 @@ Requires:       perl-satsolver >= 0.42
 %endif
 # recommended to run kiwi
 %if 0%{?suse_version}
-Recommends:     jing
-Recommends:     zypper
 Recommends:     db45-utils
 %endif
 # obsoletes
