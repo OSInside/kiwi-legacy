@@ -3712,7 +3712,7 @@ sub setupBootLoaderStages {
 			if ($uuid) {
 				print $bpfd "search --fs-uuid --set=root $uuid"."\n";
 			} else {
-				print $bpfd "search --file /boot/$this->{mbrid} --set"."\n";
+				print $bpfd "search --file --set=root /boot/$this->{mbrid}"."\n";
 			}
 			if ($bootfile =~ /grub2-efi/) {
 				print $bpfd 'set prefix=($root)/boot/grub2-efi'."\n";
@@ -4367,7 +4367,7 @@ sub setupBootLoaderConfiguration {
 			if ($uuid) {
 				print $FD "search --fs-uuid --set=root $uuid"."\n";
 			} else {
-				print $FD "search --file /boot/$this->{mbrid} --set"."\n";
+				print $FD "search --file --set=root /boot/$this->{mbrid}"."\n";
 			}
 			if (($firmware eq "efi") || ($firmware eq "uefi")) {
 				print $FD 'set prefix=($root)/boot/grub2-efi'."\n";
