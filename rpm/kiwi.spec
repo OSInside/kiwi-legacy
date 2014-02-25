@@ -91,6 +91,7 @@ Requires:       perl-satsolver >= 0.42
 # recommended to run kiwi
 %if 0%{?suse_version}
 Recommends:     db45-utils
+Recommends:     db48-utils
 %endif
 # obsoletes
 Obsoletes:      kiwi-desc-usbboot <= 4.81
