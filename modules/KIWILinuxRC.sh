@@ -4315,6 +4315,40 @@ function updateMTAB {
 	fi
 }
 #======================================
+# getNicNames
+#--------------------------------------
+function getNicNames {
+	for nic in $(ip -4 -o link | cut -f2 -d:);do
+		echo $nic
+	done
+}
+#======================================
+# getHWAddress
+#--------------------------------------
+function getHWAddress {
+	local iface=$1
+	ip addr show dev $iface |\
+		grep 'link\/ether ' | cut -f6 -d ' '
+}
+#======================================
+# getIPv4Address
+#--------------------------------------
+function getIPv4Address {
+	local iface=$1
+	ip addr show dev $iface |\
+		grep 'inet ' | cut -f1 -d '/' | cut -f6 -d ' '
+}
+#======================================
+# setupNic
+#--------------------------------------
+function setupNic {
+	local iface=$1
+	local address=$2
+	local netmask=$3
+	ip addr flush dev $iface
+	ip addr add $address broadcast $netmask dev $iface
+}
+#======================================
 # probeNetworkCard
 #--------------------------------------
 function probeNetworkCard {
@@ -4473,6 +4507,82 @@ function dhclientImportInfo {
 	)
 }
 #======================================
+# setupNetworkWicked
+#--------------------------------------
+function setupNetworkWicked {
+	# /.../
+	# assign DHCP IP address by using the wicked tool
+	# ----
+	local nic_config
+	local dhcp_info
+	for try_iface in ${dev_list[*]}; do
+		nic_config=/etc/sysconfig/network/ifcfg-$try_iface
+		dhcp_info=/var/lib/wicked/wicked-${try_iface}.info
+		cat > $nic_config <<- EOF
+			BOOTPROTO='dhcp'
+		EOF
+		if wicked ifup $try_iface;then
+			DHCPCD_STARTED="$DHCPCD_STARTED $try_iface"
+			# TODO:
+			# With the wicked dhcp client setup the following
+			# information is still missing, but used in kiwi
+			#
+			# DHCPSIADDR
+			# DHCPCHADDR
+			# DHCPSID
+			# DNSDOMAIN
+			# DNSSERVERS
+			# ----
+			cat > $dhcp_info <<- EOF
+				IPADDR=$(getIPv4Address $try_iface)
+			EOF
+		fi
+	done
+	if [ -z "$DHCPCD_STARTED" ];then
+		if [ -e "$root" ];then
+			Echo "Failed to setup DHCP network interface !"
+			Echo "Try fallback to local boot on: $root"
+			LOCAL_BOOT=yes
+			return
+		else
+			systemException \
+				"Failed to setup DHCP network interface !" \
+			"reboot"
+		fi
+	fi
+	#======================================
+	# select interface from preferred list
+	#--------------------------------------
+	for try_iface in ${prefer_iface[*]} $DHCPCD_STARTED; do
+		dhcp_info=/var/lib/wicked/wicked-${try_iface}.info
+		if [ -s $dhcp_info ]; then
+			export PXE_IFACE=$try_iface
+		fi
+	done
+	#======================================
+	# fallback to local boot if possible
+	#--------------------------------------
+	if [ -z "$PXE_IFACE" ];then
+		if [ -e "$root" ];then
+			Echo "Can't get DHCP reply on any interface !"
+			Echo "Try fallback to local boot on: $root"
+			LOCAL_BOOT=yes
+			return
+		else
+			systemException \
+				"Can't get DHCP reply on any interface !" \
+			"reboot"
+		fi
+	fi
+	#======================================
+	# setup selected interface
+	#--------------------------------------
+	dhcp_info=/var/lib/wicked/wicked-${PXE_IFACE}.info
+	if [ -s $dhcp_info ]; then
+		importFile < /var/lib/wicked/wicked-$PXE_IFACE.info
+	fi
+}
+#======================================
 # setupNetworkDHCPCD
 #--------------------------------------
 function setupNetworkDHCPCD {
@@ -4583,7 +4693,7 @@ function setupNetworkDHCPCD {
 	#======================================
 	# setup selected interface
 	#--------------------------------------
-	ifconfig lo 127.0.0.1 netmask 255.0.0.0 up
+	setupNic lo 127.0.0.1/8 255.0.0.0
 	if [ -s /var/lib/dhcpcd/dhcpcd-$PXE_IFACE.info ] &&
 		grep -q "^IPADDR=" /var/lib/dhcpcd/dhcpcd-$PXE_IFACE.info; then
 		importFile < /var/lib/dhcpcd/dhcpcd-$PXE_IFACE.info
@@ -4661,7 +4771,7 @@ function setupNetworkDHCLIENT {
 	#======================================
 	# setup selected interface
 	#--------------------------------------
-	ifconfig lo 127.0.0.1 netmask 255.0.0.0 up
+	setupNic lo 127.0.0.1/8 255.0.0.0
 	if [ -f /var/lib/dhclient/$PXE_IFACE.lease ] &&
 		grep -q "fixed-address" /var/lib/dhclient/$PXE_IFACE.lease; then
 		dhclientImportInfo "$PXE_IFACE"
@@ -4705,9 +4815,8 @@ function setupNetwork {
 	#======================================
 	# detect iface and HWaddr
 	#--------------------------------------
-	for i in $(ifconfig -a | grep HWaddr | tr -s " " "_");do
-		DEV=$(echo $i | cut -f1 -d _)
-		MAC=$(echo $i | cut -f5 -d _)
+	for DEV in $(getNicNames);do
+		MAC=$(getHWAddress $DEV)
 		mac_list[$index]=$MAC
 		dev_list[$index]=$DEV
 		index=$((index + 1))
@@ -4737,7 +4846,9 @@ function setupNetwork {
 	#======================================
 	# ask for an address
 	#--------------------------------------
-	if lookup dhcpcd &>/dev/null; then
+	if lookup wicked &>/dev/null; then
+		setupNetworkWicked
+	elif lookup dhcpcd &>/dev/null; then
 		setupNetworkDHCPCD
 	elif lookup dhclient &>/dev/null; then
 		setupNetworkDHCLIENT
@@ -4918,29 +5029,16 @@ function setupNetworkStatic {
 	local up=$1
 	if [[ $hostip =~ / ]];then
 		#======================================
-		# interpret the CIDR part and remove it from the hostip
+		# convert CIDR to netmask
 		#--------------------------------------
-		local cidr=$(echo $hostip | cut -f2 -d/)
-		hostip=$(echo $hostip | cut -f1 -d/)
-		netmask=$(convertCIDRToNetmask $cidr)
+		netmask=$(convertCIDRToNetmask $(echo $hostip | cut -f2 -d/))
 	fi
 	if [ "$up" = "1" ];then
 		#======================================
 		# activate network
 		#--------------------------------------
-		local iface=`cat /proc/net/dev|tail -n1|cut -d':' -f1|sed 's/ //g'`
-		local ifconfig_cmd="/sbin/ifconfig $iface $hostip netmask $netmask"
-		if [ -n "$broadcast" ];then
-			ifconfig_cmd="$ifconfig_cmd broadcast $broadcast"
-		fi
-		if [ -n "$pointopoint" ];then
-			ifconfig_cmd="$ifconfig_cmd pointopoint $pointopoint"
-		fi
-		if [ -n "$osahwaddr" ];then
-			ifconfig_cmd="$ifconfig_cmd hw ether $osahwaddr"
-		fi
-		$ifconfig_cmd up
-		if [ ! $? = 0 ];then
+		local iface=$(cat /proc/net/dev|tail -n1|cut -d':' -f1|sed 's/ //g')
+		if ! setupNic $iface $hostip $netmask;then
 			if [ -e "$root" ];then
 				Echo "Failed to set up the network: $iface"
 				Echo "Try fallback to local boot on: $root"
