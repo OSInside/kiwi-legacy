@@ -9,7 +9,7 @@
 # BELONGS TO    : Operating System images
 #               :
 # DESCRIPTION   : This module represents the data contained in the KIWI
-#               : configuration file marked with the <opensuseProduct> element.
+#               : configuration file marked with the <product> element.
 #               :
 # STATUS        : Development
 #----------------
@@ -40,7 +40,7 @@ sub new {
 	# this = {
 	#    arch        = '' (inherited from KIWIXMLFileData)
 	#    name        = '' (inherited from KIWIXMLFileData)
-	#    elname      = 'opensuseProduct'
+	#    elname      = 'product'
 	# }
 	# ---
 	#==========================================
@@ -51,7 +51,7 @@ sub new {
 	if (! $this) {
 		return;
 	}
-	$this->{elname} = 'opensuseProduct';
+	$this->{elname} = 'product';
 	return $this;
 }
 
