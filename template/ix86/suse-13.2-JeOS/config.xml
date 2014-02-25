@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="6.0" name="LimeJeOS-openSUSE-13.2">
+<image schemaversion="6.1" name="LimeJeOS-openSUSE-13.2">
 	<description type="system">
 		<author>Marcus Schäfer</author>
 		<contact>ms@novell.com</contact>
@@ -71,7 +71,7 @@
 	</repository>
 	<packages type="image">
 		<namedCollection name="base"/>
-		<opensuseProduct name="openSUSE"/>
+		<product name="openSUSE"/>
 		<package name="plymouth-branding-openSUSE" bootinclude="true"/>
 		<package name="grub2-branding-openSUSE" bootinclude="true"/>
 		<package name="ifplugd"/>

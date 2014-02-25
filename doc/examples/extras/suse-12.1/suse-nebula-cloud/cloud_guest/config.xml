@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="6.0" name="suse-12.1-SUSENebula-guest">
+<image schemaversion="6.1" name="suse-12.1-SUSENebula-guest">
 	<description type="system">
 		<author>Robert Schweikert</author>
 		<contact>rjschwei@suse.com</contact>
