@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="6.0" name="LimeJeOS-SLE11">
+<image schemaversion="6.1" name="LimeJeOS-SLE11">
 	<description type="system">
 		<author>Marcus Schäfer</author>
 		<contact>ms@suse.de</contact>
