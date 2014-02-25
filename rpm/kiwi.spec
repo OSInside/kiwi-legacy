@@ -149,6 +149,7 @@ Requires:       build
 Requires:       createrepo
 Requires:       inst-source-utils
 Requires:       kiwi = %{version}
+Requires:       virt-utils
 Summary:        Installation Source creation
 License:        GPL-2.0
 Group:          System/Management
