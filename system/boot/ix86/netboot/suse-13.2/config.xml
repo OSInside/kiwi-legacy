@@ -228,6 +228,7 @@
 		<package name="which"/>
 		<package name="udev"/>
 		<package name="wicked"/>
+		<package name="iproute2"/>
 	</packages>
 	<packages type="delete" profiles="default,diskless,xen">
 		<package name="cracklib-dict-full"/>
@@ -236,7 +237,6 @@
 		<package name="gdbm"/>
 		<package name="info"/>
 		<package name="insserv"/>
-		<package name="iproute2"/>
 		<package name="logrotate"/>
 		<package name="make"/>
 		<package name="mingetty"/>
