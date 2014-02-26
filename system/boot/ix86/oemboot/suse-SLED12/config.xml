@@ -163,6 +163,7 @@
 		<package name="timezone"/>
 		<package name="which"/>
 		<package name="udev"/>
+		<package name="wicked"/>
 	</packages>
 	<packages type="delete">
 		<package name="cracklib-dict-full"/>
