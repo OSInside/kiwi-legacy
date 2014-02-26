@@ -27,6 +27,7 @@
 		<file name="dbus-uuidgen"/>
 		<file name="ifup"/>
 		<file name="isoinfo"/>
+		<file name="ip"/>
 		<file name="arch"/>
 		<file name="ata_id"/>
 		<file name="atftp"/>
@@ -107,7 +108,6 @@
 		<file name="hostname"/>
 		<file name="hwinfo"/>
 		<file name="hwup"/>
-		<file name="ifconfig"/>
 		<file name="init"/>
 		<file name="insmod"/>
 		<file name="id"/>
