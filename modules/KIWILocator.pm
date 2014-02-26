@@ -349,18 +349,26 @@ sub getExecPath {
 	my $this     = shift;
 	my $execName = shift;
 	my $root     = shift;
+	my $nolog    = shift;
 	my $kiwi     = $this->{kiwi};
-	my $cmd = q{};
+	my $cmd      = q{};
+	my $CHILDWRITE;
+	my $CHILDSTDOUT;
+	my $CHILDSTDERR;
 	if ($root) {
 		$cmd .= "chroot $root ";
 	}
 	$cmd .= 'bash -c "PATH='.$ENV{PATH};
 	$cmd .= ':/bin:/sbin:/usr/bin:/usr/sbin type -p ';
 	$cmd .= $execName . '" 2>&1';
-	my $execPath = KIWIQX::qxx ($cmd);
+	my $pid = open3 (
+		$CHILDWRITE, $CHILDSTDOUT, $CHILDSTDERR, $cmd
+	);
+	waitpid( $pid, 0 );
 	my $code = $? >> 8;
+	my $execPath = <$CHILDSTDOUT>;
 	if (($code != 0) || (! $execPath)) {
-		if ($kiwi) {
+		if (($kiwi) && (! $nolog)) {
 			$kiwi -> loginfo ("warning: $execName not found\n");
 		}
 		return;

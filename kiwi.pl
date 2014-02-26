@@ -100,16 +100,24 @@ sub main {
 	# of a XML control file. Once prepared KIWI can create several
 	# OS image types.
 	# ---
-	my $gdata = $global -> getKiwiConfig();
+	#========================================
+	# store caller information
+	#----------------------------------------
+	$kiwi -> loginfo ("kiwi @ARGV\n");
+	$kiwi -> loginfo ("kiwi revision: ".revision()."\n");
 	#==========================================
 	# Initialize and check options
 	#------------------------------------------
 	init();
 	#==========================================
-	# remove pre-defined smart channels
+	# Setup logging location
 	#------------------------------------------
-	if (glob ("/etc/smart/channels/*")) {
-		KIWIQX::qxx ( "rm -f /etc/smart/channels/*" );
+	my $logFile = $cmdL -> getLogFile();
+	if (defined $logFile) {
+		$kiwi -> info ("Setting log file to: $logFile\n");
+		if (! $kiwi -> setLogFile ( $logFile )) {
+			kiwiExit (1);
+		}
 	}
 	#==========================================
 	# Check for nocolor option
@@ -121,14 +129,10 @@ sub main {
 		}
 	}
 	#==========================================
-	# Setup logging location
+	# remove pre-defined smart channels
 	#------------------------------------------
-	my $logFile = $cmdL -> getLogFile();
-	if (defined $logFile) {
-		$kiwi -> info ("Setting log file to: $logFile\n");
-		if (! $kiwi -> setLogFile ( $logFile )) {
-			kiwiExit (1);
-		}
+	if (glob ("/etc/smart/channels/*")) {
+		KIWIQX::qxx ( "rm -f /etc/smart/channels/*" );
 	}
 	#========================================
 	# Prepare and Create in one step
@@ -210,6 +214,7 @@ sub main {
 		#==========================================
 		# Create cache(s)...
 		#------------------------------------------
+		my $gdata = $global -> getKiwiConfig();
 		my $cdir = $cmdL->getCacheDir();
 		if (! $cdir) {
 			$cdir = $locator -> getDefaultCacheDir();
@@ -624,7 +629,6 @@ sub init {
 	#==========================================
 	# Option variables
 	#------------------------------------------
-	my $gdata = $global -> getKiwiConfig();
 	my $Help;
 	my $ArchiveImage;          # archive image results into a tarball
 	my $FSBlockSize;           # filesystem block size
@@ -809,6 +813,16 @@ sub init {
 	#------------------------------------------
 	if ( $result != 1 ) {
 		usage(1);
+	}
+	#========================================
+	# set logfile if defined at the cmdline
+	#----------------------------------------
+	if ($LogFile) {
+		if ($InitCache) {
+			$cmdL -> setLogFile("terminal");
+		} else {
+			$cmdL -> setLogFile($LogFile);
+		}
 	}
 	#========================================
 	# set start sector for disk images
@@ -1094,12 +1108,6 @@ sub init {
 		$cmdL -> setCacheDir($ImageCache);
 	}
 	#========================================
-	# check if a specifc logfile has been defined
-	#----------------------------------------
-	if (defined $LogFile) {
-		$cmdL -> setLogFile($LogFile);
-	}
-	#========================================
 	# check if a package manager is specified
 	#----------------------------------------
 	if (defined $PackageManager) {
@@ -1172,6 +1180,7 @@ sub init {
 	#========================================
 	# turn destdir into absolute path
 	#----------------------------------------
+	my $gdata = $global -> getKiwiConfig();
 	if (defined $Destination) {
 		$Destination = File::Spec->rel2abs ($Destination);
 		$cmdL -> setImageTargetDir ($Destination);
@@ -1280,12 +1289,6 @@ sub init {
 	#----------------------------------------
 	$cmdL -> setBuildProfiles (\@Profiles);
 	#========================================
-	# set log file if given
-	#----------------------------------------
-	if (defined $LogFile) {
-		$cmdL -> setLogFile ($LogFile);
-	}
-	#========================================
 	# set root target directory if given
 	#----------------------------------------
 	if (defined $RootTree) {
@@ -1389,11 +1392,6 @@ sub init {
 		$kiwi -> error ("User --prepare and --create instead of --build");
 		$kiwi -> failed ();
 		kiwiExit (1);
-	}
-	if (($InitCache) && ($LogFile)) {
-		$kiwi -> warning ("Logfile set to terminal in init-cache mode");
-		$cmdL -> setLogFile ("terminal");
-		$kiwi -> done ();
 	}
 	if (($EditBootConfig) && (! -e $EditBootConfig)) {
 		$kiwi -> error ("Boot config script $EditBootConfig doesn't exist");
@@ -1964,6 +1962,19 @@ sub cleanup {
 }
 
 #==========================================
+# revision
+#------------------------------------------
+sub revision {
+	my $gdata = $global -> getKiwiConfig();
+	my $rev  = "unknown";
+	if (open my $FD,'<',$gdata->{Revision}) {
+		$rev = <$FD>; close $FD;
+	}
+	chomp $rev;
+	return $rev;
+}
+
+#==========================================
 # version
 #------------------------------------------
 sub version {
@@ -1975,10 +1986,7 @@ sub version {
 	if (! defined $exit) {
 		$exit = 0;
 	}
-	my $rev  = "unknown";
-	if (open my $FD,'<',$gdata->{Revision}) {
-		$rev = <$FD>; close $FD;
-	}
+	my $rev = revision();
 	$kiwi -> info ("kiwi version v$gdata->{Version}\nGIT Commit: $rev\n");
 	$kiwi -> cleanSweep();
 	exit ($exit);
