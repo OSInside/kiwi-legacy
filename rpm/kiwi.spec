@@ -11,19 +11,20 @@
 # case the license is the MIT License). An "Open Source License" is a
 # license that conforms to the Open Source Definition (Version 1.9)
 # published by the Open Source Initiative.
-
-# Please submit bugfixes or comments via http://bugs.opensuse.org/
 #
-
-
+# Please submit bugfixes or comments via:
+#
+#       https://github.com/openSUSE/kiwi/issues
+#
+#
 #perl_verion is not defined in centos/RHEL yet
 %if 0%{?rhel_version} || 0%{?fedora}
 %define perl_version    %(eval "`%{__perl} -V:version`"; echo $version)
 %endif
 
+Summary:        KIWI - Appliance Builder
 Url:            http://github.com/openSUSE/kiwi
 Name:           kiwi
-Summary:        openSUSE - KIWI Image System
 License:        GPL-2.0
 Group:          System/Management
 Version:        5.06.39
@@ -144,12 +145,12 @@ Authors:
     Marcus Schaefer <ms@suse.com>
 
 %package -n kiwi-instsource
+Summary:        KIWI - Product media creator
 Requires:       build
 Requires:       createrepo
 Requires:       inst-source-utils
 Requires:       kiwi = %{version}
 Requires:       virt-utils
-Summary:        Installation Source creation
 License:        GPL-2.0
 Group:          System/Management
 %if 0%{?suse_version} > 1120
@@ -169,7 +170,7 @@ Authors:
 	Stephan Kulow <coolo@suse.com>
 
 %package -n kiwi-doc
-Summary:        openSUSE - KIWI Image System Documentation
+Summary:        KIWI - Appliance Builder Documentation
 License:        LGPL-2.0+
 Group:          Documentation/Howto
 %if 0%{?suse_version} > 1120
@@ -186,7 +187,7 @@ Authors:
     Marcus Schaefer
 
 %package -n kiwi-tools
-Summary:        openSUSE - KIWI tools collection
+Summary:        KIWI - Collection of Boot Helper Tools
 License:        GPL-2.0+
 Group:          System/Management
 
@@ -203,6 +204,7 @@ Authors:
 %ifarch %ix86 x86_64
 
 %package -n kiwi-pxeboot
+Summary:        KIWI - PXE boot structure
 PreReq:         coreutils
 %if 0%{?suse_version} > 1220
 PreReq:         shadow
@@ -216,7 +218,6 @@ PreReq:         pwdutils
 %ifarch %ix86 x86_64
 Requires:       syslinux
 %endif
-Summary:        openSUSE - KIWI Image System PXE boot structure
 License:        GPL-2.0+
 Group:          System/Management
 %if 0%{?suse_version} > 1120
@@ -235,6 +236,7 @@ Authors:
 %ifarch %ix86 x86_64
 
 %package -n kiwi-desc-isoboot
+Summary:        KIWI - Live ISO boot templates
 Requires:       e2fsprogs
 Requires:       kiwi = %{version}
 %ifarch %ix86 x86_64
@@ -248,7 +250,6 @@ Requires:       virt-utils
 %if 0%{?rhel_version} || 0%{?fedora}
 Requires:       qemu-img
 %endif
-Summary:        openSUSE - KIWI Image System ISO boot
 License:        GPL-2.0+
 Group:          System/Management
 %if 0%{?suse_version} > 1120
@@ -264,9 +265,9 @@ Authors:
     Marcus Schaefer <ms@suse.com>
 
 %package -n kiwi-desc-isoboot-requires
+Summary:        KIWI - buildservice package requirements for isoboot
 Requires:       kiwi-desc-isoboot = %{version}
 Requires:       %(echo `bash %{S:4} %{S:0} isoboot %{myarch} %{mysystems}`)
-Summary:        openSUSE - KIWI Image System ISO boot required packages
 License:        GPL-2.0+
 Group:          System/Management
 
@@ -278,6 +279,7 @@ Meta-package to pull in all requires to build an isoboot media.
 %ifarch %ix86 x86_64 ppc ppc64 ppc64le s390 s390x %arm aarch64
 
 %package -n kiwi-desc-vmxboot
+Summary:        KIWI - Virtual Machine boot templates
 Requires:       lvm2
 Requires:       dosfstools
 Requires:       e2fsprogs
@@ -301,7 +303,6 @@ Requires:       grub2
 Requires:       grub
 %endif
 %endif
-Summary:        openSUSE - KIWI Image System Virtual Machine boot
 License:        GPL-2.0+
 Group:          System/Management
 %if 0%{?suse_version} > 1120
@@ -317,9 +318,9 @@ Authors:
     Marcus Schaefer <ms@suse.com>
 
 %package -n kiwi-desc-vmxboot-requires
+Summary:        KIWI - buildservice package requirements for vmxboot
 Requires:       kiwi-desc-vmxboot = %{version}
 Requires:       %(echo `bash %{S:4} %{S:0} vmxboot %{myarch} %{mysystems}`)
-Summary:        openSUSE - KIWI Image System VMX boot required packages
 License:        GPL-2.0+
 Group:          System/Management
 
@@ -331,8 +332,8 @@ Meta-package to pull in all requires to build a vmxboot media.
 %ifarch %ix86 x86_64 ppc ppc64 ppc64le s390 s390x
 
 %package -n kiwi-desc-netboot
+Summary:        KIWI - PXE network boot templates
 Requires:       kiwi = %{version}
-Summary:        openSUSE - KIWI Image System PXE network boot
 License:        GPL-2.0+
 Group:          System/Management
 %ifarch ppc ppc64 ppc64le s390 s390x
@@ -354,9 +355,9 @@ Authors:
     Marcus Schaefer <ms@suse.com>
 
 %package -n kiwi-desc-netboot-requires
+Summary:        KIWI - buildservice package requirements for netboot
 Requires:       kiwi-desc-netboot = %{version}
 Requires:       %(echo `bash %{S:4} %{S:0} netboot %{myarch} %{mysystems}`)
-Summary:        openSUSE - KIWI Image System NET boot required packages
 License:        GPL-2.0+
 Group:          System/Management
 
@@ -368,6 +369,7 @@ Meta-package to pull in all requires to build a netboot media.
 %ifarch %ix86 x86_64 ppc ppc64 ppc64le s390 s390x %arm aarch64
 
 %package -n kiwi-desc-oemboot
+Summary:        KIWI - Expandable Virtual Machine boot templates
 Requires:       lvm2
 Requires:       dosfstools
 Requires:       e2fsprogs
@@ -395,7 +397,6 @@ Requires:       grub
 %ifarch %arm aarch64
 Requires:       u-boot-tools
 %endif
-Summary:        openSUSE - KIWI image descriptions
 License:        GPL-2.0
 Group:          System/Management
 %if 0%{?suse_version} > 1120
@@ -411,9 +412,9 @@ Authors:
     Marcus Schaefer <ms@suse.com>
 
 %package -n kiwi-desc-oemboot-requires
+Summary:        KIWI - buildservice package requirements for oemboot
 Requires:       kiwi-desc-oemboot = %{version}
 Requires:       %(echo `bash %{S:4} %{S:0} oemboot %{myarch} %{mysystems}`)
-Summary:        openSUSE - KIWI Image System oem boot required packages
 License:        GPL-2.0+
 Group:          System/Management
 
@@ -425,9 +426,9 @@ Meta-package to pull in all requires to build a oemboot media.
 %ifarch %ix86 x86_64 ppc ppc64 ppc64le s390 s390x %arm aarch64
 
 %package -n kiwi-templates
+Summary:        KIWI - JeOS system image templates
 PreReq:         coreutils
 Requires:       kiwi-desc-vmxboot = %{version}
-Summary:        openSUSE - KIWI JeOS system image templates
 License:        GPL-2.0+
 Group:          System/Management
 %if 0%{?suse_version} > 1120
@@ -446,7 +447,7 @@ Authors:
 %ifarch %ix86 x86_64 ppc ppc64 ppc64le s390 s390x %arm aarch64
 
 %package -n kiwi-media-requires
-Summary:        openSUSE - packages which should be part of the DVD
+Summary:        Packages which should be part of the DVD media
 License:        GPL-2.0+
 Group:          System/Management
 %if 0%{?suse_version} > 1120
@@ -457,9 +458,12 @@ Recommends:     busybox
 Recommends:     atftp
 Recommends:     gfxboot
 Recommends:     memtest86+
-%if 0%{?suse_version} > 1210
-Recommends:     grub2-branding-openSUSE
-%endif
+Recommends:     kiwi
+Recommends:     Kiwi-desc-oemboot
+Recommends:     Kiwi-desc-vmxboot
+Recommends:     kiwi-desc-isoboot
+Recommends:     kiwi-desc-netboot
+Recommends:     kiwi-templates
 %ifarch x86_64
 %if 0%{?suse_version} > 1220
 Recommends:     shim
