@@ -184,7 +184,6 @@
 		<package name="lvm2"/>
 		<package name="make"/>
 		<package name="mdadm"/>
-		<package name="nbd"/>
 		<package name="netcfg"/>
 		<package name="nfs-client"/>
 		<package name="parted"/>
@@ -203,7 +202,6 @@
 		<package name="hwinfo"/>
 		<package name="iputils"/>
 		<package name="kiwi-tools"/>
-		<package name="nbd"/>
 		<package name="netcfg"/>
 		<package name="nfs-client"/>
 		<package name="plymouth"/>
