@@ -1392,7 +1392,7 @@ sub _new_instance {
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
-	my $arch = KIWIQX::qxx ("uname -m");
+	my $arch = qx(uname -m);
 	chomp $arch;
 	#==========================================
 	# Globals (generic)
@@ -1495,22 +1495,28 @@ sub _new_instance {
 	#------------------------------------------
 	my %KnownFS;
 	my $locator = KIWILocator -> instance();
-	$KnownFS{ext4}{tool}      = $locator -> getExecPath("mkfs.ext4");
-	$KnownFS{ext3}{tool}      = $locator -> getExecPath("mkfs.ext3");
-	$KnownFS{ext2}{tool}      = $locator -> getExecPath("mkfs.ext2");
-	$KnownFS{squashfs}{tool}  = $locator -> getExecPath("mksquashfs");
-	$KnownFS{overlayfs}{tool} = $locator -> getExecPath("mksquashfs");
-	$KnownFS{clicfs}{tool}    = $locator -> getExecPath("mkclicfs");
-	$KnownFS{clic}{tool}      = $locator -> getExecPath("mkclicfs");
-	$KnownFS{seed}{tool}      = $locator -> getExecPath("mkfs.btrfs");
-	$KnownFS{overlay}{tool}   = $locator -> getExecPath("mksquashfs");
-	$KnownFS{clic_udf}{tool}  = $locator -> getExecPath("mkclicfs");
-	$KnownFS{compressed}{tool}= $locator -> getExecPath("mksquashfs");
-	$KnownFS{reiserfs}{tool}  = $locator -> getExecPath("mkreiserfs");
-	$KnownFS{btrfs}{tool}     = $locator -> getExecPath("mkfs.btrfs");
-	$KnownFS{xfs}{tool}       = $locator -> getExecPath("mkfs.xfs");
-	$KnownFS{zfs}{tool}       = $locator -> getExecPath("zpool");
-	$KnownFS{cpio}{tool}      = $locator -> getExecPath("cpio");
+	my %tools;
+	$tools{ext4}       = "mkfs.ext4";
+	$tools{ext3}       = "mkfs.ext3";
+	$tools{ext2}       = "mkfs.ext2";
+	$tools{squashfs}   = "mksquashfs";
+	$tools{overlayfs}  = "mksquashfs";
+	$tools{clicfs}     = "mkclicfs";
+	$tools{clic}       = "mkclicfs";
+	$tools{seed}       = "mkfs.btrfs";
+	$tools{overlay}    = "mksquashfs";
+	$tools{clic_udf}   = "mkclicfs";
+	$tools{compressed} = "mksquashfs";
+	$tools{reiserfs}   = "mkreiserfs";
+	$tools{btrfs}      = "mkfs.btrfs";
+	$tools{xfs}        = "mkfs.xfs";
+	$tools{zfs}        = "zpool";
+	$tools{cpio}       = "cpio";
+	foreach my $flag (keys %tools) {
+		$KnownFS{$flag}{tool} = $locator -> getExecPath(
+			$tools{$flag},undef,'nolog'
+		);
+	}
 	$KnownFS{ext3}{ro}        = 0;
 	$KnownFS{ext4}{ro}        = 0;
 	$KnownFS{ext2}{ro}        = 0;

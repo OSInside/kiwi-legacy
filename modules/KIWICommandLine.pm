@@ -60,7 +60,6 @@ sub new {
 	#------------------------------------------
 	my $global = KIWIGlobals -> instance();
 	$this->{gdata} = $global -> getKiwiConfig();
-
 	return $this;
 }
 
