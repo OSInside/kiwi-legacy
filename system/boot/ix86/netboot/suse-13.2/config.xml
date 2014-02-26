@@ -227,6 +227,7 @@
 		<package name="kmod-compat"/>
 		<package name="which"/>
 		<package name="udev"/>
+		<package name="wicked"/>
 	</packages>
 	<packages type="delete" profiles="default,diskless,xen">
 		<package name="cracklib-dict-full"/>
