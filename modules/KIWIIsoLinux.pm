@@ -518,6 +518,12 @@ sub createS390CDLoader {
 	my $initrd = "$src/$basez/initrd";
 	my $outfile = "$src/$basez/cd.ikr";
 	my $cmdline = 'root=/dev/sda2';
+	# Nothing to do if file already exists.
+	if (-f $outfile) {
+		$kiwi -> info ("\tUsing pre-ceated image $outfile");
+		$outfile =~ s|$src/||;
+		return $outfile;
+	}
 	# Open input files
 	if (! sysopen(image_fh,$image,O_RDONLY) ) {
 		$kiwi -> error  ("Cannot open kernel image $image: $!");
