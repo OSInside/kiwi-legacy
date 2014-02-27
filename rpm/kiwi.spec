@@ -685,6 +685,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files -n kiwi-tools
 %defattr(-, root, root)
+%dir %{_defaultdocdir}/kiwi
 %doc %{_defaultdocdir}/kiwi/README.tools
 %exclude /usr/bin/livestick
 /usr/bin/*
