@@ -93,7 +93,7 @@ function getRPMManagedData {
 	# recursive search in a find call
 	rm -f ${rpm_dir_names}.stripped
 	while read dir; do
-		if [ ! -z "$cur_dir" ] && [[ $dir =~ ^$cur_dir ]];then
+		if [ ! -z "$cur_dir" ] && [[ $dir =~ ^$cur_dir/ ]];then
 			continue
 		fi
 		cur_dir=$dir
@@ -118,7 +118,7 @@ function searchRootFSData {
 	local rpm_find_names=$(fileName rpm_find_names)
 	local rpm_dir_names=$(fileName rpm_dir_names)
 	# perform the search in root(/) with no recursion (maxdepth 0)
-	find /* -maxdepth 0 -type d -print0 | quote |\
+	find / -mindepth 1 -maxdepth 1 -print0 | quote |\
 		grep -v -E "$(filter_items)" > $rpm_find_names
 	# perform search in junks, but don't leave this machine
 	split -l 1000 $rpm_dir_names ${rpm_dir_names}_part
