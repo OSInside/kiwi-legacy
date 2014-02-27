@@ -967,6 +967,15 @@ function installBootLoaderGrub2 {
 			# ----
 			elilo --refresh-EBM -vv
 			#======================================
+			# delete non vendor grub config
+			#--------------------------------------
+			# elilo updates only the vendor config but not the one
+			# in EFI/BOOT, in order to make sure shim picks up the
+			# right config file and also to allow further updates
+			# the one from EFI/BOOT must go
+			# ----
+			rm -f /boot/efi/EFI/BOOT/grub.cfg
+			#======================================
 			# return early for elilo case
 			#--------------------------------------
 			return 0
