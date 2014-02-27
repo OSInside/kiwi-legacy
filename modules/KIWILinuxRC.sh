@@ -4331,14 +4331,6 @@ function getHWAddress {
 		grep 'link\/ether ' | cut -f6 -d ' '
 }
 #======================================
-# getIPv4Address
-#--------------------------------------
-function getIPv4Address {
-	local iface=$1
-	ip addr show dev $iface |\
-		grep 'inet ' | cut -f1 -d '/' | cut -f6 -d ' '
-}
-#======================================
 # setupNic
 #--------------------------------------
 function setupNic {
@@ -4347,6 +4339,7 @@ function setupNic {
 	local netmask=$3
 	ip addr flush dev $iface
 	ip addr add $address broadcast $netmask dev $iface
+	ip link set dev $iface up
 }
 #======================================
 # probeNetworkCard
@@ -4515,27 +4508,20 @@ function setupNetworkWicked {
 	# ----
 	local nic_config
 	local dhcp_info
+	local wicked_dhcp4=/usr/lib/wicked/bin/wickedd-dhcp4
 	for try_iface in ${dev_list[*]}; do
-		nic_config=/etc/sysconfig/network/ifcfg-$try_iface
-		dhcp_info=/var/lib/wicked/wicked-${try_iface}.info
-		cat > $nic_config <<- EOF
-			BOOTPROTO='dhcp'
-		EOF
-		if wicked ifup $try_iface;then
-			DHCPCD_STARTED="$DHCPCD_STARTED $try_iface"
-			# TODO:
-			# With the wicked dhcp client setup the following
-			# information is still missing, but used in kiwi
-			#
-			# DHCPSIADDR
-			# DHCPCHADDR
-			# DHCPSID
-			# DNSDOMAIN
-			# DNSSERVERS
-			# ----
-			cat > $dhcp_info <<- EOF
-				IPADDR=$(getIPv4Address $try_iface)
-			EOF
+		if ip link set dev $try_iface up;then
+			if [ $try_iface = "lo" ];then
+				continue
+			fi
+			dhcp_info=/var/run/wicked/wicked-${try_iface}.info
+			$wicked_dhcp4 --test $try_iface > $dhcp_info
+			if [ -s $dhcp_info ];then
+				importFile < $dhcp_info
+				if setupNic $try_iface $IPADDR $NETMASK;then
+					DHCPCD_STARTED="$DHCPCD_STARTED $try_iface"
+				fi
+			fi
 		fi
 	done
 	if [ -z "$DHCPCD_STARTED" ];then
@@ -4554,9 +4540,16 @@ function setupNetworkWicked {
 	# select interface from preferred list
 	#--------------------------------------
 	for try_iface in ${prefer_iface[*]} $DHCPCD_STARTED; do
-		dhcp_info=/var/lib/wicked/wicked-${try_iface}.info
+		dhcp_info=/var/run/wicked/wicked-${try_iface}.info
 		if [ -s $dhcp_info ]; then
 			export PXE_IFACE=$try_iface
+			ip route add default dev $PXE_IFACE
+			# Currently we don't handle routing information from DHCP
+			# As example if a default routing IP information would exist
+			# we would need to change the route as follows:
+			#
+			# ip route change default via $IP dev $PXE_IFACE
+			#
 		fi
 	done
 	#======================================
@@ -4577,9 +4570,9 @@ function setupNetworkWicked {
 	#======================================
 	# setup selected interface
 	#--------------------------------------
-	dhcp_info=/var/lib/wicked/wicked-${PXE_IFACE}.info
+	dhcp_info=/var/run/wicked/wicked-${PXE_IFACE}.info
 	if [ -s $dhcp_info ]; then
-		importFile < /var/lib/wicked/wicked-$PXE_IFACE.info
+		importFile < /var/run/wicked/wicked-${PXE_IFACE}.info
 	fi
 }
 #======================================
@@ -4881,7 +4874,9 @@ function setupNetwork {
 	IFS="," ; for i in $DNS;do
 		echo "nameserver $i" >> /etc/resolv.conf
 	done
-	DHCPCHADDR=`echo $DHCPCHADDR | tr a-z A-Z`
+	export DHCPCHADDR=$(
+		ip link show dev $PXE_IFACE | grep link | awk '{print $2}'
+	)
 }
 #======================================
 # releaseNetwork
@@ -8940,11 +8935,14 @@ function pxeSetupDownloadServer {
 		Echo "Server: $SERVER not found"
 		if [ -z "$SERVERTYPE" ] || [ "$SERVERTYPE" = "tftp" ]; then
 			if [ ! -z "$DHCPSIADDR" ];then
-				Echo "Using: $DHCPSIADDR from dhcpcd-info"
+				Echo "Using: $DHCPSIADDR from DHCP info"
 				SERVER=$DHCPSIADDR
 			elif [ ! -z "$DHCPSID" ];then
-				Echo "Using: $DHCPSID from dhcpcd-info"
+				Echo "Using: $DHCPSID from DHCP info"
 				SERVER=$DHCPSID
+			elif [ ! -z "$SERVERID" ];then
+				Echo "Using: $SERVERID from DHCP info"
+				SERVER=$SERVERID
 			else
 				systemException \
 					"Can't assign SERVER IP/name... fatal !" \
