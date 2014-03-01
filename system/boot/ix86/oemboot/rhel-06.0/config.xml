@@ -103,6 +103,7 @@
 		<package name="e2fsprogs"/>
 		<package name="gettext"/>
 		<package name="genisoimage"/>
+		<package name="syslinux"/>
 	</packages>
 	<packages type="delete">
 		<package name="cracklib-dicts"/>
