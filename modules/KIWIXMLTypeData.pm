@@ -547,9 +547,9 @@ sub getInstallBoot {
 }
 
 #==========================================
-# getInstallFailsafe
+# getInstallProvideFailsafe
 #------------------------------------------
-sub getInstallFailsafe {
+sub getInstallProvideFailsafe {
 	# ...
 	# Return the value indicating whether the boot menu should have a
 	# failsfe entry or not
@@ -941,7 +941,7 @@ sub getXMLElement {
 		$element -> setAttribute('installiso', $instIso);
 	}
 	if (! $this->{defaultinstallprovidefailsafe}) {
-		my $instFail = $this -> getInstallFailsafe();
+		my $instFail = $this -> getInstallProvideFailsafe();
 		if ($instFail) {
 			$element -> setAttribute('installprovidefailsafe', $instFail);
 		}
@@ -1460,9 +1460,9 @@ sub setInstallBoot {
 }
 
 #==========================================
-# setInstallFailsafe
+# setInstallProvideFailsafe
 #------------------------------------------
-sub setInstallFailsafe {
+sub setInstallProvideFailsafe {
 	# ...
 	# Set the value indicating whether the boot menu should have a
 	# failsfe entry or not
@@ -1472,7 +1472,7 @@ sub setInstallFailsafe {
 	my %settings = (
 		attr   => 'installprovidefailsafe',
 		value  => $instF,
-		caller => 'setInstallFailsafe'
+		caller => 'setInstallProvideFailsafe'
 	);
 	return $this -> p_setBooleanValue(\%settings);
 }

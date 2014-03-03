@@ -2009,10 +2009,10 @@ sub __addTypeToBootXML {
 	#==========================================
 	# installfailsafe
 	#------------------------------------------
-	my $installfailsafe = $systemType -> getInstallFailsafe();
-	if ($installfailsafe) {
-		$kiwi -> info ("--> installfailsafe: $installfailsafe");
-		$bootType -> setInstallFailsafe ($installfailsafe);
+	my $installprovidefailsafe = $systemType -> getInstallProvideFailsafe();
+	if ($installprovidefailsafe) {
+		$kiwi -> info ("--> installprovidefailsafe: $installprovidefailsafe");
+		$bootType -> setInstallProvideFailsafe ($installprovidefailsafe);
 		$kiwi -> done();
 	}
 	#==========================================

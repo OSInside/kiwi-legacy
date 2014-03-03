@@ -338,7 +338,7 @@ sub new {
 		$type{fsnocheck}              = $xmltype -> getFSNoCheck();
 		$type{installboot}            = $xmltype -> getInstallBoot();
 		$type{installiso}             = $xmltype -> getInstallIso();
-		$type{installprovidefailsafe} = $xmltype -> getInstallFailsafe();
+		$type{installprovidefailsafe} = $xmltype -> getInstallProvideFailsafe();
 		$type{installpxe}             = $xmltype -> getInstallPXE();
 		$type{installstick}           = $xmltype -> getInstallStick();
 		$type{luks}                   = $xmltype -> getLuksPass();
