@@ -1156,45 +1156,38 @@ function suseGFXBoot {
 		# create the archive [2]
 		[ "$newlayout" ] || make -C themes/$loader_theme prep
 		make -C themes/$loader_theme
+		# copy result files
 		test -d /image/loader || mkdir /image/loader
-		local gfximage=
-		local bootimage=
+		local gfximage=themes/$loader_theme/install/bootlogo
+		local bootimage=themes/$loader_theme/boot/message
 		if [ "$newlayout" ] ; then
 			gfximage=themes/$loader_theme/bootlogo
 			bootimage=themes/$loader_theme/message
-		else
-			gfximage=themes/$loader_theme/install/bootlogo
-			bootimage=themes/$loader_theme/boot/message
 		fi
-		if [ $loader = "isolinux" ];then
-			# isolinux boot data...
-			cp $gfximage /image/loader
-			bin/unpack_bootlogo /image/loader
-		else
-			# boot loader graphics image file...
-			if [ ! -z "$kiwi_language" ];then
-				msgdir=/image/loader/message.dir
-				mkdir $msgdir && mv $bootimage $msgdir
-				(cd $msgdir && cat message | cpio -i && rm -f message)
-				if [ "$newlayout" ];then
-					for l in `echo $kiwi_language | tr "," " "`;do
-						l=$(echo $l | cut -f1 -d_)
-						cp themes/$loader_theme/po/$l*.tr $msgdir
-						cp themes/$loader_theme/help-boot/$l*.hlp $msgdir
-					done
-				else
-					for l in `echo $kiwi_language | tr "," " "`;do
-						l=$(echo $l | cut -f1 -d_)
-						cp themes/$loader_theme/boot/$l*.tr  $msgdir
-						cp themes/$loader_theme/boot/$l*.hlp $msgdir
-						echo $l >> $msgdir/languages
-					done
-				fi
-				(cd $msgdir && find | cpio --quiet -o > ../message)
-				rm -rf $msgdir
+		cp $gfximage /image/loader
+		bin/unpack_bootlogo /image/loader
+		if [ ! -z "$kiwi_language" ];then
+			msgdir=/image/loader/message.dir
+			mkdir $msgdir && mv $bootimage $msgdir
+			(cd $msgdir && cat message | cpio -i && rm -f message)
+			if [ "$newlayout" ];then
+				for l in `echo $kiwi_language | tr "," " "`;do
+					l=$(echo $l | cut -f1 -d_)
+					cp themes/$loader_theme/po/$l*.tr $msgdir
+					cp themes/$loader_theme/help-boot/$l*.hlp $msgdir
+				done
 			else
-				mv $bootimage /image/loader
+				for l in `echo $kiwi_language | tr "," " "`;do
+					l=$(echo $l | cut -f1 -d_)
+					cp themes/$loader_theme/boot/$l*.tr  $msgdir
+					cp themes/$loader_theme/boot/$l*.hlp $msgdir
+					echo $l >> $msgdir/languages
+				done
 			fi
+			(cd $msgdir && find | cpio --quiet -o > ../message)
+			rm -rf $msgdir
+		else
+			mv $bootimage /image/loader
 		fi
 		make -C themes/$loader_theme clean
 	elif [ -f /etc/bootsplash/themes/$loader_theme/bootloader/message ];then
