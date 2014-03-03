@@ -749,11 +749,15 @@ sub createReport {
 	# Print report note...
 	#------------------------------------------
 	$kiwi -> info ("--> Created report: file://$dest/report.html\n");
-	$kiwi -> info ("--> Clone this system description with:\n");
-	if ($ip) {
-		$kiwi -> note ("\n\tgit clone root\@$ip:$dest\n\n");
-	} else {
-		$kiwi -> note ("\n\tgit clone root\@<ip-address>:$dest\n\n");
+	my $locator = KIWILocator -> instance();
+	my $git = $locator -> getExecPath ("git");
+	if ($git) {
+		$kiwi -> info ("--> Clone this system description with:\n");
+		if ($ip) {
+			$kiwi -> note ("\n\tgit clone root\@$ip:$dest\n\n");
+		} else {
+			$kiwi -> note ("\n\tgit clone root\@<ip-address>:$dest\n\n");
+		}
 	}
 	return $this;
 }

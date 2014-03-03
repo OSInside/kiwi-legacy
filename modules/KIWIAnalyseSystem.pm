@@ -80,12 +80,16 @@ sub new {
 			$kiwi -> failed ();
 			return;
 		}
-		$data = KIWIQX::qxx ("cd $destdir && git init 2>&1");
-		$code = $? >> 8;
-		if ($code != 0) {
-			$kiwi -> error  ("git init failed: $data");
-			$kiwi -> failed ();
-			return;
+		my $locator = KIWILocator -> instance();
+		my $git = $locator -> getExecPath ("git");
+		if ($git) {
+			$data = KIWIQX::qxx ("cd $destdir && $git init 2>&1");
+			$code = $? >> 8;
+			if ($code != 0) {
+				$kiwi -> error  ("git init failed: $data");
+				$kiwi -> failed ();
+				return;
+			}
 		}
 		$data = KIWIQX::qxx (
 			"cd $destdir && git config user.email \"$mail\" 2>&1"
@@ -193,14 +197,22 @@ sub commitTransaction {
 	my $this = shift;
 	my $dest = $this->{destdir};
 	my $kiwi = $this->{kiwi};
+	my $locator = KIWILocator -> instance();
+	my $git = $locator -> getExecPath ("git");
+	if (! $git) {
+		return $this;
+	}
 	my $text = '- automatic transaction commit';
-	my $data = KIWIQX::qxx ("cd $dest && git add . 2>&1");
+	my $data = KIWIQX::qxx ("cd $dest && $git add . 2>&1");
 	my $code = $? >> 8;
 	if ($code == 0) {
-		$data = KIWIQX::qxx ("cd $dest && git commit -a -m \"$text\" 2>&1");
+		$data = KIWIQX::qxx ("cd $dest && $git commit -a -m \"$text\" 2>&1");
 		$code = $? >> 8;
 	}
-	return $code;
+	if ($code != 0) {
+		return;
+	}
+	return $this;
 }
 
 #==========================================
