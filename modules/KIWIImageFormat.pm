@@ -711,7 +711,7 @@ sub createVMwareConfiguration {
 		print $VMWFD $device.':0.redo = ""'."\n";
 	} else {
 		# SCSI Interface...
-		my $device = 'lsilogic' . $diskID;
+		my $device = 'scsi' . $diskID;
 		print $VMWFD $device.'.present = "true"'."\n";
 		print $VMWFD $device.'.sharedBus = "none"'."\n";
 		print $VMWFD $device.'.virtualDev = "' . $diskController . '"' . "\n";
