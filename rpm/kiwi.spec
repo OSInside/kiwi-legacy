@@ -459,8 +459,8 @@ Recommends:     atftp
 Recommends:     gfxboot
 Recommends:     memtest86+
 Recommends:     kiwi
-Recommends:     Kiwi-desc-oemboot
-Recommends:     Kiwi-desc-vmxboot
+Recommends:     kiwi-desc-oemboot
+Recommends:     kiwi-desc-vmxboot
 Recommends:     kiwi-desc-isoboot
 Recommends:     kiwi-desc-netboot
 Recommends:     kiwi-templates
