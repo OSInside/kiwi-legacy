@@ -68,7 +68,6 @@ Requires:       checkmedia
 Requires:       coreutils
 Requires:       kiwi-tools >= %{version}
 Requires:       libxslt
-Requires:       git
 Requires:       perl-Class-Singleton
 Requires:       perl-Config-IniFiles
 Requires:       perl-Digest-SHA1
@@ -93,6 +92,7 @@ Requires:       perl-satsolver >= 0.42
 %if 0%{?suse_version}
 Recommends:     db45-utils
 Recommends:     db48-utils
+Recommends:     git
 %endif
 # obsoletes
 Obsoletes:      kiwi-desc-usbboot <= 4.81
