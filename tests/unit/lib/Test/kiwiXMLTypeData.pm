@@ -1348,16 +1348,16 @@ sub test_getInstallBoot {
 }
 
 #==========================================
-# test_getInstallFailsafe
+# test_getInstallProvideFailsafe
 #------------------------------------------
-sub test_getInstallFailsafe {
+sub test_getInstallProvideFailsafe {
 	# ...
-	# Test the getInstallFailsafe method
+	# Test the getInstallProvideFailsafe method
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $typeDataObj = $this -> __getTypeObj();
-	my $instFS = $typeDataObj -> getInstallFailsafe();
+	my $instFS = $typeDataObj -> getInstallProvideFailsafe();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -1369,17 +1369,17 @@ sub test_getInstallFailsafe {
 }
 
 #==========================================
-# test_getInstallFailsafeDefault
+# test_getInstallProvideFailsafeDefault
 #------------------------------------------
-sub test_getInstallFailsafeDefault {
+sub test_getInstallProvideFailsafeDefault {
 	# ...
-	# Test the getInstallFailsafe method, verify the default setting
+	# Test the getInstallProvideFailsafe method, verify the default setting
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my %init = ( image => 'cpio' );
 	my $typeDataObj = KIWIXMLTypeData -> new(\%init);
-	my $instFS = $typeDataObj -> getInstallFailsafe();
+	my $instFS = $typeDataObj -> getInstallProvideFailsafe();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -3736,16 +3736,16 @@ sub test_setInstallBootNoArg {
 }
 
 #==========================================
-# test_setInstallFailsafe
+# test_setInstallProvideFailsafe
 #------------------------------------------
-sub test_setInstallFailsafe {
+sub test_setInstallProvideFailsafe {
 	# ...
-	# Test the setInstallFailsafe method
+	# Test the setInstallProvideFailsafe method
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $typeDataObj = $this -> __getTypeObj();
-	$typeDataObj = $typeDataObj -> setInstallFailsafe('true');
+	$typeDataObj = $typeDataObj -> setInstallProvideFailsafe('true');
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -3753,7 +3753,7 @@ sub test_setInstallFailsafe {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	$this -> assert_not_null($typeDataObj);
-	my $failS = $typeDataObj -> getInstallFailsafe();
+	my $failS = $typeDataObj -> getInstallProvideFailsafe();
 	$msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	$msgT = $kiwi -> getMessageType();
@@ -3765,16 +3765,16 @@ sub test_setInstallFailsafe {
 }
 
 #==========================================
-# test_setInstallFailsafeNoArg
+# test_setInstallProvideFailsafeNoArg
 #------------------------------------------
-sub test_setInstallFailsafeNoArg {
+sub test_setInstallProvideFailsafeNoArg {
 	# ...
-	# Test the setInstallFailsafe method with no argument
+	# Test the setInstallProvideFailsafe method with no argument
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $typeDataObj = $this -> __getTypeObj();
-	my $res = $typeDataObj -> setInstallFailsafe();
+	my $res = $typeDataObj -> setInstallProvideFailsafe();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -3782,7 +3782,7 @@ sub test_setInstallFailsafeNoArg {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	$this -> assert_not_null($typeDataObj);
-	my $failS = $typeDataObj -> getInstallFailsafe();
+	my $failS = $typeDataObj -> getInstallProvideFailsafe();
 	$msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	$msgT = $kiwi -> getMessageType();
@@ -3794,18 +3794,18 @@ sub test_setInstallFailsafeNoArg {
 }
 
 #==========================================
-# test_setInstallFailsafeUnknownArg
+# test_setInstallProvideFailsafeUnknownArg
 #------------------------------------------
-sub test_setInstallFailsafeUnknownArg {
+sub test_setInstallProvideFailsafeUnknownArg {
 	# ...
-	# Test the setInstallFailsafe method with an unrecognized argument
+	# Test the setInstallProvideFailsafe method with an unrecognized argument
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $typeDataObj = $this -> __getTypeObj();
-	my $res = $typeDataObj -> setInstallFailsafe('5');
+	my $res = $typeDataObj -> setInstallProvideFailsafe('5');
 	my $msg = $kiwi -> getMessage();
-	my $expected = 'KIWIXMLTypeData:setInstallFailsafe: unrecognized '
+	my $expected = 'KIWIXMLTypeData:setInstallProvideFailsafe: unrecognized '
 		. 'argument expecting "true" or "false".';
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -3813,7 +3813,7 @@ sub test_setInstallFailsafeUnknownArg {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('failed', $state);
 	$this -> assert_null($res);
-	my $failS = $typeDataObj -> getInstallFailsafe();
+	my $failS = $typeDataObj -> getInstallProvideFailsafe();
 	$msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	$msgT = $kiwi -> getMessageType();
