@@ -1049,15 +1049,26 @@ sub init {
 	if (@AddRepository) {
 		my $numRepos = scalar @AddRepository;
 		my $numTypes = scalar @AddRepositoryType;
+		my $numAlia  = scalar @AddRepositoryAlias;
+		my $numPrio  = scalar @AddRepositoryPriority;
+		my $msg;
+		if (($numAlia) && ($numRepos != $numAlia)) {
+			$msg = 'Must specify repository alias for each given ';
+			$msg.= 'repository. Mismatch number of arguments.';
+		}
+		if (($numPrio) && ($numRepos != $numPrio)) {
+			$msg = 'Must specify repository priority for each given ';
+			$msg.= 'repository. Mismatch number of arguments.';
+		}
 		if ($numRepos != $numTypes) {
-			my $msg = 'Must specify repository type for each given '
-				. 'repository. Mismatch number of arguments.';
+			$msg = 'Must specify repository type for each given ';
+			$msg.= 'repository. Mismatch number of arguments.';
+		}
+		if ($msg) {
 			$kiwi -> error($msg);
 			$kiwi -> failed();
 			kiwiExit (1);
 		}
-		my $numAlia = scalar @AddRepositoryAlias;
-		my $numPrio = scalar @AddRepositoryPriority;
 		my $idx = 0;
 		my @reposToAdd;
 		while ($idx < $numRepos) {
