@@ -804,7 +804,7 @@ sub init {
 		"disk-start-sector=i"   => \$DiskStartSector,
 		"disk-alignment=i"      => \$DiskAlignment,
 		"disk-sector-size=i"    => \$DiskBIOSSectorSize,
-		"v|verbose=i"           => \$Verbosity,
+		"verbose|v=i"           => \$Verbosity,
 		"version"               => \$Version,
 		"yes|y"                 => \$defaultAnswer,
 	);
