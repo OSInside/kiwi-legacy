@@ -70,7 +70,8 @@
 	<packages type="image">
 <!-- Patterns seems broken atm, e,g wants yast2-mouse but does not exist -->
 <!--		<namedCollection name="base"/>-->
-		<product name="SUSE_SLES"/>
+<!-- Product SUSE_SLES does not yet exist -->
+<!--		<product name="SUSE_SLES"/>-->
 <!-- The following packages does not yet exist for SLE12 -->
 <!--		<package name="plymouth-branding-SLES" bootinclude="true"/>-->
 <!--		<package name="grub2-branding-SLES" bootinclude="true"/>-->
@@ -92,7 +93,10 @@
 		<package name="iproute2"/>
 		<package name="kiwi"/>
 	</packages>
-	<packages type="iso"><!-- The following packages does not yet exist for SLE12 --><!--		<package name="gfxboot-branding-SLES" bootinclude="true" bootdelete="true"/>--></packages>
+	<packages type="iso">
+<!-- The following packages does not yet exist for SLE12 -->
+		<package name="gfxboot-branding-SLES" bootinclude="true" bootdelete="true"/>
+	</packages>
 	<packages type="image" profiles="ec2Flavour">
 		<package name="kernel-ec2" replaces="kernel-default"/>
 		<package name="kernel-ec2" replaces="kernel-xen"/>
