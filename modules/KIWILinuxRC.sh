@@ -932,7 +932,7 @@ function installBootLoaderGrub2 {
 				# Modified by YaST2.
 				timeout = $timeout
 				##YaST - boot_efilabel = "SUSE Linux Enterprise Server 11"
-				vendor-directory = SuSE
+				vendor-directory = BOOT
 				secure-boot = on
 				prompt
 				image  = /boot/vmlinuz
@@ -943,10 +943,6 @@ function installBootLoaderGrub2 {
 				description = Linux
 				root = $(getDiskID $imageRootDevice)
 			EOF
-			#======================================
-			# copy vendor directory
-			#--------------------------------------
-			cp -a /boot/efi/EFI/BOOT /boot/efi/EFI/SuSE
 			#======================================
 			# update sysconfig/bootloader
 			#--------------------------------------
@@ -966,15 +962,6 @@ function installBootLoaderGrub2 {
 			# title for this system
 			# ----
 			elilo --refresh-EBM -vv
-			#======================================
-			# delete non vendor grub config
-			#--------------------------------------
-			# elilo updates only the vendor config but not the one
-			# in EFI/BOOT, in order to make sure shim picks up the
-			# right config file and also to allow further updates
-			# the one from EFI/BOOT must go
-			# ----
-			rm -f /boot/efi/EFI/BOOT/grub.cfg
 			#======================================
 			# return early for elilo case
 			#--------------------------------------
