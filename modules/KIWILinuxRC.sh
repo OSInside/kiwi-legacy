@@ -3081,8 +3081,27 @@ function updateBootDeviceFstab {
 	local prefix=$1
 	local sdev=$2
 	local nfstab=$prefix/etc/fstab
+	local mount=boot_bind
 	#======================================
-	# check for kiwi_JumpPart
+	# Store boot entry
+	#--------------------------------------
+	if [ -e /mnt/$mount ];then
+		local diskByID=$(getDiskID $sdev)
+		if [ ! -z "$FSTYPE" ];then
+			FSTYPE_SAVE=$FSTYPE
+		fi
+		probeFileSystem $sdev
+		if [ -z "$FSTYPE" ] || [ "$FSTYPE" = "unknown" ];then
+			FSTYPE="auto"
+		fi
+		echo "$diskByID /$mount $FSTYPE defaults 1 2" >> $nfstab
+		echo "/$mount/boot /boot none bind 0 0" >> $nfstab
+		if [ ! -z "$FSTYPE_SAVE" ];then
+			FSTYPE=$FSTYPE_SAVE
+		fi
+	fi
+	#======================================
+	# Store boot/efi entry
 	#--------------------------------------
 	if [ ! -z "$kiwi_JumpPart" ];then
 		local jdev=$(ddn $imageDiskDevice $kiwi_JumpPart)
@@ -3092,29 +3111,6 @@ function updateBootDeviceFstab {
 			jdev=$(getDiskID $jdev)
 			echo "$jdev /boot/efi $fstype defaults 0 0" >> $nfstab
 		fi
-	fi
-	#======================================
-	# Return if no action required
-	#--------------------------------------
-	local mount=boot_bind
-	if [ ! -e /mnt/$mount ];then
-		return
-	fi
-	local diskByID=$(getDiskID $sdev)
-	if [ ! -z "$FSTYPE" ];then
-		FSTYPE_SAVE=$FSTYPE
-	fi
-	#======================================
-	# probe filesystem
-	#--------------------------------------
-	probeFileSystem $sdev
-	if [ -z "$FSTYPE" ] || [ "$FSTYPE" = "unknown" ];then
-		FSTYPE="auto"
-	fi
-	echo "$diskByID /$mount $FSTYPE defaults 1 2" >> $nfstab
-	echo "/$mount/boot /boot none bind 0 0" >> $nfstab
-	if [ ! -z "$FSTYPE_SAVE" ];then
-		FSTYPE=$FSTYPE_SAVE
 	fi
 }
 #======================================
