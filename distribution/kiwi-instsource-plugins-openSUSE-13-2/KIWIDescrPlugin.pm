@@ -71,9 +71,7 @@ sub new
   my $tpack      = $ini->val('base', 'toolpack'); # scalar value
   my $enable     = $ini->val('base', 'defaultenable'); # scalar value
 
-  my $pdbfiles  = $ini->val('options', 'pdbfiles');
   my @params	 = $ini->val('options', 'parameter');
-  my @langs     = $ini->val('options', 'language');
 
   my $gzip       = $ini->val('target', 'compress');
 
@@ -86,7 +84,6 @@ sub new
      or not defined($tdir)
      or not defined($tpack)
      or not defined($enable)
-     or not defined($pdbfiles)
      or not defined($gzip)
      or not (@params)) {
     $this->logMsg("E", "Plugin ini file <$config> seems broken!");
@@ -120,11 +117,9 @@ sub new
   $this->{m_tool} = $tool;
   $this->{m_tooldir} = $tdir;
   $this->{m_toolpack} = $tpack;
-  $this->{m_pdbfiles} = $pdbfiles;
   $this->{m_createrepo} = $createrepo;
   $this->{m_rezip} = $rezip;
   $this->{m_params} = $params;
-  $this->{m_languages} = join(' ', @langs);
   $this->{m_compress} = $gzip;
   if($enable != 0) {
     $this->ready(1);
@@ -190,6 +185,9 @@ sub executeDir
   my $coll  = $this->{m_collect};
   my $datadir  = $coll->productData()->getInfo("DATADIR");
   my $descrdir = $coll->productData()->getInfo("DESCRDIR");
+  my $cpeid = $coll->productData()->getInfo("CPEID");
+  my $repoid = $coll->productData()->getInfo("REPOID");
+  my $distroname = $coll->productData()->getInfo("DISTRIBUTION").".".$coll->productData()->getInfo("VERSION");
   my $createrepomd = $coll->productData()->getVar("CREATE_REPOMD");
 
   my $targetdir = $paths[0]."/".$descrdir;
@@ -204,7 +202,7 @@ sub executeDir
 
   $this->logMsg("I", "Calling ".$this->name()." for directories <@paths>:");
 
-  my $cmd = "$this->{m_tooldir}/$this->{m_tool} $this->{m_pdbfiles} $pathlist $this->{m_params} $this->{m_languages} -o ".$paths[0]."/".$descrdir;
+  my $cmd = "$this->{m_tooldir}/$this->{m_tool} $pathlist $this->{m_params} -o ".$paths[0]."/".$descrdir;
   $this->logMsg("I", "Executing command <$cmd>");
   my $data = qx( $cmd );
   my $status = $? >> 8;
@@ -215,7 +213,10 @@ sub executeDir
 
   if ( $createrepomd eq "true" ) {
     foreach my $p (@paths) {
-      my $cmd = "$this->{m_createrepo} $p/$datadir ";
+      my $cmd = "$this->{m_createrepo}";
+      $cmd .= " --repo=\"$repoid\"" if $repoid;
+      $cmd .= " --distro=\"$cpeid,$distroname\"" if $cpeid && $distroname;
+      $cmd .= " $p/$datadir";
       $this->logMsg("I", "Executing command <$cmd>");
       my $data = qx( $cmd );
       my $status = $? >> 8;
@@ -234,16 +235,35 @@ sub executeDir
     }
   }
 
-#  foreach my $trans (glob('/usr/share/locale/en_US/LC_MESSAGES/package-translations-*.mo')) {
-#     $trans = basename($trans, ".mo");
-#     $trans =~ s,.*-,,;
-#     my $cmd = "/usr/bin/translate_packages.pl $trans < $targetdir/packages.en > $targetdir/packages.$trans";
-#     my $data = qx( $cmd );
-#     if($? >> 8) {
-#	 $this->logMsg("E", "Calling <translate_packages.pl $trans > failed:\n$data\n");
-#	 return 1;
-#     }
-#  }
+  foreach my $trans (glob('/usr/share/locale/en_US/LC_MESSAGES/package-translations-*.mo')) {
+     $trans = basename($trans, ".mo");
+     $trans =~ s,.*-,,;
+     my $cmd = "/usr/bin/translate_packages.pl $trans < $targetdir/packages.en > $targetdir/packages.$trans";
+     my $data = qx( $cmd );
+     if($? >> 8) {
+	 $this->logMsg("E", "Calling <translate_packages.pl $trans > failed:\n$data\n");
+	 return 1;
+     }
+  }
+  # one more time for english to insert possible EULAs
+  my $cmd = "/usr/bin/translate_packages.pl en < $targetdir/packages.en > $targetdir/packages.en.new && mv $targetdir/packages.en.new $targetdir/packages.en";
+  my $data = qx( $cmd );
+  if($? >> 8) {
+     $this->logMsg("E", "Calling <translate_packages.pl en > failed:\n$data\n");
+     return 1;
+  }
+
+  if (-x "/usr/bin/extract-appdata-icons" && -s "$targetdir/appdata.xml") {
+     my $cmd = "/usr/bin/extract-appdata-icons $targetdir/appdata.xml $targetdir";
+     my $data = qx( $cmd );
+     if($? >> 8) {
+       $this->logMsg("E", "Calling <extract-appdata-icons $targetdir/appdata.xml $targetdir> failed:\n$data\n");
+       return 1;
+     }
+     if($this->{m_compress} =~ m{yes}i) {
+         system("gzip", "--rsyncable", "$targetdir/appdata.xml");
+     }
+  }
 
   if($this->{m_compress} =~ m{yes}i) {
       foreach my $pfile(glob("$targetdir/packages*")) {
