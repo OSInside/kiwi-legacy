@@ -186,6 +186,7 @@ sub executeDir
   my $datadir  = $coll->productData()->getInfo("DATADIR");
   my $descrdir = $coll->productData()->getInfo("DESCRDIR");
   my $cpeid = $coll->productData()->getInfo("CPEID");
+  my $repoid = $coll->productData()->getInfo("REPOID");
   my $distroname = $coll->productData()->getInfo("DISTRIBUTION").".".$coll->productData()->getInfo("VERSION");
   my $createrepomd = $coll->productData()->getVar("CREATE_REPOMD");
 
@@ -213,6 +214,7 @@ sub executeDir
   if ( $createrepomd eq "true" ) {
     foreach my $p (@paths) {
       my $cmd = "$this->{m_createrepo}";
+      $cmd .= " --repo=\"$repoid\"" if $repoid;
       $cmd .= " --distro=\"$cpeid,$distroname\"" if $cpeid && $distroname;
       $cmd .= " $p/$datadir";
       $this->logMsg("I", "Executing command <$cmd>");
