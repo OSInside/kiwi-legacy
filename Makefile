@@ -23,6 +23,7 @@ tftp_prefix = ${buildroot}/srv/tftpboot
 doc_prefix  = ${buildroot}/usr/share/doc/packages
 man_prefix  = ${buildroot}/usr/share/man
 emacs_prefix= ${buildroot}/usr/share/emacs
+etc_prefix  = ${buildroot}/etc
 
 #============================================
 # Variables... 
@@ -48,6 +49,7 @@ TFTPUPLOAD  = ${tftp_prefix}/upload
 TFTPIMAGE   = ${tftp_prefix}/image
 PACKDOCVZ   = ${doc_prefix}/kiwi
 MANVZ       = ${man_prefix}/man1
+BASHCOMPL   = ${etc_prefix}/bash_completion.d
 
 ifdef KIWIVERBTEST
 TESTVERBOSE = --verbose
@@ -77,7 +79,7 @@ install:
 	install -d -m 755 ${TFTPKIWI} ${TFTPBOOT} ${TFTPBOOTCONF} ${TFTPIMAGE}
 	install -d -m 755 ${TFTPBOOTBOOT} ${KIWILOCVZ} ${KIWIKEYVZ} ${KIWIMETAVZ}
 	install -d -m 755 ${TFTPUPLOAD} ${KIWIREPO}
-	install -d -m 755 ${PACKDOCVZ} ${MANVZ}
+	install -d -m 755 ${PACKDOCVZ} ${MANVZ} ${BASHCOMPL}
 	install -d -m 755 ${TOOLSVZ} ${INITVZ} ${LIVESTICKVZ}
 	install -d -m 755 ${KIWIEDITING} ${KIWIEMACS} ${KIWITESTS}
 
@@ -87,6 +89,8 @@ install:
 	# for Emacs
 	install -m 644 ./editing/suse-start-kiwi-mode.el ${KIWIEMACS}
 	install -m 644 ./editing/suse-start-kiwi-xmllocator.xml ${KIWIEDITING}
+	# for Bash
+	install -m 644 ./editing/kiwi.sh ${BASHCOMPL}
 
 	#============================================
 	# install .revision file
@@ -236,6 +240,7 @@ uninstall:
 	rm -rf /usr/share/doc/packages/kiwi
 	rm -f /usr/sbin/kiwi
 	rm -f /usr/share/emacs/site-lisp/suse-start-kiwi-mode.el
+	rm -f /etc/bash_completion.d/kiwi.sh
 
 build:
 	./.doit -p --local

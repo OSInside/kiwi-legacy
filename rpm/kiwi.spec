@@ -630,6 +630,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/kiwi/locale
 %{_datadir}/kiwi/repo
 %{_datadir}/emacs/site-lisp
+%config /etc/bash_completion.d/kiwi.sh
 %exclude %{_datadir}/kiwi/metadata/KIWIIsoLinux-AppleFileMapping.map
 %exclude %{_datadir}/kiwi/modules/KIWICollect.pm
 %exclude %{_datadir}/kiwi/modules/KIWIRepoMetaHandler.pm
