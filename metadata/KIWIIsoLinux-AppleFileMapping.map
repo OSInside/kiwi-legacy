@@ -49,7 +49,7 @@ yaboot.conf        Ascii 'ttxt' 'TEXT' "os-chooser between MacOS and yaboot"
 yaboot.cnf         Ascii 'ttxt' 'TEXT' "os-chooser between MacOS and yaboot"
 os-chooser         Ascii 'chrp' 'tbxi' "os-chooser between MacOS and yaboot"
 os-chooser.example Ascii 'ttxt' 'TEXT' "os-chooser between MacOS and yaboot"
-grub2.core         Raw   'chrp' 'tbxi' "Bootable GRUB2 executable"
+core.elf           Raw   'chrp' 'tbxi' "Bootable GRUB2 executable"
 
 generate_os_chooser.sh        Raw    'R*ch'    'TEXT'   "BBEdit Text"
 
