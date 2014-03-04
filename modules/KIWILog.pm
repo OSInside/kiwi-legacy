@@ -468,6 +468,10 @@ sub printLog {
 	my $date    = $this -> getPrefix ( $lglevel );
 	my $trace   = KIWITrace -> instance();
 	#==========================================
+	# no logdata -> return
+	#------------------------------------------
+	return if ! $logdata;
+	#==========================================
 	# check log status 
 	#------------------------------------------
 	if (! defined $lglevel) {

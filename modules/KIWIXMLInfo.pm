@@ -252,7 +252,7 @@ sub __solve {
 		return;
 	}
 	if (@{$psolve -> getFailedJobs()}) {
-		$kiwi -> error ("SaT solver failed jobs found !");
+		$kiwi -> error ("SaT solver failed jobs found !\n");
 		$kiwi -> error ($psolve -> getProblemInfo());
 		return;
 	}
