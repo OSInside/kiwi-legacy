@@ -127,11 +127,11 @@ sub new {
 	$base{ia64}{loader}  = "undef";
 	$base{ia64}{efi}     = "boot/ia64/efi";
 	# ppc64
-	$base{ppc64}{boot}    = "suseboot";
+	$base{ppc64}{boot}    = "boot/ppc64";
 	$base{ppc64}{loader}  = "undef";
 	$base{ppc64}{efi}     = "undef";
 	# ppc64le
-	$base{ppc64le}{boot}    = "suseboot";
+	$base{ppc64le}{boot}    = "boot/ppc64le";
 	$base{ppc64le}{loader}  = "undef";
 	$base{ppc64le}{efi}     = "undef";
 	#=======================================
