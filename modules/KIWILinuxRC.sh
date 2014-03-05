@@ -4540,12 +4540,11 @@ function setupNetworkWicked {
 		if [ -s $dhcp_info ]; then
 			export PXE_IFACE=$try_iface
 			ip route add default dev $PXE_IFACE
-			# Currently we don't handle routing information from DHCP
-			# As example if a default routing IP information would exist
-			# we would need to change the route as follows:
-			#
-			# ip route change default via $IP dev $PXE_IFACE
-			#
+			if [ ! -z "$GATEWAYS" ];then
+				# Use first entry as primary gateway
+				local gw=$(echo $GATEWAYS | cut -f1 -d " ")
+				ip route change default via $gw dev $PXE_IFACE
+			fi
 		fi
 	done
 	#======================================
