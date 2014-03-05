@@ -27,7 +27,7 @@ Url:            http://github.com/openSUSE/kiwi
 Name:           kiwi
 License:        GPL-2.0
 Group:          System/Management
-Version:        5.06.44
+Version:        5.06.45
 Release:        0
 # requirements to build packages
 BuildRequires:  diffutils
