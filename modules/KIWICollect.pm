@@ -958,6 +958,16 @@ sub addAppdata {
 	$this->logMsg('I', "taking $packPointer->{'appdata'}");
 	my $XML = FileHandle -> new();
 	$XML -> open ($packPointer->{'appdata'});
+
+	my $xml  = XML::LibXML -> new();
+	eval { $xml -> parse_fh ( $XML ); };
+	if ($@) {
+		$this->logMsg('W', "ignoring broken appdata file");
+		$XML -> close();
+		return;
+	}
+	$XML->seek(0, 0);
+
 	while ( <$XML> ) {
 		next if m,<\?xml,;
 		next if m,^\s*</?applications,;
