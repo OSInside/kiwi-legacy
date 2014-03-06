@@ -869,7 +869,7 @@ sub mainTask
 					if ($firmware eq "efi" || $firmware eq "uefi") {
 						if (grep {"x86_64" eq $_} $this->{m_archlist}->headList()) {
 							$this->logMsg('I', "Add Live setup");
-							$iso -> addBootLive(1);
+							$iso -> addBootLive();
 						}
 					}
 					$this->logMsg('I', "Boot methods called successfully");
