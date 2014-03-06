@@ -204,6 +204,22 @@ sub createReport {
 	print $FD ' src=".report/d3/d3.layout.js"></script>'."\n";
 	print $FD '<script type="text/javascript"';
 	print $FD ' src=".report/d3/kiwi.js"></script>'."\n";
+	print $FD '<script src="http://code.jquery.com/jquery-1.11.0.min.js">';
+	print $FD '</script>'."\n";
+	print $FD '<script type="text/javascript">'."\n";
+	print $FD '  $(document).on("ready", function(){'."\n";
+	print $FD '    $(".infoPanel").each(function(index, val) {'."\n";
+	print $FD '      $("h1").css({'."\n";
+	print $FD '        "cursor": "pointer"'."\n";
+	print $FD '      })'."\n";
+	print $FD '      $(this).children(".panel-wraper").show()'."\n";
+	print $FD '    })'."\n";
+	print $FD '    $("h1").click(function(event) {'."\n";
+	print $FD '  $(this).parent().children(".panel-wraper").slideToggle(400)';
+	print $FD "\n";
+	print $FD '  });'."\n";
+	print $FD '})'."\n";
+	print $FD '</script>'."\n";
 	print $FD '</head>'."\n";
 	#==========================================
 	# Container Menu
@@ -282,6 +298,7 @@ sub createReport {
 	print $FD '<div class="infoPanel">'."\n";
 	print $FD '<a name="kernel"></a>'."\n";
 	print $FD '<h1>Currently active kernel version</h1>'."\n";
+	print $FD '<div class="panel-wraper">'."\n";
 	print $FD '<p>'."\n";
 	print $FD 'The table below shows the packages required for the currently ';
 	print $FD 'active kernel. The generated image description template ';
@@ -313,6 +330,7 @@ sub createReport {
 		print $FD '</table>'."\n";
 	}
 	print $FD '</div>'."\n";
+	print $FD '</div>'."\n";
 	#==========================================
 	# Hardware dependent packages report
 	#------------------------------------------
@@ -320,6 +338,7 @@ sub createReport {
 		print $FD '<div class="infoPanel">'."\n";
 		print $FD '<a name="RPM-packages"></a>'."\n";
 		print $FD '<h1>Hardware dependent RPM packages </h1>'."\n";
+		print $FD '<div class="panel-wraper">'."\n";
 		print $FD '<p>'."\n";
 		print $FD 'The table below shows packages that depend on specific ';
 		print $FD 'hardware Please note that it might be required to have a ';
@@ -337,6 +356,7 @@ sub createReport {
 		}
 		print $FD '</table>'."\n";
 		print $FD '</div>'."\n";
+		print $FD '</div>'."\n";
 	}
 	#==========================================
 	# Local repository checkout(s)
@@ -345,6 +365,7 @@ sub createReport {
 		print $FD '<div class="infoPanel">'."\n";
 		print $FD '<a name="local-repositories"></a>'."\n";
 		print $FD '<h1>Local repository checkout paths </h1>'."\n";
+		print $FD '<div class="panel-wraper">'."\n";
 		print $FD '<p>'."\n";
 		print $FD 'The table below shows the local paths which belongs ';
 		print $FD 'to source control systems like git. It is assumed ';
@@ -364,6 +385,7 @@ sub createReport {
 		}
 		print $FD '</table>'."\n";
 		print $FD '</div>'."\n";
+		print $FD '</div>'."\n";
 	}
 	#==========================================
 	# GEM packages report
@@ -372,6 +394,7 @@ sub createReport {
 		print $FD '<div class="infoPanel">'."\n";
 		print $FD '<a name="gems"></a>'."\n";
 		print $FD '<h1>Installed GEM packages </h1>'."\n";
+		print $FD '<div class="panel-wraper">'."\n";
 		print $FD '<p>'."\n";
 		print $FD 'The table(s) below shows GEM packages found on the system ';
 		print $FD 'and installed by gem manually. In order to migrate them ';
@@ -392,6 +415,7 @@ sub createReport {
 			print $FD '</table>'."\n";
 		}
 		print $FD '</div>'."\n";
+		print $FD '</div>'."\n";
 	}
 	#==========================================
 	# Package/Pattern report
@@ -400,6 +424,7 @@ sub createReport {
 		print $FD '<div class="infoPanel">'."\n";
 		print $FD '<a name="multiple-RPM"></a>'."\n";
 		print $FD '<h1>RPM Package(s) installed multiple times</h1>'."\n";
+		print $FD '<div class="panel-wraper">'."\n";
 		print $FD '<p>'."\n";
 		print $FD 'The following packages are installed multiple times. ';
 		print $FD 'For a clone of the system you only need to take the ';
@@ -415,11 +440,13 @@ sub createReport {
 		}
 		print $FD '</table>'."\n";
 		print $FD '</div>'."\n";
+		print $FD '</div>'."\n";
 	}
 	if ($problem1) {
 		print $FD '<div class="infoPanel">'."\n";
 		print $FD '<a name="pattern-conflicts"></a>'."\n";
 		print $FD '<h1>Pattern conflict(s)</h1>'."\n";
+		print $FD '<div class="panel-wraper">'."\n";
 		print $FD '<p>'."\n";
 		print $FD 'The following patterns could not be solved because ';
 		print $FD 'they have dependency conflicts. Please check the list ';
@@ -443,11 +470,13 @@ sub createReport {
 		print $FD "$problem1";
 		print $FD '</pre>'."\n";
 		print $FD '</div>'."\n";
+		print $FD '</div>'."\n";
 	}
 	if ($problem2) {
 		print $FD '<div class="infoPanel">'."\n";
 		print $FD '<a name="RPM-conflicts"></a>'."\n";
 		print $FD '<h1>RPM Package conflict(s)</h1>'."\n";
+		print $FD '<div class="panel-wraper">'."\n";
 		print $FD '<p>'."\n";
 		print $FD 'The following packages could not be solved due to ';
 		print $FD 'dependency conflicts. Please check the list and ';
@@ -471,11 +500,13 @@ sub createReport {
 		print $FD "$problem2";
 		print $FD '</pre>'."\n";
 		print $FD '</div>'."\n";
+		print $FD '</div>'."\n";
 	}
 	if (($failedJob1) && (@{$failedJob1})) {
 		print $FD '<div class="infoPanel">'."\n";
 		print $FD '<a name="pattern-lost"></a>'."\n";
 		print $FD '<h1>Pattern(s) not found</h1>'."\n";
+		print $FD '<div class="panel-wraper">'."\n";
 		print $FD '<p>'."\n";
 		print $FD 'The following patterns could not be found in your ';
 		print $FD 'repository list marked as installed. Please check the ';
@@ -501,11 +532,13 @@ sub createReport {
 		}
 		print $FD '</ul>'."\n";
 		print $FD '</div>'."\n";
+		print $FD '</div>'."\n";
 	}
 	if (($failedJob2) && (@{$failedJob2})) {
 		print $FD '<div class="infoPanel">'."\n";
 		print $FD '<a name="RPM-lost"></a>'."\n";
 		print $FD '<h1>RPM Package(s) not found</h1>'."\n";
+		print $FD '<div class="panel-wraper">'."\n";
 		print $FD '<p>'."\n";
 		print $FD 'The following packages could not be found in your ';
 		print $FD 'repository list but are installed on the system ';
@@ -552,6 +585,7 @@ sub createReport {
 		}
 		print $FD '</table>'."\n";
 		print $FD '</div>'."\n";
+		print $FD '</div>'."\n";
 	}
 	#==========================================
 	# Custom files report...
@@ -560,6 +594,7 @@ sub createReport {
 		print $FD '<div class="infoPanel">'."\n";
 		print $FD '<a name="custom-files"></a>'."\n";
 		print $FD '<h1>Custom files</h1>'."\n";
+		print $FD '<div class="panel-wraper">'."\n";
 		print $FD '<p>'."\n";
 		print $FD 'Within the current custom.files sync source file you will ';
 		print $FD 'find files/directories which are not part of any package.';
@@ -577,9 +612,10 @@ sub createReport {
 		print $FD "part of the image and call $dest/custom.sync when done.";
 		print $FD 'You can watch the complete custom source file here: '."\n";
 		print $FD '</p>'."\n";
-		print $FD '<div>'."\n";
+		print $FD '<p>'."\n";
 		print $FD 'Open <a href="custom.files" target="_blank">';
 		print $FD 'Custom sync source file</a>.'."\n";
+		print $FD '</p>'."\n";
 		print $FD '</div>'."\n";
 		print $FD '</div>'."\n";
 		foreach my $type (sort keys %json) {
@@ -707,11 +743,11 @@ sub createReport {
 		print $FD '<div class="infoPanel">'."\n";
 		print $FD '<a name="custom-files-visualisation"></a>'."\n";
 		print $FD '<h1>Custom files visualisation</h1>'."\n";
+		print $FD '<div class="panel-wraper">'."\n";
 		print $FD '<p>'."\n";
 		print $FD 'For a better overview the following data reports ';
 		print $FD 'were created';
 		print $FD '</p>'."\n";
-		print $FD '<div>'."\n";
 		print $FD '<table>'."\n";
 		foreach my $type (sort keys %json) {
 			my $title;
