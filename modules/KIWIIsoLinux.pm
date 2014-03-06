@@ -1258,6 +1258,9 @@ sub makeIsoEFIBootable {
 		}
 	}
 	if ($firmware eq 'bios') {
+		$kiwi -> loginfo (
+			"makeIsoEFIBootable: No EFI firmware requested"
+		);
 		return $this;
 	}
 	my $arch = KIWIQX::qxx ("uname -m");
@@ -1266,6 +1269,12 @@ sub makeIsoEFIBootable {
 		$efi_arch = 'i386';
 	}
 	my $efi_fat = "$source/boot/$efi_arch/efi";
+	if (-e $efi_fat) {
+		$kiwi -> loginfo (
+			"makeIsoEFIBootable: EFI fat image already exists"
+		);
+		return $this;
+	}
 	my $status = KIWIQX::qxx ("mkdir -p $source/boot/$efi_arch");
 	my $result = $? >> 8;
 	if ($result == 0) {
