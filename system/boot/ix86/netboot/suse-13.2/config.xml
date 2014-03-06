@@ -229,6 +229,7 @@
 		<package name="udev"/>
 		<package name="wicked"/>
 		<package name="iproute2"/>
+		<package name="psmisc"/>
 	</packages>
 	<packages type="delete" profiles="default,diskless,xen">
 		<package name="cracklib-dict-full"/>

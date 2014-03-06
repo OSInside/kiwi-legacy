@@ -141,6 +141,7 @@
 		<package name="procps"/>
 		<package name="timezone"/>
 		<package name="udev"/>
+		<package name="psmisc"/>
 	</packages>
 	<packages type="delete">
 		<package name="cracklib-dict-full"/>

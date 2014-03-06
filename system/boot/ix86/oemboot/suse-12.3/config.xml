@@ -169,6 +169,7 @@
 		<package name="timezone"/>
 		<package name="udev"/>
 		<package name="iproute2"/>
+		<package name="psmisc"/>
 	</packages>
 	<packages type="delete">
 		<package name="cracklib-dict-full"/>
