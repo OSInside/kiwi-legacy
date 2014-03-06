@@ -164,6 +164,7 @@
 		<package name="tar"/>
 		<package name="util-linux"/>
 		<package name="xfsprogs"/>
+		<package name="iproute2"/>
 	</packages>
 	<packages type="image" profiles="diskless">
 		<package name="atftp"/>
@@ -185,6 +186,8 @@
 		<package name="procps"/>
 		<package name="tar"/>
 		<package name="util-linux"/>
+		<package name="psmisc"/>
+		<package name="iproute2"/>
 	</packages>
 	<packages type="image" profiles="custom"><!-- empty custom section to allow bootincluding custom kernel --></packages>
 	<packages type="bootstrap">
@@ -213,7 +216,6 @@
 		<package name="gpg"/>
 		<package name="info"/>
 		<package name="insserv"/>
-		<package name="iproute2"/>
 		<package name="iptables"/>
 		<package name="irqbalance"/>
 		<package name="libxcrypt"/>

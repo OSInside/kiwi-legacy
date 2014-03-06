@@ -138,6 +138,8 @@
 		<package name="which"/>
 		<package name="udev"/>
 		<package name="s390-tools"/>
+		<package name="iproute2"/>
+		<package name="psmisc"/>
 	</packages>
 	<packages type="delete">
 		<package name="cracklib-dict-full"/>
@@ -145,7 +147,6 @@
 		<package name="gdbm"/>
 		<package name="info"/>
 		<package name="insserv"/>
-		<package name="iproute2"/>
 		<package name="make"/>
 		<package name="mingetty"/>
 		<package name="Mesa"/>

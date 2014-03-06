@@ -137,6 +137,8 @@
 		<package name="module-init-tools"/>
 		<package name="which"/>
 		<package name="udev"/>
+		<package name="iproute2"/>
+		<package name="psmisc"/>
 	</packages>
 	<packages type="delete" profiles="default,ppc64">
 		<package name="cracklib-dict-full"/>
@@ -145,7 +147,6 @@
 		<package name="gdbm"/>
 		<package name="info"/>
 		<package name="insserv"/>
-		<package name="iproute2"/>
 		<package name="logrotate"/>
 		<package name="make"/>
 		<package name="mingetty"/>

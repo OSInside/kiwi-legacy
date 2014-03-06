@@ -138,6 +138,7 @@
 		<package name="which"/>
 		<package name="udev"/>
 		<package name="s390-tools"/>
+		<package name="psmisc"/>
 	</packages>
 	<packages type="delete">
 		<package name="cracklib-dict-full"/>

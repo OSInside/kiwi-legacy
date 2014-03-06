@@ -125,6 +125,7 @@
 		<package name="glibc-locale"/>
 		<package name="procps"/>
 		<package name="udev"/>
+		<package name="iproute2"/>
 	</packages>
 	<packages type="delete">
 		<package name="audit-libs"/>
@@ -140,7 +141,6 @@
 		<package name="gpg"/>
 		<package name="info"/>
 		<package name="insserv"/>
-		<package name="iproute2"/>
 		<package name="iptables"/>
 		<package name="limal"/>
 		<package name="limal-perl"/>
