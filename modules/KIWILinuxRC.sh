@@ -4315,7 +4315,9 @@ function updateMTAB {
 #--------------------------------------
 function getNicNames {
 	for nic in $(ip -4 -o link | cut -f2 -d:);do
-		echo $nic
+		if [ ! $nic = 'lo' ];then
+			echo $nic
+		fi
 	done
 }
 #======================================
@@ -4790,15 +4792,6 @@ function setupNetwork {
 	local hwicmd=/usr/sbin/hwinfo
 	local opts="--noipv4ll -p"
 	local try_iface
-	#======================================
-	# global variable setup
-	#--------------------------------------
-	# setting interface names will hurt in the future because
-	# the names are no longer predictable. Read the following for
-	# further details: http://www.freedesktop.org
-	#     --> wiki/Software/systemd/PredictableNetworkInterfaceNames
-	# ----
-	export prefer_iface=eth0
 	export DHCPCD_STARTED=""
 	#======================================
 	# detect iface and HWaddr
@@ -4809,6 +4802,18 @@ function setupNetwork {
 		dev_list[$index]=$DEV
 		index=$((index + 1))
 	done
+	if [ $index = 0 ];then
+		systemException \
+			"No network interfaces found" \
+		"reboot"
+	fi
+	#======================================
+	# preselect first nic as a start
+	#--------------------------------------
+	export prefer_iface=${dev_list[0]}
+	#======================================
+	# continue to be smarter in nic check
+	#--------------------------------------
 	if [ -z $BOOTIF ];then
 		# /.../
 		# there is no PXE boot interface information. We will use
