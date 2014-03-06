@@ -155,7 +155,6 @@
 		<package name="hdparm"/>
 		<package name="info"/>
 		<package name="insserv"/>
-		<package name="iproute2"/>
 		<package name="lvm2"/>
 		<package name="make"/>
 		<package name="memtest86+"/>

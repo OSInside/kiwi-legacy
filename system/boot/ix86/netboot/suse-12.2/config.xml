@@ -193,6 +193,7 @@
 		<package name="reiserfs"/>
 		<package name="tar"/>
 		<package name="xfsprogs"/>
+		<package name="iproute2"/>
 	</packages>
 	<packages type="image" profiles="custom"><!-- empty custom section to allow bootincluding custom kernel --></packages>
 	<packages type="bootstrap">
@@ -217,6 +218,7 @@
 		<package name="glibc-locale"/>
 		<package name="rsync"/>
 		<package name="timezone"/>
+		<package name="iproute2"/>
 	</packages>
 	<packages type="delete" profiles="default,diskless,xen">
 		<package name="cracklib-dict-full"/>
@@ -225,7 +227,6 @@
 		<package name="gdbm"/>
 		<package name="info"/>
 		<package name="insserv"/>
-		<package name="iproute2"/>
 		<package name="logrotate"/>
 		<package name="make"/>
 		<package name="mingetty"/>

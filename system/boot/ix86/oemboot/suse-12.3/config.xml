@@ -168,6 +168,7 @@
 		<package name="rsync"/>
 		<package name="timezone"/>
 		<package name="udev"/>
+		<package name="iproute2"/>
 	</packages>
 	<packages type="delete">
 		<package name="cracklib-dict-full"/>
@@ -175,7 +176,6 @@
 		<package name="gdbm"/>
 		<package name="info"/>
 		<package name="insserv"/>
-		<package name="iproute2"/>
 		<package name="make"/>
 		<package name="mingetty"/>
 		<package name="openSUSE-release"/>

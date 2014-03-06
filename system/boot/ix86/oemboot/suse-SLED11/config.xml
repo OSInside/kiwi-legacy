@@ -148,6 +148,7 @@
 		<package name="glibc-locale"/>
 		<package name="openssl-certs"/>
 		<package name="procps"/>
+		<package name="iproute2"/>
 	</packages>
 	<packages type="delete">
 		<package name="PolicyKit"/>
@@ -163,7 +164,6 @@
 		<package name="gpg"/>
 		<package name="info"/>
 		<package name="insserv"/>
-		<package name="iproute2"/>
 		<package name="iptables"/>
 		<package name="irqbalance"/>
 		<package name="libxcrypt"/>

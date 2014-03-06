@@ -159,7 +159,6 @@
 		<package name="hdparm"/>
 		<package name="info"/>
 		<package name="insserv"/>
-		<package name="iproute2"/>
 		<package name="iptables"/>
 		<package name="irqbalance"/>
 		<package name="keyutils-libs"/>
