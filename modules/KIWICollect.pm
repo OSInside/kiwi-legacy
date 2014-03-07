@@ -576,9 +576,19 @@ sub Init
 		}
 	}
 	my $descrdir = $this->{m_proddata}->getInfo("DESCRDIR");
+	my $create_repomd;
+	if ( defined($this->{m_proddata}->getVar("CREATE_REPOMD"))
+		&& $this->{m_proddata}->getVar("CREATE_REPOMD") eq "true") {
+		$create_repomd = 1;
+	}
+
 	if(not defined($descrdir) or $descrdir =~ m{notset}i) {
-		$this->logMsg('E', "Variable DESCRDIR missing!");
-		return;
+		if ($create_repomd) {
+			$this->logMsg('W', "Variable DESCRDIR not set but CREATE_REPOMD is true!");
+		} else {
+			$this->logMsg('E', "Variable DESCRDIR missing!");
+			return;
+		}
 	}
 	my $datadir = $this->{m_proddata}->getInfo("DATADIR");
 	if(not defined($datadir) or $datadir =~ m{notset}i) {
@@ -594,6 +604,7 @@ sub Init
 		$dirbase .= "$n" if not defined($dirext);
 		$this->{m_dirlist}->{"$dirbase"} = 1;
 		$this->{m_dirlist}->{"$dirbase/$datadir"} = 1;
+		$this->{m_dirlist}->{"$dirbase/$datadir/repodata"} = 1 if $create_repomd;
 		my $curdir = "$dirbase/";
 		foreach my $part(@descrdirs) {
 			$curdir .= "$part/";
@@ -1392,9 +1403,24 @@ sub collectPackages {
 	my $descrdir = $this->{m_proddata}->getInfo("DESCRDIR");
 	if ($descrdir && $this->{m_appdata}) {
 		my $dirbase = "$this->{m_basesubdir}->{1}";
-		print "OUT $dirbase/$descrdir\n";
+		$this->logMsg('I', "write appdata to $dirbase/$descrdir\n");
 		my $XML = FileHandle -> new();
 		$XML -> open (">$dirbase/$descrdir/appdata.xml") or die "WHAT";
+		print $XML "<?xml version='1.0' ?>\n";
+		print $XML "<applications>\n";
+		print $XML $this->{m_appdata};
+		print $XML "</applications>\n";
+		$XML -> close ();
+	}
+
+	my $datadir = $this->{m_proddata}->getInfo("DATADIR");
+	if ( defined($this->{m_proddata}->getVar("CREATE_REPOMD"))
+		&& $this->{m_proddata}->getVar("CREATE_REPOMD") eq "true"
+		&& $this->{m_appdata}) {
+		my $dirbase = "$this->{m_basesubdir}->{1}";
+		$this->logMsg('I', "write appdata to $dirbase/$datadir/repodata\n");
+		my $XML = FileHandle -> new();
+		$XML -> open (">$dirbase/$datadir/repodata/appdata.xml") or die "WHAT";
 		print $XML "<?xml version='1.0' ?>\n";
 		print $XML "<applications>\n";
 		print $XML $this->{m_appdata};
@@ -2284,28 +2310,31 @@ sub createMetadata
 
 	# moved to beginnig after diffing with autobuild:
 	## STEP 11: ChangeLog file
-	$this->logMsg('I', "Running mk_changelog for base directory");
-	my $mk_cl = "/usr/bin/mk_changelog";
-	if(! (-f $mk_cl or -x $mk_cl)) {
-		my $msg = "[createMetadata] excutable `$mk_cl` not found. Maybe "
-		    . 'package `inst-source-utils` is not installed?';
-		$this->logMsg('E', $msg);
-		return;
+	my $make_listings = $this->{m_proddata}->getVar("MAKE_LISTINGS");
+	unless (defined($make_listings) && $make_listings eq "false") {
+		$this->logMsg('I', "Running mk_changelog for base directory");
+		my $mk_cl = "/usr/bin/mk_changelog";
+		if(! (-f $mk_cl or -x $mk_cl)) {
+			my $msg = "[createMetadata] excutable `$mk_cl` not found. Maybe "
+			    . 'package `inst-source-utils` is not installed?';
+			$this->logMsg('E', $msg);
+			return;
+		}
+		my @data = qx($mk_cl $this->{m_basesubdir}->{'1'});
+		my $res = $? >> 8;
+		if($res == 0) {
+			$this->logMsg('I', "$mk_cl finished successfully.");
+		}
+		else {
+			$this->logMsg('E', "$mk_cl finished with errors: returncode was $res");
+		}
+		$this->logMsg('I', "[createMetadata] $mk_cl output:");
+		foreach(@data) {
+			chomp $_;
+			$this->logMsg('I', "\t$_");
+		}
+		@data = (); # clear list
 	}
-	my @data = qx($mk_cl $this->{m_basesubdir}->{'1'});
-	my $res = $? >> 8;
-	if($res == 0) {
-		$this->logMsg('I', "$mk_cl finished successfully.");
-	}
-	else {
-		$this->logMsg('E', "$mk_cl finished with errors: returncode was $res");
-	}
-	$this->logMsg('I', "[createMetadata] $mk_cl output:");
-	foreach(@data) {
-		chomp $_;
-		$this->logMsg('I', "\t$_");
-	}
-	@data = (); # clear list
 
 	## step 5: media file
 	$this->logMsg('I', "Creating media file in all media:");
@@ -2431,7 +2460,6 @@ sub createMetadata
 	$this->createBootPackageLinks();
 
 	## step 9: LISTINGS
-	my $make_listings = $this->{m_proddata}->getVar("MAKE_LISTINGS");
 	unless (defined($make_listings) && $make_listings eq "false") {
 		$this->logMsg('I', "Calling mk_listings:");
 		my $listings = "/usr/bin/mk_listings";
@@ -2442,7 +2470,7 @@ sub createMetadata
 			return;
 		}
 		my $cmd = "$listings ".$this->{m_basesubdir}->{'1'};
-		@data = qx($cmd);
+		my @data = qx($cmd);
 		undef $cmd;
 		$this->logMsg('I', "[createMetadata] $listings output:");
 		for my $item (@data) {
@@ -2490,10 +2518,21 @@ sub createMetadata
 
 	my $datadir = $this->{m_proddata}->getInfo("DATADIR");
 	my $descrdir = $this->{m_proddata}->getInfo("DESCRDIR");
-	if((! defined($datadir)) || (! defined($descrdir))) {
-		$this->logMsg('E', "variables DATADIR and/or DESCRDIR are missing");
+	my $create_repomd;
+	if ( defined($this->{m_proddata}->getVar("CREATE_REPOMD"))
+		&& $this->{m_proddata}->getVar("CREATE_REPOMD") eq "true") {
+		$create_repomd = 1;
+	}
+	if(! defined($datadir)) {
+		$this->logMsg('E', "variables DATADIR is missing");
 		die "MISSING VARIABLES!";
 	}
+	if((! defined($descrdir)) && !$create_repomd) {
+		$this->logMsg('E', "variables DESCRDIR is missing and CREATE_REPOMD is not set");
+		die "MISSING VARIABLES!";
+	}
+	# skip the rest if we are not creating susetags
+	return unless $descrdir;
 
 	for my $d($this->getMediaNumbers()) {
 		my $dbase = $this->{m_basesubdir}->{$d};
@@ -2510,11 +2549,13 @@ sub createMetadata
 		push @dlist, "$dbase/media.1/license";
 		push @dlist, "$dbase/images";
 		push @dlist, "$dbase/$datadir/setup/slide";
-		push @dlist, "$dbase/$descrdir";
+		if(defined $descrdir) {
+			push @dlist, "$dbase/$descrdir";
+		}
 
 		for my $item (@dlist) {
 			if(-d $item) {
-				@data = qx($dy $item);
+				my @data = qx($dy $item);
 				$this->logMsg('I',
 					      "[createMetadata] $dy output for directory $item:");
 				for my $entry (@data) {
