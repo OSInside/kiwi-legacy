@@ -190,7 +190,7 @@ sub executeDir
   my $distroname = $coll->productData()->getInfo("DISTRIBUTION").".".$coll->productData()->getInfo("VERSION");
   my $createrepomd = $coll->productData()->getVar("CREATE_REPOMD");
 
-  my $targetdir = $paths[0]."/".$descrdir;
+  my $targetdir;
 
   ## this ugly bit creates a parameter string from a list of directories:
   # param = -d <dir1> -d <dir2> ...
@@ -202,13 +202,17 @@ sub executeDir
 
   $this->logMsg("I", "Calling ".$this->name()." for directories <@paths>:");
 
-  my $cmd = "$this->{m_tooldir}/$this->{m_tool} $pathlist $this->{m_params} -o ".$paths[0]."/".$descrdir;
-  $this->logMsg("I", "Executing command <$cmd>");
-  my $data = qx( $cmd );
-  my $status = $? >> 8;
-  if($status) {
-    $this->logMsg("E", "Calling <$cmd> exited with code <$status> and the following output:\n$data\n");
-    return $retval;
+  if ($descrdir) {
+    $targetdir = $paths[0]."/".$descrdir;
+
+    my $cmd = "$this->{m_tooldir}/$this->{m_tool} $pathlist $this->{m_params} -o ".$paths[0]."/".$descrdir;
+    $this->logMsg("I", "Executing command <$cmd>");
+    my $data = qx( $cmd );
+    my $status = $? >> 8;
+    if($status) {
+      $this->logMsg("E", "Calling <$cmd> exited with code <$status> and the following output:\n$data\n");
+      return $retval;
+    }
   }
 
   if ( $createrepomd eq "true" ) {
@@ -235,6 +239,18 @@ sub executeDir
         $this->logMsg("E", "Calling <$cmd> exited with code <$status> and the following output:\n$data\n");
         return $retval;
       }
+      my $newtargetdir = "$p/$datadir/repodata";
+      if (-x "/usr/bin/extract-appdata-icons" && -s "$newtargetdir/appdata.xml") {
+	my $cmd = "/usr/bin/extract-appdata-icons $newtargetdir/appdata.xml $newtargetdir";
+	my $data = qx( $cmd );
+	if($? >> 8) {
+	  $this->logMsg("E", "Calling <extract-appdata-icons $newtargetdir/appdata.xml $newtargetdir> failed:\n$data\n");
+	  return 1;
+	}
+	if($this->{m_compress} =~ m{yes}i) {
+	  system("gzip", "--rsyncable", "$newtargetdir/appdata.xml");
+	}
+      }
       if ( -f "/usr/bin/add_product_susedata" ) {
 	my $kwdfile = abs_path($this->collect()->{m_xml}->{xmlOrigFile});
 	$kwdfile =~ s/.kiwi$/.kwd/;
@@ -255,45 +271,47 @@ sub executeDir
     }
   }
 
-  foreach my $trans (glob('/usr/share/locale/en_US/LC_MESSAGES/package-translations-*.mo')) {
-     $trans = basename($trans, ".mo");
-     $trans =~ s,.*-,,;
-     my $cmd = "/usr/bin/translate_packages.pl $trans < $targetdir/packages.en > $targetdir/packages.$trans";
-     my $data = qx( $cmd );
-     if($? >> 8) {
-	 $this->logMsg("E", "Calling <translate_packages.pl $trans > failed:\n$data\n");
-	 return 1;
-     }
-  }
-  # one more time for english to insert possible EULAs
-  my $cmd = "/usr/bin/translate_packages.pl en < $targetdir/packages.en > $targetdir/packages.en.new && mv $targetdir/packages.en.new $targetdir/packages.en";
-  my $data = qx( $cmd );
-  if($? >> 8) {
-     $this->logMsg("E", "Calling <translate_packages.pl en > failed:\n$data\n");
-     return 1;
-  }
-
-  if (-x "/usr/bin/extract-appdata-icons" && -s "$targetdir/appdata.xml") {
-     my $cmd = "/usr/bin/extract-appdata-icons $targetdir/appdata.xml $targetdir";
-     my $data = qx( $cmd );
-     if($? >> 8) {
-       $this->logMsg("E", "Calling <extract-appdata-icons $targetdir/appdata.xml $targetdir> failed:\n$data\n");
+  if ($targetdir) {
+    foreach my $trans (glob('/usr/share/locale/en_US/LC_MESSAGES/package-translations-*.mo')) {
+       $trans = basename($trans, ".mo");
+       $trans =~ s,.*-,,;
+       my $cmd = "/usr/bin/translate_packages.pl $trans < $targetdir/packages.en > $targetdir/packages.$trans";
+       my $data = qx( $cmd );
+       if($? >> 8) {
+           $this->logMsg("E", "Calling <translate_packages.pl $trans > failed:\n$data\n");
+           return 1;
+       }
+    }
+    # one more time for english to insert possible EULAs
+    my $cmd = "/usr/bin/translate_packages.pl en < $targetdir/packages.en > $targetdir/packages.en.new && mv $targetdir/packages.en.new $targetdir/packages.en";
+    my $data = qx( $cmd );
+    if($? >> 8) {
+       $this->logMsg("E", "Calling <translate_packages.pl en > failed:\n$data\n");
        return 1;
-     }
-     if($this->{m_compress} =~ m{yes}i) {
-         system("gzip", "--rsyncable", "$targetdir/appdata.xml");
-     }
-  }
-
-  if($this->{m_compress} =~ m{yes}i) {
-      foreach my $pfile(glob("$targetdir/packages*")) {
-	  if(system("gzip", "--rsyncable", "$pfile") == 0) {
-	      unlink "$targetdir/$pfile";
-	  }
-	  else {
-	      $this->logMsg("W", "Can't compress file <$targetdir/$pfile>!");
-	  }
-      }
+    }
+   
+    if (-x "/usr/bin/extract-appdata-icons" && -s "$targetdir/appdata.xml") {
+       my $cmd = "/usr/bin/extract-appdata-icons $targetdir/appdata.xml $targetdir";
+       my $data = qx( $cmd );
+       if($? >> 8) {
+         $this->logMsg("E", "Calling <extract-appdata-icons $targetdir/appdata.xml $targetdir> failed:\n$data\n");
+         return 1;
+       }
+       if($this->{m_compress} =~ m{yes}i) {
+           system("gzip", "--rsyncable", "$targetdir/appdata.xml");
+       }
+    }
+   
+    if($this->{m_compress} =~ m{yes}i) {
+        foreach my $pfile(glob("$targetdir/packages*")) {
+            if(system("gzip", "--rsyncable", "$pfile") == 0) {
+                unlink "$targetdir/$pfile";
+            }
+            else {
+                $this->logMsg("W", "Can't compress file <$targetdir/$pfile>!");
+            }
+        }
+    }
   }
 
   return 1;
