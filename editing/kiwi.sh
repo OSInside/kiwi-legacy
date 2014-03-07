@@ -47,4 +47,4 @@ _kiwi() {
 	return 0
 }
 
-complete -F _kiwi kiwi
+complete -F _kiwi -o default kiwi
