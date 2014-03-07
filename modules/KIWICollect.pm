@@ -1184,7 +1184,7 @@ sub setupPackageFiles
 						    . 'failed';
 						$this->logMsg('E', $msg);
 					} else {
-						$this->addToReportFile($packOptions->{$requestedArch}->{'newpath'}, $medium, $packPointer->{'localfile'});
+						$this->addToChannelFile($packName, $packPointer->{'disturl'}, $arch, $medium);
 						if ($this->{m_debug} >= 4) {
 							my $lnkTarget = $packOptions->{$requestedArch}->
 							{'newpath'};
@@ -1421,25 +1421,69 @@ sub collectPackages {
 	# step 4: run scripts for other (non-meta) packages
 	# TODO (copy/paste?)
 
-        # close all report log file handles
-        for my $r(keys(%{$this->{m_reportLog}})) {
-		close $this->{m_reportLog}->{$r};
+        # write out the channel files based on the collected rpms
+        for my $m (keys($this->{m_reportLog})) {
+                my $medium = $this->{m_reportLog}->{$m};
+         	open(my $fd, ">", $medium->{filename}) or die "Unable to open report file";
+                print $fd "<channel>\n";
+
+                for my $key(keys($medium->{entries})) {
+                  for my $binary(@{$medium->{entries}->{$key}}) {
+                    if ($binary->{project}) {
+                      printChannelLine($fd, "  <binaries ", $binary, ">");
+                    } else {
+                      printChannelLine($fd, "    <binary ", $binary, "/>");
+                    }
+                  }
+                }
+                print $fd "  </binaries>\n";
+                print $fd "</channel>\n";
+		close $fd;
         }
 
 	return 0;
 }
 # /collectPackages
 
-sub addToReportFile
+sub printChannelLine
 {
-	my ($this, $source, $medium, $target) = @_;
+        my ($fd, $prefix, $hash, $suffix) = @_;
+        print $fd $prefix;
+        my $space="";
+        for my $k(sort(keys($hash))) {
+            print $fd $space;
+            my $attribute = $k."='".$hash->{$k}."'";
+            print $fd $attribute;
+            $space = " " x (30 - length($attribute));
+        }
+        print $fd $suffix."\n";
+}
+
+sub addToChannelFile
+{
+	my ($this, $name, $disturl, $arch, $medium) = @_;
 
         if (!$this->{m_reportLog}->{$medium}) {
-         	open($this->{m_reportLog}->{$medium}, ">", "$this->{m_basesubdir}->{$medium}.packages") or die "Unable to open report file";
+         	$this->{m_reportLog}->{$medium}->{filename} = "$this->{m_basesubdir}->{$medium}.channel";
         }
 
-        my $fh = $this->{m_reportLog}->{$medium};
-        print $fh "$source from $target\n";
+        my $project;
+        my $repo;
+        my $package;
+        if ( $disturl =~ /^obs:\/\/[^\/]*\/([^\/]*)\/([^\/]*)\/[^\/]*\-(.*)$/ ) {
+          $project = $1;
+          $repo = $2;
+          $package = $3;
+        }
+
+        my $key = "$project::$repo::$arch";
+        unless ($this->{m_reportLog}->{$medium}->{entries}->{$key}) {
+          $this->{m_reportLog}->{$medium}->{entries}->{$key}=[{ "project" => $project, "repository" => $repo, "arch" => $arch}];
+        }
+        push @{$this->{m_reportLog}->{$medium}->{entries}->{$key}}, 
+          { "package" => $package, "name" => $name }; #, "support" => $support };
+
+
 	return $this;
 }
 
@@ -1536,7 +1580,7 @@ sub unpackMetapackages
 
 					$this->logMsg('I', "unpack $packPointer->{localfile} ");
 					$this->{m_util}->unpac_package($packPointer->{localfile}, $tmp);
-					$this->addToReportFile($packPointer->{localfile}, $medium, "META");
+#					$this->addToReportFile($packPointer->{localfile}, $medium, "META");
 					# all metapackages contain at least a CD1 dir and _may_
 					# contain another /usr/share/<name> dir
 					if ( -d "$tmp/CD1") {
@@ -1841,7 +1885,7 @@ sub lookUpAllPackages
 				my %flags = RPMQ::rpmq_many("$uri", 'NAME', 'VERSION',
 							    'RELEASE', 'ARCH', 'SOURCE',
 							    'SOURCERPM', 'NOSOURCE',
-							    'NOPATCH');
+							    'NOPATCH', 'DISTURL');
 				if(!%flags || !$flags{'NAME'} || !$flags{'RELEASE'}
 				   || !$flags{'VERSION'} || !$flags{'RELEASE'} )
 				{
@@ -1869,6 +1913,7 @@ sub lookUpAllPackages
 					my $package;
 					$package->{'arch'} = $arch;
 					$package->{'localfile'} = $uri;
+					$package->{'disturl'} = $flags{'DISTURL'}[0];
 					my $appdata = $uri;
 					$appdata =~ s,[^/]*$,$name-appdata.xml,;
 					$package->{'appdata'} = $appdata if (-s $appdata);
