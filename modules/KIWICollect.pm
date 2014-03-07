@@ -1437,6 +1437,24 @@ sub collectPackages {
 	# step 4: run scripts for other (non-meta) packages
 	# TODO (copy/paste?)
 
+        # collect support levels for _channel file
+        my %supporthash;
+        my $supportfile = abs_path($this->{m_xml}->{xmlOrigFile});
+        $supportfile =~ s/.kiwi$/.kwd/;
+	if ( -e $supportfile ) {
+		local *R;
+		if (!open(R, '<', $supportfile)) {
+			$this->logMsg('E', "[collectPackages] failed to read support file!");
+			return 1;
+		}
+                my $line;
+		while (defined($line = <R>)) {
+			$line =~ s/\n$//;
+			$supporthash{$1} = $2 if $line =~ /^([^:]*):.*support_([^\\]*)\\n-Kwd:$/;
+		}
+		close R;
+	}
+
         # write out the channel files based on the collected rpms
         for my $m (keys($this->{m_reportLog})) {
                 my $medium = $this->{m_reportLog}->{$m};
@@ -1446,9 +1464,9 @@ sub collectPackages {
                 for my $key(keys($medium->{entries})) {
                   for my $binary(@{$medium->{entries}->{$key}}) {
                     if ($binary->{project}) {
-                      printChannelLine($fd, "  <binaries ", $binary, ">");
+                      printChannelLine($fd, "  <binaries ", $binary, ">", %supporthash);
                     } else {
-                      printChannelLine($fd, "    <binary ", $binary, "/>");
+                      printChannelLine($fd, "    <binary ", $binary, "/>", %supporthash);
                     }
                   }
                 }
@@ -1463,14 +1481,20 @@ sub collectPackages {
 
 sub printChannelLine
 {
-        my ($fd, $prefix, $hash, $suffix) = @_;
+        my ($fd, $prefix, $hash, $suffix, %supporthash) = @_;
         print $fd $prefix;
+        my $name;
         my $space="";
         for my $k(sort(keys($hash))) {
             print $fd $space;
             my $attribute = $k."='".$hash->{$k}."'";
             print $fd $attribute;
             $space = " " x (30 - length($attribute));
+            $name = $hash->{$k} if $k eq 'name';
+        }
+        if ( $name && $supporthash{$name} ) {
+            print $fd $space;
+            print $fd "support='".$supporthash{$name}."'";
         }
         print $fd $suffix."\n";
 }
