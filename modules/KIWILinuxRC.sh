@@ -5747,7 +5747,7 @@ function setupReadWrite {
 	mkdir -p $rwDir
 	if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
 		if [ "$RELOAD_IMAGE" = "yes" ] || \
-			! mount -o ro $rwDevice $rwDir >/dev/null
+			! mount -o ro $rwDevice $rwDir &>/dev/null
 		then
 			#======================================
 			# store old FSTYPE value
@@ -5770,7 +5770,7 @@ function setupReadWrite {
 				FSTYPE=$FSTYPE_SAVE
 			fi
 			if [ "$RELOAD_IMAGE" = "yes" ] || \
-				! mount -o ro $rwDevice $rwDir >/dev/null
+				! mount -o ro $rwDevice $rwDir &>/dev/null
 			then
 				Echo "Creating filesystem for RW data on $rwDevice..."
 				if ! mkfs.ext3 -F $rwDevice >/dev/null;then
