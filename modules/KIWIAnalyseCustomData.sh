@@ -145,6 +145,9 @@ function getUnmanagedData {
 	rm -f $rpm_unmanaged
 	diff -u $rpm_find_names $rpm_all_names \
 		| grep ^-/ | cut -c2- > $rpm_unmanaged
+	# we need an empty line to finish rendering in stripCustomData
+	# implemented in KIWIAnalyseSystem.pm
+	echo >> $rpm_unmanaged
 	rm -f $rpm_find_names
 	rm -f $rpm_all_names
 }

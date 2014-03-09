@@ -498,7 +498,7 @@ sub getCustomData {
 				} else {
 					$type = 'directory';
 				}
-			} elsif ($file =~ /^\./) {
+			} elsif (($file) && ($file =~ /^\./)) {
 				$attr = stat ($item);
 				$type = 'hidden-file';
 			} else {
@@ -607,16 +607,15 @@ sub createCustomDataForType {
 	my $result= $this-> getCustomData();
 	my @items = ();
 	my $tree;
-	if ($type eq 'directory') {
-		# directory information is part of file path
-		return;
-	}
 	$kiwi -> info ("Creating D3 view for custom $type data...");
 	my %filecount = ();
 	foreach my $item (sort keys %{$result}) {
-		if ($result->{$item}->[0] eq $type) {
+		my $cur_type = $result->{$item}->[0];
+		if (($cur_type eq $type) ||
+			(($cur_type eq 'directory') && ($type eq 'file'))
+		) {
 			push @items, $item;
-			if ($max_child) {
+			if (($max_child) && ($cur_type ne 'directory')) {
 				my @path_elements = split (/\//,$item);
 				$path_elements[0] = '/';
 				pop @path_elements;
@@ -655,7 +654,7 @@ sub createCustomDataForType {
 		#==========================================
 		# add a more flag and stop after max_count
 		#------------------------------------------
-		if ($max_child) {
+		if (($max_child) && ($result->{$item}->[0] ne 'directory')) {
 			if ($curcount{$dirname} == $max_child + 1) {
 				my $rest = $filecount{$dirname} - $max_child;
 				$filename = "THERE ARE [ $rest ] MORE ITEMS NOT DISPLAYED";
@@ -916,8 +915,111 @@ sub __dumpCustomData {
 		$kiwi -> failed();
 		return;
 	}
+	# The following function is able to reduce the custom files
+	# result by providing only the name of the directory if all
+	# data below this directory contains only custom files.
+	# Problem is that other types of data e.g repo checkouts
+	# might vanish from the report which is imho unwanted.
+	# Therefore the code is currently deactivated:
+	#
+	# if ($this -> __stripCustomData()) {
+	#	KIWIQX::qxx ("mv $this->{custom}.stripped $this->{custom}");
+	# }
+	#
 	$kiwi -> done();
 	return $this;
+}
+
+#==========================================
+# __stripCustomData
+#------------------------------------------
+sub __stripCustomData {
+	my $this  = shift;
+	my $kiwi  = $this->{kiwi};
+	my $custom= $this->{custom};
+	my $filter= $this->__filter_filesystem();
+	my $grep  = '^\/(tmp|dev|proc|sys|run|var\/lib\/ntp|lost\+found|var\/run)';
+	if (! -f $custom) {
+		$kiwi -> failed();
+		$kiwi -> error ("Failed to find $custom file");
+		$kiwi -> failed();
+		return;
+	}
+	my $cfd = FileHandle -> new();
+	if (! $cfd -> open ($custom)) {
+		$kiwi -> error  ("Couldn't read $custom: $!");
+		$kiwi -> failed ();
+		return;
+	}
+	my $cfd_new = FileHandle -> new();
+	if (! $cfd_new -> open (">$custom.stripped")) {
+		$kiwi -> error  ("Couldn't open $custom.stripped for writing: $!");
+		$kiwi -> failed ();
+		return;
+	}
+	my $prev_item;
+	my $count = 0;
+	my @files;
+	while (my $item = <$cfd>) {
+		chomp $item;
+		if ((! $prev_item) || ($item !~ /^$prev_item\//)) {
+			if (! $prev_item) {
+				# at the start there is no previous item to match
+				print $cfd_new $item;
+				$prev_item = $item;
+				next;
+			}
+			# find items in subpath to compare number of elements
+			my $find_options = "\"$prev_item\" $filter -mindepth 1 -print0";
+			my $find_result = KIWIQX::qxx (
+				"echo $find_options | xargs -x find 2>/dev/null"
+			);
+			my @find_list = split(/\0/,$find_result);
+			my $find_count= 0;
+			foreach my $f (@find_list) {
+				next if ($f =~ /$grep/);
+				$find_count++;
+			}
+			if (($count > 0) && ($count == $find_count)) {
+				# entire tree is unmanaged
+				print $cfd_new "\n";
+			} elsif (($count == 0) && (-d "$prev_item")) {
+				print $cfd_new "\n";
+			} else {
+				# there are managed items in this tree
+				print $cfd_new "\n";
+				foreach my $f (@files) {
+					print $cfd_new $f."\n";
+				}
+			}
+			if ($item) {
+				print $cfd_new $item
+			}
+			$count = 0;
+			undef @files;
+			$prev_item = $item;
+		} else {
+			# we have a prev_item and it matches the current one
+			$count++;
+			push @files, $item;
+		}
+	}
+	$cfd -> close();
+	$cfd_new -> close();
+	return $this;
+}
+
+#==========================================
+# __filter_filesystem
+#------------------------------------------
+sub __filter_filesystem {
+	my $this = shift;
+	my @fs = qw(nfs tmpfs proc sysfs devtmpfs devpts);
+	my $result;
+	foreach my $fs (@fs) {
+		$result .= "-not -fstype $fs "
+	}
+	return $result;
 }
 
 1;
