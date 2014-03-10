@@ -553,18 +553,19 @@ function baseStripAndKeep {
 	# - params - files which should be keep
 	# ----
 	local keepFiles="$@"
+	local found
 	while read file; do
-			local baseFile=`/usr/bin/basename $file`
-			local found="no"
-			for keep in $keepFiles;do
-					if echo $baseFile | grep -q $keep; then
-							found="yes"
-							break
-					fi
-			done
-			if test $found = "no";then
-				   Rm -rf $file
+		local baseFile=$(/usr/bin/basename $file)
+		found=0
+		for keep in $keepFiles;do
+			if echo $baseFile | grep -q $keep; then
+				found=1
+				break
 			fi
+		done
+		if [ "$found" = 0 ]; then
+		   Rm -rf "$file"
+		fi
 	done
 }
 #======================================
@@ -573,17 +574,18 @@ function baseStripAndKeep {
 function baseStripTools {
 	local tpath=$1
 	local tools=$2
+	local found
 	for file in `find $tpath`;do
 		found=0
-		base=`/usr/bin/basename $file`
+		base=$(/usr/bin/basename $file)
 		for need in $tools;do
-			if [ $base = $need ];then
+			if [ "$base" = "$need" ];then
 				found=1
 				break
 			fi
 		done
-		if [ $found = 0 ] && [ ! -d $file ];then
-			Rm -fv $file
+		if [ "$found" = 0 ] && [ ! -d "$file" ];then
+			Rm -fv "$file"
 		fi
 	done
 }
