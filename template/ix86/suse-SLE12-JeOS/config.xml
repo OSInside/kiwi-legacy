@@ -44,13 +44,13 @@
 		</type>
 	</preferences>
 	<preferences profiles="vmxFlavour">
-		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES12" format="vmdk" bootloader="grub2">
+		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES12" format="vmdk" bootloader="grub2" firmware="uefi">
 			<machine memory="512" guestOS="suse" HWversion="4">
 				<vmdisk id="0" controller="ide"/>
 				<vmnic driver="e1000" interface="0" mode="bridged"/>
 			</machine>
 		</type>
-		<type image="oem" filesystem="ext3" boot="oemboot/suse-SLES12" installiso="true" bootloader="grub2">
+		<type image="oem" filesystem="ext3" boot="oemboot/suse-SLES12" installiso="true" bootloader="grub2" firmware="uefi" hybrid="true">
 			<oemconfig>
 				<oem-systemsize>2048</oem-systemsize>
 				<oem-swap>true</oem-swap>
@@ -107,12 +107,14 @@
 		<package name="kernel-xen" replaces="kernel-ec2"/>
 		<package name="xen-tools" arch="x86_64" replaces=""/>
 		<package name="xen" arch="x86_64" replaces=""/>
+		<package name="gfxboot-branding-SLES" bootinclude="true" bootdelete="true"/>
 	</packages>
 	<packages type="image" profiles="vmxFlavour">
 		<package name="kernel-default" replaces="kernel-xen"/>
 		<package name="kernel-default" replaces="kernel-ec2"/>
 		<package name="kernel-default" replaces="xen-tools"/>
 		<package name="kernel-default" replaces="xen"/>
+		<package name="gfxboot-branding-SLES" bootinclude="true" bootdelete="true"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="udev"/>
