@@ -39,7 +39,6 @@ BuildRequires:  module-init-tools
 BuildRequires:  rsync
 BuildRequires:  screen
 BuildRequires:  zlib-devel
-BuildRequires:  fdupes
 BuildRequires:  perl-Class-Singleton
 BuildRequires:  perl-Config-IniFiles
 BuildRequires:  perl-Digest-SHA1
@@ -51,6 +50,9 @@ BuildRequires:  perl-XML-LibXML-Common
 BuildRequires:  perl-XML-SAX
 BuildRequires:  perl-libwww-perl
 BuildRequires:  perl-Test-Unit-Lite
+%if 0%{?suse_version}
+BuildRequires:  fdupes
+%endif
 %ifarch %ix86 x86_64
 BuildRequires:  syslinux
 %endif
