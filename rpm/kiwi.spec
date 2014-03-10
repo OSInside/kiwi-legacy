@@ -545,6 +545,11 @@ test -f $RPM_BUILD_ROOT/srv/tftpboot/mboot.c32 && \
 %endif
 cat kiwi.loader
 
+%if 0%{?suse_version}
+# suse provides this tool in an extra package, others don't
+rm -f $RPM_BUILD_ROOT/usr/bin/setctsid
+%endif
+
 for i in isoboot vmxboot netboot oemboot ; do
   if [ -d  $RPM_BUILD_ROOT/%{_datadir}/kiwi/image/$i ]; then
     cat > $RPM_BUILD_ROOT/%{_datadir}/kiwi/image/$i/README.requires <<EOF
