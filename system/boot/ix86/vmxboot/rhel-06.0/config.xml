@@ -96,6 +96,7 @@
 		<package name="dracut"/>
 		<package name="e2fsprogs"/>
 		<package name="bc"/>
+		<package name="gettext"/>
 	</packages>
 	<packages type="delete">
 		<package name="cracklib-dicts"/>
