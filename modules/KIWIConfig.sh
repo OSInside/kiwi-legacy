@@ -577,13 +577,13 @@ function baseStripTools {
 		found=0
 		base=`/usr/bin/basename $file`
 		for need in $tools;do
-			if [ $base = $need ];then
+			if [ "$base" = "$need" ];then
 				found=1
 				break
 			fi
 		done
-		if [ $found = 0 ] && [ ! -d $file ];then
-			Rm -fv $file
+		if [ "$found" = 0 ] && [ ! -d "$file" ];then
+			Rm -fv "$file"
 		fi
 	done
 }

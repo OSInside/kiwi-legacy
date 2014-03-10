@@ -1161,7 +1161,7 @@ function updateModuleDependencies {
 # setupInitrd
 #--------------------------------------
 function setupInitrd {
-	if [ -e /usr/bin/dracut ];then
+	if [ -e "$(lookup dracut 2>/dev/null)" ]; then
 		setupDracutInitrd
 	else
 		setupMakeInitrd
