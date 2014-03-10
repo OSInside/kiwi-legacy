@@ -35,7 +35,6 @@ BuildRequires:  e2fsprogs
 BuildRequires:  gcc-c++
 BuildRequires:  libxslt
 BuildRequires:  lvm2
-BuildRequires:  lxc
 BuildRequires:  module-init-tools
 BuildRequires:  rsync
 BuildRequires:  screen
