@@ -1161,19 +1161,8 @@ function updateModuleDependencies {
 # setupInitrd
 #--------------------------------------
 function setupInitrd {
-	if [ -e /usr/bin/dracut ];then
-		setupDracutInitrd
-	else
-		setupMakeInitrd
-	fi
-}
-
-#======================================
-# setupDracutInitrd
-#--------------------------------------
-function setupDracutInitrd {
 	# /.../
-	# call dracut to create the distro initrd.
+	# call mkinitrd to create the distro initrd
 	# ----
 	bootLoaderOK=1
 	local umountProc=0
@@ -1185,98 +1174,19 @@ function setupDracutInitrd {
 	local running
 	local rlinux
 	local rinitrd
-	local kernel_version=`uname -r`
-	for i in `find /boot/ -name "System.map*"`;do
+	local kernel_version=$(uname -r)
+	for i in $(find /boot/ -name "System.map*");do
 		systemMap=1
 	done
 	setupDefaultTheme
 	if [ $systemMap -eq 1 ];then
-		Echo "Creating dracut based initrd"
-		if [ ! -e /proc/mounts ];then
-			mount -t proc proc /proc
-			umountProc=1
-		fi
-		if [ ! -e /sys/block ];then
-			mount -t sysfs sysfs /sys
-			umountSys=1
-		fi
-		rm -f /boot/initrd-*.img   ##remove the dist's initrd image
-		updateModuleDependencies
-		params=" -f /boot/initrd-$kernel_version $kernel_version"
-		if [ -x "$mkinitrdExec" ] ; then
-			if ! $mkinitrdExec $params;then
-				Echo "Can't create initrd"
-				systemIntegrity=unknown
-				bootLoaderOK=0
-			fi
-		elif [ -x "$dracutExec" ]; then
-			if ! $dracutExec -H  $params;then
-				Echo "Can't create initrd"
-				systemIntegrity=unknown
-				bootLoaderOK=0
-			fi
-		else
-			Echo "Coudn't find a tool to create initrd image"
-			systemIntegrity=unknown
-			bootLoaderOK=0
-		fi
-		if [ $bootLoaderOK = "1" ];then
-			if [ -f /boot/initrd.vmx ];then
-				rm -f /boot/initrd.vmx
-			fi
-			if [ -f /boot/linux.vmx ];then
-				rm -f /boot/linux.vmx
-			fi
-			if [ -f /boot/initrd.uboot ];then
-				rm -f /boot/initrd.uboot
-			fi
-		fi
-		if [ $umountSys -eq 1 ];then
-			umount /sys
-		fi
-		if [ $umountProc -eq 1 ];then
-			umount /proc
-		fi
-	else
-		Echo "Image doesn't include kernel system map"
-		Echo "Can't create initrd"
-		systemIntegrity=unknown
-		bootLoaderOK=0
-	fi
-	if [ $bootLoaderOK = 0 ];then
-		if lookup dialog &>/dev/null;then
-			Dialog \
-				--backtitle \"$TEXT_BOOT_SETUP_FAILED\" \
-				--msgbox "\"$TEXT_BOOT_SETUP_FAILED_INFO\"" 10 70
-		else
-			systemException \
-				"$TEXT_BOOT_SETUP_FAILED\n\n$TEXT_BOOT_SETUP_FAILED_INFO" \
-			"waitkey"
-		fi
-	fi
-}
-#======================================
-# setupMakeInitrd
-#--------------------------------------
-function setupMakeInitrd {
-	# /.../
-	# call mkinitrd to create the distro initrd
-	# ----
-	bootLoaderOK=1
-	local umountProc=0
-	local umountSys=0
-	local systemMap=0
-	local mkinitrdExec=$(lookup mkinitrd 2>/dev/null)
-	local params
-	local running
-	local rlinux
-	local rinitrd
-	for i in `find /boot/ -name "System.map*"`;do
-		systemMap=1
-	done
-	setupDefaultTheme
-	if [ $systemMap -eq 1 ];then
-		Echo "Creating mkinitrd based initrd"
+		#======================================
+		# Cleanup
+		#--------------------------------------
+		rm -f /boot/initrd-*.img
+		#======================================
+		# Prepare for tool call
+		#--------------------------------------
 		if [ ! -e /proc/mounts ];then
 			mount -t proc proc /proc
 			umountProc=1
@@ -1287,14 +1197,38 @@ function setupMakeInitrd {
 		fi
 		modprobe dm-mod &>/dev/null
 		updateModuleDependencies
-		if grep -qi param_B $mkinitrdExec;then
-			params="-B"
-		fi
-		if ! $mkinitrdExec $params;then
-			Echo "Can't create initrd"
+		#======================================
+		# Call initrd creation tool
+		#--------------------------------------
+		if [ -x "$dracutExec" ]; then
+			# 1. dracut
+			Echo "Creating dracut based initrd"
+			params=" -f /boot/initrd-$kernel_version $kernel_version"
+			if ! $dracutExec -H $params;then
+				Echo "Can't create initrd with dracut"
+				systemIntegrity=unknown
+				bootLoaderOK=0
+			fi
+		elif [ -x "$mkinitrdExec" ]; then
+			# 2. mkinitrd
+			Echo "Creating mkinitrd based initrd"
+			if grep -qi param_B $mkinitrdExec;then
+				params="-B"
+			fi
+			if ! $mkinitrdExec $params;then
+				Echo "Can't create initrd with mkinitrd"
+				systemIntegrity=unknown
+				bootLoaderOK=0
+			fi
+		else
+			# no tool found
+			Echo "Coudn't find a tool to create initrd image"
 			systemIntegrity=unknown
 			bootLoaderOK=0
 		fi
+		#======================================
+		# Cleanup kiwi firstboot initrd
+		#--------------------------------------
 		if [ $bootLoaderOK = "1" ];then
 			if [ -f /boot/initrd.vmx ];then
 				rm -f /boot/initrd.vmx
@@ -1306,6 +1240,9 @@ function setupMakeInitrd {
 				rm -f /boot/initrd.uboot
 			fi
 		fi
+		#======================================
+		# Loader exceptions
+		#--------------------------------------
 		if [ "$loader" = "syslinux" ];then
 			# /.../
 			# if syslinux is used we need to make sure to copy
@@ -1326,6 +1263,9 @@ function setupMakeInitrd {
 			cp /boot/$kernel /boot/boot/
 			cp /boot/$initrd /boot/boot/
 		fi
+		#======================================
+		# Cleanup mounts
+		#--------------------------------------
 		rmmod dm-mod &>/dev/null
 		if [ $umountSys -eq 1 ];then
 			umount /sys
@@ -1339,6 +1279,9 @@ function setupMakeInitrd {
 		systemIntegrity=unknown
 		bootLoaderOK=0
 	fi
+	#======================================
+	# Display a warning on failure
+	#--------------------------------------
 	if [ $bootLoaderOK = 0 ];then
 		if lookup dialog &>/dev/null;then
 			Dialog \
