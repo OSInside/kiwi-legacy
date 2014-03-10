@@ -16,7 +16,7 @@ package Common::ktTestCase;
 
 use warnings;
 use strict;
-
+use Test::Unit::Lite;
 use base qw /Test::Unit::TestCase/;
 
 use FindBin;
