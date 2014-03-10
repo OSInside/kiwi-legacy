@@ -5,6 +5,12 @@ use warnings;
 use Cwd;
 use File::Basename;
 use IPC::Open2;
+use Getopt::Long;
+
+my $TestAllModules;
+my $result = GetOptions(
+	"test-all" => \$TestAllModules
+);
 
 # The known Perl modules
 my @kiwiModules = qw (
@@ -520,29 +526,44 @@ my @notClean5 = qw (
 );
 
 my @changedFiles;
-my %knownFiles = map { ($_ => 1) } @kiwiModules;
 my $chld_in;
 my $chld_out;
-my $pid = open2(
-	$chld_out, $chld_in, 'git', 'diff-index', '--name-only','HEAD'
-);
-waitpid( $pid, 0 );
-# Collect all changed Perl code and verify that all Perl modules are known
-while (<$chld_out>) {
-	my $exists;
-	chomp $_;
-	if (-f $_) {
-		$exists = 1;
+if ($TestAllModules) {
+	foreach my $name (@kiwiModules) {
+		my $pid = open2(
+			$chld_out, $chld_in, 'find', '-name', $name
+		);
+		waitpid( $pid, 0 );
+		my $file = <$chld_out>;
+		if ($file) {
+			chomp $file;
+			push @changedFiles, $file;
+		}
 	}
-	my $fname = basename($_);
-	if ($fname =~ /.*\.pm$|\.pl$|\.t$/x) {
-		push @changedFiles, $_;
-		if (! $knownFiles{$fname} && $exists) {
-			print "Comitting new module '$fname'. Registration required. Add ";
-			print "your module to the\ngit-hooks/pre-commit file in the ";
-			print '@kiwiModules list as well as the notCleanX list';
-			print "\n";
-			exit 1;
+} else {
+	my %knownFiles = map { ($_ => 1) } @kiwiModules;
+	my $pid = open2(
+		$chld_out, $chld_in, 'git', 'diff-index', '--name-only','HEAD'
+	);
+	waitpid( $pid, 0 );
+	# Collect all changed Perl code and verify that all Perl modules are known
+	while (<$chld_out>) {
+		my $exists;
+		chomp $_;
+		if (-f $_) {
+			$exists = 1;
+		}
+		my $fname = basename($_);
+		if ($fname =~ /.*\.pm$|\.pl$|\.t$/x) {
+			push @changedFiles, $_;
+			if (! $knownFiles{$fname} && $exists) {
+				print "Comitting new module '$fname'. Registration required";
+				print "\n";
+				print 'Add your module to the git-hooks/pre-commit file in ';
+				print 'the @kiwiModules list as well as the notCleanX list';
+				print "\n";
+				exit 1;
+			}
 		}
 	}
 }
@@ -622,14 +643,15 @@ for my $path (@changedFiles) {
 }
 
 # Run tests as needed
-print STDOUT "Trigger unit tests for changed files\n";
-my $cmd = './tests/runTests';
-for my $path (@changedFiles) {
-	chomp $path;
-	$cmd .= " $path";
-}
-
-my $status = system $cmd;
-if ($status) {
-	exit 1;
+if (! $TestAllModules) {
+	print STDOUT "Trigger unit tests for changed files\n";
+	my $cmd = './tests/runTests';
+	for my $path (@changedFiles) {
+		chomp $path;
+		$cmd .= " $path";
+	}
+	my $status = system $cmd;
+	if ($status) {
+		exit 1;
+	}
 }

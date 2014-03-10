@@ -215,6 +215,12 @@ test:
 	cd tests/unit && ${NONETWORKTEST} /usr/bin/prove ${TESTVERBOSE} .
 	rm -f .revision
 
+critic:
+	#============================================
+	# Run critic tests...
+	#--------------------------------------------
+	.git-hooks/pre-commit --test-all
+
 %.t:
 	#============================================
 	# Run specific unit test
