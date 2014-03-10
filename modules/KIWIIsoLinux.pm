@@ -727,10 +727,9 @@ sub createISOLinuxConfig {
 	);
 	my $code = $? >> 8;
 	if ($code != 0) {
-		# /.../
-		# Could not set base directory to isolinux, therefore we
-		# create a compat directory /isolinux and hardlink all files
-		# ----
+		$kiwi -> info("Could not set base directory to isolinux using isolinux-config. ".
+						"Base directory will be precompiled. Therefore we create ".
+						"a compat directory /isolinux and hardlink all files.");
 		my $data = KIWIQX::qxx ("mkdir -p $src/isolinux 2>&1");
 		my $code = $? >> 8;
 		if ($code == 0) {
