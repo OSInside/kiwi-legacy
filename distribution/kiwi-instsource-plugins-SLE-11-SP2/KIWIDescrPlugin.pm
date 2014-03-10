@@ -225,8 +225,8 @@ sub executeDir
       }
       $cmd = "$this->{m_rezip} $p/$datadir ";
       $this->logMsg("I", "Executing command <$cmd>");
-      my $data = qx( $cmd );
-      my $status = $? >> 8;
+      $data = qx( $cmd );
+      $status = $? >> 8;
       if($status) {
         $this->logMsg("E", "Calling <$cmd> exited with code <$status> and the following output:\n$data\n");
         return $retval;

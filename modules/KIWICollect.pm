@@ -1452,17 +1452,16 @@ sub collectPackages {
         my $supportfile = abs_path($this->{m_xml}->{xmlOrigFile});
         $supportfile =~ s/.kiwi$/.kwd/;
 	if ( -e $supportfile ) {
-		local *R;
-		if (!open(R, '<', $supportfile)) {
+		my $support_fd = FileHandle -> new();
+		if (! $support_fd -> open ($supportfile)) {
 			$this->logMsg('E', "[collectPackages] failed to read support file!");
 			return 1;
 		}
-                my $line;
-		while (defined($line = <R>)) {
+		while (my $line = <$support_fd>) {
 			$line =~ s/\n$//;
 			$supporthash{$1} = $2 if $line =~ /^([^:]*):.*support_([^\\]*)\\n-Kwd:$/;
 		}
-		close R;
+		$support_fd -> close();
 	}
 
         # write out the channel files based on the collected rpms
@@ -1474,9 +1473,9 @@ sub collectPackages {
                 for my $key(keys($medium->{entries})) {
                   for my $binary(@{$medium->{entries}->{$key}}) {
                     if ($binary->{project}) {
-                      printChannelLine($fd, "  <binaries ", $binary, ">", %supporthash);
+                      $this->printChannelLine($fd, "  <binaries ", $binary, ">", %supporthash);
                     } else {
-                      printChannelLine($fd, "    <binary ", $binary, "/>", %supporthash);
+                      $this->printChannelLine($fd, "    <binary ", $binary, "/>", %supporthash);
                     }
                   }
                 }
@@ -1489,51 +1488,47 @@ sub collectPackages {
 }
 # /collectPackages
 
-sub printChannelLine
-{
-        my ($fd, $prefix, $hash, $suffix, %supporthash) = @_;
-        print $fd $prefix;
-        my $name;
-        my $space="";
-        for my $k(sort(keys($hash))) {
-            print $fd $space;
-            my $attribute = $k."='".$hash->{$k}."'";
-            print $fd $attribute;
-            $space = " " x (30 - length($attribute));
-            $name = $hash->{$k} if $k eq 'name';
-        }
-        if ( $name && $supporthash{$name} ) {
-            print $fd $space;
-            print $fd "support='".$supporthash{$name}."'";
-        }
-        print $fd $suffix."\n";
+sub printChannelLine {
+	my ($this, $fd, $prefix, $hash, $suffix, %supporthash) = @_;
+	print $fd $prefix;
+	my $name;
+	my $space="";
+	for my $k(sort(keys($hash))) {
+		print $fd $space;
+		my $attribute = $k."='".$hash->{$k}."'";
+		print $fd $attribute;
+		$space = " " x (30 - length($attribute));
+		$name = $hash->{$k} if $k eq 'name';
+	}
+	if ( $name && $supporthash{$name} ) {
+		print $fd $space;
+		print $fd "support='".$supporthash{$name}."'";
+	}
+	print $fd $suffix."\n";
+	return $this;
 }
 
-sub addToChannelFile
-{
+sub addToChannelFile {
 	my ($this, $name, $disturl, $arch, $medium) = @_;
-
-        if (!$this->{m_reportLog}->{$medium}) {
-         	$this->{m_reportLog}->{$medium}->{filename} = "$this->{m_basesubdir}->{$medium}.channel";
-        }
-
-        my $project;
-        my $repo;
-        my $package;
-        if ( $disturl =~ /^obs:\/\/[^\/]*\/([^\/]*)\/([^\/]*)\/[^\/]*\-(.*)$/ ) {
-          $project = $1;
-          $repo = $2;
-          $package = $3;
-        }
-
-        my $key = "$project::$repo::$arch";
-        unless ($this->{m_reportLog}->{$medium}->{entries}->{$key}) {
-          $this->{m_reportLog}->{$medium}->{entries}->{$key}=[{ "project" => $project, "repository" => $repo, "arch" => $arch}];
-        }
-        push @{$this->{m_reportLog}->{$medium}->{entries}->{$key}}, 
-          { "package" => $package, "name" => $name }; #, "support" => $support };
-
-
+	if (!$this->{m_reportLog}->{$medium}) {
+		$this->{m_reportLog}->{$medium}->{filename} =
+			"$this->{m_basesubdir}->{$medium}.channel";
+	}
+	my $project;
+	my $repo;
+	my $package;
+	if ( $disturl =~ /^obs:\/\/[^\/]*\/([^\/]*)\/([^\/]*)\/[^\/]*\-(.*)$/ ) {
+		$project = $1;
+		$repo = $2;
+		$package = $3;
+	}
+	my $key = "$project::$repo::$arch";
+	unless ($this->{m_reportLog}->{$medium}->{entries}->{$key}) {
+		$this->{m_reportLog}->{$medium}->{entries}->{$key} =
+			[{ "project" => $project, "repository" => $repo, "arch" => $arch}];
+	}
+	push @{$this->{m_reportLog}->{$medium}->{entries}->{$key}},
+		{ "package" => $package, "name" => $name }; #, "support" => $support };
 	return $this;
 }
 
