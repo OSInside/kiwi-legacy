@@ -95,6 +95,7 @@
 		<package name="setup"/>
 		<package name="sysfsutils"/>
 		<package name="tar"/>
+		<package name="gettext"/>
 	</packages>
 	<packages type="delete">
 		<package name="audit-libs"/>
