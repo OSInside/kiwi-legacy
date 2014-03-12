@@ -3710,10 +3710,11 @@ sub setupBootLoaderStages {
 				return;
 			}
 			if ($uuid) {
-				print $bpfd "search --fs-uuid --set=root $uuid"."\n";
+				print $bpfd "search --fs-uuid --set=root $uuid";
 			} else {
-				print $bpfd "search --file --set=root /boot/$this->{mbrid}"."\n";
+				print $bpfd "search --file --set=root /boot/$this->{mbrid}";
 			}
+			print $bpfd "\n";
 			if ($bootfile =~ /grub2-efi/) {
 				print $bpfd 'set prefix=($root)/boot/grub2-efi'."\n";
 			} else {
@@ -3837,8 +3838,11 @@ sub setupBootLoaderStages {
 				$fo_bin = 'bootx32.efi';
 			}
 			my $core= "$tmpdir/EFI/BOOT/$fo_bin";
+			my $core_opts;
+			$core_opts = "-O $fo -o $core -c $bootefi ";
+			$core_opts.= "-d $tmpdir/$stages{efi}{stageSRC}";
 			$status = KIWIQX::qxx (
-				"$grub2_uefi_mkimage -O $fo -o $core -c $bootefi @modules 2>&1"
+				"$grub2_uefi_mkimage $core_opts @modules 2>&1"
 			);
 			$result = $? >> 8;
 			if ($result != 0) {
@@ -3934,9 +3938,11 @@ sub setupBootLoaderStages {
 			my $core     = "$tmpdir/boot/grub2/$format/core.img";
 			my $cdimg    = "$tmpdir/boot/grub2/$format/eltorito.img";
 			my $cdcore   = "$tmpdir/boot/grub2/$format/cdboot.img";
-			my $mkimage  = $grub2_bios_mkimage;
+			my $core_opts;
+			$core_opts = "-O $format -o $core -c $bootconf ";
+			$core_opts.= "-d $tmpdir/$stages{bios}{stageSRC}";
 			my $status = KIWIQX::qxx (
-				"$mkimage -O $format -o $core -c $bootconf @modules 2>&1"
+				"$grub2_bios_mkimage $core_opts @modules 2>&1"
 			);
 			my $result = $? >> 8;
 			if ($result != 0) {

@@ -1803,8 +1803,9 @@ sub createImageLiveCD {
 			}
 			my $core    = "$CD/EFI/BOOT/$efi_bin";
 			my @modules = @efimods;
+			my $core_opts = "-O $efi_fo -o $core -c $bootefi -d $ir_modules";
 			$status = KIWIQX::qxx (
-				"$grub2_mkimage -O $efi_fo -o $core -c $bootefi @modules 2>&1"
+				"$grub2_mkimage $core_opts @modules 2>&1"
 			);
 			$result = $? >> 8;
 			if ($result != 0) {
