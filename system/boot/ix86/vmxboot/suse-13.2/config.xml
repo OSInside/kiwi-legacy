@@ -102,7 +102,6 @@
 		<package name="bind-libs"/>
 		<package name="bind-utils"/>
 		<package name="btrfsprogs"/>
-		<package name="clicfs"/>
 		<package name="cryptsetup"/>
 		<package name="dialog"/>
 		<package name="e2fsprogs"/>

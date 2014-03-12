@@ -107,7 +107,6 @@
 		<package name="bind-utils"/>
 		<package name="checkmedia"/>
 		<package name="cdrkit-cdrtools-compat"/>
-		<package name="clicfs"/>
 		<package name="cryptsetup"/>
 		<package name="dhcpcd"/>
 		<package name="nfs-client"/>
