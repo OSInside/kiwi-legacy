@@ -97,7 +97,6 @@
 		<package name="btrfsprogs"/>
 		<package name="busybox"/>
 		<package name="bzip2"/>
-		<package name="clicfs"/>
 		<package name="cryptsetup"/>
 		<package name="curl"/>
 		<package name="dialog"/>

@@ -88,7 +88,6 @@
 		<package name="bind-utils"/>
 		<package name="btrfsprogs"/>
 		<package name="busybox"/>
-		<package name="clicfs"/>
 		<package name="cryptsetup"/>
 		<package name="curl"/>
 		<package name="dmraid"/>
@@ -113,7 +112,6 @@
 		<package name="atftp"/>
 		<package name="bc"/>
 		<package name="busybox"/>
-		<package name="clicfs"/>
 		<package name="hwinfo"/>
 		<package name="iputils"/>
 		<package name="kiwi-tools"/>
