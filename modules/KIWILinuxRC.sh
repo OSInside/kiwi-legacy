@@ -7529,15 +7529,22 @@ function setupUnionFS {
 	local rwDevice=`getDiskID $1`
 	local roDevice=`getDiskID $2`
 	local unionFST=$3
-	luksOpen $rwDevice luksReadWrite
-	rwDeviceLuks=$luksDeviceOpened
-	luksOpen $roDevice luksReadOnly
-	roDeviceLuks=$luksDeviceOpened
-	if [ ! $rwDeviceLuks = $rwDevice ];then
+	if [[ "$roDevice" =~ aoe|nbd ]]; then
+		roDevice=$imageRootDevice
+	fi
+	if [ -e "$rwDevice" ]; then
+		luksOpen $rwDevice luksReadWrite
+		rwDeviceLuks=$luksDeviceOpened
+	fi
+	if [ -e "$roDevice" ]; then
+		luksOpen $roDevice luksReadOnly
+		roDeviceLuks=$luksDeviceOpened
+	fi
+	if [ ! "$rwDeviceLuks" = "$rwDevice" ];then
 		rwDevice=$rwDeviceLuks
 		export haveLuks="yes"
 	fi
-	if [ ! $roDeviceLuks = $roDevice ];then
+	if [ ! "$roDeviceLuks" = "$roDevice" ];then
 		roDevice=$roDeviceLuks
 		export haveLuks="yes"
 	fi
