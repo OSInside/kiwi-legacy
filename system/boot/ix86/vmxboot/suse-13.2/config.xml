@@ -64,6 +64,7 @@
 		<file name="fs/squashfs/*"/>
 		<file name="fs/vfat/*"/>
 		<file name="fs/xfs/*"/>
+		<file name="fs/isofs/*"/>
 		<file name="lib/crc-t10dif.ko"/>
 		<file name="lib/crc16.ko"/>
 		<file name="lib/libcrc32c.ko"/>

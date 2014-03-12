@@ -59,6 +59,7 @@
 		<file name="fs/lockd/*"/>
 		<file name="fs/mbcache.ko"/>
 		<file name="fs/nfs/*"/>
+		<file name="fs/isofs/*"/>
 		<file name="fs/nfs_common/*"/>
 		<file name="fs/quota_v1.ko"/>
 		<file name="fs/quota_v2.ko"/>
