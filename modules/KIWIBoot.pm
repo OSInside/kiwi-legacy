@@ -4291,13 +4291,6 @@ sub setupBootLoaderConfiguration {
 			$root_id = $this->{partids}{root};
 		}
 		#==========================================
-		# kernel loader command
-		#------------------------------------------
-		my $efi_suffix = '';
-		if ($firmware eq "uefi") {
-			$efi_suffix = 'efi';
-		}
-		#==========================================
 		# Theme and Fonts table
 		#------------------------------------------
 		my $theme = $xml -> getPreferences() -> getBootLoaderTheme();
@@ -4366,6 +4359,13 @@ sub setupBootLoaderConfiguration {
 				$kiwi -> error  ("Couldn't create $config/grub.cfg: $!");
 				$kiwi -> failed ();
 				return;
+			}
+			#==========================================
+			# kernel loader command
+			#------------------------------------------
+			my $efi_suffix = '';
+			if ($config eq 'grub2-efi') {
+				$efi_suffix = 'efi';
 			}
 			#==========================================
 			# General grub2 setup
