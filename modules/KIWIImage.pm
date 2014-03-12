@@ -1272,7 +1272,9 @@ sub createImageLiveCD {
 				if (! -d "$imageTree/$dir") {
 					next;
 				}
-				$data = KIWIQX::qxx ("mv $imageTree/$dir $imageTreeReadOnly 2>&1");
+				$data = KIWIQX::qxx (
+					"mv $imageTree/$dir $imageTreeReadOnly 2>&1"
+				);
 				$code = $? >> 8;
 				if ($code != 0) {
 					$kiwi -> failed ();
@@ -1370,7 +1372,9 @@ sub createImageLiveCD {
 					$this -> restoreSplitExtend ();
 					return;
 				}
-				$data = KIWIQX::qxx ("btrfstune -S 1 $this->{imageDest}/$namero 2>&1");
+				$data = KIWIQX::qxx (
+					"btrfstune -S 1 $this->{imageDest}/$namero 2>&1"
+				);
 				$code = $? >> 8;
 				if ($code != 0) {
 					$kiwi -> failed ();
@@ -1451,7 +1455,9 @@ sub createImageLiveCD {
 			if (! -d "$imageTree/$dir") {
 				next;
 			}
-			$data = KIWIQX::qxx ("cp -a $imageTree/$dir $imageTreeReadOnly 2>&1");
+			$data = KIWIQX::qxx (
+				"cp -a $imageTree/$dir $imageTreeReadOnly 2>&1"
+			);
 			$code = $? >> 8;
 			if ($code != 0) {
 				$kiwi -> failed ();
@@ -1618,7 +1624,9 @@ sub createImageLiveCD {
 	chomp $tmpdir;
 	push @{$this->{tmpdirs}},$tmpdir;
 	my $zipper = $this->{gdata}->{IrdZipperCommand};
-	$data = KIWIQX::qxx ("$zipper -cd $pinitrd | (cd $tmpdir && cpio -di 2>&1)");
+	$data = KIWIQX::qxx (
+		"$zipper -cd $pinitrd | (cd $tmpdir && cpio -di 2>&1)"
+	);
 	$code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> failed();
