@@ -44,13 +44,13 @@
 		</type>
 	</preferences>
 	<preferences profiles="vmxFlavour">
-		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES12" format="vmdk" bootloader="grub2" firmware="uefi">
+		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES12" format="vmdk" bootloader="grub2" firmware="efi">
 			<machine memory="512" guestOS="suse" HWversion="4">
 				<vmdisk id="0" controller="ide"/>
 				<vmnic driver="e1000" interface="0" mode="bridged"/>
 			</machine>
 		</type>
-		<type image="oem" filesystem="ext3" boot="oemboot/suse-SLES12" installiso="true" bootloader="grub2" firmware="uefi" hybrid="true">
+		<type image="oem" filesystem="ext3" boot="oemboot/suse-SLES12" installiso="true" bootloader="grub2" firmware="efi" hybrid="true">
 			<oemconfig>
 				<oem-systemsize>2048</oem-systemsize>
 				<oem-swap>true</oem-swap>
