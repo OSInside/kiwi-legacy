@@ -102,7 +102,6 @@
 		<package name="checkmedia"/>
 		<package name="cdrkit-cdrtools-compat"/>
 		<package name="cryptsetup"/>
-		<package name="dhcpcd"/>
 		<package name="nfs-client"/>
 		<package name="dialog"/>
 		<package name="file"/>
@@ -126,7 +125,6 @@
 		<package name="kiwi-tools"/>
 		<package name="lvm2"/>
 		<package name="make"/>
-		<package name="memtest86+"/>
 		<package name="netcfg"/>
 		<package name="parted"/>
 		<package name="psmisc"/>
@@ -157,7 +155,6 @@
 		<package name="insserv"/>
 		<package name="lvm2"/>
 		<package name="make"/>
-		<package name="memtest86+"/>
 		<package name="mingetty"/>
 		<package name="mtools"/>
 		<package name="Mesa"/>

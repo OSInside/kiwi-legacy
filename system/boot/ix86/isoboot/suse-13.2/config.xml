@@ -108,7 +108,6 @@
 		<package name="checkmedia"/>
 		<package name="cdrkit-cdrtools-compat"/>
 		<package name="cryptsetup"/>
-		<package name="dhcpcd"/>
 		<package name="nfs-client"/>
 		<package name="dialog"/>
 		<package name="file"/>

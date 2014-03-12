@@ -90,7 +90,6 @@
 		<package name="bzip2"/>
 		<package name="cryptsetup"/>
 		<package name="curl"/>
-		<package name="dhcpcd"/>
 		<package name="dialog"/>
 		<package name="dmraid"/>
 		<package name="dosfstools"/>

@@ -106,7 +106,6 @@
 		<package name="checkmedia"/>
 		<package name="clicfs"/>
 		<package name="cryptsetup"/>
-		<package name="dhcpcd"/>
 		<package name="nfs-client"/>
 		<package name="dialog"/>
 		<package name="file"/>
