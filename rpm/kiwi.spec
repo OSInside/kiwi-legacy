@@ -297,7 +297,6 @@ Requires:       qemu-img
 %ifarch %ix86 x86_64
 Requires:       syslinux
 Requires:       squashfs
-Requires:       master-boot-code
 %if 0%{?suse_version} >= 1220
 Requires:       grub2
 %else
@@ -388,7 +387,6 @@ Requires:       qemu-img
 %ifarch %ix86 x86_64
 Requires:       syslinux
 Requires:       squashfs
-Requires:       master-boot-code
 %if 0%{?suse_version} >= 1220
 Requires:       grub2
 %else
