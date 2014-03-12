@@ -1395,7 +1395,7 @@ sub init {
 		$kiwi -> skipped ();
 		$kiwi -> info ("--> For building call:\n");
 		$kiwi -> note ("\n\tkiwi --build <template> -d <destdir>\n\n");
-		$kiwi -> info ("--> Found following templates\n");
+		$kiwi -> info ("--> Looking up templates\n");
 		listImage();
 	}
 	if (($Build) && ($RecycleRoot)) {
@@ -1709,6 +1709,7 @@ sub listImage {
 	my $system = $gdata->{System};
 	opendir (FD,$system);
 	my @images = readdir (FD); closedir (FD);
+	my $templates = 0;
 	foreach my $image (sort @images) {
 		if ($image =~ /^\./) {
 			next;
@@ -1733,7 +1734,12 @@ sub listImage {
 			my $version = $xml -> getPreferences() -> getVersion();
 			$kiwi -> info ("Version: $version");
 			$kiwi -> done();
+			$templates++;
 		}
+	}
+	if (! $templates) {
+		$kiwi -> info ("No templates found");
+		$kiwi -> done ();
 	}
 	exit 0;
 }
