@@ -1365,7 +1365,7 @@ sub init {
 	if ($< != 0) {
 		$kiwi -> error ("Only root can do this");
 		$kiwi -> failed ();
-		usage(1);
+		kiwiExit (1);
 	}
 	#==========================================
 	# Check option combination/values
@@ -1391,9 +1391,12 @@ sub init {
 		(! defined $TestImage)          &&
 		(! defined $Convert)
 	) {
-		$kiwi -> error ("No operation specified");
-		$kiwi -> failed ();
-		kiwiExit (1);
+		$kiwi -> warning ("No operation specified");
+		$kiwi -> skipped ();
+		$kiwi -> info ("--> For building call:\n");
+		$kiwi -> note ("\n\tkiwi --build <template> -d <destdir>\n\n");
+		$kiwi -> info ("--> Found following templates\n");
+		listImage();
 	}
 	if (($Build) && ($RecycleRoot)) {
 		$kiwi -> error (
@@ -1478,13 +1481,17 @@ sub usage {
 
 	print "Usage:\n";
 	print "    kiwi -l | --list\n";
-	print "Configuration check:\n";
+	print "\n";
+	print "XML Configuration check:\n";
 	print "    kiwi --check-config <path-to-xml-file-to-check>\n";
-	print "Image Cloning:\n";
+	print "\n";
+	print "Image Description Cloning:\n";
 	print "    kiwi -o | --clone <image-path> -d <destination>\n";
+	print "\n";
 	print "Image Creation in one step:\n";
 	print "    kiwi -b | --build <image-path> -d <destination>\n";
 	print "      [ --cache <dir> ]\n";
+	print "\n";
 	print "Image Preparation/Creation in two steps:\n";
 	print "    kiwi -p | --prepare <image-path>\n";
 	print "       [ --root <image-root> ]\n";
@@ -1493,18 +1500,23 @@ sub usage {
 	print "    kiwi -c | --create  <image-root> -d <destination>\n";
 	print "       [ --type <image-type> ]\n";
 	print "       [ --recycle-root [ --force-bootstrap ]]\n";
-	print "Image Cache:\n";
+	print "\n";
+	print "Image Cache Creation:\n";
 	print "    kiwi --init-cache <image-path>\n";
 	print "       [ --cache <dir> ]\n";
+	print "\n";
 	print "Image Upgrade:\n";
 	print "    kiwi -u | --upgrade <image-root>\n";
 	print "       [ --add-package <name> --add-pattern <name> ]\n";
-	print "System Analysis/Migration:\n";
+	print "\n";
+	print "System Analysis:\n";
 	print "    kiwi -D | --describe <name>\n";
+	print "\n";
 	print "Testsuite (requires os-autoinst package):\n";
 	print "    kiwi --test-image <image> --test-case <path>\n";
 	print "         --type <image-type>\n";
-	print "Image postprocessing modes:\n";
+	print "\n";
+	print "Image Post Creation modes:\n";
 	print "    kiwi --bootvm <initrd> --bootvm-system <systemImage>\n";
 	print "       [ --bootvm-disksize <size> ]\n";
 	print "    kiwi --bootcd  <initrd>\n";
@@ -1515,9 +1527,11 @@ sub usage {
 	print "       [ --installstick-system <vmx-system-image> ]\n";
 	print "    kiwi --installpxe <initrd>\n";
 	print "       [ --installpxe-system <vmx-system-image> ]\n";
-	print "Image format conversion:\n";
+	print "\n";
+	print "Image Format Conversion:\n";
 	print "    kiwi --convert <systemImage>\n";
 	print "       [ --format <vmdk|vdi|ovf|qcow2|vhd|..> ]\n";
+	print "\n";
 	print "Helper Tools:\n";
 	print "    kiwi --createpassword\n";
 	print "    kiwi --createhash <image-path>\n";
@@ -1527,7 +1541,6 @@ sub usage {
 	print "         > --select ...\n";
 	print "    kiwi --setup-splash <initrd>\n";
 	print "\n";
-
 	print "Global Options:\n";
 	print "    [ --add-profile <profile-name> ]\n";
 	print "      Use the specified profile.\n";
@@ -1591,7 +1604,6 @@ sub usage {
 	print "    [ -y | --yes ]\n";
 	print "      Answer any interactive questions with yes\n";
 	print "\n";
-
 	print "Image Preparation Options:\n";
 	print "    [ -r | --root <image-root> ]\n";
 	print "      Use the given directory as new image root path\n";
@@ -1600,7 +1612,6 @@ sub usage {
 	print "      Force creation of new root directory. If the directory\n";
 	print "      already exists, it is deleted.\n";
 	print "\n";
-
 	print "Image Upgrade/Preparation Options:\n";
 	print "    [ --add-package <package> ]\n";
 	print "      Adds the given package name to the list of image packages.\n";
@@ -1612,7 +1623,6 @@ sub usage {
 	print "      Removes the given package by adding it the list of packages\n";
 	print "      to become removed.\n";
 	print "\n";
-
 	print "Image Creation Options:\n";
 	print "    [ -d | --destdir <destination-path> ]\n";
 	print "      Specify destination directory to store the image file(s)\n";
@@ -1685,8 +1695,7 @@ sub usage {
 	print "      Sets the disk id to the given value. The default is to\n";
 	print "      generate a random id.\n";
 	print "--\n";
-	version ($exit);
-	return;
+	exit ($exit);
 }
 
 #==========================================
@@ -1998,7 +2007,9 @@ sub version {
 		$exit = 0;
 	}
 	my $rev = revision();
-	$kiwi -> info ("kiwi version v$gdata->{Version}\nGIT Commit: $rev\n");
+	$kiwi -> info ("Version:\n");
+	$kiwi -> info ("--> vnr: $gdata->{Version}\n");
+	$kiwi -> info ("--> git: $rev\n");
 	$kiwi -> cleanSweep();
 	exit ($exit);
 }
