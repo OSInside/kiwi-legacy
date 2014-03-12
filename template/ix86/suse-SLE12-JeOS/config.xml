@@ -15,8 +15,8 @@
 		<type image="iso" primary="true" boot="isoboot/suse-SLES12" flags="overlay" hybrid="true" firmware="efi"/>
 		<version>1.13.1</version>
 		<packagemanager>zypper</packagemanager>
-		<bootsplash-theme>SLES</bootsplash-theme>
-		<bootloader-theme>SLES</bootloader-theme>
+		<bootsplash-theme>SLE</bootsplash-theme>
+		<bootloader-theme>SLE</bootloader-theme>
 		<locale>en_US</locale>
 		<keytable>us.map.gz</keytable>
 		<timezone>Europe/Berlin</timezone>
@@ -72,9 +72,8 @@
 <!--		<namedCollection name="base"/>-->
 <!-- Product SUSE_SLES does not yet exist -->
 <!--		<product name="SUSE_SLES"/>-->
-<!-- The following packages does not yet exist for SLE12 -->
-<!--		<package name="plymouth-branding-SLES" bootinclude="true"/>-->
-<!--		<package name="grub2-branding-SLES" bootinclude="true"/>-->
+		<package name="plymouth-branding-SLE" bootinclude="true"/>
+		<package name="grub2-branding-SLE" bootinclude="true"/>
 		<package name="ifplugd"/>
 		<package name="iputils"/>
 		<package name="vim"/>
@@ -91,10 +90,11 @@
 		<package name="dracut"/>
 		<package name="wicked"/>
 		<package name="iproute2"/>
-		<package name="kiwi"/>
+<!-- kiwi not yet on the media, will be there with next beta -->
+<!--		<package name="kiwi"/>-->
 	</packages>
 	<packages type="iso">
-		<package name="gfxboot-branding-SLES" bootinclude="true" bootdelete="true"/>
+		<package name="gfxboot-branding-SLE" bootinclude="true" bootdelete="true"/>
 	</packages>
 	<packages type="image" profiles="ec2Flavour">
 		<package name="kernel-ec2" replaces="kernel-default"/>
@@ -107,14 +107,14 @@
 		<package name="kernel-xen" replaces="kernel-ec2"/>
 		<package name="xen-tools" arch="x86_64" replaces=""/>
 		<package name="xen" arch="x86_64" replaces=""/>
-		<package name="gfxboot-branding-SLES" bootinclude="true" bootdelete="true"/>
+		<package name="gfxboot-branding-SLE" bootinclude="true" bootdelete="true"/>
 	</packages>
 	<packages type="image" profiles="vmxFlavour">
 		<package name="kernel-default" replaces="kernel-xen"/>
 		<package name="kernel-default" replaces="kernel-ec2"/>
 		<package name="kernel-default" replaces="xen-tools"/>
 		<package name="kernel-default" replaces="xen"/>
-		<package name="gfxboot-branding-SLES" bootinclude="true" bootdelete="true"/>
+		<package name="gfxboot-branding-SLE" bootinclude="true" bootdelete="true"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="udev"/>
