@@ -140,6 +140,7 @@
 		<package name="timezone"/>
 		<package name="which"/>
 		<package name="udev"/>
+		<package name="wicked"/>
 		<package name="iproute2"/>
 		<package name="psmisc"/>
 	</packages>

@@ -138,6 +138,7 @@
 		<package name="which"/>
 		<package name="udev"/>
 		<package name="s390-tools"/>
+		<package name="wicked"/>
 		<package name="iproute2"/>
 		<package name="psmisc"/>
 	</packages>

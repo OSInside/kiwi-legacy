@@ -136,6 +136,7 @@
 		<package name="module-init-tools"/>
 		<package name="which"/>
 		<package name="udev"/>
+		<package name="wicked"/>
 		<package name="iproute2"/>
 		<package name="psmisc"/>
 	</packages>
