@@ -134,6 +134,12 @@ sub execute
     return $retval;
   }
 
+  my $descrdir = $this->collect()->productData()->getInfo("DESCRDIR");
+  unless ($descrdir && $descrdir ne "/") {
+    $this->logMsg("I", "Empty descrdir, skipping content file creation");
+    return $retval;
+  }
+
   my @targetmedia = $this->collect()->getMediaNumbers();
   my %targets;
   if($this->{m_media}->[0] =~ m{all}i) {
