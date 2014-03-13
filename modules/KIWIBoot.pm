@@ -6338,6 +6338,9 @@ sub setStoragePartition {
 						$p_cmd = "set $index raid on";
 					} elsif ($type eq '8e') {
 						$p_cmd = "set $index lvm on";
+					} elsif ($type eq '83') {
+						# default partition type set by parted is linux(83)
+						next;
 					} else {
 						# be careful, this is a suse parted extension
 						$p_cmd = "set $index type 0x$type";

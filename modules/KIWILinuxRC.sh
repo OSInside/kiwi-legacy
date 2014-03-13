@@ -8522,6 +8522,9 @@ function createPartedInput {
 					cmdq="$cmdq set $partid raid on"
 				elif [ "$ptypex" = "8e" ];then
 					cmdq="$cmdq set $partid lvm on"
+				elif [ "$ptypex" = "83" ];then
+					# default partition type set by parted is linux(83)
+					flagok=0
 				else
 					# be careful, this is a suse parted extension
 					cmdq="$cmdq set $partid type 0x$ptypex"
