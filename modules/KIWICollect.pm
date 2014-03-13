@@ -2504,6 +2504,24 @@ sub createMetadata
 		@data = (); # clear list
 	}
 
+	my $datadir = $this->{m_proddata}->getInfo("DATADIR");
+	my $descrdir = $this->{m_proddata}->getInfo("DESCRDIR");
+	my $create_repomd;
+	if ( defined($this->{m_proddata}->getVar("CREATE_REPOMD"))
+		&& $this->{m_proddata}->getVar("CREATE_REPOMD") eq "true") {
+		$create_repomd = 1;
+	}
+	if(! defined($datadir)) {
+		$this->logMsg('E', "variables DATADIR is missing");
+		die "MISSING VARIABLES!";
+	}
+	if((! defined($descrdir)) && !$create_repomd) {
+		$this->logMsg('E', "variables DESCRDIR is missing and CREATE_REPOMD is not set");
+		die "MISSING VARIABLES!";
+	}
+	# skip the rest if we are not creating susetags
+	return unless $descrdir;
+	
 	## step 7: SHA1SUMS
 	$this->logMsg('I', "Calling create_sha1sums:");
 	my $csha1sum = "/usr/bin/create_sha1sums";
@@ -2540,23 +2558,6 @@ sub createMetadata
 		return;
 	}
 
-	my $datadir = $this->{m_proddata}->getInfo("DATADIR");
-	my $descrdir = $this->{m_proddata}->getInfo("DESCRDIR");
-	my $create_repomd;
-	if ( defined($this->{m_proddata}->getVar("CREATE_REPOMD"))
-		&& $this->{m_proddata}->getVar("CREATE_REPOMD") eq "true") {
-		$create_repomd = 1;
-	}
-	if(! defined($datadir)) {
-		$this->logMsg('E', "variables DATADIR is missing");
-		die "MISSING VARIABLES!";
-	}
-	if((! defined($descrdir)) && !$create_repomd) {
-		$this->logMsg('E', "variables DESCRDIR is missing and CREATE_REPOMD is not set");
-		die "MISSING VARIABLES!";
-	}
-	# skip the rest if we are not creating susetags
-	return unless $descrdir;
 
 	for my $d($this->getMediaNumbers()) {
 		my $dbase = $this->{m_basesubdir}->{$d};
