@@ -930,6 +930,9 @@ function installBootLoaderGrub2 {
 	local confFile_uefi=/boot/efi/EFI/BOOT/grub.cfg
 	local confFile_grub=$confFile_grub_bios
 	local bios_grub=/boot/grub2/i386-pc
+	local product=/etc/products.d/baseproduct
+	local elilo_efi=/usr/lib64/efi/elilo.efi
+	local grub_efi=/boot/efi/EFI/BOOT/grub.efi
 	local isEFI=0
 	#======================================
 	# check for EFI and mount EFI partition
@@ -944,6 +947,60 @@ function installBootLoaderGrub2 {
 				return 1
 			fi
 			isEFI=1
+		fi
+	fi
+	#======================================
+	# check for elilo compat mode
+	#--------------------------------------
+	if [ $isEFI -eq 1 ] && [ -e $product ] && [ -e $elilo_efi ];then
+		product=$(readlink $product)
+		if [[ "$product" =~ "SUSE_SLE" ]];then
+			#======================================
+			# write elilo.conf
+			#--------------------------------------
+			. /etc/default/grub
+			local timeout=10
+			if [ ! -z "$KIWI_BOOT_TIMEOUT" ];then
+				timeout=$KIWI_BOOT_TIMEOUT
+			fi
+			cat > /etc/elilo.conf <<- EOF
+				# Modified by YaST2.
+				timeout = $timeout
+				##YaST - boot_efilabel = "SUSE Linux Enterprise Server 11"
+				vendor-directory = BOOT
+				secure-boot = on
+				prompt
+				image  = /boot/vmlinuz
+				###Don't change this comment - YaST2 identifier: Original name: linux###
+				initrd = /boot/initrd
+				label  = linux
+				append = "$GRUB_CMDLINE_LINUX_DEFAULT"
+				description = Linux
+				root = $(getDiskID $imageRootDevice)
+			EOF
+			#======================================
+			# update sysconfig/bootloader
+			#--------------------------------------
+			sed -i -e s'@LOADER_TYPE.*@LOADER_TYPE="elilo"@' \
+				/etc/sysconfig/bootloader
+			#======================================
+			# set up boot files and configurations
+			#--------------------------------------
+			# create elilo.conf and grub.cfg and
+			# copy boot files to /boot/efi
+			# ----
+			elilo -vv
+			#======================================
+			# write efi variable to NvRam
+			#--------------------------------------
+			# this is for the efi boot manager to show a better
+			# title for this system
+			# ----
+			elilo --refresh-EBM -vv
+			#======================================
+			# return early for elilo case
+			#--------------------------------------
+			return 0
 		fi
 	fi
 	#======================================
