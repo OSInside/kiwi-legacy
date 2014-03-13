@@ -1412,6 +1412,7 @@ sub _new_instance {
 	$data{SnapshotChunk}   = 4096;
 	$data{SnapshotCount}   = "5G";
 	$data{OverlayRootTree} = 0;
+	$data{VolumeFree}      = 20;
 	#============================================
 	# Read .kiwirc
 	#--------------------------------------------

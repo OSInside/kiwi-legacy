@@ -267,10 +267,18 @@ sub getVolumes {
 			my $haveAbsolute;
 			my $usedValue;
 			if ($size) {
+				# got absolute size value
 				$haveAbsolute = 1;
 				$usedValue = $size;
 			} elsif ($free) {
+				# got free space definition
 				$usedValue = $free;
+				$haveAbsolute = 0;
+			} else {
+				# add default freespace as default
+				my $global = KIWIGlobals -> instance();
+				my $gdata  = $global -> getKiwiConfig();
+				$usedValue = $gdata->{VolumeFree};
 				$haveAbsolute = 0;
 			}
 			if (($usedValue) && ($usedValue =~ /(\d+)([MG]*)/sxm)) {

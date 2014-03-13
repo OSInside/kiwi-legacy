@@ -1857,6 +1857,7 @@ sub __addSystemDiskToBootXML {
 		my %volData;
 		my $vcount = 1;
 		my $volIDs = $systemdisk -> getVolumeIDs();
+		my $default = $this->{gdata}->{VolumeFree};
 		if ($volIDs) {
 			foreach my $id (@{$volIDs}) {
 				my %volInfo;
@@ -1889,7 +1890,7 @@ sub __addSystemDiskToBootXML {
 					);
 				} else {
 					$kiwi-> info (
-						"--> Volume $name\n"
+						"--> Volume $name: with $default MB[default] free\n"
 					);
 				}
 			}
