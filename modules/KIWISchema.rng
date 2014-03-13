@@ -2688,7 +2688,9 @@ by the VM (ovf only)</a:documentation>
           <value>ide</value>
           <value>buslogic</value>
           <value>lsilogic</value>
+          <value>lsisas1068</value>
           <value>legacyESX</value>
+          <value>pvscsi</value>
         </choice>
       </attribute>
     </define>
