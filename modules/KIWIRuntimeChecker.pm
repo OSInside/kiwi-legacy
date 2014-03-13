@@ -917,9 +917,8 @@ sub __checkVMConverterExist {
 	my $convCmd = $this->{locator}->getExecPath($converter);
 	if (! $convCmd) {
 		my $msg = "$converter tool not found on system.";
-		$kiwi -> error  ($msg);
-		$kiwi -> failed ();
-		return;
+		$kiwi -> info  ("$msg\n");
+		return 1;
 	}
 	return 1;
 }
