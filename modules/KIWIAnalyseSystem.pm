@@ -678,6 +678,9 @@ sub createCustomDataForType {
 		# create file node first
 		#------------------------------------------
 		my $file_node->{name} = $filename;
+		if ($type eq 'directory') {
+			$file_node->{children} = [ ];
+		}
 		#==========================================
 		# search for nodes in current tree
 		#------------------------------------------
