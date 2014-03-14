@@ -1503,7 +1503,7 @@ sub printChannelLine
         }
         if ( $name && $supporthash{$name} ) {
             print $fd $space;
-            print $fd "support='".$supporthash{$name}."'";
+            print $fd "supportstatus='".$supporthash{$name}."'";
         }
         print $fd $suffix."\n";
 }
