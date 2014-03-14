@@ -90,24 +90,24 @@ sub new {
 				$kiwi -> failed ();
 				return;
 			}
-		}
-		$data = KIWIQX::qxx (
-			"cd $destdir && git config user.email \"$mail\" 2>&1"
-		);
-		$code = $? >> 8;
-		if ($code != 0) {
-			$kiwi -> error  ("git config failed: $data");
-			$kiwi -> failed ();
-			return;
-		}
-		$data = KIWIQX::qxx (
-			"cd $destdir && git config user.name \"KIWI\" 2>&1"
-		);
-		$code = $? >> 8;
-		if ($code != 0) {
-			$kiwi -> error  ("git config failed: $data");
-			$kiwi -> failed ();
-			return;
+			$data = KIWIQX::qxx (
+				"cd $destdir && git config user.email \"$mail\" 2>&1"
+			);
+			$code = $? >> 8;
+			if ($code != 0) {
+				$kiwi -> error  ("git config failed: $data");
+				$kiwi -> failed ();
+				return;
+			}
+			$data = KIWIQX::qxx (
+				"cd $destdir && git config user.name \"KIWI\" 2>&1"
+			);
+			$code = $? >> 8;
+			if ($code != 0) {
+				$kiwi -> error  ("git config failed: $data");
+				$kiwi -> failed ();
+				return;
+			}
 		}
 	}
 	$destdir =~ s/\/$//;
