@@ -1490,7 +1490,7 @@ sub collectPackages {
 
 sub printChannelLine
 {
-        my ($fd, $prefix, $hash, $suffix, %supporthash) = @_;
+        my ($this, $fd, $prefix, $hash, $suffix, %supporthash) = @_;
         print $fd $prefix;
         my $name;
         my $space="";
@@ -1506,29 +1506,32 @@ sub printChannelLine
             print $fd "supportstatus='".$supporthash{$name}."'";
         }
         print $fd $suffix."\n";
+	return $this;
 }
 
 sub addToChannelFile {
 	my ($this, $name, $disturl, $arch, $medium) = @_;
-	if (!$this->{m_reportLog}->{$medium}) {
-		$this->{m_reportLog}->{$medium}->{filename} =
-			"$this->{m_basesubdir}->{$medium}.channel";
-	}
-	my $project;
-	my $repo;
-	my $package;
-	if ( $disturl =~ /^obs:\/\/[^\/]*\/([^\/]*)\/([^\/]*)\/[^\/]*\-(.*)$/ ) {
-		$project = $1;
-		$repo = $2;
-		$package = $3;
-	}
-	my $key = "$project::$repo::$arch";
-	unless ($this->{m_reportLog}->{$medium}->{entries}->{$key}) {
-		$this->{m_reportLog}->{$medium}->{entries}->{$key} =
-			[{ "project" => $project, "repository" => $repo, "arch" => $arch}];
-	}
-	push @{$this->{m_reportLog}->{$medium}->{entries}->{$key}},
-		{ "package" => $package, "name" => $name }; #, "support" => $support };
+
+        if (!$this->{m_reportLog}->{$medium}) {
+         	$this->{m_reportLog}->{$medium}->{filename} = "$this->{m_basesubdir}->{$medium}.channel";
+        }
+
+        my $project;
+        my $repo;
+        my $package;
+        if ( $disturl =~ /^obs:\/\/[^\/]*\/([^\/]*)\/([^\/]*)\/[^-]*\-(.*)$/ ) {
+          $project = $1;
+          $repo = $2;
+          $package = $3;
+        }
+
+        my $key = "$project::$repo::$arch";
+        unless ($this->{m_reportLog}->{$medium}->{entries}->{$key}) {
+          $this->{m_reportLog}->{$medium}->{entries}->{$key}=[{ "project" => $project, "repository" => $repo, "arch" => $arch}];
+        }
+        push @{$this->{m_reportLog}->{$medium}->{entries}->{$key}}, 
+          { "package" => $package, "name" => $name }; #, "support" => $support };
+
 	return $this;
 }
 
