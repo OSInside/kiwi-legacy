@@ -2524,8 +2524,6 @@ sub createMetadata
 		$this->logMsg('E', "variables DESCRDIR is missing and CREATE_REPOMD is not set");
 		die "MISSING VARIABLES!";
 	}
-	# skip the rest if we are not creating susetags
-	return unless $descrdir;
 	
 	## step 7: SHA1SUMS
 	$this->logMsg('I', "Calling create_sha1sums:");
@@ -2552,6 +2550,9 @@ sub createMetadata
 			$this->logMsg('I', "\t$item");
 		}
 	}
+
+	# skip the rest if we are not creating susetags
+	return unless $descrdir;
 
 	## step 8: DIRECTORY.YAST FILES
 	$this->logMsg('I', "Calling create_directory.yast:");
