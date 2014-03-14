@@ -68,10 +68,16 @@
 		<source path="http://download.suse.de/ibs/SUSE:/SLE-12:/GA/standard/"/>
 	</repository>
 	<packages type="image">
-<!-- Patterns seems broken atm, e,g wants yast2-mouse but does not exist -->
-<!--		<namedCollection name="base"/>-->
-<!-- Product SUSE_SLES does not yet exist -->
-<!--		<product name="SUSE_SLES"/>-->
+		<!-- The installation of patterns in SLE12 requires the SLE12 zypper -->
+		<!-- Thus the following definition only works when building on SLE12 -->
+		<!--		<namedCollection name="base"/>-->
+		<!-- In order to stay compatible we just install the pattern package -->
+		<package name="sca-patterns-base"/>
+		<!-- The installation of products in SLE12 requires the SLE12 zypper -->
+		<!-- Thus the following definition only works when building on SLE12 -->
+		<!--		<product name="SUSE_SLES"/>-->
+		<!-- In order to stay compatible we just install the product package -->
+		<package name="sles-release-12"/>
 		<package name="plymouth-branding-SLE" bootinclude="true"/>
 		<package name="grub2-branding-SLE" bootinclude="true"/>
 		<package name="ifplugd"/>
@@ -90,8 +96,7 @@
 		<package name="dracut"/>
 		<package name="wicked"/>
 		<package name="iproute2"/>
-<!-- kiwi not yet on the media, will be there with next beta -->
-<!--		<package name="kiwi"/>-->
+		<package name="kiwi"/>
 	</packages>
 	<packages type="iso">
 		<package name="gfxboot-branding-SLE" bootinclude="true" bootdelete="true"/>
