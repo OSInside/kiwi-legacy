@@ -1478,8 +1478,8 @@ sub collectPackages {
                       $this->printChannelLine($fd, "    <binary ", $binary, "/>", %supporthash);
                     }
                   }
+                  print $fd "  </binaries>\n";
                 }
-                print $fd "  </binaries>\n";
                 print $fd "</channel>\n";
 		close $fd;
         }
@@ -1488,24 +1488,24 @@ sub collectPackages {
 }
 # /collectPackages
 
-sub printChannelLine {
-	my ($this, $fd, $prefix, $hash, $suffix, %supporthash) = @_;
-	print $fd $prefix;
-	my $name;
-	my $space="";
-	for my $k(sort(keys($hash))) {
-		print $fd $space;
-		my $attribute = $k."='".$hash->{$k}."'";
-		print $fd $attribute;
-		$space = " " x (30 - length($attribute));
-		$name = $hash->{$k} if $k eq 'name';
-	}
-	if ( $name && $supporthash{$name} ) {
-		print $fd $space;
-		print $fd "support='".$supporthash{$name}."'";
-	}
-	print $fd $suffix."\n";
-	return $this;
+sub printChannelLine
+{
+        my ($fd, $prefix, $hash, $suffix, %supporthash) = @_;
+        print $fd $prefix;
+        my $name;
+        my $space="";
+        for my $k(sort(keys($hash))) {
+            print $fd $space." ";
+            my $attribute = $k."='".$hash->{$k}."'";
+            print $fd $attribute;
+            $space = " " x (30 - length($attribute));
+            $name = $hash->{$k} if $k eq 'name';
+        }
+        if ( $name && $supporthash{$name} ) {
+            print $fd $space;
+            print $fd "support='".$supporthash{$name}."'";
+        }
+        print $fd $suffix."\n";
 }
 
 sub addToChannelFile {
