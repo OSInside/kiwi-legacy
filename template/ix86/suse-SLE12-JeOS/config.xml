@@ -97,6 +97,7 @@
 		<package name="wicked"/>
 		<package name="iproute2"/>
 		<package name="kiwi"/>
+		<package name="openssh"/>
 	</packages>
 	<packages type="iso">
 		<package name="gfxboot-branding-SLE" bootinclude="true" bootdelete="true"/>
