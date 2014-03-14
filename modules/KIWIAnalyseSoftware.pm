@@ -177,11 +177,14 @@ sub __populateOperatingSystemVersion {
 	# to the table KIWIAnalyse.systems
 	# ---
 	my $this = shift;
+	my $kiwi = $this->{kiwi};
 	my $VFD = FileHandle -> new();
 	my $name;
 	my $vers;
 	my $plvl;
 	if (! $VFD -> open ("/etc/products.d/baseproduct")) {
+		$kiwi -> error ("Can't find a baseproduct");
+		$kiwi -> failed();
 		return;
 	}
 	while (my $line = <$VFD>) {
@@ -199,11 +202,17 @@ sub __populateOperatingSystemVersion {
 	}
 	$VFD -> close();
 	if ((! $name) || (! $vers)) {
+		$kiwi -> error ("Can't find a product name/version");
+		$kiwi -> failed();
 		return;
 	}
 	if ($name eq 'SUSE_SLES') {
 		$name = 'SUSE-Linux-Enterprise-Server';
+	} elsif ($name eq 'SLES') {
+		$name = 'SUSE-Linux-Enterprise-Server';
 	} elsif ($name eq 'SUSE_SLED') {
+		$name = 'SUSE-Linux-Enterprise-Desktop';
+	} elsif ($name eq 'SLED') {
 		$name = 'SUSE-Linux-Enterprise-Desktop';
 	}
 	if ($plvl) {
@@ -214,6 +223,8 @@ sub __populateOperatingSystemVersion {
 	}
 	my $MFD = FileHandle -> new();
 	if (! $MFD -> open ($this->{gdata}->{KAnalyse})) {
+		$kiwi -> error ("Can't open $this->{gdata}->{KAnalyse}");
+		$kiwi -> failed();
 		return;
 	}
 	while (my $line = <$MFD>) {
@@ -229,6 +240,10 @@ sub __populateOperatingSystemVersion {
 		}
 	}
 	$MFD -> close();
+	$kiwi -> error (
+		"Can't find product in $this->{gdata}->{KAnalyse}"
+	);
+	$kiwi -> failed();
 	return;
 }
 
@@ -609,7 +624,7 @@ sub __dumpSoftwareStack {
 	if (! $this -> __populateRepos()) {
 		$this -> __cleanMount();
 		return;
-    }
+	}
 	return $this -> __populatePackagesAndPatterns();
 }
 
