@@ -641,20 +641,23 @@ sub createCustomDataForType {
 	$kiwi -> cursorOFF();
 	my %curcount = ();
 	foreach my $item (@items) {
+		my $type = $result->{$item}->[0];
 		my @path_elements = ();
 		@path_elements = split (/\//,$item);
 		$path_elements[0] = '/';
 		my $filename = pop @path_elements;
 		my $dirname  = join ("/",@path_elements);
-		if (! $curcount{$dirname}) {
-			$curcount{$dirname} = 1;
-		} else {
-			$curcount{$dirname}++;
+		if (($max_child) && ($type ne 'directory')) {
+			if (! $curcount{$dirname}) {
+				$curcount{$dirname} = 1;
+			} else {
+				$curcount{$dirname}++;
+			}
 		}
 		#==========================================
 		# add a more flag and stop after max_count
 		#------------------------------------------
-		if (($max_child) && ($result->{$item}->[0] ne 'directory')) {
+		if (($max_child) && ($type ne 'directory')) {
 			if ($curcount{$dirname} == $max_child + 1) {
 				my $rest = $filecount{$dirname} - $max_child;
 				$filename = "THERE ARE [ $rest ] MORE ITEMS NOT DISPLAYED";
