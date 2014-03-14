@@ -41,22 +41,22 @@ echo 'SUBSYSTEM=="net", ACTION=="add", DRIVERS="?*", ATTR{dev_id}=="0x0", ATTR{t
 # Activate services
 #--------------------------------------
 suseActivateDefaultServices
-suseInsertService amazon
-suseInsertService amazon-late
-suseInsertService boot.device-mapper
 suseInsertService sshd
-suseInsertService sces-client
+suseInsertService cloud-init-local
+suseInsertService cloud-init
+suseInsertService cloud-config
+suseInsertService cloud-final
+suseRemoveService boot.efivars
+suseRemoveService boot.lvm
+suseRemoveService boot.md
+suseRemoveService boot.multipath
+suseRemoveService kbd
+suseRemoveService acpid 
 
 #======================================
 # Let the DHCP server set the hostname
 #--------------------------------------
-suseConfig
 baseUpdateSysConfig /etc/sysconfig/network/dhcp DHCLIENT_SET_HOSTNAME yes
-
-#======================================
-# From suse-ami-tools
-#--------------------------------------
-suse-ec2-configure --norefresh
 
 #======================================
 # clone runlevel 3 to 4

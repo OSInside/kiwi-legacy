@@ -21,13 +21,13 @@
 	<repository type="yast2">
 		<source path="opensuse://13.1/repo/oss/"/>
 	</repository>
-	<repository type="yast2">
-		<source path="opensuse://13.1/repo/non-oss"/>
+	<repository type="rpm-md">
+		<source path="http://download.opensuse.org/repositories/Cloud:/Tools/openSUSE_13.1"/>
 	</repository>
 	<packages type="image">
+        <package name="cloud-init"/>
 		<package name="ifplugd"/>
 		<package name="kernel-ec2"/>
-		<package name="suse-ami-tools"/>
 		<package name="vim"/>
 		<package name="xen-tools-domU"/>
 		<package name="xen"/>
