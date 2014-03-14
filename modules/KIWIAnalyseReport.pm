@@ -752,23 +752,29 @@ sub createReport {
 		foreach my $type (sort keys %json) {
 			my $title;
 			my $link;
+			my $file;
 			if ($type eq 'binaries') {
+				$file = "$dest/report-binary.html";
 				$title = "Binary files";
 				$link = "Open <a href=\"report-binary.html\" ";
 				$link.= "target=\"_blank\"> Report</a>.";
 			} elsif ($type eq 'modified') {
+				$file = "$dest/report-modified.html";
 				$title = "Modified files";
 				$link = "Open <a href=\"report-modified.html\" ";
 				$link.= "target=\"_blank\"> Report</a>.";
 			} else {
+				$file = "$dest/report-text.html";
 				$title = "Text files";
 				$link = "Open <a href=\"report-text.html\" ";
 				$link.= "target=\"_blank\"> Report</a>.";
 			}
-			print $FD '<tr valign="top">'."\n";
-			print $FD '<td>'."$title".'</td>'."\n";
-			print $FD '<td>'.$link.'</td>'."\n";
-			print $FD '</tr>'."\n";
+			if (($file) && (-f $file)) {
+				print $FD '<tr valign="top">'."\n";
+				print $FD '<td>'."$title".'</td>'."\n";
+				print $FD '<td>'.$link.'</td>'."\n";
+				print $FD '</tr>'."\n";
+			}
 		}
 		print $FD '</table>'."\n";
 		print $FD '</div>'."\n";
