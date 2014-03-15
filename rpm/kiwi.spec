@@ -681,7 +681,6 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-, root, root)
 %dir %attr(0750,tftp,tftp) /srv/tftpboot
 %doc /srv/tftpboot/README
-%dir /srv/tftpboot
 %dir /srv/tftpboot/KIWI
 %dir /srv/tftpboot/pxelinux.cfg
 %dir /srv/tftpboot/image
