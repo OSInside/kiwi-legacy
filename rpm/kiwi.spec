@@ -18,7 +18,7 @@
 #
 #
 #perl_verion is not defined in centos/RHEL yet
-%if 0%{?rhel_version} || 0%{?fedora}
+%if 0%{?rhel_version} || 0%{?fedora} || 0%{?centos}
 %define perl_version    %(eval "`%{__perl} -V:version`"; echo $version)
 %endif
 
@@ -123,6 +123,12 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 %if 0%{?rhel_version}
 %define mysystems %(echo `VER=%{rhel_version} echo "rhel-0${VER:0:1}.${VER:1:2}"`)
 %endif
+%if 0%{?fedora}
+%define mysystems %(echo `VER=%{fedora} echo "fedora-0${VER:0:1}.${VER:1:2}"`)
+%endif
+%if 0%{?centos}
+%define mysystems %(echo `VER=%{centos} echo "centos-0${VER:0:1}.${VER:1:2}"`)
+%endif
 # find out about my arch name, could be done also via symlinks
 %define myarch %{_target_cpu}
 %ifarch armv7l armv7hl
@@ -207,11 +213,11 @@ Authors:
 %package -n kiwi-pxeboot
 Summary:        KIWI - PXE boot structure
 PreReq:         coreutils
+%if 0%{?rhel_version} || 0%{?fedora} || 0%{?centos}
+PreReq:         shadow-utils
+%else
 %if 0%{?suse_version} > 1220
 PreReq:         shadow
-%else
-%if 0%{?fedora}
-Requires:	shadow-utils
 %else
 PreReq:         pwdutils
 %endif
@@ -248,7 +254,7 @@ Requires:       dosfstools
 Requires:       genisoimage
 Requires:       virt-utils
 %endif
-%if 0%{?rhel_version} || 0%{?fedora}
+%if 0%{?rhel_version} || 0%{?fedora} || 0%{?centos}
 Requires:       qemu-img
 %endif
 License:        GPL-2.0+
@@ -290,7 +296,7 @@ Requires:       parted
 Requires:       multipath-tools
 Requires:       virt-utils
 %endif
-%if 0%{?rhel_version} || 0%{?fedora}
+%if 0%{?rhel_version} || 0%{?fedora} || 0%{?centos}
 Requires:       device-mapper-multipath
 Requires:       qemu-img
 %endif
@@ -380,7 +386,7 @@ Requires:       genisoimage
 Requires:       multipath-tools
 Requires:       virt-utils
 %endif
-%if 0%{?rhel_version} || 0%{?fedora}
+%if 0%{?rhel_version} || 0%{?fedora} || 0%{?centos}
 Requires:       device-mapper-multipath
 Requires:       qemu-img
 %endif
