@@ -77,7 +77,6 @@
 	<packages type="image">
 		<package name="bind-libs"/>
 		<package name="bind-utils"/>
-		<package name="clicfs"/>
 		<package name="coreutils"/>
 		<package name="dialog"/>
 		<package name="e2fsprogs"/>

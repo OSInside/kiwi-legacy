@@ -98,7 +98,6 @@
 		<package name="hwinfo"/>
 		<package name="pam"/>
 		<package name="parted"/>
-		<package name="clicfs"/>
 		<package name="bc"/>
 		<package name="e2fsprogs"/>
 		<package name="gettext"/>
