@@ -49,11 +49,11 @@
 	<users group="root">
 		<user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
 	</users>
-	<repository type="rpm-md" priority="1">
-		<source path="obs://Virtualization:/Appliances/RedHat_RHEL-6"/>
-	</repository>
 	<repository type="rpm-md" profiles="RedHat">
 		<source path="iso:///image/CDs/RHEL-6.2-x86_64-DVD.iso"/>
+	</repository>
+	<repository type="rpm-md" priority="1">
+		<source path="obs://Virtualization:/Appliances/RedHat_RHEL-6"/>
 	</repository>
 	<packages type="image">
 		<package name="bash"/>
@@ -112,6 +112,5 @@
 	<packages type="bootstrap">
 		<package name="filesystem"/>
 		<package name="basesystem"/>
-		<package name="yum-priorities"/>
 	</packages>
 </image>
