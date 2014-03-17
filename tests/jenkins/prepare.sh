@@ -4,8 +4,8 @@
 # into the shell execution layer at jenkins
 #
 # cd /tmp && wget \
-#    https://raw.github.com/openSUSE/kiwi/master/tests/jenkins/prepare.sh
-# /tmp/prepare.sh
+#    https://raw.github.com/openSUSE/kiwi/master/tests/jenkins/prepare.sh && \
+#    bash /tmp/prepare.sh
 #
 # Add jenkins user for running code tests
 grep -q jenkins /etc/passwd || useradd -m jenkins
@@ -16,7 +16,7 @@ if [ ! -d /home/jenkins/kiwi ];then
 	su - jenkins -c "mkdir -p /home/jenkins/kiwi"
 	su - jenkins -c "cd /home/jenkins/kiwi && git clone $kiwi"
 else
-	su - jenkins -c "cd /home/jenkins/kiwi && git pull"
+	su - jenkins -c "cd /home/jenkins/kiwi/kiwi && git pull"
 fi
 
 # install required packages
