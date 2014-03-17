@@ -1478,8 +1478,8 @@ sub collectPackages {
                       $this->printChannelLine($fd, "    <binary ", $binary, "/>", %supporthash);
                     }
                   }
+                  print $fd "  </binaries>\n";
                 }
-                print $fd "  </binaries>\n";
                 print $fd "</channel>\n";
 		close $fd;
         }
@@ -1488,47 +1488,50 @@ sub collectPackages {
 }
 # /collectPackages
 
-sub printChannelLine {
-	my ($this, $fd, $prefix, $hash, $suffix, %supporthash) = @_;
-	print $fd $prefix;
-	my $name;
-	my $space="";
-	for my $k(sort(keys($hash))) {
-		print $fd $space;
-		my $attribute = $k."='".$hash->{$k}."'";
-		print $fd $attribute;
-		$space = " " x (30 - length($attribute));
-		$name = $hash->{$k} if $k eq 'name';
-	}
-	if ( $name && $supporthash{$name} ) {
-		print $fd $space;
-		print $fd "support='".$supporthash{$name}."'";
-	}
-	print $fd $suffix."\n";
+sub printChannelLine
+{
+        my ($this, $fd, $prefix, $hash, $suffix, %supporthash) = @_;
+        print $fd $prefix;
+        my $name;
+        my $space="";
+        for my $k(sort(keys($hash))) {
+            print $fd $space." ";
+            my $attribute = $k."='".$hash->{$k}."'";
+            print $fd $attribute;
+            $space = " " x (30 - length($attribute));
+            $name = $hash->{$k} if $k eq 'name';
+        }
+        if ( $name && $supporthash{$name} ) {
+            print $fd $space;
+            print $fd "supportstatus='".$supporthash{$name}."'";
+        }
+        print $fd $suffix."\n";
 	return $this;
 }
 
 sub addToChannelFile {
 	my ($this, $name, $disturl, $arch, $medium) = @_;
-	if (!$this->{m_reportLog}->{$medium}) {
-		$this->{m_reportLog}->{$medium}->{filename} =
-			"$this->{m_basesubdir}->{$medium}.channel";
-	}
-	my $project;
-	my $repo;
-	my $package;
-	if ( $disturl =~ /^obs:\/\/[^\/]*\/([^\/]*)\/([^\/]*)\/[^\/]*\-(.*)$/ ) {
-		$project = $1;
-		$repo = $2;
-		$package = $3;
-	}
-	my $key = "$project::$repo::$arch";
-	unless ($this->{m_reportLog}->{$medium}->{entries}->{$key}) {
-		$this->{m_reportLog}->{$medium}->{entries}->{$key} =
-			[{ "project" => $project, "repository" => $repo, "arch" => $arch}];
-	}
-	push @{$this->{m_reportLog}->{$medium}->{entries}->{$key}},
-		{ "package" => $package, "name" => $name }; #, "support" => $support };
+
+        if (!$this->{m_reportLog}->{$medium}) {
+         	$this->{m_reportLog}->{$medium}->{filename} = "$this->{m_basesubdir}->{$medium}.channel";
+        }
+
+        my $project;
+        my $repo;
+        my $package;
+        if ( $disturl =~ /^obs:\/\/[^\/]*\/([^\/]*)\/([^\/]*)\/[^-]*\-(.*)$/ ) {
+          $project = $1;
+          $repo = $2;
+          $package = $3;
+        }
+
+        my $key = "$project::$repo::$arch";
+        unless ($this->{m_reportLog}->{$medium}->{entries}->{$key}) {
+          $this->{m_reportLog}->{$medium}->{entries}->{$key}=[{ "project" => $project, "repository" => $repo, "arch" => $arch}];
+        }
+        push @{$this->{m_reportLog}->{$medium}->{entries}->{$key}}, 
+          { "package" => $package, "name" => $name }; #, "support" => $support };
+
 	return $this;
 }
 
@@ -2524,8 +2527,6 @@ sub createMetadata
 		$this->logMsg('E', "variables DESCRDIR is missing and CREATE_REPOMD is not set");
 		die "MISSING VARIABLES!";
 	}
-	# skip the rest if we are not creating susetags
-	return unless $descrdir;
 	
 	## step 7: SHA1SUMS
 	$this->logMsg('I', "Calling create_sha1sums:");
@@ -2552,6 +2553,9 @@ sub createMetadata
 			$this->logMsg('I', "\t$item");
 		}
 	}
+
+	# skip the rest if we are not creating susetags
+	return unless $descrdir;
 
 	## step 8: DIRECTORY.YAST FILES
 	$this->logMsg('I', "Calling create_directory.yast:");
