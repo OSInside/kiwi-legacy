@@ -900,7 +900,7 @@ sub __checkUsersConsistent {
 #------------------------------------------
 sub __checkVMConverterExist {
 	# ...
-	# Check that the required converter exists
+	# Check that the preferred converter exists
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
@@ -913,11 +913,22 @@ sub __checkVMConverterExist {
 	if ((! $format) || ($format ne 'ova')) {
 		return 1;
 	}
+	# /.../
+	# for the creation of an ova archive we prefer ovftool
+	# warn us if it is not present. This check will be
+	# enhanced in the future to also check if the installed
+	# version of ovftool is option compatible the way it is
+	# used in kiwi. For now just check it's presence
+	# ---
 	my $converter = 'ovftool';
 	my $convCmd = $this->{locator}->getExecPath($converter);
 	if (! $convCmd) {
-		my $msg = "$converter tool not found on system.";
-		$kiwi -> info  ("$msg\n");
+		$kiwi -> warning (
+			"preferred command '$converter' tool not found\n"
+		);
+		$kiwi -> warning (
+			"--> will create a tar archive alternatively\n"
+		);
 		return 1;
 	}
 	return 1;
