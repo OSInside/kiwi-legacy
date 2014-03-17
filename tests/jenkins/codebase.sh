@@ -4,4 +4,5 @@
 # Required: prepare.sh
 #
 topic=$1
+su - jenkins -c "cd /home/jenkins/kiwi/kiwi && git pull"
 su - jenkins -c "cd /home/jenkins/kiwi/kiwi && make $topic"
