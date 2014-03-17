@@ -30,7 +30,7 @@ else
 fi
 
 # install required packages
-spec=/home/jenkins/kiwi/kiwi/kiwi/rpm/kiwi.spec
+spec=/home/jenkins/kiwi/kiwi/rpm/kiwi.spec
 packages="genisoimage cdrkit-cdrtools-compat"
 if ! zypper -n install --no-recommends $packages;then
 	exit 1
