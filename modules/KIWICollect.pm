@@ -1447,91 +1447,103 @@ sub collectPackages {
 	# step 4: run scripts for other (non-meta) packages
 	# TODO (copy/paste?)
 
-        # collect support levels for _channel file
-        my %supporthash;
-        my $supportfile = abs_path($this->{m_xml}->{xmlOrigFile});
-        $supportfile =~ s/.kiwi$/.kwd/;
+	# collect support levels for _channel file
+	my %supporthash;
+	my $supportfile = abs_path($this->{m_xml}->{xmlOrigFile});
+	$supportfile =~ s/.kiwi$/.kwd/;
 	if ( -e $supportfile ) {
 		my $support_fd = FileHandle -> new();
 		if (! $support_fd -> open ($supportfile)) {
-			$this->logMsg('E', "[collectPackages] failed to read support file!");
+			$this->logMsg(
+				'E', "[collectPackages] failed to read support file!"
+			);
 			return 1;
 		}
 		while (my $line = <$support_fd>) {
 			$line =~ s/\n$//;
-			$supporthash{$1} = $2 if $line =~ /^([^:]*):.*support_([^\\]*)\\n-Kwd:$/;
+			if ($line =~ /^([^:]*):.*support_([^\\]*)\\n-Kwd:$/) {
+				$supporthash{$1} = $2;
+			}
 		}
 		$support_fd -> close();
 	}
 
-        # write out the channel files based on the collected rpms
-        for my $m (keys($this->{m_reportLog})) {
-                my $medium = $this->{m_reportLog}->{$m};
-         	open(my $fd, ">", $medium->{filename}) or die "Unable to open report file";
-                print $fd "<channel>\n";
-
-                for my $key(keys($medium->{entries})) {
-                  for my $binary(@{$medium->{entries}->{$key}}) {
-                    if ($binary->{project}) {
-                      $this->printChannelLine($fd, "  <binaries ", $binary, ">", %supporthash);
-                    } else {
-                      $this->printChannelLine($fd, "    <binary ", $binary, "/>", %supporthash);
-                    }
-                  }
-                  print $fd "  </binaries>\n";
-                }
-                print $fd "</channel>\n";
+	# write out the channel files based on the collected rpms
+	for my $m (keys($this->{m_reportLog})) {
+		my $medium = $this->{m_reportLog}->{$m};
+		my $fd;
+		if (! open($fd, ">", $medium->{filename})) {
+			die "Unable to open report file: $medium->{filename}";
+		}
+		print $fd "<channel>\n";
+		for my $key(keys($medium->{entries})) {
+			for my $binary(@{$medium->{entries}->{$key}}) {
+				if ($binary->{project}) {
+					$this->printChannelLine(
+						$fd, "  <binaries ", $binary, ">", %supporthash
+					);
+				} else {
+					$this->printChannelLine(
+						$fd, "    <binary ", $binary, "/>", %supporthash
+					);
+				}
+			}
+			print $fd "  </binaries>\n";
+		}
+		print $fd "</channel>\n";
 		close $fd;
-        }
-
+	}
 	return 0;
 }
-# /collectPackages
 
-sub printChannelLine
-{
-        my ($this, $fd, $prefix, $hash, $suffix, %supporthash) = @_;
-        print $fd $prefix;
-        my $name;
-        my $space="";
-        for my $k(sort(keys($hash))) {
-            print $fd $space." ";
-            my $attribute = $k."='".$hash->{$k}."'";
-            print $fd $attribute;
-            $space = " " x (30 - length($attribute));
-            $name = $hash->{$k} if $k eq 'name';
-        }
-        if ( $name && $supporthash{$name} ) {
-            print $fd $space;
-            print $fd "supportstatus='".$supporthash{$name}."'";
-        }
-        print $fd $suffix."\n";
+sub printChannelLine {
+	my ($this, $fd, $prefix, $hash, $suffix, %supporthash) = @_;
+	print $fd $prefix;
+	my $name;
+	my $space="";
+	for my $k(sort(keys($hash))) {
+		print $fd $space." ";
+		my $attribute = $k."='".$hash->{$k}."'";
+		print $fd $attribute;
+		$space = " " x (30 - length($attribute));
+		$name = $hash->{$k} if $k eq 'name';
+	}
+	if ( $name && $supporthash{$name} ) {
+		print $fd $space;
+		print $fd "supportstatus='".$supporthash{$name}."'";
+	}
+	print $fd $suffix."\n";
 	return $this;
 }
 
 sub addToChannelFile {
 	my ($this, $name, $disturl, $arch, $medium) = @_;
-
-        if (!$this->{m_reportLog}->{$medium}) {
-         	$this->{m_reportLog}->{$medium}->{filename} = "$this->{m_basesubdir}->{$medium}.channel";
-        }
-
-        my $project;
-        my $repo;
-        my $package;
-        if ( $disturl =~ /^obs:\/\/[^\/]*\/([^\/]*)\/([^\/]*)\/[^-]*\-(.*)$/ ) {
-          $project = $1;
-          $repo = $2;
-          $package = $3;
-        }
-
-        my $key = "$project::$repo::$arch";
-        unless ($this->{m_reportLog}->{$medium}->{entries}->{$key}) {
-          $this->{m_reportLog}->{$medium}->{entries}->{$key}=[{ "project" => $project, "repository" => $repo, "arch" => $arch}];
-        }
-        push @{$this->{m_reportLog}->{$medium}->{entries}->{$key}}, 
-          { "package" => $package, "name" => $name }; #, "support" => $support };
-
+	if (!$this->{m_reportLog}->{$medium}) {
+		$this->{m_reportLog}->{$medium}->{filename} = 
+			"$this->{m_basesubdir}->{$medium}.channel";
+	}
+	my $project;
+	my $repo;
+	my $package;
+	if ( $disturl =~ /^obs:\/\/[^\/]*\/([^\/]*)\/([^\/]*)\/[^-]*\-(.*)$/ ) {
+		$project = $1;
+		$repo = $2;
+		$package = $3;
+	}
+	my $key = "$project::$repo::$arch";
+	unless ($this->{m_reportLog}->{$medium}->{entries}->{$key}) {
+		$this->{m_reportLog}->{$medium}->{entries}->{$key} = [
+			{
+				"project"    => $project,
+				"repository" => $repo,
+				"arch"       => $arch
+			}
+		];
+	}
+	push @{$this->{m_reportLog}->{$medium}->{entries}->{$key}},	{
+		"package" => $package,
+		"name"    => $name
+	};
 	return $this;
 }
 
@@ -1550,8 +1562,7 @@ sub addToChannelFile {
 # - different for metaFILES because they are loose and don't have any
 #   install mechanism yet. We think about this.
 #==========================================
-sub unpackMetapackages
-{
+sub unpackMetapackages {
 	# the second (first explicit) parameter is a list of packages
 	my @packlist = @_;
 	my $this = shift @packlist;
@@ -1578,20 +1589,22 @@ sub unpackMetapackages
 		if(-d $tmp) {
 			qx(rm -rf $tmp);
 		}
-		if(!mkpath("$tmp", { mode => oct(755) } )) {
+		if (!mkpath("$tmp", { mode => oct(755) } )) {
 			$this->logMsg('E', "can't create dir <$tmp>");
 			return 1;
 		}
 
 		my $nofallback = 0;
-	      ARCH:
-		for my $reqArch ($this->getArchList($this->{m_metaPacks}->{$metapack},
-						    $metapack, \$nofallback))
-		{
-			if($reqArch =~ m{(src|nosrc)}) {
+		ARCH:
+		for my $reqArch (
+			$this->getArchList(
+				$this->{m_metaPacks}->{$metapack}, $metapack, \$nofallback
+			)
+		) {
+			if ($reqArch =~ m{(src|nosrc)}) {
 				next;
 			}
-			if ( defined($packOptions{$reqArch}) ) {
+			if (defined($packOptions{$reqArch})) {
 				next;
 			}
 			my @fallbacklist;
@@ -1605,74 +1618,75 @@ sub unpackMetapackages
 			}
 			if ($this->{m_debug} >= 5) {
 				my $msg = '    Use as expanded architectures >'
-				    . join(" ", @fallbacklist)
-				    . '<';
+					. join(" ", @fallbacklist)
+					. '<';
 				$this->logMsg('I', $msg);
 			}
-
-		      FARCH:
+			FARCH:
 			for my $arch(@fallbacklist) {
-			      PACKKEY:
-				for my $packKey( sort{
-					$poolPackages->{$a}->{priority}
-					<=> $poolPackages->{$b}->{priority}}
-						 keys(%{$poolPackages}))
-				{
+				PACKKEY:
+				for my $packKey(
+						sort {
+							$poolPackages->{$a}->{priority}
+							<=> $poolPackages->{$b}->{priority}
+						}
+						keys(%{$poolPackages}
+					)
+				) {
 					my $packPointer = $poolPackages->{$packKey};
-					if(!$packPointer->{'localfile'}) {
+					if (!$packPointer->{'localfile'}) {
 						next PACKKEY; # should not be needed
 					}
-					if($packPointer->{arch} ne $arch) {
+					if ($packPointer->{arch} ne $arch) {
 						next PACKKEY;
 					}
 
 					$this->logMsg('I', "unpack $packPointer->{localfile} ");
-					$this->{m_util}->unpac_package($packPointer->{localfile}, $tmp);
-#					$this->addToReportFile($packPointer->{localfile}, $medium, "META");
+					$this->{m_util}->unpac_package(
+						$packPointer->{localfile}, $tmp
+					);
 					# all metapackages contain at least a CD1 dir and _may_
 					# contain another /usr/share/<name> dir
 					if ( -d "$tmp/CD1") {
 						qx(cp -a $tmp/CD1/* $this->{m_basesubdir}->{$medium});
-					}
-					else {
-						my $msg = "No CD1 directory on $packPointer->{localfile}";
+					} else {
+						my $msg;
+						$msg = "No CD1 directory on $packPointer->{localfile}";
 						$this->logMsg('W', $msg);
 					}
-					#for my $sub("usr", "etc") {
-					#if(-d "$tmp/$sub") {
-					#  qx(cp -r $tmp/$sub $this->{m_basesubdir}->{$medium});
-					#}
 					if(-f "$tmp/usr/share/mini-iso-rmlist") {
 						my $RMLIST;
-						if(!open($RMLIST, '<',
-							 "$tmp/usr/share/mini-iso-rmlist")) {
+						if (! open(
+							$RMLIST, '<', "$tmp/usr/share/mini-iso-rmlist")
+						) {
 							$this->logMsg('W',
-								      "cannot open <$tmp/usr/share/mini-iso-rmlist>");
-						}
-						else {
+								"cannot open <$tmp/usr/share/mini-iso-rmlist>"
+							);
+						} else {
 							my @rmfiles = <$RMLIST>;
 							chomp(@rmfiles);
 							$this->{m_rmlists}->{$arch} = [@rmfiles];
 							close $RMLIST;
 						}
 					}
-					#}
 					# copy content of CD2 ... CD<i> subdirs if exists:
-					for(2..10) {
-						if(-d "$tmp/CD$_"
-						   and defined $this->{m_basesubdir}->{$_})
-						{
+					for (2..10) {
+						if (-d "$tmp/CD$_"
+							and defined $this->{m_basesubdir}->{$_}
+						) {
 							qx(cp -a $tmp/CD$_/* $this->{m_basesubdir}->{$_});
 							$this->logMsg('I',
-								      "Unpack CD$_ for $packPointer->{name} ");
+								"Unpack CD$_ for $packPointer->{name} "
+							);
 						}
-						# add handling for "DVD<i>" subdirs if necessary FIXME
+						# FIXME: add handling for "DVD<i>" subdirs if needed
 					}
 
 					# THEMING
 					if ($this->{m_debug}) {
 						$this->logMsg('I',
-							      "Handling theming for package $metapack");
+							"Handling theming for package $metapack"
+						);
 					}
 					my $thema = $this->{m_proddata}->getVar("PRODUCT_THEME");
 
@@ -1680,10 +1694,11 @@ sub unpackMetapackages
 
 					if(-d "$tmp/SuSE") {
 						my $TD;
-						if(! opendir($TD, "$tmp/SuSE")) {
-							my $msg = '[unpackMetapackages] Cannot open '
-							    . "theme directory for reading!\nSkipping "
-							    . "themes for package $metapack";
+						if (! opendir($TD, "$tmp/SuSE")) {
+							my $msg;
+							$msg = '[unpackMetapackages] Cannot open ';
+							$msg.= "theme directory for reading!\nSkipping ";
+							$msg.= "themes for package $metapack";
 							$this->logMsg('W', $msg);
 							next;
 						}
@@ -1704,8 +1719,9 @@ sub unpackMetapackages
 						if($found==0) {
 							for my $d(sort(@themes)) {
 								if($d =~ m{linux|sles|suse}i) {
-									my $msg = "Using fallback theme $d "
-									    . "instead of $thema";
+									my $msg;
+									$msg = "Using fallback theme $d ";
+									$msg.= "instead of $thema";
 									$this->logMsg('W', $msg);
 									$thema = $d;
 									last;
@@ -1716,11 +1732,12 @@ sub unpackMetapackages
 						for my $i(1..3) {
 							# drop not used configs when media does not exist
 							if(-d "$tmp/SuSE/$thema/CD$i"
-							   and $this->{m_basesubdir}->{$i}
-							   and -d "$tmp/SuSE/$thema/CD$i")
-							{
-								my $cmd = "cp -a $tmp/SuSE/$thema/CD$i/* "
-								    . "$this->{m_basesubdir}->{$i}";
+								and $this->{m_basesubdir}->{$i}
+								and -d "$tmp/SuSE/$thema/CD$i"
+							) {
+								my $cmd;
+								$cmd = "cp -a $tmp/SuSE/$thema/CD$i/* ";
+								$cmd.= "$this->{m_basesubdir}->{$i}";
 								qx( $cmd );
 							}
 						}
@@ -1733,45 +1750,45 @@ sub unpackMetapackages
 						$packOptions{'script'} =~ m{.*/([^/]+)$};
 						if(defined($1)) {
 							$scriptfile = $1;
-						}
-						else {
-							my $msg = '[executeScripts] malformed script '
-							    . "name: $packOptions{'script'}";
+						} else {
+							my $msg;
+							$msg = '[executeScripts] malformed script ';
+							$msg.= "name: $packOptions{'script'}";
 							$this->logMsg('W', $msg);
 							next;
 						}
-						my $info = "Downloading script $packOptions{'script'} "
-						    . "to $this->{m_scriptbase}:";
+						my $info;
+						$info = "Downloading script $packOptions{'script'} ";
+						$info.= "to $this->{m_scriptbase}:";
 						print $info;
 						KIWIGlobals -> instance() -> downloadFile(
 							$packOptions{'script'},
-							"$this->{m_scriptbase}/$scriptfile");
-
+							"$this->{m_scriptbase}/$scriptfile"
+						);
 						# TODO I don't like this. Not at all. use chroot
 						# in next version!
 						qx(chmod u+x "$this->{m_scriptbase}/$scriptfile");
-						my $msg = '[executeScripts] Execute script '
-						    . "$this->{m_scriptbase}/$scriptfile:";
+						my $msg;
+						$msg = '[executeScripts] Execute script ';
+						$msg.= "$this->{m_scriptbase}/$scriptfile:";
 						$this->logMsg('I', $msg);
-						if(-f "$this->{m_scriptbase}/$scriptfile"
-						   and -x "$this->{m_scriptbase}/$scriptfile")
-						{
+						if (-f "$this->{m_scriptbase}/$scriptfile"
+								and -x "$this->{m_scriptbase}/$scriptfile"
+						) {
 							my $status = qx($this->{m_scriptbase}/$scriptfile);
 							my $retcode = $? >> 8;
 							print "STATUS:\n$status\n";
 							print "RETURNED:\n$retcode\n";
-						}
-						else {
+						} else {
 							$msg = '[executeScripts] script '
-							    . $this->{m_scriptbase}
-							. "/$scriptfile for metapackage $metapack "
-							    . 'could not be executed successfully!';
+								. $this->{m_scriptbase}
+								. "/$scriptfile for metapackage $metapack "
+								. 'could not be executed successfully!';
 							$this->logMsg('W', $msg);
 						}
-					}
-					else {
+					} else {
 						$this->logMsg('W',
-							      "No script defined for metapackage $metapack");
+							"No script defined for metapackage $metapack");
 					}
 
 					# found a package, jump to next required arch.
@@ -1779,14 +1796,15 @@ sub unpackMetapackages
 				}
 			}
 			# Package was not found
-			if ( !defined($this->{m_proddata}->getOpt(
-					      "IGNORE_MISSING_META_PACKAGES"))
-			     || $this->{m_proddata}->getOpt(
-				      "IGNORE_MISSING_META_PACKAGES")
-			     ne "true" ) {
+			if (!defined(
+				$this->{m_proddata}->getOpt("IGNORE_MISSING_META_PACKAGES")
+			)|| $this->{m_proddata}->getOpt("IGNORE_MISSING_META_PACKAGES")
+				ne "true" 
+			) {
 				# abort
-				my $msg = "Metapackage <$metapack> not available for "
-				    . "required $reqArch architecture!";
+				my $msg;
+				$msg = "Metapackage <$metapack> not available for ";
+				$msg.= "required $reqArch architecture!";
 				$this->logMsg('E', $msg);
 			}
 		}
@@ -1803,13 +1821,11 @@ sub unpackMetapackages
 	}
 	return 0;
 }
-# /executeScripts
 
 #==========================================
 # executeMetafileScripts
 #------------------------------------------
-sub executeMetafileScripts
-{
+sub executeMetafileScripts {
 	my @filelist = @_;
 	my $this = shift @filelist;
 	my $ret = 0;
@@ -1822,47 +1838,45 @@ sub executeMetafileScripts
 			$tmp{'script'} =~ m{.*/([^/]+)$};
 			if(defined($1)) {
 				$scriptfile = $1;
-			}
-			else {
+			} else {
 				$this->logMsg('W',
-					      "[executeScripts] malformed script name: $tmp{'script'}");
+					"[executeScripts] malformed script name: $tmp{'script'}"
+				);
 				next;
 			}
 			my $info = "Downloading script $tmp{'script'} to "
-			    . "$this->{m_scriptbase}:";
+				. "$this->{m_scriptbase}:";
 			print $info;
-			KIWIGlobals -> instance() -> downloadFile($tmp{'script'},
-				"$this->{m_scriptbase}/$scriptfile");
-
+			KIWIGlobals -> instance() -> downloadFile(
+				$tmp{'script'},	"$this->{m_scriptbase}/$scriptfile"
+			);
 			# TODO I don't like this. Not at all. use chroot in next version!
 			qx(chmod u+x "$this->{m_scriptbase}/$scriptfile");
-			my $msg = '[executeScripts] Execute script '
-			    . "$this->{m_scriptbase}/$scriptfile:";
+			my $msg;
+			$msg = '[executeScripts] Execute script ';
+			$msg.= "$this->{m_scriptbase}/$scriptfile:";
 			$this->logMsg('I', $msg);
-			if(-f "$this->{m_scriptbase}/$scriptfile"
-			   and -x "$this->{m_scriptbase}/$scriptfile")
-			{
+			if (-f "$this->{m_scriptbase}/$scriptfile"
+				and -x "$this->{m_scriptbase}/$scriptfile"
+			) {
 				my $status = qx($this->{m_scriptbase}/$scriptfile);
 				my $retcode = $? >> 8;
 				$msg = '[executeScripts] Script '
-				    . "$this->{m_scriptbase}/$scriptfile returned "
-				    . "with $status($retcode).";
+					. "$this->{m_scriptbase}/$scriptfile returned "
+					. "with $status($retcode).";
 				$this->logMsg('I', );
-			}
-			else {
+			} else {
 				$msg = '[executeScripts] script '
-				    . "$this->{m_scriptbase}/$scriptfile for "
-				    . "metafile $metafile could not be executed successfully!";
+					. "$this->{m_scriptbase}/$scriptfile for "
+					. "metafile $metafile could not be executed successfully!";
 				$this->logMsg('W', );
 			}
-		}
-		else {
+		} else {
 			$this->logMsg('W', "No script defined for metafile $metafile");
 		}
 	}
 	return $ret;
 }
-# /executeScripts
 
 #==========================================
 # lookUpAllPackages
@@ -1877,27 +1891,25 @@ sub executeMetafileScripts
 #------------------------------------------
 # Returns the number of resolved files, or 0 for bad list
 #------------------------------------------
-sub lookUpAllPackages
-{
+sub lookUpAllPackages {
 	my $this = shift;
-
 	my $retval = 0;
 	my $packPool = {};
 	my $num_repos = keys %{$this->{m_repos}};
 	my $count_repos = 0;
 	my $last_progress_time = 0;
-
 	REPO:
 	for my $r (sort {
-		$this->{m_repos}->{$a}->{priority}
-		<=> $this->{m_repos}->{$b}->{priority} }
-		   keys(%{$this->{m_repos}}))
-	{
+			$this->{m_repos}->{$a}->{priority}
+			<=> $this->{m_repos}->{$b}->{priority}
+		}
+		keys(%{$this->{m_repos}})
+	) {
 		my $num_dirs = keys %{$this->{m_repos}->{$r}->{'srcdirs'}};
 		my $count_dirs = 0;
 		$count_repos++;
 
-	      DIR:
+		DIR:
 		for my $d(keys(%{$this->{m_repos}->{$r}->{'srcdirs'}})) {
 			my $num_files = @{$this->{m_repos}->{$r}->{'srcdirs'}->{$d}};
 			my $count_files = 0;
@@ -1906,7 +1918,7 @@ sub lookUpAllPackages
 				next DIR;
 			}
 
-		      URI:
+			URI:
 			for my $uri(@{$this->{m_repos}->{$r}->{'srcdirs'}->{$d}}) {
 				$count_files++;
 				# skip all files without rpm suffix
@@ -1914,14 +1926,14 @@ sub lookUpAllPackages
 
 				if ($this->{m_debug} >= 1) {
 					# show progress every 30 seconds
-					if ( $last_progress_time < time() ){
+					if ($last_progress_time < time()) {
 						my $str;
 						$str = (time() - $this->{m_startUpTime}) / 60;
 						$str = sprintf "%.0f", $str;
 						my $msg = 'read package progress: '
-						    . "($count_repos/$num_repos | "
-						    . "$count_dirs/$num_dirs | "
-						    . "$count_files/$num_files) running $str minutes ";
+							. "($count_repos/$num_repos | "
+							. "$count_dirs/$num_dirs | "
+							. "$count_files/$num_files) running $str minutes ";
 						$this->logMsg('I', $msg);
 						$last_progress_time = time() + 5;
 					}
@@ -1929,22 +1941,27 @@ sub lookUpAllPackages
 						$this->logMsg('I', "read package: $uri ");
 					}
 				}
-
-				my %flags = RPMQ::rpmq_many("$uri", 'NAME', 'VERSION',
-							    'RELEASE', 'ARCH', 'SOURCE',
-							    'SOURCERPM', 'NOSOURCE',
-							    'NOPATCH', 'DISTURL');
+				my %flags = RPMQ::rpmq_many(
+					"$uri",
+					'NAME',
+					'VERSION',
+				    'RELEASE',
+					'ARCH',
+					'SOURCE',
+				    'SOURCERPM',
+					'NOSOURCE',
+				    'NOPATCH',
+					'DISTURL'
+				);
 				if(!%flags || !$flags{'NAME'} || !$flags{'RELEASE'}
-				   || !$flags{'VERSION'} || !$flags{'RELEASE'} )
-				{
+					|| !$flags{'VERSION'} || !$flags{'RELEASE'}
+				) {
 					my $msg = "[lookUpAllPakcges] Package $uri seems to "
-					    . 'have an invalid header or is no rpm at all!';
+						. 'have an invalid header or is no rpm at all!';
 					$this->logMsg('W', $msg);
-				}
-				else {
+				} else {
 					my $arch;
 					my $name = $flags{'NAME'}[0];
-
 					if( !$flags{'SOURCERPM'} ) {
 						# we deal with a source rpm...
 						my $srcarch = 'src';
@@ -1955,7 +1972,6 @@ sub lookUpAllPackages
 					} else {
 						$arch = $flags{'ARCH'}->[0];
 					}
-
 					# all data gets assigned, which is needed for setting the
 					# directory structure up.
 					my $package;
@@ -1968,7 +1984,8 @@ sub lookUpAllPackages
 					$package->{'version'} = $flags{'VERSION'}[0];
 					$package->{'release'} = $flags{'RELEASE'}[0];
 					# needs to be a string or sort breaks later
-					$package->{'priority'} = "$this->{m_repos}->{$r}->{priority}";
+					$package->{'priority'} =
+						"$this->{m_repos}->{$r}->{priority}";
 
 					# We can have a package only once per architecture and in
 					# one repo
@@ -1976,18 +1993,17 @@ sub lookUpAllPackages
 					# BUT src, nosrc and debug packages need to be available
 					# in all versions.
 					if ( !$flags{'SOURCERPM'} || $name =~ /-debugsource$/
-					     || $name =~ /-debuginfo$/ )
-					{
+					     || $name =~ /-debuginfo$/
+					) {
 						$repokey .= "@"
-						    . $package->{'version'}
-						. "@"
-						    . $package->{'release'};
+							. $package->{'version'}
+							. "@"
+							. $package->{'release'};
 					}
 					if ( $packPool->{$name}->{$repokey} ) {
 						# we have it already from a more important repo.
 						next;
 					}
-
 					# collect data for connected source rpm
 					if( $flags{'SOURCERPM'} ) {
 						# collect source rpms
@@ -1998,8 +2014,7 @@ sub lookUpAllPackages
 					my $store;
 					if($packPool->{$name}) {
 						$store = $packPool->{$name};
-					}
-					else {
+					} else {
 						$store = {};
 						$packPool->{$name} = $store;
 					}
@@ -2014,13 +2029,11 @@ sub lookUpAllPackages
 	$this->{m_packagePool} = $packPool;
 	return $retval;
 }
-# /lookUpAllPackages
 
 #==========================================
 # dumpRepoData
 #------------------------------------------
-sub dumpRepoData
-{
+sub dumpRepoData {
 	# dumps data collected in $this-> ... for debugging purpose.
 	# receives a file name as parameter.
 	# If file can't be openend, a warning is issued through $this->{m_logger}
@@ -2034,8 +2047,7 @@ sub dumpRepoData
 		my $msg = "[dumpRepoData] Dumping data to file $target failed: ";
 		$msg .= 'file could not be created!';
 		$this->logMsg('E', $msg);
-	}
-	else {
+	} else {
 		print $DUMP "Dumped data from KIWICollect object\n\n";
 		print $DUMP "\n\nKNOWN REPOSITORIES:\n";
 		for my $repo(keys(%{$this->{m_repos}})) {
@@ -2059,13 +2071,11 @@ sub dumpRepoData
 	}
 	return 0;
 }
-# /dumpRepoData
 
 #==========================================
 # dumpPackageList
 #------------------------------------------
-sub dumpPackageList
-{
+sub dumpPackageList {
 	# dumps data collected in $this->{m_repoPacks} for debugging purpose.
 	# receives a file name as parameter.
 	# If file can't be openend, a warning is issued through $this->{m_logger}
@@ -2093,18 +2103,15 @@ sub dumpPackageList
 		if(defined($this->{m_repoPacks}->{$pack}->{'priority'})) {
 			print $DUMP 
 			    "\t (prio=$this->{m_repoPacks}->{$pack}->{'priority'})\n";
-		}
-		else {
+		} else {
 			print $DUMP "\n";
 		}
 	}
 	$DUMP -> close();
 	return;
 }
-# /dumpData
 
-sub getArchList
-{
+sub getArchList {
 	my $this = shift;
 	my $packOptions = shift;
 	my $packName = shift;
@@ -2191,8 +2198,7 @@ sub getArchList
 #------------------------------------------
 # params:
 #------------------------------------------
-sub collectProducts
-{
+sub collectProducts {
 	my $this = shift;
 	my $xml = XML::LibXML -> new();
 
@@ -2213,21 +2219,21 @@ sub collectProducts
 		my $file;
 		# go via all used archs
 		my $nofallback = 0;
-		for my $arch($this->getArchList( $this->{m_repoPacks}->{$i}, $i, 
-						 \$nofallback))
-		{
-			if ( $this->{m_repoPacks}->{$i}->{$arch}->{'newpath'} eq ""
-			     || $this->{m_repoPacks}->{$i}->{$arch}->{'newfile'} eq "" )
-			{
+		for my $arch(
+			$this->getArchList( $this->{m_repoPacks}->{$i}, $i, \$nofallback)
+		) {
+			if ($this->{m_repoPacks}->{$i}->{$arch}->{'newpath'} eq ""
+				|| $this->{m_repoPacks}->{$i}->{$arch}->{'newfile'} eq ""
+			) {
 				$this->logMsg('I', "Skip product release package $i");
 				next RELEASEPACK;
 			}
 			$file = $this->{m_repoPacks}->{$i}->{$arch}->{'newpath'}
-			. "/"
-			    . $this->{m_repoPacks}->{$i}->{$arch}->{'newfile'};
+				. "/"
+				. $this->{m_repoPacks}->{$i}->{$arch}->{'newfile'};
 		}
 		$this->logMsg('I',
-			      "Unpacking product release package $i in file $file ".$tmp);
+			"Unpacking product release package $i in file $file ".$tmp);
 		$this->{m_util}->unpac_package($file, $tmp);
 
 		# get all .prod files
@@ -2264,14 +2270,14 @@ sub collectProducts
 			}
 			if ( $found_product ) {
 				my $msg = 'ERROR: No handling of multiple products on one '
-				    . 'media supported yet (spec for content file missing)!';
+					. 'media supported yet (spec for content file missing)!';
 				die $msg;
 			}
 			$found_product = 1;
 
 			# overwrite data with informations from prod file.
 			my $msg = 'Found product file, superseeding data from config '
-			    . 'file variables';
+				. 'file variables';
 			$this->logMsg('I', $msg);
 			$this->logMsg('I', "set release to ".$release);
 			$this->logMsg('I', "set product name to ".$product_name);
@@ -2287,12 +2293,8 @@ sub collectProducts
 			if ( defined $sp_version ) {
 				$this->{m_proddata}->setVar("SP_VERSION", $sp_version);
 			}
-
-			# further candidates:
-			#   my $proddir	 = $this->{m_proddata}->getVar("PRODUCT_DIR");
 		}
 	}
-	# cleanup
 	qx(rm -rf $tmp);
 	return;
 }
@@ -2300,12 +2302,10 @@ sub collectProducts
 #==========================================
 # createMetadata
 #------------------------------------------
-#
 #------------------------------------------
 # params:
 #------------------------------------------
-sub createMetadata
-{
+sub createMetadata {
 	my $this = shift;
 	# retrieve a complete list of all loaded plugins
 	my %plugins = $this->{m_metacreator}->getPluginList();
@@ -2358,7 +2358,9 @@ sub createMetadata
 			$this->logMsg('I', "$mk_cl finished successfully.");
 		}
 		else {
-			$this->logMsg('E', "$mk_cl finished with errors: returncode was $res");
+			$this->logMsg(
+				'E', "$mk_cl finished with errors: returncode was $res"
+			);
 		}
 		$this->logMsg('I', "[createMetadata] $mk_cl output:");
 		foreach(@data) {
@@ -2412,10 +2414,9 @@ sub createMetadata
 			print $BUILD $this->{m_proddata}->getVar("BUILD_ID", "0")."\n";
 			close $BUILD;
 		}
-	}
-	else {
+	} else {
 		$this->logMsg('E',
-			      "[createMetadata] required variable \"VENDOR\" not set");
+			"[createMetadata] required variable \"VENDOR\" not set");
 	}
 
 	# step 5b: create info.txt for Beta releases.
@@ -2427,27 +2428,28 @@ sub createMetadata
 		my $dist_string = $summary." ".${beta_version};
 		if ( -e "$this->{m_basesubdir}->{'1'}/README.BETA" ) {
 			if (system("sed",
-				   "-i",
-				   "s/BETA_DIST_VERSION/$dist_string/",
-				   "$this->{m_basesubdir}->{'1'}/README.BETA") == 0 )
+					"-i",
+					"s/BETA_DIST_VERSION/$dist_string/",
+					"$this->{m_basesubdir}->{'1'}/README.BETA")
+				== 0 )
 			{
 				if (system("ln",
-					   "-sf",
-					   "../README.BETA",
-					   "$this->{m_basesubdir}->{'1'}/media.1/info.txt")
-				    != 0 )
+						"-sf",
+						"../README.BETA",
+						"$this->{m_basesubdir}->{'1'}/media.1/info.txt")
+					!= 0 )
 				{
 					$this->logMsg('W', "Failed to symlink README.BETA file!");
 				}
-			}else{
+			} else {
 				$this->logMsg('W',
-					      "Failed to replace beta version in README.BETA file!");
+					"Failed to replace beta version in README.BETA file!");
 			}
-		}else{
+		} else {
 			$this->logMsg('W',
-				      "No README.BETA file, but beta version is defined!");
+				"No README.BETA file, but beta version is defined!");
 		}
-	}else{
+	} else {
 		unlink("$this->{m_basesubdir}->{'1'}/README.BETA");
 	}
 
@@ -2460,21 +2462,21 @@ sub createMetadata
 	my $prodrel  = $this->{m_proddata}->getInfo("RELEASE");
 	$prodname =~ s/\ /-/g;
 	$prodver .= ".$sp_ver" if defined($sp_ver);
-	if(defined($proddir)
-	   and defined($prodname)
-	   and defined($prodver)
-	   and defined($summary))
+	if (defined($proddir)
+		and defined($prodname)
+		and defined($prodver)
+		and defined($summary))
 	{
 		$summary =~ s{\s+}{-}g; # replace space(s) by a single dash
 		for my $n($this->getMediaNumbers()) {
 			my $num = $n;
 			if ( $this->{m_proddata}->getVar("FLAVOR") eq "ftp"
-			     or $n == $this->{m_debugmedium} )
+				or $n == $this->{m_debugmedium} )
 			{
 				$num = 1;
 			}
 			my $productsfile =
-			    "$this->{m_basesubdir}->{$n}/media.$num/products";
+				"$this->{m_basesubdir}->{$n}/media.$num/products";
 			my $PRODUCT;
 			if(! open($PRODUCT, ">", $productsfile)) {
 				die "Cannot create $productsfile";
@@ -2482,10 +2484,10 @@ sub createMetadata
 			print $PRODUCT "$proddir $summary $prodver-$prodrel\n";
 			close $PRODUCT;
 		}
-	}
-	else {
-		my $msg = '[createMetadata] one or more of the following  variables '
-		    . 'are missing: PRODUCT_DIR|PRODUCT_NAME|PRODUCT_VERSION|LABEL';
+	} else {
+		my $msg;
+		$msg = '[createMetadata] one or more of the following  variables ';
+		$msg.= 'are missing: PRODUCT_DIR|PRODUCT_NAME|PRODUCT_VERSION|LABEL';
 		$this->logMsg('E', $msg);
 	}
 
@@ -2497,7 +2499,7 @@ sub createMetadata
 		my $listings = "/usr/bin/mk_listings";
 		if(! (-f $listings or -x $listings)) {
 			my $msg = "[createMetadata] excutable `$listings` not found. "
-			    . 'Maybe package `inst-source-utils` is not installed?';
+				. 'Maybe package `inst-source-utils` is not installed?';
 			$this->logMsg('W', $msg);
 			return;
 		}
@@ -2516,7 +2518,8 @@ sub createMetadata
 	my $descrdir = $this->{m_proddata}->getInfo("DESCRDIR");
 	my $create_repomd;
 	if ( defined($this->{m_proddata}->getVar("CREATE_REPOMD"))
-		&& $this->{m_proddata}->getVar("CREATE_REPOMD") eq "true") {
+		&& $this->{m_proddata}->getVar("CREATE_REPOMD") eq "true"
+	) {
 		$create_repomd = 1;
 	}
 	if(! defined($datadir)) {
@@ -2524,7 +2527,9 @@ sub createMetadata
 		die "MISSING VARIABLES!";
 	}
 	if((! defined($descrdir)) && !$create_repomd) {
-		$this->logMsg('E', "variables DESCRDIR is missing and CREATE_REPOMD is not set");
+		$this->logMsg(
+			'E', "variables DESCRDIR is missing and CREATE_REPOMD is not set"
+		);
 		die "MISSING VARIABLES!";
 	}
 	
@@ -2532,12 +2537,13 @@ sub createMetadata
 	$this->logMsg('I', "Calling create_sha1sums:");
 	my $csha1sum = "/usr/bin/create_sha1sums";
 	my $s1sum_opts = $this->{m_proddata}->getVar("SHA1OPT");
-	if(! defined($s1sum_opts)) {
+	if (! defined($s1sum_opts)) {
 		$s1sum_opts = "";
 	}
-	if(! (-f $csha1sum or -x $csha1sum)) {
-		my $msg = "[createMetadata] excutable `$csha1sum` not found. "
-		    . 'Maybe package `inst-source-utils` is not installed?';
+	if (! (-f $csha1sum or -x $csha1sum)) {
+		my $msg;
+		$msg = "[createMetadata] excutable `$csha1sum` not found. ";
+		$msg.= 'Maybe package `inst-source-utils` is not installed?';
 		$this->logMsg('E', $msg);
 		return;
 	}
@@ -2560,13 +2566,13 @@ sub createMetadata
 	## step 8: DIRECTORY.YAST FILES
 	$this->logMsg('I', "Calling create_directory.yast:");
 	my $dy = "/usr/bin/create_directory.yast";
-	if(! (-f $dy or -x $dy)) {
-		my $msg = "[createMetadata] excutable `$dy` not found. "
-		    . 'Maybe package `inst-source-utils` is not installed?';
+	if (! (-f $dy or -x $dy)) {
+		my $msg;
+		$msg = "[createMetadata] excutable `$dy` not found. ";
+		$msg.= 'Maybe package `inst-source-utils` is not installed?';
 		$this->logMsg('W', $msg);
 		return;
 	}
-
 
 	for my $d($this->getMediaNumbers()) {
 		my $dbase = $this->{m_basesubdir}->{$d};
@@ -2590,8 +2596,9 @@ sub createMetadata
 		for my $item (@dlist) {
 			if(-d $item) {
 				my @data = qx($dy $item);
-				$this->logMsg('I',
-					      "[createMetadata] $dy output for directory $item:");
+				$this->logMsg(
+					'I',"[createMetadata] $dy output for directory $item:"
+				);
 				for my $entry (@data) {
 					chomp $entry;
 					$this->logMsg('I', "\t$entry");
@@ -2601,11 +2608,9 @@ sub createMetadata
 	}
 	return;
 }
-# createMetadata
 
 # part of DUD:
-sub unpackModules
-{
+sub unpackModules {
 	my $this = shift;
 
 	my $tmp_dir = "$this->{m_basesubdir}->{'1'}/temp";
@@ -2656,7 +2661,7 @@ sub unpackModules
 		}
 	}
 	return;
-} # unpackModules
+}
 
 # used only in DUD so far:
 sub getBestPackFromRepos {
@@ -2679,8 +2684,7 @@ sub getBestPackFromRepos {
 }
 
 # part of DUD:
-sub unpackInstSys
-{
+sub unpackInstSys {
 	my $this = shift;
 
 	my $tmp_dir = "$this->{m_basesubdir}->{'1'}/temp";
@@ -2727,18 +2731,16 @@ sub unpackInstSys
 		qx(cp -a $arch_tmp_dir $target_dir);
 	}
 	return;
-} # unpackInstSys
+}
 
 # part of DUD:
-sub createInstallPackageLinks
-{
+sub createInstallPackageLinks {
 	my $this = shift;
 	if (! ref $this ) {
 		return;
 	}
 
 	print Dumper($this->{m_repoPacks});
-	#die;
 
 	# So far DUDs only have one single medium
 	my $medium = 1;
@@ -2758,36 +2760,35 @@ sub createInstallPackageLinks
 	for my $target (keys(%targets)) {
 		my $arch = $targets{$target};
 		my $target_dir = "$this->{m_basesubdir}->{$medium}"
-		    . "/linux/suse/$target/install/";
+			. "/linux/suse/$target/install/";
 		qx(mkdir -p $target_dir) unless -d $target_dir;
 		my @fallback_archs = $this->{m_archlist}->fallbacks($arch);
 
-	      RPM:
+		RPM:
 		for my $rpmname (@packlist) {
 			if((! defined($rpmname))
-			   || (! defined($this->{m_repoPacks}->{$rpmname})))
-			{
+				|| (! defined($this->{m_repoPacks}->{$rpmname}))
+			) {
 				my $msg = 'something wrong with rpmlist: undefined value '
-				    . "$rpmname";
+					. "$rpmname";
 				$this->logMsg('W', $msg);
 				next RPM;
 			}
 
-		      FARCH:
+			FARCH:
 			for my $fallback_arch (@fallback_archs) {
-				#my $pack_file = $this->{m_packagePool}->{$module}
-				#->{$repo}->{'localfile'};
 				my $pPointer = $this->{m_repoPacks}->{$rpmname};
 				my $file = $pPointer->{$arch}->{'newpath'}
-				. "/"
-				    . $pPointer->{$fallback_arch}->{'newfile'};
+					. "/"
+					. $pPointer->{$fallback_arch}->{'newfile'};
 				next FARCH unless (-e $file);
 
 				link($file,
-				     "$target_dir/".$pPointer->{$fallback_arch}->{'newfile'});
+					"$target_dir/".$pPointer->{$fallback_arch}->{'newfile'}
+				);
 				if ($this->{m_debug} > 2) {
 					my $msg = "linking $file to $target_dir/"
-					    . $pPointer->{$fallback_arch}->{'newfile'};
+						. $pPointer->{$fallback_arch}->{'newfile'};
 					$this->logMsg('I', $msg);
 				}
 				$retval++;
@@ -2796,11 +2797,10 @@ sub createInstallPackageLinks
 		}
 	}
 	return $retval;
-} # createInstallPackageLinks
+}
 
 # returns the number of links created
-sub createBootPackageLinks
-{
+sub createBootPackageLinks {
 	my $this = shift;
 	if (! ref $this ) {
 		return;
@@ -2811,8 +2811,9 @@ sub createBootPackageLinks
 
 	my $retval = 0;
 	if(! -d "$base/boot") {
-		my $msg = 'There is no /boot subdirectory. This may be ok for some '
-		    . 'media, but might indicate errors in metapackages!';
+		my $msg;
+		$msg = 'There is no /boot subdirectory. This may be ok for some ';
+		$msg.= 'media, but might indicate errors in metapackages!';
 		$this->logMsg('W', $msg);
 		return $retval;
 	}
@@ -2825,18 +2826,18 @@ sub createBootPackageLinks
 		$RPMLIST = FileHandle -> new();
 		if(! $RPMLIST -> open($rpmlist_files{$arch})) {
 			$this->logMsg('W',
-				      "cannnot open file $base/boot/$arch/$rpmlist_files{$arch}!");
+				"can not open file $base/boot/$arch/$rpmlist_files{$arch}!");
 			return -1;
-		}
-		else {
-		      RPM:
+		} else {
+			RPM:
 			while (my $rpmname = <$RPMLIST>) {
 				chomp $rpmname;
 				if((! defined($rpmname))
-				   || (! defined($this->{m_repoPacks}->{$rpmname})))
-				{
+					|| (! defined($this->{m_repoPacks}->{$rpmname}))
+				) {
 					$this->logMsg('W',
-						      "something wrong with rpmlist: undefined value $rpmname");
+						"rpmlist is wrong: undefined value $rpmname"
+					);
 					next RPM;
 				}
 				# HACK: i586 is hardcoded as i386 in boot loader
@@ -2846,17 +2847,17 @@ sub createBootPackageLinks
 				}
 				# End of hack
 				my @fallb = $this->{m_archlist}->fallbacks($targetarch);
-			      FARCH:
+				FARCH:
 				for my $fa(@fallb) {
 					my $pPointer = $this->{m_repoPacks}->{$rpmname};
 					my $file = $pPointer->{$targetarch}->{'newpath'}
-					. "/"
-					    . $pPointer->{$targetarch}->{'newfile'};
+						. "/"
+						. $pPointer->{$targetarch}->{'newfile'};
 					next FARCH unless (-e $file);
 					link($file, "$base/boot/$arch/$rpmname.rpm");
 					if ($this->{m_debug} > 2) {
 						my $msg = "linking $file to "
-						    . "$base/boot/$arch/$rpmname.rpm";
+							. "$base/boot/$arch/$rpmname.rpm";
 						$this->logMsg('I', $msg);
 					}
 					$retval++;
@@ -2869,18 +2870,15 @@ sub createBootPackageLinks
 	return $retval;
 }
 
-sub rpmlist_find_cb
-{
+sub rpmlist_find_cb {
 	my $this = shift;
 	if (! ref $this ) {
 		return;
 	}
-
 	my $listref = shift;
 	if (! defined $listref ) {
 		return;
 	}
-
 	if($File::Find::name =~ m{.*/([^/]+)/rpmlist}) {
 		$listref->{$1} = $File::Find::name;
 	}
@@ -2898,8 +2896,7 @@ sub rpmlist_find_cb
 # 1 = directory must be created
 # 2 = an error occured at creation
 #------------------------------------------
-sub createDirectoryStructure
-{
+sub createDirectoryStructure {
 	my $this = shift;
 	my %dirs = %{$this->{m_dirlist}};
 
@@ -2911,22 +2908,23 @@ sub createDirectoryStructure
 		}
 		if(-d $d) {
 			$dirs{$d} = 0;
-		}
-		elsif(!mkpath($d, { mode => oct(755) } )) {
+		} elsif (!mkpath($d, { mode => oct(755) } )) {
 			$this->logMsg('E',
-				      "createDirectoryStructure: can't create directory $d!");
+				"createDirectoryStructure: can't create directory $d!"
+			);
 			$dirs{$d} = 2;
 			$errors++;
-		}
-		else {
-			$this->logMsg('I', "created directory $d") if $this->{m_debug};
+		} else {
+			if ($this->{m_debug}) {
+				$this->logMsg('I', "created directory $d");
+			}
 			$dirs{$d} = 0;
 		}
 	}
-
 	if($errors) {
 		$this->logMsg('E',
-			      "createDirectoryStructure failed. Abort recommended.");
+			"createDirectoryStructure failed. Abort recommended."
+		);
 	}
 	return $errors;
 }
@@ -2938,25 +2936,21 @@ sub createDirectoryStructure
 # product. Each number is only reported once.
 # The list may contain leaks (1,2,5,6 is perfectly ok)
 #------------------------------------------
-sub getMediaNumbers
-{
+sub getMediaNumbers {
 	my $this = shift;
 	if (! defined $this) {
 		return;
 	}
-
 	my @media = (1);	# default medium is 1 (always)
 	if ( $this->{m_srcmedium} > 1 ) {
 		push @media, $this->{m_srcmedium};
 	}
-
 	if ( $this->{m_debugmedium} > 1 ) {
 		push @media, $this->{m_debugmedium};
 	}
-
-	for my $p(values(%{$this->{m_repoPacks}}), 
-		  values(%{$this->{m_metapackages}}))
-	{
+	for my $p(values(%{$this->{m_repoPacks}}),
+		values(%{$this->{m_metapackages}})
+	) {
 		if(defined($p->{'medium'}) and $p->{'medium'} != 0) {
 			push @media, $p->{medium};
 		}
