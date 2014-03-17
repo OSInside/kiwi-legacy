@@ -43,3 +43,10 @@ packages="perl-Perl-Critic"
 if ! zypper -n install $packages;then
 	exit 1
 fi
+
+# install kiwi
+cd /home/jenkins/kiwi/kiwi
+make
+make uninstall
+make install
+make clean
