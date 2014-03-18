@@ -70,8 +70,16 @@
 		<source path="obs://13.2/repo/oss"/>
 	</repository>
 	<packages type="image">
-		<namedCollection name="base"/>
-		<product name="openSUSE"/>
+		<!-- The installation of patterns in 13.2 requires the 13.2 zypper -->
+		<!-- Thus the following definition only works when building on 13.2 -->
+		<!--        <namedCollection name="base"/>-->
+		<!-- In order to stay compatible we just install the pattern package -->
+		<package name="patterns-openSUSE-base"/>
+		<!-- The installation of products in 13.2 requires the 13.2 zypper -->
+		<!-- Thus the following definition only works when building on 13.2 -->
+		<!--        <product name="openSUSE"/>-->
+		<!-- In order to stay compatible we just install the product package -->
+		<package name="openSUSE-release"/>
 		<package name="plymouth-branding-openSUSE" bootinclude="true"/>
 		<package name="grub2-branding-openSUSE" bootinclude="true"/>
 		<package name="ifplugd"/>
@@ -116,7 +124,6 @@
 		<package name="glibc-locale"/>
 		<package name="cracklib-dict-full"/>
 		<package name="ca-certificates"/>
-		<package name="module-init-tools"/>
 	</packages>
 	<packages type="delete">
 		<package name="kernel-debug"/>
