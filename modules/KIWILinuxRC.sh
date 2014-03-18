@@ -7966,6 +7966,15 @@ function displayEULA {
 			code=/$name.txt
 		fi
 		if [ ! -f $code ];then
+			code=/etc/YaST2/licenses/base/$name.$code.txt
+		fi
+		if [ ! -f $code ];then
+			code=/etc/YaST2/licenses/base/$name.txt
+		fi
+		if [ ! -f $code ];then
+			code=/etc/YaST2/licenses/base/$name
+		fi
+		if [ ! -f $code ];then
 			Echo "License with basename $name not found... skipped"
 			continue
 		fi

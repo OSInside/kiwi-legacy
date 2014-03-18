@@ -368,7 +368,7 @@ sub __updateXMLPreferences {
 	#------------------------------------------
 	my $lics = $pref -> getShowLic();
 	if ($lics) {
-		$this -> addEntry('kiwi_showlicense',$lics);
+		$this -> addEntry('kiwi_showlicense',"@{$lics}");
 	}
 	#==========================================
 	# kiwi_keytable
