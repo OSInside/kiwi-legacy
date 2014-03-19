@@ -5696,7 +5696,7 @@ sub installBootLoader {
 			my $boot = "'boot sector'";
 			my $null = "/dev/null";
 			$status= KIWIQX::qxx (
-				"dd if=$diskname bs=512 count=1 2>$null|file - | grep -q $boot"
+				"dd if=$diskname bs=513 count=1 2>$null|file - | grep -q $boot"
 			);
 			$result= $? >> 8;
 		}
