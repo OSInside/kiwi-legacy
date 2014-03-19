@@ -179,5 +179,7 @@
 		<package name="pwdutils"/>
 		<package name="sysconfig"/>
 		<package name="syslinux"/>
+		<package name="python"/>
+		<package name="dracut"/>
 	</packages>
 </image>
