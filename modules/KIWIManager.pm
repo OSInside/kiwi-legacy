@@ -292,7 +292,7 @@ sub setupScreenCall {
 			unshift (@lines,"[*** log excerpt follows, screen ***]");
 			push    (@lines,"[*** end ***]\n");
 			$data = join ("\n",@lines);
-			printf STDERR $data;
+			printf STDERR "%s", $data;
 			$kiwi -> doNorm();
 		}
 		$this -> resetInstallationSource();
