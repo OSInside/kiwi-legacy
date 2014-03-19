@@ -7955,7 +7955,8 @@ function displayEULA {
 	# ----
 	local code=$(echo $DIALOG_LANG | cut -f1 -d_)
 	if [ -z "$kiwi_showlicense" ];then
-		kiwi_showlicense="license EULA"
+		Echo "No license name(s) configured"
+		return
 	fi
 	for name in $kiwi_showlicense;do
 		#======================================
