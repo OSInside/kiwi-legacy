@@ -1,4 +1,3 @@
-[-Miscellanea::RequireRcsKeywords]
 [-Modules::RequireVersionVar]
 [-NamingConventions::Capitalization]
 [-InputOutput::RequireBriefOpen]
