@@ -939,7 +939,8 @@ sub fixupOverlayFilesOwnership {
 		chomp $line;
 		my $name = (split (/:/,$line))[5];
 		$name =~ s/\///;
-		if ($name =~ /^(bin|sbin|root)/) {
+		next if ! $name;
+		if ($name =~ /^(bin|sbin|root|proc|dev)/) {
 			next;
 		}
 		$except{$name} = 1;
@@ -952,7 +953,7 @@ sub fixupOverlayFilesOwnership {
 		my $ok = 1;
 		$file =~ s/^ +//;
 		foreach my $exception (keys %except) {
-			if ($file =~ /$exception/) {
+			if ($file =~ /^$exception/) {
 				$kiwi -> loginfo (
 					"$prefix: $file belongs to passwd, leaving it untouched"
 				);
@@ -960,7 +961,9 @@ sub fixupOverlayFilesOwnership {
 			}
 		}
 		next if ! $ok;
-		my $data = KIWIQX::qxx ("chroot $root chown -c root:root '".$file."' 2>&1");
+		my $data = KIWIQX::qxx (
+			"chroot $root chown -c root:root '".$file."' 2>&1"
+		);
 		my $code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> warning (
