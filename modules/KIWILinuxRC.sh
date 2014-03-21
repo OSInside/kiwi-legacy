@@ -4455,9 +4455,12 @@ function setupNetworkWicked {
 			if [ $try_iface = "lo" ];then
 				continue
 			fi
+			Echo "Waiting for link up on $try_iface..."
+			sleep 5
 			dhcp_info=/var/run/wicked/wicked-${try_iface}.info
-			$wicked_dhcp4 --test $try_iface > $dhcp_info
-			if [ -s $dhcp_info ];then
+			$wicked_dhcp4 --debug all \
+				--test --test-output $dhcp_info $try_iface
+			if [ $? == 0 ] && [ -s $dhcp_info ];then
 				importFile < $dhcp_info
 				if setupNic $try_iface $IPADDR $NETMASK;then
 					DHCPCD_STARTED="$DHCPCD_STARTED $try_iface"
