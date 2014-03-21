@@ -107,38 +107,39 @@ Source4:        %{name}-find-boot-requires.sh
 # build root path
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 
-# find out about the name scheme of the local system for -requires packages
-# in terms of problems with this magic ask adrian@suse.de for details
+# find out about the name scheme of the local system for
+# the buildservice needed -requires packages. In terms of
+# problems with this magic ask adrian@suse.de for details
 %if 0%{?suse_version}
-# Lucky us we no longer build openSUSE versions that have the 1010 and 1110
-# version identifiers.
-%if 0%{?sles_version} || %suse_version == 1010 || %suse_version == 1110 || %suse_version == 1315
-%if 0%{?sles_version}
-%define mysystems suse-SLES%{sles_version} suse-SLED%{sles_version}
-%else
-%if %suse_version == 1010
-%define mysystems suse-SLES10 suse-SLED10
-%else
-%if %suse_version == 1110
-%define mysystems suse-SLES11 suse-SLED11
-%else
+%define mysystems %(echo `export VER=%{suse_version}; echo "suse-${VER:0:2}.${VER:2:1}"`)
+# redefine for the SLES case if no sles_version exists
+# SLE12: NOTE: potential problems ahead with the first SP of SLES12
+%if %suse_version == 1315
 %define mysystems suse-SLES12 suse-SLED12
 %endif
+# redefine for the SLE11 case if no sles_version exists
+# SLE11: NOTE: this works only because openSUSE 11.1 is out of scope
+%if %suse_version == 1110
+%define mysystems suse-SLES11 suse-SLED11
 %endif
 %endif
-%else
-%define mysystems %(echo `export VER=%{suse_version}; echo "suse-${VER:0:2}.${VER:2:1}"`)
-%endif
-%endif
+# SLES with sles_version macro
+%if 0%{?sles_version}
+%define mysystems suse-SLES%{sles_version} suse-SLED%{sles_version}
+%fi
+# RHEL
 %if 0%{?rhel_version}
 %define mysystems %(echo `VER=%{rhel_version} echo "rhel-0${VER:0:1}.${VER:1:2}"`)
 %endif
+# Fedora
 %if 0%{?fedora}
 %define mysystems %(echo `VER=%{fedora} echo "fedora-0${VER:0:1}.${VER:1:2}"`)
 %endif
+# CentOS
 %if 0%{?centos}
 %define mysystems %(echo `VER=%{centos} echo "centos-0${VER:0:1}.${VER:1:2}"`)
 %endif
+
 # find out about my arch name, could be done also via symlinks
 %define myarch %{_target_cpu}
 %ifarch armv7l armv7hl
