@@ -126,7 +126,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 # SLES with sles_version macro
 %if 0%{?sles_version}
 %define mysystems suse-SLES%{sles_version} suse-SLED%{sles_version}
-%fi
+%endif
 # RHEL
 %if 0%{?rhel_version}
 %define mysystems %(echo `VER=%{rhel_version} echo "rhel-0${VER:0:1}.${VER:1:2}"`)
