@@ -107,17 +107,27 @@ Source4:        %{name}-find-boot-requires.sh
 # build root path
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 
-# find out about the name scheme of the local system for -requieres packages
+# find out about the name scheme of the local system for -requires packages
 # in terms of problems with this magic ask adrian@suse.de for details
 %if 0%{?suse_version}
-%if %suse_version == 1315
-%define mysystems suse-SLES12 suse-SLED12
-%else
+# Lucky us we no longer build openSUSE versions that have the 1010 and 1110
+# version identifiers.
+%if 0%{?sles_version} || %suse_version == 1010 || %suse_version == 1110 || %suse_version == 1315
 %if 0%{?sles_version}
 %define mysystems suse-SLES%{sles_version} suse-SLED%{sles_version}
 %else
-%define mysystems %(echo `export VER=%{suse_version}; echo "suse-${VER:0:2}.${VER:2:1}"`)
+%if %suse_version == 1010
+%define mysystems suse-SLES10 suse-SLED10
+%else
+%if %suse_version == 1110
+%define mysystems suse-SLES11 suse-SLED11
+%else
+%define mysystems suse-SLES12 suse-SLED12
 %endif
+%endif
+%endif
+%else
+%define mysystems %(echo `export VER=%{suse_version}; echo "suse-${VER:0:2}.${VER:2:1}"`)
 %endif
 %endif
 %if 0%{?rhel_version}
