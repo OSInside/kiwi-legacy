@@ -4456,7 +4456,7 @@ function setupNetworkWicked {
 				continue
 			fi
 			Echo "Waiting for link up on $try_iface..."
-			sleep 5
+			sleep 1
 			dhcp_info=/var/run/wicked/wicked-${try_iface}.info
 			$wicked_dhcp4 --debug all \
 				--test --test-output $dhcp_info $try_iface
