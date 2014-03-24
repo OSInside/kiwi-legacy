@@ -60,7 +60,6 @@
 		<package name="filesystem"/>
 		<package name="glibc-locale"/>
 		<package name="cracklib-dict-full"/>
-		<package name="module-init-tools"/>
 		<package name="kbd"/>
 		<package name="aaa_base"/>
 		<package name="hwinfo"/>
