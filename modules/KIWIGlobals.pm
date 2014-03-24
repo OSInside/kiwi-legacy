@@ -412,7 +412,7 @@ sub mount {
 			$status = KIWIQX::qxx ("clicfs -m 512 $source $dest 2>&1");
 			$result = $? >> 8;
 			if ($result == 0) {
-				$status = KIWIQX::qxx ("resize2fs $dest/fsdata.ext4 2>&1");
+				$status = KIWIQX::qxx ("resize2fs $dest/fsdata.ext3 2>&1");
 				$result = $? >> 8;
 			}
 		} else {
@@ -435,8 +435,8 @@ sub mount {
 	#==========================================
 	# Post mount actions
 	#------------------------------------------
-	if (-f $dest."/fsdata.ext4") {
-		$source = $dest."/fsdata.ext4";
+	if (-f $dest."/fsdata.ext3") {
+		$source = $dest."/fsdata.ext3";
 		$status = KIWIQX::qxx ("mount -o loop $source $dest 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {

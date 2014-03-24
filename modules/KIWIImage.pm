@@ -269,7 +269,7 @@ sub createImageClicFS {
 	# ---
 	my $this    = shift;
 	my $rename  = shift;
-	my $journal = "journaled-ext4";
+	my $journal = "journaled-ext3";
 	my $kiwi    = $this->{kiwi};
 	my $data;
 	my $code;
@@ -309,11 +309,11 @@ sub createImageClicFS {
 	# Rename filesystem loop file
 	#------------------------------------------
 	$data = qxx (
-		"mv $this->{imageDest}/$name $this->{imageDest}/fsdata.ext4 2>&1"
+		"mv $this->{imageDest}/$name $this->{imageDest}/fsdata.ext3 2>&1"
 	);
 	$code = $? >> 8;
 	if ($code != 0) {
-		$kiwi -> error  ("Can't move file to fsdata.ext4");
+		$kiwi -> error  ("Can't move file to fsdata.ext3");
 		$kiwi -> failed ();
 		$kiwi -> error  ($data);
 		return;
@@ -328,12 +328,12 @@ sub createImageClicFS {
 	my $req = "-R 'show_super_stats -h'";
 	my $bcn = "'^Block count:'";
 	my $bfr = "'^Free blocks:'";
-	my $src = "$this->{imageDest}/fsdata.ext4";
+	my $src = "$this->{imageDest}/fsdata.ext3";
 	my $blocks = 0;
 	$kiwi -> loginfo ("Using resize2fs version: $rver\n");
 	if ($rver >= 1.41) {
 		$data = qxx (
-			"resize2fs $this->{imageDest}/fsdata.ext4 -M 2>&1"
+			"resize2fs $this->{imageDest}/fsdata.ext3 -M 2>&1"
 		);
 		$code = $? >> 8;
 		if ($code != 0) {
@@ -365,7 +365,7 @@ sub createImageClicFS {
 		$kiwi -> info ("clicfs: blocks count=$blocks free=$data");
 		$blocks = $blocks - $data;  
 		$data = qxx (
-			"resize2fs $this->{imageDest}/fsdata.ext4 $blocks 2>&1"
+			"resize2fs $this->{imageDest}/fsdata.ext3 $blocks 2>&1"
 		);
 		$code = $? >> 8;
 		if ($code != 0) {
@@ -384,10 +384,10 @@ sub createImageClicFS {
 	if (defined $ENV{MKCLICFS_COMPRESSION}) {
 		my $c = int $ENV{MKCLICFS_COMPRESSION};
 		my $d = $this->{imageDest};
-		$data = qxx ("$clicfs -c $c $d/fsdata.ext4 $d/$name 2>&1");
+		$data = qxx ("$clicfs -c $c $d/fsdata.ext3 $d/$name 2>&1");
 	} else {
 		my $d = $this->{imageDest};
-		$data = qxx ("$clicfs $d/fsdata.ext4 $d/$name 2>&1");
+		$data = qxx ("$clicfs $d/fsdata.ext3 $d/$name 2>&1");
 	}
 	$code = $? >> 8;
 	if ($code != 0) {
@@ -397,8 +397,8 @@ sub createImageClicFS {
 		$kiwi -> error  ($data);
 		return;
 	}
-	qxx ("mv -f $this->{imageDest}/$name.ext4 $this->{imageDest}/$name.clicfs");
-	qxx ("rm -f $this->{imageDest}/fsdata.ext4");
+	qxx ("mv -f $this->{imageDest}/$name.ext3 $this->{imageDest}/$name.clicfs");
+	qxx ("rm -f $this->{imageDest}/fsdata.ext3");
 	$kiwi -> done();
 	#==========================================
 	# Create image md5sum
