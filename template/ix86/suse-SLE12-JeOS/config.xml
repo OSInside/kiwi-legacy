@@ -77,7 +77,7 @@
 		<!-- Thus the following definition only works when building on SLE12 -->
 		<!--		<product name="SUSE_SLES"/>-->
 		<!-- In order to stay compatible we just install the product package -->
-		<package name="sles-release"/>
+		<package name="sles-release-DVD"/>
 		<package name="plymouth-branding-SLE" bootinclude="true"/>
 		<package name="grub2-branding-SLE" bootinclude="true"/>
 		<package name="ifplugd"/>
