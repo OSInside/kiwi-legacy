@@ -1,7 +1,7 @@
 Build instructions for local build
 ==================================
 * tip: create a local RHEL 6.0 installation source to speed up the build process
-  tip: copy RHEL 6.0 DVD
+  tip: copy RHEL 6.x DVD
 
 * call kiwi:
   kiwi --build rhel-06.0-JeOS --set-repo /path/to/RHEL/repo \

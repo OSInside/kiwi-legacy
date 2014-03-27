@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="6.1" name="LimeJeOS-RHEL-06.2">
+<image schemaversion="6.1" name="LimeJeOS-RHEL-06.5">
 	<description type="system">
 		<author>Marcus Schäfer</author>
 		<contact>ms@suse.com</contact>
@@ -9,6 +9,7 @@
 	<profiles>
 		<profile name="RedHat" description="Build for RHEL" import="true"/>
 		<profile name="CentOS" description="Build for CentOS"/>
+		<profile name="Oracle" description="Build for Oracle Linux"/>
 	</profiles>
 	<strip type="delete">
 		<file name="/usr/lib*/python2.6"/>
@@ -19,13 +20,13 @@
 		<file name="/lib/kbd"/>
 	</strip>
 	<preferences>
-		<version>1.1.0</version>
+		<version>1.2.0</version>
 		<packagemanager>yum</packagemanager>
 		<bootsplash-theme>upstream</bootsplash-theme>
 		<bootloader-theme>upstream</bootloader-theme>
 		<locale>en_US</locale>
 		<keytable>us.map.gz</keytable>
-		<timezone>Europe/Berlin</timezone>
+		<timezone>UTC</timezone>
 		<hwclock>utc</hwclock>
 		<rpm-check-signatures>false</rpm-check-signatures>
 		<type image="iso" primary="true" boot="isoboot/rhel-06.0" flags="compressed" firmware="bios"/>
@@ -50,10 +51,15 @@
 		<user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
 	</users>
 	<repository type="rpm-md" profiles="RedHat">
+<!-- Use the set-repo option to replace this first repo if needed -->
 		<source path="iso:///image/CDs/RHEL-6.2-x86_64-DVD.iso"/>
 	</repository>
-	<repository type="rpm-md" priority="1">
+<!-- Don't remove the following repos, they contain tools needed by kiwi -->
+	<repository type="rpm-md" priority="1" profiles="RedHat,Oracle">
 		<source path="obs://Virtualization:/Appliances/RedHat_RHEL-6"/>
+	</repository>
+	<repository type="rpm-md" priority="1" profiles="CentOS">
+		<source path="obs://Virtualization:/Appliances/CentOS_CentOS-6"/>
 	</repository>
 	<packages type="image">
 		<package name="bash"/>
@@ -106,8 +112,13 @@
 		<namedCollection name="Base"/>
 		<namedCollection name="Console internet tools"/>
 		<package name="gfxboot-branding-upstream" bootinclude="true" bootdelete="true"/>
-		<package name="redhat-logos" bootinclude="true" bootdelete="true"/>
 		<package name="yum-plugin-priorities" bootinclude="true"/>
+	</packages>
+	<packages type="image" profiles="RedHat">
+		<package name="redhat-logos" bootinclude="true" bootdelete="true"/>
+	</packages>
+	<packages type="image" profiles="Oracle">
+		<package name="oracle-logos" bootinclude="true" bootdelete="true"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>
