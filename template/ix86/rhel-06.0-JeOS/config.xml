@@ -107,7 +107,7 @@
 		<namedCollection name="Console internet tools"/>
 		<package name="gfxboot-branding-upstream" bootinclude="true" bootdelete="true"/>
 		<package name="redhat-logos" bootinclude="true" bootdelete="true"/>
-		<package name="yum-priorities" bootinclude="true"/>
+		<package name="yum-plugin-priorities" bootinclude="true"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>
