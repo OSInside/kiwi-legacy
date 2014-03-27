@@ -200,10 +200,13 @@
         <varlistentry>
           <term><sgmltag class="attribute">displayname</sgmltag></term>
           <listitem>
-            <para> allows setup of the boot menu title for isolinux and
-              grub. So you can have <emphasis>suse-SLED-foo</emphasis>
-              as the image name but something like <emphasis>my cool
-                Image</emphasis> as the boot display name. </para>
+            <para>Allows setup of the boot menu title for the selected
+              bootloader. So you can have <emphasis>suse-SLED-foo</emphasis>
+              as the image name but a different name as the boot display name.
+              Spaces are not allowed in the display name because it causes
+              problems for some bootloaders and kiwi did not take the effort
+              to separate the ones which can display them correctly from the
+              ones which can't</para>
           </listitem>
         </varlistentry>
         <varlistentry>
