@@ -56,6 +56,7 @@
 		<file name="drivers/virtio/*"/>
 		<file name="fs/binfmt_aout.ko"/>
 		<file name="fs/binfmt_misc.ko"/>
+		<file name="fs/overlayfs/*"/>
 		<file name="fs/btrfs/*"/>
 		<file name="fs/exportfs/*"/>
 		<file name="fs/ext2/*"/>
