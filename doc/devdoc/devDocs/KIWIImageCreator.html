@@ -53,15 +53,180 @@
 <li><a href="#__upgradeTree">__upgradeTree</a></li>
 </ul>
 <hr>
+<a name="__addDefaultStripData"><h2>__addDefaultStripData</h2></a>
+<p>
+ Add default strip data from KIWIConfig.txt
+<p>
+Defined on line: 2117
+<p>
+Called in
+<ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 316</li></ul>
+<a name="__addOEMConfigDataToBootXML"><h2>__addOEMConfigDataToBootXML</h2></a>
+<p>
+ add the oemconfig information from the system XML data to the
+ boot XML data by cloning the oemconfig section. kiwi's boot
+ image descriptions does not contain oemconfig section data
+ thus it's ok to to just add a copy of the system XML oemconfig
+ section. The data is only copied if an oemconfig sectiom
+ exists in the system XML data set
+<p>
+Defined on line: 2061
+<p>
+Called in
+<ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 393</li></ul>
+<a name="__addPackagesToBootXML"><h2>__addPackagesToBootXML</h2></a>
+<p>
+ add boot included packages/archives information
+ from the system XML data to the boot XML data
+<p>
+Defined on line: 1677
+<p>
+Called in
+<ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 369</li></ul>
+<a name="__addPreferencesToBootXML"><h2>__addPreferencesToBootXML</h2></a>
+<p>
+ add additional preferences information from the
+ the system XML data to the boot XML data
+<p>
+Defined on line: 1760
+<p>
+Called in
+<ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 363</li></ul>
+<a name="__addStripDataToBootXML"><h2>__addStripDataToBootXML</h2></a>
+<p>
+ Add system XML strip data to the
+ boot image description.
+<p>
+Defined on line: 2133
+<p>
+Called in
+<ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 357</li></ul>
+<a name="__addSystemDiskToBootXML"><h2>__addSystemDiskToBootXML</h2></a>
+<p>
+ add the systemdisk information from the system XML data to the
+ boot XML data by copying some data into a new SystemdiskData
+ object which is then stored in the boot XML object. kiwi's boot
+ image descriptions does not contain systemdisk section data
+ thus it's ok to to just add a copy of the system XML systemdisk
+ section. The data is only copied if a systemdisk sectiom
+ exists in the system XML data set
+<p>
+Defined on line: 1827
+<p>
+Called in
+<ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 381</li></ul>
+<a name="__addTypeToBootXML"><h2>__addTypeToBootXML</h2></a>
+<p>
+ add additional type information from the system
+ XML data to the boot XML data
+<p>
+Defined on line: 1908
+<p>
+Called in
+<ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 375</li></ul>
+<a name="__addVMachineDomainToBootXML"><h2>__addVMachineDomainToBootXML</h2></a>
+<p>
+ add the domain information from the system XML data to the
+ boot XML data by cloning the machine section. kiwi's boot
+ image descriptions does not contain machine section data
+ thus it's ok to to just add a copy of the system XML machine
+ section. The data is only copied if the system XML machine
+ section contains a domain information
+<p>
+Defined on line: 2089
+<p>
+Called in
+<ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 387</li></ul>
+<a name="__applyAdditionalXMLOverrides"><h2>__applyAdditionalXMLOverrides</h2></a>
+<p>
+ Apply XML overrides from command line applicable to some
+ procedures
+<p>
+Defined on line: 1362
+<p>
+Called in
+<ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 409</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 470</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 558</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 761</li></ul>
+<a name="__applyBaseXMLOverrides"><h2>__applyBaseXMLOverrides</h2></a>
+<p>
+ Apply XML overrides from command line common to all procedures
+<p>
+Defined on line: 1420
+<p>
+Called in
+<ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 408</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 469</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 557</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 760</li></ul>
+<a name="__checkImageIntegrity"><h2>__checkImageIntegrity</h2></a>
+<p>
+ Check the image description integrity if a checksum file exists
+<p>
+Defined on line: 1446
+<p>
+Called in
+<ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 221</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 429</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 496</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 708</li></ul>
+<a name="__prepareTree"><h2>__prepareTree</h2></a>
+<p>
+ Prepare the tree for the specified configuration file
+<p>
+Defined on line: 1552
+<p>
+Called in
+<ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 410</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 575</li></ul>
+<a name="__printProfileInfo"><h2>__printProfileInfo</h2></a>
+<p>
+Missing<p>
+Defined on line: 2201
+<p>
+Called in
+<ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 404</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 462</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 528</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 737</li></ul>
+<a name="__selectCache"><h2>__selectCache</h2></a>
+<p>
+Missing<p>
+Defined on line: 1521
+<p>
+Called in
+<ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1487</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1568</li></ul>
+<a name="__updateProfileEnvironment"><h2>__updateProfileEnvironment</h2></a>
+<p>
+ update the contents of the .profile file due to
+ changes given on the command line e.g image type
+<p>
+Defined on line: 2159
+<p>
+Called in
+<ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 904</li></ul>
+<a name="__upgradeTree"><h2>__upgradeTree</h2></a>
+<p>
+ Upgrade the existing tree using the packagemanager
+ upgrade functionality
+<p>
+Defined on line: 1472
+<p>
+Called in
+<ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 474</li></ul>
 <a name="DESTROY"><h2>DESTROY</h2></a>
 <p>
 Missing<p>
-Defined on line: 1647
+Defined on line: 1648
 <a name="createBootImage"><h2>createBootImage</h2></a>
 <p>
  Create the boot image
 <p>
-Defined on line: 582
+Defined on line: 583
 <p>
 Called in
 <ul>
@@ -70,57 +235,57 @@ Called in
 <p>
  Create the image
 <p>
-Defined on line: 684
+Defined on line: 685
 <a name="createImageBootCD"><h2>createImageBootCD</h2></a>
 <p>
  create a bootable CD with the stored initrd
  file. Note That this only creates a boot CD running the
  initrd and not more
 <p>
-Defined on line: 1161
+Defined on line: 1162
 <a name="createImageBootUSB"><h2>createImageBootUSB</h2></a>
 <p>
  create a bootable USB stick with the stored initrd
  file. Note That this only creates a stick running the
  initrd and not more
 <p>
-Defined on line: 1131
+Defined on line: 1132
 <a name="createImageDisk"><h2>createImageDisk</h2></a>
 <p>
 Missing<p>
-Defined on line: 1293
+Defined on line: 1294
 <p>
 Called in
 <ul>
-<li><a href="KIWIImage.html">KIWIImage</a> : 1092</li><li><a href="KIWIImage.html">KIWIImage</a> : 3100</li></ul>
+<li><a href="KIWIImage.html">KIWIImage</a> : 1092</li><li><a href="KIWIImage.html">KIWIImage</a> : 3091</li></ul>
 <a name="createImageFormat"><h2>createImageFormat</h2></a>
 <p>
 Missing<p>
-Defined on line: 1334
+Defined on line: 1335
 <p>
 Called in
 <ul>
-<li><a href="KIWIImage.html">KIWIImage</a> : 1105</li><li><a href="KIWIImage.html">KIWIImage</a> : 3113</li></ul>
+<li><a href="KIWIImage.html">KIWIImage</a> : 1105</li><li><a href="KIWIImage.html">KIWIImage</a> : 3104</li></ul>
 <a name="createImageInstallCD"><h2>createImageInstallCD</h2></a>
 <p>
  create an OEM install CD
 <p>
-Defined on line: 1191
+Defined on line: 1192
 <a name="createImageInstallPXE"><h2>createImageInstallPXE</h2></a>
 <p>
  create all data required for OEM PXE install
 <p>
-Defined on line: 1259
+Defined on line: 1260
 <a name="createImageInstallStick"><h2>createImageInstallStick</h2></a>
 <p>
  create an OEM install Stick
 <p>
-Defined on line: 1225
+Defined on line: 1226
 <a name="createSplash"><h2>createSplash</h2></a>
 <p>
  create a splash screen on the stored initrd file
 <p>
-Defined on line: 1107
+Defined on line: 1108
 <a name="getBootImageName"><h2>getBootImageName</h2></a>
 <p>
 Missing<p>
@@ -153,7 +318,7 @@ Defined on line: 52
 <p>
 Called in
 <ul>
-<li><a href="KIWICache.html">KIWICache</a> : 262</li><li><a href="KIWIImage.html">KIWIImage</a> : 799</li><li><a href="KIWIImage.html">KIWIImage</a> : 1091</li><li><a href="KIWIImage.html">KIWIImage</a> : 1104</li><li><a href="KIWIImage.html">KIWIImage</a> : 3099</li><li><a href="KIWIImage.html">KIWIImage</a> : 3112</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 852</li></ul>
+<li><a href="KIWICache.html">KIWICache</a> : 262</li><li><a href="KIWIImage.html">KIWIImage</a> : 799</li><li><a href="KIWIImage.html">KIWIImage</a> : 1091</li><li><a href="KIWIImage.html">KIWIImage</a> : 1104</li><li><a href="KIWIImage.html">KIWIImage</a> : 3090</li><li><a href="KIWIImage.html">KIWIImage</a> : 3103</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 853</li></ul>
 <a name="prepareBootImage"><h2>prepareBootImage</h2></a>
 <p>
  Prepare the boot image
@@ -167,7 +332,7 @@ Called in
 <p>
  Prepare the image
 <p>
-Defined on line: 481
+Defined on line: 482
 <p>
 Called in
 <ul>
@@ -175,173 +340,8 @@ Called in
 <a name="upgradeImage"><h2>upgradeImage</h2></a>
 <p>
 Missing<p>
-Defined on line: 417
+Defined on line: 418
 <p>
 Called in
 <ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 856</li></ul>
-<a name="__addDefaultStripData"><h2>__addDefaultStripData</h2></a>
-<p>
- Add default strip data from KIWIConfig.txt
-<p>
-Defined on line: 2115
-<p>
-Called in
-<ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 316</li></ul>
-<a name="__addOEMConfigDataToBootXML"><h2>__addOEMConfigDataToBootXML</h2></a>
-<p>
- add the oemconfig information from the system XML data to the
- boot XML data by cloning the oemconfig section. kiwi's boot
- image descriptions does not contain oemconfig section data
- thus it's ok to to just add a copy of the system XML oemconfig
- section. The data is only copied if an oemconfig sectiom
- exists in the system XML data set
-<p>
-Defined on line: 2059
-<p>
-Called in
-<ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 393</li></ul>
-<a name="__addPackagesToBootXML"><h2>__addPackagesToBootXML</h2></a>
-<p>
- add boot included packages/archives information
- from the system XML data to the boot XML data
-<p>
-Defined on line: 1676
-<p>
-Called in
-<ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 369</li></ul>
-<a name="__addPreferencesToBootXML"><h2>__addPreferencesToBootXML</h2></a>
-<p>
- add additional preferences information from the
- the system XML data to the boot XML data
-<p>
-Defined on line: 1759
-<p>
-Called in
-<ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 363</li></ul>
-<a name="__addStripDataToBootXML"><h2>__addStripDataToBootXML</h2></a>
-<p>
- Add system XML strip data to the
- boot image description.
-<p>
-Defined on line: 2131
-<p>
-Called in
-<ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 357</li></ul>
-<a name="__addSystemDiskToBootXML"><h2>__addSystemDiskToBootXML</h2></a>
-<p>
- add the systemdisk information from the system XML data to the
- boot XML data by copying some data into a new SystemdiskData
- object which is then stored in the boot XML object. kiwi's boot
- image descriptions does not contain systemdisk section data
- thus it's ok to to just add a copy of the system XML systemdisk
- section. The data is only copied if a systemdisk sectiom
- exists in the system XML data set
-<p>
-Defined on line: 1826
-<p>
-Called in
-<ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 381</li></ul>
-<a name="__addTypeToBootXML"><h2>__addTypeToBootXML</h2></a>
-<p>
- add additional type information from the system
- XML data to the boot XML data
-<p>
-Defined on line: 1906
-<p>
-Called in
-<ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 375</li></ul>
-<a name="__addVMachineDomainToBootXML"><h2>__addVMachineDomainToBootXML</h2></a>
-<p>
- add the domain information from the system XML data to the
- boot XML data by cloning the machine section. kiwi's boot
- image descriptions does not contain machine section data
- thus it's ok to to just add a copy of the system XML machine
- section. The data is only copied if the system XML machine
- section contains a domain information
-<p>
-Defined on line: 2087
-<p>
-Called in
-<ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 387</li></ul>
-<a name="__applyAdditionalXMLOverrides"><h2>__applyAdditionalXMLOverrides</h2></a>
-<p>
- Apply XML overrides from command line applicable to some
- procedures
-<p>
-Defined on line: 1361
-<p>
-Called in
-<ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 469</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 557</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 760</li></ul>
-<a name="__applyBaseXMLOverrides"><h2>__applyBaseXMLOverrides</h2></a>
-<p>
- Apply XML overrides from command line common to all procedures
-<p>
-Defined on line: 1419
-<p>
-Called in
-<ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 408</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 468</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 556</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 759</li></ul>
-<a name="__checkImageIntegrity"><h2>__checkImageIntegrity</h2></a>
-<p>
- Check the image description integrity if a checksum file exists
-<p>
-Defined on line: 1445
-<p>
-Called in
-<ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 221</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 428</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 495</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 707</li></ul>
-<a name="__prepareTree"><h2>__prepareTree</h2></a>
-<p>
- Prepare the tree for the specified configuration file
-<p>
-Defined on line: 1551
-<p>
-Called in
-<ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 409</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 574</li></ul>
-<a name="__printProfileInfo"><h2>__printProfileInfo</h2></a>
-<p>
-Missing<p>
-Defined on line: 2199
-<p>
-Called in
-<ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 404</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 461</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 527</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 736</li></ul>
-<a name="__selectCache"><h2>__selectCache</h2></a>
-<p>
-Missing<p>
-Defined on line: 1520
-<p>
-Called in
-<ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1486</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1567</li></ul>
-<a name="__updateProfileEnvironment"><h2>__updateProfileEnvironment</h2></a>
-<p>
- update the contents of the .profile file due to
- changes given on the command line e.g image type
-<p>
-Defined on line: 2157
-<p>
-Called in
-<ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 903</li></ul>
-<a name="__upgradeTree"><h2>__upgradeTree</h2></a>
-<p>
- Upgrade the existing tree using the packagemanager
- upgrade functionality
-<p>
-Defined on line: 1471
-<p>
-Called in
-<ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 473</li></ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 857</li></ul>
