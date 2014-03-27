@@ -17,14 +17,17 @@ fi
 # clone or update kiwi git
 if [ ! -d /home/jenkins/kiwi ];then
 	kiwi=git://github.com/openSUSE/kiwi.git
-	if ! su - jenkins -c "mkdir -p /home/jenkins/kiwi";then
+	if ! su - jenkins -c \
+		"mkdir -p /home/jenkins/kiwi";then
 		exit 1
 	fi
-	if ! su - jenkins -c "cd /home/jenkins/kiwi && git clone $kiwi";then
+	if ! su - jenkins -c \
+		"cd /home/jenkins/kiwi && git clone $kiwi";then
 		exit 1
 	fi
 else
-	if ! su - jenkins -c "cd /home/jenkins/kiwi/kiwi && git pull";then
+	if ! su - jenkins -c \
+		"cd /home/jenkins/kiwi/kiwi && git checkout . && git pull";then
 		exit 1
 	fi
 fi
