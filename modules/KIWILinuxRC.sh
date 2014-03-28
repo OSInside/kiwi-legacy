@@ -729,16 +729,27 @@ function udevKill {
 # startPlymouth
 #--------------------------------------
 function startPlymouth {
+	local consoledev
 	if lookup plymouthd &>/dev/null;then
+		# first trigger graphics subsystem
+		udevadm trigger --action=add --attr-match=class=0x030000 &>/dev/null
+		# next trigger graphics and tty subsystem
+		udevadm trigger --action=add --subsystem-match=graphics \
+			--subsystem-match=drm --subsystem-match=tty &>/dev/null
+		udevadm settle --timeout=30
 		mkdir --mode 755 /run/plymouth
+		read consoledev rest < /sys/class/tty/console/active
+		consoledev=${consoledev:-tty0}
+		if [ -x /lib/udev/console_init ] && [ -e "/dev/$consoledev" ];then
+			/lib/udev/console_init "/dev/$consoledev"
+		fi
 		plymouth-set-default-theme $kiwi_splash_theme &>/dev/null
-		plymouthd \
-			--mode=boot --attach-to-session \
-			--pid-file /run/plymouth/pid \
-		&>/dev/null
-		udevadm settle --timeout 30 --exit-if-exists=/sys/class/drm/card0/dev
-		udevadm settle --timeout 30 --exit-if-exists=/sys/class/graphics/fb0/dev
+		plymouthd --attach-to-session --pid-file /run/plymouth/pid &>/dev/null
 		plymouth show-splash &>/dev/null
+		# reset tty after plymouth messed with it
+		if [ -x /lib/udev/console_init ] && [ -e "/dev/$consoledev" ];then
+			/lib/udev/console_init "/dev/$consoledev"
+		fi
 	fi
 }
 #======================================
