@@ -100,6 +100,7 @@
 		<package name="syslinux"/>
 		<package name="tar"/>
 		<package name="gettext"/>
+		<package name="sysvinit-tools"/>
 	</packages>
 	<packages type="delete">
 		<package name="audit-libs"/>

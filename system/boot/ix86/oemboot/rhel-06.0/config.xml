@@ -103,6 +103,7 @@
 		<package name="gettext"/>
 		<package name="genisoimage"/>
 		<package name="syslinux"/>
+		<package name="sysvinit-tools"/>
 	</packages>
 	<packages type="delete">
 		<package name="cracklib-dicts"/>

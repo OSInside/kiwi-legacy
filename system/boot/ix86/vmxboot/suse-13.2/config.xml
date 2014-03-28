@@ -144,6 +144,7 @@
 		<package name="which"/>
 		<package name="udev"/>
 		<package name="psmisc"/>
+		<package name="sysvinit-tools"/>
 	</packages>
 	<packages type="delete">
 		<package name="cracklib-dict-full"/>

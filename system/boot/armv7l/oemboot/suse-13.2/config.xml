@@ -125,6 +125,7 @@
 		<package name="which"/>
 		<package name="udev"/>
 		<package name="iproute2"/>
+		<package name="sysvinit-tools"/>
 	</packages>
 	<packages type="delete">
 		<package name="audit-libs"/>

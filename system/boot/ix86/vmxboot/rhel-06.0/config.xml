@@ -97,6 +97,7 @@
 		<package name="e2fsprogs"/>
 		<package name="bc"/>
 		<package name="gettext"/>
+		<package name="sysvinit-tools"/>
 	</packages>
 	<packages type="delete">
 		<package name="cracklib-dicts"/>

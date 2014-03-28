@@ -142,6 +142,7 @@
 		<package name="udev"/>
 		<package name="iproute2"/>
 		<package name="psmisc"/>
+		<package name="sysvinit-tools"/>
 	</packages>
 	<packages type="delete">
 		<package name="cracklib-dict-full"/>
