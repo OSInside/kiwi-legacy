@@ -7191,16 +7191,22 @@ function activateImage {
 	#--------------------------------------
 	Echo "Preparing preinit phase..."
 	if ! cp /usr/bin/utimer /mnt;then
-		systemException "Failed to copy utimer code" "reboot"
+		systemException "Failed to copy: utimer" "reboot"
 	fi
 	if ! cp /iprocs /mnt;then
-		systemException "Failed to copy iprocs code" "reboot"
+		systemException "Failed to copy: iprocs" "reboot"
 	fi
 	if ! cp /preinit /mnt;then
-		systemException "Failed to copy preinit code" "reboot"
+		systemException "Failed to copy: preinit" "reboot"
 	fi
 	if ! cp /include /mnt;then
-		systemException "Failed to copy include code" "reboot"
+		systemException "Failed to copy: include" "reboot"
+	fi
+	if ! cp -f /sbin/killall5 /mnt/sbin;then
+		systemException "Failed to copy: killall5" "reboot"
+	fi
+	if ! cp -f /sbin/pidof /mnt/sbin;then
+		systemException "Failed to copy: pidof" "reboot"
 	fi
 }
 #======================================
