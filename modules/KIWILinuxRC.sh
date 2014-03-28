@@ -606,14 +606,23 @@ function udevTrigger {
 #--------------------------------------
 function udevSystemStart {
 	# /.../
-	# start udev while in pre-init phase.
+	# start udev daemon
 	# ----
-	if [ -x /sbin/udevd ];then
-		/sbin/udevd --daemon
-	else
-		/lib/udev/udevd --daemon
+	export UDEV_LOG=info
+	local udev_bin=/usr/lib/systemd/systemd-udevd
+	if [ ! -x $udev_bin ];then
+		udev_bin=/sbin/udevd
 	fi
-	UDEVD_PID=$(pidof -s /sbin/udevd)
+	if [ ! -x $udev_bin ];then
+		udev_bin=/lib/udev/udevd
+	fi
+	if [ ! -x $udev_bin ];then
+		systemException \
+			"Can't find udev daemon" \
+		"reboot"
+	fi
+	$udev_bin --daemon
+	export UDEVD_PID=$(pidof -s $udev_bin)
 }
 #======================================
 # udevSystemStop
@@ -671,12 +680,7 @@ function udevStart {
 	# load modules required before udev
 	moduleLoadBeforeUdev
 	# start the udev daemon
-	if [ -x /sbin/udevd ];then
-		/sbin/udevd --daemon
-	else
-		/lib/udev/udevd --daemon
-	fi
-	UDEVD_PID=$(pidof -s /sbin/udevd)
+	udevSystemStart
 	echo UDEVD_PID=$UDEVD_PID >> /iprocs
 	# trigger events for all devices
 	udevTrigger
