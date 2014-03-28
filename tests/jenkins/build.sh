@@ -10,5 +10,7 @@
 #
 # /home/jenkins/kiwi/kiwi/tests/jenkins/build.sh <jeos-name>
 #
+# possible jeos-name: see the result of 'kiwi -l'
+#
 jeos=$1
 kiwi --build $jeos -d /tmp/mytest --type oem --logfile terminal

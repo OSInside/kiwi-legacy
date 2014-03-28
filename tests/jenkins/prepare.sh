@@ -34,7 +34,7 @@ fi
 
 # install required packages
 spec=/home/jenkins/kiwi/kiwi/rpm/kiwi.spec
-packages="genisoimage cdrkit-cdrtools-compat squashfs"
+packages="genisoimage cdrkit-cdrtools-compat squashfs osc"
 if ! zypper -n install --no-recommends $packages;then
 	exit 1
 fi
