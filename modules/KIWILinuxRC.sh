@@ -580,6 +580,11 @@ function errorLogStart {
 # udevPending
 #--------------------------------------
 function udevPending {
+	local umountProc=0
+	if [ ! -e /proc/cmdline ];then
+		mount -t proc proc /proc
+		umountProc=1
+	fi
 	local timeout=30
 	local udevadmExec=$(lookup udevadm 2>/dev/null)
 	if [ -x $udevadmExec ];then
@@ -588,6 +593,9 @@ function udevPending {
 		# udevsettle exists on old distros and is not
 		# affected by the move from sbin to usr
 		/sbin/udevsettle --timeout=$timeout
+	fi
+	if [ $umountProc -eq 1 ];then
+		umount /proc
 	fi
 }
 #======================================
