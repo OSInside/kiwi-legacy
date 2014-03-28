@@ -1524,7 +1524,6 @@ function setupBootLoaderSyslinuxRecovery {
 				echo -n " disk=$(getDiskID $imageDiskDevice)"  >> $conf
 			fi
 			echo -n " vga=$fbmode"                         >> $conf
-			echo -n " splash=silent"                       >> $conf
 			echo -n " $KIWI_INITRD_PARAMS"                 >> $conf
 			echo -n " $KIWI_KERNEL_OPTIONS"                >> $conf
 			echo " KIWI_RECOVERY=$recoid"                  >> $conf
@@ -1547,7 +1546,6 @@ function setupBootLoaderSyslinuxRecovery {
 				echo -n " disk=$(getDiskID $imageDiskDevice)"  >> $conf
 			fi
 			echo -n " vga=$fbmode"                         >> $conf
-			echo -n " splash=silent"                       >> $conf
 			echo -n " $KIWI_INITRD_PARAMS"                 >> $conf
 			echo -n " $KIWI_KERNEL_OPTIONS"                >> $conf
 			echo " KIWI_RECOVERY=$recoid RESTORE=1"        >> $conf
@@ -1619,7 +1617,7 @@ function setupBootLoaderGrubRecovery {
 			if [ ! -z "$imageDiskDevice" ];then
 				echo -n " disk=$(getDiskID $imageDiskDevice)" >> $menu
 			fi
-			echo -n " vga=$fbmode splash=silent"          >> $menu
+			echo -n " vga=$fbmode"                        >> $menu
 			echo -n " $KIWI_INITRD_PARAMS"                >> $menu
 			echo -n " $KIWI_KERNEL_OPTIONS"               >> $menu
 			echo -n " KIWI_RECOVERY=$recoid"              >> $menu
@@ -1631,7 +1629,7 @@ function setupBootLoaderGrubRecovery {
 			if [ ! -z "$imageDiskDevice" ];then
 				echo -n " disk=$(getDiskID $imageDiskDevice)" >> $menu
 			fi
-			echo -n " vga=$fbmode splash=silent"          >> $menu
+			echo -n " vga=$fbmode"                        >> $menu
 			echo -n " $KIWI_INITRD_PARAMS"                >> $menu
 			echo -n " $KIWI_KERNEL_OPTIONS"               >> $menu
 			echo -n " KIWI_RECOVERY=$recoid"              >> $menu
@@ -1651,7 +1649,7 @@ function setupBootLoaderGrubRecovery {
 			if [ ! -z "$imageDiskDevice" ];then
 				echo -n " disk=$(getDiskID $imageDiskDevice)" >> $menu
 			fi
-			echo -n " vga=$fbmode splash=silent"          >> $menu
+			echo -n " vga=$fbmode"                        >> $menu
 			echo -n " $KIWI_INITRD_PARAMS"                >> $menu
 			echo -n " $KIWI_KERNEL_OPTIONS"               >> $menu
 			echo -n " KIWI_RECOVERY=$recoid"              >> $menu
@@ -1663,7 +1661,7 @@ function setupBootLoaderGrubRecovery {
 			if [ ! -z "$imageDiskDevice" ];then
 				echo -n " disk=$(getDiskID $imageDiskDevice)" >> $menu
 			fi
-			echo -n " vga=$fbmode splash=silent"          >> $menu
+			echo -n " vga=$fbmode"                        >> $menu
 			echo -n " $KIWI_INITRD_PARAMS"                >> $menu
 			echo -n " $KIWI_KERNEL_OPTIONS"               >> $menu
 			echo -n " KIWI_RECOVERY=$recoid RESTORE=1"    >> $menu
@@ -1999,7 +1997,7 @@ function setupBootLoaderS390 {
 	#--------------------------------------
 	echo "LOADER_TYPE=\"$loader\""                            > $sysb
 	echo "LOADER_LOCATION=\"mbr\""                           >> $sysb
-	echo -n "DEFAULT_APPEND=\"root=$diskByID splash=silent"  >> $sysb
+	echo -n "DEFAULT_APPEND=\"root=$diskByID"                >> $sysb
 	if [ ! -z "$swap" ];then
 		echo -n " resume=$swapByID"                          >> $sysb
 	fi
@@ -2145,7 +2143,6 @@ function setupBootLoaderSyslinux {
 					echo -n " disk=$(getDiskID $imageDiskDevice)"  >> $conf
 				fi
 				echo -n " vga=$fbmode"                         >> $conf
-				echo -n " splash=silent"                       >> $conf
 				if [ ! -z "$swap" ];then
 					echo -n " resume=$swapByID"                >> $conf
 				fi
@@ -2175,7 +2172,6 @@ function setupBootLoaderSyslinux {
 					echo -n " disk=$(getDiskID $imageDiskDevice)"  >> $conf
 				fi
 				echo -n " vga=$fbmode"                         >> $conf
-				echo -n " splash=silent"                       >> $conf
 				if [ ! -z "$swap" ];then
 					echo -n " resume=$swapByID"                >> $conf
 				fi
@@ -2206,14 +2202,14 @@ function setupBootLoaderSyslinux {
 	echo "LOADER_TYPE=\"$loader\""                           > $sysb
 	echo "LOADER_LOCATION=\"mbr\""                           >> $sysb
 	echo "DEFAULT_VGA=\"$fbmode\""                           >> $sysb 
-	echo -n "DEFAULT_APPEND=\"root=$diskByID splash=silent"  >> $sysb
+	echo -n "DEFAULT_APPEND=\"root=$diskByID"                >> $sysb
 	if [ ! -z "$swap" ];then
 		echo -n " resume=$swapByID"                          >> $sysb
 	fi
 	echo -n " $KIWI_INITRD_PARAMS $KIWI_KERNEL_OPTIONS"      >> $sysb
 	echo " showopts\""                                       >> $sysb
 	echo "FAILSAFE_VGA=\"$fbmode\""                          >> $sysb
-	echo -n "FAILSAFE_APPEND=\"root=$diskByID splash=silent" >> $sysb
+	echo -n "FAILSAFE_APPEND=\"root=$diskByID"               >> $sysb
 	if [ ! -z "$swap" ];then
 		echo -n " resume=$swapByID"                          >> $sysb
 	fi
@@ -2352,7 +2348,7 @@ function setupBootLoaderGrub {
 				if [ ! -z "$imageDiskDevice" ];then
 					echo -n " disk=$(getDiskID $imageDiskDevice)" >> $menu
 				fi
-				echo -n " $console vga=$fbmode splash=silent"     >> $menu
+				echo -n " $console vga=$fbmode"                   >> $menu
 				if [ ! -z "$swap" ];then
 					echo -n " resume=$swapByID"                   >> $menu
 				fi
@@ -2371,7 +2367,7 @@ function setupBootLoaderGrub {
 				if [ ! -z "$imageDiskDevice" ];then
 					echo -n " disk=$(getDiskID $imageDiskDevice)" >> $menu
 				fi
-				echo -n " $console vga=$fbmode splash=silent"     >> $menu
+				echo -n " $console vga=$fbmode"                   >> $menu
 				if [ ! -z "$swap" ];then
 					echo -n " resume=$swapByID"                   >> $menu
 				fi
@@ -2398,7 +2394,7 @@ function setupBootLoaderGrub {
 				if [ ! -z "$imageDiskDevice" ];then
 					echo -n " disk=$(getDiskID $imageDiskDevice)" >> $menu
 				fi
-				echo -n " $console vga=$fbmode splash=silent"     >> $menu
+				echo -n " $console vga=$fbmode"                   >> $menu
 				echo -n " $KIWI_INITRD_PARAMS"                    >> $menu
 				echo -n " $KIWI_KERNEL_OPTIONS"                   >> $menu
 				echo -n " $failsafe"                              >> $menu
@@ -2415,7 +2411,7 @@ function setupBootLoaderGrub {
 				if [ ! -z "$imageDiskDevice" ];then
 					echo -n " disk=$(getDiskID $imageDiskDevice)" >> $menu
 				fi
-				echo -n " $console vga=$fbmode splash=silent"     >> $menu
+				echo -n " $console vga=$fbmode"                   >> $menu
 				echo -n " $KIWI_INITRD_PARAMS"                    >> $menu
 				echo -n " $KIWI_KERNEL_OPTIONS"                   >> $menu
 				echo -n " $failsafe"                              >> $menu
@@ -2463,14 +2459,14 @@ function setupBootLoaderGrub {
 	echo "LOADER_TYPE=\"grub\""                               > $sysb
 	echo "LOADER_LOCATION=\"mbr\""                           >> $sysb
 	echo "DEFAULT_VGA=\"$fbmode\""                           >> $sysb  
-	echo -n "DEFAULT_APPEND=\"root=$diskByID splash=silent"  >> $sysb
+	echo -n "DEFAULT_APPEND=\"root=$diskByID"                >> $sysb
 	if [ ! -z "$swap" ];then
 		echo -n " resume=$swapByID"                          >> $sysb
 	fi
 	echo -n " $KIWI_INITRD_PARAMS $KIWI_KERNEL_OPTIONS"      >> $sysb
 	echo " showopts\""                                       >> $sysb
 	echo "FAILSAFE_VGA=\"$fbmode\""                          >> $sysb
-	echo -n "FAILSAFE_APPEND=\"root=$diskByID splash=silent" >> $sysb
+	echo -n "FAILSAFE_APPEND=\"root=$diskByID"               >> $sysb
 	if [ ! -z "$swap" ];then
 		echo -n " resume=$swapByID"                          >> $sysb
 	fi
@@ -2588,9 +2584,6 @@ function setupBootLoaderGrub2 {
 	fi
 	if [[ ! $cmdline =~ quiet ]];then
 		cmdline="$cmdline quiet"
-	fi
-	if [[ ! $cmdline =~ splash= ]];then
-		cmdline="$cmdline splash=silent"
 	fi
 	#======================================
 	# check for boot TIMEOUT
@@ -2816,7 +2809,7 @@ function setupBootLoaderYaboot {
 				if [ ! -z "$imageDiskDevice" ];then
 					echo -n " disk=$(getDiskID $imageDiskDevice)" >> $conf
 				fi
-				echo -n " $console vga=$fbmode splash=silent" >> $conf
+				echo -n " $console vga=$fbmode"               >> $conf
 				if [ ! -z "$swap" ];then                     
 					echo -n " resume=$swapByID"               >> $conf
 				fi
@@ -2846,7 +2839,7 @@ function setupBootLoaderYaboot {
 				if [ ! -z "$imageDiskDevice" ];then
 					echo -n " disk=$(getDiskID $imageDiskDevice)" >> $conf
 				fi
-				echo -n " $console vga=$fbmode splash=silent" >> $conf
+				echo -n " $console vga=$fbmode"               >> $conf
 				if [ ! -z "$swap" ];then
 					echo -n " resume=$swapByID"               >> $conf
 				fi
@@ -2877,14 +2870,14 @@ function setupBootLoaderYaboot {
 	echo "LOADER_TYPE=\"$loader_type\""                       > $sysb
 	echo "LOADER_LOCATION=\"mbr\""                           >> $sysb
 	echo "DEFAULT_VGA=\"$fbmode\""                           >> $sysb 
-	echo -n "DEFAULT_APPEND=\"root=$diskByID splash=silent"  >> $sysb
+	echo -n "DEFAULT_APPEND=\"root=$diskByID"                >> $sysb
 	if [ ! -z "$swap" ];then
 		echo -n " resume=$swapByID"                          >> $sysb
 	fi
 	echo -n " $KIWI_INITRD_PARAMS $KIWI_KERNEL_OPTIONS"      >> $sysb
 	echo " showopts\""                                       >> $sysb
 	echo "FAILSAFE_VGA=\"$fbmode\""                          >> $sysb
-	echo -n "FAILSAFE_APPEND=\"root=$diskByID splash=silent" >> $sysb
+	echo -n "FAILSAFE_APPEND=\"root=$diskByID"               >> $sysb
 	if [ ! -z "$swap" ];then
 		echo -n " resume=$swapByID"                          >> $sysb
 	fi

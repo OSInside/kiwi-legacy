@@ -1927,8 +1927,7 @@ sub createImageLiveCD {
 			print $FD "\t"."echo Loading linux...\n";
 			print $FD "\t"."set gfxpayload=keep"."\n";
 			print $FD "\t"."linux$efi_suffix /boot/$isoarch/loader/linux";
-			print $FD ' ramdisk_size=512000 ramdisk_blocksize=4096';
-			print $FD " splash=silent"."\n";
+			print $FD ' ramdisk_size=512000 ramdisk_blocksize=4096'."\n";
 			print $FD "\t"."echo Loading initrd...\n";
 			print $FD "\t"."initrd$efi_suffix /boot/$isoarch/loader/initrd\n";
 			print $FD "}\n";
@@ -1938,8 +1937,7 @@ sub createImageLiveCD {
 			print $FD "\t"."echo Loading linux...\n";
 			print $FD "\t"."set gfxpayload=keep"."\n";
 			print $FD "\t"."module /boot/$isoarch/loader/linux dummy";
-			print $FD ' ramdisk_size=512000 ramdisk_blocksize=4096';
-			print $FD " splash=silent"."\n";
+			print $FD ' ramdisk_size=512000 ramdisk_blocksize=4096'."\n";
 			print $FD "\t"."echo Loading initrd...\n";
 			print $FD "\t"."module /boot/$isoarch/loader/initrd dummy\n";
 			print $FD "}\n";
@@ -1954,7 +1952,6 @@ sub createImageLiveCD {
 			print $FD "\t"."set gfxpayload=keep"."\n";
 			print $FD "\t"."linux$efi_suffix /boot/$isoarch/loader/linux";
 			print $FD ' ramdisk_size=512000 ramdisk_blocksize=4096';
-			print $FD " splash=silent";
 			print $FD " @failsafe"."\n";
 			print $FD "\t"."echo Loading initrd...\n";
 			print $FD "\t"."initrd$efi_suffix /boot/$isoarch/loader/initrd\n";
@@ -1966,7 +1963,6 @@ sub createImageLiveCD {
 			print $FD "\t"."set gfxpayload=keep"."\n";
 			print $FD "\t"."module /boot/$isoarch/loader/linux dummy";
 			print $FD ' ramdisk_size=512000 ramdisk_blocksize=4096';
-			print $FD " splash=silent";
 			print $FD " @failsafe"."\n";
 			print $FD "\t"."echo Loading initrd...\n";
 			print $FD "\t"."module /boot/$isoarch/loader/initrd dummy\n";
@@ -1982,7 +1978,7 @@ sub createImageLiveCD {
 				print $FD "\t"."echo Loading linux...\n";
 				print $FD "\t"."set gfxpayload=keep"."\n";
 				print $FD "\t"."linux$efi_suffix /boot/$isoarch/loader/linux";
-				print $FD " mediacheck=1 splash=silent";
+				print $FD " mediacheck=1";
 				print $FD "\t"."echo Loading initrd...\n";
 				print $FD "\t"."initrd$efi_suffix /boot/$isoarch/loader/initrd";
 				print $FD "\n}\n";
@@ -1992,7 +1988,7 @@ sub createImageLiveCD {
 				print $FD "\t"."echo Loading linux...\n";
 				print $FD "\t"."set gfxpayload=keep"."\n";
 				print $FD "\t"."module /boot/$isoarch/loader/linux dummy";
-				print $FD " mediacheck=1 splash=silent";
+				print $FD " mediacheck=1";
 				print $FD "\t"."echo Loading initrd...\n";
 				print $FD "\t"."module /boot/$isoarch/loader/initrd dummy";
 				print $FD "\n}\n";
@@ -2090,7 +2086,7 @@ sub createImageLiveCD {
 		print $IFD "label $label"."\n";
 		print $IFD "  kernel linux"."\n";
 		print $IFD "  append initrd=initrd ramdisk_size=512000 ";
-		print $IFD "ramdisk_blocksize=4096 splash=silent${cmdline} showopts ";
+		print $IFD "ramdisk_blocksize=4096${cmdline} showopts ";
 		#print FD "console=ttyS0,9600n8 console=tty0${cmdline} showopts ";
 		if ($vga) {
 			print $IFD "vga=$vga ";
@@ -2099,13 +2095,13 @@ sub createImageLiveCD {
 		print $IFD "label $lsafe"."\n";
 		print $IFD "  kernel linux"."\n";
 		print $IFD "  append initrd=initrd ramdisk_size=512000 ";
-		print $IFD "ramdisk_blocksize=4096 splash=silent${cmdline} showopts ";
+		print $IFD "ramdisk_blocksize=4096${cmdline} showopts ";
 		print $IFD "@failsafe"."\n";
 	} else {
 		print $IFD "label $label"."\n";
 		print $IFD "  kernel mboot.c32"."\n";
 		print $IFD "  append xen.gz --- linux ramdisk_size=512000 ";
-		print $IFD "ramdisk_blocksize=4096 splash=silent${cmdline} ";
+		print $IFD "ramdisk_blocksize=4096${cmdline} ";
 		if ($vga) {
 			print $IFD "vga=$vga ";
 		}
@@ -2114,7 +2110,7 @@ sub createImageLiveCD {
 		print $IFD "label $lsafe"."\n";
 		print $IFD "  kernel mboot.c32"."\n";
 		print $IFD "  append xen.gz --- linux ramdisk_size=512000 ";
-		print $IFD "ramdisk_blocksize=4096 splash=silent${cmdline} ";
+		print $IFD "ramdisk_blocksize=4096${cmdline} ";
 		print $IFD "@failsafe ";
 		print $IFD "--- initrd showopts"."\n";
 	}
@@ -2126,13 +2122,13 @@ sub createImageLiveCD {
 		if (! $isxen) {
 			print $IFD "label mediacheck"."\n";
 			print $IFD "  kernel linux"."\n";
-			print $IFD "  append initrd=initrd splash=silent mediacheck=1";
+			print $IFD "  append initrd=initrd mediacheck=1";
 			print $IFD "$cmdline ";
 			print $IFD "showopts"."\n";
 		} else {
 			print $IFD "label mediacheck"."\n";
 			print $IFD "  kernel mboot.c32"."\n";
-			print $IFD "  append xen.gz --- linux splash=silent mediacheck=1";
+			print $IFD "  append xen.gz --- linux mediacheck=1";
 			print $IFD "$cmdline ";
 			print $IFD "--- initrd showopts"."\n";
 		}
