@@ -75,8 +75,6 @@ sub new {
 	my $zconfig = Config::IniFiles -> new (
 		-file => $zyppConf, -allowedcommentchars => '#'
 	);
-	# TODO: We should not write files in the constructor, but that's
-	# a job for another day
 	my $repos = $xml -> getRepositories();
 	for my $repo (@{$repos}) {
 		my ($uname, $pass) = $repo -> getCredentials();
@@ -267,14 +265,6 @@ sub setupInstallationSource {
 		local $ENV{ZYPP_LOCKFILE_ROOT} = $root;
 		$stype = "public";
 	}
-	if ($chroot) {
-		$data = KIWIQX::qxx ("@kchroot zypper --version 2>&1 | cut -c 8"); chomp $data;
-		if ((! isdigit($data)) || ($data < 1)) {
-			$kiwi -> info ("image zypper version is too old, or not installed");
-			$kiwi -> skipped ();
-			return $this;
-		}
-	}
 	#==========================================
 	# search list of .repo files in dataDir
 	#------------------------------------------
@@ -367,7 +357,9 @@ sub setupInstallationSource {
 				$code = $? >> 8;
 			} else {
 				$kiwi -> info ("Updating bootstrap zypper service: $alias");
-				$data = KIWIQX::qxx ("grep -q '^baseurl=file:/base-system' $repo");
+				$data = KIWIQX::qxx (
+					"grep -q '^baseurl=file:/base-system' $repo"
+				);
 				$code = $? >> 8;
 				if ($code == 0) {
 					$sed = '@\(baseurl=file:/base-system\)@baseurl=file:@';
@@ -391,7 +383,9 @@ sub setupInstallationSource {
 				$code = $? >> 8;
 			} else {
 				$kiwi -> info ("Updating chroot zypper service: $alias");
-				$data = KIWIQX::qxx ("grep -q '^baseurl=file:/base-system' $repo");
+				$data = KIWIQX::qxx (
+					"grep -q '^baseurl=file:/base-system' $repo"
+				);
 				$code = $? >> 8;
 				if ($code != 0) {
 					$sed = '@\(baseurl=file:/\)@\1base-system/@';
@@ -428,7 +422,6 @@ sub setupInstallationSource {
 				}
 				$kiwi -> done ();
 			}
-
 		}
 		if ( $prio ) {
 			$kiwi -> info ("--> Set priority to: $prio");
@@ -477,7 +470,6 @@ sub setupDownload {
 	my @pacs   = @_;
 	my $this   = shift @pacs;
 	my $kiwi   = $this->{kiwi};
-	# FIXME
 	$kiwi -> failed ();
 	$kiwi -> error  ("*** not implemeted for zypper ***");
 	$kiwi -> failed ();
@@ -654,13 +646,6 @@ sub setupUpgrade {
 	if (($installOption) && ($installOption ne 'plusRecommended')) {
 		push (@installOpts,"--no-recommends");
 	}
-	print $fd "ZV=\$(@kchroot zypper --version 2>&1 | cut -c 8)"."\n";
-	print $fd 'if [ $ZV = 0 ];then'."\n";
-	print $fd "\t".'echo "image zypper version is too old, skipped"'."\n";
-	print $fd "\t"."ECODE=0\n";
-	print $fd "\t"."echo \$ECODE > $screenCall.exit\n";
-	print $fd "\t"."exit \$ECODE\n";
-	print $fd "fi"."\n";
 	print $fd "function clean { kill \$SPID;";
 	print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;";
 	print $fd "if [ \"\$c\" = 5 ];then kill \$SPID;break;fi;"; 
