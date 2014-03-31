@@ -288,6 +288,9 @@ Requires:       kiwi-desc-isoboot = %{version}
 Requires:       %(echo `bash %{S:4} %{S:0} isoboot %{myarch} %{mysystems}`)
 License:        GPL-2.0+
 Group:          System/Management
+%if 0%{?suse_version} > 1120
+BuildArch:      noarch
+%endif
 
 %description -n kiwi-desc-isoboot-requires
 Meta-package to pull in all requires to build an isoboot media.
@@ -340,6 +343,9 @@ Requires:       kiwi-desc-vmxboot = %{version}
 Requires:       %(echo `bash %{S:4} %{S:0} vmxboot %{myarch} %{mysystems}`)
 License:        GPL-2.0+
 Group:          System/Management
+%if 0%{?suse_version} > 1120
+BuildArch:      noarch
+%endif
 
 %description -n kiwi-desc-vmxboot-requires
 Meta-package to pull in all requires to build a vmxboot media.
@@ -377,6 +383,9 @@ Requires:       kiwi-desc-netboot = %{version}
 Requires:       %(echo `bash %{S:4} %{S:0} netboot %{myarch} %{mysystems}`)
 License:        GPL-2.0+
 Group:          System/Management
+%if 0%{?suse_version} > 1120
+BuildArch:      noarch
+%endif
 
 %description -n kiwi-desc-netboot-requires
 Meta-package to pull in all requires to build a netboot media.
@@ -433,6 +442,9 @@ Requires:       kiwi-desc-oemboot = %{version}
 Requires:       %(echo `bash %{S:4} %{S:0} oemboot %{myarch} %{mysystems}`)
 License:        GPL-2.0+
 Group:          System/Management
+%if 0%{?suse_version} > 1120
+BuildArch:      noarch
+%endif
 
 %description -n kiwi-desc-oemboot-requires
 Meta-package to pull in all requires to build a oemboot media.
