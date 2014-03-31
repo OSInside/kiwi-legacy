@@ -99,11 +99,23 @@ sub new {
 		$kiwi -> failed ();
 		return;
 	}
-	my $count = 1;
-	my %sourceChannel = ();
+	#==========================================
+	# Get configured name of package manager
+	#------------------------------------------
+	$kiwi -> info ("Setting up package manager: ");
+	my $pmgr = $xml -> getPreferences() -> getPackageManager();
+	if (! defined $pmgr) {
+		$kiwi -> failed();
+		$this -> cleanMount();
+		return;
+	}
+	$kiwi -> note ($pmgr);
+	$kiwi -> done ();
 	#==========================================
 	# Create sourceChannel hash
 	#------------------------------------------
+	my $count = 1;
+	my %sourceChannel = ();
 	for my $repo (@{$repos}) {
 		my $alias        = $repo -> getAlias();
 		my $comp         = $repo -> getComponents();
@@ -114,13 +126,31 @@ sub new {
 		my $type         = $repo -> getType();
 		my $source       = $repo -> getPath();
 		my ($user, $pwd) = $repo ->	getCredentials();
+		$kiwi -> info ("Setting up source channel:\n");
+		$kiwi -> info ("--> $source\n");
+		#==========================================
+		# Set default repotype if not set
+		#------------------------------------------
+		if (! $type) {
+			$kiwi -> warning ("--> Repository type set to: ");
+			if ($pmgr ne "zypper") {
+				$kiwi -> note ("rpm-md\n");
+				$type = "rpm-md";
+			} else {
+				$kiwi -> note ("AutoDetect\n");
+				$type = "NONE";
+			}
+		}
+		#==========================================
+		# Validate given URI for access and type
+		#------------------------------------------
 		my $urlHandler  = KIWIURL -> new ($cmdL,$this,$user,$pwd);
 		my $publics_url = $urlHandler -> normalizePath ($source);
 		if ($publics_url =~ /^\//) {
 			my ( $publics_url_test ) = bsd_glob ( $publics_url );
 			if (! -d $publics_url_test) {
 				$kiwi ->warning (
-					"local URL path not found: $publics_url_test"
+					"--> local URL path not found: $publics_url_test"
 				);
 				$kiwi ->skipped ();
 				next;
@@ -133,7 +163,7 @@ sub new {
 		my $publics_type = $urlHandler -> getRepoType();
 		if (($publics_type ne "unknown") && ($publics_type ne $type)) {
 			$kiwi -> warning (
-				"$private_url: overwrite repo type $type with: $publics_type"
+				"--> overwrite repo type $type with: $publics_type"
 			);
 			$kiwi -> done();
 			$type = $publics_type;
@@ -154,18 +184,20 @@ sub new {
 		#------------------------------------------
 		my $srckey  = "baseurl";
 		my $srcopt;
-		if (($type eq "rpm-dir") || ($type eq "deb-dir")) {
+		if (($type) && ($type =~ /rpm-dir|deb-dir/)) {
 			$srckey = "path";
 			$srcopt = "recursive=True";
 		}
 		$private_url = "'".$private_url."'";
 		$publics_url = "'".$publics_url."'";
+
 		my @private_options = ("type=$type","name=$channel",
 			"$srckey=$private_url",$srcopt
 		);
 		my @public_options  = ("type=$type","name=$channel",
 			"$srckey=$publics_url",$srcopt
 		);
+
 		if (($prio) && ($prio != 0)) {
 			push (@private_options,"priority=$prio");
 			push (@public_options ,"priority=$prio");
@@ -264,18 +296,6 @@ sub new {
 			$kiwi -> setRootLog ($root."."."$$".".screenrc.log");
 		}
 	}
-	#==========================================
-	# Get configured name of package manager
-	#------------------------------------------
-	$kiwi -> info ("Setting up package manager: ");
-	my $pmgr = $xml -> getPreferences() -> getPackageManager();
-	if (! defined $pmgr) {
-		$kiwi -> failed();
-		$this -> cleanMount();
-		return;
-	}
-	$kiwi -> note ($pmgr);
-	$kiwi -> done ();
 	#==========================================
 	# Create package manager object
 	#------------------------------------------

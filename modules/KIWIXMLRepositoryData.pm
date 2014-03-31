@@ -434,15 +434,10 @@ sub __isInitConsistent {
 	if (! $this -> p_areKeywordBooleanValuesValid($init) ) {
 		return;
 	}
-	if (! $init->{type} ) {
-		my $msg = 'KIWIXMLRepositoryData: no "type" specified in '
-			. 'initialization structure.';
-		$kiwi -> error($msg);
-		$kiwi -> failed();
-		return;
-	}
-	if (! $this -> __isSupportedRepoType($init->{type}) ) {
-		return;
+	if ($init->{type} ) {
+		if (! $this -> __isSupportedRepoType($init->{type}) ) {
+			return;
+		}
 	}
 	return 1;
 }

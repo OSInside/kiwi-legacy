@@ -1700,7 +1700,9 @@ whether and how this information is passed</a:documentation>
     </define>
     <define name="k.repository.attlist">
       <interleave>
-        <ref name="k.repository.type.attribute"/>
+        <optional>
+          <ref name="k.repository.type.attribute"/>
+        </optional>
         <optional>
           <ref name="k.repository.profiles.attribute"/>
         </optional>

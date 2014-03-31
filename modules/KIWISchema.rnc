@@ -1288,7 +1288,7 @@ div {
 		## whether and how this information is passed
 		k.username.attribute
 	k.repository.attlist =
-		k.repository.type.attribute &
+		k.repository.type.attribute? &
 		k.repository.profiles.attribute? &
 		k.repository.status.attribute? &
 		k.repository.alias.attribute? &

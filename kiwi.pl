@@ -1060,7 +1060,7 @@ sub init {
 			$msg = 'Must specify repository priority for each given ';
 			$msg.= 'repository. Mismatch number of arguments.';
 		}
-		if ($numRepos != $numTypes) {
+		if (($numTypes) && ($numRepos != $numTypes)) {
 			$msg = 'Must specify repository type for each given ';
 			$msg.= 'repository. Mismatch number of arguments.';
 		}
@@ -1130,7 +1130,7 @@ sub init {
 	#========================================
 	# check replacement repo information
 	#----------------------------------------
-	if (($SetRepository) && ($SetRepositoryType)) {
+	if ($SetRepository) {
 		my %init = (
 			alias    => $SetRepositoryAlias,
 			path     => $SetRepository,
@@ -1425,13 +1425,6 @@ sub init {
 	if ((defined $IgnoreRepos) && (defined $SetRepository)) {
 		$kiwi -> error ("Can't use ignore repos together with set repos");
 		$kiwi -> failed ();
-		kiwiExit (1);
-	}
-	if (($SetRepository) && (! $SetRepositoryType)) {
-		my $msg = 'Must specify repository type for given '
-				. 'repository. Mismatch number of arguments.';
-		$kiwi -> error($msg);
-		$kiwi -> failed();
 		kiwiExit (1);
 	}
 	if (defined $LogPort) {

@@ -325,7 +325,7 @@ sub setupInstallationSource {
 			#==========================================
 			# Adapt type parameter
 			#------------------------------------------
-			if (($key) && ($key eq "type")) {
+			if (($key) && ($key eq "type") && ($val ne "NONE")) {
 				if ($val eq "yast2") {
 					$val = "YaST";
 				}

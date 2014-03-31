@@ -117,33 +117,6 @@ sub test_ctor_argsInvalidHashInvalidPrefLic {
 }
 
 #==========================================
-# test_ctor_argsInvalidHashNoType
-#------------------------------------------
-sub test_ctor_argsInvalidHashNoType {
-	# ...
-	# Test the RepositoryData constructor with an invalid hash argument
-	# ---
-	my $this = shift;
-	my $kiwi = $this -> {kiwi};
-	my %repoData = (
-					alias => 'myRepo',
-					path  => 'opensuse:///'
-	);
-	my $repoDataObj = KIWIXMLRepositoryData -> new(\%repoData);
-	my $msg = $kiwi -> getMessage();
-	my $expected = 'KIWIXMLRepositoryData: no "type" specified in '
-		. 'initialization structure.';
-	$this -> assert_str_equals($expected, $msg);
-	my $msgT = $kiwi -> getMessageType();
-	$this -> assert_str_equals('error', $msgT);
-	my $state = $kiwi -> getState();
-	$this -> assert_str_equals('failed', $state);
-	# Test this condition last to get potential error messages
-	$this -> assert_null($repoDataObj);
-	return;
-}
-
-#==========================================
 # test_ctor_argsInvalidHashPassNoUsr
 #------------------------------------------
 sub test_ctor_argsInvalidHashPassNoUsr {
