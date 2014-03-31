@@ -19,9 +19,6 @@ baseMount
 # Activate services
 #--------------------------------------
 suseActivateDefaultServices
-suseRemoveService sshd
-suseRemoveService gpm
-suseRemoveService nfs
 
 #======================================
 # Setup baseproduct link
