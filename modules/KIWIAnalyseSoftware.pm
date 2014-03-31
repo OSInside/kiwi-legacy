@@ -196,7 +196,7 @@ sub __populateOperatingSystemVersion {
 		if ($line =~ /<patchlevel>(.*)<\/patchlevel>/) {
 			$plvl = $1;
 		}
-		if ($line =~ /<name>(.*)<\/name>/) {
+		if ($line =~ /<distribution>(.*)<\/distribution>/) {
 			$name = $1;
 		}
 	}
@@ -214,6 +214,8 @@ sub __populateOperatingSystemVersion {
 		$name = 'SUSE-Linux-Enterprise-Desktop';
 	} elsif ($name eq 'SLED') {
 		$name = 'SUSE-Linux-Enterprise-Desktop';
+	} elsif ($name eq 'SUSE_SLE') {
+		$name = 'SUSE-Linux-Enterprise-Server';
 	}
 	if ($plvl) {
 		$plvl = 'SP'.$plvl;
