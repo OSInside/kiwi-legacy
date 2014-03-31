@@ -7538,7 +7538,14 @@ function bootImage {
 		Echo "Prepare for shutdown"
 		exec chroot . /sbin/halt -fihp
 	fi
-	exec chroot . $init $option
+	if lookup switch_root &>/dev/null;then
+		exec switch_root . $init $option
+	else
+		if lookup pivot_root &>/dev/null;then
+			pivot_root . run/initramfs
+		fi
+		exec chroot . $init $option
+	fi
 }
 #======================================
 # setupUnionFS
