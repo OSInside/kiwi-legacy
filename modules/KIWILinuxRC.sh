@@ -616,7 +616,6 @@ function udevSystemStart {
 	# /.../
 	# start udev daemon
 	# ----
-	export UDEV_LOG=info
 	local udev_bin=/usr/lib/systemd/systemd-udevd
 	if [ ! -x $udev_bin ];then
 		udev_bin=/sbin/udevd
