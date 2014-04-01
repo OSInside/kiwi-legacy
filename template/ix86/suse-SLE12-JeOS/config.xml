@@ -70,12 +70,12 @@
 	<packages type="image">
 		<!-- The installation of patterns in SLE12 requires the SLE12 zypper -->
 		<!-- Thus the following definition only works when building on SLE12 -->
-		<!--		<namedCollection name="base"/>-->
+		<!--		<namedCollection name="Minimal"/>-->
 		<!-- In order to stay compatible we just install the pattern package -->
-		<package name="sca-patterns-base"/>
+		<package name="patterns-sles-Minimal"/>
 		<!-- The installation of products in SLE12 requires the SLE12 zypper -->
 		<!-- Thus the following definition only works when building on SLE12 -->
-		<!--		<product name="SUSE_SLES"/>-->
+		<!--		<product name="SLES"/>-->
 		<!-- In order to stay compatible we just install the product package -->
 		<package name="sles-release-DVD"/>
 		<package name="plymouth-branding-SLE" bootinclude="true"/>
