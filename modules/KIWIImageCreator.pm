@@ -925,7 +925,7 @@ sub createImage {
 	if (-f "$tree/var/lib/rpm/Packages") {
 		$kiwi -> info ("Creating unpacked image tree meta data");
 		my $idest = $cmdL -> getImageIntermediateTargetDir();
-		my $query = '%{NAME}|%{VERSION}|%{RELEASE}|%{ARCH}|%{DISTURL}\n';
+		my $query = '%{NAME}|%{EPOCH}|%{VERSION}|%{RELEASE}|%{ARCH}|%{DISTURL}\n';
 		my $name  = KIWIGlobals
 			-> instance() -> generateBuildImageName($xml);
 		my $path = File::Spec->rel2abs ($tree);
