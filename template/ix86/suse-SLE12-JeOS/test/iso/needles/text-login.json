@@ -1,0 +1,16 @@
+{
+   "area" : [
+      {
+         "ypos" : 0,
+         "type" : "match",
+         "height" : 768,
+         "xpos" : 0,
+         "width" : 1024
+      }
+   ],
+   "tags" : [
+      "text-login",
+      "ENV-DISTRI-kiwi-3596",
+      "ENV-INSTLANG-en_US"
+   ]
+}
