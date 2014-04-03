@@ -270,9 +270,6 @@ Requires:       qemu-img
 %endif
 License:        GPL-2.0+
 Group:          System/Management
-%if 0%{?suse_version} > 1120
-BuildArch:      noarch
-%endif
 
 %description -n kiwi-desc-isoboot
 This package contains kiwi boot (initrd) descriptions for booting
@@ -322,9 +319,6 @@ Requires:       grub
 %endif
 License:        GPL-2.0+
 Group:          System/Management
-%if 0%{?suse_version} > 1120
-BuildArch:      noarch
-%endif
 
 %description -n kiwi-desc-vmxboot
 This package contains kiwi boot (initrd) descriptions for booting
@@ -359,9 +353,6 @@ Requires:       virt-utils
 %if 0%{?suse_version} >= 1130
 Requires:       virt-utils
 %endif
-%endif
-%if 0%{?suse_version} > 1120
-BuildArch:      noarch
 %endif
 
 %description -n kiwi-desc-netboot
@@ -415,9 +406,6 @@ Requires:       u-boot-tools
 %endif
 License:        GPL-2.0
 Group:          System/Management
-%if 0%{?suse_version} > 1120
-BuildArch:      noarch
-%endif
 
 %description -n kiwi-desc-oemboot
 This package contains kiwi boot (initrd) descriptions for booting
@@ -466,9 +454,6 @@ Authors:
 Summary:        Packages which should be part of the DVD media
 License:        GPL-2.0+
 Group:          System/Management
-%if 0%{?suse_version} > 1120
-BuildArch:      noarch
-%endif
 %if 0%{?suse_version}
 Recommends:     busybox
 Recommends:     atftp
@@ -485,6 +470,9 @@ Recommends:     kiwi-templates
 Recommends:     shim
 %endif
 %endif
+%endif
+%if 0%{?suse_version} > 1120
+BuildArch:      noarch
 %endif
 
 %description -n kiwi-media-requires
