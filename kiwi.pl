@@ -611,7 +611,7 @@ sub main {
 		} else {
 			$kiwi -> failed ();
 		}
-		$kiwi -> info ("Find test results in $out/currentautoinst-log.txt");
+		$kiwi -> info ("Find test results in $out/autoinst-log.txt");
 		$kiwi -> done ();
 	}
 	return 1;

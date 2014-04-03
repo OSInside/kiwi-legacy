@@ -34,7 +34,7 @@ sub run {
 	sleep 5;
 	
 	# shutdown
-	sendautotype "halt\n";
+	sendautotype "halt -p\n";
 }
 
 1;

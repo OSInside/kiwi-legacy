@@ -1,0 +1,26 @@
+# /.../
+# The files in this directory defines an end-to-end test description
+# which can be used by the os-autoinst toolkit. In order to run the
+# test the following pre conditions must be fulfilled:
+#
+# 1) make sure you have installed the os-autoinst package which
+#    provides the test-suite code required by this test description
+#
+# 2) make sure you have built an image out of the template using kiwi
+#    so far I only added an e2e test for the iso image type
+#
+# After that you can run the test by calling:
+#
+#  kiwi \
+#    --test-image LimeJeOS-SLE11.x86_64-1.1.0.iso \
+#    --test-case /usr/share/kiwi/image/suse-SLE11-JeOS/test \
+#    --type iso
+#
+# according to your system performance it might be required to adapt
+# the IDLETHESHOLD value in the file
+#
+#  /usr/share/kiwi/image/suse-SLE11-JeOS/test/env.sh
+#
+# please refer the os-autoinst documentation for details about the
+# environment and the test contents
+#
