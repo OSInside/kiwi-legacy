@@ -33,6 +33,8 @@ use Carp qw (cluck);
 use Getopt::Long;
 use File::Spec;
 use File::Find;
+use File::Glob ':glob';
+use JSON;
 
 #==========================================
 # KIWIModules
@@ -611,8 +613,39 @@ sub main {
 		} else {
 			$kiwi -> failed ();
 		}
-		$kiwi -> info ("Find test results in $out/autoinst-log.txt");
+		$kiwi -> info ("Find test results in $out");
 		$kiwi -> done ();
+		#==========================================
+		# Read result
+		#------------------------------------------
+		my $json;
+		foreach my $result (glob ("$out/testresults/*/results.json")) {
+			my $json_fd = FileHandle -> new();
+			if ($json_fd -> open ($result)) {
+				local $/;
+				my $json_text = <$json_fd>;
+				$json = from_json(
+					$json_text, { utf8  => 1 }
+				);
+				$json_fd -> close();
+			}
+			last;
+		}
+		#==========================================
+		# Exit according to test result
+		#------------------------------------------
+		if ($json) {
+			my $status = $json->{overall};
+			if ($status eq 'fail') {
+				$kiwi -> info ("Test Failed");
+				$kiwi -> done();
+				kiwiExit (1);
+			} else {
+				$kiwi -> info ("Test Succeeded");
+				$kiwi -> failed();
+				kiwiExit (0);
+			}
+		}
 	}
 	return 1;
 }
