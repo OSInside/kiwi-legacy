@@ -21,6 +21,9 @@
 	locations except for the ones listed here
 	-->
 	<strip type="tools">
+		<file name="multipath"/>
+		<file name="multipathd"/>
+		<file name="mpathpersist"/>
 		<file name="mountpoint"/>
 		<file name="checkproc"/>
 		<file name="date"/>
@@ -291,6 +294,7 @@
 		<file name="libsplashycnf"/>
 		<file name="libjpeg"/>
 		<file name="libkms"/>
+		<file name="libaio"/>
 	</strip>
 
 </initrd>

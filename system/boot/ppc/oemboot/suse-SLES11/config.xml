@@ -106,6 +106,7 @@
 		<package name="sysfsutils"/>
 		<package name="tar"/>
 		<package name="util-linux"/>
+		<package name="multipath-tools"/>
 		<package name="xfsprogs"/>
 		<package name="iproute2"/>
 	</packages>
