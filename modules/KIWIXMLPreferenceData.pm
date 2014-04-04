@@ -52,6 +52,7 @@ sub new {
 	#     keymap               = ''
 	#     locale               = ''
 	#     packagemanager       = ''
+	#     partitioner          = ''
 	#     rpm_check_signatures = ''
 	#     rpm_excludedocs      = ''
 	#     rpm_force            = ''
@@ -85,6 +86,7 @@ sub new {
 		keymap
 		locale
 		packagemanager
+		partitioner
 		rpm_check_signatures
 		rpm_excludedocs
 		rpm_force
@@ -120,13 +122,19 @@ sub new {
 		$this->{keymap}               = $init->{keymap};
 		$this->{locale}               = $init->{locale};
 		$this->{packagemanager}       = $init->{packagemanager};
+		$this->{partitioner}          = $init->{partitioner};
 		$this->{showlicense}          = $init->{showlicense};
 		$this->{timezone}             = $init->{timezone};
 		$this->{version}              = $init->{version};
 	}
 	# Set default values
+	my $global = KIWIGlobals -> instance();
+	my $gdata = $global -> getKiwiConfig();
+	if (! $init->{partitioner}) {
+		$this->{partitioner} = $gdata->{Partitioner};
+	}
 	if (! $init->{packagemanager} ) {
-		$this->{packagemanager} = 'zypper';
+		$this->{packagemanager} = $gdata->{PackageManager};
 		$this->{defaultpackagemanager} = 1;
 	}
 	if (! $init->{bootloader_theme}) {
@@ -164,6 +172,17 @@ sub addShowLic {
 		$this->{showlicense} = \@licenses;
 	}
 	return $this;
+}
+
+#==========================================
+# getPartitioner
+#------------------------------------------
+sub getPartitioner {
+	# ...
+	# Return the configured partitioner
+	# ---
+	my $this = shift;
+	return $this->{partitioner};
 }
 
 #==========================================
@@ -437,6 +456,22 @@ sub getXMLElement {
 	);
 	$element = $this -> p_addElement(\%initVer);
 	return $element;
+}
+
+#==========================================
+# setPartitioner
+#------------------------------------------
+sub setPartitioner {
+	# ...
+	# Set the partitioner
+	# ---
+	my $this  = shift;
+	my $pTool = shift;
+	if (! $this -> __isValidPartitioner($pTool, 'setPartitioner') ) {
+		return;
+	}
+	$this->{partitioner} = $pTool;
+	return $this;
 }
 
 #==========================================
@@ -767,6 +802,12 @@ sub __isInitConsistent {
 			return;
 		}
 	}
+	if ($init->{partitioner}) {
+		if (! $this->__isValidPartitioner(
+			$init->{partitioner},'object initialization')) {
+			return;
+		}
+	}
 	if ($init->{showlicense}) {
 		if (ref($init->{showlicense}) ne 'ARRAY') {
 			my $kiwi = $this->{kiwi};
@@ -814,6 +855,40 @@ sub __isValidPckgMgr {
 	if (! $supported{$pMgr} ) {
 		my $msg = "$caller: specified package manager '$pMgr' is not "
 			. 'supported.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	return 1;
+}
+
+#==========================================
+# __isValidPartitioner
+#------------------------------------------
+sub __isValidPartitioner {
+	# ...
+	# Verify that the given partitioner is supported
+	# ---
+	my $this   = shift;
+	my $pTool  = shift;
+	my $caller = shift;
+	my $kiwi = $this->{kiwi};
+	if (! $caller ) {
+		my $msg = 'Internal error __isValidPartitioner called without '
+			. 'call origin argument.';
+		$kiwi -> info($msg);
+		$kiwi -> oops();
+	}
+	if (! $pTool ) {
+		my $msg = "$caller: no packagemanager argument specified, retaining "
+			. 'current data.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	my %supported = map { ($_ => 1) } qw( parted fdasd );
+	if (! $supported{$pTool} ) {
+		my $msg = "$caller: specified partitioner '$pTool' is not supported.";
 		$kiwi -> error($msg);
 		$kiwi -> failed();
 		return;

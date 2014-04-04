@@ -179,6 +179,7 @@ sub new {
 	#                hwclock              = ''
 	#                keymap               = ''
 	#                locale               = ''
+	#                partitioner          = ''
 	#                packagemanager       = ''
 	#                rpm_check_signatures = ''
 	#                rpm_excludedocs      = ''
@@ -2206,6 +2207,7 @@ sub setPreferences {
 		keymap               => $prefObj -> getKeymap(),
 		locale               => $prefObj -> getLocale(),
 		packagemanager       => $prefObj -> getPackageManager(),
+		partitioner          => $prefObj -> getPartitioner(),
 		rpm_check_signatures => $prefObj -> getRPMCheckSig(),
 		rpm_excludedocs      => $prefObj -> getRPMExcludeDoc(),
 		rpm_force            => $prefObj -> getRPMForce(),
@@ -4278,6 +4280,7 @@ sub __mergePreferenceData {
 		keymap
 		locale
 		packagemanager
+		partitioner
 		rpm_check_signatures
 		rpm_excludedocs
 		rpm_force
@@ -4878,6 +4881,9 @@ sub __populatePreferenceInfo {
 		my $pckMgr          = $this -> __getChildNodeTextValue(
 			$prefInfo, 'packagemanager'
 		);
+		my $partitioner     = $this -> __getChildNodeTextValue(
+			$prefInfo, 'partitioner'
+		);
 		my $rpmSigCheck     = $this -> __getChildNodeTextValue(
 			$prefInfo, 'rpm-check-signatures'
 		);
@@ -4916,6 +4922,7 @@ sub __populatePreferenceInfo {
 			keymap               => $keymap,
 			locale               => $locale,
 			packagemanager       => $pckMgr,
+			partitioner          => $partitioner,
 			rpm_check_signatures => $rpmSigCheck,
 			rpm_excludedocs      => $rpmExclDoc,
 			rpm_force            => $rpmForce,

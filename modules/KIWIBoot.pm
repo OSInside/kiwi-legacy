@@ -490,8 +490,20 @@ sub new {
 	#==========================================
 	# check partitioner
 	#------------------------------------------
-	my $ptool = $cmdL -> getPartitioner();
+	my $ptool;
+	if (defined $xml) {
+		# lookup partitioner from XML description
+		my $preferences = $xml -> getPreferences();
+		if ($preferences) {
+			$ptool = $preferences -> getPartitioner();
+		}
+	}
+	if ($cmdL -> getPartitioner()) {
+		# commandline specified partitioner overwrites all
+		$ptool = $cmdL -> getPartitioner();
+	}
 	if (! $ptool) {
+		# use default partitioner if no value is set
 		$ptool = $this->{gdata}->{Partitioner};
 	}
 	#==========================================

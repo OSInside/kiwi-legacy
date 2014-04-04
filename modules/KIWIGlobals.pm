@@ -1403,6 +1403,7 @@ sub _new_instance {
 	$data{Preparer}        = "KIWI - http://opensuse.github.com/kiwi";
 	$data{ConfigName}      = "config.xml";
 	$data{Partitioner}     = "parted";
+	$data{PackageManager}  = "zypper";
 	$data{FSInodeRatio}    = 16384;
 	$data{FSMinInodes}     = 20000;
 	$data{FSInodeSize}     = 256;

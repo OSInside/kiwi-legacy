@@ -296,6 +296,31 @@ sub test_ctor_initUnsupportedPckgMgr {
 }
 
 #==========================================
+# test_ctor_initUnsupportedPartitioner
+#------------------------------------------
+sub test_ctor_initUnsupportedPartitioner {
+	# ...
+	# Test the PreferenceDataconstructor with an initialization hash
+	# that contains unsupported data for the partitioner
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my %init = ( partitioner => 'foo' );
+	my $prefDataObj = KIWIXMLPreferenceData -> new(\%init);
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'object initialization: specified partitioner '
+		. "'foo' is not supported.";
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_null($prefDataObj);
+	return;
+}
+
+#==========================================
 # test_ctor_withInit
 #------------------------------------------
 sub test_ctor_withInit {
@@ -307,6 +332,7 @@ sub test_ctor_withInit {
 	my %init = ( bootloader_theme => 'openSUSE',
 				hwclock          => 'utc',
 				packagemanager   => 'yum',
+				partitioner      => 'fdasd',
 				version          => '1.1.0'
 			);
 	my $prefDataObj = KIWIXMLPreferenceData -> new(\%init);
@@ -511,6 +537,27 @@ sub test_getPackageManager{
 }
 
 #==========================================
+# test_getPartitioner
+#------------------------------------------
+sub test_getPartitioner {
+	# ...
+	# Test the getPartitioner method
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $prefDataObj = $this -> __getPrefObj();
+	my $pkM = $prefDataObj -> getPartitioner();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('fdasd', $pkM);
+	return;
+}
+
+#==========================================
 # test_getPackageManagerDefault
 #------------------------------------------
 sub test_getPackageManagerDefault {
@@ -528,6 +575,27 @@ sub test_getPackageManagerDefault {
 	my $state = $kiwi -> getState();
 	$this -> assert_str_equals('No state set', $state);
 	$this -> assert_str_equals('zypper', $pkM);
+	return;
+}
+
+#==========================================
+# test_getPartitionerDefault
+#------------------------------------------
+sub test_getPartitionerDefault {
+	# ...
+	# Test the getPartitioner method, verify the default setting
+	# ---
+	my $this = shift;
+	my $kiwi = $this -> {kiwi};
+	my $prefDataObj = KIWIXMLPreferenceData -> new();
+	my $pkM = $prefDataObj -> getPartitioner();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('parted', $pkM);
 	return;
 }
 
@@ -1774,6 +1842,7 @@ sub __getPrefObj {
 		keymap               => 'us.map.gz',
 		locale               => 'en_us',
 		packagemanager       => 'smart',
+		partitioner          => 'fdasd',
 		rpm_check_signatures => 'true',
 		rpm_excludedocs      => 'true',
 		rpm_force            => 'true',

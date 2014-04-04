@@ -1089,6 +1089,26 @@ div {
 }
 
 #==========================================
+# common element <partitioner>
+#
+div {
+	k.partitioner.content = "parted" | "fdasd"
+	k.partitioner.attlist = empty
+	k.partitioner =
+		## Name of the Partitioner used for any disk partition tasks
+		[
+		db:para [
+			"The partitioner used for creating disk partitions\x{a}"~
+			"could be either parted or fdasd"
+		]
+		]
+		element partitioner {
+			k.partitioner.attlist,
+			k.partitioner.content
+		}
+}
+
+#==========================================
 # common element <partition>
 #
 div {
@@ -2621,6 +2641,7 @@ div {
 			k.keytable? &
 			k.locale? &
 			k.packagemanager? &
+			k.partitioner? &
 			k.rpm-check-signatures? &
 			k.rpm-excludedocs? &
 			k.rpm-force? &

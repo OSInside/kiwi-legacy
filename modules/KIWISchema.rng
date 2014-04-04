@@ -1372,6 +1372,31 @@ could be either zypper or smart</db:para>
   </div>
   <!--
     ==========================================
+    common element <partitioner>
+    
+  -->
+  <div>
+    <define name="k.partitioner.content">
+      <choice>
+        <value>parted</value>
+        <value>fdasd</value>
+      </choice>
+    </define>
+    <define name="k.partitioner.attlist">
+      <empty/>
+    </define>
+    <define name="k.partitioner">
+      <element name="partitioner">
+        <a:documentation>Name of the Partitioner used for any disk partition tasks</a:documentation>
+        <db:para>The partitioner used for creating disk partitions
+could be either parted or fdasd</db:para>
+        <ref name="k.partitioner.attlist"/>
+        <ref name="k.partitioner.content"/>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
     common element <partition>
     
   -->
@@ -3824,6 +3849,9 @@ and also depends of the selected image output type.</db:para>
           </optional>
           <optional>
             <ref name="k.packagemanager"/>
+          </optional>
+          <optional>
+            <ref name="k.partitioner"/>
           </optional>
           <optional>
             <ref name="k.rpm-check-signatures"/>
