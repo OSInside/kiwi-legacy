@@ -1262,6 +1262,10 @@ sub __hasBootLoaderTools {
 		return 1;
 	}
 	my $imgType = $bldType -> getTypeName();
+	my $firmware = $bldType -> getFirmwareType();
+	if (! $firmware) {
+		$firmware = 'bios';
+	}
 	if ($imgType !~ /oem|vmx|iso/) {
 		return 1;
 	}
@@ -1271,8 +1275,8 @@ sub __hasBootLoaderTools {
 		$loader_check = 'genisoimage';
 	} elsif (! $bootloader) {
 		$loader_check = 'grub-install';
-	} elsif ($bootloader eq 'grub2') {
-		$loader_check = 'grub2-install';
+	} elsif (($bootloader eq 'grub2') && ($firmware eq 'bios')) {
+		$loader_check = 'grub2-bios-setup';
 	} elsif ($bootloader eq 'syslinux') {
 		$loader_check = 'syslinux';
 	} elsif ($bootloader eq 'extlinux') {
