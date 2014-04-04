@@ -6244,6 +6244,11 @@ sub setStoragePartition {
 	}
 	my $locator = KIWILocator -> instance();
 	my $partitioner = $locator -> getExecPath($tool);
+	if (! $partitioner) {
+		$kiwi -> failed ();
+		$kiwi -> error ("Can't find partitioner: $tool");
+		return;
+	}
 	SWITCH: for ($tool) {
 		#==========================================
 		# fdasd
