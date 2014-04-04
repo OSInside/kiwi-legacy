@@ -5696,7 +5696,7 @@ sub installBootLoader {
 			my $boot = "'boot sector'";
 			my $null = "/dev/null";
 			$status= KIWIQX::qxx (
-				"dd if=$diskname bs=513 count=1 2>$null|file - | grep -q $boot"
+				"dd if=$diskname bs=4k count=1 2>$null|file - | grep -q $boot"
 			);
 			$result= $? >> 8;
 		}
@@ -5729,24 +5729,6 @@ sub installBootLoader {
 				return;
 			}
 			#==========================================
-			# write backup MBR with partition table
-			#------------------------------------------
-			#my $bmbr= $diskname.".mbr";
-			#$status = KIWIQX::qxx (
-			#	"dd if=$diskname of=$bmbr bs=1 count=512 2>&1"
-			#);
-			#$result= $? >> 8;
-			#if ($result != 0) {
-			#	$kiwi -> failed ();
-			#	$kiwi -> error  ("Couldn't store backup MBR: $status");
-			#	$kiwi -> failed ();
-			#	return;
-			#}
-			#$status = KIWIQX::qxx (
-			#  "dd if=$bmbr of=$diskname bs=512 count=1 seek=3 skip=0 $opt 2>&1"
-			#);
-			#unlink $bmbr;
-			#==========================================
 			# write FDST flag
 			#------------------------------------------
 			my $fdst = "perl -e \"printf '%s', pack 'A4', eval 'FDST';\"";
@@ -5770,7 +5752,9 @@ sub installBootLoader {
 		} else {
 			$kiwi -> info ("Installing extlinux on device: $bootdev");
 			if (KIWIGlobals -> instance() -> mount ($bootdev, '/mnt')) {
-				$status = KIWIQX::qxx ("extlinux --install /mnt/boot/syslinux 2>&1");
+				$status = KIWIQX::qxx (
+					"extlinux --install /mnt/boot/syslinux 2>&1"
+				);
 				$result = $? >> 8;
 			}
 			$status = KIWIQX::qxx ("umount /mnt 2>&1");
@@ -5836,6 +5820,33 @@ sub installBootLoader {
 		my $config = "$mount/boot/zipl.conf";
 		if (! $haveRealDevice) {
 			#==========================================
+			# get physical blocksize of target
+			#------------------------------------------
+			my $bsize = KIWIQX::qxx (
+				"blockdev --getpbsz $this->{loop} 2>&1"
+			);
+			my $result = $? >> 8;
+			if ($result != 0) {
+				$kiwi -> failed ();
+				$kiwi -> error  (
+					"Can't get block size for device $this->{loop}: $bsize"
+				);
+				$kiwi -> failed ();
+				KIWIQX::qxx ("umount $mount 2>&1");
+				$this -> cleanStack ();
+				return;
+			}
+			chomp $bsize;
+			#==========================================
+			# try to identify target type
+			#------------------------------------------
+			my $type;
+			if ($bsize == 4096) {
+				$type = 'LDL';
+			} else {
+				$type = 'SCSI';
+			}
+			#==========================================
 			# rewrite zipl.conf with additional params
 			#------------------------------------------
 			my $readzconf = FileHandle -> new();
@@ -5863,12 +5874,12 @@ sub installBootLoader {
 				print $zconffd $line;
 				if ($line =~ /^:menu/) {
 					$kiwi -> loginfo ("targetbase = $this->{loop}\n");
-					$kiwi -> loginfo ("targetbase = SCSI\n");
-					$kiwi -> loginfo ("targetblocksize = 512\n");
+					$kiwi -> loginfo ("targettype = $type\n");
+					$kiwi -> loginfo ("targetblocksize = $bsize\n");
 					$kiwi -> loginfo ("targetoffset = $offset\n");
 					print $zconffd "\t"."targetbase = $this->{loop}"."\n";
-					print $zconffd "\t"."targettype = SCSI"."\n";
-					print $zconffd "\t"."targetblocksize = 512"."\n";
+					print $zconffd "\t"."targettype = $type"."\n";
+					print $zconffd "\t"."targetblocksize = $bsize"."\n";
 					print $zconffd "\t"."targetoffset = $offset"."\n";
 				}
 			}
@@ -6055,8 +6066,8 @@ sub bindDiskPartitions {
 #------------------------------------------
 sub getGeometry {
 	# ...
-	# obtain number of sectors from the given
-	# disk device and return it
+	# Create a new disk label on the given device and
+	# obtain the number of sectors from this disk
 	# ---
 	my $this     = shift;
 	my $disk     = shift;
@@ -6072,7 +6083,7 @@ sub getGeometry {
 	my $parted;
 	my $locator = KIWILocator -> instance();
 	my $parted_exec = $locator -> getExecPath("parted");
-	$status = KIWIQX::qxx ("dd if=/dev/zero of=$disk bs=512 count=1 2>&1");
+	$status = KIWIQX::qxx ("dd if=/dev/zero of=$disk bs=4k count=1 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> loginfo ($status);
@@ -6228,11 +6239,11 @@ sub setStoragePartition {
 	my $status;
 	my $ignore;
 	my $action;
-	my $locator = KIWILocator -> instance();
-	my $parted_exec = $locator -> getExecPath("parted");
 	if (! defined $tool) {
-		$tool = "parted";
+		$tool = $this->{gdata}->{Partitioner};
 	}
+	my $locator = KIWILocator -> instance();
+	my $partitioner = $locator -> getExecPath($tool);
 	SWITCH: for ($tool) {
 		#==========================================
 		# fdasd
@@ -6242,7 +6253,7 @@ sub setStoragePartition {
 				"FDASD input: $device [@commands]"
 			);
 			$status = KIWIQX::qxx (
-				"dd if=/dev/zero of=$device bs=4096 count=10 2>&1"
+				"dd if=/dev/zero of=$device bs=4k count=10 2>&1"
 			);
 			$result = $? >> 8;
 			if ($result != 0) {
@@ -6250,7 +6261,7 @@ sub setStoragePartition {
 				return;
 			}
 			my $FD = FileHandle -> new();
-			if (! $FD -> open ("|fdasd $device &> $tmpdir/fdasd.log")) {
+			if (! $FD -> open ("|$partitioner $device &> $tmpdir/fdasd.log")) {
 				return;
 			}
 			print $FD "y\n";
@@ -6324,7 +6335,7 @@ sub setStoragePartition {
 					$p_cmd = "mkpart $name $this->{pStart} $this->{pStopp}";
 					$kiwi -> loginfo ("PARTED input: $device [$p_cmd]\n");
 					$status = KIWIQX::qxx (
-						"$parted_exec -s $device unit s $p_cmd 2>&1"
+						"$partitioner -s $device unit s $p_cmd 2>&1"
 					);
 				}
 				if (($cmd eq "t") && ($ptype eq 'msdos')) {
@@ -6347,7 +6358,7 @@ sub setStoragePartition {
 					}
 					$kiwi -> loginfo ("PARTED input: $device [$p_cmd]\n");
 					$status = KIWIQX::qxx (
-						"$parted_exec -s $device unit s $p_cmd 2>&1"
+						"$partitioner -s $device unit s $p_cmd 2>&1"
 					);
 				}
 				if ($cmd eq "a") {
@@ -6355,7 +6366,7 @@ sub setStoragePartition {
 					$p_cmd = "set $index boot on";
 					$kiwi -> loginfo ("PARTED input: $device [$p_cmd]\n");
 					$status = KIWIQX::qxx (
-						"$parted_exec -s $device unit s $p_cmd 2>&1"
+						"$partitioner -s $device unit s $p_cmd 2>&1"
 					);
 				}
 				$result = $? >> 8;
