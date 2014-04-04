@@ -515,7 +515,7 @@ sub main {
 		}
 		if (! -d $tcase."/".$type) {
 			$kiwi -> failed ();
-			$kiwi -> error ("Test case $type does not exist");
+			$kiwi -> error ("Test case for type $type does not exist");
 			$kiwi -> failed ();
 			kiwiExit (1);
 		}
