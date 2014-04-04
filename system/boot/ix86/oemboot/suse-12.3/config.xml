@@ -168,7 +168,6 @@
 		<package name="rsync"/>
 		<package name="timezone"/>
 		<package name="udev"/>
-		<package name="wicked"/>
 		<package name="iproute2"/>
 		<package name="psmisc"/>
 	</packages>
