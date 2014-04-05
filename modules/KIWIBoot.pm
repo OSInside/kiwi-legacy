@@ -6266,7 +6266,7 @@ sub setStoragePartition {
 				return;
 			}
 			my $FD = FileHandle -> new();
-			if (! $FD -> open ("|$partitioner $device &> $tmpdir/fdasd.log")) {
+			if (! $FD-> open("|$partitioner -f $device &> $tmpdir/fdasd.log")) {
 				return;
 			}
 			print $FD "y\n";
