@@ -514,7 +514,6 @@ function baseStripLocales {
 	"
 	find $directories -mindepth 1 -maxdepth 1 -type d 2>/dev/null |\
 		baseStripAndKeep ${keepLocales}
-	rm -f /usr/lib/gconv/*
 }
 
 #======================================
