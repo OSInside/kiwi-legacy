@@ -2027,7 +2027,7 @@ sub setupBootDisk {
 	#------------------------------------------
 	if ($imgtype eq "split") {
 		$needRoP = 1;
-	} elsif ($type->{filesystem} =~ /clicfs|overlayfs/) {
+	} elsif ($type->{filesystem} =~ /clicfs|overlayfs|squashfs/) {
 		$needRoP = 1;
 	}
 	#==========================================
