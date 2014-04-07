@@ -44,6 +44,11 @@ function clean {
 trap clean INT TERM
 
 #==========================================
+# set default theme
+#------------------------------------------
+basetheme=upstream
+
+#==========================================
 # get disk-by-id device name first
 #------------------------------------------
 disk=$2
@@ -54,7 +59,7 @@ if [ ! -e "$device_disk" ];then
 	clean
 fi
 if [ ! -e "$device_part" ];then
-	echo "Can't find partition table for $disk"
+	echo "Can't find partition $device_part for $disk"
 	clean
 fi
 
@@ -82,7 +87,7 @@ mkdir -p $tmpdir/boot/grub2
 # unpack grub2 theme tarball into a tmpdir
 #------------------------------------------
 echo "==> Preparation in progress..."
-theme=/usr/share/kiwi/livestick/theme/suse-12.3/booting.tgz
+theme=/usr/share/kiwi/livestick/theme/$basetheme/booting.tgz
 if ! tar -C $tmpdir/boot/grub2 -xf $theme;then
 	echo "Can't extract grub2 theme files"
 	clean
@@ -91,7 +96,7 @@ fi
 #==========================================
 # unpack boot helpers, bootnext, memcheck
 #------------------------------------------
-tools=/usr/share/kiwi/livestick/theme/suse-12.3/tooling.tgz
+tools=/usr/share/kiwi/livestick/theme/$basetheme/tooling.tgz
 if ! tar -C $tmpdir/boot -xf $tools; then
 	echo "Can't extract boot helper files"
 	clean
@@ -142,20 +147,6 @@ cmdline_fsf="$cmdline_fsf nohz=off highres=off processsor.max+cstate=1"
 cmdline_fsf="$cmdline_fsf nomodeseet x11failsafe"
 
 cat > $conf <<- EOF
-	insmod fat
-	insmod ntfs
-	insmod ext2
-	insmod gettext
-	insmod part_msdos
-	insmod chain
-	insmod vbe
-	insmod vga
-	insmod video_bochs
-	insmod video_cirrus
-	insmod gzio
-	insmod search
-	insmod configfile
-	insmod png
 	search --no-floppy --fs-uuid --set=root $uuid
 	set default=0
 	set font=/boot/grub2/fonts/unicode.pf2
@@ -167,16 +158,17 @@ cat > $conf <<- EOF
 	        terminal gfxterm
 	    fi
 	fi
-	if loadfont /boot/grub2/themes/openSUSE/ascii.pf2;then
-	    loadfont /boot/grub2/themes/openSUSE/DejaVuSans-Bold14.pf2
-	    loadfont /boot/grub2/themes/openSUSE/DejaVuSans10.pf2
-	    loadfont /boot/grub2/themes/openSUSE/DejaVuSans12.pf2
-	    loadfont /boot/grub2/themes/openSUSE/ascii.pf2
-	    set theme=/boot/grub2/themes/openSUSE/theme.txt
-	    background_image -m stretch /boot/grub2/themes/openSUSE/background.png
+	if loadfont /boot/grub2/themes/$basetheme/ascii.pf2;then
+	    loadfont /boot/grub2/themes/$basetheme/DejaVuSans-Bold14.pf2
+	    loadfont /boot/grub2/themes/$basetheme/DejaVuSans10.pf2
+	    loadfont /boot/grub2/themes/$basetheme/DejaVuSans12.pf2
+	    loadfont /boot/grub2/themes/$basetheme/ascii.pf2
+	    set theme=/boot/grub2/themes/$basetheme/theme.txt
+	    background_image -m stretch /boot/grub2/themes/$basetheme/background.png
 	fi
 	set timeout=10
-	menuentry "$title" --class opensuse --class os {
+	menuentry "$title" --class os {
+		set gfxpayload=auto
 	    echo Loading live system...
 	    loopback loop /boot/$image_base
 		echo Loading linux...
@@ -184,7 +176,8 @@ cat > $conf <<- EOF
 		echo Loading initrd...
 	    initrd (loop)/boot/$arch/loader/initrd
 	}
-	menuentry "Failsafe -- $title" --class opensuse --class os {
+	menuentry "Failsafe -- $title" --class os {
+		set gfxpayload=auto
 	    echo Loading live system...
 	    loopback loop /boot/$image_base
 	    echo Loading linux...
@@ -192,11 +185,11 @@ cat > $conf <<- EOF
 	    echo Loading initrd...
 	    initrd (loop)/boot/$arch/loader/initrd
 	}
-	menuentry "Boot from Hard Disk" --class opensuse --class os {
+	menuentry "Boot from Hard Disk" --class os {
 	    set root=(hd1)
 	    chainloader +1
 	}
-	menuentry "Memory Test" --class opensuse --class os {
+	menuentry "Memory Test" --class os {
 	    linux16 /boot/memtest
 	}
 EOF
@@ -213,7 +206,7 @@ fi
 # create grub2 core image
 #------------------------------------------
 format=i386-pc
-biosmod="biosdisk part_msdos ext2 iso9660 chain"
+biosmod="biosdisk part_msdos ext2 iso9660 chain gettext"
 biosmod="$biosmod normal linux echo vga vbe png"
 biosmod="$biosmod video_bochs video_cirrus gzio"
 biosmod="$biosmod multiboot search configfile fat ntfs"
