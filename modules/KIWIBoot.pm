@@ -7040,18 +7040,46 @@ sub diskOffset {
 	# ---
 	my $this = shift;
 	my $disk = shift;
+	my $kiwi = $this->{kiwi};
+	my $tool = $this->{ptool};
 	my $offset;
-	my @table = qx (parted -m $disk unit s print 2>&1);
-	chomp @table;
-	foreach my $entry (@table) {
-		if ($entry =~ /^[1-4]:/) {
-			my @items = split (/:/,$entry);
-			$offset = $items[1];
-			chop $offset;
-			last;
+	my $result;
+	my $status;
+	if ($tool eq 'fdasd') {
+		$status = KIWIQX::qxx(
+			"fdasd -f -s -p $disk | tr -s ' ' | cut -f2 -d ' '"
+		);
+		$result = $? >> 8;
+		chomp $status;
+		$offset = $status;
+	} else {
+		$status = KIWIQX::qxx(
+			"parted -m $disk unit s print 2>&1"
+		);
+		$result = $? >> 8;
+		chomp $status;
+		my @table = split(/\n/,$status);
+		foreach my $entry (@table) {
+			if ($entry =~ /^[1-4]:/) {
+				my @items = split (/:/,$entry);
+				$offset = $items[1];
+				chop $offset;
+				last;
+			}
 		}
 	}
-	if (! $offset) {
+	if ($result != 0) {
+		$kiwi -> error ("Failed to obtain partition geometry: $status");
+		$kiwi -> failed();
+		return;
+	}
+	if ((! defined $offset) || ($offset <= 0)) {
+		if (! defined $offset) {
+			$kiwi -> error ("empty partition offset: $status");
+		} else {
+			$kiwi -> error ("bogus partition offset: $offset");
+		}
+		$kiwi -> failed();
 		return;
 	}
 	return $offset;
