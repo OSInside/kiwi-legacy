@@ -82,6 +82,7 @@ sub new {
 		kiwi_lvm
 		kiwi_lvmgroup
 		kiwi_oemataraid_scan
+		kiwi_oemmultipath_scan
 		kiwi_oembootwait
 		kiwi_oemkboot
 		kiwi_oempartition_install
@@ -562,6 +563,7 @@ sub __updateXMLOEMConfig {
 	my %oem;
 	if ($oemconf) {
 		$oem{kiwi_oemataraid_scan}       = $oemconf -> getAtaRaidScan();
+		$oem{kiwi_oemmultipath_scan}     = $oemconf -> getMultipathScan();
 		$oem{kiwi_oemswapMB}             = $oemconf -> getSwapSize();
 		$oem{kiwi_oemrootMB}             = $oemconf -> getSystemSize();
 		$oem{kiwi_oemswap}               = $oemconf -> getSwap();
@@ -586,7 +588,7 @@ sub __updateXMLOEMConfig {
 		#==========================================
 		# special handling
 		#------------------------------------------
-		if (($oem{kiwi_oemswap}) && 
+		if (($oem{kiwi_oemswap}) &&
 			($oem{kiwi_oemswap} ne 'false')
 		) {
 			$this -> addEntry('kiwi_oemswap','true');
@@ -594,11 +596,18 @@ sub __updateXMLOEMConfig {
 				$this -> addEntry('kiwi_oemswapMB',$oem{kiwi_oemswapMB});
 			}
 		}
-		if (($oem{kiwi_oemataraid_scan}) && 
+		if (($oem{kiwi_oemataraid_scan}) &&
 			($oem{kiwi_oemataraid_scan} eq 'false')
 		) {
 			$this -> addEntry(
 				'kiwi_oemataraid_scan',$oem{kiwi_oemataraid_scan}
+			);
+		}
+		if (($oem{kiwi_oemmultipath_scan}) &&
+			($oem{kiwi_oemmultipath_scan} eq 'false')
+		) {
+			$this -> addEntry(
+				'kiwi_oemmultipath_scan',$oem{kiwi_oemmultipath_scan}
 			);
 		}
 		if ($oem{kiwi_oemtitle}) {
@@ -610,6 +619,7 @@ sub __updateXMLOEMConfig {
 		delete $oem{kiwi_oemswap};
 		delete $oem{kiwi_oemswapMB};
 		delete $oem{kiwi_oemataraid_scan};
+		delete $oem{kiwi_oemmultipath_scan};
 		#==========================================
 		# default handling for non false values
 		#------------------------------------------

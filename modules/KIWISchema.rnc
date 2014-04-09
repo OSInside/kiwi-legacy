@@ -905,6 +905,27 @@ div {
 }
 
 #==========================================
+# common element <oem-multipath-scan>
+#
+div {
+	k.oem-multipath-scan.content = xsd:boolean
+	k.oem-multipath-scan.attlist = empty
+	k.oem-multipath-scan =
+		## For oemboot driven images: turn on or off the search
+		## for multipath devices: true/false (default is true)
+		[
+		db:para [
+			"For oemboot driven images: turn on or off the search "~
+			"for multipath devices: true/false (default is true) "
+		]
+		]
+		element oem-multipath-scan {
+			k.oem-multipath-scan.attlist,
+			k.oem-multipath-scan.content
+		}
+}
+
+#==========================================
 # common element <oem-silent-verify>
 #
 div {
@@ -2485,6 +2506,7 @@ div {
 		element oemconfig {
 			k.oemconfig.attlist &
 			k.oem-ataraid-scan? &
+			k.oem-multipath-scan? &
 			k.oem-boot-title? &
 			k.oem-bootwait? &
 			k.oem-inplace-recovery? &

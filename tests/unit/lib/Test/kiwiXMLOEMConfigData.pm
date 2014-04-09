@@ -1002,6 +1002,7 @@ sub test_getXMLElement{
 	my $xmlstr = $elem -> toString();
 	my $expected = '<oemconfig>'
 		. '<oem-ataraid-scan>true</oem-ataraid-scan>'
+		. '<oem-multipath-scan>true</oem-multipath-scan>'
 		. '<oem-boot-title>test build</oem-boot-title>'
 		. '<oem-inplace-recovery>true</oem-inplace-recovery>'
 		. '<oem-kiwi-initrd>false</oem-kiwi-initrd>'
@@ -1097,6 +1098,91 @@ sub test_setAtaRaidScanNoArg {
 	# Test this condition last to get potential error messages
 	$this -> assert_not_null($confDataObj);
 	my $align = $confDataObj -> getAtaRaidScan();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('false', $align);
+	return;
+}
+
+#==========================================
+# test_setMultipathScan
+#------------------------------------------
+sub test_setMultipathScan {
+	# ...
+	# Test the setMultipathScan method
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $confDataObj = KIWIXMLOEMConfigData -> new();
+	$confDataObj = $confDataObj -> setMultipathScan('false');
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_not_null($confDataObj);
+	my $align = $confDataObj -> getMultipathScan();
+	$msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	$msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	$state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	$this -> assert_str_equals('false', $align);
+	return;
+}
+
+#==========================================
+# test_setMultipathScanInvalidArg
+#------------------------------------------
+sub test_setMultipathScanInvalidArg {
+	# ...
+	# Test the setMultipathScan method with an unrecognized bool value
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $confDataObj = KIWIXMLOEMConfigData -> new();
+	my $res = $confDataObj -> setMultipathScan(1);
+	my $msg = $kiwi -> getMessage();
+	my $expected = 'KIWIXMLOEMConfigData:setMultipathScan: unrecognized '
+		. 'argument expecting "true" or "false".';
+	$this -> assert_str_equals($expected, $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('error', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('failed', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_null($res);
+	return;
+}
+
+#==========================================
+# test_setMultipathScanNoArg
+#------------------------------------------
+sub test_setMultipathScanNoArg {
+	# ...
+	# Test the setMultipathScan method
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $init = $this -> __getBaseInitHash();
+	my $confDataObj = KIWIXMLOEMConfigData -> new($init);
+	$confDataObj = $confDataObj -> setMultipathScan();
+	my $msg = $kiwi -> getMessage();
+	$this -> assert_str_equals('No messages set', $msg);
+	my $msgT = $kiwi -> getMessageType();
+	$this -> assert_str_equals('none', $msgT);
+	my $state = $kiwi -> getState();
+	$this -> assert_str_equals('No state set', $state);
+	# Test this condition last to get potential error messages
+	$this -> assert_not_null($confDataObj);
+	my $align = $confDataObj -> getMultipathScan();
 	$msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	$msgT = $kiwi -> getMessageType();
@@ -3020,23 +3106,24 @@ sub __getBaseInitHash {
 	# ---
 	my $this = shift;
 	my %init = (
-				oem_ataraid_scan          => 'true',
-				oem_boot_title            => 'test build',
-				oem_inplace_recovery      => 'true',
-				oem_kiwi_initrd           => 'false',
-				oem_partition_install     => 'false',
-				oem_recovery              => 'true',
-				oem_recoveryID            => '1234',
-				oem_recoveryPartSize      => '2048',
-				oem_silent_boot           => 'true',
-				oem_silent_install        => 'true',
-				oem_silent_verify         => 'true',
-				oem_swap                  => 'true',
-				oem_swapsize              => '2048',
-				oem_systemsize            => '8192',
-				oem_unattended            => 'true',
-				oem_unattended_id         => '1'
-			);
+		oem_ataraid_scan          => 'true',
+		oem_multipath_scan        => 'true',
+		oem_boot_title            => 'test build',
+		oem_inplace_recovery      => 'true',
+		oem_kiwi_initrd           => 'false',
+		oem_partition_install     => 'false',
+		oem_recovery              => 'true',
+		oem_recoveryID            => '1234',
+		oem_recoveryPartSize      => '2048',
+		oem_silent_boot           => 'true',
+		oem_silent_install        => 'true',
+		oem_silent_verify         => 'true',
+		oem_swap                  => 'true',
+		oem_swapsize              => '2048',
+		oem_systemsize            => '8192',
+		oem_unattended            => 'true',
+		oem_unattended_id         => '1'
+	);
 	return \%init;
 }
 

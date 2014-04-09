@@ -235,10 +235,10 @@ sub p_initializeBoolMembers {
 	my $init = shift;
 	for my $boolAttr (keys %{$this->{boolKeywords}}) {
 		my %settings = (
-						attr   => $boolAttr,
-						value  => $init->{$boolAttr},
-						caller => 'ctor'
-					);
+			attr   => $boolAttr,
+			value  => $init->{$boolAttr},
+			caller => 'ctor'
+		);
 		$this -> p_setBooleanValue(\%settings);
 	}
 	return 1;

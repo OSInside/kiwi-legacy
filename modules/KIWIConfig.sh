@@ -298,6 +298,10 @@ function baseSetupOEMPartition {
 		echo "Setting up DISABLE_OEM_ATARAID_SCAN=1"
 		echo "DISABLE_OEM_ATARAID_SCAN=1" >> $oemfile
 	fi
+	if [ ! -z "$kiwi_oemmultipath_scan" ];then
+		echo "Setting up DISABLE_OEM_MULTIPATH_SCAN=1"
+		echo "DISABLE_OEM_MULTIPATH_SCAN=1" >> $oemfile
+	fi
 	if [ ! -z "$kiwi_oemswapMB" ];then
 		echo "Setting up OEM_SWAPSIZE=$kiwi_oemswapMB"
 		echo "OEM_SWAPSIZE=$kiwi_oemswapMB" >> $oemfile

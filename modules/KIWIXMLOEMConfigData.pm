@@ -41,6 +41,7 @@ sub new {
 	#
 	# this = {
 	#    oem_ataraid_scan         = ''
+	#    oen_multipath_scan       = ''
 	#    oem_boot_title           = ''
 	#    oem_bootwait             = ''
 	#    oem_inplace_recovery     = ''
@@ -78,6 +79,7 @@ sub new {
 	#------------------------------------------
 	my %keywords = map { ($_ => 1) } qw(
 		oem_ataraid_scan
+		oem_multipath_scan
 		oem_boot_title
 		oem_bootwait
 		oem_inplace_recovery
@@ -103,6 +105,7 @@ sub new {
 	$this->{supportedKeywords} = \%keywords;
 	my %boolKW = map { ($_ => 1) } qw(
 		oem_ataraid_scan
+		oem_multipath_scan
 		oem_bootwait
 		oem_inplace_recovery
 		oem_kiwi_initrd
@@ -169,6 +172,17 @@ sub getAtaRaidScan {
 	# ---
 	my $this = shift;
 	return $this->{oem_ataraid_scan};
+}
+
+#==========================================
+# getMultipathScan
+#------------------------------------------
+sub getMultipathScan {
+	# ...
+	# Return the setting for the oem-multipath-scan configuration
+	# ---
+	my $this = shift;
+	return $this->{oem_multipath_scan};
 }
 
 #==========================================
@@ -414,6 +428,12 @@ sub getXMLElement {
 		text      => $this -> getAtaRaidScan ()
 	);
 	$element = $this -> p_addElement(\%initAtaRaidScan);
+	my %initMultipathScan = (
+		parent    => $element,
+		childName => 'oem-multipath-scan',
+		text      => $this -> getMultipathScan ()
+	);
+	$element = $this -> p_addElement(\%initMultipathScan);
 	my %initBootT = (
 		parent    => $element,
 		childName => 'oem-boot-title',
@@ -558,6 +578,24 @@ sub setAtaRaidScan {
 		attr   => 'oem_ataraid_scan',
 		value  => $val,
 		caller => 'setAtaRaidScan'
+	);
+	return $this -> p_setBooleanValue(\%settings);
+}
+
+#==========================================
+# setMultipathScan
+#------------------------------------------
+sub setMultipathScan {
+	# ...
+	# Set the oem_multipath_scan attribute, if called with no argument the
+	# value is set to false.
+	# ---
+	my $this = shift;
+	my $val  = shift;
+	my %settings = (
+		attr   => 'oem_multipath_scan',
+		value  => $val,
+		caller => 'setMultipathScan'
 	);
 	return $this -> p_setBooleanValue(\%settings);
 }
@@ -711,7 +749,9 @@ sub setRebootInteractive {
 	if (! $this -> p_setBooleanValue(\%settings) ) {
 		return;
 	}
-	if ($this->{oem_reboot_interactive} && $this->{oem_reboot_interactive} eq 'true') {
+	if (($this->{oem_reboot_interactive}) &&
+		($this->{oem_reboot_interactive} eq 'true')
+	) {
 		delete $this->{oem_bootwait};
 		delete $this->{oem_reboot};
 		delete $this->{oem_shutdown};
