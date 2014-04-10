@@ -1195,7 +1195,7 @@ sub setupPackageFiles
 						    . 'failed';
 						$this->logMsg('E', $msg);
 					} else {
-						$this->addToChannelFile($packName, $packPointer->{'disturl'}, $arch, $medium);
+						$this->addToChannelFile($packName, $packPointer->{'disturl'}, $arch, $medium, $packPointer->{'localfile'});
 						if ($this->{m_debug} >= 4) {
 							my $lnkTarget = $packOptions->{$requestedArch}->
 							{'newpath'};
@@ -1484,7 +1484,7 @@ sub collectPackages {
 					);
 				} else {
 					$this->printChannelLine(
-						$fd, "    <binary ", $binary, "/>", %supporthash
+						$fd, "    <binary ", $binary, ">".$binary->{'localfile'}."</binary>", %supporthash
 					);
 				}
 			}
@@ -1502,6 +1502,7 @@ sub printChannelLine {
 	my $name;
 	my $space="";
 	for my $k(sort(keys($hash))) {
+		next if $k eq 'localfile';
 		print $fd $space." ";
 		my $attribute = $k."='".$hash->{$k}."'";
 		print $fd $attribute;
@@ -1510,14 +1511,14 @@ sub printChannelLine {
 	}
 	if ( $name && $supporthash{$name} ) {
 		print $fd $space;
-		print $fd "supportstatus='".$supporthash{$name}."'";
+		print $fd " supportstatus='".$supporthash{$name}."'";
 	}
 	print $fd $suffix."\n";
 	return $this;
 }
 
 sub addToChannelFile {
-	my ($this, $name, $disturl, $arch, $medium) = @_;
+	my ($this, $name, $disturl, $arch, $medium, $localfile) = @_;
 	if (!$this->{m_reportLog}->{$medium}) {
 		$this->{m_reportLog}->{$medium}->{filename} = 
 			"$this->{m_basesubdir}->{$medium}.channel";
@@ -1530,19 +1531,19 @@ sub addToChannelFile {
 		$repo = $2;
 		$package = $3;
 	}
-	my $key = "$project::$repo::$arch";
+	my $key = "$project::$repo";
 	unless ($this->{m_reportLog}->{$medium}->{entries}->{$key}) {
 		$this->{m_reportLog}->{$medium}->{entries}->{$key} = [
 			{
 				"project"    => $project,
 				"repository" => $repo,
-				"arch"       => $arch
 			}
 		];
 	}
 	push @{$this->{m_reportLog}->{$medium}->{entries}->{$key}},	{
 		"package" => $package,
-		"name"    => $name
+		"name"    => $name,
+		"localfile"  => $localfile,
 	};
 	return $this;
 }
