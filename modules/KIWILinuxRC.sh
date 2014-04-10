@@ -7023,13 +7023,26 @@ function getDiskID {
 		echo $device
 		return
 	fi
-	if [ -z "$swap" ] && echo $device | grep -q "dev\/md"; then
+	if [ -z "$swap" ] && [[ $device =~ ^/dev/md ]];then
 		echo $device
 		return
 	fi
 	if [ ! -z "$NON_PERSISTENT_DEVICE_NAMES" ]; then
 		echo $device
 		return
+	fi
+	if [[ $device =~ ^/dev/dm- ]];then
+		for i in /dev/mapper/*;do
+			if [ ! -L $i ];then
+				continue
+			fi
+			local dev=$(readlink $i)
+			dev=/dev/$(basename $dev)
+			if [ $dev = $device ];then
+				echo $i
+				return
+			fi
+		done
 	fi
 	if [ ! -z "$kiwi_devicepersistency" ];then
 		prefix=$kiwi_devicepersistency
@@ -7041,8 +7054,8 @@ function getDiskID {
 		if echo $i | grep -q edd-;then
 			continue
 		fi
-		local dev=`readlink $i`
-		dev=/dev/`basename $dev`
+		local dev=$(readlink $i)
+		dev=/dev/$(basename $dev)
 		if [ $dev = $device ];then
 			echo $i
 			return
@@ -7058,12 +7071,12 @@ function getDiskDevice {
 	# this function is able to turn the given udev disk
 	# ID label into the /dev/ device name
 	# ----
-	local device=`readlink $1`
+	local device=$(readlink $1)
 	if [ -z "$device" ];then
 		echo $1
 		return
 	fi
-	device=`basename $device`
+	device=$(basename $device)
 	device=/dev/$device
 	echo $device
 }
