@@ -67,7 +67,7 @@
 		<user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
 	</users>
 	<repository type="yast2">
-		<source path="obs://openSUSE-current/repo/oss"/>
+		<source path="obs://13.2/repo/oss"/>
 	</repository>
 	<packages type="image">
 		<!-- The installation of patterns in 13.2 requires the 13.2 zypper -->
