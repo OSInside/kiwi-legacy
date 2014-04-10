@@ -959,7 +959,7 @@ function identifyDevice {
 	#======================================
 	# search for given id
 	#--------------------------------------
-	for prefix in by-id by-path;do
+	for prefix in by-id by-path by-uuid by-label;do
 		id_device=/dev/disk/$prefix/$kiwi_oemunattended_id
 		if [ -e $id_device ];then
 			ux_device=$(getDiskDevice $id_device)
@@ -967,6 +967,14 @@ function identifyDevice {
 			break
 		fi
 	done
+	if [ $found -eq 0 ];then
+		id_device=/dev/mapper/$kiwi_oemunattended_id
+		if [ -e $id_device ];then
+			ux_device=$(getDiskDevice $id_device)
+			found=1
+			break
+		fi
+	fi
 	if [ $found -eq 0 ];then
 		systemException \
 			"Storage ID: $kiwi_oemunattended_id not found" \
