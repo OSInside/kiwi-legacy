@@ -1033,13 +1033,11 @@ div {
 	k.oem-unattended-id.attlist = empty
 	k.oem-unattended-id =
 		## For oemboot driven images: use the specified disk id
-		## the id corresponds with the value of devicepersistency
-		## or by default with /dev/disk/by-id/...
+		## the device is looked up in /dev/disk/by-* and /dev/mapper/*
 		[
 		db:para [
 			"For oemboot driven images: use the specified disk id"
-			"the id corresponds with the value of devicepersistency"
-			"or by default with /dev/disk/by-id/..."
+			"the device is looked up in /dev/disk/by-* and /dev/mapper/*"
 		]
 		]
 		element oem-unattended-id {
