@@ -217,11 +217,13 @@ function OEMInstall {
 	# Add optional dmraid device(s)
 	#--------------------------------------
 	if [ -z "$DISABLE_OEM_ATARAID_SCAN" ];then
-		if lookup dmraid &>/dev/null && dmraid -s &>/dev/null;then
-			dmraid -a y
-			udevPending
-			identifyDMRaid
-		fi
+		identifyDMRaid
+	fi
+	#======================================
+	# Add optional multipath device(s)
+	#--------------------------------------
+	if [ -z "$DISABLE_OEM_MULTIPATH_SCAN" ];then
+		identifyMultipath
 	fi
 	#======================================
 	# Run user script
@@ -825,11 +827,11 @@ function OEMInstall {
 		fi
 		Echo "Image checksum test: fine :-)"
 		Echo "System installation has finished"
-		#======================================
-		# Run user script
-		#--------------------------------------
-		runHook postImageDump
 	fi
+	#======================================
+	# Run user script
+	#--------------------------------------
+	runHook postImageDump
 	#======================================
 	# Umount CD/DVD USB
 	#--------------------------------------
@@ -957,7 +959,7 @@ function identifyDevice {
 	#======================================
 	# search for given id
 	#--------------------------------------
-	for prefix in by-id by-path;do
+	for prefix in by-id by-path by-uuid by-label;do
 		id_device=/dev/disk/$prefix/$kiwi_oemunattended_id
 		if [ -e $id_device ];then
 			ux_device=$(getDiskDevice $id_device)
@@ -965,6 +967,14 @@ function identifyDevice {
 			break
 		fi
 	done
+	if [ $found -eq 0 ];then
+		id_device=/dev/mapper/$kiwi_oemunattended_id
+		if [ -e $id_device ];then
+			ux_device=$(getDiskDevice $id_device)
+			found=1
+			break
+		fi
+	fi
 	if [ $found -eq 0 ];then
 		systemException \
 			"Storage ID: $kiwi_oemunattended_id not found" \
@@ -988,6 +998,73 @@ function identifyDevice {
 }
 
 #======================================
+# identifyMultipath
+#--------------------------------------
+function identifyMultipath {
+	local multipath_config=/etc/multipath.conf
+	local device_disks=$deviceDisks
+	local device_disks_new
+	local disk
+	local wwn
+	#======================================
+	# check the tools
+	#--------------------------------------
+	for tool in multipathd multipath;do
+		if ! lookup $tool &>/dev/null;then
+			Echo "identifyMultipath: $tool not found"
+			return
+		fi
+	done
+	#======================================
+	# lookup multipath configuration
+	#--------------------------------------
+	if [ ! -f $multipath_config ];then
+		Echo "identifyMultipath: no multipath configuration found"
+		return
+	fi
+	#======================================
+	# load multipath dm modules
+	#--------------------------------------
+	if ! modprobe dm-multipath;then
+		Echo "identifyMultipath: can't load dm-multipath"
+		return
+	fi
+	#======================================
+	# start multipath daemon
+	#--------------------------------------
+	if ! multipathd;then
+		Echo "identifyMultipath: failed to start multipathd"
+		return
+	fi
+	#======================================
+	# wait for devices to settle
+	#--------------------------------------
+	udevPending
+	#======================================
+	# strip list of disk devices
+	#--------------------------------------
+	# keep only non multipath devices in the list
+	for disk in $device_disks;do
+		if ! multipath -c $disk &>/dev/null;then
+			device_disks_new="$device_disks_new $disk"
+		fi
+	done
+	#======================================
+	# add multipath devices to the list
+	#--------------------------------------
+	for wwn in $(multipath -l -v1);do
+		disk=/dev/mapper/$wwn
+		if [ -e $disk ];then
+			device_disks_new="$device_disks_new $disk"
+		fi
+	done
+	#======================================
+	# return with new disk list
+	#--------------------------------------
+	deviceDisks=$device_disks_new
+}
+
+#======================================
 # identifyDMRaid
 #--------------------------------------
 function identifyDMRaid {
@@ -1001,6 +1078,28 @@ function identifyDMRaid {
 	local device_clean
 	local device_disks
 	local device_disks_new
+	#======================================
+	# check the tool
+	#--------------------------------------
+	if ! lookup dmraid &>/dev/null;then
+		Echo "identifyDMRaid: dmraid tool not found"
+		return
+	fi
+	#======================================
+	# check for raid disks
+	#--------------------------------------
+	if ! dmraid -s &>/dev/null;then
+		Echo "identifyDMRaid: no raid disks found"
+		return
+	fi
+	#======================================
+	# activate raid disks
+	#--------------------------------------
+	dmraid -a y
+	#======================================
+	# wait for devices to settle
+	#--------------------------------------
+	udevPending
 	#======================================
 	# search raid devices and store them
 	#--------------------------------------
