@@ -1290,7 +1290,12 @@ sub __hasBootLoaderTools {
 		my $locator = KIWILocator -> instance();
 		my $loaderTool = $locator -> getExecPath($loader_check);
 		if (! $loaderTool || ! -x $loaderTool) {
-			return 0;
+			my $msg = "The bootloader $loader_check is missing. ";
+			$msg.= "Please make sure that you have installed the package ";
+			$msg.= "providing $loader_check on your image build machine.";
+			$kiwi -> error($msg);
+			$kiwi -> failed();
+			return;
 		}
 	}
 	return 1;
