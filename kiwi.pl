@@ -1966,11 +1966,9 @@ sub kiwiExit {
 			$kiwi -> printBackTrace();
 		}
 		$kiwi -> printLogExcerpt();
-		$kiwi -> error  ("KIWI exited with error(s)");
-		$kiwi -> done ();
+		$kiwi -> error  ("KIWI exited with error(s)\n");
 	} else {
-		$kiwi -> info ("KIWI exited successfully");
-		$kiwi -> done ();
+		$kiwi -> info ("KIWI exited successfully\n");
 	}
 	#==========================================
 	# Move process log to final logfile name...
