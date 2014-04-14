@@ -59,6 +59,10 @@ ifdef KIWINONETWORKTEST
 NONETWORKTEST = env KIWI_NO_NET=1
 endif
 
+ifdef KIWINOFSTEST
+KIWINOFSTEST = env KIWI_NO_FS=1
+endif
+
 all: modules/KIWISchema.rng
 	#============================================
 	# build tools
@@ -212,7 +216,8 @@ test:
 	for i in `find -name "*.t" | cut -d/ -f4`;do \
 		touch tests/.timestamps/$$i's';\
 	done
-	cd tests/unit && ${NONETWORKTEST} /usr/bin/prove ${TESTVERBOSE} .
+	cd tests/unit && \
+		${NONETWORKTEST} ${KIWINOFSTEST} /usr/bin/prove ${TESTVERBOSE} .
 	rm -f .revision
 
 critic:
@@ -230,7 +235,8 @@ critic:
 		mkdir tests/.timestamps; \
 	fi
 	touch tests/.timestamps/$@s
-	cd tests/unit && /usr/bin/prove ${TESTVERBOSE} $@
+	cd tests/unit && \
+		${NONETWORKTEST} ${KIWINOFSTEST} /usr/bin/prove ${TESTVERBOSE} $@
 
 clean:
 	(cd system/boot && find -type f | grep -v .svn | xargs chmod u+w)
