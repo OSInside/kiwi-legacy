@@ -1,5 +1,5 @@
-opensuse|s/^/http:\/\/download.opensuse.org\//
-opensuse|s/^/http:\/\/download.opensuse.org\/repositories\//
-opensuse|s/^/http:\/\/download.opensuse.org\/distribution\//
-opensuse|s/build.opensuse.org/http:\/\/download.opensuse.org\/distribution/
-opensuse|s/build.opensuse.org/http:\/\/download.opensuse.org\/repositories/
+opensuse|^|http://download.opensuse.org/
+opensuse|^|http://download.opensuse.org/repositories/
+opensuse|^|http://download.opensuse.org/distribution/
+opensuse|build.opensuse.org|http://download.opensuse.org/distribution/
+opensuse|build.opensuse.org|http://download.opensuse.org/repositories/

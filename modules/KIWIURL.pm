@@ -600,48 +600,38 @@ sub openSUSEpath {
 	}
 	while (my $match =<$FD>) {
 		chomp $match;
-		my @list = split (/\|/,$match);
-		my $repo = $module;
-		my $match= '$repo =~ '.$list[1];
-		# Violates "expression eval rule FIXME
-		eval $match; ## no critic
-		$matches{$repo} = $list[0];
+		my ($match_type,$exp_match,$exp_replace) = split (/\|/,$match);
+		my $repo_uri = $module;
+		if ($repo_uri =~ s/$exp_match/$exp_replace/) {
+			$matches{$repo_uri} = $match_type;
+		}
 	}
 	$FD -> close();
 	#==========================================
 	# Check URL entries
 	#------------------------------------------
-	foreach my $url (keys %matches) {
+	foreach my $url (sort keys %matches) {
 		my $type = $matches{$url};
 		if ($type ne "opensuse") {
 			next;
 		}
-		#==========================================
-		# Try to access URL from matches
-		#------------------------------------------
-		my $response = $browser -> get ( $url );
-		if ($response -> is_success) {
-			my $repourl = $url;
+		foreach my $lookup ("/repodata","/media.1") {
 			#==========================================
-			# 1) Check for rpm-md repo
+			# Try to access URL from matches
 			#------------------------------------------
-			$response = $browser -> get ( $repourl."/repodata" );
+			my $response = $browser -> get ( $url.$lookup );
 			if ($response -> is_success) {
-				$this->{type} = "rpm-md";
+				if ($lookup eq "/repodata") {
+					$this->{type} = "rpm-md";
+				} else {
+					$this->{type} = "yast2";
+				}
 				return $url;
 			}
-			#==========================================
-			# 2) Check for yast2 repo
-			#------------------------------------------
-			$response = $browser -> get ( $repourl."/media.1");
-			if ($response -> is_success) {
-				$this->{type} = "yast2";
-				return $url;
-			}
-			$kiwi -> loginfo (
-				"URL: $url is neither rpm-md nor yast2\n"
-			);
 		}
+		$kiwi -> loginfo (
+			"URL: $url is neither rpm-md nor yast2\n"
+		);
 	}
 	if (! defined $quiet) {
 		$kiwi -> warning ("Couldn't resolve opensuse URL: $origurl");
