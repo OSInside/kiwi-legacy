@@ -138,7 +138,7 @@ sub test_buildProfWithDefPackages {
 	$cmd -> setBuildProfiles(\@profiles);
 	my $xml = $this -> __getXMLObj( $configDir );
 	my $checker = KIWIRuntimeChecker -> new($cmd, $xml);
-	my $res = $checker -> prepareChecks();
+	my $res = $checker -> __checkPatternTypeAttrValueConsistent();
 	my $expected = 'Set profiles to command line provided profiles for '
 		. "validation.\nUsing profile(s): my-first, my-secondReset profiles "
 		. "to original values.\n";
@@ -168,7 +168,7 @@ sub test_conflictingProfiles {
 	$cmd -> setBuildProfiles(\@profiles);
 	my $xml = $this -> __getXMLObj( $this -> {dataDir} );
 	my $checker = KIWIRuntimeChecker -> new($cmd, $xml);
-	my $res = $checker -> prepareChecks();
+	my $res = $checker -> __checkPatternTypeAttrValueConsistent();
 	my $infoMsg = $kiwi -> getInfoMessage();
 	my $expected = 'Set profiles to command line provided profiles for '
 		. "validation.\nUsing profile(s): my-first, my-second";
@@ -206,7 +206,7 @@ sub test_conflictingUsers {
 	# Clear the log
 	my $state = $kiwi -> getState();
 	my $checker = KIWIRuntimeChecker -> new($cmd, $xml);
-	$res = $checker -> prepareChecks();
+	$res = $checker -> __checkUsersConsistent();
 	my $iMsg = $kiwi -> getInfoMessage();
 	my $iExpect = "Merging data for user 'auser'";
 	$this -> assert_str_equals($iExpect, $iMsg);
@@ -237,7 +237,7 @@ sub test_containerPackMissing {
 	my $res = $cmd -> setConfigDir ($configDir);
 	my $xml = $this -> __getXMLObj( $configDir );
 	my $checker = KIWIRuntimeChecker -> new($cmd, $xml);
-	$res = $checker -> createChecks();
+	$res = $checker -> __checkContainerHasLXC();
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Attempting to build container, but no lxc package '
 		. 'included in image.';
@@ -270,7 +270,7 @@ sub test_duplicateRepoAliasConflict {
 	my $msgT = $kiwi -> getMessageType();
 	my $state = $kiwi -> getState();
 	my $checker = KIWIRuntimeChecker -> new($cmd, $xml);
-	my $res = $checker -> prepareChecks();
+	my $res = $checker -> __checkRepoAliasUnique();
 	$msg = $kiwi -> getMessage();
 	my $expected = "Specified repo alias 'arepo' not unique across "
 		. 'active repositories';
@@ -299,7 +299,7 @@ sub test_duplicateRepoAliasNoConflict {
 	$cmd -> setConfigDir ($configDir);
 	my $xml = $this -> __getXMLObj( $configDir );
 	my $checker = KIWIRuntimeChecker -> new($cmd, $xml);
-	my $res = $checker -> prepareChecks();
+	my $res = $checker -> __checkRepoAliasUnique();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -321,6 +321,9 @@ sub test_fsToolCheckFsysImg {
 	# conditions of the test are only exercised on systems where the
 	# tool is not present.
 	# ---
+	if ($ENV{KIWI_NO_FS} && $ENV{KIWI_NO_FS} == 1) {
+		return; # skip the test in unknown filesystem environments
+	}
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $cmd = $this -> __getCommandLineObj();
@@ -329,7 +332,7 @@ sub test_fsToolCheckFsysImg {
 	for my $fsTestName (@fsTestDirs) {
 		my $xml = $this -> __getXMLObj($fsTestName);
 		my $checker = KIWIRuntimeChecker -> new($cmd, $xml);
-		my $res = $checker -> createChecks();
+		my $res = $checker -> __checkFilesystemTool();
 		my $eMsg = $kiwi -> getErrorMessage();
 		if ($eMsg) {
 			# File system tool is not present
@@ -388,6 +391,9 @@ sub test_fsToolCheckIsoImg {
 	# conditions of the test are only exercised on systems where the
 	# tool is not present.
 	# ---
+	if ($ENV{KIWI_NO_FS} && $ENV{KIWI_NO_FS} == 1) {
+		return; # skip the test in unknown filesystem environments
+	}
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $cmd = $this -> __getCommandLineObj();
@@ -399,7 +405,7 @@ sub test_fsToolCheckIsoImg {
 		}
 		my $xml = $this -> __getXMLObj($fsTestName);
 		my $checker = KIWIRuntimeChecker -> new($cmd, $xml);
-		my $res = $checker -> createChecks();
+		my $res = $checker -> __checkFilesystemTool();
 		my $eMsg = $kiwi -> getErrorMessage();
 		if ($eMsg) {
 			# File system tool is not present
@@ -451,13 +457,16 @@ sub test_fsToolCheckOemBtrfs {
 	# conditions of the test are only exercised on systems where the
 	# tool is not present.
 	# ---
+	if ($ENV{KIWI_NO_FS} && $ENV{KIWI_NO_FS} == 1) {
+		return; # skip the test in unknown filesystem environments
+	}
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $cmd = $this -> __getCommandLineObj();
 	my $configPath = $this -> {dataDir} . '/oemBtrfs';
 	my $xml = $this -> __getXMLObj($configPath);
 	my $checker = KIWIRuntimeChecker -> new($cmd, $xml);
-	my $res = $checker -> createChecks();
+	my $res = $checker -> __checkFilesystemTool();
 	my $eMsg = $kiwi -> getErrorMessage();
 	if ($eMsg) {
 		# File system tool is not present
@@ -498,6 +507,9 @@ sub test_fsToolCheckSplitImg {
 	# conditions of the test are only exercised on systems where the
 	# tool is not present.
 	# ---
+	if ($ENV{KIWI_NO_FS} && $ENV{KIWI_NO_FS} == 1) {
+		return; # skip the test in unknown filesystem environments
+	}
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $cmd = $this -> __getCommandLineObj();
@@ -506,7 +518,7 @@ sub test_fsToolCheckSplitImg {
 	my $locator = KIWILocator -> instance();
 	my $haveBtrfs = $locator -> getExecPath('mkfs.btrfs');
 	my $checker = KIWIRuntimeChecker -> new($cmd, $xml);
-	my $res = $checker -> createChecks();
+	my $res = $checker -> __checkFilesystemTool();
 	if ($haveBtrfs) {
 		# Filesystem tool is present
 		my $msg = $kiwi -> getMessage();
@@ -565,7 +577,7 @@ sub test_isohybrid {
 	$cmd -> setConfigDir ($configDir);
 	my $xml = $this -> __getXMLObj( $configDir );
 	my $checker = KIWIRuntimeChecker -> new($cmd, $xml);
-	my $res = $checker -> createChecks();
+	my $res = $checker -> __isoHybridCapable();
 	my $msg = $kiwi -> getMessage();
 	my $msgT = $kiwi -> getMessageType();
 	my $state = $kiwi -> getState();
@@ -616,7 +628,7 @@ sub test_lvmOEMSizeSetings {
 	$cmd -> setConfigDir ($configDir);
 	my $xml = $this -> __getXMLObj( $configDir );
 	my $checker = KIWIRuntimeChecker -> new($cmd, $xml);
-	my $res = $checker -> prepareChecks();
+	my $res = $checker -> __checkLVMoemSizeSettings();
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Specified system size is smaller than requested '
 		. 'volume sizes';
@@ -644,7 +656,7 @@ sub test_lvmOEMSizeSetingsValid {
 	$cmd -> setConfigDir ($configDir);
 	my $xml = $this -> __getXMLObj( $configDir );
 	my $checker = KIWIRuntimeChecker -> new($cmd, $xml);
-	my $res = $checker -> prepareChecks();
+	my $res = $checker -> __checkLVMoemSizeSettings();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -670,7 +682,7 @@ sub test_noBuildProfile {
 	$cmd -> setConfigDir ($configDir);
 	my $xml = $this -> __getXMLObj( $configDir );
 	my $checker = KIWIRuntimeChecker -> new($cmd, $xml);
-	my $res = $checker -> prepareChecks();
+	my $res = $checker -> __checkProfileConsistent();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -696,7 +708,7 @@ sub test_noBuildType {
 	$cmd -> setConfigDir ($configDir);
 	my $xml = $this -> __getXMLObj( $configDir );
 	my $checker = KIWIRuntimeChecker -> new($cmd, $xml);
-	my $res = $checker -> prepareChecks();
+	my $res = $checker -> __haveValidTypeString();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('Cannot determine build type', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -736,7 +748,7 @@ sub test_noEFIIsohybridOEMImg {
 	$cmd -> setConfigDir ($configDir);
 	my $xml = $this -> __getXMLObj( $configDir );
 	my $checker = KIWIRuntimeChecker -> new($cmd, $xml);
-	my $res = $checker -> createChecks();
+	my $res = $checker -> __isoHybridCapable();
 	my $msg = $kiwi -> getMessage();
 	my $msgT = $kiwi -> getMessageType();
 	my $state = $kiwi -> getState();
@@ -796,7 +808,7 @@ sub test_oemSizeSettingSufficient {
 	$this -> assert_not_null($status);
 	$cmd -> setConfigDir ($tmpDir);
 	my $checker = KIWIRuntimeChecker -> new($cmd, $xml);
-	my $res = $checker -> createChecks();
+	my $res = $checker -> __checkOEMsizeSettingSufficient();
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'System requires 2 MB, but size '
 		. 'constraint set to 1 MB';
@@ -832,7 +844,7 @@ sub test_packageManagerCheck_ens {
 	$prefObj -> setPackageManager('ensconce');
 	$xml -> setPreferences($prefObj);
 	my $checker = KIWIRuntimeChecker -> new($cmd, $xml);
-	my $res = $checker -> prepareChecks();
+	my $res = $checker -> __checkPackageManagerExists();
 	my $locator = KIWILocator -> instance();
 	my $haveEnsconce = $locator -> getExecPath('ensconce');
 	if ($haveEnsconce) {
@@ -877,8 +889,7 @@ sub test_packageManagerCheck_zypp {
 	# config.xml, this test should succeed
 	my $xml = $this -> __getXMLObj( $configDir );
 	my $checker = KIWIRuntimeChecker -> new($cmd, $xml);
-	my $res = $checker -> prepareChecks();
-
+	my $res = $checker -> __checkPackageManagerExists();
 	my $locator = KIWILocator -> instance();
 	my $haveZypper = $locator -> getExecPath('zypper');
 	if ($haveZypper) {
@@ -926,7 +937,7 @@ sub test_systemDiskDataNoVolume {
 	my $tmpDir = $this -> createTestTmpDir();
 	$cmd -> setConfigDir ($tmpDir);
 	my $checker = KIWIRuntimeChecker -> new($cmd, $xml);
-	my $res = $checker -> createChecks();
+	my $res = $checker -> __checkSystemDiskData();
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Volume path home does not exist in unpacked tree';
 	$this -> assert_str_equals($expected, $msg);
@@ -968,7 +979,7 @@ sub test_systemDiskDataSizeTooSmall {
 	$status = close $TESTFILE;
 	$this -> assert_not_null($status);
 	my $checker = KIWIRuntimeChecker -> new($cmd, $xml);
-	my $res = $checker -> createChecks();
+	my $res = $checker -> __checkSystemDiskData();
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Calculated 1 MB free, but require 3 MB';
 	$this -> assert_str_equals($expected, $msg);
@@ -1010,7 +1021,7 @@ sub test_systemDiskDataVolTooSmall {
 	$status = close $TESTFILE;
 	$this -> assert_not_null($status);
 	my $checker = KIWIRuntimeChecker -> new($cmd, $xml);
-	my $res = $checker -> createChecks();
+	my $res = $checker -> __checkSystemDiskData();
 	my $msg = $kiwi -> getMessage();
 	my $expected = 'Required size for var [ 2 MB ] is larger than specified size [ 1 ] MB';
 	$this -> assert_str_equals($expected, $msg);
@@ -1041,7 +1052,7 @@ sub test_useSingleBuildProfile {
 	$cmd -> setBuildProfiles(\@profiles);
 	my $xml = $this -> __getXMLObj( $configDir );
 	my $checker = KIWIRuntimeChecker -> new($cmd, $xml);
-	my $res = $checker -> prepareChecks();
+	my $res = $checker -> __checkProfileConsistent();
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
