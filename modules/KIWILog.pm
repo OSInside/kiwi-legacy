@@ -391,6 +391,9 @@ sub closeRootChannel {
 	my $this = shift;
 	if (defined $this->{rootefd}) {
 		close $this->{rootefd};
+		if ($this->{rootefd} eq $this->{channel}) {
+			undef $this->{channel};
+		}
 		undef $this->{rootefd};
 	}
 	return;
@@ -483,7 +486,6 @@ sub printLog {
 	# setup message string
 	#------------------------------------------
 	my $result;
-	my $FD = $this->{channel};
 	foreach my $level (@showLevel) {
 		if ($level != $lglevel) {
 			next;
@@ -528,7 +530,8 @@ sub printLog {
 	#==========================================
 	# print message to log channel (stdin,file)
 	#------------------------------------------
-	if ((! defined $flag) || ($this->{fileLog})) {
+	my $FD = $this->{channel};
+	if (($FD) && ((! defined $flag) || ($this->{fileLog}))) {
 		my $msg = $result;
 		if ($this->{fileLog}) {
 			$msg .= "\n" if ($msg !~ /\n$/);
@@ -1043,10 +1046,12 @@ sub setLogServer {
 sub cleanSweep {
 	my $this     = shift;
 	my $logchild = $this->{logchild};
-	my $rootEFD  = $this->{rootefd};
 	my $sharedMem= $this->{smem};
 	if ($this->{errorOk}) {
-		close $rootEFD;
+		close $this->{rootefd};
+		if ($this->{rootefd} eq $this->{channel}) {
+			undef $this->{channel};
+		}
 		undef $this->{rootefd};
 	}
 	if (defined $logchild) {
