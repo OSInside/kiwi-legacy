@@ -1105,7 +1105,7 @@ sub __hasBootLoaderTools {
 	my $loader_check;
 	if ($imgType eq 'iso') {
 		$loader_check = 'genisoimage';
-	} elsif (! $bootloader) {
+	} elsif ((! $bootloader) || ($bootloader eq 'grub')) {
 		$loader_check = 'grub-install';
 	} elsif (($bootloader eq 'grub2') && ($firmware eq 'bios')) {
 		$loader_check = 'grub2-bios-setup';
