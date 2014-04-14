@@ -151,6 +151,9 @@ sub createChecks {
 	if (! $this -> __hasBootLoaderTools()) {
 		return;
 	}
+	if (! $this -> __hasBootDescription()) {
+		return;
+	}
 	return 1;
 }
 
@@ -202,6 +205,9 @@ sub prepareChecks {
 		return;
 	}
 	if (! $this -> __hasBootLoaderTools()) {
+		return;
+	}
+	if (! $this -> __hasBootDescription()) {
 		return;
 	}
 	return 1;
@@ -1244,6 +1250,42 @@ sub __isFsToolAvailable {
 	if ($fsType eq 'zfs' ) {
 		return $locator -> getExecPath('zpool');
 	}
+}
+
+#==========================================
+# __hasBootDescription
+#------------------------------------------
+sub __hasBootDescription {
+	# ...
+	# Check if the boot description exists according
+	# to the selected image type
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $locator = $this->{locator};
+	my $xml = $this->{xml};
+	my $bldType = $xml -> getImageType();
+	if (! $bldType) {
+		return 1;
+	}
+	my $imgType = $bldType -> getTypeName();
+	my $description = $bldType -> getBootImageDescript();
+	if (! $description) {
+		return 1;
+	}
+	if ($imgType !~ /iso|pxe|oem|vmx/) {
+		return 1;
+	}
+	my $gdata = KIWIGlobals -> instance() -> getKiwiConfig();
+	if (! -d "$gdata->{System}/${imgType}boot") {
+		my $msg = "The required boot image description for the ";
+		$msg.= "selected build type: '$imgType' does not exist. ";
+		$msg.= "Please install the package: kiwi-desc-${imgType}boot";
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	return 1;
 }
 
 #==========================================
