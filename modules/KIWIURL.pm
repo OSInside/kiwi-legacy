@@ -615,13 +615,13 @@ sub openSUSEpath {
 		if ($type ne "opensuse") {
 			next;
 		}
-		foreach my $lookup ("/repodata","/media.1") {
+		foreach my $lookup ("/repodata/repomd.xml","/media.1/media") {
 			#==========================================
 			# Try to access URL from matches
 			#------------------------------------------
 			my $response = $browser -> get ( $url.$lookup );
 			if ($response -> is_success) {
-				if ($lookup eq "/repodata") {
+				if ($lookup eq "/repodata/repomd.xml") {
 					$this->{type} = "rpm-md";
 				} else {
 					$this->{type} = "yast2";
