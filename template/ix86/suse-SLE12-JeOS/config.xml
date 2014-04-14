@@ -68,15 +68,15 @@
 		<source path="http://download.suse.de/ibs/SUSE:/SLE-12:/GA/standard/"/>
 	</repository>
 	<packages type="image">
-		<!-- The installation of patterns in SLE12 requires the SLE12 zypper -->
-		<!-- Thus the following definition only works when building on SLE12 -->
-		<!--		<namedCollection name="Minimal"/>-->
-		<!-- In order to stay compatible we just install the pattern package -->
+<!-- The installation of patterns in SLE12 requires the SLE12 zypper -->
+<!-- Thus the following definition only works when building on SLE12 -->
+<!--		<namedCollection name="Minimal"/>-->
+<!-- In order to stay compatible we just install the pattern package -->
 		<package name="patterns-sles-Minimal"/>
-		<!-- The installation of products in SLE12 requires the SLE12 zypper -->
-		<!-- Thus the following definition only works when building on SLE12 -->
-		<!--		<product name="SLES"/>-->
-		<!-- In order to stay compatible we just install the product package -->
+<!-- The installation of products in SLE12 requires the SLE12 zypper -->
+<!-- Thus the following definition only works when building on SLE12 -->
+<!--		<product name="SLES"/>-->
+<!-- In order to stay compatible we just install the product package -->
 		<package name="sles-release-DVD"/>
 		<package name="plymouth-branding-SLE" bootinclude="true"/>
 		<package name="grub2-branding-SLE" bootinclude="true"/>

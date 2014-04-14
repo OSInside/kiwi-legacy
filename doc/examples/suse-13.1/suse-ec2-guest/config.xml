@@ -25,7 +25,7 @@
 		<source path="http://download.opensuse.org/repositories/Cloud:/Tools/openSUSE_13.1"/>
 	</repository>
 	<packages type="image">
-        <package name="cloud-init"/>
+		<package name="cloud-init"/>
 		<package name="ifplugd"/>
 		<package name="kernel-ec2"/>
 		<package name="vim"/>

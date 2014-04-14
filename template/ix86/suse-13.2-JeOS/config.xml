@@ -70,15 +70,15 @@
 		<source path="obs://13.2/repo/oss"/>
 	</repository>
 	<packages type="image">
-		<!-- The installation of patterns in 13.2 requires the 13.2 zypper -->
-		<!-- Thus the following definition only works when building on 13.2 -->
-		<!--        <namedCollection name="base"/>-->
-		<!-- In order to stay compatible we just install the pattern package -->
+<!-- The installation of patterns in 13.2 requires the 13.2 zypper -->
+<!-- Thus the following definition only works when building on 13.2 -->
+<!--        <namedCollection name="base"/>-->
+<!-- In order to stay compatible we just install the pattern package -->
 		<package name="patterns-openSUSE-base"/>
-		<!-- The installation of products in 13.2 requires the 13.2 zypper -->
-		<!-- Thus the following definition only works when building on 13.2 -->
-		<!--        <product name="openSUSE"/>-->
-		<!-- In order to stay compatible we just install the product package -->
+<!-- The installation of products in 13.2 requires the 13.2 zypper -->
+<!-- Thus the following definition only works when building on 13.2 -->
+<!--        <product name="openSUSE"/>-->
+<!-- In order to stay compatible we just install the product package -->
 		<package name="openSUSE-release"/>
 		<package name="plymouth-branding-openSUSE" bootinclude="true"/>
 		<package name="grub2-branding-openSUSE" bootinclude="true"/>
