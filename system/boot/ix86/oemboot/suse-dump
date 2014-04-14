@@ -1032,6 +1032,7 @@ function identifyMultipath {
 	#======================================
 	# start multipath daemon
 	#--------------------------------------
+	mkdir -p /etc/multipath
 	if ! multipathd;then
 		Echo "identifyMultipath: failed to start multipathd"
 		return
