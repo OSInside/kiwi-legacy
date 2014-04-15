@@ -684,6 +684,7 @@ sub Init
 			    . "$this->{m_repos}->{$r}->{'source'}...";
 			$this->logMsg('I', $msg);
 		}
+		$this->{m_repos}->{$r}->{'origin'} = $this->{m_repos}->{$r}->{'source'};
 		$this->{m_repos}->{$r}->{'source'} =
 		    $this->{m_urlparser}->normalizePath(
 			    $this->{m_repos}->{$r}->{'source'});
@@ -1195,7 +1196,7 @@ sub setupPackageFiles
 						    . 'failed';
 						$this->logMsg('E', $msg);
 					} else {
-						$this->addToChannelFile($packName, $packPointer->{'disturl'}, $arch, $medium, $packPointer->{'localfile'});
+						$this->addToTrackFile($packName, $packPointer, $medium);
 						if ($this->{m_debug} >= 4) {
 							my $lnkTarget = $packOptions->{$requestedArch}->
 							{'newpath'};
@@ -1475,76 +1476,53 @@ sub collectPackages {
 		if (! open($fd, ">", $medium->{filename})) {
 			die "Unable to open report file: $medium->{filename}";
 		}
-		print $fd "<channel>\n";
-		for my $key(keys($medium->{entries})) {
-			for my $binary(@{$medium->{entries}->{$key}}) {
-				if ($binary->{project}) {
-					$this->printChannelLine(
-						$fd, "  <binaries ", $binary, ">", %supporthash
-					);
-				} else {
-					$this->printChannelLine(
-						$fd, "    <binary ", $binary, ">".$binary->{'localfile'}."</binary>", %supporthash
-					);
-				}
-			}
-			print $fd "  </binaries>\n";
+		print $fd "<report>\n";
+		for my $binary(@{$medium->{entries}}) {
+			$this->printTrackLine(
+				$fd, "    <binary ", $binary, ">".$binary->{'localfile'}."</binary>", %supporthash
+			);
 		}
-		print $fd "</channel>\n";
+		print $fd "</report>\n";
 		close $fd;
 	}
 	return 0;
 }
 
-sub printChannelLine {
+sub printTrackLine {
 	my ($this, $fd, $prefix, $hash, $suffix, %supporthash) = @_;
 	print $fd $prefix;
 	my $name;
-	my $space="";
 	for my $k(sort(keys($hash))) {
 		next if $k eq 'localfile';
-		print $fd $space." ";
+		print $fd " ";
 		my $attribute = $k."='".$hash->{$k}."'";
 		print $fd $attribute;
-		$space = " " x (30 - length($attribute));
 		$name = $hash->{$k} if $k eq 'name';
 	}
 	if ( $name && $supporthash{$name} ) {
-		print $fd $space;
 		print $fd " supportstatus='".$supporthash{$name}."'";
 	}
 	print $fd $suffix."\n";
 	return $this;
 }
 
-sub addToChannelFile {
-	my ($this, $name, $disturl, $arch, $medium, $localfile) = @_;
+sub addToTrackFile {
+	my ($this, $name, $pkg, $medium) = @_;
 	if (!$this->{m_reportLog}->{$medium}) {
 		$this->{m_reportLog}->{$medium}->{filename} = 
-			"$this->{m_basesubdir}->{$medium}.channel";
+			"$this->{m_basesubdir}->{$medium}.report";
 	}
-	my $project;
-	my $repo;
-	my $package;
-	if ( $disturl =~ /^obs:\/\/[^\/]*\/([^\/]*)\/([^\/]*)\/[^-]*\-(.*)$/ ) {
-		$project = $1;
-		$repo = $2;
-		$package = $3;
-	}
-	my $key = "$project::$repo";
-	unless ($this->{m_reportLog}->{$medium}->{entries}->{$key}) {
-		$this->{m_reportLog}->{$medium}->{entries}->{$key} = [
-			{
-				"project"    => $project,
-				"repository" => $repo,
-			}
-		];
-	}
-	push @{$this->{m_reportLog}->{$medium}->{entries}->{$key}},	{
-		"package" => $package,
-		"name"    => $name,
-		"localfile"  => $localfile,
-	};
+        my %hash = (
+	        "name"       => $name,
+	        "version"    => $pkg->{version},
+	        "release"    => $pkg->{release},
+	        "binaryarch" => $pkg->{arch},
+	        "buildtime"  => $pkg->{buildtime},
+	        "disturl"    => $pkg->{disturl},
+	        "localfile"  => $pkg->{repo}->{origin}.substr($pkg->{localfile}, length($pkg->{repo}->{source}))
+	);
+	$hash{"epoch"} = $pkg->{epoch} if defined($pkg->{epoch}) && $pkg->{epoch} ne "";
+	push @{$this->{m_reportLog}->{$medium}->{entries}}, \%hash;
 	return $this;
 }
 
@@ -1945,14 +1923,16 @@ sub lookUpAllPackages {
 				my %flags = RPMQ::rpmq_many(
 					"$uri",
 					'NAME',
+					'EPOCH',
 					'VERSION',
-				    'RELEASE',
+					'RELEASE',
 					'ARCH',
 					'SOURCE',
-				    'SOURCERPM',
+					'SOURCERPM',
 					'NOSOURCE',
-				    'NOPATCH',
-					'DISTURL'
+					'NOPATCH',
+					'DISTURL',
+					'BUILDTIME'
 				);
 				if(!%flags || !$flags{'NAME'} || !$flags{'RELEASE'}
 					|| !$flags{'VERSION'} || !$flags{'RELEASE'}
@@ -1977,6 +1957,7 @@ sub lookUpAllPackages {
 					# directory structure up.
 					my $package;
 					$package->{'arch'} = $arch;
+					$package->{'repo'} = $this->{m_repos}->{$r};
 					$package->{'localfile'} = $uri;
 					$package->{'disturl'} = $flags{'DISTURL'}[0];
 					my $appdata = $uri;
@@ -1986,8 +1967,10 @@ sub lookUpAllPackages {
 					# New appdata location since OBS 2.5.0
 					$appdata =~ s,[^/]*$,../appdata/$name-appdata.xml,;
 					$package->{'appdata'} = $appdata if (-s $appdata);
+					$package->{'epoch'} = $flags{'EPOCH'}[0];
 					$package->{'version'} = $flags{'VERSION'}[0];
 					$package->{'release'} = $flags{'RELEASE'}[0];
+					$package->{'buildtime'} = $flags{'BUILDTIME'}[0];
 					# needs to be a string or sort breaks later
 					$package->{'priority'} =
 						"$this->{m_repos}->{$r}->{priority}";
