@@ -124,7 +124,6 @@
 		<package name="iproute"/>
 		<package name="irqbalance"/>
 		<package name="logrotate"/>
-		<package name="lvm2"/>
 		<package name="make"/>
 		<package name="mdadm"/>
 		<package name="memtest86+"/>
