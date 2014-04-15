@@ -1042,6 +1042,11 @@ function identifyMultipath {
 	#--------------------------------------
 	udevPending
 	#======================================
+	# sleep for a while
+	#--------------------------------------
+	# make sure /etc/multipath/wwids are written
+	sleep 3
+	#======================================
 	# strip list of disk devices
 	#--------------------------------------
 	# keep only non multipath devices in the list
