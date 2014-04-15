@@ -629,9 +629,6 @@ sub openSUSEpath {
 				return $url;
 			}
 		}
-		$kiwi -> loginfo (
-			"URL: $url is neither rpm-md nor yast2\n"
-		);
 	}
 	if (! defined $quiet) {
 		$kiwi -> warning ("Couldn't resolve opensuse URL: $origurl");
