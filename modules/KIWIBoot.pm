@@ -1172,9 +1172,7 @@ sub setupInstallStick {
 	my $partid = "83";
 	my $needBiosP  = 0;
 	my $legacysize = 2;
-	if ($type->{bootfilesystem}) {
-		$bootfs = $type->{bootfilesystem};
-	} elsif ($bootloader eq 'syslinux') {
+	if ($bootloader eq 'syslinux') {
 		$bootfs = 'fat32';
 	} elsif ($bootloader eq 'yaboot') {
 		if ($lvm) {
@@ -1184,11 +1182,15 @@ sub setupInstallStick {
 		}
 	} elsif (($firmware eq "efi") || ($firmware eq "uefi")) {
 		$bootfs = 'fat16';
-		$needBiosP = 1;
 	} else {
 		$bootfs = 'ext3';
 	}
-	$type->{bootfilesystem} = $bootfs;
+	#==========================================
+	# Do we need a bios legacy partition
+	#------------------------------------------
+	if (($firmware eq "efi") || ($firmware eq "uefi")) {
+		$needBiosP = 1;
+	}
 	#==========================================
 	# setup boot partition type
 	#------------------------------------------
