@@ -750,8 +750,14 @@ sub mainTask {
 	if ($this->collectPackages()) {
 		$this->logMsg('E', "collecting packages failed!");
 	}
+
 	# Look for all products collected
-	$this->collectProducts();
+	if ($this->{m_proddata}->getInfo("NAME")) {
+		# product must be part of content file for
+		# pre-openSUSE 13.2 and SLE 12
+		$this->collectProducts();
+        }
+
 	# create meta data
 	$this->createMetadata();
 	# DUD:
