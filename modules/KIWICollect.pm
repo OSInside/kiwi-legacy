@@ -2410,7 +2410,9 @@ sub createMetadata {
 	# step 5b: create info.txt for Beta releases.
 	$this->logMsg('I', "Handling Beta information on media:");
 	my $beta_version = $this->{m_proddata}->getOpt("BETA_VERSION");
-	my $summary = $this->{m_proddata}->getInfo("LABEL");
+	my $summary = $this->{m_proddata}->getVar("PRODUCT_SUMMARY");
+        # fallbacks for pre openSUSE 13.2/SLE 12
+	$summary = $this->{m_proddata}->getInfo("LABEL") unless $summary;
 	$summary = $this->{m_proddata}->getInfo("SUMMARY") unless $summary;
 	if (defined($beta_version)) {
 		my $dist_string = $summary." ".${beta_version};
