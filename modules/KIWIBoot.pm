@@ -5469,10 +5469,10 @@ sub installBootLoader {
 	#------------------------------------------
 	my $boot_id = 1;
 	if ($this->{partids}) {
-		if ($this->{partids}{boot}) {
-			$boot_id = $this->{partids}{boot};
-		} elsif ($this->{partids}{installboot}) {
+		if ($this->{partids}{installboot}) {
 			$boot_id = $this->{partids}{installboot};
+		} elsif ($this->{partids}{boot}) {
+			$boot_id = $this->{partids}{boot};
 		}
 	}
 	if ((! $this->{bindloop}) && (-b $diskname)) {
