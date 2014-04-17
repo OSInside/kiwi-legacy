@@ -4382,7 +4382,7 @@ sub setupBootLoaderConfiguration {
 			# kernel loader command
 			#------------------------------------------
 			my $efi_suffix = '';
-			if ($config eq 'grub2-efi') {
+			if (($config eq 'grub2-efi') && ($firmware eq 'uefi')) {
 				$efi_suffix = 'efi';
 			}
 			#==========================================
