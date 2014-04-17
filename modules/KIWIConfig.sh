@@ -1709,29 +1709,59 @@ function suseSetupProduct {
 #--------------------------------------
 function baseSetRunlevel {
 	# /.../
-	# This function sets the runlevel in /etc/inittab to
-	# the specified value
+	# Set the init runlevel in /etc/inittab or the systemd
+	# default target link according to the specified value
+	# Examples:
+	#
+	# baseSetRunlevel 5
+	#   --> set initdefault to 5
+	#   --> set graphical.target as systemd default
+	#
+	# baseSetRunlevel shutdown.target
+	#   --> set shutdown.target as systemd default
+	#
 	# ----
-	local RUNLEVEL=$1
-	local target_console=/usr/lib/systemd/system/multi-user.target
-	local target_graphics=/usr/lib/systemd/system/graphical.target
-	if [ ! -f $target ];then
-		target=/lib/systemd/system/runlevel$RUNLEVEL.target
-	fi
-	case "$RUNLEVEL" in
+	local target=$1
+	local inittab=/etc/inittab
+	local systemd_system=/usr/lib/systemd/system
+	local systemd_default=/etc/systemd/system/default.target
+	local systemd_consoles=$systemd_system/multi-user.target
+	local systemd_graphics=$systemd_system/graphical.target
+	case "$target" in
 		1|2|3|5)
-			sed -i "s/id:[0123456]:initdefault:/id:$RUNLEVEL:initdefault:/" \
-			/etc/inittab
-			if test -d /etc/systemd/system; then
-				if [ $RUNLEVEL -lt 5 ];then
-					ln -sf $target_console /etc/systemd/system/default.target
+			# /.../
+			# Given target is a number; use this to update the inittab
+			# In addition check for systemd and clone the number to an
+			# appropriate systemd target
+			# ----
+			#======================================
+			# set runlevel in inittab
+			#--------------------------------------
+			if [ -e $inittab ];then
+				sed -i "s/id:[0123456]:initdefault:/id:$target:initdefault:/" \
+					$inittab
+			fi
+			#======================================
+			# clone runlevel number to systemd
+			#--------------------------------------
+			if [ -d $systemd_system ]; then
+				if [ $target -lt 5 ];then
+					ln -sf $systemd_consoles $systemd_default
 				else
-					ln -sf $target_graphics /etc/systemd/system/default.target
+					ln -sf $systemd_graphics $systemd_default
 				fi
 			fi
 		;;
 		*)
-			echo "Invalid runlevel argument: $RUNLEVEL"
+			# /.../
+			# Given target is a raw name; use this as systemd target
+			# name and setup this target name as the default target
+			# ----
+			if [ -e $systemd_system/$target ]; then
+				ln -sf $systemd_system/$target $systemd_default
+			else
+				echo "Can't find systemd target: $target"
+			fi
 		;;
 	esac
 }
