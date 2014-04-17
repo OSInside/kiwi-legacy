@@ -1108,6 +1108,9 @@ sub __hasBootDescription {
 	if ($imgType !~ /iso|pxe|oem|vmx/) {
 		return 1;
 	}
+	if ($imgType eq 'pxe') {
+		$imgType = 'net';
+	}
 	my $gdata = KIWIGlobals -> instance() -> getKiwiConfig();
 	if (! -d "$gdata->{System}/${imgType}boot") {
 		my $msg = "The required boot image description for the ";
