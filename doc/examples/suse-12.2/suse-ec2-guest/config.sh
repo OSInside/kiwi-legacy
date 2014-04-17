@@ -59,11 +59,6 @@ suse-ec2-configure --norefresh
 suseConfig
 
 #======================================
-# clone runlevel 3 to 4
-#--------------------------------------
-suseCloneRunlevel 4
-
-#======================================
 # Umount kernel filesystems
 #--------------------------------------
 baseCleanMount

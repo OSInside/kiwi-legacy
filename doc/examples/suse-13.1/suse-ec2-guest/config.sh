@@ -59,11 +59,6 @@ suseRemoveService acpid
 baseUpdateSysConfig /etc/sysconfig/network/dhcp DHCLIENT_SET_HOSTNAME yes
 
 #======================================
-# clone runlevel 3 to 4
-#--------------------------------------
-suseCloneRunlevel 4
-
-#======================================
 # Umount kernel filesystems
 #--------------------------------------
 baseCleanMount
