@@ -73,20 +73,26 @@ function baseSystemdCall {
 #--------------------------------------
 function suseInsertService {
 	# /.../
-	# Recursively insert a service. If there is a service
-	# required for this service it will be inserted first
-	# -----
+	# Insert a service using either chkconfig or systemctl
+	# Examples:
+	#
+	# suseInsertService sshd
+	#   --> enable sshd service
+	#
+	# suseInsertService sshd 35
+	#   --> enable sshd service, if sysVInit in level 3+5
+	# ----
 	local service=$1
-	if [ -f /bin/systemd ];then
+	local targets=$2
+	local systemd_system=/usr/lib/systemd/system
+	if [ -z "$targets" ];then
+		targets=on
+	fi
+	if [ -d $systemd_system ];then
 		baseSystemdCall "$service" "enable"
 	else
-		if /sbin/insserv $service;then
-			echo "Service $service inserted"
-		else
-			if ! /sbin/insserv --recursive $service;then
-				echo "$service: recursive insertion failed...skipped"
-			fi
-		fi
+		chkconfig $service off
+		chkconfig $service $targets
 	fi
 }
 
@@ -95,41 +101,19 @@ function suseInsertService {
 #--------------------------------------
 function suseRemoveService {
 	# /.../
-	# Remove a service and its dependant services
-	# using insserv -r
+	# Remove a service using either chkconfig or systemctl
+	# Example:
+	#
+	# suseRemoveService sshd
+	#   --> disable sshd service
 	# ----
 	local service=$1
-	if [ -f /bin/systemd ];then
+	local systemd_system=/usr/lib/systemd/system
+	if [ -d $systemd_system ];then
 		baseSystemdCall "$service" "disable"
 	else
-		service=/etc/init.d/$service
-		if /sbin/insserv -r $service;then
-			echo "Service $service removed"
-		else
-			if ! /sbin/insserv --recursive -r $service;then
-				echo "$service: recursive removal failed...skipped"
-			fi
-		fi
+		chkconfig $service off
 	fi
-}
-
-#======================================
-# suseActivateServices
-#--------------------------------------
-function suseActivateServices {
-	# /.../
-	# Check all services in /etc/init.d/ and activate them
-	# by calling insertService
-	# -----
-	for i in /etc/init.d/*;do
-		if [ -x $i ] && [ -f $i ];then
-			echo $i | grep -q skel
-			if [ $? = 0 ];then
-				continue
-			fi
-			suseInsertService $i
-		fi
-	done
 }
 
 #======================================
@@ -137,18 +121,33 @@ function suseActivateServices {
 #--------------------------------------
 function suseService {
 	# /.../
-	# if a service exist then enable or disable it
-	# example : suseService apache2 on
-	# example : suseService apache2 off
+	# Enable | Disable a service transparently
+	# for sysVInit and systemd
+	# Examples:
+	#
+	# suseService sshd on
+	#   --> enable sshd service
+	#
+	# suseService sshd off
+	#   --> disable sshd service
+	#
+	# suseService sshd 35
+	#   --> enable sshd service, if sysVInit in level 3+5
 	# ----
 	local service=$1
-	local action=$2
-	if [ -x /etc/init.d/$service ];then
-		if [ $action = on ];then
-			suseInsertService $service
-		elif [ $action = off ];then
-			suseRemoveService $service
-		fi
+	local target=$2
+	if [ -z "$target" ];then
+		echo "suseService: no target specified"
+		return
+	fi
+	if [ -z "$service" ];then
+		echo "suseService: no service name specified"
+		return
+	fi
+	if [ $action = off ];then
+		suseRemoveService $service
+	else
+		suseInsertService $service $action
 	fi
 }
 
@@ -176,34 +175,8 @@ function suseActivateDefaultServices {
 		kbd
 	)
 	for i in "${services[@]}";do
-		if [ -x /etc/init.d/$i ];then
-			suseInsertService $i
-		fi
+		suseInsertService $i
 	done
-}
-
-#======================================
-# suseCloneRunlevel
-#--------------------------------------
-function suseCloneRunlevel {
-	# /.../
-	# Clone the given runlevel to work in the same way
-	# as the default runlevel 3.
-	# ----
-	local clone=$1
-	if [ -z "$clone" ];then
-		echo "suseCloneRunlevel: no runlevel given... abort"
-		return 1
-	fi
-	if [ $clone = 3 ];then
-		echo "suseCloneRunlevel: can't clone myself... abort"
-		return 1
-	fi
-	if [ -d /etc/init.d/rc$clone.d ];then
-		rm -rf /etc/init.d/rc$clone.d
-	fi
-	cp -a /etc/init.d/rc3.d /etc/init.d/rc$clone.d
-	sed -i -e s"@#l$clone@l4@" /etc/inittab
 }
 
 #======================================
