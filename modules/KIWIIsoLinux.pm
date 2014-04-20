@@ -421,10 +421,8 @@ sub addBootLive {
 	#==========================================
 	# update parameter list
 	#------------------------------------------
-	if ($firmware ne 'bios') {
+	if (($firmware ne 'bios') && (-e "$src/boot/$arch/efi")) {
 		$para.= ' -eltorito-alt-boot ';
-		# FIXME: setting the size limits it, which is pretty bad
-		# $para.= " -boot-load-size $size";
 		$para.= " -b boot/$arch/efi";
 	}
 	$para.= ' -no-emul-boot -joliet-long -hide glump -hide-joliet glump';
