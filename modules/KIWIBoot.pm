@@ -3283,11 +3283,11 @@ sub setupPartIDs {
 				if (! $currentIDs{$entry}) { print $ID_FD $entry }
 			}
 		}
-		if ($this->{partids}{installboot}) {
+		if ($this->{partids}{installroot}) {
 			$entry = "kiwi_InstallRootPart=\"$this->{partids}{installroot}\"\n";
 			if (! $currentIDs{$entry}) { print $ID_FD $entry }
 		}
-		if ($this->{partids}{installroot}) {
+		if ($this->{partids}{installboot}) {
 			$entry = "kiwi_InstallBootPart=\"$this->{partids}{installboot}\"\n";
 			if (! $currentIDs{$entry}) { print $ID_FD $entry }
 		}
@@ -4276,7 +4276,9 @@ sub setupBootLoaderConfiguration {
 	# join common options, finish with '\n'
 	#------------------------------------------
 	$cmdline .= " $extra" if $extra;
-	$cmdline .= " COMBINED_IMAGE=yes" if $imgtype eq "split";
+	if (($imgtype) && ($imgtype eq 'split')) {
+		$cmdline .= " COMBINED_IMAGE=yes";
+	}
 	$cmdline .= " showopts\n";
 	# ensure exactly one space at start
 	$cmdline =~ s/^\s*/ /;
@@ -4646,7 +4648,7 @@ sub setupBootLoaderConfiguration {
 		# boot id in grub context
 		#------------------------------------------
 		my $boot_id = 0;
-		if ($this->{partids}) {
+		if (($this->{partids}) && ($this->{partids}{boot})) {
 			$boot_id = $this->{partids}{boot} - 1;
 		}
 		#==========================================
@@ -5620,7 +5622,7 @@ sub installBootLoader {
 		# re-init bootid, legacy grub starts at 0
 		#------------------------------------------
 		$boot_id = 0;
-		if ($this->{partids}) {
+		if (($this->{partids}) && ($this->{partids}{boot})) {
 			$boot_id = $this->{partids}{boot} - 1;
 		}
 		#==========================================
@@ -6856,8 +6858,6 @@ sub setupFilesystem {
 	my $kiwi   = $this->{kiwi};
 	my $xml    = $this->{xml};
 	my $cmdL   = $this->{cmdL};
-	my $opts   = $xml -> getImageType() -> getFSMountOptions();
-	my $zfsopts= $xml -> getImageType() -> getZFSOptions();
 	if (! $type->{fsnocheck}) {
 		$type->{fsnocheck} = 'true';
 	}
@@ -6942,10 +6942,20 @@ sub setupFilesystem {
 		};
 		/^zfs/          && do {
 			$kiwi -> info ("Creating zfs $name filesystem");
+			my $opts;
+			my $zfsopts;
+			if ($xml) {
+				$opts = $xml -> getImageType() -> getFSMountOptions();
+				$zfsopts = $xml -> getImageType() -> getZFSOptions();
+			}
 			if ($opts) {
-				$status = KIWIQX::qxx ("zpool create $opts kiwipool $device 2>&1");
+				$status = KIWIQX::qxx (
+					"zpool create $opts kiwipool $device 2>&1"
+				);
 			} else {
-				$status = KIWIQX::qxx ("zpool create kiwipool $device 2>&1");
+				$status = KIWIQX::qxx (
+					"zpool create kiwipool $device 2>&1"
+				);
 			}
 			$result = $? >> 8;
 			if ($result == 0) {
