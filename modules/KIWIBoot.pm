@@ -619,7 +619,6 @@ sub setupInstallCD {
 	my $isxen     = $this->{isxen};
 	my $lvm       = $this->{lvm};
 	my $xml       = $this->{xml};
-	my $hybrid    = $xml -> getImageType() -> getHybrid();
 	my $firmware  = $this->{firmware};
 	my $md5name   = $system;
 	my $destdir   = dirname ($initrd);
@@ -638,6 +637,13 @@ sub setupInstallCD {
 	my $haveDiskDevice;
 	my $version;
 	my $FD;
+	my $hybrid;
+	#==========================================
+	# Check for hybrid setup
+	#------------------------------------------
+	if ($xml) {
+		$hybrid = $xml -> getImageType() -> getHybrid();
+	}
 	#==========================================
 	# Check for disk device
 	#------------------------------------------
