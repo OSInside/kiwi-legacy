@@ -252,6 +252,7 @@ sub createCache {
 		print $metafd "$name-$pver.$arch"."\n";
 	}
 	$metafd -> close();
+	undef $info;
 	#==========================================
 	# Prepare cache
 	#------------------------------------------
