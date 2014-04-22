@@ -8207,7 +8207,7 @@ function createHybridPersistent {
 function callPartitioner {
 	local input=$1
 	if [ $PARTITIONER = "fdasd" ];then
-		Echo "Repartition the disk according to real geometry [ fdasd ]"
+		Echo "Partition the disk according to real geometry [ fdasd ]"
 		echo "w" >> $input
 		echo "q" >> $input
 		fdasd $imageDiskDevice < $input 1>&2
@@ -8238,7 +8238,7 @@ function createPartitionerInput {
 		createFDasdInput $@
 	else
 		updatePartitionTable $imageDiskDevice
-		Echo "Repartition the disk according to real geometry [ parted ]"
+		Echo "Partition the disk according to real geometry [ parted ]"
 		partedInit $imageDiskDevice
 		partedSectorInit $imageDiskDevice
 		createPartedInput $imageDiskDevice $@
