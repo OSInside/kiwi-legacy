@@ -45,6 +45,7 @@ test -z "$ELOG_EXCEPTION" && export ELOG_EXCEPTION=/dev/console
 #======================================
 # Exports (General)
 #--------------------------------------
+test -z "$RECOVERY_THEME"     && export RECOVERY_THEME=openSUSE
 test -z "$splitroot_size"     && export splitroot_size=512
 test -z "$arch"               && export arch=$(uname -m)
 test -z "$haveDASD"           && export haveDASD=0
@@ -1147,7 +1148,7 @@ function installBootLoaderGrub2Recovery {
 		method="configfile /boot/grub2/grub.cfg"
 	fi
 	cat > /etc/grub.d/40_custom <<- EOF
-		echo "menuentry 'Recovery' --class opensuse --class os {"
+		echo "menuentry 'Recovery' --class os {"
 		echo "	set root='hd0,$recoid'"
 		echo "	$method"
 		echo "}"
@@ -1705,6 +1706,7 @@ function setupBootLoaderGrub2Recovery {
 	local kernel=vmlinuz  # this is a copy of the kiwi linux.vmx file
 	local initrd=initrd   # this is a copy of the kiwi initrd.vmx file
 	local conf=$destsPrefix/boot/grub2/grub.cfg
+	local theme=$RECOVERY_THEME
 	#======================================
 	# setup ID device names
 	#--------------------------------------
@@ -1773,20 +1775,20 @@ function setupBootLoaderGrub2Recovery {
 				terminal gfxterm
 			fi
 		fi
-		if loadfont /boot/grub2/themes/openSUSE/ascii.pf2;then
-			loadfont /boot/grub2/themes/openSUSE/DejaVuSans-Bold14.pf2
-			loadfont /boot/grub2/themes/openSUSE/DejaVuSans10.pf2
-			loadfont /boot/grub2/themes/openSUSE/DejaVuSans12.pf2
-			loadfont /boot/grub2/themes/openSUSE/ascii.pf2
-			set theme=/boot/grub2/themes/openSUSE/theme.txt
-			set bgimg=/boot/grub2/themes/openSUSE/background.png
+		if loadfont /boot/grub2/themes/$theme/ascii.pf2;then
+			loadfont /boot/grub2/themes/$theme/DejaVuSans-Bold14.pf2
+			loadfont /boot/grub2/themes/$theme/DejaVuSans10.pf2
+			loadfont /boot/grub2/themes/$theme/DejaVuSans12.pf2
+			loadfont /boot/grub2/themes/$theme/ascii.pf2
+			set theme=/boot/grub2/themes/$theme/theme.txt
+			set bgimg=/boot/grub2/themes/$theme/background.png
 			background_image -m stretch \$bgimg
 		fi
 		set timeout=30
 	EOF
 	if xenServer $kernel $mountPrefix;then
 		cat >> $conf <<- EOF
-		menuentry 'Recover/Repair System' --class opensuse --class os {
+		menuentry 'Recover/Repair System' --class os {
 			set root='hd0,$recoid'
 			echo Loading Xen...
 			multiboot /boot/xen.gz dummy
@@ -1796,7 +1798,7 @@ function setupBootLoaderGrub2Recovery {
 			echo Loading $initrd...
 			module /boot/$initrd dummy
 		}
-		menuentry 'Restore Factory System' --class opensuse --class os {
+		menuentry 'Restore Factory System' --class os {
 			set root='hd0,$recoid'
 			echo Loading Xen...
 			multiboot /boot/xen.gz dummy
@@ -1809,7 +1811,7 @@ function setupBootLoaderGrub2Recovery {
 		EOF
 	else
 		cat >> $conf <<- EOF
-		menuentry 'Recover/Repair System' --class opensuse --class os {
+		menuentry 'Recover/Repair System' --class os {
 			set root='hd0,$recoid'
 			echo Loading $kernel...
 			set gfxpayload=keep
@@ -1817,7 +1819,7 @@ function setupBootLoaderGrub2Recovery {
 			echo Loading $initrd...
 			initrd /boot/$initrd
 		}
-		menuentry 'Restore Factory System' --class opensuse --class os {
+		menuentry 'Restore Factory System' --class os {
 			set root='hd0,$recoid'
 			echo Loading $kernel...
 			set gfxpayload=keep
