@@ -1425,7 +1425,7 @@ sub __checkCorrectRootFSPermissons {
 	my $kiwi = $this -> {kiwi};
 	my $cmdL = $this -> {cmdArgs};
 	my $tree = $cmdL -> getConfigDir();
-	my @dirs = qw(bin etc lib proc root sbin usr var);
+	my @dirs = qw(bin etc lib proc sbin usr var);
 	my $msg;
 	if (! $tree) {
 		return 1;
