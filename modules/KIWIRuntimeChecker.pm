@@ -1439,10 +1439,10 @@ sub __checkCorrectRootFSPermissons {
 		my $user_name = getpwuid($uid);
 		my $group_name = getgrgid($gid);
 		if (($uid != 0) || ($gid != 0)) {
-			$msg = "Image tree not LSB compatible, check for $path ";
-			$msg.= "returned owner/group '$user_name/$group_name' ";
-			$msg.= "returned owner/group IDs '$uid/$gid' ";
-			$msg.= "and not 'root/root'";
+			$msg = "Image tree check for $path ";
+			$msg.= "returned owner/group name '$user_name/$group_name' ";
+			$msg.= "with owner/group IDs '$uid/$gid'. ";
+			$msg.= "Expected 'root/root with 0/0 IDs'";
 			$kiwi -> error ($msg);
 			$kiwi -> failed ();
 			return;
