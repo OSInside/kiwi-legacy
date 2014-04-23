@@ -8569,9 +8569,17 @@ function createPartedInput {
 				partid=${pcmds[$index + 1]}
 				flagok=1
 				if [ "$ptypex" = "82" ];then
-					# suse parted is not able to do this
-					# cmdq="$cmdq set $partid swap on"
-					flagok=0
+					if [[ $kiwi_iname =~ boot-suse ]];then
+						# /.../
+						# suse parted is not able to set swap flag. I consider
+						# this as a bug in the suse parted tool. In order to
+						# proceed here kiwi uses suse parted 'type' command
+						# extension.
+						#
+						cmdq="$cmdq set $partid type 0x$ptypex"
+					else
+						cmdq="$cmdq set $partid swap on"
+					fi
 				elif [ "$ptypex" = "fd" ];then
 					cmdq="$cmdq set $partid raid on"
 				elif [ "$ptypex" = "8e" ];then
