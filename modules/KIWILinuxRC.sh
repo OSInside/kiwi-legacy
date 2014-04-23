@@ -5250,6 +5250,11 @@ function partedGetPartitionID {
 	local parted=$(parted -m -s $1 print | grep -v Warning:)
 	local diskhd=$(echo $parted | head -n 3 | tail -n 2 | head -n 1)
 	local plabel=$(echo $diskhd | cut -f6 -d:)
+	if [ -z "$plabel" ];then
+		# can't find a partition label for this disk
+		echo xx
+		return
+	fi
 	if [[ $plabel =~ gpt ]];then
 		plabel=gpt
 	fi
