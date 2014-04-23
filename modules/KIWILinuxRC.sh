@@ -5346,6 +5346,7 @@ function partedGetPartitionID {
 	if [ -z "$plabel" ];then
 		# can't find a partition label for this disk
 		echo xx
+		return
 	fi
 	if [[ $plabel =~ gpt ]];then
 		plabel=gpt
