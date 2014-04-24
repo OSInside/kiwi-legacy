@@ -9041,7 +9041,7 @@ function pxePartitionInputGeneric {
 			partID=8e
 			pname=lxlvm
 		fi
-		if [ $partID = "fd" ];then
+		if [ $partID = "fd" ] || [ ! -z "$RAID" ];then
 			partID=fd
 			pname=lxroot
 		fi
