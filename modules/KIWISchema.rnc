@@ -1651,7 +1651,7 @@ div {
 		## type of the bootloader might overwrite this setting
 		## e.g for the syslinux loader fat is required
 		attribute bootfilesystem {
-			"ext2" | "ext3" | "fat32" | "fat16"
+			"ext2" | "ext3" | "ext4" | "fat32" | "fat16"
 		}
 	k.type.flags.attribute =
 		## Specifies flags for the image type. This could be compressed
