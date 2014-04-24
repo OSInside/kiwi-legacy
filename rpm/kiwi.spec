@@ -72,7 +72,6 @@ Requires:       checkmedia
 Requires:       coreutils
 Requires:       kiwi-tools >= %{version}
 Requires:       libxslt
-Requires:       git
 %if 0%{?rhel_version}
 # RHEL/CentOS seem to require the release info as well,
 # while matching the version. So the >=
@@ -114,6 +113,7 @@ Recommends:     perl-satsolver >= 0.42
 Recommends:     jing
 Recommends:     zypper
 Recommends:     lxc
+Recommends:     git
 %endif
 %if 0%{?suse_version} > 1140
 Recommends:     db45-utils
