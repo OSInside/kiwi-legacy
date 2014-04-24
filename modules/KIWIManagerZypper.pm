@@ -80,12 +80,14 @@ sub new {
 		my ($uname, $pass) = $repo -> getCredentials();
 		if ($uname) {
 			$kiwi -> info ('Creating credentials data');
+			$repo -> getPath() =~ /credentials=(\w+)/;
+			my $credFile = $1;
 			my $credDir = "$dataDir/credentials.d";
 			mkdir $credDir;
 			$zconfig->newval('main', 'credentials.global.dir', $credDir);
 			$zconfig->RewriteConfig();
 			my $CREDFILE = FileHandle -> new();
-			if (! $CREDFILE -> open (">$credDir/kiwiRepoCredentials")) {
+			if (! $CREDFILE -> open (">$credDir/$credFile")) {
 				my $msg = 'Unable to open credetials file for write '
 				. "in $credDir";
 				$kiwi -> error ($msg);
@@ -316,7 +318,7 @@ sub setupInstallationSource {
 				if ($val =~ /^'\//) {
 					$val =~ s/^'(.*)'$/"file:\/\/$1"/
 				}
-				if ($val =~ /^'https:/) {
+				if ($val =~ /^'https:/ && ! ($val =~ /credentials=\w/)) {
 				    chop $val;
 					$val .= "?credentials=kiwiRepoCredentials'";
 				}
