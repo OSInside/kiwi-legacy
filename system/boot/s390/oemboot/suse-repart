@@ -484,10 +484,7 @@ function OEMRepartLVM {
 		#======================================
 		# setup all free volume name
 		#--------------------------------------
-		export allFreeVolume=LVRoot
-		if [ ! -z "$kiwi_allFreeVolume" ];then
-			allFreeVolume=$kiwi_allFreeVolume
-		fi
+		export allFreeVolume=$(getAllFreeVolume)
 		#======================================
 		# close open device mappings
 		#--------------------------------------
@@ -583,10 +580,7 @@ function OEMPartitionInstall {
 		#======================================
 		# setup all free volume name
 		#--------------------------------------
-		export allFreeVolume=LVRoot
-		if [ ! -z "$kiwi_allFreeVolume" ];then
-			allFreeVolume=$kiwi_allFreeVolume
-		fi
+		export allFreeVolume=$(getAllFreeVolume)
 		#======================================
 		# extend mdraid array if required
 		#--------------------------------------
@@ -990,4 +984,18 @@ function getFreeDiskBytes {
 	done
 	rest_Bytes=$((rest_Bytes - part_Bytes))
 	echo $rest_Bytes
+}
+
+#======================================
+# getAllFreeVolume
+#--------------------------------------
+function getAllFreeVolume {
+	local volume
+	local allFree=$(grep kiwi_allFreeVolume /.profile)
+	if [ ! -z "$allFree" ];then
+		volume=$(echo $allFree| cut -f3- -d_ | cut -f1 -d=)
+		echo $volume
+		return
+	fi
+	echo LVRoot
 }

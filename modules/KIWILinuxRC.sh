@@ -3049,7 +3049,7 @@ function updateRootDeviceFstab {
 		local volpath
 		local mpoint
 		local mppath
-		for i in $(cat /.profile | grep kiwi_LVM_);do
+		for i in $(cat /.profile | grep -E 'kiwi_LVM_|kiwi_allFreeVolume');do
 			variable=$(echo $i|cut -f1 -d=)
 			volume=$(echo $i| cut -f3- -d_ | cut -f1 -d=)
 			content=$(eval echo \$$variable)
@@ -3068,11 +3068,6 @@ function updateRootDeviceFstab {
 				echo "$mppath /$mpoint $FSTYPE $opts 1 2" >> $nfstab
 			fi
 		done
-		if [ ! -z $kiwi_allFreeVolume ];then
-			mppath="/dev/$kiwi_lvmgroup/$kiwi_allFreeVolume"
-			mpoint=$(echo $kiwi_allFreeVolume | tr -d LV | tr _ /)
-			echo "$mppath /$mpoint $FSTYPE $opts 1 2" >> $nfstab
-		fi
 	fi
 }
 #======================================
@@ -6212,7 +6207,7 @@ function mountSystemStandard {
 		mount $mountDevice /mnt >/dev/null
 	fi
 	if [ "$haveLVM" = "yes" ];then
-		for i in $(cat /.profile | grep kiwi_LVM_);do
+		for i in $(cat /.profile | grep -E 'kiwi_LVM_|kiwi_allFreeVolume');do
 			variable=$(echo $i|cut -f1 -d=)
 			volume=$(echo $i| cut -f3- -d_ | cut -f1 -d=)
 			content=$(eval echo \$$variable)
@@ -6231,11 +6226,6 @@ function mountSystemStandard {
 				kiwiMount "/dev/$kiwi_lvmgroup/$volume" "/mnt/$mpoint"
 			fi
 		done
-		if [ ! -z $kiwi_allFreeVolume ];then
-			mppath="/dev/$kiwi_lvmgroup/$kiwi_allFreeVolume"
-			mpoint=$(echo $kiwi_allFreeVolume | tr -d LV | tr _ /)
-			kiwiMount "$mppath" "/mnt/$mpoint"
-		fi
 	fi
 	return $?
 }
@@ -7351,7 +7341,7 @@ function cleanImage {
 	local content
 	local volpath
 	local mpoint
-	for i in $(cat /.profile | grep kiwi_LVM_);do
+	for i in $(cat /.profile | grep -E 'kiwi_LVM_|kiwi_allFreeVolume');do
 		variable=$(echo $i|cut -f1 -d=)
 		volume=$(echo $i| cut -f3- -d_ | cut -f1 -d=)
 		content=$(eval echo \$$variable)
@@ -7369,10 +7359,6 @@ function cleanImage {
 			umount /$mpoint 1>&2
 		fi
 	done
-	if [ ! -z $kiwi_allFreeVolume ];then
-		mpoint=$(echo $kiwi_allFreeVolume | tr -d LV | tr _ /)
-		umount /$mpoint 1>&2
-	fi
 	#======================================
 	# umount image boot partition if any
 	#--------------------------------------
