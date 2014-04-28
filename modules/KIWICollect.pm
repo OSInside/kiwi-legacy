@@ -2073,7 +2073,7 @@ sub getArchList {
 		$packOptions->{'onlyarch'} =~ s{^\s*,}{};
 		push @archs, split(/,\s*/, $packOptions->{'onlyarch'});
 		$$nofallbackref = 1;
-		# onlyarch superceeds the following options !
+		# onlyarch supersedes the following options !
 		return @archs;
 	}
 	if(defined($packOptions->{'addarch'})) {
@@ -2183,7 +2183,7 @@ sub collectProducts {
 			$found_product = 1;
 
 			# overwrite data with informations from prod file.
-			my $msg = 'Found product file, superseeding data from config '
+			my $msg = 'Found product file, superseding data from config '
 				. 'file variables';
 			$this->logMsg('I', $msg);
 			$this->logMsg('I', "set release to ".$release);
