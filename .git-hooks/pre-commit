@@ -37,6 +37,7 @@ my @kiwiModules = qw (
 	KIWIImageFormat.pm
 	KIWIImage.pm
 	KIWIIsoLinux.pm
+	KIWILicensePlugin.pm
 	KIWILiveTreePlugin.pm
 	KIWILocator.pm
 	KIWILog.pm
@@ -220,6 +221,7 @@ my @notClean1 = qw (
 	KIWIImageFormat.pm
 	KIWIImage.pm
 	KIWIIsoLinux.pm
+	KIWILicensePlugin.pm
 	KIWILiveTreePlugin.pm
 	KIWILocator.pm
 	KIWILog.pm
@@ -398,6 +400,7 @@ my @notClean2 = qw (
 	KIWIImageFormat.pm
 	KIWIImage.pm
 	KIWIIsoLinux.pm
+	KIWILicensePlugin.pm
 	KIWILiveTreePlugin.pm
 	KIWILocator.pm
 	KIWILog.pm
@@ -462,6 +465,7 @@ my @notClean3 = qw (
 	KIWIImageFormat.pm
 	KIWIImage.pm
 	KIWIIsoLinux.pm
+	KIWILicensePlugin.pm
 	KIWILiveTreePlugin.pm
 	KIWILog.pm
 	KIWIManager.pm
@@ -509,6 +513,7 @@ my @notClean4 = qw (
 	KIWIContentPlugin.pm
 	KIWIDescrPlugin.pm
 	KIWIEulaPlugin.pm
+	KIWILicensePlugin.pm
 	KIWILiveTreePlugin.pm
 	KIWIMiniIsoPlugin.pm
 	KIWIPatternsPlugin.pm
@@ -521,6 +526,7 @@ my @notClean5 = qw (
 	KIWIDescrPlugin.pm
 	KIWIEulaPlugin.pm
 	KIWILiveTreePlugin.pm
+	KIWILicensePlugin.pm
 	KIWIMiniIsoPlugin.pm
 	KIWIPatternsPlugin.pm
 );
