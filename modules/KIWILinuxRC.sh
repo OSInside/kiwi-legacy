@@ -8796,32 +8796,27 @@ function resizeFilesystem {
 	fi
 	resize_lucks="luksResize $deviceResize"
 	if [ "$FSTYPE" = "reiserfs" ];then
-		Echo "Resize Reiser filesystem to full partition space..."
 		resize_fs="resize_reiserfs -q $deviceResize"
 		check="reiserfsck -y $deviceResize"
 	elif [ "$FSTYPE" = "ext2" ];then
-		Echo "Resize EXT2 filesystem to full partition space..."
 		resize_fs="resize2fs -f -F -p $deviceResize"
 		check="e2fsck -p $deviceResize"
 		if [ $ramdisk -eq 1 ];then
 			resize_fs="resize2fs -f $deviceResize"
 		fi
 	elif [ "$FSTYPE" = "ext3" ];then
-		Echo "Resize EXT3 filesystem to full partition space..."
 		resize_fs="resize2fs -f -F -p $deviceResize"
 		check="e2fsck -p $deviceResize"
 		if [ $ramdisk -eq 1 ];then
 			resize_fs="resize2fs -f $deviceResize"
 		fi
 	elif [ "$FSTYPE" = "ext4" ];then
-		Echo "Resize EXT4 filesystem to full partition space..."
 		resize_fs="resize2fs -f -F -p $deviceResize"
 		check="e2fsck -p $deviceResize"
 		if [ $ramdisk -eq 1 ];then
 			resize_fs="resize2fs -f $deviceResize"
 		fi
 	elif [ "$FSTYPE" = "btrfs" ];then
-		Echo "Resize BTRFS filesystem to full partition space..."
 		resize_fs="mount $deviceResize $mnt &&"
 		if lookup btrfs &>/dev/null;then
 			resize_fs="$resize_fs btrfs filesystem resize max $mnt;umount $mnt"
@@ -8830,31 +8825,27 @@ function resizeFilesystem {
 		fi
 		check="btrfsck $deviceResize"
 	elif [ "$FSTYPE" = "xfs" ];then
-		Echo "Resize XFS filesystem to full partition space..."
 		resize_fs="mount $deviceResize $mnt &&"
 		resize_fs="$resize_fs xfs_growfs $mnt;umount $mnt"
 		check="xfs_check $deviceResize"
 	elif [ "$FSTYPE" = "zfs" ];then
 		local device=$(getDiskID $deviceResize)
-		Echo "Resize ZFS filesystem to full partition space..."
 		resize_fs="zpool import kiwipool && udevPending &&"
 		resize_fs="$resize_fs zpool online -e kiwipool $device;"
 		resize_fs="$resize_fs zpool export kiwipool"
 	else
 		# don't know how to resize this filesystem
+		Echo "Don't know how to resize ${FSTYPE}... skip it"
 		return
 	fi
 	if [ -z "$callme" ];then
 		if [ $ramdisk -eq 0 ] && [ ! -z "$check" ];then
-			$check
+			Echo "Checking $FSTYPE filesystem on ${deviceResize}..."
+			eval $check
 		fi
-		if [ $ramdisk -eq 0 ];then
-			eval $resize_lucks
-			eval $resize_fs
-		else
-			eval $resize_lucks
-			eval $resize_fs
-		fi
+		Echo "Resizing $FSTYPE filesystem on ${deviceResize}..."
+		eval $resize_lucks
+		eval $resize_fs
 		if [ ! $? = 0 ];then
 			systemException \
 				"Failed to resize/check filesystem" \
