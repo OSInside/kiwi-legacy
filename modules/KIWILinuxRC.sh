@@ -8827,7 +8827,7 @@ function resizeFilesystem {
 	elif [ "$FSTYPE" = "xfs" ];then
 		resize_fs="mount $deviceResize $mnt &&"
 		resize_fs="$resize_fs xfs_growfs $mnt;umount $mnt"
-		check="xfs_check $deviceResize"
+		check="xfs_repair -n $deviceResize"
 	elif [ "$FSTYPE" = "zfs" ];then
 		local device=$(getDiskID $deviceResize)
 		resize_fs="zpool import kiwipool && udevPending &&"
