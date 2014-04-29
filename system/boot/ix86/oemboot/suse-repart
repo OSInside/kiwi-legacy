@@ -661,7 +661,7 @@ function OEMRepart {
 	#--------------------------------------
 	if [ -z "$DONT_PARTITION" ] && [ $swapsize -gt 0 ]; then
 		if partitionSize $imageSwapDevice &>/dev/null;then
-			Echo "Activating swap space on $imageSwapDevice"
+			Echo "Creating swap space on $imageSwapDevice"
 			if ! mkswap $imageSwapDevice 1>&2;then
 				systemException "Failed to create swap signature" "reboot"
 			fi
