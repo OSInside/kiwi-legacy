@@ -1,5 +1,5 @@
 ################################################################
-# Copyright (c) 2008 Jan-Christoph Bornschlegel, SUSE LLC
+# Copyright (c) 2014 SUSE
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -16,247 +16,185 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
 #
 ################################################################
-
-#================
-# FILE          : KIWIInstSourceBasePlugin.pm
-#----------------
-# PROJECT       : openSUSE Build-Service
-# COPYRIGHT     : (c) 2006 SUSE LINUX Products GmbH, Germany
-#               :
-# AUTHOR        : Jan-Christoph Bornschlegel <jcborn@suse.de>
-#               :
-# BELONGS TO    : Operating System images
-#               :
-# DESCRIPTION   : Base class for a loadable plugin which creates
-#               : a certain type of metadata
-#               :
-# STATUS        : Development
-#----------------
-
 package KIWIBasePlugin;
 
 use strict;
+use warnings;
 
-
-sub new
-{
-  # ...
-  # Create a new KIWIInstSourceBasePlugin object which creates
-  # one specific type of metadata
-  # ---
-  my $class = shift;
-  
-  my $this  = {
-    m_handler	  => undef, # know the handler object
-    m_name	  => "KIWIBasePlugin", # name of the plugin (just sound nice)
-    m_order	  => undef, # order number, selects execution time
-    m_requireddirs => [],    # list of directories required before execution
-    m_descr	  => [],    # plaintext description of what the plugin does
-    m_requires	  => [],    # list of required packages for the plugin
-    m_ready	  => 0,	    # execution ready flag. Must be true to enable execute()
-    m_collect	  => 0,	    # reference to KIWICollect object
-  };
-  bless ($this, $class);
-
-  $this->{m_handler} = shift;
-  if(not ref($this->{m_handler})) {
-    return undef;
-  }
-  $this->{m_collect} = $this->{m_handler}->collect();
-
-  return $this;
-}
-# /constructor
-
-
-
-# access method for name:
-sub name
-{
-  my $this = shift;
-  if(not ref($this)) {
-    return undef;
-  }
-  my $oldname = $this->{m_name};
-  if(@_) {
-    $this->{m_name} = shift;
-  }
-  return $oldname;
+sub new {
+	my $class = shift;
+	my $this  = {
+		m_handler     => undef,
+		m_name        => "KIWIBasePlugin",
+		m_order       => undef,
+		m_requireddirs=> [],
+		m_descr       => [],
+		m_requires    => [],
+		m_ready       => 0,
+		m_collect     => 0
+	};
+	bless ($this, $class);
+	$this->{m_handler} = shift;
+	if (! ref($this->{m_handler})) {
+		return;
+	}
+	$this->{m_collect} = $this->{m_handler}->collect();
+	return $this;
 }
 
-
-
-# access method for order:
-sub order
-{
-  my $this = shift;
-  if(not ref($this)) {
-    return undef;
-  }
-  my $oldorder = $this->{m_order};
-  if(@_) {
-    $this->{m_order} = shift;
-  }
-  return $oldorder;
+sub name {
+	my $this = shift;
+	my $name = shift;
+	if (! ref($this)) {
+		return;
+	}
+	my $oldname = $this->{m_name};
+	if($name) {
+		$this->{m_name} = $name;
+	}
+	return $oldname;
 }
 
-
-
-# access method for readyness:
-sub ready
-{
-  my $this = shift;
-  if(not ref($this)) {
-    return undef;
-  }
-  my $oldready = $this->{m_ready};
-  if(@_) {
-    $this->{m_ready} = shift;
-  }
-  return $oldready;
+sub order {
+	my $this  = shift;
+	my $order = shift;
+	if (! ref($this)) {
+		return;
+	}
+	my $oldorder = $this->{m_order};
+	if($order) {
+		$this->{m_order} = $order;
+	}
+	return $oldorder;
 }
 
-
-
-# access method for required directories:
-sub requiredDirs
-{
-  my $this = shift;
-  if(not ref($this)) {
-    return undef;
-  }
-  my @oldrd = @{$this->{m_requireddirs}};
-  foreach my $entry(@_) {
-    push @{$this->{m_requireddirs}}, $entry;
-  }
-  return @oldrd;
+sub ready {
+	my $this  = shift;
+	my $ready = shift;
+	if (! ref($this)) {
+		return;
+	}
+	my $oldready = $this->{m_ready};
+	if($ready) {
+		$this->{m_ready} = $ready;
+	}
+	return $oldready;
 }
 
-
-
-# access method for description
-sub description
-{
-  my $this = shift;
-  if(not ref($this)) {
-    return undef;
-  }
-  my @olddesc = $this->{m_descr};
-  foreach my $entry(@_) {
-    push @{$this->{m_descr}}, $entry;
-  }
-  return @olddesc;
+sub requiredDirs {
+	my @params = @_;
+	my $this = shift @params;
+	my @dirs = @params;
+	if (! ref($this)) {
+		return;
+	}
+	my @oldrd = @{$this->{m_requireddirs}};
+	foreach my $entry(@params) {
+		push @{$this->{m_requireddirs}}, $entry;
+	}
+	return @oldrd;
 }
 
-
-
-# access method for requirements
-sub requires
-{
-  my $this = shift;
-  if(not ref($this)) {
-    return undef;
-  }
-  my @oldreq = $this->{m_requires};
-  foreach my $entry(@_) {
-    push @{$this->{m_requires}}, $entry;
-  }
-  return @oldreq;
+sub description {
+	my @params = @_;
+	my $this = shift @params;
+	my @descr= @params;
+	if (! ref($this)) {
+		return;
+	}
+	my @olddesc = $this->{m_descr};
+	foreach my $entry(@descr) {
+		push @{$this->{m_descr}}, $entry;
+	}
+	return @olddesc;
 }
 
-
-
-# access method for handler
-sub handler
-{
-  my $this = shift;
-  if(not ref($this)) {
-    return undef;
-  }
-  return $this->{m_handler};
+sub requires {
+	my @params = @_;
+	my $this = shift;
+	my @reqs = @params;
+	if (! ref($this)) {
+		return;
+	}
+	my @oldreq = $this->{m_requires};
+	foreach my $entry(@reqs) {
+		push @{$this->{m_requires}}, $entry;
+	}
+	return @oldreq;
 }
 
-
-
-# access method for collect
-sub collect
-{
-  my $this = shift;
-  if(not ref($this)) {
-    return undef;
-  }
-  return $this->{m_collect};
+sub handler {
+	my $this = shift;
+	if (! ref($this)) {
+		return;
+	}
+	return $this->{m_handler};
 }
 
-
-
-# interface to KIWICollect::logMsg
-sub logMsg
-{
-  my $this = shift;
-  if(not ref($this)) {
-    return undef;
-  }
-  my $type = shift;
-  my $msg = shift;
-  if(not defined($type) or not defined($msg)) {
-    return undef;
-  }
-
-  $this->{m_collect}->logMsg($type, $msg);
+sub collect {
+	my $this = shift;
+	if (! ref($this)) {
+		return;
+	}
+	return $this->{m_collect};
 }
 
-# method to distinguish debugmedia and ftp media subdirectories.
-# This is needed in several different plugins.
-sub getSubdirLists
-{
-  my $this = shift;
-  if(not ref($this)) {
-    return undef;
-  }
+sub logMsg {
+	my $this = shift;
+	if (! ref($this)) {
+		return;
+	}
+	my $type = shift;
+	my $msg = shift;
+	if ((! defined($type)) || (! defined($msg))) {
+		return;
+	}
+	$this->{m_collect}->logMsg($type, $msg);
+	return $this;
+}
 
-  my @ret = ();
-  my $coll = $this->{m_collect};
-  my $dbm = $coll->productData()->getOpt("DEBUGMEDIUM");
-  my $flavor = $coll->productData()->getVar("FLAVOR");
-  my $basesubdirs = $coll->basesubdirs();
-  my @paths = values(%{$basesubdirs});
-  @paths = grep { $_ =~ /[^0]$/ } @paths; # remove Media0
-  #@paths = sort @paths; # sort it
-
-  my %path = map { $_ => 1 } @paths;
-
-  # case 1: FTP tree, all subdirs get a separate call.
-  if($flavor =~ m{ftp}i) {
-    my @d = sort(keys(%path));
-    foreach(@d) {
-      my @tmp;
-      push @tmp, $_;
-      push @ret, \@tmp;
-    }
-  }
-  # case 2: non-ftp tree, may have separate DEBUGMEDIUM specified
-  elsif($dbm >= 2) {
-    my @deb;
-    my @rest;
-    foreach my $d(keys(%path)) {
-      if($d =~ m{.*$dbm$}) {
-       push @deb, $d;
-      }
-      else {
-       push @rest, $d;
-      }
-    }
-    push @ret, \@deb;
-    push @ret, \@rest;
-  }
-  else {
-    my @d = keys(%path);
-    push @ret, \@d;
-  }
-
-  return @ret;
+sub getSubdirLists {
+	# ...
+	# method to distinguish debugmedia and ftp media subdirectories.
+	# ---
+	my $this = shift;
+	if (! ref($this)) {
+		return;
+	}
+	my @ret = ();
+	my $coll = $this->{m_collect};
+	my $dbm = $coll->productData()->getOpt("DEBUGMEDIUM");
+	my $flavor = $coll->productData()->getVar("FLAVOR");
+	my $basesubdirs = $coll->basesubdirs();
+	my @paths = values(%{$basesubdirs});
+	@paths = grep { $_ =~ /[^0]$/x } @paths; # remove Media0
+	my %path = map { $_ => 1 } @paths;
+	if($flavor =~ m{ftp}i) {
+		# 1: FTP tree, all subdirs get a separate call.
+		my @d = sort(keys(%path));
+		foreach(@d) {
+			my @tmp;
+			push @tmp, $_;
+			push @ret, \@tmp;
+		}
+	} elsif($dbm >= 2) {
+		# 2: non-ftp tree, may have separate DEBUGMEDIUM specified
+		my @deb;
+		my @rest;
+		foreach my $d(keys(%path)) {
+			if ($d =~ m{.*$dbm$}x) {
+				push @deb, $d;
+			} else {
+				push @rest, $d;
+			}
+		}
+		push @ret, \@deb;
+		push @ret, \@rest;
+	} else {
+		my @d = keys(%path);
+		push @ret, \@d;
+	}
+	return @ret;
 }
 
 1;
-
