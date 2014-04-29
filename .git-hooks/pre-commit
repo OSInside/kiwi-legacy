@@ -452,7 +452,6 @@ my @notClean2 = qw (
 # List of modules not clean to level 3 (harsh) of perlcritic
 my @notClean3 = qw (
 	KIWIArchList.pm
-	KIWIBasePlugin.pm
 	KIWIBoot.pm
 	KIWICache.pm
 	KIWICollect.pm
@@ -465,7 +464,6 @@ my @notClean3 = qw (
 	KIWIImageFormat.pm
 	KIWIImage.pm
 	KIWIIsoLinux.pm
-	KIWILicensePlugin.pm
 	KIWILiveTreePlugin.pm
 	KIWILog.pm
 	KIWIManager.pm
@@ -509,11 +507,9 @@ my @notClean3 = qw (
 
 # List of modules not clean to level 4 (stern) of perlcritic
 my @notClean4 = qw (
-	KIWIBasePlugin.pm
 	KIWIContentPlugin.pm
 	KIWIDescrPlugin.pm
 	KIWIEulaPlugin.pm
-	KIWILicensePlugin.pm
 	KIWILiveTreePlugin.pm
 	KIWIMiniIsoPlugin.pm
 	KIWIPatternsPlugin.pm
@@ -521,12 +517,10 @@ my @notClean4 = qw (
 
 # List of modules not clean to level 5 (gentle) of perlcritic
 my @notClean5 = qw (
-	KIWIBasePlugin.pm
 	KIWIContentPlugin.pm
 	KIWIDescrPlugin.pm
 	KIWIEulaPlugin.pm
 	KIWILiveTreePlugin.pm
-	KIWILicensePlugin.pm
 	KIWIMiniIsoPlugin.pm
 	KIWIPatternsPlugin.pm
 );
