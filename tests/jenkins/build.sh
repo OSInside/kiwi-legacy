@@ -14,4 +14,4 @@
 #
 jeos=$1
 shift
-kiwi --build $jeos -d /tmp/mytest --type oem --logfile terminal $@
+kiwi --build $jeos --type oem --logfile terminal $@
