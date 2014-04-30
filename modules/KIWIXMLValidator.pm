@@ -213,9 +213,9 @@ sub __checkBootSpecPresent {
 }
 
 #==========================================
-# __checkConainerSpec
+# __checkContainerSpec
 #------------------------------------------
-sub __checkConainerSpec {
+sub __checkContainerSpec {
 	# ...
 	# Check that the container attribute is set and has a valid name
 	# ---
@@ -1745,7 +1745,7 @@ sub __validateConsistency {
 	if (! $this -> __checkBootSpecPresent()) {
 		return;
 	}
-	if (! $this -> __checkConainerSpec()) {
+	if (! $this -> __checkContainerSpec()) {
 		return;
 	}
 	if (! $this -> __checkDefaultProfSetting()) {
