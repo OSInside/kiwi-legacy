@@ -2297,6 +2297,7 @@ to keep data persistent over a reboot</a:documentation>
           <value>btrfs</value>
           <value>clicfs</value>
           <value>cpio</value>
+          <value>docker</value>
           <value>ext2</value>
           <value>ext3</value>
           <value>ext4</value>
@@ -3761,6 +3762,7 @@ virtual machine when running the image.</db:para>
         <choice>
           <value>bootstrap</value>
           <value>delete</value>
+          <value>docker</value>
           <value>image</value>
           <value>iso</value>
           <value>lxc</value>

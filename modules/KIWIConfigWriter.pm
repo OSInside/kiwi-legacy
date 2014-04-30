@@ -100,6 +100,27 @@ sub getConfigFileName {
 }
 
 #==========================================
+# setConfigFileName
+#------------------------------------------
+sub setConfigFileName {
+	# ...
+	# Set the configuration file name
+	# ---
+	my $this = shift;
+	my $name = shift;
+	my $kiwi = $this->{kiwi};
+	if (! $name) {
+		my $msg = 'setConfigFileName: no filename argument '
+			. 'provided, retaining current data.';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	$this->{name} = $name;
+	return $this;
+}
+
+#==========================================
 # setConfigDir
 #------------------------------------------
 sub setConfigDir {
@@ -126,4 +147,5 @@ sub setConfigDir {
 	$this->{confDir} = $confDir;
 	return $this;
 }
+
 1;

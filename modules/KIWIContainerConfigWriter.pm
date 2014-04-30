@@ -61,7 +61,10 @@ sub p_writeConfigFile {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $xml = $this->{xml};
-	$kiwi -> info('Write container configuration file');
+	my $loc = $this -> getConfigDir();
+	my $fileName = $this -> getConfigFileName();
+	$kiwi -> info("Write container configuration file\n");
+	$kiwi -> info ("--> $loc/$fileName");
 	my $vmConfig = $xml -> getVMachineConfig();
 	my $config = '# KIWI generated container configuration file' . "\n";
 	if ($vmConfig) {
@@ -115,10 +118,6 @@ sub p_writeConfigFile {
 		. 'lxc.cgroup.devices.allow = c 5:2 rwm' . "\n"
 		. '# rtc' . "\n"
 		. 'lxc.cgroup.devices.allow = c 254:0 rwm' . "\n";
-
-	my $loc = $this -> getConfigDir();
-	my $fileName = $this -> getConfigFileName();
-
 	my $status = open (my $CONF, '>', "$loc/$fileName");
 	if (! $status) {
 		$kiwi -> failed();

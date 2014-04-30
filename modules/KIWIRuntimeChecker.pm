@@ -354,7 +354,7 @@ sub __checkContainerHasLXC {
 		return 1;
 	}
 	my $name = $type -> getTypeName();
-	if ($name =~ /^lxc/smx) {
+	if ($name =~ /^lxc|^docker/smx) {
 		my $pckgs = $xml -> getPackages();
 		push @{$pckgs}, @{$xml -> getBootstrapPackages()};
 		for my $pckg (@{$pckgs}) {
@@ -1171,6 +1171,7 @@ sub __haveValidTypeString {
 		btrfs
 		clicfs
 		cpio
+		docker
 		ext2
 		ext3
 		ext4

@@ -90,8 +90,11 @@ sub getConfigWriter {
 	my $xml  = $this->{xml};
 	my $typeName = $xml -> getImageType() -> getTypeName();
 	SWITCH: for ($typeName) {
-		/^lxc/smx && do {
+		/^lxc|^docker/smx && do {
 			my $writer = KIWIContainerConfigWriter -> new($xml, $confDir);
+			if (($writer) && ($typeName eq 'docker')) {
+				$writer -> setConfigFileName('default.conf');
+			}
 			return $writer;
 	    };
 	}

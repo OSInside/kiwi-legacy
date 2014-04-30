@@ -2195,6 +2195,7 @@ sub __isValidImage {
 		btrfs
 		clicfs
 		cpio
+		docker
 		ext2
 		ext3
 		ext4
