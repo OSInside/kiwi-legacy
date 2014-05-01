@@ -318,13 +318,21 @@ sub __createContainerBundle {
 	my $kiwi = $this->{kiwi};
 	my $locator = $this->{locator};
 	my $xml  = $this->{xml};
+	my $type = $xml -> getImageType();
+	my $imageType = $type -> getTypeName();
+	my $extension = '-lxc';
 	$kiwi -> info('Creating container tarball...');
+	if ($imageType eq 'docker') {
+		$extension = '-docker';
+	}
 	my $baseBuildDir = $this -> getBaseBuildDirectory();
 	my $origin = $baseBuildDir
 		. '/'
 		. $this -> p_getBaseWorkingDir();
 	my $globals = KIWIGlobals -> instance();
-	my $imgFlName = $globals -> generateBuildImageName($xml, '-', '-lxc');
+	my $imgFlName = $globals -> generateBuildImageName(
+		$xml, '-', $extension
+	);
 	$imgFlName .= '.tbz';
 	my $tar = $locator -> getExecPath('tar');
 	if (! $tar) {
