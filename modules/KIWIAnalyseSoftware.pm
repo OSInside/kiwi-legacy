@@ -365,6 +365,7 @@ sub __populateRepos {
 					$source = "dir://".$mpoint;
 					push @{$mounts},$mpoint;
 					$osc{$product}{$source}{flag} = "local";
+					$origsrc = "iso://$iso";
 				}
 				#==========================================
 				# handle source type http|https|ftp://
