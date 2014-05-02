@@ -1,0 +1,28 @@
+KIWI Image Description Example
+==============================
+* A docker image is a tarball containing the root file system of the container.
+  Do not extract the tarball on your machine or you will overwrite sensible part
+  of your system, possibly breaking it. Let docker handle the import process as
+  explained below.
+
+How to build this Example
+==============================
+
+    kiwi -p /usr/share/doc/packages/kiwi/examples/suse-13.1/suse-docker-container \
+         --root /tmp/mycontainer
+
+    kiwi --create /tmp/mycontainer --type docker -d /tmp/mycontainer-result
+
+How to import the container into docker
+=======================================
+* Move the tarball on the machine running docker daemon and run the following
+  command:
+
+  docker import - myOpenSUSE < /path/to/mycontainer.tbz
+
+  This will import the container and name it 'myOpenSUSE'.
+
+
+Login Details
+==============================
+* Though you are not going to need it, the user root password is 'linux'.

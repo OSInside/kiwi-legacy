@@ -1,0 +1,8 @@
+[repo-oss]
+name=openSUSE-13.1-Oss
+enabled=1
+autorefresh=1
+baseurl=http://download.opensuse.org/distribution/13.1/repo/oss/
+path=/
+type=yast2
+keeppackages=0

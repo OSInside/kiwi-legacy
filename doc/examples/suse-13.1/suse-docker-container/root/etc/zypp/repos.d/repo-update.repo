@@ -1,0 +1,8 @@
+[repo-update]
+name=openSUSE-13.1-Update
+enabled=1
+autorefresh=1
+baseurl=http://download.opensuse.org/update/13.1/
+path=/
+type=rpm-md
+keeppackages=0

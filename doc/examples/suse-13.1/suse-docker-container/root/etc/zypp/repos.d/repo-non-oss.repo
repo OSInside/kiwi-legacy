@@ -1,0 +1,8 @@
+[repo-non-oss]
+name=openSUSE-13.1-Non-Oss
+enabled=1
+autorefresh=1
+baseurl=http://download.opensuse.org/distribution/13.1/repo/non-oss/
+path=/
+type=yast2
+keeppackages=0
