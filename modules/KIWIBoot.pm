@@ -483,8 +483,11 @@ sub new {
 			$kiwi -> warning (
 				"UEFI Secure boot is only supported on x86_64"
 			);
-			$kiwi -> skipped ();
-			$firmware = 'bios';
+			$kiwi -> skipped();
+			$kiwi -> warning (
+				"--> switching to non secure EFI boot\n"
+			);
+			$firmware = 'efi';
 		}
 	}
 	#==========================================
@@ -3618,6 +3621,9 @@ sub setupBootLoaderStages {
 		my $grub_efi   = 'grub2';
 		my $grub_share = 'grub2';
 		my $lib        = 'lib';
+		if ($arch ne 'x86_64') {
+			$efipc = 'i386-efi';
+		}
 		if ($zipped) {
 			$test = $unzip;
 		}

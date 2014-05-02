@@ -1690,7 +1690,10 @@ sub createImageLiveCD {
 		$kiwi -> warning (
 			"UEFI Secure boot is only supported on x86_64"
 		);
-		$kiwi -> skipped ();
+		$kiwi -> skipped();
+		$kiwi -> warning (
+			"--> switching to non secure EFI boot\n"
+		);
 		$firmware = 'efi';
 	}
 	#==========================================
