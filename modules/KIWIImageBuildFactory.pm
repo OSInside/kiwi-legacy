@@ -94,7 +94,7 @@ sub getImageBuilder {
 	my $xml  = $this->{xml};
 	my $typeName = $xml -> getImageType() -> getTypeName();
 	SWITCH: for ($typeName) {
-		/^lxc/smx && do {
+		/^lxc|^docker/smx && do {
 			my $builder = KIWIContainerBuilder -> new($xml, $cmdL, $unPImg);
 			return $builder;
 		};

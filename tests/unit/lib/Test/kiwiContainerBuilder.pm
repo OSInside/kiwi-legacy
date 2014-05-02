@@ -438,7 +438,7 @@ sub test_createContainerConfigDir {
 	my $builder = KIWIContainerBuilder -> new($xml, $cmdL, $image);
 	my $res = $builder -> __createContainerConfigDir();
 	my $msg = $kiwi -> getMessage();
-	my $expected = 'Creating container configuration directory';
+	my $expected = "Creating container configuration directory\n--> etc/lxc/mycontainer";
 	$this -> assert_str_equals($expected, $msg);
 	my $msgT = $kiwi -> getMessageType();
 	$this -> assert_str_equals('info', $msgT);

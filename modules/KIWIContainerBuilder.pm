@@ -318,18 +318,48 @@ sub __createContainerBundle {
 	my $kiwi = $this->{kiwi};
 	my $locator = $this->{locator};
 	my $xml  = $this->{xml};
+	my $type = $xml -> getImageType();
+	my $imageType = $type -> getTypeName();
+	my $extension = '-lxc';
 	$kiwi -> info('Creating container tarball...');
+	if ($imageType eq 'docker') {
+		$extension = '-docker';
+	}
 	my $baseBuildDir = $this -> getBaseBuildDirectory();
 	my $origin = $baseBuildDir
 		. '/'
 		. $this -> p_getBaseWorkingDir();
 	my $globals = KIWIGlobals -> instance();
-	my $imgFlName = $globals -> generateBuildImageName($xml, '-', '-lxc');
+	my $imgFlName = $globals -> generateBuildImageName(
+		$xml, '-', $extension
+	);
 	$imgFlName .= '.tbz';
 	my $tar = $locator -> getExecPath('tar');
-	my $cmd = "cd $origin; "
-		. "$tar -cjf $baseBuildDir/$imgFlName etc var 2>&1";
-	my $data = KIWIQX::qxx ($cmd);
+	if (! $tar) {
+		$kiwi -> failed();
+		$kiwi -> error("Could not find tar utility");
+		$kiwi -> failed();
+		return;
+	}
+	my @dirlist;
+	if (opendir my($dh), $origin) {
+		@dirlist = grep { !/^\.\.?$/x } readdir $dh;
+		closedir $dh;
+	} else {
+		$kiwi -> failed();
+		$kiwi -> error("Couldn't open dir $origin: $!");
+		$kiwi -> failed();
+		return;
+	}
+	if (! @dirlist) {
+		$kiwi -> failed();
+		$kiwi -> error("Got empty dirlist");
+		$kiwi -> failed();
+		return;
+	}
+	my $data = KIWIQX::qxx (
+		"$tar -C $origin -cjf $baseBuildDir/$imgFlName @dirlist 2>&1"
+	);
 	my $code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> failed();
@@ -350,25 +380,30 @@ sub __createContainerConfigDir {
 	# ...
 	# Create the directory for the container configuration file
 	# ---
-	my $this      = shift;
+	my $this = shift;
 	my $cmdL = $this->{cmdL};
 	my $kiwi = $this->{kiwi};
 	my $locator = $this->{locator};
-	my $xml  = $this->{xml};
-	$kiwi -> info('Creating container configuration directory');
+	my $xml = $this->{xml};
+	my $msg;
+	$kiwi -> info("Creating container configuration directory\n");
 	# Build the directory name
-	my $dirPath = '/etc/lxc/';
-	my $name = $xml -> getImageType() -> getContainerName();
-	if (! $name) {
-		$kiwi -> failed();
-		my $msg = 'KIWIContainerBuilder:__createContainerConfigDir '
-			. 'internal error no container name found. Please file a bug.';
-		$kiwi -> error($msg);
-		$kiwi -> failed();
-		return;
+	my $dirPath = 'etc/lxc';
+	my $type = $xml -> getImageType();
+	my $containerName = $type -> getContainerName();
+	my $imageType = $type -> getTypeName();
+	if ($imageType eq "lxc") {
+		if (! $containerName) {
+			$msg = 'KIWIContainerBuilder:__createContainerConfigDir '
+				. 'internal error no container name found. Please file a bug.';
+			$kiwi -> error($msg);
+			$kiwi -> failed();
+			return;
+		}
+		$dirPath .= '/'.$containerName;
 	}
-	$dirPath .= $name;
 	my $path = $this -> __createWorkingDir($dirPath);
+	$kiwi -> info ("--> $dirPath");
 	if (! $path) {
 		$kiwi -> failed();
 		return;
@@ -584,19 +619,25 @@ sub __createTargetRootTree {
 	my $kiwi = $this->{kiwi};
 	my $locator = $this->{locator};
 	my $xml  = $this->{xml};
+	my $dirPath;
+	my $msg;
 	$kiwi -> info('Creating rootfs target directory');
 	# Build the directory name
-	my $dirPath = 'var/lib/lxc/';
-	my $name = $xml -> getImageType() -> getContainerName();
-	if (! $name) {
-		$kiwi -> failed();
-		my $msg = 'KIWIContainerBuilder:__createTargetRootTree '
-			. 'internal error no container name found. Please file a bug.';
-		$kiwi -> error($msg);
-		$kiwi -> failed();
-		return;
+	my $type = $xml -> getImageType();
+	my $imageType = $type -> getTypeName();
+	if ($imageType eq 'lxc') {
+		$dirPath = 'var/lib/lxc/';
+		my $containerName = $type -> getContainerName();
+		if (! $containerName) {
+			$kiwi -> failed();
+			$msg = 'KIWIContainerBuilder:__createTargetRootTree '
+				. 'internal error no container name found. Please file a bug.';
+			$kiwi -> error($msg);
+			$kiwi -> failed();
+			return;
+		}
+		$dirPath .= $containerName . '/rootfs';
 	}
-	$dirPath .= $name . '/rootfs';
 	my $path = $this -> __createWorkingDir($dirPath);
 	if (! $path) {
 		$kiwi -> failed();
@@ -620,10 +661,15 @@ sub __createWorkingDir {
 	my $locator = $this->{locator};
 	my $basePath = $this -> getBaseBuildDirectory();
 	my $baseWork = $this -> p_getBaseWorkingDir();
-	if (! $path && ! $baseWork) {
+	my $dirPath;
+	if (! $baseWork) {
 		return $basePath;
 	}
-	my $dirPath = $basePath . '/' . $baseWork . '/' . $path;
+	if ($path) {
+		$dirPath = $basePath . '/' . $baseWork . '/' . $path;
+	} else {
+		$dirPath = $basePath . '/' . $baseWork;
+	}
 	my $mdir = $locator -> getExecPath('mkdir');
 	my $data = KIWIQX::qxx ("$mdir -p $dirPath");
 	my $code = $? >> 8;
@@ -647,7 +693,7 @@ sub __disableServices {
 	my $kiwi = $this->{kiwi};
 	my $locator = $this->{locator};
 	$kiwi -> info('Disable unwanted services');
-	my $sysctl = $locator -> getExecPath('systemct', $targetDir);
+	my $sysctl = $locator -> getExecPath('systemctl', $targetDir);
 	my $croot = $locator -> getExecPath('chroot');
 	if ($sysctl) {
 		my @srvs = qw (
@@ -669,6 +715,10 @@ sub __disableServices {
 			}
 		}
 		for my $srvPath (@services) {
+			if (-l $srvPath) {
+				# only real service files can be disabled
+				next;
+			}
 			my @parts = split /\//smx, $srvPath;
 			my $name = $parts[-1];
 			my $cmd = "$croot $targetDir "
@@ -677,7 +727,7 @@ sub __disableServices {
 			my $code = $? >> 8;
 			if ($code != 0) {
 				$kiwi -> failed();
-				$kiwi -> error('Could not disable service: $name');
+				$kiwi -> error("Could not disable service: $name");
 				$kiwi -> failed();
 				return;
 			}

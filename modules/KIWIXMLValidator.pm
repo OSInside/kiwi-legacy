@@ -213,9 +213,9 @@ sub __checkBootSpecPresent {
 }
 
 #==========================================
-# __checkConainerSpec
+# __checkContainerSpec
 #------------------------------------------
-sub __checkConainerSpec {
+sub __checkContainerSpec {
 	# ...
 	# Check that the container attribute is set and has a valid name
 	# ---
@@ -1217,7 +1217,7 @@ sub __checkTypeConfigConsist {
 	# relevant inside the initrd
 	# ----
 	my %typeChildDeps = (
-		'machine'    => 'image:cpio,lxc,oem,vmx,split',
+		'machine'    => 'image:cpio,lxc,docker,oem,vmx,split',
 		'oemconfig'  => 'image:cpio,oem,split',
 		'pxedeploy'  => 'image:cpio,pxe',
 		'size'       => ':', # generic
@@ -1745,7 +1745,7 @@ sub __validateConsistency {
 	if (! $this -> __checkBootSpecPresent()) {
 		return;
 	}
-	if (! $this -> __checkConainerSpec()) {
+	if (! $this -> __checkContainerSpec()) {
 		return;
 	}
 	if (! $this -> __checkDefaultProfSetting()) {
