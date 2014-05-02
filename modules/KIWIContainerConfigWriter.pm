@@ -131,6 +131,7 @@ sub p_writeConfigFile {
 	print $CONF $config;
 	$status = close $CONF;
 	if (! $status) {
+		$kiwi -> oops();
 		my $msg = 'Unable to close configuration file'
 			. "$loc/$fileName";
 		$kiwi -> warning($msg);
