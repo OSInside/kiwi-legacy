@@ -144,10 +144,10 @@ function suseService {
 		echo "suseService: no service name specified"
 		return
 	fi
-	if [ $action = off ];then
+	if [ $target = off ];then
 		suseRemoveService $service
 	else
-		suseInsertService $service $action
+		suseInsertService $service $target
 	fi
 }
 
