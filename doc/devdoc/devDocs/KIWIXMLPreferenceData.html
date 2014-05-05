@@ -22,6 +22,7 @@
 <li><a href="#getKeymap">getKeymap</a></li>
 <li><a href="#getLocale">getLocale</a></li>
 <li><a href="#getPackageManager">getPackageManager</a></li>
+<li><a href="#getPartitioner">getPartitioner</a></li>
 <li><a href="#getRPMCheckSig">getRPMCheckSig</a></li>
 <li><a href="#getRPMExcludeDoc">getRPMExcludeDoc</a></li>
 <li><a href="#getRPMForce">getRPMForce</a></li>
@@ -39,6 +40,7 @@
 <li><a href="#setKeymap">setKeymap</a></li>
 <li><a href="#setLocale">setLocale</a></li>
 <li><a href="#setPackageManager">setPackageManager</a></li>
+<li><a href="#setPartitioner">setPartitioner</a></li>
 <li><a href="#setRPMCheckSig">setRPMCheckSig</a></li>
 <li><a href="#setRPMExcludeDoc">setRPMExcludeDoc</a></li>
 <li><a href="#setRPMForce">setRPMForce</a></li>
@@ -50,6 +52,7 @@
 <p>
 <ul>
 <li><a href="#__isInitConsistent">__isInitConsistent</a></li>
+<li><a href="#__isValidPartitioner">__isValidPartitioner</a></li>
 <li><a href="#__isValidPckgMgr">__isValidPckgMgr</a></li>
 <li><a href="#__isValidVersionFormat">__isValidVersionFormat</a></li>
 </ul>
@@ -58,152 +61,157 @@
 <p>
  Add a license to the configured licenses
 <p>
-Defined on line: 144
+Defined on line: 152
 <a name="getBootLoaderTheme"><h2>getBootLoaderTheme</h2></a>
 <p>
  Return the configured boot loader theme
 <p>
-Defined on line: 172
+Defined on line: 191
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 4300</li><li><a href="KIWIImage.html">KIWIImage</a> : 1722</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1584</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1795</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 411</li><li><a href="KIWIXML.html">KIWIXML</a> : 2200</li><li><a href="KIWIXMLPreferenceData.html">KIWIXMLPreferenceData</a> : 347</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 4328</li><li><a href="KIWIImage.html">KIWIImage</a> : 1725</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1584</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1795</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 412</li><li><a href="KIWIXML.html">KIWIXML</a> : 2201</li><li><a href="KIWIXMLPreferenceData.html">KIWIXMLPreferenceData</a> : 366</li></ul>
 <a name="getBootSplashTheme"><h2>getBootSplashTheme</h2></a>
 <p>
  Return the configured boot splash theme
 <p>
-Defined on line: 183
+Defined on line: 202
 <p>
 Called in
 <ul>
-<li><a href="KIWIImage.html">KIWIImage</a> : 1721</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1583</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1802</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 404</li><li><a href="KIWIXML.html">KIWIXML</a> : 2201</li><li><a href="KIWIXMLPreferenceData.html">KIWIXMLPreferenceData</a> : 353</li></ul>
+<li><a href="KIWIImage.html">KIWIImage</a> : 1724</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1583</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1802</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 405</li><li><a href="KIWIXML.html">KIWIXML</a> : 2202</li><li><a href="KIWIXMLPreferenceData.html">KIWIXMLPreferenceData</a> : 372</li></ul>
 <a name="getDefaultDest"><h2>getDefaultDest</h2></a>
 <p>
  Return the configured destination for the image
 <p>
-Defined on line: 194
+Defined on line: 213
 <p>
 Called in
 <ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 746</li><li><a href="KIWIXML.html">KIWIXML</a> : 2202</li><li><a href="KIWIXMLPreferenceData.html">KIWIXMLPreferenceData</a> : 359</li></ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 746</li><li><a href="KIWIXML.html">KIWIXML</a> : 2203</li><li><a href="KIWIXMLPreferenceData.html">KIWIXMLPreferenceData</a> : 378</li></ul>
 <a name="getDefaultPreBuilt"><h2>getDefaultPreBuilt</h2></a>
 <p>
  Return the configured location for pre built boot images
 <p>
-Defined on line: 205
+Defined on line: 224
 <p>
 Called in
 <ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 284</li><li><a href="KIWIXML.html">KIWIXML</a> : 2203</li><li><a href="KIWIXMLPreferenceData.html">KIWIXMLPreferenceData</a> : 365</li></ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 284</li><li><a href="KIWIXML.html">KIWIXML</a> : 2204</li><li><a href="KIWIXMLPreferenceData.html">KIWIXMLPreferenceData</a> : 384</li></ul>
 <a name="getDefaultRoot"><h2>getDefaultRoot</h2></a>
 <p>
  Return the configured default root location
 <p>
-Defined on line: 216
+Defined on line: 235
 <p>
 Called in
 <ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 540</li><li><a href="KIWIXML.html">KIWIXML</a> : 2204</li><li><a href="KIWIXMLPreferenceData.html">KIWIXMLPreferenceData</a> : 371</li></ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 540</li><li><a href="KIWIXML.html">KIWIXML</a> : 2205</li><li><a href="KIWIXMLPreferenceData.html">KIWIXMLPreferenceData</a> : 390</li></ul>
 <a name="getHWClock"><h2>getHWClock</h2></a>
 <p>
  Return the configured timezone setting for the HW clock
 <p>
-Defined on line: 227
+Defined on line: 246
 <p>
 Called in
 <ul>
-<li><a href="KIWIConfigure.html">KIWIConfigure</a> : 504</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 390</li><li><a href="KIWIXML.html">KIWIXML</a> : 2205</li><li><a href="KIWIXMLPreferenceData.html">KIWIXMLPreferenceData</a> : 377</li></ul>
+<li><a href="KIWIConfigure.html">KIWIConfigure</a> : 504</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 391</li><li><a href="KIWIXML.html">KIWIXML</a> : 2206</li><li><a href="KIWIXMLPreferenceData.html">KIWIXMLPreferenceData</a> : 396</li></ul>
 <a name="getKeymap"><h2>getKeymap</h2></a>
 <p>
  Return the configured keyboard layout
 <p>
-Defined on line: 238
+Defined on line: 257
 <p>
 Called in
 <ul>
-<li><a href="KIWIConfigure.html">KIWIConfigure</a> : 535</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 376</li><li><a href="KIWIXML.html">KIWIXML</a> : 2206</li><li><a href="KIWIXMLPreferenceData.html">KIWIXMLPreferenceData</a> : 383</li></ul>
+<li><a href="KIWIConfigure.html">KIWIConfigure</a> : 535</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 377</li><li><a href="KIWIXML.html">KIWIXML</a> : 2207</li><li><a href="KIWIXMLPreferenceData.html">KIWIXMLPreferenceData</a> : 402</li></ul>
 <a name="getLocale"><h2>getLocale</h2></a>
 <p>
  Return the configured localization setting
 <p>
-Defined on line: 249
+Defined on line: 268
 <p>
 Called in
 <ul>
-<li><a href="KIWIConfigure.html">KIWIConfigure</a> : 562</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1781</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 397</li><li><a href="KIWIXML.html">KIWIXML</a> : 2207</li><li><a href="KIWIXMLPreferenceData.html">KIWIXMLPreferenceData</a> : 389</li></ul>
+<li><a href="KIWIConfigure.html">KIWIConfigure</a> : 562</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1781</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 398</li><li><a href="KIWIXML.html">KIWIXML</a> : 2208</li><li><a href="KIWIXMLPreferenceData.html">KIWIXMLPreferenceData</a> : 408</li></ul>
 <a name="getPackageManager"><h2>getPackageManager</h2></a>
 <p>
  Return the configured package manager
 <p>
-Defined on line: 260
+Defined on line: 279
 <p>
 Called in
 <ul>
-<li><a href="KIWIXMLPreferenceData.html">KIWIXMLPreferenceData</a> : 396</li></ul>
+<li><a href="KIWIXMLPreferenceData.html">KIWIXMLPreferenceData</a> : 415</li></ul>
+<a name="getPartitioner"><h2>getPartitioner</h2></a>
+<p>
+ Return the configured partitioner
+<p>
+Defined on line: 180
 <a name="getRPMCheckSig"><h2>getRPMCheckSig</h2></a>
 <p>
  Return the configured flag for checking RPM signatures
 <p>
-Defined on line: 271
+Defined on line: 290
 <p>
 Called in
 <ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1809</li><li><a href="KIWIManagerSmart.html">KIWIManagerSmart</a> : 103</li><li><a href="KIWIManagerYum.html">KIWIManagerYum</a> : 96</li><li><a href="KIWIManagerZypper.html">KIWIManagerZypper</a> : 113</li><li><a href="KIWIXML.html">KIWIXML</a> : 2209</li><li><a href="KIWIXMLPreferenceData.html">KIWIXMLPreferenceData</a> : 403</li></ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1809</li><li><a href="KIWIManagerSmart.html">KIWIManagerSmart</a> : 103</li><li><a href="KIWIManagerYum.html">KIWIManagerYum</a> : 96</li><li><a href="KIWIManagerZypper.html">KIWIManagerZypper</a> : 113</li><li><a href="KIWIXML.html">KIWIXML</a> : 2211</li><li><a href="KIWIXMLPreferenceData.html">KIWIXMLPreferenceData</a> : 422</li></ul>
 <a name="getRPMExcludeDoc"><h2>getRPMExcludeDoc</h2></a>
 <p>
  Return the configured flag for the RPM documentation exclusion setting
 <p>
-Defined on line: 282
+Defined on line: 301
 <p>
 Called in
 <ul>
-<li><a href="KIWIManagerSmart.html">KIWIManagerSmart</a> : 192</li><li><a href="KIWIManagerZypper.html">KIWIManagerZypper</a> : 195</li><li><a href="KIWIXML.html">KIWIXML</a> : 2210</li><li><a href="KIWIXMLPreferenceData.html">KIWIXMLPreferenceData</a> : 409</li></ul>
+<li><a href="KIWIManagerSmart.html">KIWIManagerSmart</a> : 192</li><li><a href="KIWIManagerZypper.html">KIWIManagerZypper</a> : 195</li><li><a href="KIWIXML.html">KIWIXML</a> : 2212</li><li><a href="KIWIXMLPreferenceData.html">KIWIXMLPreferenceData</a> : 428</li></ul>
 <a name="getRPMForce"><h2>getRPMForce</h2></a>
 <p>
  Return the configured flag for forcing RPM installation
 <p>
-Defined on line: 293
+Defined on line: 312
 <p>
 Called in
 <ul>
-<li><a href="KIWIManagerSmart.html">KIWIManagerSmart</a> : 569</li><li><a href="KIWIManagerSmart.html">KIWIManagerSmart</a> : 679</li><li><a href="KIWIManagerSmart.html">KIWIManagerSmart</a> : 724</li><li><a href="KIWIXML.html">KIWIXML</a> : 2211</li><li><a href="KIWIXMLPreferenceData.html">KIWIXMLPreferenceData</a> : 415</li></ul>
+<li><a href="KIWIManagerSmart.html">KIWIManagerSmart</a> : 569</li><li><a href="KIWIManagerSmart.html">KIWIManagerSmart</a> : 679</li><li><a href="KIWIManagerSmart.html">KIWIManagerSmart</a> : 724</li><li><a href="KIWIXML.html">KIWIXML</a> : 2213</li><li><a href="KIWIXMLPreferenceData.html">KIWIXMLPreferenceData</a> : 434</li></ul>
 <a name="getShowLic"><h2>getShowLic</h2></a>
 <p>
  Return an array ref containing the configured paths for the
  license to be shown
 <p>
-Defined on line: 304
+Defined on line: 323
 <p>
 Called in
 <ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1788</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 369</li><li><a href="KIWIXML.html">KIWIXML</a> : 2212</li><li><a href="KIWIXMLPreferenceData.html">KIWIXMLPreferenceData</a> : 418</li></ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1788</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 370</li><li><a href="KIWIXML.html">KIWIXML</a> : 2214</li><li><a href="KIWIXMLPreferenceData.html">KIWIXMLPreferenceData</a> : 437</li></ul>
 <a name="getTimezone"><h2>getTimezone</h2></a>
 <p>
  Return the configured timezone
 <p>
-Defined on line: 316
+Defined on line: 335
 <p>
 Called in
 <ul>
-<li><a href="KIWIConfigure.html">KIWIConfigure</a> : 710</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 383</li><li><a href="KIWIXML.html">KIWIXML</a> : 2213</li><li><a href="KIWIXMLPreferenceData.html">KIWIXMLPreferenceData</a> : 430</li></ul>
+<li><a href="KIWIConfigure.html">KIWIConfigure</a> : 710</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 384</li><li><a href="KIWIXML.html">KIWIXML</a> : 2215</li><li><a href="KIWIXMLPreferenceData.html">KIWIXMLPreferenceData</a> : 449</li></ul>
 <a name="getVersion"><h2>getVersion</h2></a>
 <p>
  Return the configured version for the configuration
 <p>
-Defined on line: 327
+Defined on line: 346
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 634</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1037</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1485</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2065</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 528</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 362</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 387</li><li><a href="KIWIXML.html">KIWIXML</a> : 2214</li><li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 543</li><li><a href="KIWIXMLPreferenceData.html">KIWIXMLPreferenceData</a> : 436</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 655</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1058</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1508</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2088</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 528</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 363</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 407</li><li><a href="KIWIXML.html">KIWIXML</a> : 2216</li><li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 543</li><li><a href="KIWIXMLPreferenceData.html">KIWIXMLPreferenceData</a> : 455</li></ul>
 <a name="getXMLElement"><h2>getXMLElement</h2></a>
 <p>
  Return an XML Element representing the object's data
 <p>
-Defined on line: 338
+Defined on line: 357
 <p>
 Called in
 <ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 4095</li></ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 4099</li></ul>
 <a name="new"><h2>new</h2></a>
 <p>
  Create the KIWIXMLPreferenceData object
@@ -220,6 +228,7 @@ Called in
      keymap               = ''
      locale               = ''
      packagemanager       = ''
+     partitioner          = ''
      rpm_check_signatures = ''
      rpm_excludedocs      = ''
      rpm_force            = ''
@@ -233,12 +242,12 @@ Defined on line: 39
 <p>
 Called in
 <ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 1758</li><li><a href="KIWIXML.html">KIWIXML</a> : 4094</li></ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 1759</li><li><a href="KIWIXML.html">KIWIXML</a> : 4098</li></ul>
 <a name="setBootLoaderTheme"><h2>setBootLoaderTheme</h2></a>
 <p>
  Set the boot loader theme configuration
 <p>
-Defined on line: 445
+Defined on line: 480
 <p>
 Called in
 <ul>
@@ -247,7 +256,7 @@ Called in
 <p>
  Set the boot splash theme
 <p>
-Defined on line: 466
+Defined on line: 501
 <p>
 Called in
 <ul>
@@ -256,27 +265,27 @@ Called in
 <p>
  Set the destination for the image
 <p>
-Defined on line: 487
+Defined on line: 522
 <a name="setDefaultPreBuilt"><h2>setDefaultPreBuilt</h2></a>
 <p>
  Set the location for pre built boot images
 <p>
-Defined on line: 508
+Defined on line: 543
 <a name="setDefaultRoot"><h2>setDefaultRoot</h2></a>
 <p>
  Set the default root location
 <p>
-Defined on line: 529
+Defined on line: 564
 <a name="setHWClock"><h2>setHWClock</h2></a>
 <p>
  Set the timezone setting for the HW clock
 <p>
-Defined on line: 550
+Defined on line: 585
 <a name="setKeymap"><h2>setKeymap</h2></a>
 <p>
  Set the keyboard layout
 <p>
-Defined on line: 571
+Defined on line: 606
 <p>
 Called in
 <ul>
@@ -285,7 +294,7 @@ Called in
 <p>
  Set the localization setting
 <p>
-Defined on line: 592
+Defined on line: 627
 <p>
 Called in
 <ul>
@@ -294,12 +303,17 @@ Called in
 <p>
  Set the package manager
 <p>
-Defined on line: 613
+Defined on line: 648
+<a name="setPartitioner"><h2>setPartitioner</h2></a>
+<p>
+ Set the partitioner
+<p>
+Defined on line: 464
 <a name="setRPMCheckSig"><h2>setRPMCheckSig</h2></a>
 <p>
  Set the flag for checking RPM signatures
 <p>
-Defined on line: 629
+Defined on line: 664
 <p>
 Called in
 <ul>
@@ -308,17 +322,17 @@ Called in
 <p>
  Set the flag for the RPM documentation exclusion setting
 <p>
-Defined on line: 649
+Defined on line: 684
 <a name="setRPMForce"><h2>setRPMForce</h2></a>
 <p>
  Set the flag for forcing RPM installation
 <p>
-Defined on line: 669
+Defined on line: 704
 <a name="setShowLic"><h2>setShowLic</h2></a>
 <p>
  Set the path for the license to be shown
 <p>
-Defined on line: 689
+Defined on line: 724
 <p>
 Called in
 <ul>
@@ -327,7 +341,7 @@ Called in
 <p>
  Set the timezone
 <p>
-Defined on line: 715
+Defined on line: 750
 <p>
 Called in
 <ul>
@@ -336,31 +350,40 @@ Called in
 <p>
  Set the version for the configuration
 <p>
-Defined on line: 736
+Defined on line: 771
 <a name="__isInitConsistent"><h2>__isInitConsistent</h2></a>
 <p>
  Verify that the initialization hash is valid
 <p>
-Defined on line: 755
+Defined on line: 790
 <p>
 Called in
 <ul>
-<li><a href="KIWIXMLPreferenceData.html">KIWIXMLPreferenceData</a> : 110</li></ul>
+<li><a href="KIWIXMLPreferenceData.html">KIWIXMLPreferenceData</a> : 112</li></ul>
+<a name="__isValidPartitioner"><h2>__isValidPartitioner</h2></a>
+<p>
+ Verify that the given partitioner is supported
+<p>
+Defined on line: 868
+<p>
+Called in
+<ul>
+<li><a href="KIWIXMLPreferenceData.html">KIWIXMLPreferenceData</a> : 470</li><li><a href="KIWIXMLPreferenceData.html">KIWIXMLPreferenceData</a> : 806</li></ul>
 <a name="__isValidPckgMgr"><h2>__isValidPckgMgr</h2></a>
 <p>
  Verify that the given package manager is supported
 <p>
-Defined on line: 792
+Defined on line: 833
 <p>
 Called in
 <ul>
-<li><a href="KIWIXMLPreferenceData.html">KIWIXMLPreferenceData</a> : 619</li><li><a href="KIWIXMLPreferenceData.html">KIWIXMLPreferenceData</a> : 765</li></ul>
+<li><a href="KIWIXMLPreferenceData.html">KIWIXMLPreferenceData</a> : 654</li><li><a href="KIWIXMLPreferenceData.html">KIWIXMLPreferenceData</a> : 800</li></ul>
 <a name="__isValidVersionFormat"><h2>__isValidVersionFormat</h2></a>
 <p>
  Verify that the given version is in the expected format
 <p>
-Defined on line: 827
+Defined on line: 902
 <p>
 Called in
 <ul>
-<li><a href="KIWIXMLPreferenceData.html">KIWIXMLPreferenceData</a> : 742</li><li><a href="KIWIXMLPreferenceData.html">KIWIXMLPreferenceData</a> : 781</li></ul>
+<li><a href="KIWIXMLPreferenceData.html">KIWIXMLPreferenceData</a> : 777</li><li><a href="KIWIXMLPreferenceData.html">KIWIXMLPreferenceData</a> : 822</li></ul>
