@@ -351,9 +351,16 @@ sub setupInstallationSource {
 		$alias_filename =~ s/\//_/g;
 		my $repo = "$root/$dataDir/repos/$alias_filename.repo";
 		my $imgRepo = "$root/etc/zypp/repos.d/$alias_filename.repo";
+		# /.../
+		# test if the repo exists with a shell test built-in
+		# this is because the repo string could contain shell escaped
+		# characters which is not supported by perl's test operators
+		# ----
+		KIWIQX::qxx ("test -f $repo");
+		my $repo_exists = ($? >> 8) == 0;
 		my $sed;
 		if (! $chroot) {
-			if (! -f $repo) {
+			if (! $repo_exists) {
 				$kiwi -> info ("Adding bootstrap zypper service: $alias");
 				$data = KIWIQX::qxx ("@zypper --root \"$root\" $sadd 2>&1");
 				$code = $? >> 8;
@@ -379,7 +386,7 @@ sub setupInstallationSource {
 			$kiwi -> done ();
 		} else {
 			my @zypper= @{$this->{zypper_chroot}};
-			if (! -f $repo) {
+			if (! $repo_exists) {
 				$kiwi -> info ("Adding chroot zypper service: $alias");
 				$data = KIWIQX::qxx ("@kchroot @zypper $sadd 2>&1");
 				$code = $? >> 8;
