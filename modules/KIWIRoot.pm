@@ -1534,16 +1534,27 @@ sub cleanMount {
 	}
 	my @newList= ();
 	foreach my $item (reverse @mountList) {
+		# check for matching exclude expression if specified
 		if (defined $expr) {
 			if ($item !~ /$expr/) {
 				push (@newList,$item);
 				next;
 			}
 		}
-		$kiwi -> loginfo ("Umounting path: $item\n");
-		if (! -d $item) {
+		# /.../
+		# test if the item is a directory with a shell test built-in
+		# this is because the repo string could contain shell escaped
+		# characters which is not supported by perl's test operators
+		# ----
+		KIWIQX::qxx ("test -d $item");
+		my $mountpoint_exists = ($? >> 8) == 0;
+		if (! $mountpoint_exists) {
+			$kiwi -> loginfo (
+				"Warning: \"$item\" not a directory or not existing\n"
+			);
 			next;
 		}
+		$kiwi -> loginfo ("Umounting path: $item\n");
 		my $data = KIWIQX::qxx ("umount \"$item\" 2>&1");
 		my $code = $? >> 8;
 		if (($code != 0) && ($data !~ "not mounted")) {
