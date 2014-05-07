@@ -1274,17 +1274,10 @@ sub __hasBootDescription {
 	if (! $description) {
 		return 1;
 	}
-	if ($imgType !~ /iso|pxe|oem|vmx/) {
-		return 1;
-	}
-	if ($imgType eq 'pxe') {
-		$imgType = 'net';
-	}
-	my $gdata = KIWIGlobals -> instance() -> getKiwiConfig();
-	if (! -d "$gdata->{System}/${imgType}boot") {
-		my $msg = "The required boot image description for the ";
-		$msg.= "selected build type: '$imgType' does not exist. ";
-		$msg.= "Please install the package: kiwi-desc-${imgType}boot";
+	my $bootdir = $locator -> getBootImageDescription($description);
+	if (! $bootdir) {
+		my $msg = "The required boot image description: '$description' ";
+		$msg.= "for the selected build type: '$imgType' does not exist. ";
 		$kiwi -> error($msg);
 		$kiwi -> failed();
 		return;
