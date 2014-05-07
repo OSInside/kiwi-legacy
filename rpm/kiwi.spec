@@ -82,12 +82,24 @@ Requires:       perl-libwww-perl
 Requires:       rsync
 Requires:       screen
 Requires:       util-linux
+%if 0%{?suse_version}
+# SUSE specific requires
 %if 0%{?suse_version} >= 1210
 Requires:       libsolv-tools
 Requires:       perl-solv
 %else
 Requires:       satsolver-tools
 Requires:       perl-satsolver >= 0.42
+%endif
+%if %suse_version == 1110
+Requires:       virt-utils
+%else
+Requires:       qemu-tools
+%endif
+%endif
+%if 0%{?rhel_version} || 0%{?fedora} || 0%{?centos}
+# RHEL specific requires
+Requires:       qemu-img
 %endif
 # recommended to run kiwi
 %if 0%{?suse_version}
@@ -168,7 +180,6 @@ Requires:       build
 Requires:       createrepo
 Requires:       inst-source-utils
 Requires:       kiwi = %{version}
-Requires:       qemu-tools
 License:        GPL-2.0
 Group:          System/Management
 %if 0%{?suse_version} > 1120
@@ -263,10 +274,6 @@ Requires:       syslinux
 Requires:       dosfstools
 %if 0%{?suse_version}
 Requires:       genisoimage
-Requires:       qemu-tools
-%endif
-%if 0%{?rhel_version} || 0%{?fedora} || 0%{?centos}
-Requires:       qemu-img
 %endif
 License:        GPL-2.0+
 Group:          System/Management
@@ -302,11 +309,9 @@ Requires:       kiwi = %{version}
 Requires:       parted
 %if 0%{?suse_version}
 Requires:       multipath-tools
-Requires:       qemu-tools
 %endif
 %if 0%{?rhel_version} || 0%{?fedora} || 0%{?centos}
 Requires:       device-mapper-multipath
-Requires:       qemu-img
 %endif
 %ifarch %ix86 x86_64
 Requires:       syslinux
@@ -347,12 +352,6 @@ Summary:        KIWI - PXE network boot templates
 Requires:       kiwi = %{version}
 License:        GPL-2.0+
 Group:          System/Management
-%ifarch ppc ppc64 ppc64le s390 s390x
-Requires:       qemu-tools
-%else
-%if 0%{?suse_version} >= 1130
-Requires:       qemu-tools
-%endif
 %endif
 
 %description -n kiwi-desc-netboot
@@ -386,11 +385,9 @@ Requires:       parted
 %if 0%{?suse_version}
 Requires:       genisoimage
 Requires:       multipath-tools
-Requires:       qemu-tools
 %endif
 %if 0%{?rhel_version} || 0%{?fedora} || 0%{?centos}
 Requires:       device-mapper-multipath
-Requires:       qemu-img
 %endif
 %ifarch %ix86 x86_64
 Requires:       syslinux
