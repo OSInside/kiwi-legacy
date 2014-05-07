@@ -1,0 +1,8 @@
+# /.../
+# The following rules are embedded into a 'grep -E' call of the
+# format '^/(\$|rule1|rule2|rule[n]'
+# ----
+boot
+var\/lib\/rpm
+var\/lib\/ntp
+var\/cache

@@ -44,9 +44,14 @@ function sortUniq {
 	sort -u $1 -o $1
 }
 
+function custom_filter {
+	local filter=/usr/share/kiwi/metadata/KIWIAnalyse.filter
+	grep -v '^#' $filter | tr '\n' '|'
+}
+
 function filter_items {
 	# files and directories matching here are filtered out
-	echo -n "^/(\$|tmp|dev|proc|sys|run|lost\+found|var\/run)"
+	echo -n "^/(\$|$(custom_filter)tmp|dev|proc|sys|run|lost\+found|var\/run)"
 }
 
 function filter_filesystem {
