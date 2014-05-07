@@ -168,7 +168,7 @@ Requires:       build
 Requires:       createrepo
 Requires:       inst-source-utils
 Requires:       kiwi = %{version}
-Requires:       virt-utils
+Requires:       qemu-tools
 License:        GPL-2.0
 Group:          System/Management
 %if 0%{?suse_version} > 1120
@@ -263,7 +263,7 @@ Requires:       syslinux
 Requires:       dosfstools
 %if 0%{?suse_version}
 Requires:       genisoimage
-Requires:       virt-utils
+Requires:       qemu-tools
 %endif
 %if 0%{?rhel_version} || 0%{?fedora} || 0%{?centos}
 Requires:       qemu-img
@@ -302,7 +302,7 @@ Requires:       kiwi = %{version}
 Requires:       parted
 %if 0%{?suse_version}
 Requires:       multipath-tools
-Requires:       virt-utils
+Requires:       qemu-tools
 %endif
 %if 0%{?rhel_version} || 0%{?fedora} || 0%{?centos}
 Requires:       device-mapper-multipath
@@ -348,10 +348,10 @@ Requires:       kiwi = %{version}
 License:        GPL-2.0+
 Group:          System/Management
 %ifarch ppc ppc64 ppc64le s390 s390x
-Requires:       virt-utils
+Requires:       qemu-tools
 %else
 %if 0%{?suse_version} >= 1130
-Requires:       virt-utils
+Requires:       qemu-tools
 %endif
 %endif
 
@@ -386,7 +386,7 @@ Requires:       parted
 %if 0%{?suse_version}
 Requires:       genisoimage
 Requires:       multipath-tools
-Requires:       virt-utils
+Requires:       qemu-tools
 %endif
 %if 0%{?rhel_version} || 0%{?fedora} || 0%{?centos}
 Requires:       device-mapper-multipath
