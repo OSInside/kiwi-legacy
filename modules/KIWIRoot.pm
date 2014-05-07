@@ -1546,7 +1546,7 @@ sub cleanMount {
 		# this is because the repo string could contain shell escaped
 		# characters which is not supported by perl's test operators
 		# ----
-		KIWIQX::qxx ("test -d $item");
+		KIWIQX::qxx ("test -d \"$item\"");
 		my $mountpoint_exists = ($? >> 8) == 0;
 		if (! $mountpoint_exists) {
 			$kiwi -> loginfo (
