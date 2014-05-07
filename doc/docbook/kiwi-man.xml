@@ -119,13 +119,12 @@
       </group>
       <arg choice="plain"><replaceable>image-path</replaceable></arg>
       <sbr/>
-      <group choice="opt">
+      <group choice="req">
         <arg choice="plain">-r</arg>
         <arg choice="plain">--root</arg>
-        <replaceable>image-root</replaceable>
-        <arg choice="plain">--cache</arg>
-        <replaceable>directory</replaceable>
       </group>
+      <arg choice="plain"><replaceable>image-root</replaceable></arg>
+      <arg choice="opt">--cache <replaceable>directory</replaceable></arg>
     </cmdsynopsis>
 
     <cmdsynopsis>
@@ -139,8 +138,8 @@
       <group choice="req">
         <arg choice="plain">-d</arg>
         <arg choice="plain">--destdir</arg>
-        <replaceable>destination</replaceable>
       </group>
+      <arg choice="plain"><replaceable>destination</replaceable></arg>
       <arg choice="opt">--type <replaceable>image-type</replaceable></arg>
     </cmdsynopsis>
   </refsect1>
@@ -165,8 +164,8 @@
         <arg choice="plain">--upgrade</arg>
       </group>
       <arg choice="plain"><replaceable>image-root</replaceable></arg>
-      <arg choice="opt">--add-package<replaceable>name</replaceable></arg>
-      <arg choice="opt">--add-pattern<replaceable>name</replaceable></arg>
+      <arg choice="opt">--add-package <replaceable>name</replaceable></arg>
+      <arg choice="opt">--add-pattern <replaceable>name</replaceable></arg>
     </cmdsynopsis>
   </refsect1>
 
@@ -208,13 +207,6 @@
         <arg choice="plain">--describe</arg>
       </group>
       <arg choice="plain"><replaceable>name</replaceable></arg>
-      <arg choice="opt" rep="repeat">--exclude <replaceable>directory</replaceable></arg>
-      <arg choice="opt" rep="repeat">--skip <replaceable>package</replaceable></arg>
-      <arg choice="opt">--nofiles</arg>
-      <arg choice="opt">--notemplate</arg>
-      <arg choice="opt">--skip-gem-lookup</arg>
-      <arg choice="opt">--skip-rcs-lookupk</arg>
-      <arg choice="opt">--skip-augeas-lookup</arg>
     </cmdsynopsis>
   </refsect1>
   
