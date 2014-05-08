@@ -112,7 +112,6 @@
 		<package name="kiwi-tools"/>
 		<package name="lvm2"/>
 		<package name="make"/>
-		<package name="memtest86+"/>
 		<package name="netcfg"/>
 		<package name="openssl-certs"/>
 		<package name="parted"/>
@@ -181,7 +180,6 @@
 		<package name="lvm2"/>
 		<package name="make"/>
 		<package name="mdadm"/>
-		<package name="memtest86+"/>
 		<package name="mingetty"/>
 		<package name="mktemp"/>
 		<package name="mtools"/>
