@@ -27,6 +27,7 @@ Summary:        openSUSE - KIWI Image System
 License:        GPL-2.0
 Group:          System/Management
 Version:        5.05.69
+Provides:       kiwi-schema = 5.8
 Release:        0
 # requirements to build packages
 BuildRequires:  diffutils
