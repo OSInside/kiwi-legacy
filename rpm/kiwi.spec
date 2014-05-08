@@ -174,6 +174,7 @@ documentation can be found here: http://doc.opensuse.org
 Authors:
 --------
     Marcus Schaefer <ms@suse.com>
+    Robert Schweikert <rjschwei@suse.com>
 
 %package -n kiwi-instsource
 Summary:        KIWI - Product media creator
@@ -213,8 +214,8 @@ the KIWI image builder.
 
 Authors:
 --------
-    Thomas Schraitle
-    Marcus Schaefer
+    Thomas Schraitle <toms@suse.com>
+    Marcus Schaefer <ms@suse.com>
 
 %package -n kiwi-tools
 Summary:        KIWI - Collection of Boot Helper Tools
@@ -443,7 +444,7 @@ a JeOS based operating system image with kiwi
 
 Authors:
 --------
-    Marcus Schaefer
+    Marcus Schaefer <ms@suse.com>
 %endif
 
 %ifarch %ix86 x86_64 ppc ppc64 ppc64le s390 s390x %arm aarch64
@@ -481,7 +482,7 @@ distributed source media (DVD)
 
 Authors:
 --------
-    Marcus Schaefer
+    Marcus Schaefer <ms@suse.com>
 %endif
 
 %package -n kiwi-test
@@ -497,6 +498,11 @@ BuildArch:      noarch
 %description -n kiwi-test
 This package contains the unit tests executed during package build and
 used for development testing.
+
+Authors:
+--------
+    Robert Schweikert <rjschwei@suse.com>
+    Marcus Schaefer <ms@suse.com>
 
 %prep
 %setup -q -n %name -a2 -a3
