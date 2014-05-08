@@ -180,7 +180,6 @@
       <title><sgmltag>image</sgmltag> Element</title>
       <screen>&lt;image schemaversion="5.2" name="iname"
   displayname="text" 
-  inherit="path" 
   kiwirevision="number" 
   id="10 digit number"&gt;
   <sgmltag class="sgmlcomment"> ... </sgmltag>
@@ -207,13 +206,6 @@
               problems for some bootloaders and kiwi did not take the effort
               to separate the ones which can display them correctly from the
               ones which can't</para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><sgmltag class="attribute">inherit</sgmltag></term>
-          <listitem>
-            <para>inherits the packages information from another
-                <sgmltag>image</sgmltag> description </para>
           </listitem>
         </varlistentry>
         <varlistentry>
