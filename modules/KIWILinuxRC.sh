@@ -6644,7 +6644,7 @@ function fetchFile {
 	#======================================
 	# set source path + tool if compressed
 	#--------------------------------------
-	if [ ! -z "$izip" ] && [ ! "$izip" = "uncompressed" ];then
+	if [ ! -z "$izip" ] && [[ ! "$izip" =~ ^uncomp ]];then
 		if [ $izip = "compressed" ] || [ "$izip" = "compressed-gzip" ]; then
 			unzip="gzip -d"
 			path=$(echo "$path" | sed -e s@\\.gz@@)
