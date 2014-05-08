@@ -354,7 +354,6 @@ Summary:        KIWI - PXE network boot templates
 Requires:       kiwi = %{version}
 License:        GPL-2.0+
 Group:          System/Management
-%endif
 
 %description -n kiwi-desc-netboot
 kiwi boot (initrd) image for booting PXE images.
