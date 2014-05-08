@@ -1,8 +1,17 @@
 #!/bin/bash
 
 version=$1
+schema=$2
+if [ -z "$version" ] || [ -z "$schema" ];then
+	echo "Need a version and a schema version"
+	exit 1
+fi
 if ! echo $version | grep -q -E "^[0-9]+\.[0-9]+\.[0-9]+$";then
 	echo "NOT A VERSION ! ... abort"
+	exit 1
+fi
+if ! echo $schema | grep -q -E "^[0-9]+\.[0-9]$";then
+	echo "NOT A SCHEMA VERSION ! ... abort"
 	exit 1
 fi
 
@@ -13,8 +22,10 @@ cat modules/KIWIGlobals.pm | sed \
 
 # spec file version update
 cat rpm/kiwi.spec | sed \
-	-e s"@Version:       .*@Version:        $version@" \
+	-e "0,/Version:       .*/{s/Version:       .*/Version:        $version/}" \
+	-e s"/kiwi-schema = .*/kiwi-schema = $schema/" \
 	-e s"@kiwi (Version .*@kiwi (Version $version)@" \
 > rpm/kiwi.spec.new && mv rpm/kiwi.spec.new rpm/kiwi.spec
 
-echo "update to version: $version... done"
+echo "update to version: ${version}... done"
+echo "update to schema: ${schema}... done"

@@ -7,4 +7,7 @@ v_part2=$((v_part2 + 1))
 
 version=$v_part1.$v_part2
 
-./.newversion $version
+schema=$(cat modules/KIWISchema.rnc | grep "attribute schemaversion")
+schema=$(echo $schema | cut -f 2 -d { | cut -f 1 -d } | tr -d \")
+
+./.newversion $version $schema
