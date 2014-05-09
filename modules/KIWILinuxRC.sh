@@ -22,7 +22,7 @@ export BOOTABLE_FLAG="$(echo -ne '\x80')"
 export ELOG_FILE=/var/log/boot.kiwi
 export TRANSFER_ERRORS_FILE=/tmp/transfer.errors
 export UFONT=/usr/share/fbiterm/fonts/b16.pcf.gz
-export HYBRID_PERSISTENT_FS=ext4
+export HYBRID_PERSISTENT_FS=ext3
 export HYBRID_PERSISTENT_ID=83
 export HYBRID_PERSISTENT_DIR=/read-write
 export UTIMER_INFO=/dev/utimer
@@ -6102,12 +6102,14 @@ function mountSystemCombined {
 	local haveKByte
 	local haveMByte
 	local needMByte
-	if [ "$haveLuks" = "yes" ]; then
+	if [ -e "$HYBRID_RW" ];then
+		rwDevice=$HYBRID_RW
+	elif [ "$haveLuks" = "yes" ]; then
 		rwDevice="/dev/mapper/luksReadWrite"
 	elif [ "$haveLVM" = "yes" ]; then
 		rwDevice="/dev/$kiwi_lvmgroup/LVRoot"
 	else
-		rwDevice=`getNextPartition $mountDevice`
+		rwDevice=$(getNextPartition $mountDevice)
 	fi
 	mkdir /read-only >/dev/null
 	# /.../
@@ -6165,6 +6167,43 @@ function mountSystemCombined {
 	fi
 	cd /mnt && tar xf $rootfs >/dev/null && cd /
 	# /.../
+	# check for a read-write data file and put it on the read-write
+	# device or to the root tmpfs
+	# ---
+	if [ -e ${loopf}-read-write ];then
+		local target=/mnt
+		if [ -e "$HYBRID_RW" ];then
+			mkdir -p /mnt/read-write
+			kiwiMount "$rwDevice" "/mnt/read-write"
+			target=/mnt/read-write
+		fi
+		mkdir -p /mnt-tmp
+		if ! mount ${loopf}-read-write /mnt-tmp;then
+			systemException \
+				"Failed to mount read-write data file" \
+			"reboot"
+		fi
+		pushd /mnt-tmp &>/dev/null
+		for item in *;do
+			if [ -L /$target/$item ];then
+				rm -f /$target/$item
+			fi
+			if [ ! -e /$target/$item ];then
+				if ! cp -a /mnt-tmp/$item $target;then
+					systemException \
+						"Failed to copy $item to $target" \
+					"reboot"
+				fi
+			fi
+		done
+		popd &>/dev/null
+		if [ -e "$HYBRID_RW" ];then
+			umount /mnt/read-write
+		fi
+		umount /mnt-tmp
+		rmdir /mnt-tmp
+	fi
+	# /.../
 	# create a /mnt/read-only mount point and move the /read-only
 	# mount into the /mnt root tree. After that remove the /read-only
 	# directory and create a link to /mnt/read-only instead
@@ -6180,7 +6219,7 @@ function mountSystemCombined {
 			# mount the read-write partition to /mnt/read-write and create
 			# a link to it: /read-write -> /mnt/read-write 
 			# ----
-			mkdir /mnt/read-write >/dev/null
+			mkdir -p /mnt/read-write >/dev/null
 			kiwiMount "$rwDevice" "/mnt/read-write"
 			rm -rf /read-write >/dev/null
 			ln -s /mnt/read-write /read-write >/dev/null
@@ -8316,7 +8355,9 @@ function createHybridPersistent {
 	#======================================
 	# create filesystem on write partition
 	#--------------------------------------
-	if ! mkfs.$HYBRID_PERSISTENT_FS -L hybrid -O ^has_journal,uninit_bg -E lazy_itable_init $(ddn $device $pID);then
+	local hybrid_opts="-E lazy_itable_init"
+	local hybrid_device=$(ddn $device $pID)
+	if ! mkfs.$HYBRID_PERSISTENT_FS -L hybrid $hybrid_opts $hybrid_device;then
 		Echo "Failed to create hybrid persistent filesystem"
 		Echo "Persistent writing deactivated"
 		unset kiwi_hybridpersistent

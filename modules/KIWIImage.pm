@@ -1229,6 +1229,7 @@ sub createImageLiveCD {
 	if (! defined $namerw) {
 		return;
 	}
+	my $isofile = $namerw;
 	#==========================================
 	# Call images.sh script
 	#------------------------------------------
@@ -1352,10 +1353,13 @@ sub createImageLiveCD {
 		SWITCH: for ($gzip) {
 			/^compressed$/ && do {
 				$kiwi -> info ("Creating split ext3 + squashfs...\n");
-				if (! $this -> createImageSplit ("ext3,squashfs", 1)) {
+				if (! $this -> createImageSplit ("ext3,squashfs")) {
 					return;
 				}
 				$namero = $namerw;
+				$namerw = KIWIGlobals -> instance() -> generateBuildImageName(
+					$xml,'-', '-read-write'
+				);
 				last SWITCH;
 			};
 			/^(clic|clic_udf)$/ && do {
@@ -1577,9 +1581,12 @@ sub createImageLiveCD {
 		KIWIQX::qxx ("rm $this->{imageDest}/$namerw.*");
 	}
 	if (defined $gzip) {
-		#KIWIQX::qxx ("mv $this->{imageDest}/$namero $CD");
-		#KIWIQX::qxx ("rm $this->{imageDest}/$namero.*");
 		KIWIQX::qxx ("ln -s $this->{imageDest}/$namero $CD/$namero");
+		if (-e "$this->{imageDest}/$namerw") {
+			KIWIQX::qxx (
+				"ln -s $this->{imageDest}/$namerw $CD/$namero-read-write"
+			);
+		}
 	} else {
 		KIWIQX::qxx ("mkdir -p $CD/read-only-system");
 		KIWIQX::qxx ("mv $imageTreeReadOnly/* $CD/read-only-system");
@@ -2249,7 +2256,7 @@ sub createImageLiveCD {
 	#------------------------------------------
 	$kiwi -> info ("Creating ISO image...\n");
 	my $isoerror = 1;
-	my $name = $this->{imageDest}."/".$namerw.".iso";
+	my $name = $this->{imageDest}."/".$isofile.".iso";
 	my $attr = "-R -J -f -pad -joliet-long";
 	my $flags= $xmltype -> getFlags();
 	my $volid= $xmltype -> getVolID();
@@ -2383,7 +2390,6 @@ sub createImageSplit {
 	# ---
 	my $this         = shift;
 	my $type         = shift;
-	my $nopersistent = shift;
 	my $kiwi         = $this->{kiwi};
 	my $cmdL         = $this->{cmdL};
 	my $imageTree    = $this->{imageTree};
@@ -2579,10 +2585,6 @@ sub createImageSplit {
 			my $name = $item -> getName();
 			push @persistFiles,$name;
 		}
-	}
-	if ($nopersistent) {
-		push (@tempFiles, @persistFiles);
-		undef @persistFiles;
 	}
 	#==========================================
 	# search temporary files, respect excepts
