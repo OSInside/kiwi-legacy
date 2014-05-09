@@ -24,6 +24,7 @@
 		<keytable>us.map.gz</keytable>
 		<timezone>Europe/Berlin</timezone>
 		<hwclock>utc</hwclock>
+		<type image="iso" boot="isoboot/suse-SLES11" flags="compressed" hybrid="true"/>
 	</preferences>
 	<preferences profiles="ec2Flavour">
 		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES11" bootprofile="ec2" bootkernel="ec2k" bootloader="grub" kernelcmdline="xencons=xvc0 console=xvc0 multipath=off splash=silent showopts"/>
