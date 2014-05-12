@@ -692,7 +692,7 @@ sub __disableServices {
 	my $targetDir = shift;
 	my $kiwi = $this->{kiwi};
 	my $locator = $this->{locator};
-	$kiwi -> info('Disable unwanted services');
+	$kiwi -> info("Disable unwanted services\n");
 	my $sysctl = $locator -> getExecPath('systemctl', $targetDir);
 	my $croot = $locator -> getExecPath('chroot');
 	if ($sysctl) {
@@ -726,33 +726,38 @@ sub __disableServices {
 			my $data = KIWIQX::qxx ($cmd);
 			my $code = $? >> 8;
 			if ($code != 0) {
-				$kiwi -> failed();
-				$kiwi -> error("Could not disable service: $name");
+				$kiwi -> error ("--> Could not disable service: $name");
 				$kiwi -> failed();
 				return;
+			} else {
+				$kiwi -> info ("--> Disabled: $name");
+				$kiwi -> done();
 			}
 		}
 	} else {
-		my $ins = $locator -> getExecPath('insserv', $targetDir);
-		my $cmd = "$croot $targetDir "
-			. "$ins -r -f "
-			. 'boot.clock '
-			. 'boot.device-mapper '
-			. 'boot.klog '
-			. 'boot.swap '
-			. 'boot.udev '
-			. 'kbd '
-			. '>/dev/null 2>&1';
-		my $data = KIWIQX::qxx ($cmd);
-		my $code = $? >> 8;
-		if ($code != 0) {
-			$kiwi -> failed();
-			$kiwi -> error('Could not disable services');
-			$kiwi -> failed();
-			return;
+		my $ins = $locator -> getExecPath('chkconfig', $targetDir);
+		my @services = (
+			'boot.clock',
+			'boot.device-mapper',
+			'boot.klog',
+			'boot.swap',
+			'boot.udev'
+		);
+		foreach my $service (@services) {
+			my $data = KIWIQX::qxx(
+				"$croot $targetDir $ins -f $service off"
+			);
+			my $code = $? >> 8;
+			if ($code != 0) {
+				$kiwi -> error("--> Could not disable service: $service");
+				$kiwi -> failed();
+				return;
+			} else {
+				$kiwi -> info ("--> Disabled: $service");
+				$kiwi -> done();
+			}
 		}
 	}
-	$kiwi -> done();
 	return 1;
 }
 
