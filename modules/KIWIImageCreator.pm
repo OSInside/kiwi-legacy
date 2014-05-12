@@ -1200,6 +1200,11 @@ sub createImageInstallCD {
 	my $cmdL = $this->{cmdL};
 	my $prof = $this->{buildProfiles};
 	$kiwi -> info ("Creating install ISO from: $ird...\n");
+	if (! $this -> __isInstallBootImage($ird)) {
+		$kiwi -> error  ("Given boot image has no install code");
+		$kiwi -> failed ();
+		return;
+	}
 	if (! defined $sys) {
 		$kiwi -> error  ("No Install system image specified");
 		$kiwi -> failed ();
@@ -1234,6 +1239,11 @@ sub createImageInstallStick {
 	my $cmdL = $this->{cmdL};
 	my $prof = $this->{buildProfiles};
 	$kiwi -> info ("Creating install Stick from: $ird...\n");
+	if (! $this -> __isInstallBootImage($ird)) {
+		$kiwi -> error  ("Given boot image has no install code");
+		$kiwi -> failed ();
+		return;
+	}
 	if (! defined $sys) {
 		$kiwi -> error  ("No Install system image specified");
 		$kiwi -> failed ();
@@ -1268,6 +1278,11 @@ sub createImageInstallPXE {
 	my $cmdL = $this->{cmdL};
 	my $prof = $this->{buildProfiles};
 	$kiwi -> info ("Creating install PXE data set from: $ird...\n");
+	if (! $this -> __isInstallBootImage($ird)) {
+		$kiwi -> error  ("Given boot image has no install code");
+		$kiwi -> failed ();
+		return;
+	}
 	if (! defined $sys) {
 		$kiwi -> error  ("No Install system image specified");
 		$kiwi -> failed ();
@@ -1356,6 +1371,22 @@ sub createImageFormat {
 #==========================================
 # Private helper methods
 #------------------------------------------
+sub __isInstallBootImage {
+	# ...
+	# Test a given boot image (cpio) if it contains the dump
+	# file which is kiwi's code to install images. If yes the
+	# boot image has install capabilities
+	# ---
+	my $this = shift;
+	my $boot = shift;
+	my $data = KIWIQX::qxx ("gzip -cd $boot | cpio -it | grep -q ^dump$ 2>&1");
+	my $code = $? >> 8;
+	if ($code != 0) {
+		return;
+	}
+	return 1;
+}
+
 #==========================================
 # __applyAdditionalXMLOverrides
 #------------------------------------------
