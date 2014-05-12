@@ -407,6 +407,7 @@ sub init {
 	my $imageVersion = $xml -> getPreferences() -> getVersion();
 	my $imageName    = $xml -> getImageName();
 	KIWIQX::qxx ("mkdir -p $root/etc");
+	KIWIQX::qxx ("chown root:root $root/etc");
 	if ( ! open ($FD, '>', "$imageVersionFile")) {
 		$kiwi -> error ("Failed to create version file: $!");
 		$kiwi -> failed ();
@@ -480,6 +481,9 @@ sub init {
 	$kiwi -> info ("Creating default template files for new root system");
 	if (! defined $this->{cacheRoot}) {
 		KIWIQX::qxx ("mkdir -p $root/dev");
+		KIWIQX::qxx ("chown root:root $root/dev");
+		KIWIQX::qxx ("mkdir -m 755 -p $root/proc");
+		KIWIQX::qxx ("chown root:root $root/proc");
 		KIWIQX::qxx ("mkdir -m 755 -p $root/dev/pts");
 		KIWIQX::qxx ("mknod -m 666 $root/dev/null c 1 3");
 		KIWIQX::qxx ("mknod -m 666 $root/dev/zero c 1 5");
@@ -497,6 +501,8 @@ sub init {
 		KIWIQX::qxx ("mknod -m 640 $root/dev/loop2 b 7 2");
 		KIWIQX::qxx ("mknod -m 640 $root/dev/loop3 b 7 3");
 		KIWIQX::qxx ("mkdir -p $root/etc/sysconfig");
+		KIWIQX::qxx ("mkdir -m 755 -p $root/var");
+		KIWIQX::qxx ("chown root:root $root/var");
 		# for zypper we need a yast log dir
 		if ($packager eq "zypper") {
 			KIWIQX::qxx ("mkdir -p $root/var/log/YaST2");
