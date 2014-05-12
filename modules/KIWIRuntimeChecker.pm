@@ -354,7 +354,7 @@ sub __checkContainerHasLXC {
 		return 1;
 	}
 	my $name = $type -> getTypeName();
-	if ($name =~ /^lxc|^docker/smx) {
+	if ($name eq 'lxc') {
 		my $pckgs = $xml -> getPackages();
 		push @{$pckgs}, @{$xml -> getBootstrapPackages()};
 		for my $pckg (@{$pckgs}) {
@@ -372,7 +372,6 @@ sub __checkContainerHasLXC {
 	}
 	return 1;
 }
-
 
 #==========================================
 # __checkLVMoemSizeSettings
