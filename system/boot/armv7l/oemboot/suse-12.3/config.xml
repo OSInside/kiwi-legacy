@@ -126,6 +126,7 @@
 		<package name="procps"/>
 		<package name="udev"/>
 		<package name="iproute2"/>
+		<package name="xz"/>
 	</packages>
 	<packages type="delete">
 		<package name="audit-libs"/>
