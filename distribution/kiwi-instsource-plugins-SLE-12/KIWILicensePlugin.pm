@@ -71,21 +71,44 @@ sub execute {
 			system("mkdir $media_license_dir");
 			$result = $? >> 8;
 			if ($result != 0) {
+				$this->logMsg(
+					"E", "mkdir failed!"
+				);
 				return 1;
 			}
 			system("tar xf $licenseArchive -C $media_license_dir");
 			$result = $? >> 8;
 			if ($result != 0) {
+				$this->logMsg(
+					"E", "Untar failed!"
+				);
+				return 1;
+			}
+			if ( ! -e "$media_license_dir/license.txt" ) {
+				$this->logMsg(
+					"E", "No license.txt extracted!"
+				);
+				return 1;
+			}
+			if ( ! -e "$media_license_dir/directory.yast" ) {
+				$this->logMsg(
+					"E", "No directory.yast extracted!"
+				);
 				return 1;
 			}
 			# add license information to repomd metadata
-			if ( -e "$media_base/repodata" ) {
+			if ( -d "$media_base/repodata" ) {
 				$this->logMsg("I", "Adding license.tar.gz to rpm-md data");
 				system("cd $media_base && modifyrepo $licenseArchive repodata");
 				$result = $? >> 8;
 				if ($result != 0) {
+					$this->logMsg(
+						"E", "modifyrepo failed!"
+					);
 					return 1;
 				}
+				# not needed here anymore
+				unlink $licenseArchive;
 			}
 		}
 	}
