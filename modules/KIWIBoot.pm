@@ -1474,7 +1474,7 @@ sub setupInstallStick {
 sub setupInstallPXE {
 	my $this = shift;
 	my $kiwi      = $this->{kiwi};
-	my $zipper    = $this->{gdata}->{Gzip};
+	my $zipper    = $this->{gdata}->{Xz};
 	my $initrd    = $this->{initrd};
 	my $system    = $this->{system};
 	my $xml       = $this->{xml};
@@ -1587,7 +1587,7 @@ sub setupInstallPXE {
 	$kiwi -> info ("Compressing installation image...");
 	$result = 0;
 	$sysname = $system;
-	$sysname =~ s/\.raw$/\.gz/;
+	$sysname =~ s/\.raw$/\.xz/;
 	if ($haveDiskDevice) {
 		$status = KIWIQX::qxx (
 			"qemu-img convert -f raw -O raw $haveDiskDevice $system"

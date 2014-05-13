@@ -353,7 +353,7 @@ function OEMInstall {
 	imageName=$prefix/$imageName
 	imageMD5=$(echo $imageName | sed -e s@.raw@.md5@)
 	if [ ! -z "$pxe" ];then
-		imageName=$(echo $imageName | sed -e s@.raw@.gz@)
+		imageName=$(echo $imageName | sed -e s@.raw@.xz@)
 	fi
 	OEMRootImage=$imageName
 	#======================================
@@ -765,7 +765,7 @@ function OEMInstall {
 		else
 			multicast="disable"
 			Echo "Loading $Source [$Target BS:$imageBlkSize Byte]..."
-			fetchFile $Source $Target compressed $imageServer
+			fetchFile $Source $Target compressed-xz $imageServer
 			if test $loadCode != 0 || ! loadOK "$loadStatus";then
 				systemException \
 					"Download of $imageName failed: $loadStatus" \
