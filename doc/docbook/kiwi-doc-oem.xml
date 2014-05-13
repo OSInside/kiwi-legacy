@@ -282,7 +282,7 @@
 			<listitem>
 				<para> Next copy the system image and md5 sum over to to the PXE
             boot server
-            <screen><command>scp</command> &lt;image-file&gt;.gz  pxe.server.ip:/srv/tftpboot/image/
+            <screen><command>scp</command> &lt;image-file&gt;.xz  pxe.server.ip:/srv/tftpboot/image/
 <command>scp</command> &lt;image-file&gt;.md5 pxe.server.ip:/srv/tftpboot/image/</screen>
           </para>
 			</listitem>
