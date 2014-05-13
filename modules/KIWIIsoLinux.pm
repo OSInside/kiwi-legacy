@@ -372,7 +372,6 @@ sub ppc64_default {
 	$para.= "/metadata/KIWIIsoLinux-AppleFileMapping.map";
 	$para.= " --netatalk";
 	$para.= " -part";
-	$para.= " -T";
 	$para.= " -U";
 	$this -> {params} = $para;
 	return $this;
