@@ -160,6 +160,9 @@ sub main {
 		$cmdL -> setOperationMode ("prepare", $cmdL->getConfigDir());
 		mkdir $imageTarget;
 		$kic = KIWIImageCreator -> new ($cmdL);
+		if (! $kic) {
+			kiwiExit (1);
+		}
 		my $selectedType = $kic -> getSelectedBuildType();
 		if ($selectedType && $selectedType eq 'cpio') {
 			if (! $kic -> prepareBootImage(

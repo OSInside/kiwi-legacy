@@ -136,7 +136,7 @@ sub initialize {
 	#==========================================
 	# Store selected image type
 	#------------------------------------------
-	if ($this->{buildType}) {
+	if (($this->{buildType}) && (! $cmdL->getOperationMode("convert"))) {
 		my $configDir = $this->{configDir};
 		if (! $configDir) {
 			$configDir = $cmdL -> getSystemLocation();

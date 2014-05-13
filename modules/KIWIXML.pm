@@ -37,6 +37,7 @@ use KIWIURL;
 use KIWIXMLDescriptionData;
 use KIWIXMLDriverData;
 use KIWIXMLInstRepositoryData;
+use KIWIXMLVagrantConfigData;
 use KIWIXMLOEMConfigData;
 use KIWIXMLPackageData;
 use KIWIXMLPackageArchiveData;
@@ -96,23 +97,25 @@ sub new {
 	# this = {
 	#     availableProfiles = ('',....)
 	#     defaultType = {
-	#         machine    = KIWIXMLVMachineData
-	#         oemconfig  = KIWIXMLOEMConfigData
-	#         pxeconfig  = (KIWIXMLPXEDeployConfigData,...)
-	#         pxedeploy  = KIWIXMLPXEDeployData
-	#         split      = KIWIXMLSplitData
-	#         systemdisk = KIWIXMLSystemdiskData
-	#         type       = KIWIXMLTypeData
+	#         machine       = KIWIXMLVMachineData
+	#         oemconfig     = KIWIXMLOEMConfigData
+	#         vagrantconfig = KIWIXMLVagrantConfigData
+	#         pxeconfig     = (KIWIXMLPXEDeployConfigData,...)
+	#         pxedeploy     = KIWIXMLPXEDeployData
+	#         split         = KIWIXMLSplitData
+	#         systemdisk    = KIWIXMLSystemdiskData
+	#         type          = KIWIXMLTypeData
 	#     },
 	#     selectedProfiles = ('',....,'kiwi_default')
 	#     selectedType = {
-	#         machine    = KIWIXMLVMachineData
-	#         oemconfig  = KIWIXMLOEMConfigData
-	#         pxeconfig  = (KIWIXMLPXEDeployConfigData,...)
-	#         pxedeploy  = KIWIXMLPXEDeployData
-	#         split      = KIWIXMLSplitData
-	#         systemdisk = KIWIXMLSystemdiskData
-	#         type       = KIWIXMLTypeData
+	#         machine       = KIWIXMLVMachineData
+	#         oemconfig     = KIWIXMLOEMConfigData
+	#         vagrantconfig = KIWIXMLVagrantConfigData
+	#         pxeconfig     = (KIWIXMLPXEDeployConfigData,...)
+	#         pxedeploy     = KIWIXMLPXEDeployData
+	#         split         = KIWIXMLSplitData
+	#         systemdisk    = KIWIXMLSystemdiskData
+	#         type          = KIWIXMLTypeData
 	#     },
 	#     imageConfig = {
 	#         description  = KIWIXMLDescriptionData
@@ -191,13 +194,14 @@ sub new {
 	#                types {
 	#                    defaultType = ''
 	#                    <typename>[+] {
-	#                        machine    = KIWIXMLVMachineData
-	#                        oemconfig  = KIWIXMLOEMConfigData
-	#                        pxeconfig  = (KIWIXMLPXEDeployConfigData,...)
-	#                        pxedeploy  = KIWIXMLPXEDeployData
-	#                        split      = KIWIXMLSplitData
-	#                        systemdisk = KIWIXMLSystemdiskData
-	#                        type       = KIWIXMLTypeData
+	#                        machine       = KIWIXMLVMachineData
+	#                        oemconfig     = KIWIXMLOEMConfigData
+	#                        vagrantconfig = KIWIXMLVagrantConfigData
+	#                        pxeconfig     = (KIWIXMLPXEDeployConfigData,...)
+	#                        pxedeploy     = KIWIXMLPXEDeployData
+	#                        split         = KIWIXMLSplitData
+	#                        systemdisk    = KIWIXMLSystemdiskData
+	#                        type          = KIWIXMLTypeData
 	#                    }
 	#                }
 	#            }
@@ -1603,6 +1607,17 @@ sub getLibsToKeep {
 }
 
 #==========================================
+# getVagrantConfig
+#------------------------------------------
+sub getVagrantConfig {
+	# ...
+	# Return a VagrantConfigData object for the selected build type
+	# ---
+	my $this = shift;
+	return $this->{selectedType}->{vagrantconfig};
+}
+
+#==========================================
 # getOEMConfig
 #------------------------------------------
 sub getOEMConfig {
@@ -1611,6 +1626,26 @@ sub getOEMConfig {
 	# ---
 	my $this = shift;
 	return $this->{selectedType}->{oemconfig};
+}
+
+#==========================================
+# setVagrantConfig
+#------------------------------------------
+sub setVagrantConfig {
+	# ...
+	# Store a new VagrantConfigData object for the selected build type
+	# ---
+	my $this = shift;
+	my $vagrantconf = shift;
+	my $vagrantref  = ref $vagrantconf;
+	if (! $vagrantref) {
+		return;
+	}
+	if ($vagrantref ne 'KIWIXMLVagrantConfigData') {
+		return;
+	}
+	$this->{selectedType}->{vagrantconfig} = $vagrantconf;
+	return $this;
 }
 
 #==========================================
@@ -2913,6 +2948,34 @@ sub __convertSizeStrToMBVal {
 }
 
 #==========================================
+# __createVagrantConfig
+#------------------------------------------
+sub __createVagrantConfig {
+	# ...
+	# Return a ref to a hash that contains the configuration data
+	# for the <vagrantconfig> element and it's children for the
+	# given XML:ELEMENT object
+	# ---
+	my $this = shift;
+	my $node = shift;
+	my $kiwi = $this->{kiwi};
+	my $vagrantConfig = $node
+		-> getChildrenByTagName('vagrantconfig') -> get_node(1);
+	if (! $vagrantConfig ) {
+		return;
+	}
+	my %vagrantConfigData;
+	$vagrantConfigData{provider} =
+		$vagrantConfig -> getAttribute('provider');
+	$vagrantConfigData{virtual_size} =
+		$vagrantConfig -> getAttribute('virtualsize');
+	my $vagrantConfObj = KIWIXMLVagrantConfigData -> new(
+		\%vagrantConfigData
+	);
+	return $vagrantConfObj;
+}
+
+#==========================================
 # __createOEMConfig
 #------------------------------------------
 sub __createOEMConfig {
@@ -3867,6 +3930,10 @@ sub __genTypeHash {
 			$typeData{$attr} = $type -> getAttribute($attr);
 		}
 		#==========================================
+		# store <vagrantconfig> child
+		#------------------------------------------
+		my $vagrantConfig = $this -> __createVagrantConfig($type);
+		#==========================================
 		# store <machine> child
 		#------------------------------------------
 		my $vmConfig = $this -> __createVMachineConfig($type);
@@ -3914,13 +3981,14 @@ sub __genTypeHash {
 		#------------------------------------------
 		my $typeObj = KIWIXMLTypeData -> new(\%typeData);
 		my %curType = (
-			machine    => $vmConfig,
-			oemconfig  => $oemConfig,
-			pxeconfig  => $pxeConfigData,
-			pxedeploy  => $pxeConfig,
-			split      => $splitData,
-			systemdisk => $sysDisk,
-			type       => $typeObj
+			machine       => $vmConfig,
+			vagrantconfig => $vagrantConfig,
+			oemconfig     => $oemConfig,
+			pxeconfig     => $pxeConfigData,
+			pxedeploy     => $pxeConfig,
+			split         => $splitData,
+			systemdisk    => $sysDisk,
+			type          => $typeObj
 		);
 		$types{$typeData{image}} = \%curType;
 	}
@@ -4112,6 +4180,7 @@ sub __getPreferencesXMLElement {
 			# Process all children of the <type> element
 			my @typeChildren = qw (
 				machine
+				vagrantconfig
 				oemconfig
 				split
 				systemdisk

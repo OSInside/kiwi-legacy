@@ -78,6 +78,7 @@ my @kiwiModules = qw (
 	KIWIXMLInfo.pm
 	KIWIXMLInstRepositoryData.pm
 	KIWIXMLOEMConfigData.pm
+	KIWIXMLVagrantConfigData.pm
 	KIWIXMLPXEDeployConfigData.pm
 	KIWIXMLPXEDeployData.pm
 	KIWIXMLPackageArchiveData.pm
@@ -146,6 +147,7 @@ my @kiwiModules = qw (
 	KTXMLUserData.t
 	KTXMLVMachineData.t
 	KTXMLValidator.t
+	KTXMLVagrantConfigData.t
 	ktLog.pm
 	ktTestCase.pm
 	kiwiCommandLine.pm
@@ -171,6 +173,7 @@ my @kiwiModules = qw (
 	kiwiXMLInfo.pm
 	kiwiXMLInstRepositoryData.pm
 	kiwiXMLOEMConfigData.pm
+	kiwiXMLVagrantConfigData.pm
 	kiwiXMLPXEDeployConfigData.pm
 	kiwiXMLPXEDeployData.pm
 	kiwiXMLPackageArchiveData.pm
@@ -262,6 +265,7 @@ my @notClean1 = qw (
 	KIWIXMLInfo.pm
 	KIWIXMLInstRepositoryData.pm
 	KIWIXMLOEMConfigData.pm
+	KIWIXMLVagrantConfigData.pm
 	KIWIXMLPXEDeployConfigData.pm
 	KIWIXMLPXEDeployData.pm
 	KIWIXMLPackageArchiveData.pm
@@ -308,6 +312,7 @@ my @notClean1 = qw (
 	KTXMLInfo.t
 	KTXMLInstRepositoryData.t
 	KTXMLOEMConfigData.t
+	KTXMLVagrantConfigData.t
 	KTXMLPXEDeployConfigData.t
 	KTXMLPXEDeployData.t
 	KTXMLPackageArchiveData.t
@@ -355,6 +360,7 @@ my @notClean1 = qw (
 	kiwiXMLInfo.pm
 	kiwiXMLInstRepositoryData.pm
 	kiwiXMLOEMConfigData.pm
+	kiwiXMLVagrantConfigData.pm
 	kiwiXMLPXEDeployConfigData.pm
 	kiwiXMLPXEDeployData.pm
 	kiwiXMLPackageArchiveData.pm

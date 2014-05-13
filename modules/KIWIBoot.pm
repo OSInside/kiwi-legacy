@@ -111,10 +111,10 @@ sub new {
 	# find image type...
 	#------------------------------------------
 	if (($system) && (! defined $cmdL->getBuildType())) {
-		if ($initrd =~ /oemboot/) {
+		if (($initrd) && ($initrd =~ /oemboot/)) {
 			$cmdL -> setBuildType ("oem");
 		}
-		if ($initrd =~ /vmxboot/) {
+		if (($initrd) && ($initrd =~ /vmxboot/)) {
 			$cmdL -> setBuildType ("vmx");
 		}
 	}

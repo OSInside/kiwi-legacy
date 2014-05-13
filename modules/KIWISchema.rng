@@ -2230,6 +2230,7 @@ To be remove from here by the end of 2014</a:documentation>
           <value>ovf</value>
           <value>ova</value>
           <value>qcow2</value>
+          <value>vagrant</value>
           <value>vmdk</value>
           <value>vdi</value>
           <value>vhd</value>
@@ -2562,6 +2563,9 @@ into the master block. There is space for 32 characters.</a:documentation>
           </optional>
           <optional>
             <ref name="k.systemdisk"/>
+          </optional>
+          <optional>
+            <ref name="k.vagrantconfig"/>
           </optional>
         </interleave>
       </element>
@@ -3604,6 +3608,41 @@ and setup the system disk</db:para>
             <ref name="k.oem-unattended-id"/>
           </optional>
         </interleave>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
+    main block: <vagrantconfig>
+    
+  -->
+  <div>
+    <define name="k.vagrantconfig.provider.attribute">
+      <attribute name="provider">
+        <a:documentation>The vagrant provider for this box</a:documentation>
+        <choice>
+          <value>libvirt</value>
+          <value>virtualbox</value>
+        </choice>
+      </attribute>
+    </define>
+    <define name="k.vagrantconfig.virtualsize.attribute">
+      <attribute name="virtualsize">
+        <a:documentation>The vagrant virtual image size in GB</a:documentation>
+        <data type="nonNegativeInteger"/>
+      </attribute>
+    </define>
+    <define name="k.vagrantconfig.attlist">
+      <interleave>
+        <ref name="k.vagrantconfig.provider.attribute"/>
+        <ref name="k.vagrantconfig.virtualsize.attribute"/>
+      </interleave>
+    </define>
+    <define name="k.vagrantconfig">
+      <element name="vagrantconfig">
+        <a:documentation>Specifies the Vagrant configuration section</a:documentation>
+        <db:para>The vagrantconfig element specifies the Vagrant metaconfiguration options which are used inside a vagrant box</db:para>
+        <ref name="k.vagrantconfig.attlist"/>
       </element>
     </define>
   </div>
