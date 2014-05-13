@@ -30,7 +30,6 @@
 	</repository>
 	<packages type="image">
 		<package name="coreutils"/>
-		<package name="lxc"/>
 		<package name="iputils"/>
 	</packages>
 	<packages type="bootstrap">
