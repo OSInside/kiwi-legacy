@@ -49,6 +49,7 @@
 		<package name="parted"/>
 		<package name="autoyast2"/>
 		<package name="sudo"/>
+		<package name="rsync"/>
 		<package name="kernel-default"/>
 	</packages>
 	<packages type="bootstrap">
