@@ -7681,7 +7681,9 @@ function setupUnionFS {
 		roDevice=$roDeviceLuks
 		export haveLuks="yes"
 	fi
-	export UNIONFS_CONFIG="$rwDevice,$roDevice,$unionFST"
+	if [ ! -z "$rwDevice" ] && [ ! -z "$roDevice" ];then
+		export UNIONFS_CONFIG="$rwDevice,$roDevice,$unionFST"
+	fi
 }
 #======================================
 # canWrite
