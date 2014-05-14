@@ -5685,7 +5685,7 @@ sub installBootLoader {
 		}
 		my $grubOptions = "--device-map $dmfile --no-floppy --batch";
 		if (-d "/boot/grub") {
-			KIWIQX::qxx ("mount --bind $tmpdir/boot/grub /boot/grub");
+			KIWIQX::qxx ("mount -n --bind $tmpdir/boot/grub /boot/grub");
 		}
 		KIWIQX::qxx ("$grub $grubOptions < $cmdfile &> $tmpdir/grub.log");
 		KIWIQX::qxx ("umount /boot/grub &>/dev/null");

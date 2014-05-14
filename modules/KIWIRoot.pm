@@ -518,8 +518,6 @@ sub init {
 		if (-f '/.buildenv') {
 			KIWIQX::qxx ("touch $root/.buildenv");
 		}
-		# need mtab link for mount calls
-		KIWIQX::qxx ("ln -s /proc/self/mounts $root/etc/mtab");
 		# need sysconfig/bootloader to make post scripts happy
 		KIWIQX::qxx ("touch $root/etc/sysconfig/bootloader");
 	}
@@ -1392,7 +1390,7 @@ sub setupCacheMount {
 	}
 	if (! -e "$root/dev/console") {
 		KIWIQX::qxx ("mkdir -p $root/dev");
-		KIWIQX::qxx ("mount --bind /dev $root/dev");
+		KIWIQX::qxx ("mount -n --bind /dev $root/dev");
 		push (@mountList,"$root/dev");
 	}
 	foreach my $cache (@cache) {
@@ -1407,12 +1405,12 @@ sub setupCacheMount {
 		if (! -d "$root/$cache") {
 			KIWIQX::qxx ("mkdir -p $root/$cache 2>&1");
 		}
-		KIWIQX::qxx ("mount --bind $cache $root/$cache 2>&1");
+		KIWIQX::qxx ("mount -n --bind $cache $root/$cache 2>&1");
 		push (@mountList,"$root/$cache");
 	}
 	if (! -e "$root/proc/mounts") {
 		KIWIQX::qxx ("mkdir -p $root/proc");
-		KIWIQX::qxx ("mount -t proc proc $root/proc");
+		KIWIQX::qxx ("mount -n -t proc proc $root/proc");
 		push (@mountList,"$root/proc");
 	}
 	$this->{mountList} = \@mountList;
@@ -1454,29 +1452,33 @@ sub setupMount {
 	}
 	if (! -e "$root/proc/mounts") {
 		KIWIQX::qxx ("mkdir -p $root/proc");
-		KIWIQX::qxx ("mount -t proc proc $root/proc");
+		KIWIQX::qxx ("mount -n -t proc proc $root/proc");
 		push (@mountList,"$root/proc");
 	}
 	if (! -e "$root/dev/console") {
-		KIWIQX::qxx ("mount --bind /dev $root/dev");
+		KIWIQX::qxx ("mount -n --bind /dev $root/dev");
 		push (@mountList,"$root/dev");
 	}
 	if (! -e "$root/var/run/dbus/pid") {
 		KIWIQX::qxx ("mkdir -p $root/var/run/dbus");
-		KIWIQX::qxx ("mount --bind /var/run/dbus $root/var/run/dbus");
+		KIWIQX::qxx ("mount -n --bind /var/run/dbus $root/var/run/dbus");
 		push (@mountList,"$root/var/run/dbus");
 	}
 	if (! -d "$root/sys/block") {
 		KIWIQX::qxx ("mkdir -p $root/sys");
-		KIWIQX::qxx ("mount -t sysfs sysfs $root/sys");
+		KIWIQX::qxx ("mount -n -t sysfs sysfs $root/sys");
 		KIWIQX::qxx ("mkdir -p $root/dev/pts");
-		KIWIQX::qxx ("mount -t devpts -o mode=0620,gid=5 devpts $root/dev/pts");
+		KIWIQX::qxx (
+			"mount -n -t devpts -o mode=0620,gid=5 devpts $root/dev/pts"
+		);
 		push (@mountList,"$root/sys");
 		push (@mountList,"$root/dev/pts");
 	}
 	if (! -e "$root/proc/sys/fs/binfmt_misc/register") {
 		KIWIQX::qxx ("mkdir -p $root/proc/sys/fs/binfmt_misc");
-		KIWIQX::qxx ("mount -t binfmt_misc binfmt_misc $root/proc/sys/fs/binfmt_misc");
+		KIWIQX::qxx (
+			"mount -n -t binfmt_misc binfmt_misc $root/proc/sys/fs/binfmt_misc"
+		);
 		push (@mountList,"$root/proc/sys/fs/binfmt_misc");
 	}
 	$this->{mountList} = \@mountList;
@@ -1504,7 +1506,7 @@ sub setupMount {
 		} else {
 			$kiwi -> info ("--> Status: read-only mounted");
 		}
-		$data = KIWIQX::qxx ("mount -o bind \"$path\" \"$mount\" 2>&1");
+		$data = KIWIQX::qxx ("mount -n -o bind \"$path\" \"$mount\" 2>&1");
 		$code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed();

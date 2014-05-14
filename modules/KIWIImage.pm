@@ -3932,7 +3932,9 @@ sub mountLogicalExtend {
 		if ($code == 0) {
 			push @clean,"zpool export kiwipool";
 			$this->{UmountStack} = \@clean;
-			$data = KIWIQX::qxx ("mount --bind /kiwipool/ROOT/system-1 $dest 2>&1");
+			$data = KIWIQX::qxx (
+				"mount -n --bind /kiwipool/ROOT/system-1 $dest 2>&1"
+			);
 		}
 	} else {
 		#==========================================
@@ -3940,9 +3942,9 @@ sub mountLogicalExtend {
 		#------------------------------------------
 		if ($opts) {
 			$opts =~ s/^,//;
-			$data = KIWIQX::qxx ("mount -o $opts $target $dest 2>&1");
+			$data = KIWIQX::qxx ("mount -n -o $opts $target $dest 2>&1");
 		} else {
-			$data = KIWIQX::qxx ("mount $target $dest 2>&1");
+			$data = KIWIQX::qxx ("mount -n $target $dest 2>&1");
 		}
 	}
 	#==========================================
