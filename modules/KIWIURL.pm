@@ -406,10 +406,10 @@ sub smbPath {
 	}
 	if (($user) && ($pwd)) {
 		$status = qxx (
-	      "mount -t cifs -o username=$user,passwort=$pwd $module $tmpdir 2>&1"
+			"mount -n -t cifs -o username=$user,passwort=$pwd $module $tmpdir 2>&1"
 		);
 	} else {
-		$status = qxx ("mount -t cifs -o guest $module $tmpdir 2>&1");
+		$status = qxx ("mount -n -t cifs -o guest $module $tmpdir 2>&1");
 	}
 	$result = $? >> 8;
 	if ($result != 0) {
@@ -536,7 +536,7 @@ sub isoPath {
 		$kiwi -> skipped ();
 		return;
 	}
-	$status = qxx ("mount -o loop $module $tmpdir 2>&1");
+	$status = qxx ("mount -n -o loop $module $tmpdir 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> warning ("Failed to loop mount ISO path: $status");

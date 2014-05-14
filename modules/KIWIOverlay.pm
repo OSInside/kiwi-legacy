@@ -139,7 +139,7 @@ sub unionOverlay {
 	# overlay mount both paths
 	#------------------------------------------
 	my $opts= "lowerdir=$baseRO,upperdir=$rootRW";
-	$status = qxx ("mount -t overlayfs -o $opts overlayfs $tmpdir 2>&1");
+	$status = qxx ("mount -n -t overlayfs -o $opts overlayfs $tmpdir 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> error  ("Failed to overlay mount paths: $status");

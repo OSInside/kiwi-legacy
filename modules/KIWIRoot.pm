@@ -483,8 +483,6 @@ sub init {
 		if (-f '/.buildenv') {
 			qxx ("touch $root/.buildenv");
 		}
-		# need mtab link for mount calls
-		qxx ("ln -s /proc/self/mounts $root/etc/mtab");
 		# need sysconfig/bootloader to make post scripts happy
 		qxx ("touch $root/etc/sysconfig/bootloader");
 	}
@@ -1359,7 +1357,7 @@ sub setupCacheMount {
 	}
 	if (! -e "$root/dev/console") {
 		qxx ("mkdir -p $root/dev");
-		qxx ("mount --bind /dev $root/dev");
+		qxx ("mount -n --bind /dev $root/dev");
 		push (@mountList,"$root/dev");
 	}
 	foreach my $cache (@cache) {
@@ -1374,12 +1372,12 @@ sub setupCacheMount {
 		if (! -d "$root/$cache") {
 			qxx ("mkdir -p $root/$cache 2>&1");
 		}
-		qxx ("mount --bind $cache $root/$cache 2>&1");
+		qxx ("mount -n --bind $cache $root/$cache 2>&1");
 		push (@mountList,"$root/$cache");
 	}
 	if (! -e "$root/proc/mounts") {
 		qxx ("mkdir -p $root/proc");
-		qxx ("mount -t proc proc $root/proc");
+		qxx ("mount -n -t proc proc $root/proc");
 		push (@mountList,"$root/proc");
 	}
 	$this->{mountList} = \@mountList;
@@ -1421,29 +1419,31 @@ sub setupMount {
 	}
 	if (! -e "$root/proc/mounts") {
 		qxx ("mkdir -p $root/proc");
-		qxx ("mount -t proc proc $root/proc");
+		qxx ("mount -n -t proc proc $root/proc");
 		push (@mountList,"$root/proc");
 	}
 	if (! -e "$root/dev/console") {
-		qxx ("mount --bind /dev $root/dev");
+		qxx ("mount -n --bind /dev $root/dev");
 		push (@mountList,"$root/dev");
 	}
 	if (! -e "$root/var/run/dbus/pid") {
 		qxx ("mkdir -p $root/var/run/dbus");
-		qxx ("mount --bind /var/run/dbus $root/var/run/dbus");
+		qxx ("mount -n --bind /var/run/dbus $root/var/run/dbus");
 		push (@mountList,"$root/var/run/dbus");
 	}
 	if (! -d "$root/sys/block") {
 		qxx ("mkdir -p $root/sys");
-		qxx ("mount -t sysfs sysfs $root/sys");
+		qxx ("mount -n -t sysfs sysfs $root/sys");
 		qxx ("mkdir -p $root/dev/pts");
-		qxx ("mount -t devpts -o mode=0620,gid=5 devpts $root/dev/pts");
+		qxx ("mount -n -t devpts -o mode=0620,gid=5 devpts $root/dev/pts");
 		push (@mountList,"$root/sys");
 		push (@mountList,"$root/dev/pts");
 	}
 	if (! -e "$root/proc/sys/fs/binfmt_misc/register") {
 		qxx ("mkdir -p $root/proc/sys/fs/binfmt_misc");
-		qxx ("mount -t binfmt_misc binfmt_misc $root/proc/sys/fs/binfmt_misc");
+		qxx (
+			"mount -n -t binfmt_misc binfmt_misc $root/proc/sys/fs/binfmt_misc"
+		);
 		push (@mountList,"$root/proc/sys/fs/binfmt_misc");
 	}
 	$this->{mountList} = \@mountList;
@@ -1471,7 +1471,7 @@ sub setupMount {
 		} else {
 			$kiwi -> info ("--> Status: read-only mounted");
 		}
-		$data = qxx ("mount -o bind \"$path\" \"$mount\" 2>&1");
+		$data = qxx ("mount -n -o bind \"$path\" \"$mount\" 2>&1");
 		$code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed();

@@ -375,9 +375,9 @@ sub mount {
 	#------------------------------------------
 	if ((-f $source) && ($type ne "clicfs") && ($type ne 'zfs')) {
 		if ($opts) {
-			$status = KIWIQX::qxx ("mount -o loop,$opts $source $dest 2>&1");
+			$status = KIWIQX::qxx ("mount -n -o loop,$opts $source $dest 2>&1");
 		} else {
-			$status = KIWIQX::qxx ("mount -o loop $source $dest 2>&1");
+			$status = KIWIQX::qxx ("mount -n -o loop $source $dest 2>&1");
 		}
 		$result = $? >> 8;
 		if ($result != 0) {
@@ -404,7 +404,7 @@ sub mount {
 				$this->{UmountStack} = \@UmountStack;
 				my $rootpool = '/kiwipool/ROOT/system-1';
 				$status = KIWIQX::qxx (
-					"mount --bind $rootpool $dest 2>&1"
+					"mount -n --bind $rootpool $dest 2>&1"
 				);
 				$result = $? >> 8;
 			}
@@ -417,9 +417,9 @@ sub mount {
 			}
 		} else {
 			if ($opts) {
-				$status = KIWIQX::qxx ("mount -o $opts $source $dest 2>&1");
+				$status = KIWIQX::qxx ("mount -n -o $opts $source $dest 2>&1");
 			} else {
-				$status = KIWIQX::qxx ("mount $source $dest 2>&1");
+				$status = KIWIQX::qxx ("mount -n $source $dest 2>&1");
 			}
 			$result = $? >> 8;
 		}
@@ -437,7 +437,7 @@ sub mount {
 	#------------------------------------------
 	if (-f $dest."/fsdata.ext3") {
 		$source = $dest."/fsdata.ext3";
-		$status = KIWIQX::qxx ("mount -o loop $source $dest 2>&1");
+		$status = KIWIQX::qxx ("mount -n -o loop $source $dest 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> error ("Failed to loop mount $source to: $dest: $status");

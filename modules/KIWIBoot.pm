@@ -5655,7 +5655,7 @@ sub installBootLoader {
 		}
 		my $grubOptions = "--device-map $dmfile --no-floppy --batch";
 		if (-d "/boot/grub") {
-			qxx ("mount --bind $tmpdir/boot/grub /boot/grub");
+			qxx ("mount -n --bind $tmpdir/boot/grub /boot/grub");
 		}
 		qxx ("$grub $grubOptions < $cmdfile &> $tmpdir/grub.log");
 		qxx ("umount /boot/grub &>/dev/null");

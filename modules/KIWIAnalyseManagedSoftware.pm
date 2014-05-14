@@ -315,7 +315,7 @@ sub __populateRepos {
 						next;
 					}
 					chomp $mpoint;
-					my $data = qxx ("mount /dev/dvd $mpoint 2>&1");
+					my $data = qxx ("mount -n /dev/dvd $mpoint 2>&1");
 					my $code = $? >> 8;
 					if ($code != 0) {
 						$kiwi -> warning ("DVD mount failed: $data");
@@ -344,7 +344,7 @@ sub __populateRepos {
 						next;
 					}
 					chomp $mpoint;
-					my $data = qxx ("mount -o loop $iso $mpoint 2>&1");
+					my $data = qxx ("mount -n -o loop $iso $mpoint 2>&1");
 					my $code = $? >> 8;
 					if ($code != 0) {
 						$kiwi -> warning ("ISO loop mount failed: $data");
