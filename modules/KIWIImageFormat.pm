@@ -490,6 +490,8 @@ sub createVagrantBox {
 	my $box    = $this->{image};
 	my $dest   = dirname  $this->{image};
 	my $vgc    = $xml -> getVagrantConfig();
+	my $desc   = $xml -> getDescriptionInfo();
+	my $pref   = $xml -> getPreferences();
 	my $img;
 	my $fmt;
 	if (! $vgc) {
@@ -530,7 +532,38 @@ sub createVagrantBox {
 	if (! $json_fd -> open (">$json_meta")) {
 		$kiwi -> failed ();
 		$kiwi -> error  (
-			"Couldn't create metadata.json file: $!"
+			"Couldn't create $json_meta file: $!"
+		);
+		$kiwi -> failed ();
+		return;
+	}
+	print $json_fd $json_text;
+	$json_fd -> close();
+	#==========================================
+	# create vagrant cloud configuration
+	#------------------------------------------
+	$box =~ s/\.raw$/\.box/;
+	my $json_cloud = $box;
+	$json_cloud =~ s/\.box$/\.json/;
+	%json_data = ();
+	my $versions = [];
+	my $providers = [];
+	$providers->[0]->{name} = $provider;
+	$providers->[0]->{url} = basename $box;
+	$versions->[0]->{version} = $pref -> getVersion();
+	$versions->[0]->{providers} = $providers;
+	$json_data{name} = $xml -> getImageName();
+	$json_data{description} = $desc -> getSpecificationDescript();
+	$json_data{description} =~ s/[\n\t]+//g;
+	$json_data{versions} = $versions;
+	$json_ref = JSON->new->allow_nonref;
+	$json_ref -> pretty;
+	$json_text = $json_ref ->encode( \%json_data );
+	$json_fd = FileHandle -> new();
+	if (! $json_fd -> open (">$json_cloud")) {
+		$kiwi -> failed ();
+		$kiwi -> error  (
+			"Couldn't create $json_cloud file: $!"
 		);
 		$kiwi -> failed ();
 		return;
@@ -565,11 +598,13 @@ sub createVagrantBox {
 	# package vagrant box
 	#------------------------------------------
 	$kiwi -> info ("Creating vagrant box");
-	$box =~ s/\.raw$/\.box/;
+	my $img_basename = basename $img;
+	KIWIQX::qxx ("cd $dest && ln -s $img_basename box.img");
 	my @components = ();
 	push @components, basename $json_meta;
 	push @components, basename $vagrant_meta;
-	push @components, basename $img;
+	push @components, $img_basename;
+	push @components, 'box.img';
 	my $status = KIWIQX::qxx (
 		"tar -C $dest -czf $box @components 2>&1"
 	);
@@ -586,7 +621,7 @@ sub createVagrantBox {
 	#==========================================
 	# cleanup
 	#------------------------------------------
-	KIWIQX::qxx ("rm -f $json_meta $vagrant_meta $img");
+	KIWIQX::qxx ("rm -f $json_meta $vagrant_meta $img $dest/box.img");
 	return $box;
 }
 
