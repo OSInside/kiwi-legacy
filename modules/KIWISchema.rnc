@@ -1666,7 +1666,7 @@ div {
 		## Error message than we receive from the parser.
 		## To be remove from here by the end of 2014
 		attribute format {
-			"ec2" | "ovf" | "ova" | "qcow2" | "vmdk" |
+			"ec2" | "ovf" | "ova" | "qcow2" | "vagrant" | "vmdk" |
 			"vdi" | "vhd" | "vhd-fixed"
 		}
 	k.type.fsnocheck.attribute =
@@ -1821,7 +1821,8 @@ div {
 			k.pxedeploy? &
 			k.size? &
 			k.split? &
-			k.systemdisk?
+			k.systemdisk? &
+			k.vagrantconfig?
 		}
 }
 
@@ -2526,6 +2527,32 @@ div {
 			k.oem-systemsize? &
 			k.oem-unattended? &
 			k.oem-unattended-id?
+		}
+}
+
+#==========================================
+# main block: <vagrantconfig>
+#
+div {
+	k.vagrantconfig.provider.attribute =
+		## The vagrant provider for this box
+		attribute provider { "libvirt" | "virtualbox" }
+	k.vagrantconfig.virtualsize.attribute =
+		## The vagrant virtual image size in GB
+		attribute virtualsize { xsd:nonNegativeInteger }
+	k.vagrantconfig.attlist =
+		k.vagrantconfig.provider.attribute &
+		k.vagrantconfig.virtualsize.attribute
+	k.vagrantconfig =
+		## Specifies the Vagrant configuration section
+		[
+		db:para [
+			"The vagrantconfig element specifies the Vagrant meta"
+			"configuration options which are used inside a vagrant box"
+		]
+		]
+		element vagrantconfig {
+			k.vagrantconfig.attlist
 		}
 }
 

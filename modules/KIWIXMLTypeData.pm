@@ -113,9 +113,10 @@ sub new {
 	if (! $this -> p_hasInitArg($init) ) {
 		return;
 	}
-	# While <ec2config>, <machine>, <oemconfig>, <pxedeploy>, <split>, and
-	# <systemdisk> are children of <type> the data is not in this class
-	# the child relationship is enforced at the XML level.
+	# While <ec2config>, <machine>, <oemconfig>, <pxedeploy>, <split>,
+	# <vagrantconfig> and <systemdisk> are children of <type> the data
+	# is not in this class the child relationship is enforced at the
+	# XML level.
 	my %keywords = map { ($_ => 1) } qw(
 	    boot
 		bootfilesystem
@@ -2155,7 +2156,7 @@ sub __isValidFormat {
 		return;
 	}
 	my %supported = map { ($_ => 1) } qw(
-		ec2 ovf ova qcow2 vmdk vdi vhd vhd-fixed
+		ec2 ovf ova qcow2 vmdk vdi vhd vhd-fixed vagrant
 	);
 	if (! $supported{$format} ) {
 		my $msg = "$caller: specified format '$format' is not "

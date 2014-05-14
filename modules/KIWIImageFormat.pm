@@ -24,6 +24,7 @@ use strict;
 use warnings;
 use FileHandle;
 use File::Basename;
+use JSON;
 #==========================================
 # KWIW Modules
 #------------------------------------------
@@ -175,7 +176,10 @@ sub createFormat {
 			return
 		}
 	}
-	if ($format eq "vmdk") {
+	if ($format eq "vagrant") {
+		$kiwi -> info ("Starting raw => $format conversion\n");
+		return $this -> createVagrantBox();
+	} elsif ($format eq "vmdk") {
 		$kiwi -> info ("Starting raw => $format conversion\n");
 		return $this -> createVMDK();
 	} elsif ($format eq "vhd") {
@@ -474,6 +478,116 @@ sub createQCOW2 {
 	}
 	$kiwi -> done ();
 	return $target;
+}
+
+#==========================================
+# createVagrantBox
+#------------------------------------------
+sub createVagrantBox {
+	my $this   = shift;
+	my $kiwi   = $this->{kiwi};
+	my $xml    = $this->{xml};
+	my $box    = $this->{image};
+	my $dest   = dirname  $this->{image};
+	my $vgc    = $xml -> getVagrantConfig();
+	my $img;
+	my $fmt;
+	if (! $vgc) {
+		$kiwi -> error  (
+			"No vagrantconfig section found"
+		);
+		$kiwi -> failed ();
+		return;
+	}
+	my $provider = $vgc -> getProvider();
+	#==========================================
+	# create vagrant image
+	#------------------------------------------
+	if ($provider eq 'libvirt') {
+		$img = $this -> createQCOW2();
+		$fmt = 'qcow2';
+	} elsif ($provider eq 'virtualbox') {
+		$img = $this -> createVMDK();
+		$fmt = 'vmdk';
+	}
+	if (! $img) {
+		return;
+	}
+	$kiwi -> info ("Creating vagrant box metadata files");
+	#==========================================
+	# create vagrant metadata.json
+	#------------------------------------------
+	my $vsize = $vgc -> getVirtualSize();
+	my $json_fd = FileHandle -> new();
+	my $json_meta = $dest."/metadata.json";
+	my $json_ref = JSON->new->allow_nonref;
+	my %json_data;
+	$json_data{provider} = $provider;
+	$json_data{format} = $fmt;
+	$json_data{virtual_size} = $vsize;
+	$json_ref -> pretty;
+	my $json_text = $json_ref ->encode( \%json_data );
+	if (! $json_fd -> open (">$json_meta")) {
+		$kiwi -> failed ();
+		$kiwi -> error  (
+			"Couldn't create metadata.json file: $!"
+		);
+		$kiwi -> failed ();
+		return;
+	}
+	print $json_fd $json_text;
+	$json_fd -> close();
+	#==========================================
+	# create vagrant Vagrantfile
+	#------------------------------------------
+	my $vagrant_meta = $dest."/Vagrantfile";
+	my $vagrant_fd = FileHandle -> new();
+	my $vagrant_mac= $this -> __randomMAC();
+	if (! $vagrant_fd -> open (">$vagrant_meta")) {
+		$kiwi -> failed ();
+		$kiwi -> error  (
+			"Couldn't create Vagrantfile file: $!"
+		);
+		$kiwi -> failed ();
+		return;
+	}
+	print $vagrant_fd 'Vagrant::Config.run do |config|'."\n";
+	print $vagrant_fd '  config.vm.base_mac = "'.$vagrant_mac.'"'."\n";
+	print $vagrant_fd 'end'."\n";
+	print $vagrant_fd 'include_vagrantfile = ';
+	print $vagrant_fd 'File.expand_path("../include/_Vagrantfile", ';
+	print $vagrant_fd '__FILE__)'."\n";
+	print $vagrant_fd 'load include_vagrantfile ';
+	print $vagrant_fd 'if File.exist?(include_vagrantfile)'."\n";
+	$vagrant_fd -> close();
+	$kiwi -> done();
+	#==========================================
+	# package vagrant box
+	#------------------------------------------
+	$kiwi -> info ("Creating vagrant box");
+	$box =~ s/\.raw$/\.box/;
+	my @components = ();
+	push @components, basename $json_meta;
+	push @components, basename $vagrant_meta;
+	push @components, basename $img;
+	my $status = KIWIQX::qxx (
+		"tar -C $dest -czf $box @components 2>&1"
+	);
+	my $result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  (
+			"Couldn't create box tarball: $status"
+		);
+		$kiwi -> failed ();
+		return;
+	}
+	$kiwi -> done();
+	#==========================================
+	# cleanup
+	#------------------------------------------
+	KIWIQX::qxx ("rm -f $json_meta $vagrant_meta $img");
+	return $box;
 }
 
 #==========================================
@@ -1547,6 +1661,18 @@ sub __clean_loop {
 	KIWIQX::qxx ("umount $dir 2>&1");
 	KIWIQX::qxx ("rmdir  $dir 2>&1");
 	return;
+}
+#==========================================
+# __randomMAC
+#------------------------------------------
+sub __randomMAC {
+	my $this = shift;
+	my @mac = (0x00, 0x16, 0x3e);
+	push @mac, 0x00 + int(rand(0x7e));
+	push @mac, 0x00 + int(rand(0xff));
+	push @mac, 0x00 + int(rand(0xff));
+	my $result = sprintf "%02x%02x%02x%02x%02x%02x", @mac;
+	return uc $result;
 }
 
 #==========================================

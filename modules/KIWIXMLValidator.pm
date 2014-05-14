@@ -1217,12 +1217,13 @@ sub __checkTypeConfigConsist {
 	# relevant inside the initrd
 	# ----
 	my %typeChildDeps = (
-		'machine'    => 'image:cpio,lxc,docker,oem,vmx,split',
-		'oemconfig'  => 'image:cpio,oem,split',
-		'pxedeploy'  => 'image:cpio,pxe',
-		'size'       => ':', # generic
-		'split'      => ':', # generic
-		'systemdisk' => ':'  # generic
+		'machine'       => 'image:cpio,lxc,docker,oem,vmx,split',
+		'oemconfig'     => 'image:cpio,oem,split',
+		'vagrantconfig' => 'image:vmx',
+		'pxedeploy'     => 'image:cpio,pxe',
+		'size'          => ':', # generic
+		'split'         => ':', # generic
+		'systemdisk'    => ':'  # generic
 	);
 	for my $typeNode (@types) {
 		if (! $typeNode -> hasChildNodes()) {
@@ -1255,7 +1256,7 @@ sub __checkTypeConfigConsist {
 						}
 					}
 				} else {
-					my $msg = "Unknown type configuration section '$optName'"
+					my $msg = "Unknown type configuration section '$optName' "
 					. 'found. Please report to the kiwi mailing list';
 					$kiwi -> warning($msg);
 					$kiwi -> skipped();
@@ -1264,7 +1265,6 @@ sub __checkTypeConfigConsist {
 			}
 		}
 	}
-
 	return 1;
 }
 
