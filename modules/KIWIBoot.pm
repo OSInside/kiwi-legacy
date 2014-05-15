@@ -1424,7 +1424,7 @@ sub setupInstallStick {
 		$kiwi -> info ("Installing image data to disk");
 		if (! KIWIGlobals
 			-> instance()
-			-> mount ($data, $loopdir,$type->{fsmountoptions})) {
+			-> mount ($data, $loopdir)) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't mount data partition: $status");
 			$kiwi -> failed ();
