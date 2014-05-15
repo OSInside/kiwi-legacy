@@ -599,11 +599,10 @@ sub createVagrantBox {
 	#------------------------------------------
 	$kiwi -> info ("Creating vagrant box");
 	my $img_basename = basename $img;
-	KIWIQX::qxx ("cd $dest && ln -s $img_basename box.img");
+	KIWIQX::qxx ("cd $dest && mv $img_basename box.img");
 	my @components = ();
 	push @components, basename $json_meta;
 	push @components, basename $vagrant_meta;
-	push @components, $img_basename;
 	push @components, 'box.img';
 	my $status = KIWIQX::qxx (
 		"tar -C $dest -czf $box @components 2>&1"
@@ -621,7 +620,7 @@ sub createVagrantBox {
 	#==========================================
 	# cleanup
 	#------------------------------------------
-	KIWIQX::qxx ("rm -f $json_meta $vagrant_meta $img $dest/box.img");
+	KIWIQX::qxx ("rm -f $json_meta $vagrant_meta $dest/box.img");
 	return $box;
 }
 
