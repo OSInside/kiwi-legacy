@@ -1927,6 +1927,7 @@ sub __isValidBootFS {
 	my %supported = map { ($_ => 1) } qw(
 		ext2
 		ext3
+		ext4
 		fat16
 		fat32
 	);
