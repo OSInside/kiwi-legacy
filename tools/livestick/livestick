@@ -139,7 +139,7 @@ cmdline_std="isofrom_device=$device_part"
 cmdline_std="$cmdline_std isofrom_system=/boot/$image_base"
 cmdline_std="$cmdline_std kiwi_cowdevice=$device_part"
 cmdline_std="$cmdline_std kiwi_cowsystem=/boot/cowfile"
-cmdline_std="$cmdline_std kiwi_hybridpersistent=yes splash=silent"
+cmdline_std="$cmdline_std kiwi_hybridpersistent=true splash=silent"
 cmdline_std="$cmdline_std ramdisk_size=512000 ramdisk_blocksize=4096"
 
 cmdline_fsf="$cmdline_std ide=nodma apm=off noresume edd=off powersaved=off"
