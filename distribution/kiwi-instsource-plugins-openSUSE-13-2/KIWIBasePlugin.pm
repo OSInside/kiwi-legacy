@@ -20,6 +20,7 @@ package KIWIBasePlugin;
 
 use strict;
 use warnings;
+use IPC::Open3;
 
 sub new {
 	my $class = shift;
@@ -151,6 +152,24 @@ sub logMsg {
 	}
 	$this->{m_collect}->logMsg($type, $msg);
 	return $this;
+}
+
+sub callCmd {
+	my $this = shift;
+	my $cmd  = shift;
+	my $CHILDWRITE;
+	my $CHILDSTDOUT;
+	my $CHILDSTDERR;
+	my $pid = open3 (
+		$CHILDWRITE, $CHILDSTDOUT, $CHILDSTDERR, "$cmd"
+	);
+	waitpid( $pid, 0 );
+	my $status = $? >> 8;
+	my @result = <$CHILDSTDOUT>;
+	my @errors = <$CHILDSTDERR>;
+	chomp @result;
+	chomp @errors;
+	return [$status,\@result,\@errors];
 }
 
 sub getSubdirLists {
