@@ -17,6 +17,8 @@ my @kiwiModules = qw (
 	KIWIArchList.pm
 	KIWIArch.pm
 	KIWIBasePlugin.pm
+	KIWIFinishEFIPlugin.pm
+	KIWIPromoDVDPlugin.pm
 	KIWIBoot.pm
 	KIWICache.pm
 	KIWICollect.pm
@@ -204,6 +206,8 @@ my @notClean1 = qw (
 	KIWIArchList.pm
 	KIWIArch.pm
 	KIWIBasePlugin.pm
+	KIWIFinishEFIPlugin.pm
+	KIWIPromoDVDPlugin.pm
 	KIWIBoot.pm
 	KIWICache.pm
 	KIWICollect.pm
@@ -391,6 +395,8 @@ my @notClean2 = qw (
 	KIWIArchList.pm
 	KIWIArch.pm
 	KIWIBasePlugin.pm
+	KIWIFinishEFIPlugin.pm
+	KIWIPromoDVDPlugin.pm
 	KIWIBoot.pm
 	KIWICache.pm
 	KIWICollect.pm
@@ -511,26 +517,6 @@ my @notClean3 = qw (
 	kiwi.pl
 );
 
-# List of modules not clean to level 4 (stern) of perlcritic
-my @notClean4 = qw (
-	KIWIContentPlugin.pm
-	KIWIDescrPlugin.pm
-	KIWIEulaPlugin.pm
-	KIWILiveTreePlugin.pm
-	KIWIMiniIsoPlugin.pm
-	KIWIPatternsPlugin.pm
-);
-
-# List of modules not clean to level 5 (gentle) of perlcritic
-my @notClean5 = qw (
-	KIWIContentPlugin.pm
-	KIWIDescrPlugin.pm
-	KIWIEulaPlugin.pm
-	KIWILiveTreePlugin.pm
-	KIWIMiniIsoPlugin.pm
-	KIWIPatternsPlugin.pm
-);
-
 my @changedFiles;
 my $chld_in;
 my $chld_out;
@@ -607,8 +593,7 @@ for my $path (@changedFiles) {
 	}
 }
 
-my @criticLevelFiles = (\@notClean1, \@notClean2, \@notClean3, \@notClean4,
-						\@notClean5);
+my @criticLevelFiles = (\@notClean1, \@notClean2, \@notClean3);
 
 
 # Verify the changed file against the strictest perlcritic level possible
