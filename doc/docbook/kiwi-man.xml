@@ -170,7 +170,7 @@
   </refsect1>
 
   <refsect1 id="kiwi.image.system2image">
-    <title>System Analysis/Migration</title>
+    <title>System Analysis</title>
     <para>
       KIWI provides a module which allows you to analyse
       the running system and create a report and an image description
@@ -821,19 +821,12 @@
         <term><ulink
         url="file:///usr/share/doc/packages/kiwi/kiwi.pdf"/></term>
         <listitem>
-          <para>The system design document which describes some details
-            about the building process.</para>
+          <para>The system documentation which describes the supported image
+            types in detail.</para>
         </listitem>
       </varlistentry>
       <varlistentry>
         <term><ulink url="file:///usr/share/doc/packages/kiwi/schema/kiwi.xsd.html"/></term>
-        <listitem>
-          <para>The KIWI RELAX&nbsp;NG XML Schema documentation.
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-        <term><ulink url="file:///usr/share/doc/packages/kiwi/schema/test.xsd.html"/></term>
         <listitem>
           <para>The KIWI RELAX&nbsp;NG XML Schema documentation.
           </para>
