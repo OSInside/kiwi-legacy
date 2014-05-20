@@ -1479,7 +1479,6 @@ sub _new_instance {
 	#------------------------------------------
 	$data{Tools}       = $BasePath."/tools";
 	$data{Schema}      = $BasePath."/modules/KIWISchema.rng";
-	$data{SchemaTST}   = $BasePath."/modules/KIWISchemaTest.rng";
 	$data{KConfig}     = $BasePath."/modules/KIWIConfig.sh";
 	$data{KAnalyse}    = $BasePath."/metadata/KIWIAnalyse.systems";
 	$data{KAnalyseCSS} = $BasePath."/metadata/KIWIAnalyse.tgz";
