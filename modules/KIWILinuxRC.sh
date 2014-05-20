@@ -419,7 +419,9 @@ function createInitialDevices {
 	# mount udev db tmpfs
 	#--------------------------------------
 	mkdir -p -m 0755 /run
+	mkdir -p -m 0755 /var/run
 	mount -t tmpfs -o mode=0755,nodev,nosuid tmpfs /run
+	mount --bind /run /var/run
 	#======================================
 	# mount devpts tmpfs
 	#--------------------------------------
@@ -7296,8 +7298,10 @@ function activateImage {
 	udevPending
 	mkdir -p /mnt/run
 	mkdir -p /mnt/dev
+	mkdir -p /mnt/var/run
 	mount --move /dev /mnt/dev
 	mount --move /run /mnt/run
+	mount --move /var/run /mnt/var/run
 	udevKill
 	#======================================
 	# run preinit stage
