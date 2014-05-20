@@ -2,12 +2,12 @@
 .\"     Title: kiwi
 .\"    Author: Marcus Schaefer <ms (AT) suse.de>
 .\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: Created: 05/13/2014
+.\"      Date: Created: 05/20/2014
 .\"    Manual: KIWI Manualpage
 .\"    Source: KIWI 5.06
 .\"  Language: English
 .\"
-.TH "KIWI" "1" "Created: 05/13/2014" "KIWI 5\&.06" "KIWI Manualpage"
+.TH "KIWI" "1" "Created: 05/20/2014" "KIWI 5\&.06" "KIWI Manualpage"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -71,7 +71,7 @@ config\&.xml
 includes this update channel as repository, it is useful to store the image root tree and upgrade the tree according to changes on the update channel\&. Given that the root tree exists it\*(Aqs also possible to add or remove software and recreate the image of the desired type\&.
 .HP \w'\fBkiwi\fR\ 'u
 \fBkiwi\fR {\-u | \-\-upgrade} \fIimage\-root\fR [\-\-add\-package\ \fIname\fR] [\-\-add\-pattern\ \fIname\fR]
-.SH "SYSTEM ANALYSIS/MIGRATION"
+.SH "SYSTEM ANALYSIS"
 .PP
 KIWI provides a module which allows you to analyse the running system and create a report and an image description representing the current state of the machine\&. Among others this allows you to clone your currently running system into an image\&. The system requires the zypper backend in order to work properly\&.
 .PP
@@ -395,15 +395,10 @@ The configuration XML file that contains every aspect for the image creation\&.
 .PP
 \m[blue]\fB\%file:///usr/share/doc/packages/kiwi/kiwi.pdf\fR\m[]
 .RS 4
-The system design document which describes some details about the building process\&.
+The system documentation which describes the supported image types in detail\&.
 .RE
 .PP
 \m[blue]\fB\%file:///usr/share/doc/packages/kiwi/schema/kiwi.xsd.html\fR\m[]
-.RS 4
-The KIWI RELAX\ \&NG XML Schema documentation\&.
-.RE
-.PP
-\m[blue]\fB\%file:///usr/share/doc/packages/kiwi/schema/test.xsd.html\fR\m[]
 .RS 4
 The KIWI RELAX\ \&NG XML Schema documentation\&.
 .RE
