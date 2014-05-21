@@ -710,13 +710,16 @@ sub rpmLibs {
 	# ...
 	# try to fix rpm version incompatibility
 	# ---
-	my $this   = shift;
-	my @kchroot= @{$this->{kchroot}};
+	my $this     = shift;
+	my @kchroot  = @{$this->{kchroot}};
+	my @packlist = $this -> setupInstallPackages();
 	#==========================================
 	# cleanup baselibs
 	#------------------------------------------
-	if (! $this -> cleanupRPMDatabase()) {
-		return;
+	if (@packlist) {
+		if (! $this -> cleanupRPMDatabase()) {
+			return;
+		}
 	}
 	KIWIQX::qxx ("@kchroot ldconfig 2>&1");
 	return $this;

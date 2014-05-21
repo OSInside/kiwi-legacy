@@ -800,12 +800,6 @@ sub install {
 	my $manager = $this->{manager};
 	my %type;
 	#==========================================
-	# Check for RPM incompatibility
-	#------------------------------------------
-	if (! $manager -> cleanupRPMDatabase()) {
-		return;
-	}
-	#==========================================
 	# Get image package list
 	#------------------------------------------
 	my @packList = $manager -> setupInstallPackages;
@@ -815,6 +809,12 @@ sub install {
 	if (! @packList) {
 		$kiwi -> loginfo ("Packlist is empty, skipping install\n");
 		return $this;
+	}
+	#==========================================
+	# Check for RPM incompatibility
+	#------------------------------------------
+	if (! $manager -> cleanupRPMDatabase()) {
+		return;
 	}
 	#==========================================
 	# Mount local and NFS directories
