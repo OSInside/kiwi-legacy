@@ -287,6 +287,10 @@ sub prepareBootImage {
 		}
 	}
 	#==========================================
+	# Add system strip from bootincludes
+	#------------------------------------------
+	$this -> __addBootincludedToolsToKeep ($systemXML, $systemTree);
+	#==========================================
 	# Inherit system XML data to the boot
 	#------------------------------------------
 	#==========================================
@@ -2058,6 +2062,116 @@ sub __addVMachineDomainToBootXML {
 			$kiwi -> info ("Updating machine attribute domain: $domain");
 			$bootXML -> setVMachineConfig ($systemVConf);
 			$kiwi -> done();
+		}
+	}
+	return $this;
+}
+
+#==========================================
+# __getPackageFilelist
+#------------------------------------------
+sub __getPackageFilelist {
+	# ...
+	# return a list of files owned by a given package
+	# ---
+	my $this = shift;
+	my $pack = shift;
+	my $root = shift;
+	my $kiwi = $this->{kiwi};
+	my $data = qxx (
+		"rpm --root $root -ql \"$pack\" 2>&1"
+	);
+	my $code = $? >> 8;
+	if ($code != 0) {
+		return;
+	}
+	return [split(/\n/, $data)];
+}
+
+#==========================================
+# __addBootincludedToolsToKeep
+#------------------------------------------
+sub __addBootincludedToolsToKeep {
+	# ...
+	# Keep all tools from explicitly bootincluded packages
+	# by adding a strip section to the system XML data
+	# which is then added to the boot image when we inherit
+	# system XML data to the boot
+	# ---
+	my $this = shift;
+	my $xml  = shift;
+	my $root = shift;
+	my $kiwi = $this->{kiwi};
+	my @list;
+	$kiwi -> info (
+		"Reading contents of bootincluded packages/archives\n"
+	);
+	if (! -f "$root/var/lib/rpm/Packages") {
+		# /.../
+		# For the moment we can get the package file list only
+		# from the rpm database inside of the unpacked root tree
+		# If no such database exists, treat it as a warning and
+		# return
+		# ----
+		$kiwi -> warning -> (
+			"--> No rpm database found"
+		);
+		$kiwi -> skipped();
+		return $this;
+	}
+	my $bootAddPacks = $xml -> getBootIncludePackages();
+	for my $pack (@$bootAddPacks) {
+		my $pack_name = $pack -> getName();
+		my $pkglist = $this -> __getPackageFilelist(
+			$pack_name, $root
+		);
+		if ($pkglist) {
+			$kiwi -> info (
+				"--> got list from $pack_name\n"
+			);
+			push @list, @$pkglist;
+		} else {
+			$kiwi -> warning (
+				"--> package $pack_name not installed\n"
+			);
+			$kiwi -> skipped();
+		}
+	}
+	my $FILE = FileHandle -> new();
+	if ($FILE -> open ("$root/bootincluded_archives.filelist")) {
+		while (<$FILE>) {
+			chomp;
+			push @list, File::Spec->rel2abs( $_, '/' ) ;
+		}
+		$FILE -> close();
+		$kiwi -> info (
+			"--> got list from bootincluded_archives.filelist\n"
+		);
+	}
+	$kiwi -> info (
+		"Checking for tools in bootincluded contents to keep\n"
+	);
+	my @tool_list = ();
+	for my $file (@list) {
+		if ($file =~ /^(\/usr)?\/s?bin\/([^\/]*)$/) {
+			my $tool = $2;
+			push @tool_list, $tool
+		}
+	}
+	my %hashTemp = map { $_ => 1 } @tool_list;
+	@tool_list = sort keys %hashTemp;
+	if (! @tool_list) {
+		$kiwi -> info ("--> no tools to keep\n");
+	} else {
+		for my $tool (@tool_list) {
+			$kiwi -> info ("--> Keep in boot image: $tool\n");
+			my %stripData = (
+				name => $tool
+			);
+			my $stripObj = KIWIXMLStripData -> new(\%stripData);
+			if ($stripObj) {
+				$xml -> addToolsToKeep ([$stripObj]);
+			}
 		}
 	}
 	return $this;
