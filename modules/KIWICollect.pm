@@ -2477,7 +2477,6 @@ sub createMetadata {
 	}
 	for my $d($this->getMediaNumbers()) {
 		my $dbase = $this->{m_basesubdir}->{$d};
-		#my $dbase = $ENV{'PWD'}.$this->{m_basesubdir}->{$d};
 		my @dlist;
 		push @dlist, "$dbase";
 		# boot may be nonexistent if no metapack creates it

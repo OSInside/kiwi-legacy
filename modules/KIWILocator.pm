@@ -358,7 +358,10 @@ sub getExecPath {
 	if ($root) {
 		$cmd .= "chroot $root ";
 	}
-	$cmd .= 'bash -c "PATH='.$ENV{PATH};
+	$cmd .= 'bash -c "PATH=';
+	if ($ENV{PATH}) {
+		$cmd .= $ENV{PATH};
+	}
 	$cmd .= ':/bin:/sbin:/usr/bin:/usr/sbin type -p ';
 	$cmd .= $execName . '" 2>&1';
 	my $pid = open3 (
