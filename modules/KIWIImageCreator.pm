@@ -2113,7 +2113,7 @@ sub __addBootincludedToolsToKeep {
 		# If no such database exists, treat it as a warning and
 		# return
 		# ----
-		$kiwi -> warning -> (
+		$kiwi -> warning (
 			"--> No rpm database found"
 		);
 		$kiwi -> skipped();
