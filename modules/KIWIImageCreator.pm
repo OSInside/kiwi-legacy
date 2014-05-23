@@ -2209,7 +2209,7 @@ sub __addBootincludedToolsToKeep {
 		# return
 		# ----
 		$kiwi -> warning (
-			"--> No rpm database found"
+			"--> No rpm database found in $root"
 		);
 		$kiwi -> skipped();
 		return $this;
