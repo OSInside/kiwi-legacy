@@ -3796,20 +3796,10 @@ sub setupLogicalExtend {
 	#==========================================
 	# Call images.sh script
 	#------------------------------------------
-	if ((! defined $initCache) && (-x "$imageTree/image/images.sh")) {
-		$kiwi -> info ("Calling image script: images.sh");
-		my ($code,$data) = KIWIGlobals -> instance() -> callContained (
-			$imageTree,"/image/images.sh"
-		);
-		if ($code != 0) {
-			$kiwi -> failed ();
-			$kiwi -> info   ($data);
-			$this -> cleanMount();
+	if (! defined $initCache) {
+		if (! $this -> executeUserImagesScript()) {
 			return;
-		} else {
-			$kiwi -> loginfo ("images.sh: $data");
 		}
-		$kiwi -> done ();
 	}
 	#==========================================
 	# extract kernel from physical extend
