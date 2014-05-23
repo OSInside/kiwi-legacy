@@ -929,14 +929,19 @@ sub createImage {
 	if (-f "$tree/var/lib/rpm/Packages") {
 		$kiwi -> info ("Creating unpacked image tree meta data");
 		my $idest = $cmdL -> getImageIntermediateTargetDir();
-		my $query = '%{NAME}|%{EPOCH}|%{VERSION}|%{RELEASE}|%{ARCH}|%{DISTURL}\n';
+		my $query = '%{NAME}|%{EPOCH}|%{VERSION}|'
+			. '%{RELEASE}|%{ARCH}|%{DISTURL}\n';
 		my $name  = KIWIGlobals
 			-> instance() -> generateBuildImageName($xml);
 		my $path = File::Spec->rel2abs ($tree);
-		KIWIQX::qxx ("rpm --root $path -qa --qf \"$query\" &> $idest/$name.packages");
+		KIWIQX::qxx (
+			"rpm --root $path -qa --qf \"$query\" &> $idest/$name.packages"
+		);
 		my $result = $? >> 8;
 		if ($result == 0) {
-			KIWIQX::qxx ("rpm --root $path -Va &> $idest/$name.verified");
+			KIWIQX::qxx (
+				"rpm --root $path -Va &> $idest/$name.verified"
+			);
 		}
 		if ($result != 0) {
 			my $msg;

@@ -398,8 +398,12 @@ sub createImageClicFS {
 		$kiwi -> error  ($data);
 		return;
 	}
-	KIWIQX::qxx ("mv -f $this->{imageDest}/$name.ext4 $this->{imageDest}/$name.clicfs");
-	KIWIQX::qxx ("rm -f $this->{imageDest}/fsdata.ext4");
+	KIWIQX::qxx (
+		"mv -f $this->{imageDest}/$name.ext4 $this->{imageDest}/$name.clicfs"
+	);
+	KIWIQX::qxx (
+		"rm -f $this->{imageDest}/fsdata.ext4"
+	);
 	$kiwi -> done();
 	#==========================================
 	# Create image md5sum
@@ -2956,29 +2960,43 @@ sub createImageSplit {
 		$kiwi -> info ("Checking file system: $type...");
 		SWITCH: for ($type) {
 			/ext2/       && do {
-				KIWIQX::qxx ("/sbin/e2fsck -f -y $this->{imageDest}/$name 2>&1");
+				KIWIQX::qxx (
+					"/sbin/e2fsck -f -y $this->{imageDest}/$name 2>&1"
+				);
 				$kiwi -> done();
 				last SWITCH;
 			};
 			/ext3/       && do {
-				KIWIQX::qxx ("/sbin/fsck.ext3 -f -y $this->{imageDest}/$name 2>&1");
-				KIWIQX::qxx ("/sbin/tune2fs -j $this->{imageDest}/$name 2>&1");
+				KIWIQX::qxx (
+					"/sbin/fsck.ext3 -f -y $this->{imageDest}/$name 2>&1"
+				);
+				KIWIQX::qxx (
+					"/sbin/tune2fs -j $this->{imageDest}/$name 2>&1"
+				);
 				$kiwi -> done();
 				last SWITCH;
 			};
 			/ext4/       && do {
-				KIWIQX::qxx ("/sbin/fsck.ext4 -f -y $this->{imageDest}/$name 2>&1");
-				KIWIQX::qxx ("/sbin/tune2fs -j $this->{imageDest}/$name 2>&1");
+				KIWIQX::qxx (
+					"/sbin/fsck.ext4 -f -y $this->{imageDest}/$name 2>&1"
+				);
+				KIWIQX::qxx (
+					"/sbin/tune2fs -j $this->{imageDest}/$name 2>&1"
+				);
 				$kiwi -> done();
 				last SWITCH;
 			};
 			/reiserfs/   && do {
-				KIWIQX::qxx ("/sbin/reiserfsck -y $this->{imageDest}/$name 2>&1");
+				KIWIQX::qxx (
+					"/sbin/reiserfsck -y $this->{imageDest}/$name 2>&1"
+				);
 				$kiwi -> done();
 				last SWITCH;
 			};
 			/btrfs/      && do {
-				KIWIQX::qxx ("/sbin/btrfsck $this->{imageDest}/$name 2>&1");
+				KIWIQX::qxx (
+					"/sbin/btrfsck $this->{imageDest}/$name 2>&1"
+				);
 				$kiwi -> done();
 				last SWITCH;
 			};
@@ -2987,7 +3005,9 @@ sub createImageSplit {
 				last SWITCH;
 			};
 			/xfs/        && do {
-				KIWIQX::qxx ("/sbin/mkfs.xfs $this->{imageDest}/$name 2>&1");
+				KIWIQX::qxx (
+					"/sbin/mkfs.xfs $this->{imageDest}/$name 2>&1"
+				);
 				$kiwi -> done();
 				last SWITCH;
 			};
@@ -3762,7 +3782,9 @@ sub installLogicalExtend {
 	$kiwi -> info ("Copying physical to logical [$name]...");
 	my $free = KIWIQX::qxx ("df -h $extend 2>&1");
 	$kiwi -> loginfo ("getSize: mount: $free\n");
-	my $data = KIWIQX::qxx ("rsync -aHXA --one-file-system $source/ $extend 2>&1");
+	my $data = KIWIQX::qxx (
+		"rsync -aHXA --one-file-system $source/ $extend 2>&1"
+	);
 	my $code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> failed ();
@@ -3782,7 +3804,9 @@ sub installLogicalExtend {
 			-> generateBuildImageName($this->{xml});
 		my $dest = $this->{imageDest}."/".$name;
 		$kiwi -> info ("Dumping filesystem image from $device...");
-		$data = KIWIQX::qxx ("qemu-img convert -f raw -O raw $device $dest 2>&1");
+		$data = KIWIQX::qxx (
+			"qemu-img convert -f raw -O raw $device $dest 2>&1"
+		);
 		$code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();
@@ -3917,7 +3941,9 @@ sub mountLogicalExtend {
 		#==========================================
 		# mount zfs filesystem
 		#------------------------------------------
-		$data = KIWIQX::qxx ("zpool import -d $this->{imageDest} kiwipool 2>&1");
+		$data = KIWIQX::qxx (
+			"zpool import -d $this->{imageDest} kiwipool 2>&1"
+		);
 		$code = $? >> 8;
 		if ($code == 0) {
 			push @clean,"zpool export kiwipool";
@@ -4004,7 +4030,9 @@ sub extractSplash {
 		KIWIQX::qxx ("$zipper -cd $splash > $splash.bob");
 		my $count = $this -> extractCPIO ( $splash.".bob" );
 		for (my $id=1; $id <= $count; $id++) {
-			KIWIQX::qxx ("cat $splash.bob.$id |(cd $splash.dir && cpio -i 2>&1)");
+			KIWIQX::qxx (
+				"cat $splash.bob.$id |(cd $splash.dir && cpio -i 2>&1)"
+			);
 		}
 		KIWIQX::qxx ("cp -a $splash.dir/etc $newspl");
 		$result = 1;
@@ -4211,11 +4239,17 @@ sub setupEXT2 {
 	}
 	$this -> restoreImageDest();
 	if ((defined $journal) && ($journal eq "journaled-ext3")) {
-		$data = KIWIQX::qxx ("cd $this->{imageDest} && ln -vs $name $name.ext3 2>&1");
+		$data = KIWIQX::qxx (
+			"cd $this->{imageDest} && ln -vs $name $name.ext3 2>&1"
+		);
 	} elsif ((defined $journal) && ($journal eq "journaled-ext4")) {
-		$data = KIWIQX::qxx ("cd $this->{imageDest} && ln -vs $name $name.ext4 2>&1");
+		$data = KIWIQX::qxx (
+			"cd $this->{imageDest} && ln -vs $name $name.ext4 2>&1"
+		);
 	} else {
-		$data = KIWIQX::qxx ("cd $this->{imageDest} && ln -vs $name $name.ext2 2>&1");
+		$data = KIWIQX::qxx (
+			"cd $this->{imageDest} && ln -vs $name $name.ext2 2>&1"
+		);
 	}
 	$this -> remapImageDest();
 	$kiwi -> loginfo ($data);
@@ -4251,7 +4285,9 @@ sub setupBTRFS {
 		KIWIQX::qxx ("touch $this->{imageDest}/$name");
 	}
 	$this -> restoreImageDest();
-	$data = KIWIQX::qxx ("cd $this->{imageDest} && ln -vs $name $name.btrfs 2>&1");
+	$data = KIWIQX::qxx (
+		"cd $this->{imageDest} && ln -vs $name $name.btrfs 2>&1"
+	);
 	$this -> remapImageDest();
 	$kiwi -> loginfo ($data);
 	return $name;
@@ -4287,7 +4323,9 @@ sub setupReiser {
 		KIWIQX::qxx ("touch $this->{imageDest}/$name");
 	}
 	$this -> restoreImageDest();
-	$data = KIWIQX::qxx ("cd $this->{imageDest} && ln -vs $name $name.reiserfs 2>&1");
+	$data = KIWIQX::qxx (
+		"cd $this->{imageDest} && ln -vs $name $name.reiserfs 2>&1"
+	);
 	$this -> remapImageDest();
 	$kiwi -> loginfo ($data);
 	return $name;
@@ -4319,7 +4357,9 @@ sub setupSquashFS {
 	}
 	unlink ("$this->{imageDest}/$name");
 	my $squashfs_tool = $locator -> getExecPath("mksquashfs");
-	my $data = KIWIQX::qxx ("$squashfs_tool $tree $this->{imageDest}/$name $opts 2>&1");
+	my $data = KIWIQX::qxx (
+		"$squashfs_tool $tree $this->{imageDest}/$name $opts 2>&1"
+	);
 	my $code = $? >> 8; 
 	if ($code != 0) {
 		$kiwi -> failed ();
@@ -4372,7 +4412,9 @@ sub setupSquashFS {
 	$this -> restoreImageDest();
 	$data = KIWIQX::qxx ("chmod 644 $this->{imageDest}/$name");
 	$data = KIWIQX::qxx ("rm -f $this->{imageDest}/$name.squashfs");
-	$data = KIWIQX::qxx ("cd $this->{imageDest} && ln -vs $name $name.squashfs 2>&1");
+	$data = KIWIQX::qxx (
+		"cd $this->{imageDest} && ln -vs $name $name.squashfs 2>&1"
+	);
 	$this -> remapImageDest();
 	$kiwi -> loginfo ($data);
 	return $name;
@@ -4413,7 +4455,9 @@ sub setupZFS {
 		KIWIQX::qxx ("touch $this->{imageDest}/$name");
 	}
 	$this -> restoreImageDest();
-	$data = KIWIQX::qxx ("cd $this->{imageDest} && ln -vs $name $name.zfs 2>&1");
+	$data = KIWIQX::qxx (
+		"cd $this->{imageDest} && ln -vs $name $name.zfs 2>&1"
+	);
 	$this -> remapImageDest();
 	$kiwi -> loginfo ($data);
 	return $name;
@@ -4448,7 +4492,9 @@ sub setupXFS {
 		KIWIQX::qxx ("touch $this->{imageDest}/$name");
 	}
 	$this -> restoreImageDest();
-	$data = KIWIQX::qxx ("cd $this->{imageDest} && ln -vs $name $name.xfs 2>&1");
+	$data = KIWIQX::qxx (
+		"cd $this->{imageDest} && ln -vs $name $name.xfs 2>&1"
+	);
 	$this -> remapImageDest();
 	$kiwi -> loginfo ($data);
 	return $name;
@@ -4493,7 +4539,9 @@ sub buildMD5Sum {
 	my $sum  = KIWIQX::qxx ("cat $image | md5sum - | cut -f 1 -d-");
 	chomp $sum;
 	$name =~ s/\.$suf$//;
-	KIWIQX::qxx ("echo \"$sum $blocks $blocksize\" > $this->{imageDest}/$name.md5");
+	KIWIQX::qxx (
+		"echo \"$sum $blocks $blocksize\" > $this->{imageDest}/$name.md5"
+	);
 	$this->{md5file} = $this->{imageDest}."/".$name.".md5";
 	$kiwi -> done();
 	return $name;
@@ -4564,8 +4612,9 @@ sub compressImage {
 	#------------------------------------------
 	$kiwi -> info ("Compressing image...");
 	my $suf = $this->{gdata}->{IrdZipperSuffix};
+	my $zip = $this->{gdata}->{IrdZipperCommand};
 	my $data = KIWIQX::qxx (
-		"cat $image | $this->{gdata}->{IrdZipperCommand} > $this->{imageDest}/$name.$suf"
+		"cat $image | $zip > $this->{imageDest}/$name.$suf"
 	);
 	my $code = $? >> 8;
 	if ($code != 0) {
@@ -4775,7 +4824,9 @@ sub checkKernel {
 		$cmd = "$zipper -cd $initrd";
 		$zip = 1;
 	}
-	$status = KIWIQX::qxx ("$cmd|cpio -it --quiet 'lib/modules/*'|cut -f1-3 -d/");
+	$status = KIWIQX::qxx (
+		"$cmd|cpio -it --quiet 'lib/modules/*'|cut -f1-3 -d/"
+	);
 	my $result = $? >> 8;
 	my @status = split(/\n/,$status);
 	if ($result != 0) {
