@@ -311,10 +311,6 @@ sub prepareBootImage {
 		}
 	}
 	#==========================================
-	# Add system strip from bootincludes
-	#------------------------------------------
-	$this -> __addBootincludedToolsToKeep ($systemXML, $systemTree);
-	#==========================================
 	# Add default strip information
 	#------------------------------------------
 	$this -> __addDefaultStripData ($bootXML);
@@ -954,6 +950,10 @@ sub createImage {
 			$kiwi -> done();
 		}
 	}
+	#==========================================
+	# Add system strip from bootincludes
+	#------------------------------------------
+	$this -> __addBootincludedToolsToKeep ($xml, $tree);
 	#==========================================
 	# Build image using KIWIImageBuilder
 	#------------------------------------------
