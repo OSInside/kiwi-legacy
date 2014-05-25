@@ -7131,22 +7131,46 @@ sub __getBootSize {
 	# ...
 	# set minimum boot size or the specified value from the
 	# XML description. The function returns the size in
-	# M-Bytes
+	# M-Bytes.
 	# ---
 	my $this   = shift;
 	my $kiwi   = $this->{kiwi};
 	my $xml    = $this->{xml};
 	my $type   = $this->{type};
-	my $needMB = 100;
-	my $wantMB = 200;
-	if ($type->{bootpartsize}) {
-		$wantMB = $type->{bootpartsize};
+	my $system = $this->{system};
+	my $initrd = $this->{initrd};
+	my $bootMB = 0;
+	my $irdMB  = 0;
+	my $msg;
+	# /.../
+	# The minimum boot partition size is based on best guess
+	# because prior to the creation of the disk boot fs and uuid
+	# we don't know exactly how much space is used on boot. Thus
+	# the size estimation is based on:
+	#
+	# 1. the current size of the system boot/ directory as a start
+	if (($system) && (-d $system.'/boot')) {
+		$bootMB = int (KIWIGlobals -> instance()
+			-> dsize ($system.'/boot') / 1048576);
 	}
-	if ($wantMB >= $needMB) {
+	# 2. plus twice the size of the kiwi initrd
+	if (($initrd) && (-e $initrd)) {
+		$irdMB = int (KIWIGlobals -> instance()
+			-> isize ($initrd) / 1048576);
+		# it's doubled because bootloader and theme data is
+		# copied from the initrd in the stage setup
+		$bootMB += (2 * $irdMB);
+	}
+	# 3. plus 100M addon space to reach roughly 100MB free
+	my $needMB = 100 + $bootMB;
+	if ($type->{bootpartsize}) {
+		my $wantMB = $type->{bootpartsize};
+		if ($wantMB < $needMB) {
+			$msg = "Specified bootpartsize is smaller than ";
+			$msg.= "recommended value of $needMB MB\n";
+			$kiwi -> warning ($msg);
+		}
 		$needMB = $wantMB;
-	} else {
-		$kiwi -> loginfo ("Specified boot space of $wantMB MB is too small\n");
-		$kiwi -> loginfo ("Using default value of $needMB MB\n");
 	}
 	$kiwi -> info ("Set boot partition space to: ".$needMB."M\n");
 	return $needMB;
