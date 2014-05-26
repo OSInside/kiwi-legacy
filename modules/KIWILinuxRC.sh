@@ -542,6 +542,7 @@ function errorLogStart {
 	# Log all errors and the debug information to the
 	# file set in ELOG_FILE.
 	# ----
+	local umountProc=0
 	if [ ! -f $ELOG_FILE ];then
 		#======================================
 		# Header for main stage log
@@ -566,13 +567,34 @@ function errorLogStart {
 	#--------------------------------------
 	exec 2>>$ELOG_FILE
 	#======================================
-	# Redirect stdout if quiet is set
+	# Mount proc for cmdline quiet check
 	#--------------------------------------
 	if [ ! -e /proc/cmdline ];then
 		mount -t proc proc /proc
+		umountProc=1
 	fi
 	if cat /proc/cmdline | grep -qi "quiet";then
+		#======================================
+		# Redirect/Clean stdout if quiet is set
+		#--------------------------------------
 		exec 1>>/dev/null
+		if [ -x /usr/bin/setterm ];then
+			setterm -clear all
+			setterm -background black
+		fi
+	else
+		#======================================
+		# Set kernel log level
+		#--------------------------------------
+		if lookup klogconsole;then
+			klogconsole -l 6
+		fi
+	fi
+	#======================================
+	# Clean proc
+	#--------------------------------------
+	if [ $umountProc -eq 1 ];then
+		umount /proc
 	fi
 	#======================================
 	# Enable shell debugging and redirect
@@ -10300,12 +10322,6 @@ function initialize {
 	# Start boot timer (first stage)
 	#--------------------------------------
 	startUtimer
-	#======================================
-	# Set kernel log level
-	#--------------------------------------
-	if lookup klogconsole;then
-		klogconsole -l 6
-	fi
 }
 
 # vim: set noexpandtab:
