@@ -4249,7 +4249,6 @@ sub setupBootLoaderConfiguration {
 		$type->{installboot} = "install";
 		$type->{boottimeout} = 1;
 		$type->{fastboot}    = 1;
-		$cmdline="kiwistderr=/dev/hvc0";
 		$vga="normal";
 	}
 	if ($topic =~ /^KIWI (CD|USB)/) {
