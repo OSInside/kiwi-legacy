@@ -965,20 +965,6 @@
           </para>
         </formalpara>
       </listitem>
-      <listitem>
-        <formalpara>
-          <title><parameter>kiwistderr=/dev/...</parameter></title>
-          <para>During boot, the kiwi boot code writes messages to tty1 and
-            tty3. The tty1 messages are high-level summary messages, whereas
-            the shell debug output messages, which may also contain error
-            information, are written to tty3. With the kiwistderr
-            parameter one can combine both message streams and specify
-            the device the messages should be written to. It is common
-            to set <filename class="devicefile">/dev/console</filename> as
-            an alternative target and change the default logging
-            behavior.</para>
-        </formalpara>
-      </listitem>
     </itemizedlist>
   </sect1>
 
