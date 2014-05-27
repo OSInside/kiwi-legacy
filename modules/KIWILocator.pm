@@ -222,7 +222,7 @@ sub getControlFile {
 		if (-f $config) {
 			$found = 1; last;
 		}
-		@globsearch = glob ($dir."/*.kiwi");
+		@globsearch = glob ($dir.$search."*.kiwi");
 		my $globitems  = @globsearch;
 		if ($globitems == 0) {
 			next;
