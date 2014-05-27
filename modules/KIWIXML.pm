@@ -99,7 +99,7 @@ sub new {
 	#     defaultType = {
 	#         machine       = KIWIXMLVMachineData
 	#         oemconfig     = KIWIXMLOEMConfigData
-	#         vagrantconfig = KIWIXMLVagrantConfigData
+	#         vagrantconfig = (KIWIXMLVagrantConfigData,...)
 	#         pxeconfig     = (KIWIXMLPXEDeployConfigData,...)
 	#         pxedeploy     = KIWIXMLPXEDeployData
 	#         split         = KIWIXMLSplitData
@@ -110,7 +110,7 @@ sub new {
 	#     selectedType = {
 	#         machine       = KIWIXMLVMachineData
 	#         oemconfig     = KIWIXMLOEMConfigData
-	#         vagrantconfig = KIWIXMLVagrantConfigData
+	#         vagrantconfig = (KIWIXMLVagrantConfigData,...)
 	#         pxeconfig     = (KIWIXMLPXEDeployConfigData,...)
 	#         pxedeploy     = KIWIXMLPXEDeployData
 	#         split         = KIWIXMLSplitData
@@ -196,7 +196,7 @@ sub new {
 	#                    <typename>[+] {
 	#                        machine       = KIWIXMLVMachineData
 	#                        oemconfig     = KIWIXMLOEMConfigData
-	#                        vagrantconfig = KIWIXMLVagrantConfigData
+	#                        vagrantconfig = (KIWIXMLVagrantConfigData,...)
 	#                        pxeconfig     = (KIWIXMLPXEDeployConfigData,...)
 	#                        pxedeploy     = KIWIXMLPXEDeployData
 	#                        split         = KIWIXMLSplitData
@@ -1611,7 +1611,8 @@ sub getLibsToKeep {
 #------------------------------------------
 sub getVagrantConfig {
 	# ...
-	# Return a VagrantConfigData object for the selected build type
+	# Return an array ref containing VagrantConfigData objects
+	# for the selected build type
 	# ---
 	my $this = shift;
 	return $this->{selectedType}->{vagrantconfig};
@@ -1626,26 +1627,6 @@ sub getOEMConfig {
 	# ---
 	my $this = shift;
 	return $this->{selectedType}->{oemconfig};
-}
-
-#==========================================
-# setVagrantConfig
-#------------------------------------------
-sub setVagrantConfig {
-	# ...
-	# Store a new VagrantConfigData object for the selected build type
-	# ---
-	my $this = shift;
-	my $vagrantconf = shift;
-	my $vagrantref  = ref $vagrantconf;
-	if (! $vagrantref) {
-		return;
-	}
-	if ($vagrantref ne 'KIWIXMLVagrantConfigData') {
-		return;
-	}
-	$this->{selectedType}->{vagrantconfig} = $vagrantconf;
-	return $this;
 }
 
 #==========================================
@@ -2953,26 +2934,30 @@ sub __convertSizeStrToMBVal {
 sub __createVagrantConfig {
 	# ...
 	# Return a ref to a hash that contains the configuration data
-	# for the <vagrantconfig> element and it's children for the
+	# for the <vagrantconfig> elements and it's children for the
 	# given XML:ELEMENT object
 	# ---
 	my $this = shift;
 	my $node = shift;
 	my $kiwi = $this->{kiwi};
-	my $vagrantConfig = $node
-		-> getChildrenByTagName('vagrantconfig') -> get_node(1);
-	if (! $vagrantConfig ) {
+	my @vagrantConfigNodes = $node
+		-> getChildrenByTagName('vagrantconfig');
+	if (! @vagrantConfigNodes) {
 		return;
 	}
-	my %vagrantConfigData;
-	$vagrantConfigData{provider} =
-		$vagrantConfig -> getAttribute('provider');
-	$vagrantConfigData{virtual_size} =
-		$vagrantConfig -> getAttribute('virtualsize');
-	my $vagrantConfObj = KIWIXMLVagrantConfigData -> new(
-		\%vagrantConfigData
-	);
-	return $vagrantConfObj;
+	my @vagrantConfigData;
+	for my $vagrantConfig (@vagrantConfigNodes) {
+		my %vagrantConfigSet;
+		$vagrantConfigSet{provider} =
+			$vagrantConfig -> getAttribute('provider');
+		$vagrantConfigSet{virtual_size} =
+			$vagrantConfig -> getAttribute('virtualsize');
+		my $vagrantConfObj = KIWIXMLVagrantConfigData -> new(
+			\%vagrantConfigSet
+		);
+		push @vagrantConfigData, $vagrantConfObj;
+	}
+	return \@vagrantConfigData;
 }
 
 #==========================================

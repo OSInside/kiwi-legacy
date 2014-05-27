@@ -1822,7 +1822,7 @@ div {
 			k.size? &
 			k.split? &
 			k.systemdisk? &
-			k.vagrantconfig?
+			k.vagrantconfig*
 		}
 }
 

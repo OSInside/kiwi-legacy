@@ -220,10 +220,12 @@ sub createMachineConfiguration {
 	my $xml    = $this->{xml};
 	my $bootp  = $this->{bootp};
 	my $vconf  = $this->{vmdata};
-	my $xend;
-	if ($vconf) {
-		$xend = $vconf -> getDomain();
+	if ((! $vconf) && ($format =~ /qcow2|vagrant/)) {
+		# a machine configuration doesn't make sense with these
+		# formats requested. Thus we can silently return here
+		return;
 	}
+	my $xend = $vconf -> getDomain();
 	if (! $xend) {
 		$xend = "dom0";
 	}
@@ -487,141 +489,149 @@ sub createVagrantBox {
 	my $this   = shift;
 	my $kiwi   = $this->{kiwi};
 	my $xml    = $this->{xml};
-	my $box    = $this->{image};
 	my $dest   = dirname  $this->{image};
-	my $vgc    = $xml -> getVagrantConfig();
+	my $vgclist= $xml -> getVagrantConfig();
 	my $desc   = $xml -> getDescriptionInfo();
 	my $pref   = $xml -> getPreferences();
 	my $img;
 	my $fmt;
-	if (! $vgc) {
+	my @boxes;
+	if (! $vgclist) {
 		$kiwi -> error  (
-			"No vagrantconfig section found"
+			"No vagrantconfig section(s) found"
 		);
 		$kiwi -> failed ();
 		return;
 	}
-	my $provider = $vgc -> getProvider();
-	#==========================================
-	# create vagrant image
-	#------------------------------------------
-	if ($provider eq 'libvirt') {
-		$img = $this -> createQCOW2();
-		$fmt = 'qcow2';
-	} elsif ($provider eq 'virtualbox') {
-		$img = $this -> createVMDK();
-		$fmt = 'vmdk';
-	}
-	if (! $img) {
-		return;
-	}
-	$kiwi -> info ("Creating vagrant box metadata files");
-	#==========================================
-	# create vagrant metadata.json
-	#------------------------------------------
-	my $vsize = $vgc -> getVirtualSize();
-	my $json_fd = FileHandle -> new();
-	my $json_meta = $dest."/metadata.json";
-	my $json_ref = JSON->new->allow_nonref;
-	my %json_data;
-	$json_data{provider} = $provider;
-	$json_data{format} = $fmt;
-	$json_data{virtual_size} = $vsize;
-	$json_ref -> pretty;
-	my $json_text = $json_ref ->encode( \%json_data );
-	if (! $json_fd -> open (">$json_meta")) {
-		$kiwi -> failed ();
-		$kiwi -> error  (
-			"Couldn't create $json_meta file: $!"
+	foreach my $vgc (@{$vgclist}) {
+		my $box = $this->{image};
+		my $provider = $vgc -> getProvider();
+		$kiwi -> info ("Creating vagrant box for $provider provider\n");
+		#==========================================
+		# create vagrant image
+		#------------------------------------------
+		if ($provider eq 'libvirt') {
+			$this->{format} = 'qcow2';
+			$img = $this -> createQCOW2();
+			$fmt = 'qcow2';
+		} elsif ($provider eq 'virtualbox') {
+			$this->{format} = 'vmdk';
+			$img = $this -> createVMDK();
+			$fmt = 'vmdk';
+		}
+		$this->{format} = 'vagrant';
+		if (! $img) {
+			return;
+		}
+		$kiwi -> info ("--> Creating box metadata files");
+		#==========================================
+		# create vagrant metadata.json
+		#------------------------------------------
+		my $vsize = $vgc -> getVirtualSize();
+		my $json_fd = FileHandle -> new();
+		my $json_meta = $dest."/metadata.json";
+		my $json_ref = JSON->new->allow_nonref;
+		my %json_data;
+		$json_data{provider} = $provider;
+		$json_data{format} = $fmt;
+		$json_data{virtual_size} = $vsize;
+		$json_ref -> pretty;
+		my $json_text = $json_ref ->encode( \%json_data );
+		if (! $json_fd -> open (">$json_meta")) {
+			$kiwi -> failed ();
+			$kiwi -> error  (
+				"Couldn't create $json_meta file: $!"
+			);
+			$kiwi -> failed ();
+			return;
+		}
+		print $json_fd $json_text;
+		$json_fd -> close();
+		#==========================================
+		# create vagrant cloud configuration
+		#------------------------------------------
+		my $json_cloud = $box;
+		$json_cloud =~ s/\.raw$/\.json/;
+		$box =~ s/\.raw$/\.$provider\.box/;
+		%json_data = ();
+		my $versions = [];
+		my $providers = [];
+		$providers->[0]->{name} = $provider;
+		$providers->[0]->{url} = basename $box;
+		$versions->[0]->{version} = $pref -> getVersion();
+		$versions->[0]->{providers} = $providers;
+		$json_data{name} = $xml -> getImageName();
+		$json_data{description} = $desc -> getSpecificationDescript();
+		$json_data{description} =~ s/[\n\t]+//g;
+		$json_data{versions} = $versions;
+		$json_ref = JSON->new->allow_nonref;
+		$json_ref -> pretty;
+		$json_text = $json_ref ->encode( \%json_data );
+		$json_fd = FileHandle -> new();
+		if (! $json_fd -> open (">$json_cloud")) {
+			$kiwi -> failed ();
+			$kiwi -> error  (
+				"Couldn't create $json_cloud file: $!"
+			);
+			$kiwi -> failed ();
+			return;
+		}
+		print $json_fd $json_text;
+		$json_fd -> close();
+		#==========================================
+		# create vagrant Vagrantfile
+		#------------------------------------------
+		my $vagrant_meta = $dest."/Vagrantfile";
+		my $vagrant_fd = FileHandle -> new();
+		my $vagrant_mac= $this -> __randomMAC();
+		if (! $vagrant_fd -> open (">$vagrant_meta")) {
+			$kiwi -> failed ();
+			$kiwi -> error  (
+				"Couldn't create Vagrantfile file: $!"
+			);
+			$kiwi -> failed ();
+			return;
+		}
+		print $vagrant_fd 'Vagrant::Config.run do |config|'."\n";
+		print $vagrant_fd '  config.vm.base_mac = "'.$vagrant_mac.'"'."\n";
+		print $vagrant_fd 'end'."\n";
+		print $vagrant_fd 'include_vagrantfile = ';
+		print $vagrant_fd 'File.expand_path("../include/_Vagrantfile", ';
+		print $vagrant_fd '__FILE__)'."\n";
+		print $vagrant_fd 'load include_vagrantfile ';
+		print $vagrant_fd 'if File.exist?(include_vagrantfile)'."\n";
+		$vagrant_fd -> close();
+		$kiwi -> done();
+		#==========================================
+		# package vagrant box
+		#------------------------------------------
+		$kiwi -> info ("--> Creating box archive");
+		my $img_basename = basename $img;
+		KIWIQX::qxx ("cd $dest && mv $img_basename box.img");
+		my @components = ();
+		push @components, basename $json_meta;
+		push @components, basename $vagrant_meta;
+		push @components, 'box.img';
+		my $status = KIWIQX::qxx (
+			"tar -C $dest -czf $box @components 2>&1"
 		);
-		$kiwi -> failed ();
-		return;
+		my $result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  (
+				"Couldn't create box tarball: $status"
+			);
+			$kiwi -> failed ();
+			return;
+		}
+		push @boxes, $box;
+		$kiwi -> done();
+		#==========================================
+		# cleanup
+		#------------------------------------------
+		KIWIQX::qxx ("rm -f $json_meta $vagrant_meta $dest/box.img");
 	}
-	print $json_fd $json_text;
-	$json_fd -> close();
-	#==========================================
-	# create vagrant cloud configuration
-	#------------------------------------------
-	$box =~ s/\.raw$/\.box/;
-	my $json_cloud = $box;
-	$json_cloud =~ s/\.box$/\.json/;
-	%json_data = ();
-	my $versions = [];
-	my $providers = [];
-	$providers->[0]->{name} = $provider;
-	$providers->[0]->{url} = basename $box;
-	$versions->[0]->{version} = $pref -> getVersion();
-	$versions->[0]->{providers} = $providers;
-	$json_data{name} = $xml -> getImageName();
-	$json_data{description} = $desc -> getSpecificationDescript();
-	$json_data{description} =~ s/[\n\t]+//g;
-	$json_data{versions} = $versions;
-	$json_ref = JSON->new->allow_nonref;
-	$json_ref -> pretty;
-	$json_text = $json_ref ->encode( \%json_data );
-	$json_fd = FileHandle -> new();
-	if (! $json_fd -> open (">$json_cloud")) {
-		$kiwi -> failed ();
-		$kiwi -> error  (
-			"Couldn't create $json_cloud file: $!"
-		);
-		$kiwi -> failed ();
-		return;
-	}
-	print $json_fd $json_text;
-	$json_fd -> close();
-	#==========================================
-	# create vagrant Vagrantfile
-	#------------------------------------------
-	my $vagrant_meta = $dest."/Vagrantfile";
-	my $vagrant_fd = FileHandle -> new();
-	my $vagrant_mac= $this -> __randomMAC();
-	if (! $vagrant_fd -> open (">$vagrant_meta")) {
-		$kiwi -> failed ();
-		$kiwi -> error  (
-			"Couldn't create Vagrantfile file: $!"
-		);
-		$kiwi -> failed ();
-		return;
-	}
-	print $vagrant_fd 'Vagrant::Config.run do |config|'."\n";
-	print $vagrant_fd '  config.vm.base_mac = "'.$vagrant_mac.'"'."\n";
-	print $vagrant_fd 'end'."\n";
-	print $vagrant_fd 'include_vagrantfile = ';
-	print $vagrant_fd 'File.expand_path("../include/_Vagrantfile", ';
-	print $vagrant_fd '__FILE__)'."\n";
-	print $vagrant_fd 'load include_vagrantfile ';
-	print $vagrant_fd 'if File.exist?(include_vagrantfile)'."\n";
-	$vagrant_fd -> close();
-	$kiwi -> done();
-	#==========================================
-	# package vagrant box
-	#------------------------------------------
-	$kiwi -> info ("Creating vagrant box");
-	my $img_basename = basename $img;
-	KIWIQX::qxx ("cd $dest && mv $img_basename box.img");
-	my @components = ();
-	push @components, basename $json_meta;
-	push @components, basename $vagrant_meta;
-	push @components, 'box.img';
-	my $status = KIWIQX::qxx (
-		"tar -C $dest -czf $box @components 2>&1"
-	);
-	my $result = $? >> 8;
-	if ($result != 0) {
-		$kiwi -> failed ();
-		$kiwi -> error  (
-			"Couldn't create box tarball: $status"
-		);
-		$kiwi -> failed ();
-		return;
-	}
-	$kiwi -> done();
-	#==========================================
-	# cleanup
-	#------------------------------------------
-	KIWIQX::qxx ("rm -f $json_meta $vagrant_meta $dest/box.img");
-	return $box;
+	return @boxes;
 }
 
 #==========================================
@@ -631,7 +641,7 @@ sub createXENConfiguration {
 	my $this   = shift;
 	my $kiwi   = $this->{kiwi};
 	my $xml    = $this->{xml};
-	my $vmc    = $xml -> getVMachineConfig();
+	my $vmc    = $this->{vmdata};
 	my $dest   = dirname  $this->{image};
 	my $base   = basename $this->{image};
 	my $format;
