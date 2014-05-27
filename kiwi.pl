@@ -31,6 +31,7 @@ use strict;
 use warnings;
 use Carp qw (cluck);
 use Getopt::Long;
+use File::Basename;
 use File::Spec;
 use File::Find;
 use File::Glob ':glob';
@@ -1353,6 +1354,12 @@ sub init {
 	if (! defined $FSInodeSize) {
 		$FSInodeSize = 256;
 	}
+	#========================================
+	# set build type from commandline
+	#----------------------------------------
+	if (defined $SetImageType) {
+		$cmdL -> setBuildType($SetImageType);
+	}
 	#==========================================
 	# non root task: Check XML configuration
 	#------------------------------------------
@@ -1487,9 +1494,6 @@ sub init {
 		$kiwi -> error  ("No destination directory specified");
 		$kiwi -> failed ();
 		kiwiExit (1);
-	}
-	if (defined $SetImageType) {
-		$cmdL -> setBuildType($SetImageType);
 	}
 	return;
 }
@@ -1778,7 +1782,8 @@ sub listImage {
 #------------------------------------------
 sub checkConfig {
 	# ...
-	# Check the specified configuration file
+	# Check the specified configuration. validate the
+	# schema and apply the prepare runtime checks
 	# ---
 	my $config = shift;
 	my $gdata  = $global -> getKiwiConfig();
@@ -1800,6 +1805,19 @@ sub checkConfig {
 	if (! defined $isValid) {
 		$kiwi -> error ('Validation failed');
 		$kiwi -> failed ();
+		exit 1;
+	}
+	my $configDir = dirname ($config);
+	my $xml = KIWIXML -> new (
+		$configDir,$cmdL->getBuildType(),undef,$cmdL
+	);
+	if (! $xml) {
+		exit 1;
+	}
+	my $krc = KIWIRuntimeChecker -> new(
+		$cmdL, $xml
+	);
+	if ((! $krc) || (! $krc -> prepareChecks())) {
 		exit 1;
 	}
 	$kiwi -> info ('Validation passed');
