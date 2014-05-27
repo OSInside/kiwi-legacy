@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="6.1" name="suse-11.4-gnome-demo">
+<image schemaversion="6.1" name="suse-sle11-gnome-demo">
 	<description type="system">
 		<author>Robert Schweikert</author>
 		<contact>rjschwei@suse.com</contact>
 		<specification>SUSE LE 11 Appliance using GNOME</specification>
 	</description>
 	<preferences>
-		<type image="vmx" primary="true" filesystem="ext4" boot="vmxboot/suse-11.4" format="vmdk">
+		<type image="vmx" primary="true" filesystem="ext4" boot="vmxboot/suse-SLES11" format="vmdk">
 			<machine memory="1024">
 				<vmdisk id="0" controller="ide"/>
 			</machine>
 		</type>
-		<type image="iso" boot="isoboot/suse-11.4" flags="clic"/>
+		<type image="iso" boot="isoboot/suse-SLES11" flags="clic"/>
 		<version>1.0.1</version>
 		<packagemanager>zypper</packagemanager>
 		<rpm-check-signatures>false</rpm-check-signatures>
@@ -54,6 +54,7 @@
 		<package name="xorg-x11-driver-video-radeonhd"/>
 		<package name="xkeyboard-config"/>
 		<package name="xorg-x11-driver-input"/>
+		<package name="grub"/>
 		<namedCollection name="base"/>
 		<namedCollection name="x11"/>
 	</packages>

@@ -28,6 +28,7 @@
 		<package name="ifplugd"/>
 		<package name="iputils"/>
 		<package name="vim"/>
+		<package name="grub"/>
 		<namedCollection name="base"/>
 	</packages>
 	<packages type="bootstrap">

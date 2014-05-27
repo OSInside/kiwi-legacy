@@ -62,6 +62,7 @@
 		<package name="xdmbgrd"/>
 		<package name="xkeyboard-config"/>
 		<package name="icewm-lite"/>
+		<package name="grub"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>

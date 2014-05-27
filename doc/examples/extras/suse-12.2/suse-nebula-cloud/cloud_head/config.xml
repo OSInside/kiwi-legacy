@@ -49,7 +49,7 @@
 		<package name="nfs-kernel-server"/>
 		<package name="opennebula"/>
 		<package name="opennebula-sunstone"/>
-<!--        <package name="opennebula-zones"/>-->
+<!--	<package name="opennebula-zones"/>-->
 		<package name="openssh"/>
 		<package name="openssl"/>
 		<package name="python"/>
@@ -68,6 +68,7 @@
 		<package name="yast2-ncurses"/>
 		<package name="yast2-network"/>
 		<package name="yast2-nfs-server"/>
+		<package name="grub"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>

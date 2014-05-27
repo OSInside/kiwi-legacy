@@ -41,6 +41,7 @@
 		<package name="vim"/>
 		<package name="yast2-firstboot"/>
 		<package name="syslinux"/>
+		<package name="grub2"/>
 		<namedCollection name="base"/>
 		<namedCollection name="kde4"/>
 	</packages>

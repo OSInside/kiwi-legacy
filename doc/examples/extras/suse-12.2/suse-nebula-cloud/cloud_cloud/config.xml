@@ -61,6 +61,7 @@
 		<package name="yast2-country"/>
 		<package name="yast2-ncurses"/>
 		<package name="yast2-nfs-client"/>
+		<package name="grub"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>

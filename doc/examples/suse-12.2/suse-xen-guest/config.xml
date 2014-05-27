@@ -35,6 +35,7 @@
 		<package name="xen-tools"/>
 		<package name="xen"/>
 		<package name="plymouth"/>
+		<package name="grub"/>
 		<namedCollection name="base"/>
 	</packages>
 	<packages type="bootstrap">
