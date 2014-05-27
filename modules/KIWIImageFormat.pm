@@ -551,7 +551,7 @@ sub createVagrantBox {
 		# create vagrant cloud configuration
 		#------------------------------------------
 		my $json_cloud = $box;
-		$json_cloud =~ s/\.raw$/\.json/;
+		$json_cloud =~ s/\.raw$/\.$provider\.json/;
 		$box =~ s/\.raw$/\.$provider\.box/;
 		%json_data = ();
 		my $versions = [];
