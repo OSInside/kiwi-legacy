@@ -4,7 +4,7 @@
 #
 # Makefile for OpenSuSE - KIWI Image System
 # ---
-arch      = `uname -m | grep -q ^i[3-6] && echo ix86 || uname -m`
+arch     := $(shell uname -m | grep -q ^i[3-6] && echo ix86 || uname -m)
 buildroot = /
 syslinux  = /usr/share/syslinux
 bindlib   = lib
@@ -118,7 +118,7 @@ install:
 	#============================================
 	# kiwi manual pages
 	#--------------------------------------------
-	for i in `ls -1 ./doc/*.1`;do \
+	for i in $(shell ls -1 ./doc/*.1);do \
 		install -m 644 $$i ${MANVZ} ;\
 	done
 
@@ -138,7 +138,7 @@ install:
 	#--------------------------------------------
 	install -m 755 ./kiwi.pl       ${KIWIBINVZ}/kiwi
 	install -m 644 ./xsl/*         ${KIWIXSLVZ}
-	for i in `find modules -type f | grep -v -E '\.test'`;do \
+	for i in $(shell find modules -type f | grep -v -E '\.test');do \
 		install -m 644 $$i ${KIWIMODVZ} ;\
 	done
 
@@ -146,7 +146,7 @@ install:
 	# Install KIWI metadata files
 	#--------------------------------------------
 	tar -C metadata -czf ${KIWIMETAVZ}/KIWIAnalyse.tgz d3
-	for i in `find metadata -type f | grep -v -E 'd3'`;do \
+	for i in $(shell find metadata -type f | grep -v -E 'd3');do \
 		install -m 644 $$i ${KIWIMETAVZ} ;\
 	done
 
@@ -198,7 +198,7 @@ valid: modules/KIWISchema.rng
 	#============================================
 	# Validate all XML descriptions...
 	#--------------------------------------------
-	for i in `find -name config.xml | grep -v tests`;do \
+	for i in $(shell find doc template/$(arch)/ system/boot/$(arch)/ -name config.xml);do \
 		test -f xsl/master.xsl && \
 			xsltproc -o $$i.new xsl/master.xsl $$i && mv $$i.new $$i;\
 		echo $$i;\
@@ -213,7 +213,7 @@ test:
 	if test ! -d tests/.timestamps; then \
 		mkdir tests/.timestamps; \
 	fi
-	for i in `find -name "*.t" | cut -d/ -f4`;do \
+	for i in $(shell find -name "*.t" | cut -d/ -f4);do \
 		touch tests/.timestamps/$$i's';\
 	done
 	cd tests/unit && \
