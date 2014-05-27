@@ -22,11 +22,11 @@
 		<bootsplash-theme>openSUSE</bootsplash-theme>
 		<bootloader-theme>openSUSE</bootloader-theme>
 	</preferences>
-	<users group='root'>
-		<user name='root' password='vh4vw1N4alxKQ' home='/root'/>
+	<users group="root">
+		<user name="root" password="vh4vw1N4alxKQ" home="/root"/>
 	</users>
-	<users group='vagrant'>
-		<user name='vagrant' password='vh4vw1N4alxKQ' home='/home/vagrant'/>
+	<users group="vagrant">
+		<user name="vagrant" password="vh4vw1N4alxKQ" home="/home/vagrant"/>
 	</users>
 	<repository type="yast2">
 		<source path="obs://13.1/repo/oss"/>
