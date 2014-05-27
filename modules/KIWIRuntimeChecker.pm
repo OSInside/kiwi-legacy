@@ -109,6 +109,9 @@ sub createChecks {
 	if (! $this -> __checkContainerHasLXC()) {
 		return;
 	}
+	if (! $this -> __checkSelectedBootLoaderIncluded()) {
+		return;
+	}
 	if (! $this -> __checkProfileConsistent()) {
 		return;
 	}
@@ -166,6 +169,9 @@ sub prepareChecks {
 	# ---
 	my $this = shift;
 	if (! $this -> __checkYaSTenvironment()) {
+		return;
+	}
+	if (! $this -> __checkSelectedBootLoaderIncluded()) {
 		return;
 	}
 	if (! $this -> __haveValidTypeString()) {
@@ -338,6 +344,62 @@ sub __checkSwapRecommended {
 	# We got that far, nice
 	#------------------------------------------
 	return 1;
+}
+
+#==========================================
+# __checkSelectedBootLoaderIncluded
+#------------------------------------------
+sub __checkSelectedBootLoaderIncluded {
+	# ...
+	# check if the selected bootloader will also be installed into
+	# the image. This is required for the oem, vmx and pxe image
+	# types. In case of a pxe type the deploy configuration might
+	# not require a bootloader e.g for remote root systems. As we
+	# don't know the deploy configuration at build time the check
+	# might complain unnecessarily. In such a case add the package
+	# in question and remove it in config.sh again.
+	# ---
+	my $this = shift;
+	my $xml  = $this->{xml};
+	my $kiwi = $this->{kiwi};
+	my %loaderPackages = (
+		'grub'     => 'grub',
+		'grub2'    => 'grub2',
+		'extlinux' => 'syslinux',
+		'syslinux' => 'syslinux',
+		'zipl'     => 's390-tools',
+		'uboot'    => 'u-boot-tools'
+	);
+	my $msg;
+	my $type = $xml  -> getImageType();
+	if (! $type) {
+		return 1;
+	}
+	my $name = $type -> getTypeName();
+	if ($name !~ /oem|vmx|pxe/) {
+		return 1;
+	}
+	my $bootloader = $type -> getBootLoader();
+	if (! $bootloader) {
+		$bootloader = 'grub';
+	}
+	my $loaderPackage = $loaderPackages{$bootloader};
+	if (! $loaderPackage) {
+		return 1;
+	}
+	my $pckgs = $xml -> getPackages();
+	push @{$pckgs}, @{$xml -> getBootstrapPackages()};
+	for my $pckg (@{$pckgs}) {
+		my $pname = $pckg -> getName();
+		if ($pname eq $loaderPackage) {
+			return 1;
+		}
+	}
+	$msg = "Selected bootloader is $bootloader, but required ";
+	$msg.= "package $loaderPackage is not included in image.";
+	$kiwi -> error ( $msg );
+	$kiwi -> failed ();
+	return;
 }
 
 #==========================================
