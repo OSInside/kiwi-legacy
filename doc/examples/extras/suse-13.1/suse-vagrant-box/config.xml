@@ -11,6 +11,7 @@
 	<preferences>
 		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-13.1" format="vagrant" bootloader="grub2" kernelcmdline="nomodeset">
 			<vagrantconfig provider="libvirt" virtualsize="16"/>
+			<vagrantconfig provider="virtualbox" virtualsize="16"/>
 		</type>
 		<version>1.13.1</version>
 		<packagemanager>zypper</packagemanager>
