@@ -225,6 +225,8 @@ sub removePackages {
 	my @removeOpts = (
 		"--nodeps --allmatches --noscripts"
 	);
+	print $fd "export LANG=C"."\n";
+	print $fd "export LC_ALL=C"."\n";
 	print $fd "function clean { kill \$SPID;";
 	print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;";
 	print $fd "if [ \"\$c\" = 5 ];then kill \$SPID;break;fi;"; 
