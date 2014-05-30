@@ -190,7 +190,7 @@ sub new {
 					$kiwi -> failed ();
 					return;
 				}
-				push @files, $solv_file;
+				push @files, quotemeta($solv_file);
 			}
 		} else {
 			#==========================================
