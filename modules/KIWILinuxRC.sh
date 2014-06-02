@@ -966,6 +966,11 @@ function installBootLoaderGrub {
 			Echo "Failed to install boot loader"
 			return 1
 		fi
+		if [[ $kiwi_iname =~ boot-rhel ]];then
+			# on rhel systems grub.conf is a link to menu.lst.
+			rm -f /etc/grub.conf
+			ln -s /boot/grub/menu.lst /etc/grub.conf
+		fi
 	else
 		Echo "Image doesn't have grub installed"
 		Echo "Can't install boot loader"
