@@ -454,7 +454,7 @@ sub upgradeImage {
 	$kiwi -> info ("Reading image description [Upgrade]...\n");
 	my $buildProfs = $this -> {buildProfiles};
 	my $xml = KIWIXML -> new(
-		$configDir, undef, $buildProfs,$cmdL
+		$configDir, $this->{buildType}, $buildProfs,$cmdL
 	);
 	if (! defined $xml) {
 		return;
