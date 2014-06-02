@@ -433,9 +433,6 @@ PreReq:         coreutils
 Requires:       kiwi-desc-vmxboot = %{version}
 License:        GPL-2.0+
 Group:          System/Management
-%if 0%{?suse_version} > 1120
-BuildArch:      noarch
-%endif
 
 %description -n kiwi-templates
 This package contains system image templates to easily build
@@ -593,7 +590,7 @@ fi
 %post -n kiwi-templates
 #============================================================
 # Clean up old old template directories if the exists
-oldDists=( 10.1 10.2 10.3 11.0 11.1 11.2 )
+oldDists=( 10.1 10.2 10.3 11.0 11.1 11.2 11.3 12.1 SLE10 SLED10 )
 for dist in ${oldDists[@]};do
 	rm -rf /usr/share/kiwi/image/suse-$dist-JeOS
 done
