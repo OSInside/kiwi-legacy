@@ -3657,13 +3657,6 @@ sub setupBootLoaderStages {
 			$lib = 'lib64';
 		}
 		#==========================================
-		# boot id in grub2 context
-		#------------------------------------------
-		my $boot_id = 1;
-		if ($this->{partids}) {
-			$boot_id = $this->{partids}{boot};
-		}
-		#==========================================
 		# Stage files
 		#------------------------------------------
 		$stages{bios}{initrd}   = "'usr/lib/$grub_bios/$grubpc/*'";
@@ -4313,15 +4306,6 @@ sub setupBootLoaderConfiguration {
 	#------------------------------------------
 	if ($loader eq "grub2") {
 		#==========================================
-		# root/boot id's in grub2 context
-		#------------------------------------------
-		my $boot_id = 1;
-		my $root_id = 1;
-		if ($this->{partids}) {
-			$boot_id = $this->{partids}{boot};
-			$root_id = $this->{partids}{root};
-		}
-		#==========================================
 		# Theme and Fonts table
 		#------------------------------------------
 		my $theme = $xml -> getPreferences() -> getBootLoaderTheme();
@@ -4659,8 +4643,12 @@ sub setupBootLoaderConfiguration {
 		# boot id in grub context
 		#------------------------------------------
 		my $boot_id = 0;
-		if (($this->{partids}) && ($this->{partids}{boot})) {
-			$boot_id = $this->{partids}{boot} - 1;
+		if ($this->{partids}) {
+			if ($this->{partids}{boot}) {
+				$boot_id = $this->{partids}{boot} - 1;
+			} elsif ($this->{partids}{root}) {
+				$boot_id = $this->{partids}{root} - 1;
+			}
 		}
 		#==========================================
 		# Create menu.lst file
@@ -5486,6 +5474,8 @@ sub installBootLoader {
 			$boot_id = $this->{partids}{installboot};
 		} elsif ($this->{partids}{boot}) {
 			$boot_id = $this->{partids}{boot};
+		} elsif ($this->{partids}{root}) {
+			$boot_id = $this->{partids}{root};
 		}
 	}
 	if ((! $this->{bindloop}) && (-b $diskname)) {
@@ -5633,8 +5623,12 @@ sub installBootLoader {
 		# re-init bootid, legacy grub starts at 0
 		#------------------------------------------
 		$boot_id = 0;
-		if (($this->{partids}) && ($this->{partids}{boot})) {
-			$boot_id = $this->{partids}{boot} - 1;
+		if ($this->{partids}) {
+			if ($this->{partids}{boot}) {
+				$boot_id = $this->{partids}{boot} - 1;
+			} elsif ($this->{partids}{root}) {
+				$boot_id = $this->{partids}{root} - 1;
+			}
 		}
 		#==========================================
 		# Clean loop maps
