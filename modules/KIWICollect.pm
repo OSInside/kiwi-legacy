@@ -988,6 +988,19 @@ sub addDebugPackage {
 	return;
 }
 
+sub indexOfArray
+{
+	my $element = shift;
+	my $array = shift;
+
+	my $count = 0;
+	foreach my $val(@$array) {
+		$count = $count + 1;
+		return $count if "$val" eq "$element";
+	}
+	return $count;
+}
+
 #==========================================
 # setupPackageFiles
 #------------------------------------------
@@ -1083,13 +1096,15 @@ sub setupPackageFiles
 				if ($this->{m_debug} >= 5) {
 					$this->logMsg('I', "    check architecture $arch ");
 				}
-			      PACKKEY:
+				# sort keys 1st by repository order and secondary by architecture priority
+				PACKKEY:
 				for my $packKey( sort {
-					$poolPackages->{$a}->{priority}
-					<=> $poolPackages->{$b}->{priority}
-						 } keys(%{$poolPackages}))
-				{
-					# FIXME: check for forcerepo
+						$poolPackages->{$a}->{priority}
+						<=> $poolPackages->{$b}->{priority}
+						|| indexOfArray($poolPackages->{$a}->{arch}, \@fallbacklist)
+						<=> indexOfArray($poolPackages->{$b}->{arch}, \@fallbacklist)
+					} keys(%{$poolPackages})
+				) {
 					if ($this->{m_debug} >= 5) {
 						$this->logMsg('I', "	check $packKey ");
 					}
