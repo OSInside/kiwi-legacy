@@ -761,6 +761,19 @@ sub addDebugPackage($$$$)
    $this->{m_debugPacks}->{$packname}->{'requireVersion'}->{ $packPointer->{'version'}."-".$packPointer->{'release'} } = 1;
 }
 
+sub indexOfArray
+{
+  my $element = shift;
+  my $array = shift;
+  
+  my $count = 0;
+  foreach my $val(@$array) {
+    $count = $count + 1;
+    return $count if "$val" eq "$element";
+  }
+  return $count;
+}
+
 #==========================================
 # setupPackageFiles
 #------------------------------------------
@@ -824,7 +837,14 @@ sub setupPackageFiles
 
       $this->logMsg("I", "    Use as expanded architectures >".join(" ", @fallbacklist)."<") if $this->{m_debug} >= 5;
       my $fb_available = 0;
-      PACKKEY:foreach my $packKey( sort{$poolPackages->{$a}->{priority} <=> $poolPackages->{$b}->{priority}} keys(%{$poolPackages})) {
+      # sort keys 1st by repository order and secondary by architecture priority
+      PACKKEY:
+      foreach my $packKey( sort {
+                      $poolPackages->{$a}->{priority}
+                      <=> $poolPackages->{$b}->{priority}
+                      || indexOfArray($poolPackages->{$a}->{arch}, \@fallbacklist)
+                      <=> indexOfArray($poolPackages->{$b}->{arch}, \@fallbacklist)
+      } keys(%{$poolPackages}) ) {
         FA:foreach my $arch(@fallbacklist) {
           $this->logMsg("I", "    check architecture $arch ") if $this->{m_debug} >= 5;
           # FIXME: check for forcerepo
