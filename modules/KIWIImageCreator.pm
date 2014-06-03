@@ -951,6 +951,11 @@ sub createImage {
 		}
 	}
 	#==========================================
+	# Create build result information
+	#------------------------------------------
+	KIWIGlobals -> instance()
+		-> generateBuildInformation($xml, $cmdL);
+	#==========================================
 	# Add system strip from bootincludes
 	#------------------------------------------
 	$this -> __addBootincludedToolsToKeep ($xml, $tree);

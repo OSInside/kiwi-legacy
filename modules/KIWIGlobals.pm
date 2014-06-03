@@ -20,6 +20,7 @@ package KIWIGlobals;
 use strict;
 use warnings;
 use File::Basename;
+use Config::IniFiles;
 use LWP;
 #==========================================
 # KIWI Modules
@@ -501,6 +502,85 @@ sub dsize {
 		return $size1;
 	}
 	return $size2;
+}
+
+#==========================================
+# generateBuildInformation
+#------------------------------------------
+sub generateBuildInformation {
+	# ...
+	# write an ini file containing information about
+	# the build. This data is used in the KIWIResult to
+	# create an image release
+	# ---
+	my $this = shift;
+	my $xml  = shift;
+	my $cmdL = shift;
+	my $kiwi = $this->{kiwi};
+	#==========================================
+	# requires pointer to xml and command line
+	#------------------------------------------
+	if ((! $xml) || (! $cmdL)) {
+		$kiwi -> warning (
+			"Need pointer to XML config and command line"
+		);
+		$kiwi -> skipped();
+		return;
+	}
+	my $idest = $cmdL -> getImageIntermediateTargetDir();
+	my $name  = $this -> generateBuildImageName($xml);
+	my $file  = $idest.'/kiwi.buildinfo';
+	KIWIQX::qxx ("echo '[main]' > $file");
+	my $buildinfo = Config::IniFiles -> new (
+		-file => $file, -allowedcommentchars => '#'
+	);
+	if (! $buildinfo) {
+		$kiwi -> warning (
+			"Can't create build info file: $file"
+		);
+		$kiwi -> skipped ();
+		return;
+	}
+	#==========================================
+	# store image base name
+	#------------------------------------------
+	$buildinfo->newval('main', 'image.basename', $name);
+	#==========================================
+	# store build format
+	#------------------------------------------
+	my $bldType = $xml -> getImageType();
+	if ($bldType) {
+		my $format = $bldType -> getFormat();
+		if ($format) {
+			$buildinfo->newval('main', 'image.format', $format);
+		}
+	}
+	#==========================================
+	# store build type
+	#------------------------------------------
+	if ($bldType) {
+		my $imgtype = $bldType -> getTypeName();
+		$buildinfo->newval('main', 'image.type', $imgtype);
+	}
+	#==========================================
+	# store install media type
+	#------------------------------------------
+	if ($bldType) {
+		my $instIso   = $bldType -> getInstallIso();
+		my $instStick = $bldType -> getInstallStick();
+		my $instPXE   = $bldType -> getInstallPXE();
+		if (($instIso) && ($instIso eq 'true')) {
+			$buildinfo->newval('main', 'install.iso', 'true');
+		}
+		if (($instStick) && ($instStick eq 'true')) {
+			$buildinfo->newval('main', 'install.stick', 'true');
+		}
+		if (($instPXE) && ($instPXE eq 'true')) {
+			$buildinfo->newval('main', 'install.pxe', 'true');
+		}
+	}
+	$buildinfo->RewriteConfig();
+	return $this;
 }
 
 #==========================================
