@@ -817,11 +817,32 @@ sub setInitrdFile {
 }
 
 #==========================================
+# setBuildNumber
+#------------------------------------------
+sub setBuildNumber {
+	# ...
+	# Store the build number used to bundle this build
+	# ---
+	my $this  = shift;
+	my $build = shift;
+	$this->{buildNumber} = $build;
+	return 1;
+}
+
+#==========================================
 # getSplashFile
 #------------------------------------------
 sub getInitrdFile {
 	my $this = shift;
 	return $this->{initrdFile};
+}
+
+#==========================================
+# getBuildNumber
+#------------------------------------------
+sub getBuildNumber {
+	my $this = shift;
+	return $this->{buildNumber};
 }
 
 #==========================================

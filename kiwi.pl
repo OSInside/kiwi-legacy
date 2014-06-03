@@ -56,6 +56,7 @@ use KIWILocator;
 use KIWILog;
 use KIWIQX;
 use KIWIRoot;
+use KIWIResult;
 use KIWIRuntimeChecker;
 use KIWIXML;
 use KIWIXMLInfo;
@@ -137,6 +138,27 @@ sub main {
 	if (glob ("/etc/smart/channels/*")) {
 		KIWIQX::qxx ( "rm -f /etc/smart/channels/*" );
 	}
+	#========================================
+	# Bundle user relevant build results
+	#----------------------------------------
+	if ($cmdL->getOperationMode("bundle")) {
+		my $bundle = KIWIResult -> new (
+			$cmdL -> getOperationMode("bundle"),
+			$cmdL -> getImageTargetDir(),
+			$cmdL -> getBuildNumber()
+		);
+		if (! $bundle) {
+			kiwiExit (1);
+		}
+		if (! $bundle -> buildRelease()) {
+			kiwiExit (1);
+		}
+		if (! $bundle -> populateRelease()) {
+			kiwiExit (1);
+		}
+		kiwiExit (0);
+	}
+
 	#========================================
 	# Prepare and Create in one step
 	#----------------------------------------
@@ -735,6 +757,8 @@ sub init {
 	my $RootTree;              # optional root tree destination
 	my $BootVMSystem;          # system image to be copied on a VM disk
 	my $BootVMSize;            # size of virtual disk
+	my $BundleBuild;           # bundle user relevant build results
+	my $BundleID;              # bundle/build id used in bundle-build
 	my $StripImage;            # strip shared objects and binaries
 	my $PrebuiltBootImage;     # dir. where a prepared boot image may be found
 	my $ISOCheck;              # create checkmedia boot entry
@@ -768,6 +792,8 @@ sub init {
 		"add-repoalias=s"       => \@AddRepositoryAlias,
 		"add-repopriority=i"    => \@AddRepositoryPriority,
 		"add-repotype=s"        => \@AddRepositoryType,
+		"bundle-build=s"        => \$BundleBuild,
+		"bundle-id=s"           => \$BundleID,
 		"bootcd=s"              => \$BootCD,
 		"bootusb=s"             => \$BootUSB,
 		"bootvm=s"              => \$BootVMDisk,
@@ -897,6 +923,12 @@ sub init {
 	my $status = $cmdL -> setFilesystemOptions ($fsOpts);
 	if (! $status)  {
 		kiwiExit (1);
+	}
+	#========================================
+	# check if bundle-build option is set
+	#----------------------------------------
+	if (defined $BundleID) {
+		$cmdL -> setBuildNumber ($BundleID);
 	}
 	#========================================
 	# check if archive-image option is set
@@ -1284,6 +1316,9 @@ sub init {
 	#========================================
 	# store operation modes
 	#----------------------------------------
+	if (defined $BundleBuild) {
+		$cmdL -> setOperationMode ("bundle",$BundleBuild);
+	}
 	if (defined $Build) {
 		$cmdL -> setOperationMode ("build",$Build);
 	}
@@ -1415,6 +1450,7 @@ sub init {
 	#------------------------------------------
 	if (
 		(! defined $Build)              &&
+		(! defined $BundleBuild)        &&
 		(! defined $Prepare)            &&
 		(! defined $Create)             &&
 		(! defined $InitCache)          &&
@@ -1495,6 +1531,16 @@ sub init {
 		$kiwi -> failed ();
 		kiwiExit (1);
 	}
+	if ((defined $BundleBuild) && (! defined $Destination)) {
+		$kiwi -> error  ("No destination directory specified");
+		$kiwi -> failed ();
+		kiwiExit (1);
+	}
+	if ((defined $BundleBuild) && (! defined $BundleID)) {
+		$kiwi -> error  ("No bundle ID specified for bundle build");
+		$kiwi -> failed ();
+		kiwiExit (1);
+	}
 	return;
 }
 
@@ -1548,6 +1594,10 @@ sub usage {
 	print "Testsuite (requires os-autoinst package):\n";
 	print "    kiwi --test-image <image> --test-case <path>\n";
 	print "         --type <image-type>\n";
+	print "\n";
+	print "Image bundle (user relevant files)\n";
+	print "    kiwi --bundle-build <image-dest> --bundle-id <build-number>\n";
+	print "         --dest-dir <dest-dir>\n";
 	print "\n";
 	print "Image Post Creation modes:\n";
 	print "    kiwi --bootvm <initrd> --bootvm-system <systemImage>\n";
