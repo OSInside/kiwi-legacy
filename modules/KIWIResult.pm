@@ -177,21 +177,65 @@ sub populateRelease {
 	my $kiwi   = $this->{kiwi};
 	my $dest   = $this->{destdir};
 	my $tmpdir = $this->{tmpdir};
-	$kiwi -> info ("Populating build results to: $dest");
-	my $data = KIWIQX::qxx (
-		"mkdir -p $dest && mv $tmpdir/* $dest/ 2>&1"
+	$kiwi -> info (
+		"Populating build results to: $dest\n"
 	);
-	my $code = $? >> 8;
-	if ($code != 0) {
-		$kiwi -> failed ();
-		$kiwi -> error  (
-			"Failed to populate results, keeping data in $tmpdir: $data"
-		);
-		$kiwi -> failed ();
+	#==========================================
+	# copy build meta data
+	#------------------------------------------
+	if (! $this -> __bundleMeta()) {
+		$this->DESTROY;
 		return;
 	}
+	#==========================================
+	# populate results
+	#------------------------------------------
+	my $status = KIWIQX::qxx (
+		"mkdir -p $dest && mv $tmpdir/* $dest/ 2>&1"
+	);
+	my $result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> error  ("Failed to populate results: $status");
+		$kiwi -> failed ();
+		$this->DESTROY;
+		return;
+	}
+	#==========================================
+	# cleanup
+	#------------------------------------------
 	$this->DESTROY;
-	$kiwi -> done();
+	return $this;
+}
+
+#==========================================
+# __bundleMeta
+#------------------------------------------
+sub __bundleMeta {
+	my $this   = shift;
+	my $kiwi   = $this->{kiwi};
+	my $source = $this->{sourcedir};
+	my $tmpdir = $this->{tmpdir};
+	my $bnr    = $this->{buildnr};
+	my $base   = $this->{imagebase};
+	my @meta   = (
+		'packages','verified','channel'
+	);
+	my $data;
+	my $code;
+	foreach my $suffix (@meta) {
+		my $meta = "$source/$base.$suffix";
+		if (-e $meta) {
+			$data = KIWIQX::qxx (
+				"cp $meta $tmpdir/$base-$bnr.$suffix 2>&1"
+			);
+			$code = $? >> 8;
+			if ($code != 0) {
+				$kiwi -> error  ("Failed to copy $meta: $data");
+				$kiwi -> failed ();
+				return;
+			}
+		}
+	}
 	return $this;
 }
 
@@ -249,7 +293,7 @@ sub __bundleExtension {
 	);
 	my $code = $? >> 8;
 	if ($code != 0) {
-		$kiwi -> error  ("Failed to move $suffix image: $data");
+		$kiwi -> error  ("Failed to copy $suffix image: $data");
 		$kiwi -> failed ();
 		return;
 	}
