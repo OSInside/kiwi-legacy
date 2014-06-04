@@ -298,9 +298,9 @@ sub __bundleExtension {
 		return;
 	}
 	if ($suffix =~ /json|vmx|xenconfig/) {
-		my $file = $tmpdir/$base-$bnr.$suffix;
+		my $file = "$tmpdir/$base-$bnr.$suffix";
 		$data = KIWIQX::qxx (
-			"sed -i -e 's/$base.$suffix/$base-$bnr.$suffix/' $file 2>&1"
+			"sed -i -e 's/$base/$base-$bnr/' $file 2>&1"
 		);
 		my $code = $? >> 8;
 		if ($code != 0) {
@@ -385,8 +385,13 @@ sub __bundleDisk {
 		return $this -> __bundleExtension ('raw');
 	}
 	if ($format eq 'vagrant') {
-		$code = 1;
-		foreach my $box (glob ("$source/$base.*.box")) {
+		my @boxes = glob ("$source/$base.*.box");
+		if (! @boxes) {
+			$kiwi -> error  ("No box files found");
+			$kiwi -> failed ();
+			return;
+		}
+		foreach my $box (@boxes) {
 			if ($box =~ /$base\.(.*)\.box/) {
 				my $provider = $1;
 				if (! $this -> __bundleExtension('box',"$base.$provider")) {
@@ -396,11 +401,6 @@ sub __bundleDisk {
 					return;
 				}
 			}
-		}
-		if ($code != 0) {
-			$kiwi -> error  ("No box files found");
-			$kiwi -> failed ();
-			return;
 		}
 		return $this;
 	}
