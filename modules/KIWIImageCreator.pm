@@ -2239,7 +2239,6 @@ sub __addBootincludedToolsToKeep {
 			$kiwi -> warning (
 				"--> package $pack_name not installed\n"
 			);
-			$kiwi -> skipped();
 		}
 	}
 	my $FILE = FileHandle -> new();
