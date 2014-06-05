@@ -1268,6 +1268,10 @@ function suseGFXBoot {
 	elif [ -f /usr/share/syslinux/gfxboot.c32 ];then
 		mv /usr/share/syslinux/gfxboot.c32 /image/loader
 	fi
+	# add menu capabilities for non graphics boot
+	if [ -f /usr/share/syslinux/menu.c32 ];then
+		mv /usr/share/syslinux/menu.c32 /image/loader
+	fi
 	if [ -f /usr/share/syslinux/chain.c32 ];then
 		mv /usr/share/syslinux/chain.c32 /image/loader
 	fi

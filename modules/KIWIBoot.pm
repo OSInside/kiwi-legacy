@@ -4870,6 +4870,8 @@ sub setupBootLoaderConfiguration {
 			} else {
 				print $FD "gfxboot bootlogo"."\n";
 			}
+		} else {
+			print $FD "ui menu.c32"."\n";
 		}
 		#==========================================
 		# Setup default title
