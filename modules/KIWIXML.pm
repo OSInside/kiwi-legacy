@@ -1336,6 +1336,15 @@ sub getBootIncludePackages {
 		}
 		push @bootInclPackages, $pckg;
 	}
+	# /.../
+	# Return sort uniq result
+	# ----
+	my %result;
+	foreach my $pack (@bootInclPackages) {
+		my $name = $pack -> getName();
+		$result{$name} = $pack;
+	}
+	@bootInclPackages = ( map { $result{$_} } sort keys %result );
 	return \@bootInclPackages;
 }
 
