@@ -1203,16 +1203,14 @@ function installBootLoaderGrub2Recovery {
 	# last primary partition of the disk
 	# ----
 	local confTool=grub2-mkconfig
-	local instTool=grub2-install
-	local confPath=/boot/grub2/grub.cfg
+	local confFile_grub_bios=/boot/grub2/grub.cfg
+	local confFile_grub_efi=/boot/grub2-efi/grub.cfg
+	local confFile_uefi=/boot/efi/EFI/BOOT/grub.cfg
+	local confFile_grub=$confFile_grub_bios
+	local bios_grub=/reco-save/boot/grub2/i386-pc
 	#======================================
 	# check tool status
 	#--------------------------------------
-	if [ "$partedTableType" = "gpt" ];then
-		lookup grub2-efi-mkconfig &>/dev/null && confTool=grub2-efi-mkconfig
-		lookup grub2-efi-install  &>/dev/null && instTool=grub2-efi-install
-		confPath=/boot/grub2-efi/grub.cfg
-	fi
 	if ! lookup $confTool &>/dev/null;then
 		Echo "Image doesn't have grub2 installed"
 		Echo "Can't install boot loader"
@@ -1221,28 +1219,48 @@ function installBootLoaderGrub2Recovery {
 	#======================================
 	# install grub2 into partition
 	#--------------------------------------
-	$instTool --force \
-		--boot-directory=/reco-save/boot $imageRecoveryDevice 1>&2
+	# this allows a bios to directly jump there, e.g with a function key
+	grub2-bios-setup -f -d $bios_grub $imageRecoveryDevice 1>&2
 	if [ ! $? = 0 ];then
 		Echo "Failed to install boot loader"
 	fi
 	#======================================
 	# create custom recovery entry
 	#--------------------------------------
-	local method="chainloader +1"
-	if [ "$partedTableType" = "gpt" ];then
-		method="configfile /boot/grub2/grub.cfg"
-	fi
-	cat > /etc/grub.d/40_custom <<- EOF
-		echo "menuentry 'Recovery' --class os {"
-		echo "	set root='hd0,$recoid'"
-		echo "	$method"
-		echo "}"
-	EOF
-	$confTool > $confPath
+	cat > /etc/grub.d/40_custom <<- DONE
+		#!/bin/sh
+		cat <<EOF
+		menuentry 'Recovery' --class os {
+		   set root='hd0,$recoid'
+		   configfile /boot/grub2/grub.cfg
+		}
+		EOF
+	DONE
+	#======================================
+	# create grub2 config file
+	#--------------------------------------
+	$confTool > $confFile_grub
 	if [ ! $? = 0 ];then
 		Echo "Failed to create grub2 boot configuration"
 		return 1
+	fi
+	#======================================
+	# update efi grub2 config file(s)
+	#--------------------------------------
+	if [ -e $confFile_grub_efi ];then
+		cp $confFile_grub $confFile_grub_efi
+	fi
+	if [ ! -z "$kiwi_JumpPart" ];then
+		local jdev=$(ddn $imageDiskDevice $kiwi_JumpPart)
+		local label=$(blkid $jdev -s LABEL -o value)
+		if [ "$label" = "EFI" ];then
+			if mount $jdev /boot/efi;then
+				if [ -e $confFile_uefi ];then
+					cp $confFile_grub $confFile_uefi
+					umount /boot/efi
+				fi
+			fi
+		fi
 	fi
 	return 0
 }
