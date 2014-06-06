@@ -54,6 +54,7 @@
 		<file name="fs/ext3/*"/>
 		<file name="fs/ext4/*"/>
 		<file name="fs/fat/*"/>
+		<file name="fs/ntfs/*"/>
 		<file name="fs/fuse/*"/>
 		<file name="fs/jbd/*"/>
 		<file name="fs/jbd2/*"/>
