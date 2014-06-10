@@ -57,6 +57,7 @@ BuildRequires:  fdupes
 %ifarch %ix86 x86_64
 BuildRequires:  syslinux
 %endif
+Provides:       kiwi-images:lxc
 %if 0%{?suse_version} > 1140
 BuildRequires:  btrfsprogs
 BuildRequires:  cdrkit-cdrtools-compat
@@ -176,7 +177,31 @@ Authors:
     Marcus Schaefer <ms@suse.com>
     Robert Schweikert <rjschwei@suse.com>
 
+%package -n kiwi-requires
+Provides:       kiwi-filesystem:btrfs
+Provides:       kiwi-filesystem:ext3
+Provides:       kiwi-filesystem:ext4
+Provides:       kiwi-filesystem:squashfs
+Provides:       kiwi-packagemanager:zypper
+Requires:       btrfsprogs
+Requires:       e2fsprogs
+Requires:       kiwi = %{version}
+Requires:       squashfs
+Requires:       zypper
+Summary:        Installation Source creation
+License:        GPL-2.0
+Group:          System/Management
+%if 0%{?suse_version} > 1120
+BuildArch:      noarch
+%endif
+
+%description -n kiwi-requires
+This is a meta package to hint which packages need to be available to build an image.
+It is used by Open Build Service (OBS) to provide and install the needed packages
+automatically.
+
 %package -n kiwi-instsource
+Provides:       kiwi-packagemanager:instsource
 Summary:        KIWI - Product media creator
 Requires:       build
 Requires:       createrepo
@@ -289,9 +314,20 @@ Authors:
     Marcus Schaefer <ms@suse.com>
 
 %package -n kiwi-desc-isoboot-requires
-Summary:        KIWI - buildservice package requirements for isoboot
+Provides:       kiwi-boot:isoboot
+Requires:       genisoimage
 Requires:       kiwi-desc-isoboot = %{version}
 Requires:       %(echo `bash %{S:4} %{S:0} isoboot %{myarch} %{mysystems}`)
+%ifarch ppc ppc64 ppc64le
+Requires:       yaboot
+%endif
+%ifarch s390 s390x
+Requires:       zipl
+%endif
+%ifarch i586 x86_64
+Requires:       grub
+%endif
+Summary:        KIWI - buildservice package requirements for isoboot
 License:        GPL-2.0+
 Group:          System/Management
 
@@ -337,8 +373,19 @@ Authors:
 
 %package -n kiwi-desc-vmxboot-requires
 Summary:        KIWI - buildservice package requirements for vmxboot
+Provides:       kiwi-boot:vmxboot
+Requires:       genisoimage
 Requires:       kiwi-desc-vmxboot = %{version}
 Requires:       %(echo `bash %{S:4} %{S:0} vmxboot %{myarch} %{mysystems}`)
+%ifarch ppc ppc64 ppc64le
+Requires:       yaboot
+%endif
+%ifarch s390 s390x
+Requires:       zipl
+%endif
+%ifarch i586 x86_64
+Requires:       grub
+%endif
 License:        GPL-2.0+
 Group:          System/Management
 
@@ -363,6 +410,7 @@ Authors:
     Marcus Schaefer <ms@suse.com>
 
 %package -n kiwi-desc-netboot-requires
+Provides:       kiwi-boot:netboot
 Summary:        KIWI - buildservice package requirements for netboot
 Requires:       kiwi-desc-netboot = %{version}
 Requires:       %(echo `bash %{S:4} %{S:0} netboot %{myarch} %{mysystems}`)
@@ -414,9 +462,21 @@ Authors:
     Marcus Schaefer <ms@suse.com>
 
 %package -n kiwi-desc-oemboot-requires
-Summary:        KIWI - buildservice package requirements for oemboot
+Provides:       kiwi-boot:oemboot
+Provides:       kiwi-boot:tbz
+Requires:       genisoimage
 Requires:       kiwi-desc-oemboot = %{version}
 Requires:       %(echo `bash %{S:4} %{S:0} oemboot %{myarch} %{mysystems}`)
+%ifarch ppc ppc64 ppc64le
+Requires:       yaboot
+%endif
+%ifarch s390 s390x
+Requires:       zipl
+%endif
+%ifarch i586 x86_64
+Requires:       grub
+%endif
+Summary:        KIWI - buildservice package requirements for oemboot
 License:        GPL-2.0+
 Group:          System/Management
 
@@ -563,6 +623,11 @@ to track the dependencies.
 EOF
   fi
 done
+cat > $RPM_BUILD_ROOT/%{_datadir}/kiwi/README.requires <<EOF
+This is a meta package to pull in all base dependencies required for kiwi
+images. This is supposed to be used in Open Build Service in first place
+to track the dependencies.
+EOF
 
 %ifarch %ix86 x86_64
 %pre -n kiwi-pxeboot
@@ -646,6 +711,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/kiwi/xsl
 %{_sbindir}/kiwi
 /usr/bin/livestick
+
+%files -n kiwi-requires
+%defattr(-, root, root)
+%doc %{_datadir}/kiwi/README.requires
 #=================================================
 # KIWI doc...      
 #-------------------------------------------------
