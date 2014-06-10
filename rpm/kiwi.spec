@@ -178,6 +178,7 @@ Authors:
     Robert Schweikert <rjschwei@suse.com>
 
 %package -n kiwi-requires
+Summary:        KIWI - buildservice package requirements
 Provides:       kiwi-filesystem:btrfs
 Provides:       kiwi-filesystem:ext3
 Provides:       kiwi-filesystem:ext4
@@ -188,7 +189,6 @@ Requires:       e2fsprogs
 Requires:       kiwi = %{version}
 Requires:       squashfs
 Requires:       zypper
-Summary:        KIWI - buildservice package requirements
 License:        GPL-2.0
 Group:          System/Management
 %if 0%{?suse_version} > 1120
@@ -314,6 +314,7 @@ Authors:
     Marcus Schaefer <ms@suse.com>
 
 %package -n kiwi-desc-isoboot-requires
+Provides:       kiwi-image:iso
 Provides:       kiwi-boot:isoboot
 Requires:       genisoimage
 Requires:       kiwi-desc-isoboot = %{version}
@@ -375,6 +376,7 @@ Authors:
 
 %package -n kiwi-desc-vmxboot-requires
 Summary:        KIWI - buildservice package requirements for vmxboot
+Provides:       kiwi-image:vmx
 Provides:       kiwi-boot:vmxboot
 Requires:       genisoimage
 Requires:       kiwi-desc-vmxboot = %{version}
@@ -385,8 +387,18 @@ Requires:       yaboot
 %ifarch s390 s390x
 Requires:       zipl
 %endif
-%ifarch i586 x86_64
+%ifarch %ix86 x86_64
+%if 0%{?suse_version} >= 1220
+Requires:       grub2
+%ifarch x86_64
+Requires:       grub2-x86_64-efi
+%endif
+%ifarch %ix86
+Requires:       grub2-i386-efi
+%endif
+%else
 Requires:       grub
+%endif
 %endif
 License:        GPL-2.0+
 Group:          System/Management
@@ -414,6 +426,7 @@ Authors:
     Marcus Schaefer <ms@suse.com>
 
 %package -n kiwi-desc-netboot-requires
+Provides:       kiwi-image:pxe
 Provides:       kiwi-boot:netboot
 Summary:        KIWI - buildservice package requirements for netboot
 Requires:       kiwi-desc-netboot = %{version}
@@ -468,6 +481,7 @@ Authors:
     Marcus Schaefer <ms@suse.com>
 
 %package -n kiwi-desc-oemboot-requires
+Provides:       kiwi-image:oem
 Provides:       kiwi-boot:oemboot
 Provides:       kiwi-boot:tbz
 Requires:       genisoimage
@@ -479,8 +493,18 @@ Requires:       yaboot
 %ifarch s390 s390x
 Requires:       zipl
 %endif
-%ifarch i586 x86_64
+%ifarch %ix86 x86_64
+%if 0%{?suse_version} >= 1220
+Requires:       grub2
+%ifarch x86_64
+Requires:       grub2-x86_64-efi
+%endif
+%ifarch %ix86
+Requires:       grub2-i386-efi
+%endif
+%else
 Requires:       grub
+%endif
 %endif
 Summary:        KIWI - buildservice package requirements for oemboot
 License:        GPL-2.0+
