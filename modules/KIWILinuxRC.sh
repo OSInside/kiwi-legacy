@@ -7364,8 +7364,14 @@ function activateImage {
 	if ! cp /include /mnt;then
 		systemException "Failed to copy: include" "reboot"
 	fi
+	if [ ! -e /mnt/sbin/killall5 ]; then
+		touch /mnt/sbin/killall5.from-initrd
+	fi
 	if ! cp -f /sbin/killall5 /mnt/sbin;then
 		systemException "Failed to copy: killall5" "reboot"
+	fi
+	if [ ! -e /mnt/sbin/pidof ];then
+		touch /mnt/sbin/pidof.from-initrd
 	fi
 	if ! cp -f /sbin/pidof /mnt/sbin;then
 		systemException "Failed to copy: pidof" "reboot"
@@ -7403,6 +7409,14 @@ function cleanImage {
 	rm -f /.kconfig
 	rm -f /.profile
 	rm -rf /image
+	if [ -e /sbin/pidof.from-initrd ];then
+		rm -f /sbin/pidof.from-initrd
+		rm -f /sbin/pidof
+	fi
+	if [ -e /sbin/killall5.from-initrd ];then
+		rm -f /sbin/killall5.from-initrd
+		rm -f /sbin/killall5
+	fi
 	#======================================
 	# return early for special types
 	#--------------------------------------
