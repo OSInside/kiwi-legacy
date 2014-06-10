@@ -188,7 +188,7 @@ Requires:       e2fsprogs
 Requires:       kiwi = %{version}
 Requires:       squashfs
 Requires:       zypper
-Summary:        Installation Source creation
+Summary:        KIWI - buildservice package requirements
 License:        GPL-2.0
 Group:          System/Management
 %if 0%{?suse_version} > 1120
@@ -196,9 +196,9 @@ BuildArch:      noarch
 %endif
 
 %description -n kiwi-requires
-This is a meta package to hint which packages need to be available to build an image.
-It is used by Open Build Service (OBS) to provide and install the needed packages
-automatically.
+Meta-package to pull in all requires to prepare a new root system.
+It is used by Open Build Service (OBS) to provide and install the
+needed packages automatically.
 
 %package -n kiwi-instsource
 Provides:       kiwi-packagemanager:instsource
@@ -333,6 +333,8 @@ Group:          System/Management
 
 %description -n kiwi-desc-isoboot-requires
 Meta-package to pull in all requires to build an isoboot media.
+It is used by Open Build Service (OBS) to provide and install the
+needed packages automatically.
 
 %endif
 
@@ -391,6 +393,8 @@ Group:          System/Management
 
 %description -n kiwi-desc-vmxboot-requires
 Meta-package to pull in all requires to build a vmxboot media.
+It is used by Open Build Service (OBS) to provide and install the
+needed packages automatically.
 
 %endif
 
@@ -419,6 +423,8 @@ Group:          System/Management
 
 %description -n kiwi-desc-netboot-requires
 Meta-package to pull in all requires to build a netboot media.
+It is used by Open Build Service (OBS) to provide and install the
+needed packages automatically.
 
 %endif
 
@@ -482,6 +488,8 @@ Group:          System/Management
 
 %description -n kiwi-desc-oemboot-requires
 Meta-package to pull in all requires to build a oemboot media.
+It is used by Open Build Service (OBS) to provide and install the
+needed packages automatically.
 
 %endif
 
