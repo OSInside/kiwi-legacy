@@ -1751,7 +1751,7 @@ sub __checkQemuImg {
 		$kiwi -> failed ();
 		return;
 	}
-	return $this;
+	return $qemu_img;
 }
 #==========================================
 # Destructor
