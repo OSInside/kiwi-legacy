@@ -2383,9 +2383,10 @@ sub createMetadata {
 	$this->logMsg('I', "Creating products file in all media:");
 	my $proddir  = $this->{m_proddata}->getVar("PRODUCT_DIR");
 	my $prodname = $this->{m_proddata}->getVar("PRODUCT_NAME");
-	my $sp_ver   = $this->{m_proddata}->getVar("SP_VERSION");
 	my $prodver  = $this->{m_proddata}->getVar("PRODUCT_VERSION");
-	my $prodrel  = $this->{m_proddata}->getInfo("RELEASE");
+	my $prodrel  = $this->{m_proddata}->getVar("PRODUCT_RELEASE");
+	my $sp_ver   = $this->{m_proddata}->getVar("SP_VERSION");
+	$prodrel  ||= $this->{m_proddata}->getInfo("RELEASE"); # old style before 13.2
 	$prodname =~ s/\ /-/g;
 	$prodver .= ".$sp_ver" if defined($sp_ver);
 	if (defined($proddir)
