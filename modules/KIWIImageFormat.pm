@@ -340,6 +340,10 @@ sub createVMDK {
 		$diskCnt  = $vmdata -> getSystemDiskController();
 		$diskMode = $vmdata -> getSystemDiskMode();
 	}
+	my $qemu_img = $this -> __checkQemuImg();
+	if (! $qemu_img) {
+		return;
+	}
 	$kiwi -> info ("Creating $format image...");
 	$target  =~ s/\.raw$/\.$format/;
 	$convert = "convert -f raw $source -O $format";
@@ -357,7 +361,7 @@ sub createVMDK {
 			$convert .= " -o subformat=$diskMode";
 		}
 	}
-	$status = KIWIQX::qxx ("qemu-img $convert $target 2>&1");
+	$status = KIWIQX::qxx ("$qemu_img $convert $target 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
@@ -381,10 +385,14 @@ sub createVDI {
 	my $convert;
 	my $status;
 	my $result;
+	my $qemu_img = $this -> __checkQemuImg();
+	if (! $qemu_img) {
+		return;
+	}
 	$kiwi -> info ("Creating $format image...");
 	$target  =~ s/\.raw$/\.$format/;
 	$convert = "convert -f raw $source -O $format";
-	$status = KIWIQX::qxx ("qemu-img $convert $target 2>&1");
+	$status = KIWIQX::qxx ("$qemu_img $convert $target 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
@@ -407,10 +415,14 @@ sub createVHD {
 	my $convert;
 	my $status;
 	my $result;
+	my $qemu_img = $this -> __checkQemuImg();
+	if (! $qemu_img) {
+		return;
+	}
 	$kiwi -> info ("Creating vhd image...");
 	$target  =~ s/\.raw$/\.vhd/;
 	$convert = "convert -f raw $source -O vpc";
-	$status = KIWIQX::qxx ("qemu-img $convert $target 2>&1");
+	$status = KIWIQX::qxx ("$qemu_img $convert $target 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
@@ -434,10 +446,14 @@ sub createVHDSubFormatFixed {
 	my $convert;
 	my $status;
 	my $result;
+	my $qemu_img = $this -> __checkQemuImg();
+	if (! $qemu_img) {
+		return;
+	}
 	$kiwi -> info ("Creating vhd-fixed image...");
 	$target  =~ s/\.raw$/\.vhdfixed/;
 	$convert = "convert -f raw -O vpc -o subformat=fixed";
-	$status = KIWIQX::qxx ("qemu-img $convert $source $target 2>&1");
+	$status = KIWIQX::qxx ("$qemu_img $convert $source $target 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
@@ -467,10 +483,14 @@ sub createQCOW2 {
 	my $convert;
 	my $status;
 	my $result;
+	my $qemu_img = $this -> __checkQemuImg();
+	if (! $qemu_img) {
+		return;
+	}
 	$kiwi -> info ("Creating qcow2 image...");
 	$target  =~ s/\.raw$/\.qcow2/;
 	$convert = "convert -c -f raw $source -O qcow2";
-	$status = KIWIQX::qxx ("qemu-img $convert $target 2>&1");
+	$status = KIWIQX::qxx ("$qemu_img $convert $target 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
@@ -1718,7 +1738,21 @@ sub __randomMAC {
 	my $result = sprintf "%02x%02x%02x%02x%02x%02x", @mac;
 	return uc $result;
 }
-
+#==========================================
+# __checkQemuImg
+#------------------------------------------
+sub __checkQemuImg {
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $locator = KIWILocator -> instance();
+	my $qemu_img = $locator -> getExecPath ("qemu-img");
+	if (! $qemu_img) {
+		$kiwi -> error  ("Mandatory qemu-img tool not found");
+		$kiwi -> failed ();
+		return;
+	}
+	return $this;
+}
 #==========================================
 # Destructor
 #------------------------------------------

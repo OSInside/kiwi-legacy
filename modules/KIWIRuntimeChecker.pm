@@ -1013,6 +1013,12 @@ sub __checkVMControllerCapable {
 	my $kiwi = $this->{kiwi};
 	my $xml  = $this->{xml};
 	my $type = $xml->getImageType();
+	my $locator = KIWILocator -> instance();
+	my $qemu_img = $locator -> getExecPath ("qemu-img");
+	if (! $qemu_img) {
+		# No qemu-img found, treat that as a skip check no error
+		return 1;
+	}
 	if (! $type) {
 		return 1;
 	}
@@ -1030,7 +1036,7 @@ sub __checkVMControllerCapable {
 	if (($diskCnt) && ($diskCnt ne 'ide')) {
 		my $QEMU_IMG_CAP;
 		my $msg;
-		if (! open($QEMU_IMG_CAP, '-|', "qemu-img create -f vmdk foo -o '?'")) {
+		if (! open($QEMU_IMG_CAP, '-|', "$qemu_img create -f vmdk foo -o '?'")){
 			$msg = 'Could not execute qemu-img command. ';
 			$msg.= 'This precludes format conversion.';
 			$kiwi -> error ($msg);
@@ -1073,6 +1079,12 @@ sub __checkVMdiskmodeCapable {
 	my $this = shift;
 	my $xml = $this -> {xml};
 	my $type = $xml -> getImageType();
+	my $locator = KIWILocator -> instance();
+	my $qemu_img = $locator -> getExecPath ("qemu-img");
+	if (! $qemu_img) {
+		# No qemu-img found, treat that as a skip check no error
+		return 1;
+	}
 	if (! $type) {
 		return 1;
 	}
@@ -1089,7 +1101,7 @@ sub __checkVMdiskmodeCapable {
 	my $diskMode = $vmConfig -> getSystemDiskMode();
 	if ($diskMode) {
 		my $QEMU_IMG_CAP;
-		if (! open($QEMU_IMG_CAP, '-|', "qemu-img create -f vmdk foo -o '?'")){
+		if (! open($QEMU_IMG_CAP, '-|', "$qemu_img create -f vmdk foo -o '?'")){
 			my $msg = 'Could not execute qemu-img command. This precludes '
 			. 'format conversion.';
 			$this -> {kiwi} -> error ($msg);

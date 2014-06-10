@@ -1378,10 +1378,21 @@ sub checkType {
 	if ($check_mksquashfs) {
 		my $km = glob ("$root/lib/modules/*/kernel/fs/squashfs/squashfs.ko");
 		if ($km) {
-			my $mktool_vs = KIWIQX::qxx (
-				"mksquashfs -version 2>&1 | head -n 1"
-			);
-			my $module_vs = KIWIQX::qxx ("modinfo -d $km 2>&1");
+			my $locator = KIWILocator -> instance();
+			my $mk_squash = $locator -> getExecPath ("mksquashfs");
+			my $modinfo   = $locator -> getExecPath ("modinfo");
+			my $mktool_vs = 'unknown';
+			my $module_vs = 'unknown';
+			if ($mk_squash) {
+				$mktool_vs = KIWIQX::qxx (
+					"$mk_squash -version 2>&1 | head -n 1"
+				);
+			}
+			if ($module_vs) {
+				$module_vs = KIWIQX::qxx (
+					"$modinfo -d $km 2>&1"
+				);
+			}
 			my $error = 0;
 			if ($mktool_vs =~ /^mksquashfs version (\d)\.\d \(/) {
 				$mktool_vs = $1;
@@ -1393,8 +1404,8 @@ sub checkType {
 			}
 			$kiwi -> loginfo ("squashfs mktool major version: $mktool_vs\n");
 			$kiwi -> loginfo ("squashfs module major version: $module_vs\n");
-			my $msg = "--> squashfs tool/driver mismatch";
 			if (($error == 2) && ($mktool_vs ne $module_vs)) {
+				my $msg = "--> squashfs tool/driver mismatch";
 				$kiwi -> error (
 					"$msg: $mktool_vs vs $module_vs"
 				);

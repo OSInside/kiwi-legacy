@@ -3656,7 +3656,14 @@ sub buildLogicalExtend {
 			# loop setup a disk device as file...
 			#------------------------------------------
 			unlink ($out);
-			my $data = KIWIQX::qxx ("qemu-img create $out $seek 2>&1");
+			my $locator = KIWILocator -> instance();
+			my $qemu_img = $locator -> getExecPath ("qemu-img");
+			if (! $qemu_img) {
+				$kiwi -> error  ("Mandatory qemu-img tool not found");
+				$kiwi -> failed ();
+				return;
+			}
+			my $data = KIWIQX::qxx ("$qemu_img create $out $seek 2>&1");
 			my $code = $? >> 8;
 			if ($code != 0) {
 				$kiwi -> error  ("Couldn't create logical extend");
@@ -3804,8 +3811,16 @@ sub installLogicalExtend {
 			-> generateBuildImageName($this->{xml});
 		my $dest = $this->{imageDest}."/".$name;
 		$kiwi -> info ("Dumping filesystem image from $device...");
+		my $locator = KIWILocator -> instance();
+		my $qemu_img = $locator -> getExecPath ("qemu-img");
+		if (! $qemu_img) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Mandatory qemu-img tool not found");
+			$kiwi -> failed ();
+			return;
+		}
 		$data = KIWIQX::qxx (
-			"qemu-img convert -f raw -O raw $device $dest 2>&1"
+			"$qemu_img convert -f raw -O raw $device $dest 2>&1"
 		);
 		$code = $? >> 8;
 		if ($code != 0) {

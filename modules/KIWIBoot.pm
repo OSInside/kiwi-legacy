@@ -734,20 +734,35 @@ sub setupInstallCD {
 		$md5name =~ s/\.raw$/\.md5/;
 		$kiwi -> info ("Compressing installation image...");
 		$result = 0;
+		my $locator = KIWILocator -> instance();
 		if ($haveDiskDevice) {
 			# /.../
 			# Unfortunately mksquashfs can not use a block device as
 			# input file so we have to create a file from the device
 			# first and pass that to mksquashfs
 			# ----
+			my $qemu_img = $locator -> getExecPath ("qemu-img");
+			if (! $qemu_img) {
+				$kiwi -> failed ();
+				$kiwi -> error  ("Mandatory qemu-img tool not found");
+				$kiwi -> failed ();
+				return;
+			}
 			$status = KIWIQX::qxx (
-				"qemu-img convert -f raw -O raw $haveDiskDevice $system"
+				"$qemu_img convert -f raw -O raw $haveDiskDevice $system"
 			);
 			$result = $? >> 8;
 		}
 		if ($result == 0) {
+			my $mk_squash = $locator -> getExecPath ("mksquashfs");
+			if (! $mk_squash) {
+				$kiwi -> failed ();
+				$kiwi -> error  ("Mandatory mksquashfs tool not found");
+				$kiwi -> failed ();
+				return;
+			}
 			$status = KIWIQX::qxx (
-				"mksquashfs $system $md5name $system.squashfs -no-progress 2>&1"
+				"$mk_squash $system $md5name $system.squashfs -no-progress 2>&1"
 			);
 			$result = $? >> 8;
 		}
@@ -1115,6 +1130,16 @@ sub setupInstallStick {
 		}
 	}
 	#==========================================
+	# Check toolchain
+	#------------------------------------------
+	my $locator = KIWILocator -> instance();
+	my $qemu_img = $locator -> getExecPath ("qemu-img");
+	if (! $qemu_img) {
+		$kiwi -> error  ("Mandatory qemu-img tool not found");
+		$kiwi -> failed ();
+		return;
+	}
+	#==========================================
 	# Compress system image
 	#------------------------------------------
 	if ($gotsys) {
@@ -1123,13 +1148,20 @@ sub setupInstallStick {
 		$result = 0;
 		if ($haveDiskDevice) {
 			$status = KIWIQX::qxx (
-				"qemu-img convert -f raw -O raw $haveDiskDevice $system"
+				"$qemu_img convert -f raw -O raw $haveDiskDevice $system"
 			);
 			$result = $? >> 8;
 		}
 		if ($result == 0) {
+			my $mk_squash = $locator -> getExecPath ("mksquashfs");
+			if (! $mk_squash) {
+				$kiwi -> failed ();
+				$kiwi -> error  ("Mandatory mksquashfs tool not found");
+				$kiwi -> failed ();
+				return;
+			}
 			$status = KIWIQX::qxx (
-				"mksquashfs $system $md5name $system.squashfs -no-progress 2>&1"
+				"$mk_squash $system $md5name $system.squashfs -no-progress 2>&1"
 			);
 			$result = $? >> 8;
 		}
@@ -1159,7 +1191,7 @@ sub setupInstallStick {
 	# Create virtual disk to be dumped on stick
 	#------------------------------------------
 	$kiwi -> info ("Creating virtual disk...");
-	$status = KIWIQX::qxx ("qemu-img create $diskname $vmsize 2>&1");
+	$status = KIWIQX::qxx ("$qemu_img create $diskname $vmsize 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
@@ -1589,8 +1621,16 @@ sub setupInstallPXE {
 	$sysname = $system;
 	$sysname =~ s/\.raw$/\.xz/;
 	if ($haveDiskDevice) {
+		my $locator = KIWILocator -> instance();
+		my $qemu_img = $locator -> getExecPath ("qemu-img");
+		if (! $qemu_img) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Mandatory qemu-img tool not found");
+			$kiwi -> failed ();
+			return;
+		}
 		$status = KIWIQX::qxx (
-			"qemu-img convert -f raw -O raw $haveDiskDevice $system"
+			"$qemu_img convert -f raw -O raw $haveDiskDevice $system"
 		);
 		$result = $? >> 8;
 	}
@@ -2189,6 +2229,7 @@ sub setupBootDisk {
 	#==========================================
 	# create/use disk
 	#------------------------------------------
+	my $locator = KIWILocator -> instance();
 	my $dmap; # device map
 	my $root; # root device
 	my $try_count = 50;
@@ -2223,8 +2264,15 @@ sub setupBootDisk {
 			#==========================================
 			# loop setup a disk device as file...
 			#------------------------------------------
+			my $qemu_img = $locator -> getExecPath ("qemu-img");
+			if (! $qemu_img) {
+				$kiwi -> failed ();
+				$kiwi -> error  ("Mandatory qemu-img tool not found");
+				$kiwi -> failed ();
+				return;
+			}
 			$status = KIWIQX::qxx (
-				"qemu-img create $diskname $this->{vmsize} 2>&1"
+				"$qemu_img create $diskname $this->{vmsize} 2>&1"
 			);
 			$result = $? >> 8;
 			if ($result != 0) {
@@ -2862,8 +2910,15 @@ sub setupBootDisk {
 			# create image file from disk device
 			#------------------------------------------
 			$kiwi -> info ("Dumping image file from $this->{loop}...");
+			my $qemu_img = $locator -> getExecPath ("qemu-img");
+			if (! $qemu_img) {
+				$kiwi -> failed ();
+				$kiwi -> error  ("Mandatory qemu-img tool not found");
+				$kiwi -> failed ();
+				return;
+			}
 			$status = KIWIQX::qxx (
-				"qemu-img convert -f raw -O raw $this->{loop} $diskname 2>&1"
+				"$qemu_img convert -f raw -O raw $this->{loop} $diskname 2>&1"
 			);
 			$result = $? >> 8;
 			if ($result != 0) {

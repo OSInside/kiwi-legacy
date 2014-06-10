@@ -1275,8 +1275,15 @@ sub makeIsoEFIBootable {
 	my $status = KIWIQX::qxx ("mkdir -p $source/boot/$efi_arch");
 	my $result = $? >> 8;
 	if ($result == 0) {
-		$status = KIWIQX::qxx ("qemu-img create $efi_fat 4M 2>&1");
-		$result = $? >> 8;
+		my $locator = KIWILocator -> instance();
+		my $qemu_img = $locator -> getExecPath ("qemu-img");
+		if ($qemu_img) {
+			$status = KIWIQX::qxx ("$qemu_img create $efi_fat 4M 2>&1");
+			$result = $? >> 8;
+		} else {
+			$status = "Mandatory qemu-img tool not found";
+			$result = 1;
+		}
 	}
 	if ($result == 0) {
 		$status = KIWIQX::qxx ("/sbin/mkdosfs -n 'BOOT' $efi_fat 2>&1");
