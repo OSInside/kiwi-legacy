@@ -389,6 +389,7 @@ Requires:       yaboot
 Requires:       zipl
 %endif
 %ifarch %ix86 x86_64
+Requires:       grub
 %if 0%{?suse_version} >= 1220
 Requires:       grub2
 %ifarch x86_64
@@ -397,8 +398,6 @@ Requires:       grub2-x86_64-efi
 %ifarch %ix86
 Requires:       grub2-i386-efi
 %endif
-%else
-Requires:       grub
 %endif
 %endif
 License:        GPL-2.0+
@@ -495,6 +494,7 @@ Requires:       yaboot
 Requires:       zipl
 %endif
 %ifarch %ix86 x86_64
+Requires:       grub
 %if 0%{?suse_version} >= 1220
 Requires:       grub2
 %ifarch x86_64
@@ -503,8 +503,6 @@ Requires:       grub2-x86_64-efi
 %ifarch %ix86
 Requires:       grub2-i386-efi
 %endif
-%else
-Requires:       grub
 %endif
 %endif
 Summary:        KIWI - buildservice package requirements for oemboot
