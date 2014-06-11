@@ -1159,6 +1159,10 @@ sub downloadFile {
 		return;
 	}
 	#==========================================
+	# quote shell escape sequences
+	#------------------------------------------
+	$url =~ s/(["\$`\\])/\\$1/g;
+	#==========================================
 	# download file
 	#------------------------------------------
 	if ($url !~ /:\/\//) {
@@ -1177,9 +1181,9 @@ sub downloadFile {
 	if ($url =~ /^(.*)\?(.*)$/) {
 		$url=$1;
 		my $redirect=$2;
-		if ($redirect =~ /(.*)\/(.*)?$/) {
+		if ($redirect =~ /(.*?)\/(.*)?$/) {
 			$redirect = $1;
-			$url.=$2;
+			$url.='/'.$2;
 		}
 		# get proxy url:
 		# \bproxy makes sure it does not pick up "otherproxy=unrelated"

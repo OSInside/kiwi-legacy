@@ -5925,11 +5925,16 @@ sub getSingleInstSourceSatSolvable {
 	}
 	if (! $foundDist) {
 		my $path = $repo; $path =~ s/dir:\/\///;
-		my $data = KIWIQX::qxx ("rpms2solv $path/*.rpm > $sdir/primary-$count 2>&1");
+		my $data = KIWIQX::qxx (
+			"rpms2solv $path/*.rpm > $sdir/primary-$count 2>&1"
+		);
 		my $code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();
-			$kiwi -> error  ("--> Can't find/create a distribution solvable");
+			$kiwi -> error  (
+				"--> Can't find/create a distribution solvable"
+			);
+			KIWIQX::qxx ("rm -f $sdir/primary-*");
 			$kiwi -> failed ();
 			return;
 		}
@@ -5983,11 +5988,15 @@ sub getSingleInstSourceSatSolvable {
 	if (glob ("$sdir/distxml-*.gz")) {
 		foreach my $file (glob ("$sdir/distxml-*.gz")) {
 			$destfile = $sdir."/primary-".$count;
-			my $data = KIWIQX::qxx ("gzip -cd $file | rpmmd2solv > $destfile 2>&1");
+			my $data = KIWIQX::qxx (
+				"gzip -cd $file | rpmmd2solv > $destfile 2>&1"
+			);
 			my $code = $? >> 8;
 			if ($code != 0) {
 				$kiwi -> failed ();
-				$kiwi -> error  ("--> Can't create SaT solvable file");
+				$kiwi -> error  (
+					"--> Can't create SaT solvable file"
+				);
 				$kiwi -> failed ();
 				$error = 1;
 			}
@@ -6029,11 +6038,15 @@ sub getSingleInstSourceSatSolvable {
 			push @done,$stdcmd;
 		}
 		foreach my $cmd (@done) {
-			my $data = KIWIQX::qxx ("$cmd | susetags2solv >> $destfile 2>/dev/null");
+			my $data = KIWIQX::qxx (
+				"$cmd | susetags2solv >> $destfile 2>/dev/null"
+			);
 			my $code = $? >> 8;
 			if ($code != 0) {
 				$kiwi -> failed ();
-				$kiwi -> error  ("--> Can't create SaT solvable file");
+				$kiwi -> error  (
+					"--> Can't create SaT solvable file"
+				);
 				$kiwi -> failed ();
 				$error = 1;
 				last;
