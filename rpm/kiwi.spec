@@ -206,6 +206,7 @@ Summary:        KIWI - Product media creator
 Requires:       build
 Requires:       createrepo
 Requires:       inst-source-utils
+Requires:       kiwi-instsource-plugin
 Requires:       kiwi = %{version}
 License:        GPL-2.0
 Group:          System/Management
