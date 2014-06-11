@@ -238,7 +238,6 @@ sub __solve {
 	my %meta;
 	my @solp;
 	my $solf;
-	my @rpat;
 	my $psolve = KIWISatSolver -> new (
 		$items,$urllist,"solve-patterns"
 	);
@@ -259,13 +258,48 @@ sub __solve {
 	%meta = $psolve -> getMetaData();
 	$solf = $psolve -> getSolfile();
 	@solp = $psolve -> getPackages();
-	my $rpat = KIWIQX::qxx (
-		"dumpsolv $solf|grep 'solvable:name: pattern:'|cut -f4 -d :"
-	);
-	@rpat = split(/\n/,$rpat);
 	$this->{meta}    = \%meta;
 	$this->{solfile} = $solf;
 	$this->{solved}  = \@solp;
+	return $this;
+}
+
+#==========================================
+# __lookupPatterns
+#------------------------------------------
+sub __lookupPatterns {
+	# ...
+	# lookup patterns available in the repo metadata
+	# ---
+	my $this    = shift;
+	my $items   = $this->{install};
+	my $urllist = $this->{urllist};
+	my $kiwi    = $this->{kiwi};
+	my $psolve = KIWISatSolver -> new (
+		$items,$urllist,"solve-patterns",undef,'quiet'
+	);
+	if (! defined $psolve) {
+		$kiwi -> error ("SaT solver setup failed\n");
+		return;
+	}
+	my $solf = $psolve -> getSolfile();
+	my $rpat = KIWIQX::qxx (
+		"dumpsolv $solf|grep 'solvable:name: pattern:'|cut -f4 -d :"
+	);
+	if (! $rpat) {
+		$rpat = KIWIQX::qxx (
+			"dumpsolv $solf|grep 'pattern()' | cut -f2 -d ="
+		);
+	}
+	my @rpat = split(/\n/,$rpat);
+	my %tmp_result;
+	foreach my $pattern (@rpat) {
+		$pattern =~ s/^\s+//;
+		$pattern =~ s/\s+$//;
+		next if ($pattern =~ /^\./);
+		$tmp_result{$pattern} = 1;
+	}
+	@rpat = sort keys %tmp_result;
 	$this->{repopat} = \@rpat;
 	return $this;
 }
@@ -366,7 +400,7 @@ sub __getRepoPatterns {
 	my $this   = shift;
 	my @result = ();
 	if (! $this->{repopat}) {
-		if (! $this -> __solve()) {
+		if (! $this -> __lookupPatterns()) {
 			return;
 		}
 	}
