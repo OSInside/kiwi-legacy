@@ -587,9 +587,25 @@ sub createCustomDataSyncScript {
 		$machine = $ip;
 	}
 	print $sync "#!/bin/bash"."\n";
+	print $sync 'syncfile=$1'."\n";
+	print $sync 'if [ ! -e "$syncfile" ];then'."\n";
+	print $sync '  echo "custom.sync: error syncfile $syncfile not found"'."\n";
+	print $sync '  echo'."\n";
+	print $sync '  echo "  usage: custom.sync syncfile"'."\n";
+	print $sync '  echo'."\n";
+	print $sync '  echo "you can use custom.files as complete syncfile"'."\n";
+	print $sync '  echo'."\n";
+	print $sync '  echo "  custom.sync custom.files"'."\n";
+	print $sync '  echo'."\n";
+	print $sync '  echo "but normally you want only a subset of them"'."\n";
+	print $sync '  echo'."\n";
+	print $sync '  echo "do not modify custom.files it is changed by the"'."\n";
+	print $sync '  echo "next call of kiwi --describe"'."\n";
+	print $sync '  exit 1'."\n";
+	print $sync 'fi'."\n";
 	print $sync "mkdir -p root"."\n";
 	print $sync "rsync -zavh --progress --numeric-ids --delete \\"."\n";
-	print $sync "  --files-from=custom.files -e ssh root\@$machine:/ root"."\n";
+	print $sync '  --files-from=$syncfile -e ssh root@'.$machine.':/ root'."\n";
 	$sync -> close();
 	KIWIQX::qxx ("chmod 755 $dest/custom.sync 2>&1");
 	$kiwi -> done();
