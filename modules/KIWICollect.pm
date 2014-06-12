@@ -2386,7 +2386,7 @@ sub createMetadata {
 	my $prodver  = $this->{m_proddata}->getVar("PRODUCT_VERSION");
 	my $prodrel  = $this->{m_proddata}->getVar("PRODUCT_RELEASE");
 	my $sp_ver   = $this->{m_proddata}->getVar("SP_VERSION");
-	$prodrel  ||= $this->{m_proddata}->getInfo("RELEASE"); # old style before 13.2
+	$prodrel = $this->{m_proddata}->getInfo("RELEASE") unless defined($prodrel); # old style before 13.2
 	$prodname =~ s/\ /-/g;
 	$prodver .= ".$sp_ver" if defined($sp_ver);
 	if (defined($proddir)
