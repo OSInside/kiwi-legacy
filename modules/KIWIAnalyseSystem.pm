@@ -203,15 +203,16 @@ sub commitTransaction {
 		return $this;
 	}
 	my $text = '- automatic transaction commit';
-	my $data = KIWIQX::qxx ("cd $dest && $git add . 2>&1");
+	my $data = KIWIQX::qxx ("cd $dest && $git add --all . 2>&1");
 	my $code = $? >> 8;
-	if ($code == 0) {
-		$data = KIWIQX::qxx ("cd $dest && $git commit -a -m \"$text\" 2>&1");
-		$code = $? >> 8;
-	}
 	if ($code != 0) {
+		$kiwi -> error ("commitTransaction: $data");
+		$kiwi -> failed();
 		return;
 	}
+	$data = KIWIQX::qxx (
+		"cd $dest && $git commit -a -m \"$text\" 2>&1"
+	);
 	return $this;
 }
 
@@ -545,19 +546,19 @@ sub getCustomData {
 }
 
 #==========================================
-# createCustomDataSyncScript
+# createCustomDataSyncReference
 #------------------------------------------
-sub createCustomDataSyncScript {
+sub createCustomDataSyncReference {
 	my $this  = shift;
 	my $kiwi  = $this->{kiwi};
 	my $dest  = $this->{destdir};
 	my $custom = $this->{custom};
 	my $modified = $this->{rpm_modc};
 	my $sync_source = "$dest/custom.files";
-	my $ip = $this->getIPAddress();
+	my $readme = $this->{gdata}->{KAnalyseCMK};
 	my $status;
 	my $result;
-	$kiwi -> info ("Creating custom/unpackaged source files...");
+	$kiwi -> info ("Creating custom/unpackaged files reference...");
 	KIWIQX::qxx ("touch $sync_source");
 	if (-f $custom) {
 		$status = KIWIQX::qxx ("cp $custom $sync_source 2>&1");
@@ -567,47 +568,69 @@ sub createCustomDataSyncScript {
 		$status = KIWIQX::qxx ("cat $modified >> $sync_source 2>&1");
 		$result = $? >> 8;
 	}
+	if ($result == 0) {
+		$status = KIWIQX::qxx ("cp $readme $dest/custom.files.readme");
+		$result = $? >> 8;
+	}
 	if ($result != 0) {
 		$kiwi -> failed ();
 		$kiwi -> error  ($status);
 		return;
 	}
+	$kiwi -> done();
+	return $this;
+}
+
+#==========================================
+# syncCustomData
+#------------------------------------------
+sub syncCustomData {
+	my $this  = shift;
+	my $kiwi  = $this->{kiwi};
+	my $dest  = $this->{destdir};
+	my $screen_conf = "$dest/screen.conf";
+	my $sync_logfile= "$dest/custom.sync.log";
+	my $sync_source = "$dest/custom.sync";
+	my $sync_opts = "-zavh --progress --numeric-ids --delete "
+		. "--files-from=$sync_source";
+	my $status;
+	$kiwi -> info ("Syncing custom/unpackaged files\n");
+	unlink $screen_conf;
+	unlink $sync_logfile;
+	if (! -f $sync_source) {
+		$kiwi -> info ("--> no custom.sync source file configured");
+		$kiwi -> skipped();
+		return $this;
+	}
+	$kiwi -> info ("--> Sync in progress");
 	if (! -d "$dest/root") {
 		KIWIQX::qxx ("mkdir -p $dest/root 2>&1");
 	}
-	my $sync = FileHandle -> new();
-	if (! $sync -> open (">$dest/custom.sync")) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Couldn't create sync script: $!");
+	my $cd = FileHandle -> new();
+	if (! $cd -> open (">$screen_conf")) {
+		$kiwi -> failed();
+		$kiwi -> error ("Can't create screen config file: $!");
 		$kiwi -> failed ();
 		return;
 	}
-	my $machine = '<ip-address>';
-	if ($ip) {
-		$machine = $ip;
+	print $cd "logfile $sync_logfile\n";
+	print $cd "logfile flush 1\n";
+	$cd -> close();
+	KIWIQX::qxx (
+		"screen -L -D -m -c $screen_conf rsync $sync_opts / root 2>&1"
+	);
+	my $fd = FileHandle -> new();
+	if ($fd -> open ("tail -n 10 $sync_logfile|")) {
+		local $/; $status = <$fd>; $fd -> close();
 	}
-	print $sync "#!/bin/bash"."\n";
-	print $sync 'syncfile=$1'."\n";
-	print $sync 'if [ ! -e "$syncfile" ];then'."\n";
-	print $sync '  echo "custom.sync: error syncfile $syncfile not found"'."\n";
-	print $sync '  echo'."\n";
-	print $sync '  echo "  usage: custom.sync syncfile"'."\n";
-	print $sync '  echo'."\n";
-	print $sync '  echo "you can use custom.files as complete syncfile"'."\n";
-	print $sync '  echo'."\n";
-	print $sync '  echo "  custom.sync custom.files"'."\n";
-	print $sync '  echo'."\n";
-	print $sync '  echo "but normally you want only a subset of them"'."\n";
-	print $sync '  echo'."\n";
-	print $sync '  echo "do not modify custom.files it is changed by the"'."\n";
-	print $sync '  echo "next call of kiwi --describe"'."\n";
-	print $sync '  exit 1'."\n";
-	print $sync 'fi'."\n";
-	print $sync "mkdir -p root"."\n";
-	print $sync "rsync -zavh --progress --numeric-ids --delete \\"."\n";
-	print $sync '  --files-from=$syncfile -e ssh root@'.$machine.':/ root'."\n";
-	$sync -> close();
-	KIWIQX::qxx ("chmod 755 $dest/custom.sync 2>&1");
+	unlink $screen_conf;
+	if ($status =~ /rsync error:/) {
+		$kiwi -> failed();
+		$kiwi -> error ("Sync errors see $sync_logfile for details");
+		$kiwi -> failed ();
+		return;
+	}
+	unlink $sync_logfile;
 	$kiwi -> done();
 	return $this;
 }

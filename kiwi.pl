@@ -331,7 +331,7 @@ sub main {
 	}
 
 	#==========================================
-	# Inspect system and create description
+	# Analyse system and create description
 	#------------------------------------------
 	if ($cmdL->getOperationMode("analyse")) {
 		$kiwi -> info ("Starting system analysis\n");
@@ -343,7 +343,12 @@ sub main {
 		if (! $system) {
 			return;
 		}
-		$system -> createCustomDataSyncScript();
+		if (! $system -> createCustomDataSyncReference()) {
+			return;
+		}
+		if (! $system -> syncCustomData()) {
+			return;
+		}
 		$kiwi -> info ("Creating base description files\n");
 		my $software = KIWIAnalyseSoftware -> new (
 			$system,$cmdL
@@ -367,7 +372,9 @@ sub main {
 			return;
 		}
 		$report -> createReport();
-		$system -> commitTransaction();
+		if (! $system -> commitTransaction()) {
+			return;
+		}
 	}
 
 	#==========================================

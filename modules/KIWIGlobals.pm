@@ -1577,6 +1577,7 @@ sub _new_instance {
 	$data{KConfig}     = $BasePath."/modules/KIWIConfig.sh";
 	$data{KAnalyse}    = $BasePath."/metadata/KIWIAnalyse.systems";
 	$data{KAnalyseCSS} = $BasePath."/metadata/KIWIAnalyse.tgz";
+	$data{KAnalyseCMK} = $BasePath."/metadata/KIWIAnalyse.custom.sync.mkd";
 	$data{KSplit}      = $BasePath."/metadata/KIWISplit.xml";
 	$data{KAnalyseTPL} = $BasePath."/metadata";
 	$data{KModules}    = $BasePath."/modules";
