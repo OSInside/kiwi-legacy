@@ -25,6 +25,7 @@ use warnings;
 use FileHandle;
 use File::stat;
 use File::Path;
+use File::Basename;
 use Fcntl ':mode';
 use POSIX qw( strftime );
 use Storable;
@@ -497,7 +498,11 @@ sub getCustomData {
 				} elsif ($file =~ /^\./) {
 					$type = 'hidden-directory';
 				} elsif ($this -> __matchesHomeDir($item)) {
-					$type = 'homedir';
+					if ($item =~ /\/\./) {
+						$type = 'file-in-hidden-path';
+					} else {
+						$type = 'homedata';
+					}
 				} else {
 					$type = 'directory';
 				}
@@ -507,7 +512,7 @@ sub getCustomData {
 			} elsif ($this -> __matchesHomeDir($item)) {
 				$attr = stat ($item);
 				if ($item =~ /\/\./) {
-					$type = 'file-in-hidden-home-path';
+					$type = 'file-in-hidden-path';
 				} else {
 					$type = 'homedata';
 				}
@@ -825,18 +830,49 @@ sub __getHomeDirs {
 	if (! $fd -> open ("/etc/passwd")) {
 		return \@result;
 	}
+	my %user;
 	while (my $line = <$fd>) {
 		chomp $line;
 		my $homedir = (split (/:/,$line))[5];
-		my $userid  = (split (/:/,$line))[2];
-		if ((! $homedir) || (! $userid)) {
+		my $username  = (split (/:/,$line))[0];
+		if (! $homedir) {
 			next;
 		}
-		if ((-d $homedir) && ($userid > 256) && ($homedir ne '/')) {
-			push @result, quotemeta($homedir);
-		}
+		$user{$username} = [ $homedir ];
 	}
 	$fd -> close();
+	if (! $fd -> open ("/etc/shadow")) {
+		return \@result;
+	}
+	while (my $line = <$fd>) {
+		chomp $line;
+		my $username = (split (/:/,$line))[0];
+		if (! $user{$username}) {
+			next
+		}
+		my $pwd = (split (/:/,$line))[1];
+		$user{$username}->[1] = $pwd;
+	}
+	$fd -> close();
+	foreach my $username (keys %user) {
+		my $pwd = $user{$username}->[1];
+		if (($pwd ne '*') && ($pwd ne '!')) {
+			# only users with real passwords are real users
+			my $homedir = $user{$username}->[0];
+			if ((-d $homedir) && ($homedir ne '/')) {
+				push @result, quotemeta($homedir);
+			}
+			my $homebase = dirname $homedir;
+			if ($homebase ne '/') {
+				push @result, quotemeta($homebase);
+			}
+		}
+	}
+	my %tmp_result;
+	foreach my $item (@result) {
+		$tmp_result{$item} = 1;
+	}
+	@result = sort keys %tmp_result;
 	return \@result;
 }
 
