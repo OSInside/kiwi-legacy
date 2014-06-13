@@ -6,3 +6,6 @@ boot
 var\/lib\/rpm
 var\/lib\/ntp
 var\/cache
+var\/tmp
+var\/lib
+efi
