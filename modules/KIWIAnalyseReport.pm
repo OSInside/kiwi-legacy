@@ -102,6 +102,8 @@ sub createReport {
 		-> createCustomDataForType('elfbin');
 	$json{modified} = $system
 		-> createCustomDataForType('modified');
+	$json{homes} = $system
+		-> createCustomDataForType('homedata',5);
 	my $custom = $system
 		-> getCustomData();
 	my $multiple = $software
@@ -631,13 +633,16 @@ sub createReport {
 			my $title;
 			if ($type eq 'binaries') {
 				$file = "$dest/report-binary.html";
-				$title = "Custom binary data report";
+				$title = "Custom OS binary data report";
 			} elsif ($type eq 'modified') {
 				$file = "$dest/report-modified.html";
 				$title = "RPM modified files data report";
+			} elsif ($type eq 'homes') {
+				$file = "$dest/report-homes.html";
+				$title = "Custom user data report";
 			} else {
 				$file = "$dest/report-text.html";
-				$title = "Custom text data report";
+				$title = "Custom OS text data report";
 			}
 			#==========================================
 			# Start D3 report
@@ -689,13 +694,16 @@ sub createReport {
 			print $JD '<p>'."\n";
 			if ($type eq 'binaries') {
 				print $JD 'The visualisation of the data below shows ';
-				print $JD 'the unmanaged binary data tree.'."\n";
+				print $JD 'the custom OS binary data tree.'."\n";
 			} elsif ($type eq 'modified') {
 				print $JD 'The visualisation of the data below shows ';
 				print $JD 'the RPM modified files data tree.'."\n";
+			} elsif ($type eq 'homes') {
+				print $JD 'The visualisation of the data below shows ';
+				print $JD 'the custom user data tree.'."\n";
 			} else {
 				print $JD 'The visualisation of the data below shows ';
-				print $JD 'the unmanaged text data tree.'."\n";
+				print $JD 'the custom OS text data tree.'."\n";
 			}
 			print $JD '</p>'."\n";
 			print $JD '<div id="body" class="container">'."\n";
@@ -755,17 +763,22 @@ sub createReport {
 			my $file;
 			if ($type eq 'binaries') {
 				$file = "$dest/report-binary.html";
-				$title = "Binary files";
+				$title = "Custom OS binary data";
 				$link = "Open <a href=\"report-binary.html\" ";
 				$link.= "target=\"_blank\"> Report</a>.";
 			} elsif ($type eq 'modified') {
 				$file = "$dest/report-modified.html";
-				$title = "Modified files";
+				$title = "RPM modified files";
 				$link = "Open <a href=\"report-modified.html\" ";
+				$link.= "target=\"_blank\"> Report</a>.";
+			} elsif ($type eq 'homes') {
+				$file = "$dest/report-homes.html";
+				$title = "Custom user data";
+				$link = "Open <a href=\"report-homes.html\" ";
 				$link.= "target=\"_blank\"> Report</a>.";
 			} else {
 				$file = "$dest/report-text.html";
-				$title = "Text files";
+				$title = "Custom OS text data";
 				$link = "Open <a href=\"report-text.html\" ";
 				$link.= "target=\"_blank\"> Report</a>.";
 			}

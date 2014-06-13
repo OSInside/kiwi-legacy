@@ -496,12 +496,21 @@ sub getCustomData {
 					$type = 'rubygems';
 				} elsif ($file =~ /^\./) {
 					$type = 'hidden-directory';
+				} elsif ($this -> __matchesHomeDir($item)) {
+					$type = 'homedir';
 				} else {
 					$type = 'directory';
 				}
 			} elsif (($file) && ($file =~ /^\./)) {
 				$attr = stat ($item);
 				$type = 'hidden-file';
+			} elsif ($this -> __matchesHomeDir($item)) {
+				$attr = stat ($item);
+				if ($item =~ /\/\./) {
+					$type = 'file-in-hidden-home-path';
+				} else {
+					$type = 'homedata';
+				}
 			} else {
 				$attr = stat ($item);
 				if ($item =~ /\/\./) {
@@ -783,6 +792,49 @@ sub createCustomDataForType {
 	my $json = $json_obj->canonical->pretty->encode($tree);
 	$kiwi -> done();
 	return $json;
+}
+
+#==========================================
+# __matchesHomeDir
+#------------------------------------------
+sub __matchesHomeDir {
+	my $this  = shift;
+	my $match = shift;
+	my $homes = $this->{homedirs};
+	if (! $homes) {
+		$homes = $this -> __getHomeDirs();
+		$this->{homedirs} = $homes;
+	}
+	foreach my $dir (@{$homes}) {
+		if ($match =~ /^$dir/) {
+			return 1;
+		}
+	}
+	return 0;
+}
+
+#==========================================
+# __getHomeDirs
+#------------------------------------------
+sub __getHomeDirs {
+	my $this = shift;
+	my $fd = FileHandle -> new();
+	my @result = (
+		'\/home', '\/root'
+	);
+	if (! $fd -> open ("/etc/passwd")) {
+		return \@result;
+	}
+	while (my $line = <$fd>) {
+		chomp $line;
+		my $homedir = (split (/:/,$line))[5];
+		my $userid  = (split (/:/,$line))[2];
+		if ((-d $homedir) && ($userid > 256) && ($homedir ne '/')) {
+			push @result, quotemeta($homedir);
+		}
+	}
+	$fd -> close();
+	return \@result;
 }
 
 #==========================================
