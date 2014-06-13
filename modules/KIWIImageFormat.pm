@@ -225,7 +225,10 @@ sub createMachineConfiguration {
 		# formats requested. Thus we can silently return here
 		return;
 	}
-	my $xend = $vconf -> getDomain();
+	my $xend;
+	if ($vconf) {
+		$xend = $vconf -> getDomain();
+	}
 	if (! $xend) {
 		$xend = "dom0";
 	}
