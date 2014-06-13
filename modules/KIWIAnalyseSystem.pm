@@ -829,6 +829,9 @@ sub __getHomeDirs {
 		chomp $line;
 		my $homedir = (split (/:/,$line))[5];
 		my $userid  = (split (/:/,$line))[2];
+		if ((! $homedir) || (! $userid)) {
+			next;
+		}
 		if ((-d $homedir) && ($userid > 256) && ($homedir ne '/')) {
 			push @result, quotemeta($homedir);
 		}
