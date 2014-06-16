@@ -1104,8 +1104,8 @@ function installBootLoaderGrub2 {
 			return 1
 		fi
 	elif [ ! -z "$kiwi_BiosGrub" ] && [ -d $bios_grub ];then
-		# run grub2-bios-setup manually for EFI legacy support
-		grub2-bios-setup -f -d $bios_grub $imageDiskDevice 1>&2
+		# force install of grub2 in efi legacy mode
+		$instTool --force $imageDiskDevice 1>&2
 		if [ ! $? = 0 ];then
 			Echo "Failed to install legacy boot loader"
 			return 1
