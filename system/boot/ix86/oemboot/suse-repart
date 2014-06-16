@@ -655,11 +655,17 @@ function OEMRepart {
 	#======================================
 	# find fstype for root partition
 	#--------------------------------------
+	if ! waitForStorageDevice $imageRootDevice &>/dev/null;then
+		systemException \
+			"Device $imageRootDevice doesn't appear... fatal !" \
+		"reboot"
+	fi
 	probeFileSystem $imageRootDevice
 	#======================================
 	# Activate swap space
 	#--------------------------------------
 	if [ -z "$DONT_PARTITION" ] && [ $swapsize -gt 0 ]; then
+		waitForStorageDevice $imageSwapDevice &>/dev/null
 		if partitionSize $imageSwapDevice &>/dev/null;then
 			Echo "Creating swap space on $imageSwapDevice"
 			if ! mkswap $imageSwapDevice 1>&2;then
@@ -672,7 +678,12 @@ function OEMRepart {
 	#--------------------------------------
 	if [ -z "$DONT_PARTITION" ] && [ ! -z "$OEM_RECOVERY" ];then
 		Echo "Creating Recovery filesystem on $imageRecoveryDevice"
-		if ! mke2fs -T ext2 -q -L recovery $imageRecoveryDevice 1>&2;then
+		if ! waitForStorageDevice $imageRecoveryDevice &>/dev/null;then
+			systemException \
+				"Device $imageRecoveryDevice doesn't appear... fatal !" \
+			"reboot"
+		fi
+		if ! mke2fs -T ext3 -q -L recovery $imageRecoveryDevice 1>&2;then
 			systemException "Failed to create Recovery fs" "reboot"
 		fi
 	fi
