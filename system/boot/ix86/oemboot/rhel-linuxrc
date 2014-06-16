@@ -397,7 +397,8 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 			export FSTYPE=$(cat /reco-save/recovery.tar.filesystem)
 			createFilesystem $imageRootDevice
 			if ! mountSystem $imageRootDevice;then
-				systemException "Failed to mount root filesystem" "reboot"
+				Echo "Failed to mount root filesystem"
+				exit 1
 			fi
 			for i in dev sys proc;do
 				mkdir -p /mnt/$i
@@ -411,16 +412,19 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 			for i in passwd shadow group;do
 				if ! cp etc/$i tmp/$i;then
 					cd / ; umountSystem; rm -f tmp/passwd tmp/shadow tmp/group
-					systemException "Failed to store $i" "reboot"
+					Echo "Failed to store $i"
+					exit 1
 				fi
 			done
 			if ! cp -a etc/zypp etc/zypp.backup;then
 				rm -rf etc/zypp.backup; cd / ; umountSystem
-				systemException "Failed to backup zypp database" "reboot"
+				Echo "Failed to backup zypp database"
+				exit 1
 			fi
 			if ! cp -a var/lib/rpm var/lib/rpm.backup;then
 				rm -rf var/lib/rpm.backup; cd / ; umountSystem
-				systemException "Failed to backup RPM database" "reboot"
+				Echo "Failed to backup RPM database"
+				exit 1
 			fi
 		fi
 		#======================================
@@ -435,7 +439,8 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 				tar -v -C tmp/foobar -xf -
 			then
 				rm -rf tmp/foobar; umountSystem
-				systemException "Failed to create backup files" "reboot"
+				Echo "Failed to create backup files"
+				exit 1
 			fi
 		fi
 		#======================================
@@ -514,6 +519,9 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 		bash -e /tmp/progress.sh
 	fi
 	wait $dump_pid
+	if [ ! $? = 0 ];then
+		systemException "Recovery failed" "reboot"
+	fi
 	clear
 	#======================================
 	# 16.4) restore temporary stored files
