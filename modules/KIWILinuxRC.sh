@@ -9006,9 +9006,9 @@ function createFilesystem {
 	elif [ "$FSTYPE" = "btrfs" ];then
 		if [ ! -z "$blocks" ];then
 			local bytes=$((blocks * 4096))
-			mkfs.btrfs -b $bytes $deviceCreate
+			mkfs.btrfs -f -b $bytes $deviceCreate
 		else
-			mkfs.btrfs $deviceCreate
+			mkfs.btrfs -f $deviceCreate
 		fi
 	elif [ "$FSTYPE" = "xfs" ];then
 		mkfs.xfs -f $deviceCreate
