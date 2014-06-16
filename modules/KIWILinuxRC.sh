@@ -1828,7 +1828,7 @@ function setupBootLoaderGrub2Recovery {
 	#======================================
 	# import grub2 modules into recovery
 	#--------------------------------------
-	mkdir $destsPrefix/boot
+	mkdir -p $destsPrefix/boot
 	cp -a $mountPrefix/boot/grub2 $destsPrefix/boot/
 	rm -f $destsPrefix/boot/grub2/grub.cfg
 	rm -f $destsPrefix/boot/grub2/bootpart.cfg
