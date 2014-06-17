@@ -331,7 +331,7 @@ sub _expand {
 	}
 	if($this->{m_prodinfo_updated}) {
 		foreach my $i(keys(%{$this->{prodinfo}})) {
-			if ((! $this->{m_trans}->{$i}) or
+			if ((!defined($this->{m_trans}->{$i})) or
 				($this->{m_trans}->{$this->{prodinfo}->{$i}->[0]} ne
 				 $this->{prodinfo}->{$i}->[0])
 			) {
@@ -343,7 +343,7 @@ sub _expand {
 	}
 	if($this->{m_prodvars_updated}) {
 		foreach my $var(keys(%{$this->{prodvars}})) {
-			if ((! $this->{m_trans}->{$var}) or 
+			if ((!defined($this->{m_trans}->{$var})) or 
 				($this->{m_trans}->{$var} ne $this->{prodvars}->{$var})
 			) {
 				$this->{m_trans}->{$var} = $this->{prodvars}->{$var};
@@ -353,7 +353,7 @@ sub _expand {
 	}
 	if($this->{m_prodopts_updated}) {
 		foreach my $opt(keys(%{$this->{prodopts}})) {
-			if ((! $this->{m_trans}->{$opt}) ||
+			if ((!defined($this->{m_trans}->{$opt})) ||
 				($this->{m_trans}->{$opt} ne $this->{prodopts}->{$opt})
 			) {
 				$this->{m_trans}->{$opt} = $this->{prodopts}->{$opt};
