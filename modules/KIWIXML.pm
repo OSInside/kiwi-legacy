@@ -4134,6 +4134,15 @@ sub __getInstallData {
 			}
 		}
 	}
+	# /.../
+	# Return sort uniq result
+	# ----
+	my %result;
+	foreach my $item (@names) {
+		my $name = $item -> getName();
+		$result{$name} = $item;
+	}
+	@names = ( map { $result{$_} } sort keys %result );
 	return \@names;
 }
 

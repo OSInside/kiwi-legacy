@@ -3829,7 +3829,6 @@ sub test_getArchivesUseProf {
 		myImageStuff.tgz
 		myInitStuff.tar
 		myOEMstuffProf.tar.bz2
-		myOEMstuffProf.tar.bz2
 	);
 	$this -> assert_array_equal(\@expected, \@archiveNames);
 	return;
