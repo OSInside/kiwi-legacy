@@ -33,6 +33,7 @@
 <li><a href="#__getRepoURI">__getRepoURI</a></li>
 <li><a href="#__getSizeEstimation">__getSizeEstimation</a></li>
 <li><a href="#__getTree">__getTree</a></li>
+<li><a href="#__lookupPatterns">__lookupPatterns</a></li>
 <li><a href="#__setupRepoMounts">__setupRepoMounts</a></li>
 <li><a href="#__solve">__solve</a></li>
 <li><a href="#__xmlSetup">__xmlSetup</a></li>
@@ -41,7 +42,7 @@
 <a name="DESTROY"><h2>DESTROY</h2></a>
 <p>
 Missing<p>
-Defined on line: 987
+Defined on line: 1021
 <a name="getXMLInfoTree"><h2>getXMLInfoTree</h2></a>
 <p>
  Return the tree object
@@ -69,7 +70,7 @@ Defined on line: 187
 <p>
  Verify that the information requested is a supported request
 <p>
-Defined on line: 551
+Defined on line: 585
 <p>
 Called in
 <ul>
@@ -78,104 +79,104 @@ Called in
 <p>
  Clean up any mount points, i.e. unmount and remove the directory
 <p>
-Defined on line: 613
+Defined on line: 647
 <p>
 Called in
 <ul>
-<li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 989</li></ul>
+<li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 1023</li></ul>
 <a name="__getArchives"><h2>__getArchives</h2></a>
 <p>
  provide information about configured archives
  returns a list with KIWIXMLArchiveData objects
 <p>
-Defined on line: 424
+Defined on line: 458
 <p>
 Called in
 <ul>
-<li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 831</li></ul>
+<li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 865</li></ul>
 <a name="__getImageTypes"><h2>__getImageTypes</h2></a>
 <p>
  provide information about the configured image types
  returns a list of KIWIXMLTypeData objects. default or
  primary built type is the first item in the list
 <p>
-Defined on line: 506
+Defined on line: 540
 <p>
 Called in
 <ul>
-<li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 728</li></ul>
+<li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 762</li></ul>
 <a name="__getImageVersion"><h2>__getImageVersion</h2></a>
 <p>
  provide information about the image version
  returns a list with two items: name,version
 <p>
-Defined on line: 536
+Defined on line: 570
 <p>
 Called in
 <ul>
-<li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 868</li></ul>
+<li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 902</li></ul>
 <a name="__getOverlayFiles"><h2>__getOverlayFiles</h2></a>
 <p>
  provide information about overlay files
  returns a hash with the file as key and the path
  as hash value
 <p>
-Defined on line: 389
+Defined on line: 423
 <p>
 Called in
 <ul>
-<li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 677</li></ul>
+<li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 711</li></ul>
 <a name="__getPackages"><h2>__getPackages</h2></a>
 <p>
  provide information about packages, returns
  a list of package names
 <p>
-Defined on line: 276
+Defined on line: 310
 <p>
 Called in
 <ul>
-<li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 809</li></ul>
+<li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 843</li></ul>
 <a name="__getPatterns"><h2>__getPatterns</h2></a>
 <p>
  provide information about patterns used in the
  XML configuration, returns a list of pattern names
 <p>
-Defined on line: 309
+Defined on line: 343
 <p>
 Called in
 <ul>
-<li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 711</li></ul>
+<li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 745</li></ul>
 <a name="__getProfiles"><h2>__getProfiles</h2></a>
 <p>
  provide information about profiles, returns
  a list with KIWIXMLProfileData objects
 <p>
-Defined on line: 343
+Defined on line: 377
 <p>
 Called in
 <ul>
-<li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 848</li></ul>
+<li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 882</li></ul>
 <a name="__getRepoPatterns"><h2>__getRepoPatterns</h2></a>
 <p>
  provide information about the patterns provided
  by the configured repositories. returns a list
  of pattern names
 <p>
-Defined on line: 360
+Defined on line: 394
 <p>
 Called in
 <ul>
-<li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 694</li></ul>
+<li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 728</li></ul>
 <a name="__getRepoURI"><h2>__getRepoURI</h2></a>
 <p>
  provide information about the configured repos
  returns a list with KIWIXMLRepositories objects
 <p>
-Defined on line: 489
+Defined on line: 523
 <p>
 Called in
 <ul>
-<li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 762</li></ul>
+<li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 796</li></ul>
 <a name="__getSizeEstimation"><h2>__getSizeEstimation</h2></a>
 <p>
  provide information about the overall size the later
@@ -185,30 +186,39 @@ Called in
  returns a list with two elements:
  rootsizeKB,deletionsizeKB
 <p>
-Defined on line: 441
+Defined on line: 475
 <p>
 Called in
 <ul>
-<li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 789</li></ul>
+<li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 823</li></ul>
 <a name="__getTree"><h2>__getTree</h2></a>
 <p>
  Create the information XML tree
 <p>
-Defined on line: 641
+Defined on line: 675
 <p>
 Called in
 <ul>
 <li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 181</li><li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 206</li></ul>
+<a name="__lookupPatterns"><h2>__lookupPatterns</h2></a>
+<p>
+ lookup patterns available in the repo metadata
+<p>
+Defined on line: 270
+<p>
+Called in
+<ul>
+<li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 403</li></ul>
 <a name="__setupRepoMounts"><h2>__setupRepoMounts</h2></a>
 <p>
  Setup mount points and mount any repositories that need to be mounted
  locally
 <p>
-Defined on line: 887
+Defined on line: 921
 <p>
 Called in
 <ul>
-<li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 652</li></ul>
+<li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 686</li></ul>
 <a name="__solve"><h2>__solve</h2></a>
 <p>
  use the satsolver to solve the list of packages/patterns
@@ -219,12 +229,12 @@ Defined on line: 227
 <p>
 Called in
 <ul>
-<li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 284</li><li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 317</li><li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 369</li><li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 453</li></ul>
+<li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 318</li><li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 351</li><li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 487</li></ul>
 <a name="__xmlSetup"><h2>__xmlSetup</h2></a>
 <p>
  Configure the XML object to suitably collect all requested information
 <p>
-Defined on line: 931
+Defined on line: 965
 <p>
 Called in
 <ul>
