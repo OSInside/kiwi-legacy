@@ -838,7 +838,7 @@ sub __getHomeDirs {
 		if (! $homedir) {
 			next;
 		}
-		$user{$username} = [ $homedir ];
+		$user{$username} = [ $homedir,'*' ];
 	}
 	$fd -> close();
 	if (! $fd -> open ("/etc/shadow")) {
