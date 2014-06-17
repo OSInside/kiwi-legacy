@@ -1612,11 +1612,11 @@ sub usage {
 	print "    kiwi --bootcd  <initrd>\n";
 	print "    kiwi --bootusb <initrd>\n";
 	print "    kiwi --installcd <initrd>\n";
-	print "       [ --installcd-system <vmx-system-image> ]\n";
+	print "       [ --installcd-system <raw-system-image> ]\n";
 	print "    kiwi --installstick <initrd>\n";
-	print "       [ --installstick-system <vmx-system-image> ]\n";
+	print "       [ --installstick-system <raw-system-image> ]\n";
 	print "    kiwi --installpxe <initrd>\n";
-	print "       [ --installpxe-system <vmx-system-image> ]\n";
+	print "       [ --installpxe-system <raw-system-image> ]\n";
 	print "\n";
 	print "Image Format Conversion:\n";
 	print "    kiwi --convert <systemImage>\n";

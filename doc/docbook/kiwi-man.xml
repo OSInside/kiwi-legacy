@@ -229,11 +229,15 @@
     </cmdsynopsis>
     <cmdsynopsis><command>kiwi</command>
       <arg choice="plain">--installcd <replaceable>initrd</replaceable></arg>
-      <arg choice="plain">--installcd-system <replaceable>vmx-system-image</replaceable></arg>
+      <arg choice="plain">--installcd-system <replaceable>raw-system-image</replaceable></arg>
     </cmdsynopsis>
     <cmdsynopsis><command>kiwi</command>
       <arg choice="plain">--installstick <replaceable>initrd</replaceable></arg>
-      <arg choice="plain">--installstick-system <replaceable>vmx-system-image</replaceable></arg>
+      <arg choice="plain">--installstick-system <replaceable>raw-system-image</replaceable></arg>
+    </cmdsynopsis>
+    <cmdsynopsis><command>kiwi</command>
+      <arg choice="plain">--installpxe <replaceable>initrd</replaceable></arg>
+      <arg choice="plain">--installpxe-system <replaceable>raw-system-image</replaceable></arg>
     </cmdsynopsis>
   </refsect1>
  
