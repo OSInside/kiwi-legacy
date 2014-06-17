@@ -52,8 +52,9 @@ basetheme=upstream
 # get disk-by-id device name first
 #------------------------------------------
 disk=$2
-if [ ! -z "$(blkid $disk -s TYPE -o value 2>/dev/null)" ];then
-	echo "Found filesystem signature on $disk"
+signature=$(blkid $disk -s TYPE -o value 2>/dev/null)
+if [ ! -z "$signature" ] && [ ! "$signature" = "iso9660" ];then
+	echo "Found filesystem signature $signature on $disk"
 	echo "Need a stick disk device not a partition"
 	clean
 fi
@@ -75,6 +76,14 @@ image=$1
 image_base=$(basename $image)
 if [ ! -e $image ];then
 	echo "Can't find OS image"
+	clean
+fi
+#==========================================
+# check if file is a kiwi live iso
+#------------------------------------------
+if ! isoinfo -l -i $image 2>/dev/null | grep -q LIVEBOOT;then
+	echo "Can't find live iso signature"
+	echo "Make sure the given kiwi image file is of type: image=iso"
 	clean
 fi
 

@@ -2190,6 +2190,19 @@ sub createImageLiveCD {
 	#------------------------------------------
 	KIWIQX::qxx ("rm -rf $tmpdir");
 	#==========================================
+	# Allow to identify this as a live iso
+	#------------------------------------------
+	# make sure to keep the 8.3 notation for iso9660
+	my $LFD = FileHandle -> new();
+	if (! $LFD -> open (">$CD/liveboot")) {
+		$kiwi -> error  ("Couldn't create live CD identification");
+		$kiwi -> failed ();
+		return;
+	}
+	my $initrd_base = basename $pinitrd;
+	print $LFD $initrd_base."\n";
+	$LFD -> close();
+	#==========================================
 	# Create boot configuration
 	#------------------------------------------
 	my $CFD = FileHandle -> new();
