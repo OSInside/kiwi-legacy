@@ -230,7 +230,7 @@ sub __getData {
 		$kiwi -> info($msg);
 		$kiwi -> oops();
 	}
-	if (! $this->{$typeName}{$accessName}) {
+	if (!defined($this->{$typeName}{$accessName})) {
 		my $msg = "$caller: $accessName lookup error, data does not "
 			. 'exist.';
 		$kiwi -> error($msg);
@@ -259,7 +259,7 @@ sub __getNames {
 		return;
 	}
 	my @entryNames;
-	if ($this->{$typeName}) {
+	if (defined($this->{$typeName})) {
 		my @names = keys %{$this->{$typeName}};
 		@entryNames = sort @names;
 	}
