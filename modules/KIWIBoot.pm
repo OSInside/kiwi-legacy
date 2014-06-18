@@ -6155,8 +6155,7 @@ sub getGeometry {
 		$kiwi -> loginfo ($status);
 		return;
 	}
-	if (($firmware eq "ec2")  ||
-		($firmware eq "efi")  ||
+	if (($firmware eq "efi")  ||
 		($firmware eq "uefi") ||
 		(($firmware eq "vboot") && ($loader ne "berryboot"))
 	) {
