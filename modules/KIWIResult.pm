@@ -319,7 +319,10 @@ sub __bundleExtension {
 #------------------------------------------
 sub __bundleProduct {
 	my $this = shift;
-	return $this -> __bundleExtension ('iso');
+	if ($this -> __bundleExtension ('iso')) {
+		return $this -> __sign_with_sha256sum();
+	}
+	return;
 }
 
 #==========================================
@@ -416,6 +419,45 @@ sub __bundleDisk {
 	if (-e "$source/$base.xenconfig") {
 		return $this -> __bundleExtension ('xenconfig');
 	}
+	return $this;
+}
+
+#==========================================
+# __sign_with_sha256sum
+#------------------------------------------
+sub __sign_with_sha256sum {
+	my $this   = shift;
+	my $kiwi   = $this->{kiwi};
+	my $tmpdir = $this->{tmpdir};
+	my $dh;
+	if (! opendir($dh, $tmpdir)) {
+		$kiwi -> error  ("Can't open directory: $tmpdir: $!");
+		$kiwi -> failed ();
+		return;
+	}
+	while (my $entry = readdir ($dh)) {
+		next if $entry eq "." || $entry eq "..";
+		my $data = KIWIQX::qxx (
+			"cat $tmpdir/$entry | sha256sum 2>&1"
+		);
+		my $code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> error  (
+				"sha256sum failed for $entry: $data"
+			);
+			$kiwi -> failed ();
+			return;
+		}
+		my $fd = FileHandle -> new();
+		if (! $fd -> open (">$tmpdir/$entry.sha256")) {
+			$kiwi -> error ("Can't open file $tmpdir/$entry.sha256: $!");
+			$kiwi -> failed ();
+			return;
+		}
+		print $fd $data;
+		$fd -> close();
+	}
+	closedir $dh;
 	return $this;
 }
 
