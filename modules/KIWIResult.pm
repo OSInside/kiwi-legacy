@@ -20,6 +20,7 @@ package KIWIResult;
 use strict;
 use warnings;
 use Config::IniFiles;
+use Digest::SHA qw(sha256);
 
 #==========================================
 # KIWI Modules
@@ -437,24 +438,23 @@ sub __sign_with_sha256sum {
 	}
 	while (my $entry = readdir ($dh)) {
 		next if $entry eq "." || $entry eq "..";
-		my $data = KIWIQX::qxx (
-			"cat $tmpdir/$entry | sha256sum 2>&1"
-		);
-		my $code = $? >> 8;
-		if ($code != 0) {
-			$kiwi -> error  (
-				"sha256sum failed for $entry: $data"
-			);
+		next if ! -f $entry;
+		my $alg = 'sha256';
+		my $sha = Digest::SHA->new($alg);
+		if (! $sha) {
+			$kiwi -> error  ("Unsupported Digest::SHA algorithm: $alg");
 			$kiwi -> failed ();
 			return;
 		}
+		$sha -> addfile ($tmpdir."/".$entry);
+		my $digest = $sha -> hexdigest;
 		my $fd = FileHandle -> new();
 		if (! $fd -> open (">$tmpdir/$entry.sha256")) {
 			$kiwi -> error ("Can't open file $tmpdir/$entry.sha256: $!");
 			$kiwi -> failed ();
 			return;
 		}
-		print $fd $data;
+		print $fd $digest."\n";
 		$fd -> close();
 	}
 	closedir $dh;
