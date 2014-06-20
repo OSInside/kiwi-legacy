@@ -525,12 +525,14 @@ function errorLogStop {
 	set +x
 	export ELOG_STOPPED=1
 	exec 2>$ELOG_EXCEPTION
+	exec 1>>$ELOG_EXCEPTION
 }
 #======================================
 # errorLogContinue
 #--------------------------------------
 function errorLogContinue {
 	exec 2>>$ELOG_FILE
+	exec 1>>$ELOG_EXCEPTION
 	export ELOG_STOPPED=0
 	set -x
 }
@@ -586,6 +588,7 @@ function errorLogStart {
 		#======================================
 		# Set kernel log level
 		#--------------------------------------
+		exec 1>>$ELOG_EXCEPTION
 		if lookup klogconsole;then
 			klogconsole -l 6
 		fi
