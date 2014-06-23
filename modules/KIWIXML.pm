@@ -5759,6 +5759,7 @@ sub getSingleInstSourceSatSolvable {
 	my $index    = 0;
 	my @index    = ();
 	my $error    = 0;
+	my $satopt   = '';
 	#==========================================
 	# allow arch overwrite
 	#------------------------------------------
@@ -5777,6 +5778,14 @@ sub getSingleInstSourceSatSolvable {
 		$kiwi -> error  ("--> Can't find satsolver tools");
 		$kiwi -> failed ();
 		return;
+	}
+	#==========================================
+	# check -X capability for sat tools
+	#------------------------------------------
+	KIWIQX::qxx ("mergesolv -X &>/dev/null");
+	my $code = $? >> 8;
+	if ($code == 0) {
+		$satopt = '-X';
 	}
 	#==========================================
 	# check/create cache directory
@@ -5935,7 +5944,7 @@ sub getSingleInstSourceSatSolvable {
 	if (! $foundDist) {
 		my $path = $repo; $path =~ s/dir:\/\///;
 		my $data = KIWIQX::qxx (
-			"rpms2solv $path/*.rpm > $sdir/primary-$count 2>&1"
+			"rpms2solv $satopt $path/*.rpm > $sdir/primary-$count 2>&1"
 		);
 		my $code = $? >> 8;
 		if ($code != 0) {
@@ -6048,7 +6057,7 @@ sub getSingleInstSourceSatSolvable {
 		}
 		foreach my $cmd (@done) {
 			my $data = KIWIQX::qxx (
-				"$cmd | susetags2solv >> $destfile 2>/dev/null"
+				"$cmd | susetags2solv $satopt >> $destfile 2>/dev/null"
 			);
 			my $code = $? >> 8;
 			if ($code != 0) {
@@ -6099,7 +6108,9 @@ sub getSingleInstSourceSatSolvable {
 			$kiwi -> failed ();
 			$error = 1;
 		} else {
-			my $data = KIWIQX::qxx ("mergesolv $sdir/primary-* > $index");
+			my $data = KIWIQX::qxx (
+				"mergesolv $satopt $sdir/primary-* > $index"
+			);
 			my $code = $? >> 8;
 			if ($code != 0) {
 				$kiwi -> failed ();
