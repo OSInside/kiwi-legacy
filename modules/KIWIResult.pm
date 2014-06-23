@@ -20,6 +20,7 @@ package KIWIResult;
 use strict;
 use warnings;
 use Config::IniFiles;
+use Digest::SHA qw(sha256);
 
 #==========================================
 # KIWI Modules
@@ -319,7 +320,10 @@ sub __bundleExtension {
 #------------------------------------------
 sub __bundleProduct {
 	my $this = shift;
-	return $this -> __bundleExtension ('iso');
+	if ($this -> __bundleExtension ('iso')) {
+		return $this -> __sign_with_sha256sum();
+	}
+	return;
 }
 
 #==========================================
@@ -416,6 +420,44 @@ sub __bundleDisk {
 	if (-e "$source/$base.xenconfig") {
 		return $this -> __bundleExtension ('xenconfig');
 	}
+	return $this;
+}
+
+#==========================================
+# __sign_with_sha256sum
+#------------------------------------------
+sub __sign_with_sha256sum {
+	my $this   = shift;
+	my $kiwi   = $this->{kiwi};
+	my $tmpdir = $this->{tmpdir};
+	my $dh;
+	if (! opendir($dh, $tmpdir)) {
+		$kiwi -> error  ("Can't open directory: $tmpdir: $!");
+		$kiwi -> failed ();
+		return;
+	}
+	while (my $entry = readdir ($dh)) {
+		next if $entry eq "." || $entry eq "..";
+		next if ! -f $entry;
+		my $alg = 'sha256';
+		my $sha = Digest::SHA->new($alg);
+		if (! $sha) {
+			$kiwi -> error  ("Unsupported Digest::SHA algorithm: $alg");
+			$kiwi -> failed ();
+			return;
+		}
+		$sha -> addfile ($tmpdir."/".$entry);
+		my $digest = $sha -> hexdigest;
+		my $fd = FileHandle -> new();
+		if (! $fd -> open (">$tmpdir/$entry.sha256")) {
+			$kiwi -> error ("Can't open file $tmpdir/$entry.sha256: $!");
+			$kiwi -> failed ();
+			return;
+		}
+		print $fd $digest."\n";
+		$fd -> close();
+	}
+	closedir $dh;
 	return $this;
 }
 
