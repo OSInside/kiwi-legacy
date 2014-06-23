@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<image schemaversion="6.1" name="VagrantBox-SLES11">
+	<description type="system">
+		<author>Thomas Bechtold</author>
+		<contact>tbechtold@suse.com</contact>
+		<specification>
+			SLES11-SP3 vagrant base box
+		</specification>
+	</description>
+	<preferences>
+		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES11" format="vagrant" bootloader="grub" kernelcmdline="nomodeset">
+			<vagrantconfig provider="libvirt" virtualsize="16"/>
+			<vagrantconfig provider="virtualbox" virtualsize="16"/>
+		</type>
+		<version>1.11.3</version>
+		<packagemanager>zypper</packagemanager>
+		<locale>en_US</locale>
+		<keytable>us.map.gz</keytable>
+		<timezone>Europe/Berlin</timezone>
+		<hwclock>utc</hwclock>
+		<rpm-excludedocs>true</rpm-excludedocs>
+	</preferences>
+	<users group="root">
+		<user name="root" password="vagrant" pwdformat="plain" home="/root"/>
+	</users>
+	<users group="vagrant">
+		<user name="vagrant" password="vagrant" pwdformat="plain" home="/home/vagrant"/>
+	</users>
+	<repository type="yast2">
+		<source path="iso:///opt/isos/SLES-11-SP3-DVD-x86_64-GM-DVD1.iso"/>
+	</repository>
+	<repository type="rpm-md">
+		<source path="http://download.opensuse.org/repositories/Virtualization:/Appliances/SLE_11_SP3/"/>
+	</repository>
+	<packages type="image">
+		<namedCollection name="base"/>
+		<package name="bootsplash"/>
+		<package name="ifplugd"/>
+		<package name="iputils"/>
+		<package name="vim"/>
+		<package name="grub"/>
+		<package name="syslinux"/>
+		<package name="lvm2"/>
+		<package name="fontconfig"/>
+		<package name="fonts-config"/>
+		<package name="tar"/>
+		<package name="parted"/>
+		<package name="autoyast2"/>
+		<package name="sudo"/>
+		<package name="rsync"/>
+		<package name="kernel-default"/>
+	</packages>
+	<packages type="bootstrap">
+		<package name="udev"/>
+		<package name="filesystem"/>
+		<package name="glibc-locale"/>
+		<package name="cracklib-dict-full"/>
+		<package name="module-init-tools"/>
+	</packages>
+	<packages type="delete">
+		<package name="kernel-debug"/>
+	</packages>
+</image>

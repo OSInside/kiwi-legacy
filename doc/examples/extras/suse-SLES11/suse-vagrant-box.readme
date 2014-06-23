@@ -1,0 +1,7 @@
+KIWI Image Description Example
+==============================
+
+Build a vagrant box, for details read:
+https://github.com/openSUSE/kiwi/wiki/Building-vagrant-boxes
+
+The box needs a SLES11SP3 iso under /opt/isos. See config.xml to change this.
