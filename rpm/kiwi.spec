@@ -326,8 +326,10 @@ Requires:       yaboot
 %ifarch s390 s390x
 Requires:       zipl
 %endif
-%ifarch i586 x86_64
+%ifarch %ix86 x86_64
+%if 0%{?suse_version} < 1315
 Requires:       grub
+%endif
 %endif
 Summary:        KIWI - buildservice package requirements for isoboot
 License:        GPL-2.0+
@@ -389,7 +391,9 @@ Requires:       yaboot
 Requires:       zipl
 %endif
 %ifarch %ix86 x86_64
+%if 0%{?suse_version} < 1315
 Requires:       grub
+%endif
 %if 0%{?suse_version} >= 1220
 Requires:       grub2
 %ifarch x86_64
@@ -494,7 +498,9 @@ Requires:       yaboot
 Requires:       zipl
 %endif
 %ifarch %ix86 x86_64
+%if 0%{?suse_version} < 1315
 Requires:       grub
+%endif
 %if 0%{?suse_version} >= 1220
 Requires:       grub2
 %ifarch x86_64
