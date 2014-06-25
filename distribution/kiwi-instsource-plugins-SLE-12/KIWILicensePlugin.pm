@@ -62,6 +62,8 @@ sub execute {
 		my $media_base = $this->collect()->{m_united}."/$name";
 		my $media_license_dir = $this->collect()->{m_united}
 			."/".$name.".license";
+		my $betaFile = $this->collect()->{m_united}
+			."/".$name."/README.BETA";
 		$this->logMsg(
 			"I", "Check for licenses on media $media_base"
 		);
@@ -109,6 +111,16 @@ sub execute {
 				}
 				# not needed here anymore
 				unlink $licenseArchive;
+			}
+			if ( -e $betaFile ) {
+				system("cp $betaFile $media_license_dir");
+				$result = $? >> 8;
+				if ($result != 0) {
+					$this->logMsg(
+						"E", "Copying README.BETA failed!"
+					);
+					return 1;
+				}
 			}
 		}
 	}
