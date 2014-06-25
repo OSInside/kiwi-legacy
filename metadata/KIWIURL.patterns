@@ -1,5 +1,6 @@
 opensuse|^|http://download.opensuse.org/
 opensuse|^|http://download.opensuse.org/repositories/
 opensuse|^|http://download.opensuse.org/distribution/
-opensuse|build.opensuse.org|http://download.opensuse.org/distribution/
-opensuse|build.opensuse.org|http://download.opensuse.org/repositories/
+opensuse|build.opensuse.org|http://download.opensuse.org/distribution
+opensuse|build.opensuse.org|http://download.opensuse.org/repositories
+opensuse|openSUSE:Factory/snapshot|http://download.opensuse.org/factory-snapshot/repo/oss/
