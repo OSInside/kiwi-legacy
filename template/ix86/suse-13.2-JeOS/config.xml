@@ -67,19 +67,18 @@
 		<user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
 	</users>
 	<repository type="yast2">
-		<source path="obs://13.2/repo/oss"/>
+		<source path="obs://openSUSE:Factory/snapshot"/>
 	</repository>
 	<packages type="image">
-<!-- The installation of patterns in 13.2 requires the 13.2 zypper -->
-<!-- Thus the following definition only works when building on 13.2 -->
-<!--        <namedCollection name="base"/>-->
-<!-- In order to stay compatible we just install the pattern package -->
+<!--
+		new pattern system seems still not functional in 13.2
+
+		<namedCollection name="base"/>
+
+		using pattern package directly instead
+-->
 		<package name="patterns-openSUSE-base"/>
-<!-- The installation of products in 13.2 requires the 13.2 zypper -->
-<!-- Thus the following definition only works when building on 13.2 -->
-<!--        <product name="openSUSE"/>-->
-<!-- In order to stay compatible we just install the product package -->
-		<package name="openSUSE-release"/>
+
 		<package name="plymouth-branding-openSUSE" bootinclude="true"/>
 		<package name="grub2-branding-openSUSE" bootinclude="true"/>
 		<package name="ifplugd"/>
@@ -93,6 +92,13 @@
 		<package name="fonts-config"/>
 		<package name="tar"/>
 		<package name="parted"/>
+		<package name="kiwi"/>
+		<package name="kiwi-templates"/>
+		<package name="kiwi-desc-oemboot"/>
+		<package name="kiwi-desc-isoboot"/>
+		<package name="kiwi-desc-vmxboot"/>
+		<package name="kiwi-desc-netboot"/>
+		<package name="openssh"/>
 	</packages>
 	<packages type="iso">
 		<package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
@@ -124,6 +130,19 @@
 		<package name="glibc-locale"/>
 		<package name="cracklib-dict-full"/>
 		<package name="ca-certificates"/>
+<!--
+		The installation of products in SLE12 requires the SLE12 zypper
+		Thus the following definition only works when building on SLE12
+
+		<product name="openSUSE"/>
+
+		In order to stay compatible we just install the product rpm
+		package. It's required to install the release package in the
+		bootstrap phase in order to avoid the installation of an auto
+		selected dummy-release package which later conflicts with all
+		other release packages
+-->
+        <package name="openSUSE-release"/>
 	</packages>
 	<packages type="delete">
 		<package name="kernel-debug"/>
