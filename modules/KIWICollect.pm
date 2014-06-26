@@ -2387,6 +2387,7 @@ sub createMetadata {
 	my $prodrel  = $this->{m_proddata}->getVar("PRODUCT_RELEASE");
 	my $sp_ver   = $this->{m_proddata}->getVar("SP_VERSION");
 	$prodrel = $this->{m_proddata}->getInfo("RELEASE") unless defined($prodrel); # old style before 13.2
+	$prodrel = "-$prodrel" if defined($prodrel) and $prodrel ne "";
 	$prodname =~ s/\ /-/g;
 	$prodver .= ".$sp_ver" if defined($sp_ver);
 	if (defined($proddir)
@@ -2408,7 +2409,7 @@ sub createMetadata {
 			if(! open($PRODUCT, ">", $productsfile)) {
 				die "Cannot create $productsfile";
 			}
-			print $PRODUCT "$proddir $summary $prodver-$prodrel\n";
+			print $PRODUCT "$proddir $summary $prodver$prodrel\n";
 			close $PRODUCT;
 		}
 	} else {
