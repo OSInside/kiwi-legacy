@@ -57,7 +57,8 @@ BuildRequires:  fdupes
 %ifarch %ix86 x86_64
 BuildRequires:  syslinux
 %endif
-Provides:       kiwi-images:lxc
+Provides:       kiwi-image:lxc
+Provides:       kiwi-image:tbz
 %if 0%{?suse_version} > 1140
 BuildRequires:  btrfsprogs
 BuildRequires:  cdrkit-cdrtools-compat
