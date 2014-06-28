@@ -2157,7 +2157,7 @@ sub __isValidFormat {
 		return;
 	}
 	my %supported = map { ($_ => 1) } qw(
-		ec2 ovf ova qcow2 vmdk vdi vhd vhd-fixed vagrant
+		ec2 ovf ova qcow2 raw vmdk vdi vhd vhd-fixed vagrant
 	);
 	if (! $supported{$format} ) {
 		my $msg = "$caller: specified format '$format' is not "
