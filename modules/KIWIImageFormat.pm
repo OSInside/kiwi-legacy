@@ -197,6 +197,9 @@ sub createFormat {
 	} elsif ($format eq "ova") {
 		$kiwi -> info ("Starting raw => $format conversion\n");
 		return $this -> createOVA();
+	} elsif ($format eq "raw") {
+		$kiwi -> info ("No conversion necessary raw format already exists\n");
+		return $this;
 	} elsif ($format eq "qcow2") {
 		$kiwi -> info ("Starting raw => $format conversion\n");
 		return $this -> createQCOW2();
@@ -220,7 +223,7 @@ sub createMachineConfiguration {
 	my $xml    = $this->{xml};
 	my $bootp  = $this->{bootp};
 	my $vconf  = $this->{vmdata};
-	if ((! $vconf) && ($format =~ /qcow2|vagrant/)) {
+	if ((! $vconf) && ($format =~ /qcow2|raw|vagrant/)) {
 		# a machine configuration doesn't make sense with these
 		# formats requested. Thus we can silently return here
 		return;
