@@ -1,0 +1,21 @@
+Prophet setup (1.5.5)
+=====================
+
+- This version required some gem version lock downs to work
+
+  gem install octokit --version 1.25.0
+  gem uninstall faraday
+  gem install faraday --version 0.8.8
+  gem uninstall faraday_middleware
+  gem install faraday_middleware --version 0.9.0
+  gem install prophet
+
+- In addition prophet cannot deal with https git urls in
+  Thus you have to make sure to use the following url
+  format in the .git/config file
+
+  url = git@github.com:project/project.git
+
+- In order to run the prophet script automatically you can
+  either call it from a cronjob or even better let a jenkins
+  test call it

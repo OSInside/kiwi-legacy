@@ -1,0 +1,24 @@
+#!/usr/bin/env ruby
+
+require 'prophet'
+
+Prophet.setup do |config|
+	# Setup custom logger.
+	config.logger = log = Logger.new(STDOUT)
+	log.level = Logger::INFO
+
+	# Specify which code to run.
+	config.execution do
+		log.info 'Running tests ...'
+		test_results = system "make test"
+		config.success = ($? == 0)
+        if config.success
+          log.info 'All tests are passing.'
+        else
+          log.info 'Some tests are failing.'
+          log.info test_results.inspect
+        end
+	end
+end
+
+Prophet.run
