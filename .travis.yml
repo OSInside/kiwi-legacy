@@ -1,4 +1,4 @@
 language: perl
 install:
-  - cpanm -S -v Test::Unit::Lite
+  - cpanm -S -v $(cat .perlmodules | tr "\n" " ")
 script: make test
