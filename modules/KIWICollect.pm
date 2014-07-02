@@ -1181,10 +1181,10 @@ sub setupPackageFiles {
 							. 'failed';
 						$this->logMsg('E', $msg);
 					} else {
-						$this->addToTrackFile($packName, $packPointer, $medium);
+						my $lnkTarget =
+							$packOptions->{$requestedArch}->{'newpath'};
+						$this->addToTrackFile($packName, $packPointer, $medium, $lnkTarget);
 						if ($this->{m_debug} >= 4) {
-							my $lnkTarget =
-								$packOptions->{$requestedArch}->{'newpath'};
 							my $msg =
 								"    linked file $packPointer->{'localfile'}"
 								. " to $lnkTarget/"
@@ -1448,7 +1448,8 @@ sub collectPackages {
 			die "Unable to open report file: $medium->{filename}";
 		}
 		print $fd "<report>\n";
-		for my $binary(@{$medium->{entries}}) {
+		for my $entry(sort(keys($medium->{entries}))) {
+                        my $binary = $medium->{entries}->{$entry};
 			$this->printTrackLine(
 				$fd,
 				"    <binary ", $binary, ">".$binary->{'localfile'}."</binary>",
@@ -1486,7 +1487,7 @@ sub printTrackLine {
 # addToTrackFile
 #------------------------------------------
 sub addToTrackFile {
-	my ($this, $name, $pkg, $medium) = @_;
+	my ($this, $name, $pkg, $medium, $on_media_path) = @_;
 	if (!$this->{m_reportLog}->{$medium}) {
 		$this->{m_reportLog}->{$medium}->{filename} = 
 			"$this->{m_basesubdir}->{$medium}.report";
@@ -1505,7 +1506,7 @@ sub addToTrackFile {
 	if (defined($pkg->{epoch}) && $pkg->{epoch} ne "") {
 		$hash{"epoch"} = $pkg->{epoch};
 	}
-	push @{$this->{m_reportLog}->{$medium}->{entries}}, \%hash;
+	$this->{m_reportLog}->{$medium}->{entries}->{$on_media_path} = \%hash;
 	return $this;
 }
 
