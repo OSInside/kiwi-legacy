@@ -28,7 +28,7 @@ etc_prefix  = ${buildroot}/etc
 #============================================
 # Variables... 
 #--------------------------------------------
-INC         = /home/travis/perl5
+INC         = ~/perl5/lib/perl5
 KIWIBINVZ   = ${buildroot}/usr/sbin
 KIWIMODVZ   = ${kiwi_prefix}/modules
 KIWIMETAVZ  = ${kiwi_prefix}/metadata

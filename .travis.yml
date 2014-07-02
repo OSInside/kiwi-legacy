@@ -1,6 +1,4 @@
 language: perl
-before_install:
-  - cpanm Test::Unit::Lite
 install:
   - cpanm Test::Unit::Lite
 script: make test
