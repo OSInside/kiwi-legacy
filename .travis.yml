@@ -1,6 +1,6 @@
 language: perl
-perl:
-  - "5.18"
-script: make test
+before_install:
+  - cpanm Test::Unit::Lite
 install:
   - cpanm Test::Unit::Lite
+script: make test
