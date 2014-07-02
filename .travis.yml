@@ -1,5 +1,4 @@
 language: perl
 install:
-  - cpanm -S -n -v $(cat .perlmodules | tr "\n" " ")
-  - find ~/perl5
+  - cpanm -f -S -n -v $(cat .perlmodules | tr "\n" " ")
 script: make test
