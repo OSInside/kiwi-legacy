@@ -28,6 +28,7 @@ etc_prefix  = ${buildroot}/etc
 #============================================
 # Variables... 
 #--------------------------------------------
+INC         = /home/travis/perl5
 KIWIBINVZ   = ${buildroot}/usr/sbin
 KIWIMODVZ   = ${kiwi_prefix}/modules
 KIWIMETAVZ  = ${kiwi_prefix}/metadata
@@ -217,7 +218,8 @@ test:
 		touch tests/.timestamps/$$i's';\
 	done
 	cd tests/unit && \
-		${NONETWORKTEST} ${KIWINOFSTEST} /usr/bin/prove ${TESTVERBOSE} .
+		${NONETWORKTEST} ${KIWINOFSTEST} /usr/bin/prove -I ${INC} \
+		${TESTVERBOSE} .
 	rm -f .revision
 
 critic:
@@ -236,7 +238,8 @@ critic:
 	fi
 	touch tests/.timestamps/$@s
 	cd tests/unit && \
-		${NONETWORKTEST} ${KIWINOFSTEST} /usr/bin/prove ${TESTVERBOSE} $@
+		${NONETWORKTEST} ${KIWINOFSTEST} /usr/bin/prove -I ${INC} \
+		${TESTVERBOSE} $@
 
 clean:
 	(cd system/boot && find -type f | grep -v .svn | xargs chmod u+w)
