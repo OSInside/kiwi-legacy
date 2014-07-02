@@ -9,4 +9,3 @@ XML::LibXML
 XML::LibXML::Common
 XML::SAX
 LWP
-List::MoreUtils
