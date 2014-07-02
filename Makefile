@@ -28,7 +28,7 @@ etc_prefix  = ${buildroot}/etc
 #============================================
 # Variables... 
 #--------------------------------------------
-INC         = ~/perl5/perlbrew/perls/5.14/lib/site_perl/5.14.4
+INC         = -I ~/perl5/perlbrew/perls/5.14/lib/site_perl/5.14.4 -I ~/perl5/perlbrew/perls/5.14/lib/site_perl/5.14.4/x86_64-linux-thread-multi -I ~/perl5/perlbrew/perls/5.14/lib/vendor_perl/5.14.4 -I ~/perl5/perlbrew/perls/5.14/lib/vendor_perl/5.14.4/x86_64-linux-thread-multi -I ~/perl5/perlbrew/perls/5.14/lib/5.14.4 -I ~/perl5/perlbrew/perls/5.14/lib/5.14.4/x86_64-linux-thread-multi
 KIWIBINVZ   = ${buildroot}/usr/sbin
 KIWIMODVZ   = ${kiwi_prefix}/modules
 KIWIMETAVZ  = ${kiwi_prefix}/metadata
@@ -218,7 +218,7 @@ test:
 		touch tests/.timestamps/$$i's';\
 	done
 	cd tests/unit && \
-		${NONETWORKTEST} ${KIWINOFSTEST} /usr/bin/prove -I ${INC} \
+		${NONETWORKTEST} ${KIWINOFSTEST} /usr/bin/prove ${INC} \
 		${TESTVERBOSE} .
 	rm -f .revision
 
