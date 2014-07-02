@@ -1,4 +1,4 @@
 language: perl
 install:
-  - cpanm -S -v $(cat .perlmodules | tr "\n" " ")
+  - cpanm -S -n $(cat .perlmodules | tr "\n" " ")
 script: make test
