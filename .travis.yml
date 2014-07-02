@@ -2,3 +2,5 @@ language: perl
 perl:
   - "5.18"
 script: make test
+install:
+  - cpanm Test::Unit::Lite
