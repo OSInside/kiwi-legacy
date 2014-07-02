@@ -34,7 +34,7 @@ suseConfig
 #==========================================
 # setup gfxboot
 #------------------------------------------
-suseGFXBoot SLES lilo
+suseGFXBoot SLES grub2
 
 #======================================
 # Keep UTF-8 locale

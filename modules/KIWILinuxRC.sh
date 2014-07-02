@@ -853,6 +853,7 @@ function installBootLoader {
 		x86_64-grub)     installBootLoaderGrub ;;
 		i*86-grub2)      installBootLoaderGrub2 ;;
 		x86_64-grub2)    installBootLoaderGrub2 ;;
+		ppc64*-grub2)    installBootLoaderGrub2 ;;
 		ppc*)            installBootLoaderYaboot ;;
 		arm*)            installBootLoaderUBoot ;;
 		i*86-syslinux)   installBootLoaderSyslinux ;;
@@ -1116,7 +1117,14 @@ function installBootLoaderGrub2 {
 	#======================================
 	# install grub2 in BIOS mode
 	#--------------------------------------
-	if [ $isEFI -eq 0 ];then
+	if [! -z "$kiwi_OfwGrub" ];then
+		# install powerpc grub2
+		$instTool $imagePrepDevice 1>&2
+		if [ ! $? = 0 ];then
+			Echo "Failed to install boot loader"
+			return 1
+		fi
+	else [ $isEFI -eq 0 ];then
 		# use plain grub2-install in standard bios mode
 		$instTool $imageDiskDevice 1>&2
 		if [ ! $? = 0 ];then
@@ -1471,6 +1479,7 @@ function setupBootLoader {
 		x86_64-grub)     eval setupBootLoaderGrub $para ;;
 		i*86-grub2)      eval setupBootLoaderGrub2 $para ;;
 		x86_64-grub2)    eval setupBootLoaderGrub2 $para ;;
+		ppc64*-grub2)    eval setupBootLoaderGrub2 $para ;;
 		i*86-syslinux)   eval setupBootLoaderSyslinux $para ;;
 		x86_64-syslinux) eval setupBootLoaderSyslinux $para ;;
 		i*86-extlinux)   eval setupBootLoaderSyslinux $para ;;
