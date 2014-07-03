@@ -7,7 +7,7 @@
 		<specification>boot/initrd image used on OEM VMX disk</specification>
 	</description>
 	<preferences>
-		<type image="cpio" bootprofile="ppc64" bootkernel="ppc64"/>
+		<type image="cpio" bootprofile="default" bootkernel="std"/>
 		<version>2.7.1</version>
 		<packagemanager>zypper</packagemanager>
 		<rpm-check-signatures>false</rpm-check-signatures>
@@ -127,7 +127,6 @@
 		<package name="squashfs"/>
 		<package name="sysconfig"/>
 		<package name="sysfsutils"/>
-		<package name="syslinux"/>
 		<package name="tar"/>
 		<package name="util-linux"/>
 		<package name="xfsprogs"/>

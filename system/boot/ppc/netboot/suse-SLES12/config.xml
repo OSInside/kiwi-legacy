@@ -7,7 +7,7 @@
 		<specification>boot/initrd image used for PXE</specification>
 	</description>
 	<preferences>
-		<type image="cpio" bootprofile="ppc64" bootkernel="ppc64"/>
+		<type image="cpio" bootprofile="default" bootkernel="std"/>
 		<version>2.1.1</version>
 		<packagemanager>zypper</packagemanager>
 		<rpm-check-signatures>false</rpm-check-signatures>
