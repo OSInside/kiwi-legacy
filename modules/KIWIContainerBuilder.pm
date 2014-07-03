@@ -766,7 +766,7 @@ sub __disableServices {
 #------------------------------------------
 sub __removeKiwiBuildInfo {
 	# ...
-	# Remove data that is inserted in teh root tree for image building
+	# Remove data that is inserted in the root tree for image building
 	# ---
 	my $this      = shift;
 	my $targetDir = shift;
@@ -775,7 +775,7 @@ sub __removeKiwiBuildInfo {
 	$kiwi -> info('Clean up kiwi image build artifacts');
 	# Remove the shell scripts
 	my $rm = $locator -> getExecPath('rm');
-	my $cmd = "$rm $targetDir/{.kconfig,.profile}";
+	my $cmd = "$rm -f $targetDir/{.kconfig,.profile}";
 	my $data = KIWIQX::qxx ($cmd);
 	my $code = $? >> 8;
 	if ($code != 0) {
