@@ -910,7 +910,7 @@ sub test_packageManagerCheck_zypp {
 			. 'could not be found.';
 		$this -> assert_str_equals($failExpect, $errMsg);
 		my $msgT = $kiwi -> getMessageType();
-		$this -> assert_str_equals('error', $msgT);
+		$this -> assert_str_equals('info', $msgT);
 		my $state = $kiwi -> getState();
 		$this -> assert_str_equals('failed', $state);
 		$this -> assert_null($res);

@@ -775,7 +775,7 @@ sub __removeKiwiBuildInfo {
 	$kiwi -> info('Clean up kiwi image build artifacts');
 	# Remove the shell scripts
 	my $rm = $locator -> getExecPath('rm');
-	my $cmd = "$rm -f $targetDir/{.kconfig,.profile}";
+	my $cmd = "$rm -f $targetDir/.kconfig $targetDir/.profile";
 	my $data = KIWIQX::qxx ($cmd);
 	my $code = $? >> 8;
 	if ($code != 0) {
