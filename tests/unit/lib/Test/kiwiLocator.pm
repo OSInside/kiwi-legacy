@@ -689,16 +689,15 @@ sub test_getExecPathNoExec {
 #------------------------------------------
 sub test_getExecPerl {
 	# ...
-	# Test behavior when an executable can be found
-	# Using the perl interpreter as an example
-	# Perl's location is specified by LSB, thus we only make the
-	# assumption that we are on an LSB compliant system, this should be
-	# reasonable.
+	# Test behavior when an executable can be found Using the bash
+	# interpreter as an example bash's location is specified by LSB,
+	# thus we only make the assumption that we are on an LSB compliant
+	# system, this should be reasonable.
 	# ---
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $locator = $this -> __getLocator();
-	my $res = $locator -> getExecPath( 'perl' );
+	my $res = $locator -> getExecPath( 'bash' );
 	my $msg = $kiwi -> getMessage();
 	$this -> assert_str_equals('No messages set', $msg);
 	my $msgT = $kiwi -> getMessageType();
@@ -707,9 +706,8 @@ sub test_getExecPerl {
 	$this -> assert_str_equals('No state set', $state);
 	# Test this condition last to get potential error messages
 	$this -> assert_not_null($res);
-	my $perlPath = '/usr/bin/perl';
+	my $perlPath = '/bin/bash';
 	$this -> assert_str_equals($perlPath, $res);
-
 	return;
 }
 
