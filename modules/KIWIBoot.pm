@@ -5517,6 +5517,7 @@ sub installBootLoader {
 	my $xml      = $this->{xml};
 	my $firmware = $this->{firmware};
 	my $system   = $this->{system};
+	my $haveTree = $this->{haveTree};
 	my $locator  = KIWILocator -> instance();
 	my $bootdev;
 	my $result;
@@ -5726,19 +5727,72 @@ sub installBootLoader {
 		#==========================================
 		# Install grub in batch mode
 		#------------------------------------------
-		my $grub = $locator -> getExecPath ('grub');
+		my $grub;
+		if ($haveTree) {
+			# Use image root system grub
+			$grub = $locator -> getExecPath ('grub', $system);
+		} else {
+			# Use host system grub
+			$grub = $locator -> getExecPath ('grub');
+		}
 		if (! $grub) {
 			$kiwi -> failed ();
-			$kiwi -> error  ("Can't locate grub binary");
+			if ($haveTree) {
+				$kiwi -> error (
+					"Can't locate grub binary in image root"
+				);
+			} else {
+				$kiwi -> error (
+					"Can't locate grub binary"
+				);
+			}
 			$kiwi -> failed ();
 			return;
 		}
-		my $grubOptions = "--device-map $dmfile --no-floppy --batch";
-		if (-d "/boot/grub") {
-			KIWIQX::qxx ("mount -n --bind $tmpdir/boot/grub /boot/grub");
+		my $gopts = "--device-map $dmfile --no-floppy --batch";
+		if ($haveTree) {
+			# Use image root system grub
+			my $basedir_disk = dirname ($diskname);
+			my $basedir_tmp  = $tmpdir;
+			$status = KIWIQX::qxx (
+				"mkdir -p $system/$basedir_disk $system/$basedir_tmp 2>&1"
+			);
+			$result= $? >> 8;
+			if ($result == 0) {
+				$status = KIWIQX::qxx (
+					"mount -n --bind $basedir_disk $system/$basedir_disk"
+				);
+				$result= $? >> 8;
+			}
+			if ($result == 0) {
+				$status = KIWIQX::qxx (
+					"mount -n --bind $basedir_tmp $system/$basedir_tmp"
+				);
+				$result= $? >> 8;
+			}
+			if ($result != 0) {
+				$kiwi -> failed ();
+				$kiwi -> error ("grub chroot setup failed: $status");
+				$kiwi -> failed ();
+				return;
+			}
+			KIWIQX::qxx (
+				"chroot $system $grub $gopts < $cmdfile &> $tmpdir/grub.log"
+			);
+			KIWIQX::qxx ("umount $system/$basedir_tmp 2>&1");
+			KIWIQX::qxx ("umount $system/$basedir_disk 2>&1");
+			my $rmopts = "-p --ignore-fail-on-non-empty";
+			KIWIQX::qxx (
+				"rmdir $rmopts $system/$basedir_disk $system/$basedir_tmp"
+			);
+		} else {
+			# Use host system grub
+			if (-d "/boot/grub") {
+				KIWIQX::qxx ("mount -n --bind $tmpdir/boot/grub /boot/grub");
+			}
+			KIWIQX::qxx ("$grub $gopts < $cmdfile &> $tmpdir/grub.log");
+			KIWIQX::qxx ("umount /boot/grub &>/dev/null");
 		}
-		KIWIQX::qxx ("$grub $grubOptions < $cmdfile &> $tmpdir/grub.log");
-		KIWIQX::qxx ("umount /boot/grub &>/dev/null");
 		my $glog;
 		if ($dmfd -> open ("$tmpdir/grub.log")) {
 			my @glog = <$dmfd>; $dmfd -> close();
