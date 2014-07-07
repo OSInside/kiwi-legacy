@@ -487,6 +487,18 @@
 	<itemizedlist>
 		<listitem>
 			<formalpara>
+			<title>handleSplash</title>
+			<para>
+			This hook is called prior to any dialog/exception message or
+			progress dialog. The hook can be used to customize the behavior
+			of the splash screen. kiwi automatically hides a plymouth or
+			kernel based splash screen if there is only one active console
+			</para>
+			</formalpara>
+		</listitem>
+
+		<listitem>
+			<formalpara>
 			<title>init</title>
 			<para>
 			This hook is called before udev is started. The hook
