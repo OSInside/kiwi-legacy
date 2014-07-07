@@ -3736,8 +3736,7 @@ sub setupBootLoaderStages {
 			'boot','search_label','search_fs_file','search',
 			'search_fs_uuid','ls','normal','gzio','multiboot',
 			'png','fat','gettext','chain','font','minicmd',
-			'gfxterm','gfxmenu','video_bochs','video_cirrus',
-			'video','video_fb'
+			'gfxterm','gfxmenu','video','video_fb'
 		);
 		my @bios_core_modules = (
 			'biosdisk','part_msdos','part_gpt','vga','vbe'
