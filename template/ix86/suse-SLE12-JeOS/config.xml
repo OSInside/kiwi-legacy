@@ -71,7 +71,6 @@
 		<namedCollection name="Minimal"/>
 		<package name="plymouth-branding-SLE" bootinclude="true"/>
 		<package name="grub2-branding-SLE" bootinclude="true"/>
-		<package name="ifplugd"/>
 		<package name="iputils"/>
 		<package name="vim"/>
 		<package name="grub2"/>
