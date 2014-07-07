@@ -103,10 +103,23 @@ failsafe="$failsafe nomodeset x11failsafe"
 # hideSplash
 #--------------------------------------
 function hideSplash {
-	test -e /proc/splash && echo verbose > /proc/splash
-	if lookup plymouthd &>/dev/null;then
-		plymouth hide-splash
+	# /.../
+	# Only in case of one active console kiwi hides
+	# the splash screen for it to allow interactive dialog
+	# sessions on this console. In any other case the user
+	# can control a custom behavior using the handleSplash
+	# hook called at the end of this function
+	# ----
+	local console_count=$(activeConsoles)
+	if [ $console_count -eq 1 ];then
+		test -e /proc/splash && echo verbose > /proc/splash
+		if lookup plymouthd &>/dev/null;then
+			plymouth hide-splash
+			# reset tty after plymouth messed with it
+			consoleInit
+		fi
 	fi
+	runHook handleSplash "$@"
 }
 
 #======================================
@@ -125,7 +138,7 @@ function Dialog {
 			--exit-label "$TEXT_EXIT" \
 			$@
 		echo \$? > /tmp/fbcode
-EOF
+	EOF
 	if FBOK;then
 		fbiterm -m $UFONT -- bash -e /tmp/fbcode
 	else
@@ -333,7 +346,7 @@ function systemException {
 		fi
 	;;
 	"user_reboot")
-		Echo "reboot triggered by user: consoles at Alt-F3/F4"
+		Echo "reboot triggered by user"
 		Echo "reboot in 30 sec..."; sleep 30
 		/sbin/reboot -f -i >$nuldev
 	;;
@@ -434,13 +447,7 @@ function createInitialDevices {
 	ln -s fd/0 $prefix/stdin
 	ln -s fd/1 $prefix/stdout
 	ln -s fd/2 $prefix/stderr
-	#======================================
-	# setup dev/console
-	#--------------------------------------
-	exec < $prefix/console > $prefix/console
 }
-
-
 #======================================
 # mount_rpc_pipefs
 #--------------------------------------
@@ -524,15 +531,14 @@ function createFramebufferDevices {
 function errorLogStop {
 	set +x
 	export ELOG_STOPPED=1
-	exec 2>$ELOG_EXCEPTION
-	exec 1>>$ELOG_EXCEPTION
+	exec < $ELOG_EXCEPTION &> $ELOG_EXCEPTION
 }
 #======================================
 # errorLogContinue
 #--------------------------------------
 function errorLogContinue {
 	exec 2>>$ELOG_FILE
-	exec 1>>$ELOG_EXCEPTION
+	exec < $ELOG_EXCEPTION > $ELOG_EXCEPTION
 	export ELOG_STOPPED=0
 	set -x
 }
@@ -579,19 +585,16 @@ function errorLogStart {
 		#======================================
 		# Redirect/Clean stdout if quiet is set
 		#--------------------------------------
-		exec 1>>/dev/null
+		exec >/dev/null
 		if [ -x /usr/bin/setterm ];then
 			setterm -clear all
 			setterm -background black
 		fi
 	else
 		#======================================
-		# Set kernel log level
+		# Redirect stdout to console
 		#--------------------------------------
-		exec 1>>$ELOG_EXCEPTION
-		if lookup klogconsole;then
-			klogconsole -l 6
-		fi
+		exec < $ELOG_EXCEPTION > $ELOG_EXCEPTION
 	fi
 	#======================================
 	# Clean proc
@@ -600,7 +603,7 @@ function errorLogStart {
 		umount /proc
 	fi
 	#======================================
-	# Enable shell debugging and redirect
+	# Enable shell debugging
 	#--------------------------------------
 	set -x
 }
@@ -721,6 +724,8 @@ function udevStart {
 	udevTrigger
 	# wait for events to finish
 	udevPending
+	# init console
+	consoleInit
 	# start plymouth if it exists and enabled
 	for o in $(cat /proc/cmdline) ; do
 		case "$o" in
@@ -765,6 +770,24 @@ function udevKill {
 	fi
 }
 #======================================
+# activeConsoles
+#--------------------------------------
+function activeConsoles {
+	for i in $(cat /sys/class/tty/console/active 2>/dev/null);do
+		echo $i
+	done | wc -l
+}
+#======================================
+# consoleInit
+#--------------------------------------
+function consoleInit {
+	read consoledev rest < /sys/class/tty/console/active
+	consoledev=${consoledev:-tty0}
+	if [ -x /lib/udev/console_init ] && [ -e "/dev/$consoledev" ];then
+		/lib/udev/console_init "/dev/$consoledev"
+	fi
+}
+#======================================
 # startPlymouth
 #--------------------------------------
 function startPlymouth {
@@ -777,18 +800,12 @@ function startPlymouth {
 			--subsystem-match=drm --subsystem-match=tty &>/dev/null
 		udevadm settle --timeout=30
 		mkdir --mode 755 /run/plymouth
-		read consoledev rest < /sys/class/tty/console/active
-		consoledev=${consoledev:-tty0}
-		if [ -x /lib/udev/console_init ] && [ -e "/dev/$consoledev" ];then
-			/lib/udev/console_init "/dev/$consoledev"
-		fi
+		consoleInit
 		plymouth-set-default-theme $kiwi_splash_theme &>/dev/null
 		plymouthd --attach-to-session --pid-file /run/plymouth/pid &>/dev/null
 		plymouth show-splash &>/dev/null
 		# reset tty after plymouth messed with it
-		if [ -x /lib/udev/console_init ] && [ -e "/dev/$consoledev" ];then
-			/lib/udev/console_init "/dev/$consoledev"
-		fi
+		consoleInit
 	fi
 }
 #======================================

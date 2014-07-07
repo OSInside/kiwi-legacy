@@ -119,7 +119,6 @@
 		<file name="killall"/>
 		<file name="killall5"/>
 		<file name="killproc"/>
-		<file name="klogconsole"/>
 		<file name="kpartx"/>
 		<file name="kpartx_id"/>
 		<file name="ldconfig"/>
