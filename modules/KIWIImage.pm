@@ -1760,8 +1760,7 @@ sub createImageLiveCD {
 			'linux','echo','configfile','boot','search_label',
 			'search_fs_file','search','search_fs_uuid','ls',
 			'video','video_fb','normal','test','sleep','png',
-			'gettext','video_bochs','video_cirrus','gzio',
-			'efi_uga'
+			'gettext','gzio','efi_uga'
 		);
 		my $status;
 		my $result;
