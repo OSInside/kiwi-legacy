@@ -1884,8 +1884,6 @@ function setupBootLoaderGrub2Recovery {
 		insmod png
 		insmod vbe
 		insmod vga
-		insmod video_bochs
-		insmod video_cirrus
 		insmod gzio
 		set default=0
 		set root='hd0,$recoid'
