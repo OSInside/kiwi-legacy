@@ -1423,6 +1423,16 @@ sub setupCacheMount {
 		KIWIQX::qxx ("mount -n -t proc proc $root/proc");
 		push (@mountList,"$root/proc");
 	}
+	if (! -d "$root/sys/block") {
+		KIWIQX::qxx ("mkdir -p $root/sys");
+		KIWIQX::qxx ("mount -n -t sysfs sysfs $root/sys");
+		KIWIQX::qxx ("mkdir -p $root/dev/pts");
+		KIWIQX::qxx (
+			"mount -n -t devpts -o mode=0620,gid=5 devpts $root/dev/pts"
+		);
+		push (@mountList,"$root/sys");
+		push (@mountList,"$root/dev/pts");
+	}
 	$this->{mountList} = \@mountList;
 	return @mountList;
 }
