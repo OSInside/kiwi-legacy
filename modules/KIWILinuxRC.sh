@@ -1124,14 +1124,14 @@ function installBootLoaderGrub2 {
 	#======================================
 	# install grub2 in BIOS mode
 	#--------------------------------------
-	if [! -z "$kiwi_OfwGrub" ];then
+	if [ ! -z "$kiwi_OfwGrub" ];then
 		# install powerpc grub2
 		$instTool $imagePrepDevice 1>&2
 		if [ ! $? = 0 ];then
 			Echo "Failed to install boot loader"
 			return 1
 		fi
-	else [ $isEFI -eq 0 ];then
+	elif [ $isEFI -eq 0 ];then
 		# use plain grub2-install in standard bios mode
 		$instTool $imageDiskDevice 1>&2
 		if [ ! $? = 0 ];then
@@ -1145,6 +1145,8 @@ function installBootLoaderGrub2 {
 			Echo "Failed to install legacy boot loader"
 			return 1
 		fi
+	else
+		Echo "No bootloader installaton required"
 	fi
 	return 0
 }
