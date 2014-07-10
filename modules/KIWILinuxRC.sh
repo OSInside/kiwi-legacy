@@ -878,13 +878,20 @@ function installBootLoader {
 			"waitkey"
 		fi
 	fi
-	masterBootID=$(printf 0x%04x%04x $RANDOM $RANDOM)
-	Echo "writing new MBR ID to master boot record: $masterBootID"
-	echo $masterBootID > /boot/mbrid
-	masterBootIDHex=$(echo $masterBootID |\
-		sed 's/^0x\(..\)\(..\)\(..\)\(..\)$/\\x\4\\x\3\\x\2\\x\1/')
-	echo -e -n $masterBootIDHex | dd of=$imageDiskDevice \
-		bs=1 count=4 seek=$((0x1b8))
+	case $arch in
+		i*386|x86_64)
+			masterBootID=$(printf 0x%04x%04x $RANDOM $RANDOM)
+			Echo "writing new MBR ID to master boot record: $masterBootID"
+			echo $masterBootID > /boot/mbrid
+			masterBootIDHex=$(echo $masterBootID |\
+				sed 's/^0x\(..\)\(..\)\(..\)\(..\)$/\\x\4\\x\3\\x\2\\x\1/')
+			echo -e -n $masterBootIDHex | dd of=$imageDiskDevice \
+				bs=1 count=4 seek=$((0x1b8))
+			;;
+		*)
+			echo "skiped writing MBR ID for $arch"
+			;;
+	esac
 }
 #======================================
 # installBootLoaderRecovery
