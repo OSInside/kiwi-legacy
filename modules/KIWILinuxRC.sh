@@ -4006,15 +4006,15 @@ function searchOFBootDevice {
 	# as we don't have a BIOS and a MBR here
 	# ----
 	IFS=$IFS_ORIG
-	local h=/usr/sbin/hwinfo
-	local c="Device File:|PROM id"
-	local ddevs=`$h --disk|grep -E "$c"|sed -e"s@(.*)@@"|cut -f2 -d:|tr -d " "`
+	local ofdev=`cat /proc/device-tree/chosen/bootpath|cut -f1 -d:`
+	local h=/usr/sbin/ofpathname
+	local ddevs=`$h -l $ofdev`
 	#======================================
 	# Store device with PROM id 
 	#--------------------------------------
 	for curd in $ddevs;do
-		if [ $curd = "/dev/sda" ];then
-			export biosBootDevice=$curd
+		if [ $curd = "sda" -o $curd = "vda" ];then
+			export biosBootDevice="/dev/$curd"
 			return 0
 		fi
 	done
