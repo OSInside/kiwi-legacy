@@ -853,6 +853,7 @@ function installBootLoader {
 		x86_64-grub)     installBootLoaderGrub ;;
 		i*86-grub2)      installBootLoaderGrub2 ;;
 		x86_64-grub2)    installBootLoaderGrub2 ;;
+		ppc64*-grub2)    installBootLoaderGrub2 ;;
 		ppc*)            installBootLoaderYaboot ;;
 		arm*)            installBootLoaderUBoot ;;
 		i*86-syslinux)   installBootLoaderSyslinux ;;
@@ -877,13 +878,20 @@ function installBootLoader {
 			"waitkey"
 		fi
 	fi
-	masterBootID=$(printf 0x%04x%04x $RANDOM $RANDOM)
-	Echo "writing new MBR ID to master boot record: $masterBootID"
-	echo $masterBootID > /boot/mbrid
-	masterBootIDHex=$(echo $masterBootID |\
-		sed 's/^0x\(..\)\(..\)\(..\)\(..\)$/\\x\4\\x\3\\x\2\\x\1/')
-	echo -e -n $masterBootIDHex | dd of=$imageDiskDevice \
-		bs=1 count=4 seek=$((0x1b8))
+	case $arch in
+		i*386|x86_64)
+			masterBootID=$(printf 0x%04x%04x $RANDOM $RANDOM)
+			Echo "writing new MBR ID to master boot record: $masterBootID"
+			echo $masterBootID > /boot/mbrid
+			masterBootIDHex=$(echo $masterBootID |\
+				sed 's/^0x\(..\)\(..\)\(..\)\(..\)$/\\x\4\\x\3\\x\2\\x\1/')
+			echo -e -n $masterBootIDHex | dd of=$imageDiskDevice \
+				bs=1 count=4 seek=$((0x1b8))
+			;;
+		*)
+			echo "skiped writing MBR ID for $arch"
+			;;
+	esac
 }
 #======================================
 # installBootLoaderRecovery
@@ -1116,7 +1124,14 @@ function installBootLoaderGrub2 {
 	#======================================
 	# install grub2 in BIOS mode
 	#--------------------------------------
-	if [ $isEFI -eq 0 ];then
+	if [! -z "$kiwi_OfwGrub" ];then
+		# install powerpc grub2
+		$instTool $imagePrepDevice 1>&2
+		if [ ! $? = 0 ];then
+			Echo "Failed to install boot loader"
+			return 1
+		fi
+	else [ $isEFI -eq 0 ];then
 		# use plain grub2-install in standard bios mode
 		$instTool $imageDiskDevice 1>&2
 		if [ ! $? = 0 ];then
@@ -1471,6 +1486,7 @@ function setupBootLoader {
 		x86_64-grub)     eval setupBootLoaderGrub $para ;;
 		i*86-grub2)      eval setupBootLoaderGrub2 $para ;;
 		x86_64-grub2)    eval setupBootLoaderGrub2 $para ;;
+		ppc64*-grub2)    eval setupBootLoaderGrub2 $para ;;
 		i*86-syslinux)   eval setupBootLoaderSyslinux $para ;;
 		x86_64-syslinux) eval setupBootLoaderSyslinux $para ;;
 		i*86-extlinux)   eval setupBootLoaderSyslinux $para ;;
@@ -3990,15 +4006,15 @@ function searchOFBootDevice {
 	# as we don't have a BIOS and a MBR here
 	# ----
 	IFS=$IFS_ORIG
-	local h=/usr/sbin/hwinfo
-	local c="Device File:|PROM id"
-	local ddevs=`$h --disk|grep -E "$c"|sed -e"s@(.*)@@"|cut -f2 -d:|tr -d " "`
+	local ofdev=`cat /proc/device-tree/chosen/bootpath|cut -f1 -d:`
+	local h=/usr/sbin/ofpathname
+	local ddevs=`$h -l $ofdev`
 	#======================================
 	# Store device with PROM id 
 	#--------------------------------------
 	for curd in $ddevs;do
-		if [ $curd = "/dev/sda" ];then
-			export biosBootDevice=$curd
+		if [ $curd = "sda" -o $curd = "vda" ];then
+			export biosBootDevice="/dev/$curd"
 			return 0
 		fi
 	done

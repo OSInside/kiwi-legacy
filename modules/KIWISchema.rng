@@ -2187,6 +2187,7 @@ the standard x86 bios firmware setup is used</a:documentation>
           <value>efi</value>
           <value>uefi</value>
           <value>vboot</value>
+          <value>ofw</value>
         </choice>
       </attribute>
     </define>

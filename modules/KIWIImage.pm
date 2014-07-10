@@ -4146,10 +4146,14 @@ sub extractLinux {
 	my $xml       = $this->{xml};
 	my $vconf     = $xml -> getVMachineConfig();
 	my $xendomain;
+	my $kernname = "vmlinuz";
+	if (-f "$imageTree/boot/vmlinux") {
+		$kernname = "vmlinux";
+	}
 	if ($vconf) {
 		$xendomain = $vconf -> getDomain();
 	}
-	if (-f "$imageTree/boot/vmlinuz") {
+	if (-f "$imageTree/boot/$kernname") {
 		$kiwi -> info ("Extracting kernel\n");
 		#==========================================
 		# setup file names / cleanup...
@@ -4168,7 +4172,7 @@ sub extractLinux {
 		# kernel as common name /boot/vmlinuz so we use this file
 		# for the extraction
 		# ----
-		my $src_kernel = "$imageTree/boot/vmlinuz";
+		my $src_kernel = "$imageTree/boot/$kernname";
 		if (! -e $src_kernel) {
 			$kiwi -> error  ("--> Can't find kernel for extraction: $!");
 			$kiwi -> failed ();

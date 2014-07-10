@@ -7,7 +7,7 @@
 		<specification>boot/initrd image for virtual machines</specification>
 	</description>
 	<preferences>
-		<type image="cpio" bootprofile="ppc64" bootkernel="ppc64"/>
+		<type image="cpio" bootprofile="default" bootkernel="std"/>
 		<version>2.7.1</version>
 		<packagemanager>zypper</packagemanager>
 		<rpm-check-signatures>false</rpm-check-signatures>
@@ -100,6 +100,7 @@
 		<package name="cryptsetup"/>
 		<package name="curl"/>
 		<package name="dialog"/>
+		<package name="grub2-powerpc-ieee1275"/>
 		<package name="dmraid"/>
 		<package name="dosfstools"/>
 		<package name="e2fsprogs"/>
@@ -127,7 +128,6 @@
 		<package name="squashfs"/>
 		<package name="sysconfig"/>
 		<package name="sysfsutils"/>
-		<package name="syslinux"/>
 		<package name="tar"/>
 		<package name="util-linux"/>
 		<package name="xfsprogs"/>

@@ -1212,7 +1212,9 @@ sub setupInstallStick {
 	my $bootfs = 'ext3';
 	my $partid = "83";
 	my $needBiosP  = 0;
+	my $needPrepP  = 0;
 	my $legacysize = 2;
+	my $prepsize = 8;
 	if ($bootloader eq 'syslinux') {
 		$bootfs = 'fat32';
 	} elsif ($bootloader eq 'yaboot') {
@@ -1223,6 +1225,8 @@ sub setupInstallStick {
 		}
 	} elsif (($firmware eq "efi") || ($firmware eq "uefi")) {
 		$bootfs = 'fat16';
+	} elsif ( $firmware eq "ofw" ) {
+		$needPrepP = 1;
 	} else {
 		$bootfs = 'ext3';
 	}
@@ -1250,6 +1254,16 @@ sub setupInstallStick {
 		$pnr++;
 		push @commands,"n","p:legacy",$pnr,".","+".$legacysize."M";
 		$this->{partids}{biosgrub}  = $pnr;
+	}
+	#==========================================
+	# setup Power PReP partition
+	#------------------------------------------
+	if ($needPrepP) {
+		$pnr++;
+		push @commands,"n","p:prep",$pnr,".","+".$prepsize."M";
+		push @commands,"t",$pnr,"41";
+		push @commands,"a",$pnr;
+		$this->{partids}{prep}    = $pnr;
 	}
 	#==========================================
 	# setup boot partition
@@ -1723,12 +1737,16 @@ sub setupBootDisk {
 	my $needBiosP = 0;
 	my $needJumpP = 0;
 	my $needBootP = 0;
+	my $needPrepP = 0;
 	my $needRoP   = 0;
 	my $rawRW     = 0;
 	my $md        = 0;
 	my $bootloader;
 	if ($arch =~ /ppc|ppc64|ppc64le/) {
 		$bootloader = "yaboot";
+		if ($firmware eq "ofw") {
+			$bootloader = "grub2";
+		}
 	} elsif ($arch =~ /arm/) {
 		$bootloader = "uboot";
 	} elsif ($arch =~ /s390/) {
@@ -2070,6 +2088,10 @@ sub setupBootDisk {
 		$needBootP = 1;
 	} elsif ($type->{luks}) {
 		$needBootP = 1;
+	} elsif ($firmware eq "ofw") {
+		$needPrepP = 1;
+		$this->{prepsize} = 8;
+		$this -> __updateDiskSize ($this->{prepsize});
 	}
 	$this->{needBootP} = $needBootP;
 	$this->{needJumpP} = $needJumpP;
@@ -2308,6 +2330,13 @@ sub setupBootDisk {
 			$pnr++;
 			push @commands,"n","p:legacy",$pnr,".","+".$this->{legacysize}."M";
 			$this->{partids}{biosgrub}  = $pnr;
+		}
+		if ($needPrepP) {
+			$pnr++;
+			push @commands,"n","p:prep",$pnr,".","+".$this->{prepsize}."M";
+			push @commands,"t",$pnr,"41";
+			$this->{partids}{prep}  = $pnr;
+			$active = $pnr;
 		}
 		if ($needJumpP) {
 			$pnr++;
@@ -3367,6 +3396,10 @@ sub setupPartIDs {
 			$entry = "kiwi_BiosGrub=\"$this->{partids}{biosgrub}\"\n";
 			if (! $currentIDs{$entry}) { print $ID_FD $entry }
 		}
+		if ($this->{partids}{prep}) {
+			$entry = "kiwi_OfwGrub=\"$this->{partids}{prep}\"\n";
+			if (! $currentIDs{$entry}) { print $ID_FD $entry }
+		}
 		$ID_FD -> close();
 	}
 	return $this;
@@ -3667,13 +3700,16 @@ sub setupBootLoaderStages {
 	if ($loader eq "grub2") {
 		my $efipc      = 'x86_64-efi';
 		my $grubpc     = 'i386-pc';
+		my $grubofw    = 'powerpc-ieee1275';
 		my $bootbios   = "$tmpdir/boot/grub2/bootpart.cfg";
+		my $bootofw    = "$tmpdir/boot/grub2/bootpart.cfg";
 		my $bootefi    = "$tmpdir/boot/grub2-efi/bootpart.cfg";
 		my $unzip      = "$zipper -cd $initrd 2>&1";
 		my %stages     = ();
 		my $test       = "cat $initrd";
 		my $grub_bios  = 'grub2';
 		my $grub_efi   = 'grub2';
+		my $grub_ofw   = 'grub2';
 		my $grub_share = 'grub2';
 		my $lib        = 'lib';
 		if ($arch ne 'x86_64') {
@@ -3728,24 +3764,35 @@ sub setupBootLoaderStages {
 			$stages{efi}{shim_suse} = "usr/$lib/efi/shim-opensuse.efi";
 			$stages{efi}{signed}    = "usr/$lib/efi/grub.efi";
 		}
+		if ($firmware eq "ofw") {
+			$stages{ofw}{initrd}    = "'usr/lib/$grub_ofw/$grubofw/*'";
+			$stages{ofw}{stageSRC}  = "/usr/lib/$grub_ofw/$grubofw";
+			$stages{ofw}{stageDST}  = "/boot/grub2/$grubofw";
+		}
 		#==========================================
 		# Module lists for self created grub images
 		#------------------------------------------
 		my @core_modules = (
-			'ext2','iso9660','chain','linux','echo','configfile',
+			'ext2','iso9660','linux','echo','configfile',
 			'boot','search_label','search_fs_file','search',
-			'search_fs_uuid','ls','normal','gzio','multiboot',
-			'png','fat','gettext','chain','font','minicmd',
+			'search_fs_uuid','ls','normal','gzio',
+			'png','fat','gettext','font','minicmd',
 			'gfxterm','gfxmenu','video','video_fb'
 		);
 		my @bios_core_modules = (
-			'biosdisk','part_msdos','part_gpt','vga','vbe'
+			'biosdisk','part_msdos','part_gpt','vga','vbe',
+			'chain','multiboot'
+
 		);
 		my @efi_core_modules = (
 			'part_gpt','efi_gop','efi_uga'
 		);
+		my @ofw_core_modules = (
+			'ofnet','part_gpt','part_msdos'
+		);
 		push @efi_core_modules ,@core_modules;
 		push @bios_core_modules,@core_modules;
+		push @ofw_core_modules,@core_modules;
 		#==========================================
 		# Boot directories
 		#------------------------------------------
@@ -3754,6 +3801,9 @@ sub setupBootLoaderStages {
 			push @bootdir,"$tmpdir/boot/grub2-efi/$efipc";
 			push @bootdir,"$tmpdir/boot/grub2/$efipc";
 			push @bootdir,"$tmpdir/EFI/BOOT";
+		}
+		if ($firmware eq "ofw") {
+			@bootdir = ("$tmpdir/boot/grub2/$grubofw");
 		}
 		$status = KIWIQX::qxx ("mkdir -p @bootdir 2>&1");
 		$result = $? >> 8;
@@ -3770,6 +3820,9 @@ sub setupBootLoaderStages {
 		my @bootFiles = ($bootbios);
 		if (($firmware eq "efi") || ($firmware eq "uefi")) {
 			push @bootFiles,$bootefi;
+		}
+		if ($firmware eq "ofw") {
+			@bootFiles = ($bootofw);
 		}
 		if ($uuid) {
 			$kiwi -> info ("--> Using fs-uuid search method\n");
@@ -3806,21 +3859,25 @@ sub setupBootLoaderStages {
 		my $figure= "'usr/share/$grub_share/themes/*'";
 		my $s_efi = $stages{efi}{initrd};
 		my $s_bio = $stages{bios}{initrd};
+		my $s_ofw = $stages{ofw}{initrd};
 		if (! $s_efi) {
 			$s_efi = "";
 		}
 		if (! $s_bio) {
 			$s_bio = "";
 		}
+		if (! $s_ofw) {
+			$s_ofw = "";
+		}
 		if ($zipped) {
 			$status= KIWIQX::qxx (
 				"$unzip | \\
-				(cd $tmpdir && cpio -i -d $figure -d $s_bio -d $s_efi 2>&1)"
+				(cd $tmpdir && cpio -i -d $figure -d $s_bio -d $s_efi -d $s_ofw 2>&1)"
 			);
 		} else {
 			$status= KIWIQX::qxx (
 				"cat $initrd | \\
-				(cd $tmpdir && cpio -i -d $figure -d $s_bio -d $s_efi 2>&1)"
+				(cd $tmpdir && cpio -i -d $figure -d $s_bio -d $s_efi -d $s_ofw 2>&1)"
 			);
 		}
 		#==========================================
@@ -3840,9 +3897,13 @@ sub setupBootLoaderStages {
 		my $stagesOK   = 0;
 		my $stagesBIOS = 0;
 		my $stagesEFI  = 0;
+		my $stagesOFW  = 0;
 		my @stageFiles = ('bios');
 		if (($firmware eq "efi") || ($firmware eq "uefi")) {
 			push @stageFiles,'efi';
+		}
+		if ($firmware eq "ofw") {
+			@stageFiles = ('ofw');
 		}
 		foreach my $stage (@stageFiles) {
 			my $stageD = $stages{$stage}{stageSRC};
@@ -3860,6 +3921,8 @@ sub setupBootLoaderStages {
 					$stagesBIOS = 1;
 				} elsif ($stage eq 'efi') {
 					$stagesEFI = 1;
+				} elsif ($stage eq 'ofw') {
+					$stagesOFW = 1;
 				}
 			}
 		}
@@ -3881,6 +3944,12 @@ sub setupBootLoaderStages {
 			$kiwi -> failed ();
 			return;
 		}
+		if (($firmware eq 'ofw') && (! $stagesOFW)) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("No grub2 OFW stage files found in boot image");
+			$kiwi -> failed ();
+			return;
+		}
 		$kiwi -> done();
 		#==========================================
 		# Lookup grub2 mkimage tool
@@ -3888,6 +3957,7 @@ sub setupBootLoaderStages {
 		my $locator = KIWILocator -> instance();
 		my $grub2_bios_mkimage = $locator -> getExecPath ("grub2-mkimage");
 		my $grub2_uefi_mkimage = $grub2_bios_mkimage;
+		my $grub2_ofw_mkimage = $grub2_bios_mkimage;
 		if ($firmware =~ /efi/) {
 			my $grub2_efi_mkimage = $locator -> getExecPath (
 				"grub2-efi-mkimage"
@@ -3993,6 +4063,36 @@ sub setupBootLoaderStages {
 			if ($result != 0) {
 				$kiwi -> failed ();
 				$kiwi -> error ("Failed to copy signed module: $status");
+				$kiwi -> failed ();
+				return;
+			}
+			$kiwi -> done();
+		}
+		#==========================================
+		# Create OFW grub2 boot images
+		#------------------------------------------
+		if ($firmware eq 'ofw') {
+			$kiwi -> info ("Creating grub2 ofw core boot image");
+			if (! $grub2_ofw_mkimage) {
+				$kiwi -> failed ();
+				$kiwi -> error  ("Can't find grub2 mkimage tool");
+				$kiwi -> failed ();
+				return;
+			}
+			my $format   = $grubofw;
+			my $bootconf = $bootofw;
+			my @modules  = @ofw_core_modules;
+			my $core     = "$tmpdir/boot/grub2/$format/core.elf";
+			my $core_opts;
+			$core_opts = "-O $format -o $core -c $bootconf ";
+			$core_opts.= "-d $tmpdir/$stages{ofw}{stageSRC}";
+			my $status = KIWIQX::qxx (
+				"$grub2_ofw_mkimage $core_opts @modules 2>&1"
+			);
+			my $result = $? >> 8;
+			if ($result != 0) {
+				$kiwi -> failed ();
+				$kiwi -> error  ("Couldn't create core boot image: $status");
 				$kiwi -> failed ();
 				return;
 			}
@@ -4343,18 +4443,20 @@ sub setupBootLoaderConfiguration {
 	#==========================================
 	# Create MBR id file for boot device check
 	#------------------------------------------
-	$kiwi -> info ("Saving disk label boot/mbrid: $this->{mbrid}...");
-	KIWIQX::qxx ("mkdir -p $tmpdir/boot");
-	my $FD;
-	if (! open ($FD,'>',"$tmpdir/boot/mbrid")) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Couldn't create mbrid file: $!");
-		$kiwi -> failed ();
-		return;
+	if ($firmware ne "ofw") {
+		$kiwi -> info ("Saving disk label boot/mbrid: $this->{mbrid}...");
+		KIWIQX::qxx ("mkdir -p $tmpdir/boot");
+		my $FD;
+		if (! open ($FD,'>',"$tmpdir/boot/mbrid")) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't create mbrid file: $!");
+			$kiwi -> failed ();
+			return;
+		}
+		print $FD "$this->{mbrid}";
+		close $FD;
+		$kiwi -> done();
 	}
-	print $FD "$this->{mbrid}";
-	close $FD;
-	$kiwi -> done();
 	#==========================================
 	# Grub2
 	#------------------------------------------
@@ -5519,14 +5621,19 @@ sub installBootLoader {
 	my $haveTree = $this->{haveTree};
 	my $locator  = KIWILocator -> instance();
 	my $bootdev;
+	my $prepdev;
 	my $result;
 	my $status;
-	my $biosgrub;
+	my $grubtool;
+	my $grubtoolopts;
+	my $grubarch;
 	#==========================================
 	# Setup boot device name
 	#------------------------------------------
 	my $boot_id = 1;
+	my $prep_id = 1;
 	if ($this->{partids}) {
+		$prep_id = $this->{partids}{prep};
 		if ($this->{partids}{installboot}) {
 			$boot_id = $this->{partids}{installboot};
 		} elsif ($this->{partids}{boot}) {
@@ -5537,22 +5644,15 @@ sub installBootLoader {
 	}
 	if ((! $this->{bindloop}) && (-b $diskname)) {
 		$bootdev = $this -> __getPartBase ($diskname).$boot_id;
+		$prepdev = $this -> __getPartBase ($diskname).$prep_id;
 	} else {
 		$bootdev = $this->{bindloop}.$boot_id;
+		$prepdev = $this->{bindloop}.$prep_id;
 	}
 	#==========================================
 	# Grub2
 	#------------------------------------------
 	if ($loader eq "grub2") {
-		#==========================================
-		# Check for bios loader
-		#------------------------------------------
-		$biosgrub = $locator -> getExecPath ('grub2-bios-setup');
-		if (($firmware eq 'bios') && (! $biosgrub)) {
-			$kiwi -> error  ("Mandatory grub2-bios-setup not found");
-			$kiwi -> failed ();
-			return;
-		}
 		#==========================================
 		# Create device map for the disk
 		#------------------------------------------
@@ -5566,24 +5666,42 @@ sub installBootLoader {
 		print $dmfd "(hd0) $diskname\n";
 		$dmfd -> close();
 		$kiwi -> done();
+
+		#==========================================
+		# Check for loader
+		#------------------------------------------
+		$grubtool = $locator -> getExecPath ('grub2-bios-setup');
+		$grubarch = "i386-pc";
+		my $grubimg  = "core.img";
+		if ($firmware eq 'ofw') {
+			$grubimg  = "core.elf";
+			$grubtool = $locator -> getExecPath ('grub2-install');
+			$grubarch = "powerpc-ieee1275";
+
+		}
+		if (! $grubtool) {
+			$kiwi -> error  ("Mandatory $grubtool not found");
+			$kiwi -> failed ();
+			return;
+		}
 		#==========================================
 		# Mount boot partition
 		#------------------------------------------
-		my $stages = "/mnt/boot/grub2/i386-pc";
+		my $stages = "/mnt/boot/grub2/$grubarch";
 		if (! KIWIGlobals -> instance() -> mount ($bootdev, '/mnt')) {
 			$kiwi -> error ("Couldn't mount boot partition: $status");
 			$kiwi -> failed ();
 			return;
 		}
-		if (($firmware eq 'bios') && (! -e "$stages/core.img")) {
-			$kiwi -> error  ("Mandatory grub2-bios modules not found");
+		if (($firmware =~ /bios|ofw/) && (! -e "$stages/$grubimg")) {
+			$kiwi -> error  ("Mandatory grub2 modules not found");
 			$kiwi -> failed ();
 			return;
 		}
 		#==========================================
-		# Copy bios core modules to tmpdir
+		# Copy grub2 core modules to tmpdir
 		#------------------------------------------
-		if (-e "$stages/core.img") {
+		if (-e "$stages/$grubimg") {
 			$status = KIWIQX::qxx (
 				"cp -a $stages $tmpdir/boot/grub2/ 2>&1"
 			);
@@ -5591,33 +5709,41 @@ sub installBootLoader {
 			if ($result != 0) {
 				$kiwi -> failed ();
 				$kiwi -> error  (
-					"Couldn't copy grub2-bios modules: $status"
+					"Couldn't copy grub2 modules: $status"
 				);
 				$kiwi -> failed ();
 				$this -> cleanStack ();
 				return;
 			}
-			$stages = "$tmpdir/boot/grub2/i386-pc";
+			$stages = "$tmpdir/boot/grub2/$grubarch";
 		}
-		#==========================================
-		# Clean loop maps
-		#------------------------------------------
-		$this -> cleanStack ();
 		#==========================================
 		# Install grub2
 		#------------------------------------------
-		if (-e "$stages/core.img") {
+		if (-e "$stages/$grubimg") {
+			my $loaderTarget;
+			my $msg ;
 			$kiwi -> info ("Installing grub2:\n");
-			my $loaderTarget = $diskname;
+			if ($firmware eq 'bios') {
+				$loaderTarget = $diskname;
+				$msg = "--> on disk target:";
+				$grubtoolopts = "-f -d $stages -m $dmfile";
+			} elsif ($firmware eq 'ofw') {
+				$loaderTarget = $prepdev;
+				$msg = "--> on PReP partition target:";
+				$grubtoolopts = "--grub-mkdevicemap=$dmfile -v ";
+				$grubtoolopts.= "-d /mnt/usr/lib/grub2/$grubarch ";
+				$grubtoolopts.= "--root-directory=/mnt --force --no-nvram ";
+			}
 			if ($chainload) {
 				$loaderTarget = readlink ($bootdev);
 				$loaderTarget =~ s/\.\./\/dev/;
 				$kiwi -> info ("--> on partition target: $loaderTarget\n");
 			} else {
-				$kiwi -> info ("--> on disk target: $loaderTarget\n");
+				$kiwi -> info ("$msg $loaderTarget\n");
 			}
 			$status = KIWIQX::qxx (
-				"$biosgrub -f -d $stages -m $dmfile $loaderTarget 2>&1"
+				"$grubtool $grubtoolopts $loaderTarget 2>&1"
 			);
 			$result = $? >> 8;
 			if ($result != 0) {
@@ -5633,6 +5759,10 @@ sub installBootLoader {
 			);
 			$kiwi -> skipped ();
 		}
+		#==========================================
+		# Clean loop maps
+		#------------------------------------------
+		$this -> cleanStack ();
 		#==========================================
 		# Check for chainloading
 		#------------------------------------------
@@ -6086,7 +6216,7 @@ sub installBootLoader {
 	#==========================================
 	# Write custom disk label ID to MBR
 	#------------------------------------------
-	if ($loader ne "yaboot") {
+	if ($firmware ne "ofw") {
 		$kiwi -> info ("Saving disk label in MBR: $this->{mbrid}...");
 		if (! $this -> writeMBRDiskLabel ($diskname)) {
 			return;
@@ -6472,6 +6602,8 @@ sub setStoragePartition {
 						$p_cmd = "set $index raid on";
 					} elsif ($type eq '8e') {
 						$p_cmd = "set $index lvm on";
+					} elsif ($type eq '41') {
+						$p_cmd = "set $index prep on";
 					} elsif ($type eq '83') {
 						# default partition type set by parted is linux(83)
 						next;
@@ -6601,7 +6733,7 @@ sub setLoopDeviceMap {
 		return;
 	}
 	for my $part
-		(qw(root readonly readwrite boot jump installroot installboot)
+		(qw(root readonly readwrite boot jump installroot installboot prep)
 	) {
 		if ($this->{partids}{$part}) {
 			$result{$part} = $this -> __getPartDevice (

@@ -110,6 +110,9 @@
 		<file name="host"/>
 		<file name="hostname"/>
 		<file name="hwinfo"/>
+		<file name="nvram"/>
+		<file name="ofpathname"/>
+		<file name="pseries_platform"/>
 		<file name="hwup"/>
 		<file name="init"/>
 		<file name="insmod"/>

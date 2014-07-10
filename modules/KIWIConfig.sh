@@ -1624,9 +1624,9 @@ function suseStripKernel {
 			elif [ -f vmlinuz-$VERSION.el5 ];then
 				# dedicated to kernels on ppc
 				mv vmlinux-$VERSION.el5 vmlinuz
-			elif [ -f vmlinuz-$VERSION ];then
+			elif [ -f vmlinux-$VERSION ];then
 				# dedicated to kernels on ppc
-				mv vmlinuz-$VERSION vmlinuz
+				mv vmlinux-$VERSION vmlinux
 			elif [ -f image-$VERSION ];then
 				# dedicated to kernels on s390
 				mv image-$VERSION vmlinuz
