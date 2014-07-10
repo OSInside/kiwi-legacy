@@ -5633,7 +5633,9 @@ sub installBootLoader {
 	my $boot_id = 1;
 	my $prep_id = 1;
 	if ($this->{partids}) {
-		$prep_id = $this->{partids}{prep};
+		if ($this->{partids}{prep}) {
+			$prep_id = $this->{partids}{prep};
+		}
 		if ($this->{partids}{installboot}) {
 			$boot_id = $this->{partids}{installboot};
 		} elsif ($this->{partids}{boot}) {
@@ -5677,7 +5679,6 @@ sub installBootLoader {
 			$grubimg  = "core.elf";
 			$grubtool = $locator -> getExecPath ('grub2-install');
 			$grubarch = "powerpc-ieee1275";
-
 		}
 		if (! $grubtool) {
 			$kiwi -> error  ("Mandatory $grubtool not found");
@@ -5720,28 +5721,44 @@ sub installBootLoader {
 		#==========================================
 		# Install grub2
 		#------------------------------------------
-		if (-e "$stages/$grubimg") {
-			my $loaderTarget;
-			my $msg ;
-			$kiwi -> info ("Installing grub2:\n");
-			if ($firmware eq 'bios') {
-				$loaderTarget = $diskname;
-				$msg = "--> on disk target:";
-				$grubtoolopts = "-f -d $stages -m $dmfile";
-			} elsif ($firmware eq 'ofw') {
-				$loaderTarget = $prepdev;
-				$msg = "--> on PReP partition target:";
-				$grubtoolopts = "--grub-mkdevicemap=$dmfile -v ";
-				$grubtoolopts.= "-d /mnt/usr/lib/grub2/$grubarch ";
-				$grubtoolopts.= "--root-directory=/mnt --force --no-nvram ";
-			}
+		my $loaderTarget;
+		my $targetMessage;
+		if (-e "$stages/core.img") {
+			# architectures: ix86 and x86_64
 			if ($chainload) {
 				$loaderTarget = readlink ($bootdev);
 				$loaderTarget =~ s/\.\./\/dev/;
-				$kiwi -> info ("--> on partition target: $loaderTarget\n");
+				$grubtoolopts = "-f -d $stages -m $dmfile";
+				$targetMessage= "On partition target";
 			} else {
-				$kiwi -> info ("$msg $loaderTarget\n");
+				$loaderTarget = $diskname;
+				$grubtoolopts = "-f -d $stages -m $dmfile";
+				$targetMessage= "On disk target";
 			}
+		} elsif (-e "$stages/core.elf") {
+			# architectures: ppc64le
+			$loaderTarget = $prepdev;
+			$grubtoolopts = "--grub-mkdevicemap=$dmfile -v ";
+			$grubtoolopts.= "-d /mnt/usr/lib/grub2/$grubarch ";
+			$grubtoolopts.= "--root-directory=/mnt --force --no-nvram ";
+			$targetMessage= "On PReP partition";
+		} else {
+			if (! -e "$stages/core.img") {
+				$kiwi -> warning (
+					"grub2-bios modules not found, legacy boot disabled"
+				);
+				$kiwi -> skipped();
+			} elsif (! -e "$stages/core.elf") {
+				$kiwi -> error (
+					"grub2 ppc core.elf module not found"
+				);
+				$kiwi -> failed();
+				return;
+			}
+		}
+		if ($loaderTarget) {
+			$kiwi -> info ("Installing grub2:\n");
+			$kiwi -> info ("--> $targetMessage: $loaderTarget\n");
 			$status = KIWIQX::qxx (
 				"$grubtool $grubtoolopts $loaderTarget 2>&1"
 			);
@@ -5753,11 +5770,6 @@ sub installBootLoader {
 				$kiwi -> failed ();
 				return;
 			}
-		} else {
-			$kiwi -> warning (
-				"grub2-bios modules not found, legacy boot disabled"
-			);
-			$kiwi -> skipped ();
 		}
 		#==========================================
 		# Clean loop maps
