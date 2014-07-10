@@ -1423,16 +1423,6 @@ sub setupCacheMount {
 		KIWIQX::qxx ("mount -n -t proc proc $root/proc");
 		push (@mountList,"$root/proc");
 	}
-	if (! -d "$root/sys/block") {
-		KIWIQX::qxx ("mkdir -p $root/sys");
-		KIWIQX::qxx ("mount -n -t sysfs sysfs $root/sys");
-		KIWIQX::qxx ("mkdir -p $root/dev/pts");
-		KIWIQX::qxx (
-			"mount -n -t devpts -o mode=0620,gid=5 devpts $root/dev/pts"
-		);
-		push (@mountList,"$root/sys");
-		push (@mountList,"$root/dev/pts");
-	}
 	$this->{mountList} = \@mountList;
 	return @mountList;
 }
@@ -1586,15 +1576,8 @@ sub cleanMount {
 		my $data = KIWIQX::qxx ("umount \"$item\" 2>&1");
 		my $code = $? >> 8;
 		if (($code != 0) && ($data !~ "not mounted")) {
-			$kiwi -> loginfo ("Umount failed: $data");
-			$kiwi -> warning ("Umount of $item failed: calling lazy umount");
-			my $data = KIWIQX::qxx ("umount -l \"$item\" 2>&1");
-			my $code = $? >> 8;
-			if ($code != 0) {
-				$kiwi -> failed();
-			} else {
-				$kiwi -> done();
-			}
+			$kiwi -> warning ("Umount of $item failed: $data");
+			$kiwi -> skipped ();
 		}
 		if (($prefix) && ($item =~ /^$prefix/)) {
 			KIWIQX::qxx ("rmdir -p \"$item\" 2>&1");
