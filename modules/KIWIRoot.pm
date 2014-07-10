@@ -1043,7 +1043,9 @@ sub setup {
 	#----------------------------------------
 	if (-f "$root/license.tar.gz") {
 		KIWIQX::qxx ("mkdir -p $root/etc/YaST2/licenses/base");
-		KIWIQX::qxx ("tar -C $root/etc/YaST2/licenses/base -xf $root/license.tar.gz");
+		KIWIQX::qxx (
+			"tar -C $root/etc/YaST2/licenses/base -xf $root/license.tar.gz"
+		);
 		KIWIQX::qxx ("rm -f $root/license.tar.gz");
 	}
 	#========================================
@@ -1077,7 +1079,9 @@ sub setup {
 		#========================================
 		# copy tmproot to real root (tar)
 		#----------------------------------------
-		$data = KIWIQX::qxx ("tar -cf - -C $root/tmproot . | tar -x -C $root 2>&1");
+		$data = KIWIQX::qxx (
+			"tar -cf - -C $root/tmproot . | tar -x -C $root 2>&1"
+		);
 		$code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();
@@ -1156,7 +1160,9 @@ sub setup {
 				}
 				$kiwi -> info ("Calling package setup script: $script");
 				KIWIQX::qxx (" chmod u+x $root/image/config/$script");
-				my $data = KIWIQX::qxx (" chroot $root /image/config/$script 2>&1 ");
+				my $data = KIWIQX::qxx (
+					"chroot $root /image/config/$script 2>&1"
+				);
 				my $code = $? >> 8;
 				if ($code != 0) {
 					$kiwi -> failed ();
@@ -1299,7 +1305,9 @@ sub setup {
 	if (! -e "$imageDesc/root/etc/resolv.conf") {
 		# restore only if overlay tree doesn't contain a resolv.conf
 		if ((-f "$root/etc/resolv.conf") && (-f "/etc/resolv.conf")) {
-			my $data = KIWIQX::qxx ("diff -q /etc/resolv.conf $root/etc/resolv.conf");
+			my $data = KIWIQX::qxx (
+				"diff -q /etc/resolv.conf $root/etc/resolv.conf"
+			);
 			my $code = $? >> 8;
 			if ($code == 0) {
 				$kiwi -> info ("Cleanup temporary copy of resolv.conf");
@@ -1394,7 +1402,9 @@ sub setupCacheMount {
 		push (@mountList,"$root/dev");
 	}
 	foreach my $cache (@cache) {
-		my $status = KIWIQX::qxx ("cat /proc/mounts | grep ".$root.$cache." 2>&1");
+		my $status = KIWIQX::qxx (
+			"cat /proc/mounts | grep ".$root.$cache." 2>&1"
+		);
 		my $result = $? >> 8;
 		if ($result == 0) {
 			next;
