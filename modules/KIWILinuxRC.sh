@@ -2831,15 +2831,10 @@ function setupBootLoaderGrub2 {
 	echo "DEFAULT_APPEND=\"$cmdline\""            >> $sysb
 	echo "FAILSAFE_APPEND=\"$failsafe $cmdline\"" >> $sysb
 	#======================================
-	# toggle bios grub flag
+	# Cleanup protective MBR
 	#--------------------------------------
-	# for some strange reasons it's required to toggle the
-	# bios_grub flag in the partition table if set in order
-	# to fix the EFI boot
-	# ----
-	if [ ! -z "$toggleBIOSGrubFlag" ];then
-		parted $imageDiskDevice set 1 bios_grub off &>/dev/null
-		parted $imageDiskDevice set 1 bios_grub on  &>/dev/null
+	if [ ! -z "$needProtectiveMBR" ];then
+		updateProtectiveMBR
 	fi
 }
 #======================================
@@ -10140,7 +10135,7 @@ function updatePartitionTable {
 			# set flag, but ignore errors here
 			parted -s $device set $partn $pflag on &>/dev/null
 			if [ $pflag = "bios_grub" ];then
-				export toggleBIOSGrubFlag=1
+				export needProtectiveMBR=1
 			fi
 		fi
 	done < /tmp/table
@@ -10330,6 +10325,29 @@ function activateBootPartition {
 	local bootID=$(nd $device)
 	local diskID=$(dn $device)
 	sfdisk $diskID --force -A $bootID
+}
+#======================================
+# refreshProtectiveMBR
+#--------------------------------------
+function updateProtectiveMBR {
+	local device=$1
+	local input=/part.input
+	if ! lookup gdisk &>/dev/null;then
+		Echo "Warning, gdisk tool not found"
+		Echo "This could prevent the system to boot via EFI"
+	fi
+	rm -f $input
+	if [ ! -e "$device" ];then
+		device=$imageDiskDevice
+	fi
+	for cmd in x n w y; do
+		echo $cmd >> $input
+	done
+	gdisk $device < $input 1>&2
+	if [ ! $? = 0 ]; then
+		Echo "Failed to create protective MBR !"
+		Echo "This could prevent the system to boot via EFI"
+	fi
 }
 #======================================
 # FBOK
