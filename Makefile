@@ -181,11 +181,11 @@ install: uninstall
 	#============================================
 	# Update link to boot code
 	#--------------------------------------------
-	for i in `find ${KIWIIMAGE} -name include | xargs dirname`;do \
-		pushd $$i;\
-		rm include;\
+	for i in `find ${KIWIIMAGE} -name include`;do \
+		pushd `dirname $$i`;\
+		rm -f include;\
 		ln -s /usr/share/kiwi/modules/KIWILinuxRC.sh include;\
-		popd $$i;\
+		popd;\
 	done
 
 	#============================================
