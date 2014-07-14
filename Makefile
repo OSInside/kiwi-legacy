@@ -64,6 +64,7 @@ KIWINOFSTEST = env KIWI_NO_FS=1
 endif
 
 all: modules/KIWISchema.rng
+	@echo Compiling...
 	#============================================
 	# build tools
 	#--------------------------------------------
@@ -75,7 +76,8 @@ all: modules/KIWISchema.rng
 	#--------------------------------------------
 	test -f ./.revision || ./.version > .revision
 
-install:
+install: uninstall
+	@echo Installing...
 	#============================================
 	# Install base directories
 	#--------------------------------------------
@@ -177,6 +179,16 @@ install:
 	rm -f ${KIWIIMAGE}/.md5
 
 	#============================================
+	# Update link to boot code
+	#--------------------------------------------
+	for i in `find ${KIWIIMAGE} -name include | xargs dirname`;do \
+		pushd $$i;\
+		rm include;\
+		ln -s /usr/share/kiwi/modules/KIWILinuxRC.sh include;\
+		popd $$i;\
+	done
+
+	#============================================
 	# Install system image template descriptions
 	#--------------------------------------------
 	cp -a template/${arch}/* ${KIWIIMAGE} &>/dev/null || true
@@ -188,6 +200,7 @@ install:
 	cp -a system/repo/${arch}/* ${KIWIREPO}
 
 modules/KIWISchema.rng: modules/KIWISchema.rnc
+	@echo Building Schema...
 	#============================================
 	# Convert RNC -> RNG...
 	#--------------------------------------------
@@ -241,6 +254,7 @@ critic:
 		${TESTVERBOSE} $@
 
 clean:
+	@echo Cleanup...
 	(cd system/boot && find -type f | grep -v .svn | xargs chmod u+w)
 	(find -name .checksum.md5 | xargs rm -f)
 	${MAKE} -C tools clean
@@ -251,6 +265,7 @@ clean:
 	rm -f .kiwirc
 
 uninstall:
+	@echo Uninstalling...
 	rm -rf /usr/share/kiwi
 	rm -rf /usr/share/doc/packages/kiwi
 	rm -f /usr/sbin/kiwi

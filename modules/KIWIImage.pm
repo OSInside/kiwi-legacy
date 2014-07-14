@@ -1053,7 +1053,6 @@ sub createImageVMX {
 	# type section. Supported formats are: vmdk qcow raw ovf
 	# The process will create the system image and the appropriate vmx
 	# boot image plus a .raw and an optional format specific image.
-	# The boot image description must exist in /usr/share/kiwi/image.
 	# ---
 	#==========================================
 	# Create VMX boot and system image

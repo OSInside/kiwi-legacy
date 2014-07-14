@@ -1796,14 +1796,16 @@ sub listImage {
 	# ---
 	my $gdata  = $global -> getKiwiConfig();
 	my $system = $gdata->{System};
-	opendir (FD,$system);
-	my @images = readdir (FD); closedir (FD);
+	my @images = ();
+	if (opendir (my $FD,$system)) {
+		@images = readdir ($FD); closedir ($FD);
+	}
 	my $templates = 0;
 	foreach my $image (sort @images) {
 		if ($image =~ /^\./) {
 			next;
 		}
-		if (-l "$system/$image") {
+		if (! -d "$system/$image") {
 			next;
 		}
 		if ($image =~ /(iso|net|oem|vmx)boot/) {
