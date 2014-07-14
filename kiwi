@@ -1,0 +1,23 @@
+#!/bin/bash
+# Use this script to run kiwi from the git checkout
+# ---
+callpath=$(dirname $0)
+
+pushd $callpath &>/dev/null
+
+if [ ! -s ".revision" ];then
+	./.version > .revision
+fi
+if [ ! -s ".kiwirc" ];then
+	cat > .kiwirc <<- EOF
+		use File::Spec;
+		our \$BasePath = File::Spec->rel2abs (".");
+	EOF
+fi
+
+./kiwi.pl $@
+ecode=$?
+
+popd $callpath &>/dev/null
+
+exit $ecode

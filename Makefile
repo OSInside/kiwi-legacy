@@ -248,6 +248,7 @@ clean:
 	rm -f tools/burner/Makefile
 	rm -f tools/burner/imagewriter
 	rm -f .revision
+	rm -f .kiwirc
 
 uninstall:
 	rm -rf /usr/share/kiwi
