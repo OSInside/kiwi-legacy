@@ -16,8 +16,7 @@
 # STATUS        : $LastChangedBy: ms $
 #               : $LastChangedRevision: 1 $
 #----------------
-use lib './modules';
-use lib '/usr/share/kiwi/modules';
+use lib './modules','/usr/share/kiwi/modules';
 use strict;
 
 #============================================
