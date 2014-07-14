@@ -286,12 +286,21 @@ sub __bundleExtension {
 	my $source = $this->{sourcedir};
 	my $tmpdir = $this->{tmpdir};
 	my $bnr    = $this->{buildnr};
+	my $data;
 	if (! $base) {
 		$base = $this->{imagebase};
 	}
-	my $data = KIWIQX::qxx (
-		"cp $source/$base.$suffix $tmpdir/$base-$bnr.$suffix 2>&1"
-	);
+	if ($suffix =~ /raw/) {
+		# compress this bundle using xz
+		$data = KIWIQX::qxx (
+			"xz -kc $source/$base.$suffix >$tmpdir/$base-$bnr.$suffix.xz 2>&1"
+		);
+	} else {
+		# default bundle handling is a copy
+		$data = KIWIQX::qxx (
+			"cp $source/$base.$suffix $tmpdir/$base-$bnr.$suffix 2>&1"
+		);
+	}
 	my $code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> error  ("Failed to copy $suffix image: $data");
@@ -299,6 +308,7 @@ sub __bundleExtension {
 		return;
 	}
 	if ($suffix =~ /json|vmx|xenconfig/) {
+		# there is metadata whose contents needs a path update
 		my $file = "$tmpdir/$base-$bnr.$suffix";
 		$data = KIWIQX::qxx (
 			"sed -i -e 's/$base/$base-$bnr/' $file 2>&1"
