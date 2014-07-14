@@ -1603,7 +1603,7 @@ sub usage {
 	print "\n";
 	print "Image bundle (user relevant files)\n";
 	print "    kiwi --bundle-build <image-dest> --bundle-id <build-number>\n";
-	print "         --dest-dir <dest-dir>\n";
+	print "         --destdir <dest-dir>\n";
 	print "\n";
 	print "Image Post Creation modes:\n";
 	print "    kiwi --bootvm <initrd> --bootvm-system <systemImage>\n";
