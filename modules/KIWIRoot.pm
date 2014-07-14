@@ -548,7 +548,7 @@ sub init {
 	# Create package keys
 	#------------------------------------------
 	if (! defined $this->{cacheRoot}) {
-		$manager -> setupPackageKeys();
+		$this -> importHostPackageKeys();
 	}
 	#==========================================
 	# Setup shared cache directory
@@ -1245,6 +1245,10 @@ sub setup {
 		return;
 	}
 	#========================================
+	# export build host imported rpm keys
+	#----------------------------------------
+	$this -> exportHostPackageKeys();
+	#========================================
 	# call config.sh image script
 	#----------------------------------------
 	if ((! $initCache) && (-e "$imageDesc/config.sh")) {
@@ -1355,6 +1359,141 @@ sub setup {
 	if (-f "$root/.buildenv") {
 		KIWIQX::qxx ("rm -f $root/.buildenv");
 	}
+	return $this;
+}
+
+#==========================================
+# importHostPackageKeys
+#------------------------------------------
+sub importHostPackageKeys {
+	# ...
+	# import package keys to avoid warnings on installation
+	# of packages. This is an rpm only task and needs to be
+	# enhanced for non rpm based packages
+	# ---
+	my $this = shift;
+	my $root = $this->{root};
+	my $kiwi = $this->{kiwi};
+	my $data;
+	my $code;
+	#==========================================
+	# check for rpm binary
+	#------------------------------------------
+	if (! -x "/bin/rpm") {
+		# operates on rpm only
+		return $this;
+	}
+	#==========================================
+	# check build key and gpg
+	#------------------------------------------
+	$kiwi -> info ("Importing build keys...");
+	my $gnupg       = '/usr/lib/rpm/gnupg';
+	my $dumsigsExec = "$gnupg/dumpsigs";
+	my $keydir      = "$gnupg/keys";
+	my $sigs        = "$root/rpm-sigs";
+	if (! -d $gnupg) {
+		# no rpm gpg setup available
+		return $this;
+	}
+	if (! -d $keydir) {
+		my @keyring = (
+			"$gnupg/pubring.gpg",
+			"$gnupg/suse-build-key.gpg"
+		);
+		if (! -x $dumsigsExec) {
+			$kiwi -> skipped ();
+			$kiwi -> warning ("Can't find dumpsigs on host system");
+			$kiwi -> skipped ();
+			return $this;
+		}
+		$data = KIWIQX::qxx ("mkdir -p $sigs");
+		foreach my $key (@keyring) {
+			if (! -f $key) {
+				next;
+			}
+			$data = KIWIQX::qxx (
+				"cd $sigs && $dumsigsExec $key 2>&1"
+			);
+			$code = $? >> 8;
+			if ($code != 0) {
+				$kiwi -> skipped ();
+				$kiwi -> error  ("Can't dump pubkeys: $data");
+				$kiwi -> failed ();
+				KIWIQX::qxx ("rm -rf $sigs");
+				return $this;
+			}
+		}
+	} else {
+		$data = KIWIQX::qxx (
+			"mkdir -p $sigs && cp -a $keydir/* $sigs"
+		);
+	}
+	my @rpm_keys = ();
+	if (opendir (my $FD,$sigs)) {
+		@rpm_keys = readdir ($FD); closedir ($FD);
+	}
+	if (@rpm_keys <= 2) {
+		$kiwi -> skipped ();
+		$kiwi -> info ("No keys found for import");
+		$kiwi -> skipped ();
+		KIWIQX::qxx ("rm -rf $sigs");
+		return $this;
+	}
+	$data.= KIWIQX::qxx (
+		"rpm -r $root --import $keydir/gpg-pubke* 2>&1"
+	);
+	$code = $? >> 8;
+	if ($code != 0) {
+		$kiwi -> skipped ();
+		$kiwi -> error  ("Failed to import pubkeys: $data");
+		$kiwi -> failed ();
+		if (-d $sigs) {
+			KIWIQX::qxx ("rm -rf $sigs");
+		}
+		return $this;
+	}
+	$kiwi -> done();
+	return $this;
+}
+
+#==========================================
+# exportHostPackageKeys
+#------------------------------------------
+sub exportHostPackageKeys {
+	# ...
+	# remove kiwi imported host rpm package keys from the
+	# new root system in order to cleanup the stage
+	# ---
+	my $this = shift;
+	my $root = $this->{root};
+	my $kiwi = $this->{kiwi};
+	my $data;
+	my $code;
+	if (! -d "$root/rpm-sigs") {
+		return $this;
+	}
+	my @rpm_keys = ();
+	if (opendir (my $FD,"$root/rpm-sigs")) {
+		@rpm_keys = readdir ($FD); closedir ($FD);
+	}
+	if (@rpm_keys <= 2) {
+		return $this;
+	}
+	$kiwi -> info ("Removing host package keys\n");
+	foreach my $key (@rpm_keys) {
+		next if (($key eq '.') || ($key eq '..'));
+		if ($key =~ /(.*)\.asc/) {
+			$key = $1;
+		}
+		$data = KIWIQX::qxx ("rpm -r $root -e $key 2>&1");
+		$code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> info ("--> $key failed: $data\n");
+		} else {
+			$kiwi -> info ("--> $key\n");
+		}
+	}
+	KIWIQX::qxx ("rm -rf $root/rpm-sigs");
 	return $this;
 }
 
