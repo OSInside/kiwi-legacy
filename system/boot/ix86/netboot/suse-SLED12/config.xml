@@ -34,9 +34,7 @@
 		<file name="drivers/block/loop.ko"/>
 		<file name="drivers/block/nbd.ko"/>
 		<file name="drivers/char/lp.ko"/>
-		<file name="drivers/gpu/drm/i915/i915.ko"/>
-		<file name="drivers/gpu/drm/nouveau/nouveau.ko"/>
-		<file name="drivers/gpu/drm/radeon/radeon.ko"/>
+		<file name="drivers/gpu/drm/*"/>
 		<file name="drivers/hid/*"/>
 		<file name="drivers/hv/*"/>
 		<file name="drivers/ide/*"/>
@@ -87,9 +85,7 @@
 		<file name="drivers/block/brd.ko"/>
 		<file name="drivers/block/loop.ko"/>
 		<file name="drivers/block/nbd.ko"/>
-		<file name="drivers/gpu/drm/i915/i915.ko"/>
-		<file name="drivers/gpu/drm/nouveau/nouveau.ko"/>
-		<file name="drivers/gpu/drm/radeon/radeon.ko"/>
+		<file name="drivers/gpu/drm/*"/>
 		<file name="drivers/ide/*"/>
 		<file name="drivers/md/*"/>
 		<file name="drivers/message/fusion/*"/>

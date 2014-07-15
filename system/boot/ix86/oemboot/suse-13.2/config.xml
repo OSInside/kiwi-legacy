@@ -36,9 +36,7 @@
 		<file name="drivers/char/hw_random/virtio-rng.ko"/>
 		<file name="drivers/char/lp.ko"/>
 		<file name="drivers/firmware/edd.ko"/>
-		<file name="drivers/gpu/drm/i915/i915.ko"/>
-		<file name="drivers/gpu/drm/nouveau/nouveau.ko"/>
-		<file name="drivers/gpu/drm/radeon/radeon.ko"/>
+		<file name="drivers/gpu/drm/*"/>
 		<file name="drivers/hid/*"/>
 		<file name="drivers/hv/*"/>
 		<file name="drivers/hwmon/*"/>
