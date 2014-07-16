@@ -19,9 +19,13 @@ package KIWIXMLInfo;
 #------------------------------------------
 use strict;
 use warnings;
-require Exporter;
 use File::Find;
 use XML::LibXML;
+
+#==========================================
+# Base class
+#------------------------------------------
+use base qw /Exporter/;
 
 #==========================================
 # KIWI Modules

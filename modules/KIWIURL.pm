@@ -24,10 +24,10 @@ use Carp qw (cluck);
 use File::Basename;
 use FileHandle;
 use LWP;
+
 #==========================================
 # KIWI Modules
 #------------------------------------------
-use KIWIGlobals;
 use KIWILog;
 use KIWIQX;
 

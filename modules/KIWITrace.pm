@@ -21,8 +21,9 @@ package KIWITrace;
 use strict;
 use warnings;
 use File::Basename;
+
 #==========================================
-# Singleton class
+# Base class
 #------------------------------------------
 use base qw /Class::Singleton/;
 

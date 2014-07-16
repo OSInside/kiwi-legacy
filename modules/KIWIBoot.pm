@@ -19,8 +19,6 @@ package KIWIBoot;
 #==========================================
 # Modules
 #------------------------------------------
-require Exporter;
-
 use strict;
 use warnings;
 use Carp qw (cluck);
@@ -28,6 +26,11 @@ use FileHandle;
 use File::Basename;
 use File::Spec;
 use Math::BigFloat;
+
+#==========================================
+# Base class
+#------------------------------------------
+use base qw /Exporter/;
 
 #==========================================
 # KIWI Modules

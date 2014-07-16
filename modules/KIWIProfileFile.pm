@@ -14,14 +14,16 @@
 # STATUS        : Development
 #----------------
 package KIWIProfileFile;
-
 #==========================================
 # Modules
 #------------------------------------------
 use strict;
 use warnings;
 
-require Exporter;
+#==========================================
+# Base class
+#------------------------------------------
+use base qw /Exporter/;
 
 #==========================================
 # KIWI Modules

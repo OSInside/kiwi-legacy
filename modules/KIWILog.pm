@@ -24,17 +24,19 @@ use Carp qw (cluck);
 use FileHandle;
 use POSIX ":sys_wait_h";
 use Time::HiRes qw( sleep );
+
+#==========================================
+# Base class
+#------------------------------------------
+use base qw /Class::Singleton/;
+
 #==========================================
 # KIWI Modules
 #------------------------------------------
-require KIWISocket;
-require KIWISharedMem;
-require KIWIQX;
-require KIWITrace;
-#==========================================
-# Singleton class
-#------------------------------------------
-use base qw /Class::Singleton/;
+use KIWISocket;
+use KIWISharedMem;
+use KIWIQX;
+use KIWITrace;
 
 #==========================================
 # Tracing

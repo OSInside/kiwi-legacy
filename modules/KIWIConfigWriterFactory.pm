@@ -14,13 +14,16 @@
 # STATUS        : Development
 #----------------
 package KIWIConfigWriterFactory;
-
 #==========================================
 # Modules
 #------------------------------------------
 use strict;
 use warnings;
-require Exporter;
+
+#==========================================
+# Base class
+#------------------------------------------
+use base qw /Exporter/;
 
 #==========================================
 # KIWIModules

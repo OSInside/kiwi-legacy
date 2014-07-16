@@ -20,12 +20,19 @@ package KIWIIsoLinux;
 #------------------------------------------
 use strict;
 use warnings;
-use base qw (Exporter);
-use Carp qw (cluck);
-use Fcntl; # needed for some constants for sysopen
+use Carp qw /cluck/;
+use Fcntl;
 use File::Find;
 use File::Basename;
 
+#==========================================
+# Base class
+#------------------------------------------
+use base qw /Exporter/;
+
+#==========================================
+# KIWI Modules
+#------------------------------------------
 use KIWIGlobals;
 use KIWILocator;
 use KIWILog;

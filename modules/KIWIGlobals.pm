@@ -22,18 +22,20 @@ use warnings;
 use File::Basename;
 use Config::IniFiles;
 use LWP;
+
+#==========================================
+# Base class
+#------------------------------------------
+use base qw /Class::Singleton/;
+
 #==========================================
 # KIWI Modules
 #------------------------------------------
-require KIWILocator;
-require KIWILog;
-require KIWIQX;
-require KIWITrace;
-require KIWIXML;
-#==========================================
-# Singleton class
-#------------------------------------------
-use base qw /Class::Singleton/;
+use KIWILocator;
+use KIWILog;
+use KIWIQX;
+use KIWITrace;
+use KIWIXML;
 
 #==========================================
 # getArch

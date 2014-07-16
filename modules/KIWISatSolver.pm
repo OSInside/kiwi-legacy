@@ -22,6 +22,10 @@ package KIWISatSolver;
 use strict;
 use warnings;
 use Carp qw (cluck);
+
+#==========================================
+# KIWI Modules
+#------------------------------------------
 use KIWILog;
 use KIWIQX;
 

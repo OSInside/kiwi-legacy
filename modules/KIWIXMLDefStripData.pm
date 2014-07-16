@@ -14,19 +14,24 @@
 # STATUS        : Development
 #----------------
 package KIWIXMLDefStripData;
-
-
 #==========================================
 # Modules
 #------------------------------------------
 use strict;
 use warnings;
 use XML::LibXML;
-require Exporter;
 
+#==========================================
+# Base class
+#------------------------------------------
+use base qw /Exporter/;
+
+#==========================================
+# KIWI Modules
+#------------------------------------------
 use KIWILog;
 use KIWIXMLStripData;
-require KIWIGlobals;
+use KIWIGlobals;
 
 #==========================================
 # Exports

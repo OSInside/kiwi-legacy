@@ -19,9 +19,14 @@ package KIWICommandLine;
 #------------------------------------------
 use strict;
 use warnings;
-require Exporter;
 use Digest::MD5 qw (md5_hex);
 use File::Spec;
+
+#==========================================
+# Base class
+#------------------------------------------
+use base qw /Exporter/;
+
 #==========================================
 # KIWIModules
 #------------------------------------------

@@ -20,7 +20,11 @@ use strict;
 use warnings;
 use File::Basename;
 use File::Spec;
-require Exporter;
+
+#==========================================
+# Base class
+#------------------------------------------
+use base qw /Exporter/;
 
 #==========================================
 # KIWI Modules

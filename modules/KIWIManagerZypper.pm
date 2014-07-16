@@ -19,13 +19,19 @@ package KIWIManagerZypper;
 #------------------------------------------
 use strict;
 use warnings;
-require Exporter;
 use Carp qw (cluck);
 use Env;
 use FileHandle;
 use File::Basename;
 use Config::IniFiles;
 use POSIX;
+
+#==========================================
+# Base class
+#------------------------------------------
+use base qw /Exporter/;
+use base qw /KIWIManager/;
+
 #==========================================
 # KIWI Modules
 #------------------------------------------
@@ -34,11 +40,6 @@ use KIWILocator;
 use KIWIQX;
 use KIWIXML;
 use KIWIXMLPreferenceData;
-
-#==========================================
-# Modules
-#------------------------------------------
-use base qw /KIWIManager/;
 
 #==========================================
 # Exports

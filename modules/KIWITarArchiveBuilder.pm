@@ -19,7 +19,11 @@ package KIWITarArchiveBuilder;
 use strict;
 use warnings;
 
-require Exporter;
+#==========================================
+# Base class
+#------------------------------------------
+use base qw /Exporter/;
+use base qw /KIWIImageBuilderBase/;
 
 #==========================================
 # KIWI Modules
@@ -30,8 +34,6 @@ use KIWILocator;
 use KIWILog;
 use KIWIQX;
 use KIWIXML;
-
-use base qw /KIWIImageBuilderBase/;
 
 #==========================================
 # Exports

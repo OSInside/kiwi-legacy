@@ -22,7 +22,11 @@ package KIWIRuntimeChecker;
 #------------------------------------------
 use strict;
 use warnings;
-use base qw (Exporter);
+
+#==========================================
+# Base class
+#------------------------------------------
+use base qw /Exporter/;
 
 #==========================================
 # KIWI Modules
