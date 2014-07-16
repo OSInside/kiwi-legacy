@@ -81,16 +81,15 @@ sub new {
 	#==========================================
 	# read XML if required
 	#------------------------------------------
-	if (! defined $xml) {
-		my $boot = KIWIBoot -> new (
-			undef,$cmdL,$image,undef,undef,
-			$cmdL->getBuildProfiles()
-		);
-		if ($boot) {
-			$xml = $boot->{xml};
-			$boot -> cleanStack ();
+	if (! $xml) {
+		my %read_result = $global -> readXMLFromImage ($image, $cmdL);
+		if (! %read_result) {
+			return;
 		}
-		if (! defined $xml) {
+		if ($read_result{xml}) {
+			$xml = $read_result{xml};
+		}
+		if (! $xml) {
 			$kiwi -> error  ("Can't load XML configuration, not an image ?");
 			$kiwi -> failed ();
 			return;

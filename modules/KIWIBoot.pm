@@ -223,92 +223,29 @@ sub new {
 	$this->{bootsize} = 100;
 	$this->{isDisk}   = 0;
 	#==========================================
-	# setup pointer to XML configuration
+	# read XML from given image file or path
 	#------------------------------------------
-	my $rootpath = $system;
-	if (defined $system) {
-		if (! -d $system) {
-			#==========================================
-			# mount system image
-			#------------------------------------------
-			if (! KIWIGlobals -> instance() -> mount ($system,$tmpdir)) {
-				return;
-			}
-			my $sdev = KIWIGlobals -> instance() -> getMountDevice();
-			if (KIWIGlobals -> instance() -> isMountLVM()) {
-				$this->{lvmgroup} = KIWIGlobals
-					-> instance()
-					-> getMountLVMGroup();
-				$this->{lvm} = 1;
-			}
-			#==========================================
-			# check for read-only root
-			#------------------------------------------
-			my %fsattr = KIWIGlobals -> instance() -> checkFileSystem ($sdev);
-			if ($fsattr{readonly}) {
-				$syszip = KIWIGlobals -> instance() -> isize ($system);
-			}
-			#==========================================
-			# set root path to mountpoint
-			#------------------------------------------
-			$rootpath = $tmpdir;
-		}
-		#==========================================
-		# check for split type
-		#------------------------------------------
-		if (-f "$rootpath/rootfs.tar") {
-			$cmdL -> setBuildType ("split");
-			$haveSplit = 1;
-		}
-		#==========================================
-		# read origin path of XML description
-		#------------------------------------------
-		if (open my $FD, '<', "$rootpath/image/main::Prepare") {
-			my $idesc = <$FD>; close $FD;
-			$this->{originXMLPath} = $idesc;
-		}
-		#==========================================
-		# read and validate XML description
-		#------------------------------------------
-		my $locator = KIWILocator -> instance();
-		my $controlFile = $locator -> getControlFile ($rootpath."/image");
-		my $validator = KIWIXMLValidator -> new (
-			$controlFile,
-			$this->{gdata}->{Revision},
-			$this->{gdata}->{Schema},
-			$this->{gdata}->{SchemaCVT}
+	if ($system) {
+		my %read_result = $global -> readXMLFromImage (
+			$system, $cmdL, $tmpdir
 		);
-		my $isValid = $validator ? $validator -> validate() : undef;
-		if (! $isValid) {
-			if (! -d $system) {
-				KIWIGlobals -> instance() -> umount();
-			}
+		if (! %read_result) {
 			return;
 		}
-		$xml = KIWIXML -> new (
-			$rootpath."/image",$cmdL->getBuildType(),$profile,$cmdL
-		);
-		#==========================================
-		# clean up
-		#------------------------------------------
-		if (! -d $system) {
-			$this->{isDisk} = KIWIGlobals -> instance() -> isDisk();
-			KIWIGlobals -> instance() -> umount();
+		if ($read_result{xml}) {
+			$xml = $read_result{xml};
 		}
-		#==========================================
-		# check if we got the XML description
-		#------------------------------------------
-		if (! defined $xml) {
-			return;
+		if ($read_result{sysz_size}) {
+			$syszip = $read_result{sysz_size};
+		}
+		if ($read_result{split}) {
+			$haveSplit = $read_result{split};
 		}
 	}
 	#==========================================
 	# store type information
 	#------------------------------------------
-	if (defined $xml) {
-		if (! KIWIGlobals -> instance() -> checkType ($xml,$rootpath,$cmdL)) {
-			return;
-		}
+	if ($xml) {
 		my $xmltype = $xml -> getImageType();
 		if (! $xmltype) {
 			return;

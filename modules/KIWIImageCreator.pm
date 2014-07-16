@@ -1382,7 +1382,9 @@ sub __isInstallBootImage {
 	# ---
 	my $this = shift;
 	my $boot = shift;
-	my $data = KIWIQX::qxx ('gzip -cd '.$boot.'|cpio -it|grep -q ^dump$ 2>&1');
+	my $data = KIWIQX::qxx (
+		'gzip -cd '.$boot.' | cpio -it 2>/dev/null | grep -q ^dump$ 2>&1'
+	);
 	my $code = $? >> 8;
 	if ($code != 0) {
 		return;

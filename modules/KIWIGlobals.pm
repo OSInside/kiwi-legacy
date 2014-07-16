@@ -29,6 +29,7 @@ require KIWILocator;
 require KIWILog;
 require KIWIQX;
 require KIWITrace;
+require KIWIXML;
 #==========================================
 # Singleton class
 #------------------------------------------
@@ -1603,13 +1604,13 @@ sub setupSplashLink {
 	my $result;
 	if ($initrd !~ /.(g|x)z$/) {
 		$status = KIWIQX::qxx (
-			"$this->{gdata}->{IrdZipperCommand} -f $initrd 2>&1"
+			"$gdata->{IrdZipperCommand} -f $initrd 2>&1"
 		);
 		$result = $? >> 8;
 		if ($result != 0) {
 			return ("Failed to compress initrd: $status");
 		}
-		$initrd = $initrd.".".$this->{gdata}->{IrdZipperSuffix};
+		$initrd = $initrd.".".$gdata->{IrdZipperSuffix};
 	}
 	my $dirname = dirname  $initrd;
 	my $curfile = basename $initrd;
@@ -1652,6 +1653,135 @@ sub buildMD5Sum {
 	KIWIQX::qxx ("echo \"$sum $blocks $blocksize\" > $file");
 	$kiwi -> done();
 	return $this;
+}
+
+#==========================================
+# readXMLFromSource
+#------------------------------------------
+sub readXMLFromImage {
+	# ...
+	# read the XML description stored inside of an image file
+	# returns the XML object and parameters about the rootfs
+	# living inside the image
+	# ---
+	my $this   = shift;
+	my $system = shift;
+	my $cmdL   = shift;
+	my $tmpdir = shift;
+	my $kiwi   = $this->{kiwi};
+	my $global = KIWIGlobals -> instance();
+	my $profile= $cmdL -> getBuildProfiles();
+	my $syszSize = 0;
+	my $haveSplit= 0;
+	if ((! $system) || (! $cmdL)) {
+		return;
+	}
+	my $rootpath = $system;
+	if (! -d $system) {
+		#==========================================
+		# create tmpdir if not yet available
+		#------------------------------------------
+		if ((! $tmpdir) || (! -d $tmpdir)) {
+			$tmpdir = KIWIQX::qxx ("mktemp -qdt kiwiread.XXXXXX");
+			my $result = $? >> 8;
+			chomp $tmpdir;
+			if ($result != 0) {
+				$kiwi -> error  ("Couldn't create tmp dir: $tmpdir: $!");
+				$kiwi -> failed ();
+				return;
+			}
+		}
+		#==========================================
+		# mount system image
+		#------------------------------------------
+		if (! $global -> mount ($system,$tmpdir)) {
+			return;
+		}
+		my $sdev = $global -> getMountDevice();
+		if ($global -> isMountLVM()) {
+			$this->{lvmgroup} = $global -> getMountLVMGroup();
+			$this->{lvm} = 1;
+		}
+		#==========================================
+		# check for read-only root
+		#------------------------------------------
+		my %fsattr = $global -> checkFileSystem ($sdev);
+		if ($fsattr{readonly}) {
+			$syszSize = $global -> isize ($system);
+		}
+		#==========================================
+		# set root path to mountpoint
+		#------------------------------------------
+		$rootpath = $tmpdir;
+	}
+	#==========================================
+	# check for split type
+	#------------------------------------------
+	if (-f "$rootpath/rootfs.tar") {
+		$cmdL -> setBuildType ("split");
+		$haveSplit = 1;
+	}
+	#==========================================
+	# read origin path of XML description
+	#------------------------------------------
+	if (open my $FD, '<', "$rootpath/image/main::Prepare") {
+		my $idesc = <$FD>; close $FD;
+		$this->{originXMLPath} = $idesc;
+	}
+	#==========================================
+	# read and validate XML description
+	#------------------------------------------
+	my $gdata = $global -> getKiwiConfig();
+	my $locator = KIWILocator -> instance();
+	my $controlFile = $locator -> getControlFile ($rootpath."/image");
+	my $validator = KIWIXMLValidator -> new (
+		$controlFile,
+		$gdata->{Revision},
+		$gdata->{Schema},
+		$gdata->{SchemaCVT}
+	);
+	my $isValid = $validator ? $validator -> validate() : undef;
+	if (! $isValid) {
+		if (! -d $system) {
+			$global -> umount();
+		}
+		return;
+	}
+	my $xml_error = 0;
+	my $xml = KIWIXML -> new (
+		$rootpath."/image",$cmdL->getBuildType(),$profile,$cmdL
+	);
+	if (! $xml) {
+		$xml_error = 1;
+	}
+	#==========================================
+	# check build type requirements
+	#------------------------------------------
+	if ((! $xml_error) && (! $global -> checkType ($xml,$rootpath,$cmdL))) {
+		$xml_error = 1;
+	}
+	#==========================================
+	# clean up
+	#------------------------------------------
+	if (! -d $system) {
+		$this->{isDisk} = $global -> isDisk();
+		$global -> umount();
+	}
+	#==========================================
+	# return on error
+	#------------------------------------------
+	if ($xml_error) {
+		return;
+	}
+	#==========================================
+	# build and return result hash
+	#------------------------------------------
+	my %result = (
+		"xml" => $xml,
+		"sysz_size" => $syszSize,
+		"split" => $haveSplit
+	);
+	return %result;
 }
 
 #==========================================
@@ -1830,4 +1960,3 @@ sub _new_instance {
 }
 
 1;
-
