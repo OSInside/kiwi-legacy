@@ -1124,20 +1124,9 @@ sub createSplash {
 	# create a splash screen on the stored initrd file
 	# ---
 	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $ird  = $this->{initrd};
-	my $cmdL = $this->{cmdL};
-	my $prof = $this->{buildProfiles};
-	my $boot = KIWIBoot -> new (
-		$ird,$cmdL,undef,undef,undef,$prof
+	return KIWIGlobals -> instance() -> setupSplash(
+		$this->{initrd}
 	);
-	if (! defined $boot) {
-		return;
-	}
-	$this->{boot} = $boot;
-	$boot -> setupSplash();
-	undef $boot;
-	return 1;
 }
 
 #==========================================

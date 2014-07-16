@@ -1468,6 +1468,193 @@ sub checkType {
 }
 
 #==========================================
+# isXen
+#------------------------------------------
+sub isXen {
+	# ...
+	# Check if initrd is Xen based
+	# ---
+	my $this  = shift;
+	my $xengz = shift;
+	my $isxen = 0;
+	my $gdata = KIWIGlobals -> instance() -> getKiwiConfig();
+	my $suf   = $gdata -> {IrdZipperSuffix};
+	if ($xengz) {
+		$xengz =~ s/\.$suf$//;
+		$xengz =~ s/\.splash$//;
+		foreach my $xen (glob ("$xengz*xen*.$suf")) {
+			$isxen = 1;
+			$xengz = $xen;
+			last;
+		}
+		if (! $isxen) {
+			my $kernel = readlink $xengz.".kernel";
+			if (($kernel) && ($kernel =~ /.*-xen$/)) {
+				$isxen = 1;
+			}
+		}
+	}
+	return ($xengz, $isxen);
+}
+
+#==========================================
+# setupSplash
+#------------------------------------------
+sub setupSplash {
+	# ...
+	# setup kernel based bootsplash
+	# ---
+	my $this   = shift;
+	my $initrd = shift;
+	my $kiwi   = $this->{kiwi};
+	my $destdir= dirname ($initrd);
+	my $global = KIWIGlobals -> instance();
+	my $gdata  = $global -> getKiwiConfig();
+	my $suf    = $gdata -> {IrdZipperSuffix};
+	my $zipped = 0;
+	my $status;
+	my $newird;
+	my $splfile;
+	my $result;
+	#==========================================
+	# setup file names
+	#------------------------------------------
+	if (($initrd =~ /\.(g|x)z$/)) {
+		$zipped = 1;
+	}
+	if ($zipped) {
+		$newird = $initrd; $newird =~ s/\.((g|x)z)/\.splash.$1/;
+		$splfile= $initrd; $splfile =~ s/\.(g|x)z/\.spl/;
+	} else {
+		$newird = $initrd.".splash.".$suf;
+		$splfile= $initrd.".spl";
+	}
+	my $plymouth = $destdir."/plymouth.splash.active";
+	#==========================================
+	# check if splash initrd is already there
+	#------------------------------------------
+	if ((! -l $newird) && (-f $newird)) {
+		# splash initrd already created...
+		return $newird;
+	}
+	$kiwi -> info ("Setting up splash screen...\n");
+	#==========================================
+	# setup splash in initrd
+	#------------------------------------------
+	my $spllink = 0;
+	my ($xengz, $isxen) = $global -> isXen ($initrd);
+	if (-f $plymouth) {
+		$status = "--> plymouth splash system will be used";
+		KIWIQX::qxx ("rm -f $plymouth");
+		$spllink= 1;
+	} elsif ($isxen) {
+		$status = "--> skip splash initrd attachment for xen";
+		$spllink= 1;
+		KIWIQX::qxx ("rm -f $splfile");
+	} elsif (-f $splfile) {
+		KIWIQX::qxx ("cat $initrd $splfile > $newird");
+		$status = "--> kernel splash system will be used";
+		$spllink= 0;
+	} else {
+		$status = "--> Can't find splash file: $splfile";
+		$spllink= 1;
+	}
+	$kiwi -> info ($status);
+	$kiwi -> done ();
+	#==========================================
+	# check splash compat status
+	#------------------------------------------
+	if ($spllink) {
+		$kiwi -> info ("Creating compat splash link...");
+		$status = $this -> setupSplashLink ($initrd, $newird);
+		if ($status ne "ok") {
+			$kiwi -> failed();
+			$kiwi -> error ($status);
+			$kiwi -> failed();
+		} else {
+			$kiwi -> done();
+		}
+		return $initrd;
+	}
+	#==========================================
+	# build md5 sum for real new splash initrd
+	#------------------------------------------
+	my $newmd5 = $newird;
+	$newmd5 =~ s/gz$/md5/;
+	$this -> buildMD5Sum ($newird, $newmd5);
+	return $newird;
+}
+
+#==========================================
+# setupSplashLink
+#------------------------------------------
+sub setupSplashLink {
+	# ...
+	# This function only makes sure the .splash.(g|x)z
+	# file exists. This is done by creating a link to the
+	# original initrd file
+	# ---
+	my $this   = shift;
+	my $initrd = shift;
+	my $newird = shift;
+	my $global = KIWIGlobals -> instance();
+	my $gdata  = $global -> getKiwiConfig();
+	my $status;
+	my $result;
+	if ($initrd !~ /.(g|x)z$/) {
+		$status = KIWIQX::qxx (
+			"$this->{gdata}->{IrdZipperCommand} -f $initrd 2>&1"
+		);
+		$result = $? >> 8;
+		if ($result != 0) {
+			return ("Failed to compress initrd: $status");
+		}
+		$initrd = $initrd.".".$this->{gdata}->{IrdZipperSuffix};
+	}
+	my $dirname = dirname  $initrd;
+	my $curfile = basename $initrd;
+	my $newfile = basename $newird;
+	$status = KIWIQX::qxx (
+		"cd $dirname && rm -f $newfile && ln -s $curfile $newfile"
+	);
+	$result = $? >> 8;
+	if ($result != 0) {
+		return ("Failed to create splash link $!");
+	}
+	return "ok";
+}
+
+#==========================================
+# buildMD5Sum
+#------------------------------------------
+sub buildMD5Sum {
+	my $this = shift;
+	my $file = shift;
+	my $outf = shift;
+	my $kiwi = $this->{kiwi};
+	$kiwi -> info ("Creating image MD5 sum...");
+	my $size = KIWIGlobals -> instance() -> isize ($file);
+	my $primes = KIWIQX::qxx ("factor $size"); $primes =~ s/^.*: //;
+	my $blocksize = 1;
+	for my $factor (split /\s/,$primes) {
+		last if ($blocksize * $factor > 8192);
+		$blocksize *= $factor;
+	}
+	my $blocks = $size / $blocksize;
+	my $sum  = KIWIQX::qxx ("cat $file | md5sum - | cut -f 1 -d-");
+	chomp $sum;
+	if ($outf) {
+		$file = $outf;
+	}
+	if ($file =~ /\.raw$/) {
+		$file =~ s/raw$/md5/;
+	}
+	KIWIQX::qxx ("echo \"$sum $blocks $blocksize\" > $file");
+	$kiwi -> done();
+	return $this;
+}
+
+#==========================================
 # Private helper methods
 #------------------------------------------
 #==========================================
@@ -1643,3 +1830,4 @@ sub _new_instance {
 }
 
 1;
+
