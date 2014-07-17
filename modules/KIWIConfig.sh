@@ -158,23 +158,33 @@ function suseActivateDefaultServices {
 	# /.../
 	# Some basic services that needs to be on.
 	# ----
-	local services=(
-		boot.rootfsck
-		boot.cleanup
-		boot.localfs
-		boot.localnet
-		boot.clock
-		policykitd
-		dbus
-		consolekit
-		haldaemon
-		network
-		atd
-		syslog
-		cron
-		kbd
-	)
+	local services
+	local systemd_system=/usr/lib/systemd/system
+	if [ -d $systemd_system ];then
+		services=(
+			network
+			cron
+		)
+	else
+		services=(
+			boot.rootfsck
+			boot.cleanup
+			boot.localfs
+			boot.localnet
+			boot.clock
+			policykitd
+			dbus
+			consolekit
+			haldaemon
+			network
+			atd
+			syslog
+			cron
+			kbd
+		)
+	fi
 	for i in "${services[@]}";do
+		echo "Activating service: $i"
 		suseInsertService $i
 	done
 }
