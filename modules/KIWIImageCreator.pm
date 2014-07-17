@@ -20,7 +20,11 @@ use strict;
 use warnings;
 use File::Basename;
 use File::Spec;
-require Exporter;
+
+#==========================================
+# Base class
+#------------------------------------------
+use base qw /Exporter/;
 
 #==========================================
 # KIWI Modules
@@ -1124,20 +1128,9 @@ sub createSplash {
 	# create a splash screen on the stored initrd file
 	# ---
 	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $ird  = $this->{initrd};
-	my $cmdL = $this->{cmdL};
-	my $prof = $this->{buildProfiles};
-	my $boot = KIWIBoot -> new (
-		$ird,$cmdL,undef,undef,undef,$prof
+	return KIWIGlobals -> instance() -> setupSplash(
+		$this->{initrd}
 	);
-	if (! defined $boot) {
-		return;
-	}
-	$this->{boot} = $boot;
-	$boot -> setupSplash();
-	undef $boot;
-	return 1;
 }
 
 #==========================================
@@ -1393,7 +1386,9 @@ sub __isInstallBootImage {
 	# ---
 	my $this = shift;
 	my $boot = shift;
-	my $data = KIWIQX::qxx ('gzip -cd '.$boot.'|cpio -it|grep -q ^dump$ 2>&1');
+	my $data = KIWIQX::qxx (
+		'gzip -cd '.$boot.' | cpio -it 2>/dev/null | grep -q ^dump$ 2>&1'
+	);
 	my $code = $? >> 8;
 	if ($code != 0) {
 		return;

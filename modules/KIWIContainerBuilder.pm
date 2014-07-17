@@ -19,7 +19,11 @@ package KIWIContainerBuilder;
 use strict;
 use warnings;
 
-require Exporter;
+#==========================================
+# Base class
+#------------------------------------------
+use base qw /Exporter/;
+use base qw /KIWIImageBuilderBase/;
 
 #==========================================
 # KIWI Modules
@@ -31,8 +35,6 @@ use KIWILog;
 use KIWIQX;
 use KIWIXML;
 use KIWIXMLTypeData;
-
-use base qw /KIWIImageBuilderBase/;
 
 #==========================================
 # Exports

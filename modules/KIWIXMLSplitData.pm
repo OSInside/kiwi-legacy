@@ -22,12 +22,18 @@ use strict;
 use warnings;
 use XML::LibXML;
 
+#==========================================
+# Base class
+#------------------------------------------
+use base qw /Exporter/;
+use base qw /KIWIXMLDataBase/;
+
+#==========================================
+# KIWI Modules
+#------------------------------------------
 use KIWIXMLExceptData;
 use KIWIXMLFileData;
 
-require Exporter;
-
-use base qw /KIWIXMLDataBase/;
 #==========================================
 # Exports
 #------------------------------------------

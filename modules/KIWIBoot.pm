@@ -19,8 +19,6 @@ package KIWIBoot;
 #==========================================
 # Modules
 #------------------------------------------
-require Exporter;
-
 use strict;
 use warnings;
 use Carp qw (cluck);
@@ -28,6 +26,11 @@ use FileHandle;
 use File::Basename;
 use File::Spec;
 use Math::BigFloat;
+
+#==========================================
+# Base class
+#------------------------------------------
+use base qw /Exporter/;
 
 #==========================================
 # KIWI Modules
@@ -186,27 +189,13 @@ sub new {
 		return;
 	}
 	#==========================================
-	# check if Xen system is used
+	# Store pointer to global values
 	#------------------------------------------
 	$this->{gdata} = $global -> getKiwiConfig();
-	$isxen = 0;
-	$xengz = $initrd;
-	my $suf  = $this->{gdata}->{IrdZipperSuffix};
-	if ($xengz) {
-		$xengz =~ s/\.$suf$//;
-		$xengz =~ s/\.splash$//;
-		foreach my $xen (glob ("$xengz*xen*.$suf")) {
-			$isxen = 1;
-			$xengz = $xen;
-			last;
-		}
-		if (! $isxen) {
-			my $kernel = readlink $xengz.".kernel";
-			if (($kernel) && ($kernel =~ /.*-xen$/)) {
-				$isxen = 1;
-			}
-		}
-	}
+	#==========================================
+	# check if Xen system is used
+	#------------------------------------------
+	($xengz, $isxen) = $global -> isXen ($initrd);
 	#==========================================
 	# create tmp dir for operations
 	#------------------------------------------
@@ -237,92 +226,29 @@ sub new {
 	$this->{bootsize} = 100;
 	$this->{isDisk}   = 0;
 	#==========================================
-	# setup pointer to XML configuration
+	# read XML from given image file or path
 	#------------------------------------------
-	my $rootpath = $system;
-	if (defined $system) {
-		if (! -d $system) {
-			#==========================================
-			# mount system image
-			#------------------------------------------
-			if (! KIWIGlobals -> instance() -> mount ($system,$tmpdir)) {
-				return;
-			}
-			my $sdev = KIWIGlobals -> instance() -> getMountDevice();
-			if (KIWIGlobals -> instance() -> isMountLVM()) {
-				$this->{lvmgroup} = KIWIGlobals
-					-> instance()
-					-> getMountLVMGroup();
-				$this->{lvm} = 1;
-			}
-			#==========================================
-			# check for read-only root
-			#------------------------------------------
-			my %fsattr = KIWIGlobals -> instance() -> checkFileSystem ($sdev);
-			if ($fsattr{readonly}) {
-				$syszip = KIWIGlobals -> instance() -> isize ($system);
-			}
-			#==========================================
-			# set root path to mountpoint
-			#------------------------------------------
-			$rootpath = $tmpdir;
-		}
-		#==========================================
-		# check for split type
-		#------------------------------------------
-		if (-f "$rootpath/rootfs.tar") {
-			$cmdL -> setBuildType ("split");
-			$haveSplit = 1;
-		}
-		#==========================================
-		# read origin path of XML description
-		#------------------------------------------
-		if (open my $FD, '<', "$rootpath/image/main::Prepare") {
-			my $idesc = <$FD>; close $FD;
-			$this->{originXMLPath} = $idesc;
-		}
-		#==========================================
-		# read and validate XML description
-		#------------------------------------------
-		my $locator = KIWILocator -> instance();
-		my $controlFile = $locator -> getControlFile ($rootpath."/image");
-		my $validator = KIWIXMLValidator -> new (
-			$controlFile,
-			$this->{gdata}->{Revision},
-			$this->{gdata}->{Schema},
-			$this->{gdata}->{SchemaCVT}
+	if ($system) {
+		my %read_result = $global -> readXMLFromImage (
+			$system, $cmdL, $tmpdir
 		);
-		my $isValid = $validator ? $validator -> validate() : undef;
-		if (! $isValid) {
-			if (! -d $system) {
-				KIWIGlobals -> instance() -> umount();
-			}
+		if (! %read_result) {
 			return;
 		}
-		$xml = KIWIXML -> new (
-			$rootpath."/image",$cmdL->getBuildType(),$profile,$cmdL
-		);
-		#==========================================
-		# clean up
-		#------------------------------------------
-		if (! -d $system) {
-			$this->{isDisk} = KIWIGlobals -> instance() -> isDisk();
-			KIWIGlobals -> instance() -> umount();
+		if ($read_result{xml}) {
+			$xml = $read_result{xml};
 		}
-		#==========================================
-		# check if we got the XML description
-		#------------------------------------------
-		if (! defined $xml) {
-			return;
+		if ($read_result{sysz_size}) {
+			$syszip = $read_result{sysz_size};
+		}
+		if ($read_result{split}) {
+			$haveSplit = $read_result{split};
 		}
 	}
 	#==========================================
 	# store type information
 	#------------------------------------------
-	if (defined $xml) {
-		if (! KIWIGlobals -> instance() -> checkType ($xml,$rootpath,$cmdL)) {
-			return;
-		}
+	if ($xml) {
 		my $xmltype = $xml -> getImageType();
 		if (! $xmltype) {
 			return;
@@ -561,7 +487,7 @@ sub createBootStructure {
 		$iname  = $iname.".".$loc;
 	}
 	if ($initrd !~ /splash\.$suf$|splash\.install\.$suf/) {
-		$initrd = $this -> setupSplash();
+		$initrd = KIWIGlobals -> instance() -> setupSplash($initrd);
 		$zipped = 1;
 	}
 	$kiwi -> info ("Creating initial boot structure");
@@ -574,9 +500,9 @@ sub createBootStructure {
 		return;
 	}
 	if ($zipped) {
-		$status = KIWIQX::qxx ( "cp $initrd $tmpdir/boot/$iname 2>&1" );
+		$status = KIWIQX::qxx ("cp $initrd $tmpdir/boot/$iname 2>&1");
 	} else {
-		$status = KIWIQX::qxx ( "cat $initrd | $zipper > $tmpdir/boot/$iname" );
+		$status = KIWIQX::qxx ("cat $initrd | $zipper > $tmpdir/boot/$iname");
 	}
 	$result = $? >> 8;
 	if ($result != 0) {
@@ -585,7 +511,7 @@ sub createBootStructure {
 		$kiwi -> failed ();
 		return;
 	}
-	$status = KIWIQX::qxx ( "cp $kernel $tmpdir/boot/$lname 2>&1" );
+	$status = KIWIQX::qxx ("cp $kernel $tmpdir/boot/$lname 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
@@ -594,7 +520,7 @@ sub createBootStructure {
 		return;
 	}
 	if (($isxen) && ($xendomain eq "dom0")) {
-		$status = KIWIQX::qxx ( "cp $xengz $tmpdir/boot/$xname 2>&1" );
+		$status = KIWIQX::qxx ("cp $xengz $tmpdir/boot/$xname 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -623,6 +549,7 @@ sub setupInstallCD {
 	my $lvm       = $this->{lvm};
 	my $xml       = $this->{xml};
 	my $firmware  = $this->{firmware};
+	my $global    = KIWIGlobals -> instance();
 	my $md5name   = $system;
 	my $destdir   = dirname ($initrd);
 	my $gotsys    = 1;
@@ -661,7 +588,7 @@ sub setupInstallCD {
 	#==========================================
 	# Create new MBR label for install ISO
 	#------------------------------------------
-	$this->{mbrid} = KIWIGlobals -> instance() -> getMBRDiskLabel();
+	$this->{mbrid} = $global -> getMBRDiskLabel();
 	$appid = $this->{mbrid};
 	$kiwi -> info ("Using ISO Application ID: $appid");
 	$kiwi -> done();
@@ -718,9 +645,9 @@ sub setupInstallCD {
 	#------------------------------------------
 	if ($gotsys) {
 		if (! $haveDiskDevice) {
-			$this -> buildMD5Sum ($system);
+			$global -> buildMD5Sum ($system);
 		} else {
-			$this -> buildMD5Sum ($this->{loop},$system);
+			$global -> buildMD5Sum ($this->{loop},$system);
 		}
 	}
 	#==========================================
@@ -1034,7 +961,8 @@ sub setupInstallStick {
 	my $firmware  = $this->{firmware};
 	my $type      = $this->{type};
 	my $bootsize  = $this -> __getBootSize ();
-	my $vmsize    = KIWIGlobals -> instance() -> isize ($system);
+	my $global    = KIWIGlobals -> instance();
+	my $vmsize    = $global -> isize ($system);
 	my $md5name   = $system;
 	my $destdir   = dirname ($initrd);
 	my %deviceMap = ();
@@ -1064,7 +992,7 @@ sub setupInstallStick {
 	#==========================================
 	# Create new MBR label for install disk
 	#------------------------------------------
-	$this->{mbrid} = KIWIGlobals -> instance() -> getMBRDiskLabel();
+	$this->{mbrid} = $global -> getMBRDiskLabel();
 	#==========================================
 	# Check for disk device
 	#------------------------------------------
@@ -1085,7 +1013,8 @@ sub setupInstallStick {
 	#==========================================
 	# create tmp directory
 	#------------------------------------------
-	$tmpdir = KIWIQX::qxx ( "mktemp -qdt kiwistickinst.XXXXXX" ); chomp $tmpdir;
+	$tmpdir = KIWIQX::qxx ("mktemp -qdt kiwistickinst.XXXXXX");
+	chomp $tmpdir;
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> error  ("Couldn't create tmp dir: $tmpdir: $!");
@@ -1124,9 +1053,9 @@ sub setupInstallStick {
 	#------------------------------------------
 	if ($gotsys) {
 		if (! $haveDiskDevice) {
-			$this -> buildMD5Sum ($system);
+			$global -> buildMD5Sum ($system);
 		} else {
-			$this -> buildMD5Sum ($haveDiskDevice,$system);
+			$global -> buildMD5Sum ($haveDiskDevice,$system);
 		}
 	}
 	#==========================================
@@ -1530,6 +1459,7 @@ sub setupInstallPXE {
 	my $lvm       = $this->{lvm};
 	my $imgtype   = $this->{imgtype};
 	my $type      = $this->{type};
+	my $global    = KIWIGlobals -> instance();
 	my $destdir   = dirname ($initrd);
 	my $md5name   = $system;
 	my $appname;
@@ -1545,7 +1475,7 @@ sub setupInstallPXE {
 	#==========================================
 	# Create new MBR label for PXE install
 	#------------------------------------------
-	$this->{mbrid} = KIWIGlobals -> instance() -> getMBRDiskLabel();
+	$this->{mbrid} = $global -> getMBRDiskLabel();
 	#==========================================
 	# Check for disk device
 	#------------------------------------------
@@ -1601,9 +1531,9 @@ sub setupInstallPXE {
 	# Build md5sum of system image
 	#------------------------------------------
 	if (! $haveDiskDevice) {
-		$this -> buildMD5Sum ($system);
+		$global -> buildMD5Sum ($system);
 	} else {
-		$this -> buildMD5Sum ($this->{loop},$system);
+		$global -> buildMD5Sum ($this->{loop},$system);
 	}
 	$md5name =~ s/\.raw$/\.md5/;
 	#==========================================
@@ -3406,127 +3336,6 @@ sub setupPartIDs {
 }
 
 #==========================================
-# setupSplash
-#------------------------------------------
-sub setupSplash {
-	# ...
-	# setup kernel based bootsplash
-	# ---
-	my $this   = shift;
-	my $kiwi   = $this->{kiwi};
-	my $initrd = $this->{initrd};
-	my $destdir= dirname ($initrd);
-	my $isxen  = $this->{isxen};
-	my $suf    = $this->{gdata}->{IrdZipperSuffix};
-	my $zipped = 0;
-	my $status;
-	my $newird;
-	my $splfile;
-	my $result;
-	#==========================================
-	# setup file names
-	#------------------------------------------
-	if (($initrd =~ /\.(g|x)z$/)) {
-		$zipped = 1;
-	}
-	if ($zipped) {
-		$newird = $initrd; $newird =~ s/\.((g|x)z)/\.splash.$1/;
-		$splfile= $initrd; $splfile =~ s/\.(g|x)z/\.spl/;
-	} else {
-		$newird = $initrd.".splash.".$suf;
-		$splfile= $initrd.".spl";
-	}
-	my $plymouth = $destdir."/plymouth.splash.active";
-	#==========================================
-	# check if splash initrd is already there
-	#------------------------------------------
-	if ((! -l $newird) && (-f $newird)) {
-		# splash initrd already created...
-		return $newird;
-	}
-	$kiwi -> info ("Setting up splash screen...\n");
-	#==========================================
-	# setup splash in initrd
-	#------------------------------------------
-	my $spllink = 0;
-	if (-f $plymouth) {
-		$status = "--> plymouth splash system will be used";
-		KIWIQX::qxx ("rm -f $plymouth");
-		$spllink= 1;
-	} elsif ($isxen) {
-		$status = "--> skip splash initrd attachment for xen";
-		$spllink= 1;
-		KIWIQX::qxx ("rm -f $splfile");
-	} elsif (-f $splfile) {
-		KIWIQX::qxx ("cat $initrd $splfile > $newird");
-		$status = "--> kernel splash system will be used";
-		$spllink= 0;
-	} else {
-		$status = "--> Can't find splash file: $splfile";
-		$spllink= 1;
-	}
-	$kiwi -> info ($status);
-	$kiwi -> done ();
-	#==========================================
-	# check splash compat status
-	#------------------------------------------
-	if ($spllink) {
-		$kiwi -> info ("Creating compat splash link...");
-		$status = $this -> setupSplashLink ($newird);
-		if ($status ne "ok") {
-			$kiwi -> failed();
-			$kiwi -> error ($status);
-			$kiwi -> failed();
-		} else {
-			$kiwi -> done();
-		}
-		return $initrd;
-	}
-	#==========================================
-	# build md5 sum for real new splash initrd
-	#------------------------------------------
-	my $newmd5 = $newird;
-	$newmd5 =~ s/gz$/md5/;
-	$this -> buildMD5Sum ($newird,$newmd5);
-	return $newird;
-}
-
-#==========================================
-# setupSplashLink
-#------------------------------------------
-sub setupSplashLink {
-	# ...
-	# This function only makes sure the .splash.(g|x)z
-	# file exists. This is done by creating a link to the
-	# original initrd file
-	# ---
-	my $this   = shift;
-	my $newird = shift;
-	my $initrd = $this->{initrd};
-	my $status;
-	my $result;
-	if ($initrd !~ /.(g|x)z$/) {
-		$status = KIWIQX::qxx ("$this->{gdata}->{IrdZipperCommand} -f $initrd 2>&1");
-		$result = $? >> 8;
-		if ($result != 0) {
-			return ("Failed to compress initrd: $status");
-		}
-		$initrd = $initrd.".".$this->{gdata}->{IrdZipperSuffix};
-	}
-	my $dirname = dirname  $initrd;
-	my $curfile = basename $initrd;
-	my $newfile = basename $newird;
-	$status = KIWIQX::qxx (
-		"cd $dirname && rm -f $newfile && ln -s $curfile $newfile"
-	);
-	$result = $? >> 8;
-	if ($result != 0) {
-		return ("Failed to create splash link $!");
-	}
-	return "ok";
-}
-
-#==========================================
 # cleanStack
 #------------------------------------------
 sub cleanStack {
@@ -3562,36 +3371,6 @@ sub cleanStack {
 	#-----------------------------------------
 	$this->{cleanupStack} = [];
 	return;
-}
-
-#==========================================
-# buildMD5Sum
-#------------------------------------------
-sub buildMD5Sum {
-	my $this = shift;
-	my $file = shift;
-	my $outf = shift;
-	my $kiwi = $this->{kiwi};
-	$kiwi -> info ("Creating image MD5 sum...");
-	my $size = KIWIGlobals -> instance() -> isize ($file);
-	my $primes = KIWIQX::qxx ("factor $size"); $primes =~ s/^.*: //;
-	my $blocksize = 1;
-	for my $factor (split /\s/,$primes) {
-		last if ($blocksize * $factor > 8192);
-		$blocksize *= $factor;
-	}
-	my $blocks = $size / $blocksize;
-	my $sum  = KIWIQX::qxx ("cat $file | md5sum - | cut -f 1 -d-");
-	chomp $sum;
-	if ($outf) {
-		$file = $outf;
-	}
-	if ($file =~ /\.raw$/) {
-		$file =~ s/raw$/md5/;
-	}
-	KIWIQX::qxx ("echo \"$sum $blocks $blocksize\" > $file");
-	$kiwi -> done();
-	return $this;
 }
 
 #==========================================

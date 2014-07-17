@@ -28,11 +28,10 @@ use warnings;
 use Readonly;
 use XML::LibXML;
 
-require Exporter;
-
 #==========================================
-# KIWI Modules
+# Base class
 #------------------------------------------
+use base qw /Exporter/;
 use base qw /KIWIXMLDataBase/;
 
 #==========================================

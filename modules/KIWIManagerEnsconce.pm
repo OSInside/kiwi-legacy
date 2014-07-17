@@ -19,7 +19,7 @@ package KIWIManagerEnsconce;
 #------------------------------------------
 use strict;
 use warnings;
-require Exporter;
+use base qw /Exporter/;
 use Carp qw (cluck);
 use Env;
 use FileHandle;
@@ -30,7 +30,7 @@ use KIWILocator;
 use KIWIQX;
 
 #==========================================
-# Modules
+# Base class
 #------------------------------------------
 use base qw /KIWIManager/;
 

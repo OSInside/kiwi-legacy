@@ -1003,11 +1003,7 @@ sub createImageRootAndBoot {
 	#==========================================
 	# Include splash screen to initrd
 	#------------------------------------------
-	my $kboot  = KIWIBoot -> new($initrd,$cmdL);
-	if (! defined $kboot) {
-		return;
-	}
-	my $newinitrd = $kboot -> setupSplash();
+	my $newinitrd = KIWIGlobals -> instance() -> setupSplash($initrd);
 	#==========================================
 	# Store meta data for subsequent calls
 	#------------------------------------------
@@ -1505,11 +1501,7 @@ sub createImageLiveCD {
 	#==========================================
 	# Include splash screen to initrd
 	#------------------------------------------
-	my $kboot  = KIWIBoot -> new($pinitrd,$cmdL);
-	if (! defined $kboot) {
-		return;
-	}
-	$pinitrd = $kboot -> setupSplash();
+	$pinitrd = KIWIGlobals -> instance() -> setupSplash($pinitrd);
 	#==========================================
 	# Prepare for CD ISO image
 	#------------------------------------------
@@ -3095,11 +3087,7 @@ sub createImageSplit {
 	#==========================================
 	# Include splash screen to initrd
 	#------------------------------------------
-	my $kboot  = KIWIBoot -> new($initrd,$cmdL);
-	if (! defined $kboot) {
-		return;
-	}
-	$kboot -> setupSplash();
+	KIWIGlobals -> instance() -> setupSplash($initrd);
 	#==========================================
 	# Store meta data for subsequent calls
 	#------------------------------------------

@@ -23,9 +23,13 @@ package KIWIXMLFileData;
 use strict;
 use warnings;
 use XML::LibXML;
-require Exporter;
 
+#==========================================
+# Base class
+#------------------------------------------
+use base qw /Exporter/;
 use base qw /KIWIXMLDataBase/;
+
 #==========================================
 # Exports
 #------------------------------------------

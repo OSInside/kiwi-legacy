@@ -19,15 +19,17 @@ package KIWIContainerConfigWriter;
 use strict;
 use warnings;
 
-require Exporter;
+#==========================================
+# Base class
+#------------------------------------------
+use base qw /Exporter/;
+use base qw /KIWIConfigWriter/;
 
 #==========================================
 # KIWI Modules
 #------------------------------------------
 use KIWIXML;
 use KIWIXMLVMachineData;
-
-use base qw /KIWIConfigWriter/;
 
 #==========================================
 # Exports

@@ -19,17 +19,22 @@ package KIWIXML;
 #------------------------------------------
 use strict;
 use warnings;
-require Exporter;
+no warnings 'redefine'; ## no critic
 use Carp qw (cluck);
 use Data::Dumper;
 use File::Basename;
 use File::Glob ':glob';
 use File::Slurp;
 use XML::LibXML;
+
+#==========================================
+# Base class
+#------------------------------------------
+use base qw /Exporter/;
+
 #==========================================
 # KIWI Modules
 #------------------------------------------
-use KIWIGlobals;
 use KIWILocator;
 use KIWILog;
 use KIWIQX;

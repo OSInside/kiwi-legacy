@@ -189,6 +189,16 @@ install: uninstall
 	done
 
 	#============================================
+	# Update link to boot locale
+	#--------------------------------------------
+	for i in `find ${KIWIIMAGE} -name locale`;do \
+		pushd `dirname $$i`;\
+		rm -f locale;\
+		ln -s /usr/share/kiwi/locale locale;\
+		popd;\
+	done
+
+	#============================================
 	# Install system image template descriptions
 	#--------------------------------------------
 	cp -a template/${arch}/* ${KIWIIMAGE} &>/dev/null || true

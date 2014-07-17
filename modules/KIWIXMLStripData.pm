@@ -19,8 +19,11 @@ package KIWIXMLStripData;
 #------------------------------------------
 use strict;
 use warnings;
-require Exporter;
 
+#==========================================
+# Base class
+#------------------------------------------
+use base qw /Exporter/;
 use base qw /KIWIXMLFileData/;
 
 #==========================================

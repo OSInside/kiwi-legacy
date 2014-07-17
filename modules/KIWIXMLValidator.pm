@@ -19,12 +19,19 @@ package KIWIXMLValidator;
 #------------------------------------------
 use strict;
 use warnings;
-require Exporter;
 use XML::LibXML;
-use KIWILocator;
+use Scalar::Util 'refaddr';
+
+#==========================================
+# Base class
+#------------------------------------------
+use base qw /Exporter/;
+
+#==========================================
+# KIWI Modules
+#------------------------------------------
 use KIWILog;
 use KIWIQX;
-use Scalar::Util 'refaddr';
 
 #==========================================
 # Exports

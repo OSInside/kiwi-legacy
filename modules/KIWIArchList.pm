@@ -13,19 +13,23 @@
 #               :
 # STATUS        : Development
 #----------------
-
 package KIWIArchList;
-
+#==========================================
+# Modules
+#------------------------------------------
 use strict;
 use warnings;
-use KIWIArch;
 use Data::Dumper;
 
-#==================
-# constructor
-#------------------
-sub new
-{
+#==========================================
+# KIWI Modules
+#------------------------------------------
+use KIWIArch;
+
+#==========================================
+# Constructor
+#------------------------------------------
+sub new {
 	# ...
 	# Create a new KIWIArchList object which administers
 	# the arch objects
@@ -34,40 +38,27 @@ sub new
 	# Object setup
 	#------------------------------------------
 	my $class = shift;
-
 	my $this  = {
-				m_collect	=> undef,     # phone back to KIWICollect
-				m_archs	=> {},	      # name/objref pairs
-				};
+		m_collect	=> undef,
+		m_archs	=> {},
+	};
 	bless ($this, $class);
-
-	# other init work:
-	# first and most important thing: store the caller object
 	$this->{m_collect}	= shift;
 	if(not defined($this->{m_collect})) {
-		return; # rock hard get outta here: caller must check retval anyway
+		return;
 	}
-
 	return $this;
 }
-# /constructor
 
-#==================
-# access methods
-#------------------
-#==================
-# arch(NAME)
-#------------------
-# returns undef if the element is not in the hash
-#------------------
-sub arch
-{
+#==========================================
+# arch
+#------------------------------------------
+sub arch {
 	my $this = shift;
 	if(not ref($this)) {
 		return;
 	}
 	my $name = shift;
-
 	if(defined($name) and defined($this->{m_archs}->{$name})) {
 		return $this->{m_archs}->{$name};
 	}
@@ -76,37 +67,29 @@ sub arch
 	}
 }
 
-#==================
-# other methods
-#------------------
-#==================
+#==========================================
 # dumpList
-#------------------
-sub dumpList
-{
+#------------------------------------------
+sub dumpList {
 	my $this = shift;
 	if(not ref($this)) {
 		return;
 	}
-
 	if($@) {
 		$this->{m_collect}->logger()->error("Cannot load Data::Dumper!");
 		return;
-	}
-	else {
+	} else {
 		return Dumper($this->{m_archs});
 	}
 }
 
-
-
-#==================
+#==========================================
+# Private Helpers
+#------------------------------------------
+#==========================================
 # _addArch
-#------------------
-# adds one specific arch object to the list
-#------------------
-sub _addArch
-{
+#------------------------------------------
+sub _addArch {
 	my @list  = @_;
 	my $error = 0;
 	my $this;
@@ -140,23 +123,22 @@ sub _addArch
 	return 1;
 }
 
-#==================
+#==========================================
 # addArchs
-#------------------
-# add all architectures from a hash
-# The hash has the following structure
-# (see KIWIXML::getProductRequiredArchitectures):
-# - name => [descr, nextname, ishead]
-# nextname is verified through xml validation:
-# there must be an entry with the referred name
-#------------------
-sub addArchs
-{
+#------------------------------------------
+sub addArchs {
+	# ...
+	# Add all architectures from a hash
+	# The hash has the following structure
+	# (see KIWIXML::getProductRequiredArchitectures):
+	# - name => [descr, nextname, ishead]
+	# nextname is verified through xml validation:
+	# there must be an entry with the referred name
+	# ---
 	my $this = shift;
 	if(not ref($this)) {
 		return;
 	}
-
 	my $hashref = shift;
 	if(not defined($hashref)) {
 		return;
@@ -169,19 +151,10 @@ sub addArchs
 	return 0;
 }
 
-#==================
+#==========================================
 # fallbacks
-#------------------
-# Create a list of fallback architectures
-# thereby omitting a list of archs in the
-# fallback chain if given as parameters
-# Call like this:
-# my $list = $archlist->fallback(name[, omitlist])
-# if omitlist is empty the full fallback chain
-# is returned.
-#------------------
-sub fallbacks
-{
+#------------------------------------------
+sub fallbacks {
 	my @list = @_;
 	my @al;
 	if (! @list) {
@@ -214,31 +187,29 @@ sub fallbacks
 	return @al;
 }
 
-#==================
+#==========================================
 # headList
-#------------------
-# Returns a list of architecture object
-# references that are marked as "head"
-# These are specified in config.xml as:
-#   <architecures>
-#     <arch id=".." .../>
-#     ...
-#     <requiredarch ref="name"/>
-# whereby the element "name" must match an
-# arch's id="..." otherwise validation fails
-# -> therefore I don't check for existence
-#------------------
-sub headList
-{
+#------------------------------------------
+sub headList {
+	# ...
+	# Returns a list of architecture object
+	# references that are marked as "head"
+	# These are specified in config.xml as:
+	#   <architecures>
+	#     <arch id=".." .../>
+	#     ...
+	#     <requiredarch ref="name"/>
+	# whereby the element "name" must match an
+	# arch's id="..." otherwise validation fails
+	# therefore we don't check for existence
+	# ---
 	my $this = shift;
 	my @al;
 	if(not ref($this)) {
 		return @al;
 	}
-
 	@al = grep { $this->{m_archs}->{$_}->isHead()  } keys(%{$this->{m_archs}});
 	return @al;
 }
 
 1;
-

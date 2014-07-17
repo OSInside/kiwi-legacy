@@ -19,8 +19,15 @@ package KIWIXMLDataBase;
 use strict;
 use warnings;
 use XML::LibXML;
-require Exporter;
 
+#==========================================
+# Base class
+#------------------------------------------
+use base qw /Exporter/;
+
+#==========================================
+# KIWI Modules
+#------------------------------------------
 use KIWILog;
 
 #==========================================

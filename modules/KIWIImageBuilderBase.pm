@@ -21,7 +21,10 @@ use warnings;
 use Digest::SHA1;
 use File::Basename;
 
-require Exporter;
+#==========================================
+# Base class
+#------------------------------------------
+use base qw /Exporter/;
 
 #==========================================
 # KIWIModules

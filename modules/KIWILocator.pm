@@ -17,25 +17,24 @@ package KIWILocator;
 #==========================================
 # Modules
 #------------------------------------------
-use Env;
 use strict;
 use warnings;
-use base qw (Exporter);
+use Env;
 use Cwd qw (abs_path getcwd);
 use IPC::Open3;
 
 #==========================================
-# Modules
+# Base class
 #------------------------------------------
-require KIWIGlobals;
+use base qw /Exporter/;
+use base qw /Class::Singleton/;
+
+#==========================================
+# KIWI Modules
+#------------------------------------------
 require KIWILog;
 require KIWIQX;
 require KIWITrace;
-
-#==========================================
-# Singleton class
-#------------------------------------------
-use base qw /Class::Singleton/;
 
 #==========================================
 # Exports

@@ -19,7 +19,10 @@ package KIWIConfigWriter;
 use strict;
 use warnings;
 
-require Exporter;
+#==========================================
+# Base class
+#------------------------------------------
+use base qw /Exporter/;
 
 #==========================================
 # KIWIModules

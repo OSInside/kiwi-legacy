@@ -21,10 +21,18 @@ package KIWISocket;
 #------------------------------------------
 use strict;
 use warnings;
-use base qw (Exporter);
 use Carp qw (cluck);
 use FileHandle;
 use Socket;
+
+#==========================================
+# Base class
+#------------------------------------------
+use base qw /Exporter/;
+
+#==========================================
+# KIWI Modules
+#------------------------------------------
 use KIWIQX;
 
 my @EXPORT_OK = qw ();

@@ -22,17 +22,20 @@ use warnings;
 use File::Basename;
 use Config::IniFiles;
 use LWP;
+
+#==========================================
+# Base class
+#------------------------------------------
+use base qw /Class::Singleton/;
+
 #==========================================
 # KIWI Modules
 #------------------------------------------
-require KIWILocator;
-require KIWILog;
-require KIWIQX;
-require KIWITrace;
-#==========================================
-# Singleton class
-#------------------------------------------
-use base qw /Class::Singleton/;
+use KIWILocator;
+use KIWILog;
+use KIWIQX;
+use KIWITrace;
+use KIWIXML;
 
 #==========================================
 # getArch
@@ -1465,6 +1468,322 @@ sub checkType {
 		};
 	}
 	return $para;
+}
+
+#==========================================
+# isXen
+#------------------------------------------
+sub isXen {
+	# ...
+	# Check if initrd is Xen based
+	# ---
+	my $this  = shift;
+	my $xengz = shift;
+	my $isxen = 0;
+	my $gdata = KIWIGlobals -> instance() -> getKiwiConfig();
+	my $suf   = $gdata -> {IrdZipperSuffix};
+	if ($xengz) {
+		$xengz =~ s/\.$suf$//;
+		$xengz =~ s/\.splash$//;
+		foreach my $xen (glob ("$xengz*xen*.$suf")) {
+			$isxen = 1;
+			$xengz = $xen;
+			last;
+		}
+		if (! $isxen) {
+			my $kernel = readlink $xengz.".kernel";
+			if (($kernel) && ($kernel =~ /.*-xen$/)) {
+				$isxen = 1;
+			}
+		}
+	}
+	return ($xengz, $isxen);
+}
+
+#==========================================
+# setupSplash
+#------------------------------------------
+sub setupSplash {
+	# ...
+	# setup kernel based bootsplash
+	# ---
+	my $this   = shift;
+	my $initrd = shift;
+	my $kiwi   = $this->{kiwi};
+	my $destdir= dirname ($initrd);
+	my $global = KIWIGlobals -> instance();
+	my $gdata  = $global -> getKiwiConfig();
+	my $suf    = $gdata -> {IrdZipperSuffix};
+	my $zipped = 0;
+	my $status;
+	my $newird;
+	my $splfile;
+	my $result;
+	#==========================================
+	# setup file names
+	#------------------------------------------
+	if (($initrd =~ /\.(g|x)z$/)) {
+		$zipped = 1;
+	}
+	if ($zipped) {
+		$newird = $initrd; $newird =~ s/\.((g|x)z)/\.splash.$1/;
+		$splfile= $initrd; $splfile =~ s/\.(g|x)z/\.spl/;
+	} else {
+		$newird = $initrd.".splash.".$suf;
+		$splfile= $initrd.".spl";
+	}
+	my $plymouth = $destdir."/plymouth.splash.active";
+	#==========================================
+	# check if splash initrd is already there
+	#------------------------------------------
+	if ((! -l $newird) && (-f $newird)) {
+		# splash initrd already created...
+		return $newird;
+	}
+	$kiwi -> info ("Setting up splash screen...\n");
+	#==========================================
+	# setup splash in initrd
+	#------------------------------------------
+	my $spllink = 0;
+	my ($xengz, $isxen) = $global -> isXen ($initrd);
+	if (-f $plymouth) {
+		$status = "--> plymouth splash system will be used";
+		KIWIQX::qxx ("rm -f $plymouth");
+		$spllink= 1;
+	} elsif ($isxen) {
+		$status = "--> skip splash initrd attachment for xen";
+		$spllink= 1;
+		KIWIQX::qxx ("rm -f $splfile");
+	} elsif (-f $splfile) {
+		KIWIQX::qxx ("cat $initrd $splfile > $newird");
+		$status = "--> kernel splash system will be used";
+		$spllink= 0;
+	} else {
+		$status = "--> Can't find splash file: $splfile";
+		$spllink= 1;
+	}
+	$kiwi -> info ($status);
+	$kiwi -> done ();
+	#==========================================
+	# check splash compat status
+	#------------------------------------------
+	if ($spllink) {
+		$kiwi -> info ("Creating compat splash link...");
+		$status = $this -> setupSplashLink ($initrd, $newird);
+		if ($status ne "ok") {
+			$kiwi -> failed();
+			$kiwi -> error ($status);
+			$kiwi -> failed();
+		} else {
+			$kiwi -> done();
+		}
+		return $initrd;
+	}
+	#==========================================
+	# build md5 sum for real new splash initrd
+	#------------------------------------------
+	my $newmd5 = $newird;
+	$newmd5 =~ s/gz$/md5/;
+	$this -> buildMD5Sum ($newird, $newmd5);
+	return $newird;
+}
+
+#==========================================
+# setupSplashLink
+#------------------------------------------
+sub setupSplashLink {
+	# ...
+	# This function only makes sure the .splash.(g|x)z
+	# file exists. This is done by creating a link to the
+	# original initrd file
+	# ---
+	my $this   = shift;
+	my $initrd = shift;
+	my $newird = shift;
+	my $global = KIWIGlobals -> instance();
+	my $gdata  = $global -> getKiwiConfig();
+	my $status;
+	my $result;
+	if ($initrd !~ /.(g|x)z$/) {
+		$status = KIWIQX::qxx (
+			"$gdata->{IrdZipperCommand} -f $initrd 2>&1"
+		);
+		$result = $? >> 8;
+		if ($result != 0) {
+			return ("Failed to compress initrd: $status");
+		}
+		$initrd = $initrd.".".$gdata->{IrdZipperSuffix};
+	}
+	my $dirname = dirname  $initrd;
+	my $curfile = basename $initrd;
+	my $newfile = basename $newird;
+	$status = KIWIQX::qxx (
+		"cd $dirname && rm -f $newfile && ln -s $curfile $newfile"
+	);
+	$result = $? >> 8;
+	if ($result != 0) {
+		return ("Failed to create splash link $!");
+	}
+	return "ok";
+}
+
+#==========================================
+# buildMD5Sum
+#------------------------------------------
+sub buildMD5Sum {
+	my $this = shift;
+	my $file = shift;
+	my $outf = shift;
+	my $kiwi = $this->{kiwi};
+	$kiwi -> info ("Creating image MD5 sum...");
+	my $size = KIWIGlobals -> instance() -> isize ($file);
+	my $primes = KIWIQX::qxx ("factor $size"); $primes =~ s/^.*: //;
+	my $blocksize = 1;
+	for my $factor (split /\s/,$primes) {
+		last if ($blocksize * $factor > 8192);
+		$blocksize *= $factor;
+	}
+	my $blocks = $size / $blocksize;
+	my $sum  = KIWIQX::qxx ("cat $file | md5sum - | cut -f 1 -d-");
+	chomp $sum;
+	if ($outf) {
+		$file = $outf;
+	}
+	if ($file =~ /\.raw$/) {
+		$file =~ s/raw$/md5/;
+	}
+	KIWIQX::qxx ("echo \"$sum $blocks $blocksize\" > $file");
+	$kiwi -> done();
+	return $this;
+}
+
+#==========================================
+# readXMLFromSource
+#------------------------------------------
+sub readXMLFromImage {
+	# ...
+	# read the XML description stored inside of an image file
+	# returns the XML object and parameters about the rootfs
+	# living inside the image
+	# ---
+	my $this   = shift;
+	my $system = shift;
+	my $cmdL   = shift;
+	my $tmpdir = shift;
+	my $kiwi   = $this->{kiwi};
+	my $global = KIWIGlobals -> instance();
+	my $profile= $cmdL -> getBuildProfiles();
+	my $syszSize = 0;
+	my $haveSplit= 0;
+	if ((! $system) || (! $cmdL)) {
+		return;
+	}
+	my $rootpath = $system;
+	if (! -d $system) {
+		#==========================================
+		# create tmpdir if not yet available
+		#------------------------------------------
+		if ((! $tmpdir) || (! -d $tmpdir)) {
+			$tmpdir = KIWIQX::qxx ("mktemp -qdt kiwiread.XXXXXX");
+			my $result = $? >> 8;
+			chomp $tmpdir;
+			if ($result != 0) {
+				$kiwi -> error  ("Couldn't create tmp dir: $tmpdir: $!");
+				$kiwi -> failed ();
+				return;
+			}
+		}
+		#==========================================
+		# mount system image
+		#------------------------------------------
+		if (! $global -> mount ($system,$tmpdir)) {
+			return;
+		}
+		my $sdev = $global -> getMountDevice();
+		if ($global -> isMountLVM()) {
+			$this->{lvmgroup} = $global -> getMountLVMGroup();
+			$this->{lvm} = 1;
+		}
+		#==========================================
+		# check for read-only root
+		#------------------------------------------
+		my %fsattr = $global -> checkFileSystem ($sdev);
+		if ($fsattr{readonly}) {
+			$syszSize = $global -> isize ($system);
+		}
+		#==========================================
+		# set root path to mountpoint
+		#------------------------------------------
+		$rootpath = $tmpdir;
+	}
+	#==========================================
+	# check for split type
+	#------------------------------------------
+	if (-f "$rootpath/rootfs.tar") {
+		$cmdL -> setBuildType ("split");
+		$haveSplit = 1;
+	}
+	#==========================================
+	# read origin path of XML description
+	#------------------------------------------
+	if (open my $FD, '<', "$rootpath/image/main::Prepare") {
+		my $idesc = <$FD>; close $FD;
+		$this->{originXMLPath} = $idesc;
+	}
+	#==========================================
+	# read and validate XML description
+	#------------------------------------------
+	my $gdata = $global -> getKiwiConfig();
+	my $locator = KIWILocator -> instance();
+	my $controlFile = $locator -> getControlFile ($rootpath."/image");
+	my $validator = KIWIXMLValidator -> new (
+		$controlFile,
+		$gdata->{Revision},
+		$gdata->{Schema},
+		$gdata->{SchemaCVT}
+	);
+	my $isValid = $validator ? $validator -> validate() : undef;
+	if (! $isValid) {
+		if (! -d $system) {
+			$global -> umount();
+		}
+		return;
+	}
+	my $xml_error = 0;
+	my $xml = KIWIXML -> new (
+		$rootpath."/image",$cmdL->getBuildType(),$profile,$cmdL
+	);
+	if (! $xml) {
+		$xml_error = 1;
+	}
+	#==========================================
+	# check build type requirements
+	#------------------------------------------
+	if ((! $xml_error) && (! $global -> checkType ($xml,$rootpath,$cmdL))) {
+		$xml_error = 1;
+	}
+	#==========================================
+	# clean up
+	#------------------------------------------
+	if (! -d $system) {
+		$this->{isDisk} = $global -> isDisk();
+		$global -> umount();
+	}
+	#==========================================
+	# return on error
+	#------------------------------------------
+	if ($xml_error) {
+		return;
+	}
+	#==========================================
+	# build and return result hash
+	#------------------------------------------
+	my %result = (
+		"xml" => $xml,
+		"sysz_size" => $syszSize,
+		"split" => $haveSplit
+	);
+	return %result;
 }
 
 #==========================================

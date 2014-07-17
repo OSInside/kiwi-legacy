@@ -17,9 +17,20 @@
 # STATUS        : Development
 #----------------
 package KIWICollect;
+#==========================================
+# Modules
+#------------------------------------------
 use strict;
 use warnings;
+use FileHandle;
+use File::Find;
+use File::Path;
+use Cwd 'abs_path';
+use Data::Dumper;
 
+#==========================================
+# Dynamic Modules
+#------------------------------------------
 BEGIN {
 	unshift @INC, '/usr/share/inst-source-utils/modules';
 	eval {
@@ -27,15 +38,6 @@ BEGIN {
 		RPMQ -> import;
 	};
 }
-
-#==========================================
-# Modules
-#------------------------------------------
-use FileHandle;
-use File::Find;
-use File::Path;
-use Cwd 'abs_path';
-use Data::Dumper;
 
 #==========================================
 # KIWI Modules

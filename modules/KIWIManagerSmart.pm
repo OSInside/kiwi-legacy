@@ -19,20 +19,24 @@ package KIWIManagerSmart;
 #------------------------------------------
 use strict;
 use warnings;
-require Exporter;
 use Carp qw (cluck);
 use Env;
 use FileHandle;
 use File::Basename;
 use Config::IniFiles;
+
+#==========================================
+# Base class
+#------------------------------------------
+use base qw /Exporter/;
+use base qw /KIWIManager/;
+
+#==========================================
+# KIWI Modules
+#------------------------------------------
 use KIWILog;
 use KIWILocator;
 use KIWIQX;
-
-#==========================================
-# Modules
-#------------------------------------------
-use base qw /KIWIManager/;
 
 #==========================================
 # Exports

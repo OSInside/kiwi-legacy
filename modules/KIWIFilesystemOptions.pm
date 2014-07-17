@@ -20,7 +20,10 @@ use strict;
 use warnings;
 use Readonly;
 
-require Exporter;
+#==========================================
+# Base class
+#------------------------------------------
+use base qw /Exporter/;
 
 #==========================================
 # KIWI Modules
