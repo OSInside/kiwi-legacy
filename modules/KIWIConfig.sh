@@ -1507,6 +1507,7 @@ function suseStripKernel {
 				continue
 			fi
 			VERSION=$(/usr/bin/basename $kversion)
+			echo "Found kernel version: $VERSION"
 			echo "Stripping kernel $p: Image [$kiwi_iname]..."
 			#==========================================
 			# run depmod, deps should be up to date
@@ -1630,6 +1631,9 @@ function suseStripKernel {
 			elif [ -f image-$VERSION ];then
 				# dedicated to kernels on s390
 				mv image-$VERSION vmlinuz
+			elif [ -f vmlinuz-$VERSION ];then
+				# dedicated to xz kernels
+				mv vmlinuz-$VERSION vmlinuz
 			elif [ -f vmlinuz ];then
 				# nothing to map, vmlinuz already there
 				:
