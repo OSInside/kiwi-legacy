@@ -16,9 +16,20 @@
     <primary>zypper</primary>
     <secondary>unknown package key</secondary>
   </indexterm>
-  <para>When KIWI builds up a new image root system it temporary imports the available gpg keys from the host system into the image root system. During the process of installing packages these keys are used by the package manager to verify the package signature. After kiwi has built the image root system these keys will be removed from the keyring of the image root system.</para>
+   <para>The KIWI image build process uses the distribution package
+management system to install the specified packages into the unpacked
+image tree that forms the basis for the target image. Installation of
+these packages requires KIWI to import the GPG keys from the build
+system to the target system. This allows signature verification of the
+package signatures, but also implies that repositories used to build
+the image are also know on the build host. Using a repository for
+image building if that signing key is not in the build system key ring
+will break the image build. After the unpacked image tree is created
+and the package installation is complete the GPG keys are removed from
+from the key ring of the image root system.</para>
 
-  <para>In order to permanently import the package signing keys into your appliance the following needs to be done</para>
+   <para>In order to permanently import the package signing keys into
+your appliance follow the steps outlined below:</para> 
 
   <itemizedlist>
     <listitem>
