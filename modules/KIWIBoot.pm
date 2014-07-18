@@ -4328,7 +4328,9 @@ sub setupBootLoaderConfiguration {
 			if ($config eq 'grub2-efi') {
 				print $FD 'set prefix=($root)/boot/grub2-efi'."\n";
 			} else {
-				print $FD 'set prefix=($root)/boot/grub2'."\n";
+				if ($firmware ne 'ec2') {
+					print $FD 'set prefix=($root)/boot/grub2'."\n";
+				}
 			}
 			# print $FD "set debug=all\n";
 			print $FD "set default=$defaultBootNr\n";
@@ -5477,6 +5479,21 @@ sub installBootLoader {
 			$kiwi -> error  ("Mandatory grub2 modules not found");
 			$kiwi -> failed ();
 			return;
+		}
+		if ($firmware eq 'ec2') {
+			$status = KIWIQX::qxx (
+				"cd /mnt/boot/grub2/; ln -s $grubarch xen-x86_64 2>&1"
+			);
+			$result = $? >> 8;
+			if ($result != 0) {
+				my $msg = "Could not create symlink xen-x86_64 -> $grubarch "
+					. 'for EV2 grub2 setup';
+				$kiwi -> failed ();
+				$kiwi -> error ($msg);
+				$kiwi -> failed ();
+				$this -> cleanStack ();
+				return;
+			}
 		}
 		#==========================================
 		# Copy grub2 core modules to tmpdir
