@@ -27,59 +27,75 @@
 <hr>
 <a name="addArchs"><h2>addArchs</h2></a>
 <p>
-Missing<p>
-Defined on line: 153
+ Add all architectures from a hash
+ The hash has the following structure
+ (see KIWIXML::getProductRequiredArchitectures):
+ - name => [descr, nextname, ishead]
+ nextname is verified through xml validation:
+ there must be an entry with the referred name
+<p>
+Defined on line: 129
 <p>
 Called in
 <ul>
-<li><a href="KIWICollect.html">KIWICollect</a> : 329</li></ul>
+<li><a href="KIWICollect.html">KIWICollect</a> : 331</li></ul>
 <a name="arch"><h2>arch</h2></a>
 <p>
 Missing<p>
-Defined on line: 63
+Defined on line: 56
 <p>
 Called in
 <ul>
-<li><a href="KIWIArchList.html">KIWIArchList</a> : 206</li><li><a href="KIWIArchList.html">KIWIArchList</a> : 211</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 523</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 617</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1023</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1514</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1699</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 3661</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 6501</li><li><a href="KIWICollect.html">KIWICollect</a> : 301</li><li><a href="KIWICollect.html">KIWICollect</a> : 393</li><li><a href="KIWICollect.html">KIWICollect</a> : 1099</li><li><a href="KIWICollect.html">KIWICollect</a> : 1102</li><li><a href="KIWICollect.html">KIWICollect</a> : 1110</li><li><a href="KIWICollect.html">KIWICollect</a> : 1120</li><li><a href="KIWICollect.html">KIWICollect</a> : 1123</li><li><a href="KIWICollect.html">KIWICollect</a> : 1499</li><li><a href="KIWICollect.html">KIWICollect</a> : 1590</li><li><a href="KIWICollect.html">KIWICollect</a> : 2603</li><li><a href="KIWISatSolver.html">KIWISatSolver</a> : 409</li><li><a href="KIWISatSolver.html">KIWISatSolver</a> : 671</li><li><a href="KIWISatSolver.html">KIWISatSolver</a> : 723</li><li><a href="KIWIXML.html">KIWIXML</a> : 304</li><li><a href="KIWIXML.html">KIWIXML</a> : 504</li><li><a href="KIWIXML.html">KIWIXML</a> : 555</li><li><a href="KIWIXML.html">KIWIXML</a> : 604</li><li><a href="KIWIXML.html">KIWIXML</a> : 657</li><li><a href="KIWIXML.html">KIWIXML</a> : 719</li><li><a href="KIWIXML.html">KIWIXML</a> : 771</li><li><a href="KIWIXML.html">KIWIXML</a> : 838</li><li><a href="KIWIXML.html">KIWIXML</a> : 897</li><li><a href="KIWIXML.html">KIWIXML</a> : 946</li><li><a href="KIWIXML.html">KIWIXML</a> : 995</li><li><a href="KIWIXML.html">KIWIXML</a> : 1194</li><li><a href="KIWIXML.html">KIWIXML</a> : 3248</li><li><a href="KIWIXML.html">KIWIXML</a> : 3410</li><li><a href="KIWIXML.html">KIWIXML</a> : 3682</li><li><a href="KIWIXML.html">KIWIXML</a> : 3819</li><li><a href="KIWIXML.html">KIWIXML</a> : 4022</li><li><a href="KIWIXML.html">KIWIXML</a> : 4094</li><li><a href="KIWIXML.html">KIWIXML</a> : 4471</li><li><a href="KIWIXML.html">KIWIXML</a> : 4484</li><li><a href="KIWIXML.html">KIWIXML</a> : 4658</li><li><a href="KIWIXML.html">KIWIXML</a> : 4664</li><li><a href="KIWIXML.html">KIWIXML</a> : 4702</li><li><a href="KIWIXML.html">KIWIXML</a> : 4708</li><li><a href="KIWIXML.html">KIWIXML</a> : 4756</li><li><a href="KIWIXML.html">KIWIXML</a> : 4791</li><li><a href="KIWIXML.html">KIWIXML</a> : 4831</li><li><a href="KIWIXML.html">KIWIXML</a> : 4845</li><li><a href="KIWIXML.html">KIWIXML</a> : 4883</li><li><a href="KIWIXML.html">KIWIXML</a> : 4891</li><li><a href="KIWIXML.html">KIWIXML</a> : 5184</li><li><a href="KIWIXML.html">KIWIXML</a> : 5190</li><li><a href="KIWIXML.html">KIWIXML</a> : 5355</li><li><a href="KIWIXML.html">KIWIXML</a> : 5367</li><li><a href="KIWIXML.html">KIWIXML</a> : 5393</li><li><a href="KIWIXML.html">KIWIXML</a> : 5410</li><li><a href="KIWIXML.html">KIWIXML</a> : 5634</li><li><a href="KIWIXML.html">KIWIXML</a> : 5657</li><li><a href="KIWIXML.html">KIWIXML</a> : 5686</li><li><a href="KIWIXML.html">KIWIXML</a> : 6277</li><li><a href="KIWIXMLDefStripData.html">KIWIXMLDefStripData</a> : 93</li><li><a href="KIWIXMLFileData.html">KIWIXMLFileData</a> : 73</li><li><a href="KIWIXMLFileData.html">KIWIXMLFileData</a> : 73</li><li><a href="KIWIXMLFileData.html">KIWIXMLFileData</a> : 88</li><li><a href="KIWIXMLFileData.html">KIWIXMLFileData</a> : 131</li><li><a href="KIWIXMLFileData.html">KIWIXMLFileData</a> : 156</li><li><a href="KIWIXMLFileData.html">KIWIXMLFileData</a> : 157</li><li><a href="KIWIXMLPXEDeployConfigData.html">KIWIXMLPXEDeployConfigData</a> : 70</li><li><a href="KIWIXMLPXEDeployConfigData.html">KIWIXMLPXEDeployConfigData</a> : 81</li><li><a href="KIWIXMLPXEDeployConfigData.html">KIWIXMLPXEDeployConfigData</a> : 81</li><li><a href="KIWIXMLPXEDeployConfigData.html">KIWIXMLPXEDeployConfigData</a> : 96</li><li><a href="KIWIXMLPXEDeployConfigData.html">KIWIXMLPXEDeployConfigData</a> : 134</li><li><a href="KIWIXMLSplitData.html">KIWIXMLSplitData</a> : 457</li><li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 106</li><li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 134</li><li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 134</li><li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 155</li><li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 155</li><li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 227</li><li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 596</li><li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 1516</li><li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 1517</li></ul>
+<li><a href="KIWIArchList.html">KIWIArchList</a> : 179</li><li><a href="KIWIArchList.html">KIWIArchList</a> : 184</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 449</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 543</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 950</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1457</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1643</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 3473</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 6424</li><li><a href="KIWICollect.html">KIWICollect</a> : 303</li><li><a href="KIWICollect.html">KIWICollect</a> : 395</li><li><a href="KIWICollect.html">KIWICollect</a> : 1101</li><li><a href="KIWICollect.html">KIWICollect</a> : 1104</li><li><a href="KIWICollect.html">KIWICollect</a> : 1112</li><li><a href="KIWICollect.html">KIWICollect</a> : 1122</li><li><a href="KIWICollect.html">KIWICollect</a> : 1125</li><li><a href="KIWICollect.html">KIWICollect</a> : 1501</li><li><a href="KIWICollect.html">KIWICollect</a> : 1592</li><li><a href="KIWICollect.html">KIWICollect</a> : 2605</li><li><a href="KIWISatSolver.html">KIWISatSolver</a> : 413</li><li><a href="KIWISatSolver.html">KIWISatSolver</a> : 675</li><li><a href="KIWISatSolver.html">KIWISatSolver</a> : 727</li><li><a href="KIWIXML.html">KIWIXML</a> : 309</li><li><a href="KIWIXML.html">KIWIXML</a> : 509</li><li><a href="KIWIXML.html">KIWIXML</a> : 560</li><li><a href="KIWIXML.html">KIWIXML</a> : 609</li><li><a href="KIWIXML.html">KIWIXML</a> : 662</li><li><a href="KIWIXML.html">KIWIXML</a> : 724</li><li><a href="KIWIXML.html">KIWIXML</a> : 776</li><li><a href="KIWIXML.html">KIWIXML</a> : 843</li><li><a href="KIWIXML.html">KIWIXML</a> : 902</li><li><a href="KIWIXML.html">KIWIXML</a> : 951</li><li><a href="KIWIXML.html">KIWIXML</a> : 1000</li><li><a href="KIWIXML.html">KIWIXML</a> : 1199</li><li><a href="KIWIXML.html">KIWIXML</a> : 3253</li><li><a href="KIWIXML.html">KIWIXML</a> : 3415</li><li><a href="KIWIXML.html">KIWIXML</a> : 3687</li><li><a href="KIWIXML.html">KIWIXML</a> : 3824</li><li><a href="KIWIXML.html">KIWIXML</a> : 4027</li><li><a href="KIWIXML.html">KIWIXML</a> : 4099</li><li><a href="KIWIXML.html">KIWIXML</a> : 4476</li><li><a href="KIWIXML.html">KIWIXML</a> : 4489</li><li><a href="KIWIXML.html">KIWIXML</a> : 4663</li><li><a href="KIWIXML.html">KIWIXML</a> : 4669</li><li><a href="KIWIXML.html">KIWIXML</a> : 4707</li><li><a href="KIWIXML.html">KIWIXML</a> : 4713</li><li><a href="KIWIXML.html">KIWIXML</a> : 4761</li><li><a href="KIWIXML.html">KIWIXML</a> : 4796</li><li><a href="KIWIXML.html">KIWIXML</a> : 4836</li><li><a href="KIWIXML.html">KIWIXML</a> : 4850</li><li><a href="KIWIXML.html">KIWIXML</a> : 4888</li><li><a href="KIWIXML.html">KIWIXML</a> : 4896</li><li><a href="KIWIXML.html">KIWIXML</a> : 5189</li><li><a href="KIWIXML.html">KIWIXML</a> : 5195</li><li><a href="KIWIXML.html">KIWIXML</a> : 5360</li><li><a href="KIWIXML.html">KIWIXML</a> : 5372</li><li><a href="KIWIXML.html">KIWIXML</a> : 5398</li><li><a href="KIWIXML.html">KIWIXML</a> : 5415</li><li><a href="KIWIXML.html">KIWIXML</a> : 5639</li><li><a href="KIWIXML.html">KIWIXML</a> : 5662</li><li><a href="KIWIXML.html">KIWIXML</a> : 5691</li><li><a href="KIWIXML.html">KIWIXML</a> : 6282</li><li><a href="KIWIXMLDefStripData.html">KIWIXMLDefStripData</a> : 98</li><li><a href="KIWIXMLFileData.html">KIWIXMLFileData</a> : 77</li><li><a href="KIWIXMLFileData.html">KIWIXMLFileData</a> : 77</li><li><a href="KIWIXMLFileData.html">KIWIXMLFileData</a> : 92</li><li><a href="KIWIXMLFileData.html">KIWIXMLFileData</a> : 135</li><li><a href="KIWIXMLFileData.html">KIWIXMLFileData</a> : 160</li><li><a href="KIWIXMLFileData.html">KIWIXMLFileData</a> : 161</li><li><a href="KIWIXMLPXEDeployConfigData.html">KIWIXMLPXEDeployConfigData</a> : 74</li><li><a href="KIWIXMLPXEDeployConfigData.html">KIWIXMLPXEDeployConfigData</a> : 85</li><li><a href="KIWIXMLPXEDeployConfigData.html">KIWIXMLPXEDeployConfigData</a> : 85</li><li><a href="KIWIXMLPXEDeployConfigData.html">KIWIXMLPXEDeployConfigData</a> : 100</li><li><a href="KIWIXMLPXEDeployConfigData.html">KIWIXMLPXEDeployConfigData</a> : 138</li><li><a href="KIWIXMLSplitData.html">KIWIXMLSplitData</a> : 463</li><li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 105</li><li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 133</li><li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 133</li><li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 154</li><li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 154</li><li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 226</li><li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 595</li><li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 1515</li><li><a href="KIWIXMLVMachineData.html">KIWIXMLVMachineData</a> : 1516</li></ul>
 <a name="dumpList"><h2>dumpList</h2></a>
 <p>
 Missing<p>
-Defined on line: 85
+Defined on line: 73
 <p>
 Called in
 <ul>
-<li><a href="KIWICollect.html">KIWICollect</a> : 341</li></ul>
+<li><a href="KIWICollect.html">KIWICollect</a> : 343</li></ul>
 <a name="fallbacks"><h2>fallbacks</h2></a>
 <p>
 Missing<p>
-Defined on line: 183
+Defined on line: 157
 <p>
 Called in
 <ul>
-<li><a href="KIWICollect.html">KIWICollect</a> : 1074</li><li><a href="KIWICollect.html">KIWICollect</a> : 1563</li><li><a href="KIWICollect.html">KIWICollect</a> : 2689</li><li><a href="KIWICollect.html">KIWICollect</a> : 2768</li></ul>
+<li><a href="KIWICollect.html">KIWICollect</a> : 1076</li><li><a href="KIWICollect.html">KIWICollect</a> : 1565</li><li><a href="KIWICollect.html">KIWICollect</a> : 2691</li><li><a href="KIWICollect.html">KIWICollect</a> : 2770</li></ul>
 <a name="headList"><h2>headList</h2></a>
 <p>
-Missing<p>
-Defined on line: 231
+ Returns a list of architecture object
+ references that are marked as "head"
+ These are specified in config.xml as:
+   <architecures>
+     <arch id=".." .../>
+     ...
+     <requiredarch ref="name"/>
+ whereby the element "name" must match an
+ arch's id="..." otherwise validation fails
+ therefore we don't check for existence
+<p>
+Defined on line: 193
 <p>
 Called in
 <ul>
-<li><a href="KIWICollect.html">KIWICollect</a> : 856</li><li><a href="KIWICollect.html">KIWICollect</a> : 2069</li><li><a href="KIWICollect.html">KIWICollect</a> : 2078</li><li><a href="KIWICollect.html">KIWICollect</a> : 2104</li><li><a href="KIWICollect.html">KIWICollect</a> : 2113</li></ul>
+<li><a href="KIWICollect.html">KIWICollect</a> : 858</li><li><a href="KIWICollect.html">KIWICollect</a> : 2071</li><li><a href="KIWICollect.html">KIWICollect</a> : 2080</li><li><a href="KIWICollect.html">KIWICollect</a> : 2106</li><li><a href="KIWICollect.html">KIWICollect</a> : 2115</li></ul>
 <a name="new"><h2>new</h2></a>
 <p>
  Create a new KIWIArchList object which administers
  the arch objects
 <p>
-Defined on line: 27
+Defined on line: 32
 <p>
 Called in
 <ul>
-<li><a href="KIWICollect.html">KIWICollect</a> : 327</li></ul>
+<li><a href="KIWICollect.html">KIWICollect</a> : 329</li></ul>
 <a name="_addArch"><h2>_addArch</h2></a>
 <p>
 Missing<p>
-Defined on line: 108
+Defined on line: 92
 <p>
 Called in
 <ul>
-<li><a href="KIWIArchList.html">KIWIArchList</a> : 167</li></ul>
+<li><a href="KIWIArchList.html">KIWIArchList</a> : 149</li></ul>

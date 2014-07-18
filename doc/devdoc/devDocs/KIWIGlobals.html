@@ -12,6 +12,7 @@
 <h2>Public methods</h2>
 <p>
 <ul>
+<li><a href="#buildMD5Sum">buildMD5Sum</a></li>
 <li><a href="#callContained">callContained</a></li>
 <li><a href="#checkFileSystem">checkFileSystem</a></li>
 <li><a href="#checkLVMbind">checkLVMbind</a></li>
@@ -31,10 +32,15 @@
 <li><a href="#instance">instance</a></li>
 <li><a href="#isDisk">isDisk</a></li>
 <li><a href="#isMountLVM">isMountLVM</a></li>
+<li><a href="#isXen">isXen</a></li>
 <li><a href="#isize">isize</a></li>
 <li><a href="#mount">mount</a></li>
+<li><a href="#new">new</a></li>
+<li><a href="#readXMLFromImage">readXMLFromImage</a></li>
 <li><a href="#setKiwiConfigData">setKiwiConfigData</a></li>
 <li><a href="#setupBTRFSSubVolumes">setupBTRFSSubVolumes</a></li>
+<li><a href="#setupSplash">setupSplash</a></li>
+<li><a href="#setupSplashLink">setupSplashLink</a></li>
 <li><a href="#setupZFSPoolVolumes">setupZFSPoolVolumes</a></li>
 <li><a href="#umount">umount</a></li>
 <li><a href="#umountSystemFileSystems">umountSystemFileSystems</a></li>
@@ -45,147 +51,155 @@
 <li><a href="#_new_instance">_new_instance</a></li>
 </ul>
 <hr>
+<a name="buildMD5Sum"><h2>buildMD5Sum</h2></a>
+<p>
+Missing<p>
+Defined on line: 1633
+<p>
+Called in
+<ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 648</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 650</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1056</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1058</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1534</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1536</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1587</li></ul>
 <a name="callContained"><h2>callContained</h2></a>
 <p>
 Missing<p>
-Defined on line: 989
+Defined on line: 992
 <p>
 Called in
 <ul>
-<li><a href="KIWIImage.html">KIWIImage</a> : 181</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 1248</li></ul>
+<li><a href="KIWIImage.html">KIWIImage</a> : 181</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 1259</li></ul>
 <a name="checkFileSystem"><h2>checkFileSystem</h2></a>
 <p>
 Missing<p>
-Defined on line: 647
+Defined on line: 650
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 128</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 261</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2191</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2519</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2526</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2549</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2558</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 179</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 267</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1332</li><li><a href="KIWIImage.html">KIWIImage</a> : 2947</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 131</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2143</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2478</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2485</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2508</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2517</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 182</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 270</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1335</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1710</li><li><a href="KIWIImage.html">KIWIImage</a> : 2937</li></ul>
 <a name="checkLVMbind"><h2>checkLVMbind</h2></a>
 <p>
  check if sdev points to LVM, if yes activate it and
  rebuild sdev to point to the right logical volume
 <p>
-Defined on line: 1077
+Defined on line: 1080
 <p>
 Called in
 <ul>
-<li><a href="KIWIGlobals.html">KIWIGlobals</a> : 255</li></ul>
+<li><a href="KIWIGlobals.html">KIWIGlobals</a> : 258</li></ul>
 <a name="checkType"><h2>checkType</h2></a>
 <p>
  Check the image type
 <p>
-Defined on line: 1276
+Defined on line: 1279
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 323</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 801</li></ul>
+<li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1762</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 805</li></ul>
 <a name="createDirInteractive"><h2>createDirInteractive</h2></a>
 <p>
 Missing<p>
-Defined on line: 80
+Defined on line: 83
 <p>
 Called in
 <ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 655</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 768</li></ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 659</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 772</li></ul>
 <a name="createZFSPool"><h2>createZFSPool</h2></a>
 <p>
 Missing<p>
-Defined on line: 756
+Defined on line: 759
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 7076</li><li><a href="KIWIImage.html">KIWIImage</a> : 4479</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 6999</li><li><a href="KIWIImage.html">KIWIImage</a> : 4469</li></ul>
 <a name="downloadFile"><h2>downloadFile</h2></a>
 <p>
  download a file from a network or local location to
  a given local path. It's possible to use regular expressions
  in the source file specification
 <p>
-Defined on line: 1118
+Defined on line: 1121
 <p>
 Called in
 <ul>
-<li><a href="KIWICollect.html">KIWICollect</a> : 918</li><li><a href="KIWICollect.html">KIWICollect</a> : 1709</li><li><a href="KIWICollect.html">KIWICollect</a> : 1789</li><li><a href="KIWIManager.html">KIWIManager</a> : 564</li><li><a href="KIWIXML.html">KIWIXML</a> : 5831</li><li><a href="KIWIXML.html">KIWIXML</a> : 5940</li><li><a href="KIWIXML.html">KIWIXML</a> : 5972</li><li><a href="KIWIXML.html">KIWIXML</a> : 5992</li></ul>
+<li><a href="KIWICollect.html">KIWICollect</a> : 920</li><li><a href="KIWICollect.html">KIWICollect</a> : 1711</li><li><a href="KIWICollect.html">KIWICollect</a> : 1791</li><li><a href="KIWIManager.html">KIWIManager</a> : 499</li><li><a href="KIWIXML.html">KIWIXML</a> : 5836</li><li><a href="KIWIXML.html">KIWIXML</a> : 5945</li><li><a href="KIWIXML.html">KIWIXML</a> : 5977</li><li><a href="KIWIXML.html">KIWIXML</a> : 5997</li></ul>
 <a name="dsize"><h2>dsize</h2></a>
 <p>
 Missing<p>
-Defined on line: 483
+Defined on line: 486
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 396</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1895</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1965</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 7256</li><li><a href="KIWIImage.html">KIWIImage</a> : 2766</li><li><a href="KIWIImage.html">KIWIImage</a> : 4718</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 672</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 886</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 898</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 933</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 322</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1843</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1913</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 7179</li><li><a href="KIWIImage.html">KIWIImage</a> : 2756</li><li><a href="KIWIImage.html">KIWIImage</a> : 4708</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 676</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 890</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 902</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 937</li></ul>
 <a name="generateBuildImageName"><h2>generateBuildImageName</h2></a>
 <p>
  Generate a name for the build image based on information configured
  in the config.xml file and provided parameters
 <p>
-Defined on line: 589
+Defined on line: 592
 <p>
 Called in
 <ul>
-<li><a href="KIWIContainerBuilder.html">KIWIContainerBuilder</a> : 333</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 531</li><li><a href="KIWIImage.html">KIWIImage</a> : 1015</li><li><a href="KIWIImage.html">KIWIImage</a> : 1226</li><li><a href="KIWIImage.html">KIWIImage</a> : 1229</li><li><a href="KIWIImage.html">KIWIImage</a> : 1230</li><li><a href="KIWIImage.html">KIWIImage</a> : 1364</li><li><a href="KIWIImage.html">KIWIImage</a> : 2482</li><li><a href="KIWIImage.html">KIWIImage</a> : 2487</li><li><a href="KIWIImage.html">KIWIImage</a> : 3110</li><li><a href="KIWIImage.html">KIWIImage</a> : 3217</li><li><a href="KIWIImage.html">KIWIImage</a> : 3247</li><li><a href="KIWIImage.html">KIWIImage</a> : 3268</li><li><a href="KIWIImage.html">KIWIImage</a> : 3270</li><li><a href="KIWIImage.html">KIWIImage</a> : 3824</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 270</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 931</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1057</li><li><a href="KIWITarArchiveBuilder.html">KIWITarArchiveBuilder</a> : 118</li></ul>
+<li><a href="KIWIContainerBuilder.html">KIWIContainerBuilder</a> : 335</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 534</li><li><a href="KIWIImage.html">KIWIImage</a> : 1011</li><li><a href="KIWIImage.html">KIWIImage</a> : 1221</li><li><a href="KIWIImage.html">KIWIImage</a> : 1224</li><li><a href="KIWIImage.html">KIWIImage</a> : 1225</li><li><a href="KIWIImage.html">KIWIImage</a> : 1359</li><li><a href="KIWIImage.html">KIWIImage</a> : 2472</li><li><a href="KIWIImage.html">KIWIImage</a> : 2477</li><li><a href="KIWIImage.html">KIWIImage</a> : 3096</li><li><a href="KIWIImage.html">KIWIImage</a> : 3203</li><li><a href="KIWIImage.html">KIWIImage</a> : 3233</li><li><a href="KIWIImage.html">KIWIImage</a> : 3254</li><li><a href="KIWIImage.html">KIWIImage</a> : 3256</li><li><a href="KIWIImage.html">KIWIImage</a> : 3810</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 274</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 935</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1061</li><li><a href="KIWITarArchiveBuilder.html">KIWITarArchiveBuilder</a> : 120</li></ul>
 <a name="generateBuildInformation"><h2>generateBuildInformation</h2></a>
 <p>
  write an ini file containing information about
  the build. This data is used in the KIWIResult to
  create an image release
 <p>
-Defined on line: 510
+Defined on line: 513
 <p>
 Called in
 <ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 957</li></ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 961</li></ul>
 <a name="getArch"><h2>getArch</h2></a>
 <p>
  Return the architecture setting of the build environment
 <p>
-Defined on line: 40
+Defined on line: 43
 <a name="getKiwiConfig"><h2>getKiwiConfig</h2></a>
 <p>
  Return a hash of all the KIWI configuration data
 <p>
-Defined on line: 55
+Defined on line: 58
 <p>
 Called in
 <ul>
-<li><a href="KIWIAnalyseReport.html">KIWIAnalyseReport</a> : 72</li><li><a href="KIWIAnalyseSoftware.html">KIWIAnalyseSoftware</a> : 73</li><li><a href="KIWIAnalyseSystem.html">KIWIAnalyseSystem</a> : 120</li><li><a href="KIWIAnalyseTemplate.html">KIWIAnalyseTemplate</a> : 104</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 191</li><li><a href="KIWICache.html">KIWICache</a> : 114</li><li><a href="KIWICollect.html">KIWICollect</a> : 123</li><li><a href="KIWICommandLine.html">KIWICommandLine</a> : 62</li><li><a href="KIWIConfigure.html">KIWIConfigure</a> : 89</li><li><a href="KIWIImage.html">KIWIImage</a> : 144</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 83</li><li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 71</li><li><a href="KIWIIsoLinux.html">KIWIIsoLinux</a> : 212</li><li><a href="KIWILocator.html">KIWILocator</a> : 181</li><li><a href="KIWIOverlay.html">KIWIOverlay</a> : 89</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 650</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 246</li><li><a href="KIWIURL.html">KIWIURL</a> : 69</li><li><a href="KIWIXML.html">KIWIXML</a> : 305</li><li><a href="KIWIXMLDefStripData.html">KIWIXMLDefStripData</a> : 57</li><li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 100</li><li><a href="KIWIXMLPreferenceData.html">KIWIXMLPreferenceData</a> : 132</li><li><a href="KIWIXMLSystemdiskData.html">KIWIXMLSystemdiskData</a> : 280</li></ul>
+<li><a href="KIWIAnalyseReport.html">KIWIAnalyseReport</a> : 72</li><li><a href="KIWIAnalyseSoftware.html">KIWIAnalyseSoftware</a> : 73</li><li><a href="KIWIAnalyseSystem.html">KIWIAnalyseSystem</a> : 120</li><li><a href="KIWIAnalyseTemplate.html">KIWIAnalyseTemplate</a> : 104</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 194</li><li><a href="KIWICache.html">KIWICache</a> : 118</li><li><a href="KIWICollect.html">KIWICollect</a> : 125</li><li><a href="KIWICommandLine.html">KIWICommandLine</a> : 67</li><li><a href="KIWIConfigure.html">KIWIConfigure</a> : 90</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1483</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1515</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1604</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1736</li><li><a href="KIWIImage.html">KIWIImage</a> : 144</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 87</li><li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 72</li><li><a href="KIWIIsoLinux.html">KIWIIsoLinux</a> : 219</li><li><a href="KIWILocator.html">KIWILocator</a> : 180</li><li><a href="KIWIOverlay.html">KIWIOverlay</a> : 90</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 652</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 247</li><li><a href="KIWIURL.html">KIWIURL</a> : 69</li><li><a href="KIWIXML.html">KIWIXML</a> : 310</li><li><a href="KIWIXMLDefStripData.html">KIWIXMLDefStripData</a> : 62</li><li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 104</li><li><a href="KIWIXMLPreferenceData.html">KIWIXMLPreferenceData</a> : 136</li><li><a href="KIWIXMLSystemdiskData.html">KIWIXMLSystemdiskData</a> : 284</li></ul>
 <a name="getMBRDiskLabel"><h2>getMBRDiskLabel</h2></a>
 <p>
  set the mbrid to either the value given at the
  commandline or a random 4byte MBR disk label ID
 <p>
-Defined on line: 621
+Defined on line: 624
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 457</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 664</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1067</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1534</li><li><a href="KIWIImage.html">KIWIImage</a> : 159</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 383</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 591</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 995</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1478</li><li><a href="KIWIImage.html">KIWIImage</a> : 159</li></ul>
 <a name="getMountDevice"><h2>getMountDevice</h2></a>
 <p>
 Missing<p>
-Defined on line: 110
+Defined on line: 113
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 251</li></ul>
+<li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1702</li></ul>
 <a name="getMountLVMGroup"><h2>getMountLVMGroup</h2></a>
 <p>
 Missing<p>
-Defined on line: 118
+Defined on line: 121
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 255</li></ul>
+<li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1704</li></ul>
 <a name="getPartDevice"><h2>getPartDevice</h2></a>
 <p>
  find the correct partition device according
  to the disk device and partition number
 <p>
-Defined on line: 398
+Defined on line: 401
 <p>
 Called in
 <ul>
-<li><a href="KIWIGlobals.html">KIWIGlobals</a> : 201</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 203</li></ul>
+<li><a href="KIWIGlobals.html">KIWIGlobals</a> : 204</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 206</li></ul>
 <a name="instance"><h2>instance</h2></a>
 <p>
 Missing documentation<p>
@@ -193,83 +207,131 @@ Defined on line: Unknown
 <p>
 Called in
 <ul>
-<li><a href="KIWIAnalyseReport.html">KIWIAnalyseReport</a> : 61</li><li><a href="KIWIAnalyseSoftware.html">KIWIAnalyseSoftware</a> : 68</li><li><a href="KIWIAnalyseSystem.html">KIWIAnalyseSystem</a> : 65</li><li><a href="KIWIAnalyseTemplate.html">KIWIAnalyseTemplate</a> : 79</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 72</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 130</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 248</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 251</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 252</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 261</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 263</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 298</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 309</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 310</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 323</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 388</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 389</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 396</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 406</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 457</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 664</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1037</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1067</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1393</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1401</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1404</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1485</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1534</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1895</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1965</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2172</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2191</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2435</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2446</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2519</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2526</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2549</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2634</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2700</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2716</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2842</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2859</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2871</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2883</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 3515</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 3543</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 3587</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 4488</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 5573</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 5873</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 5931</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 7076</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 7255</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 7260</li><li><a href="KIWICache.html">KIWICache</a> : 106</li><li><a href="KIWICollect.html">KIWICollect</a> : 122</li><li><a href="KIWICollect.html">KIWICollect</a> : 918</li><li><a href="KIWICollect.html">KIWICollect</a> : 1709</li><li><a href="KIWICollect.html">KIWICollect</a> : 1789</li><li><a href="KIWICommandLine.html">KIWICommandLine</a> : 61</li><li><a href="KIWIConfigure.html">KIWIConfigure</a> : 89</li><li><a href="KIWIContainerBuilder.html">KIWIContainerBuilder</a> : 332</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1332</li><li><a href="KIWIImage.html">KIWIImage</a> : 135</li><li><a href="KIWIImage.html">KIWIImage</a> : 159</li><li><a href="KIWIImage.html">KIWIImage</a> : 181</li><li><a href="KIWIImage.html">KIWIImage</a> : 1014</li><li><a href="KIWIImage.html">KIWIImage</a> : 1230</li><li><a href="KIWIImage.html">KIWIImage</a> : 1364</li><li><a href="KIWIImage.html">KIWIImage</a> : 2482</li><li><a href="KIWIImage.html">KIWIImage</a> : 2766</li><li><a href="KIWIImage.html">KIWIImage</a> : 2947</li><li><a href="KIWIImage.html">KIWIImage</a> : 3267</li><li><a href="KIWIImage.html">KIWIImage</a> : 3269</li><li><a href="KIWIImage.html">KIWIImage</a> : 3297</li><li><a href="KIWIImage.html">KIWIImage</a> : 3640</li><li><a href="KIWIImage.html">KIWIImage</a> : 3743</li><li><a href="KIWIImage.html">KIWIImage</a> : 4479</li><li><a href="KIWIImage.html">KIWIImage</a> : 4689</li><li><a href="KIWIImage.html">KIWIImage</a> : 4718</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 80</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 269</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 655</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 768</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 956</li><li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 70</li><li><a href="KIWIIsoLinux.html">KIWIIsoLinux</a> : 200</li><li><a href="KIWILocator.html">KIWILocator</a> : 180</li><li><a href="KIWIManager.html">KIWIManager</a> : 564</li><li><a href="KIWIOverlay.html">KIWIOverlay</a> : 87</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 235</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 1248</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 672</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 886</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 898</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 933</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 1440</li><li><a href="KIWITarArchiveBuilder.html">KIWITarArchiveBuilder</a> : 117</li><li><a href="KIWIURL.html">KIWIURL</a> : 68</li><li><a href="KIWIXML.html">KIWIXML</a> : 253</li><li><a href="KIWIXML.html">KIWIXML</a> : 302</li><li><a href="KIWIXML.html">KIWIXML</a> : 5831</li><li><a href="KIWIXML.html">KIWIXML</a> : 5940</li><li><a href="KIWIXML.html">KIWIXML</a> : 5972</li><li><a href="KIWIXML.html">KIWIXML</a> : 5992</li><li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 92</li><li><a href="KIWIXMLPreferenceData.html">KIWIXMLPreferenceData</a> : 131</li><li><a href="KIWIXMLSystemdiskData.html">KIWIXMLSystemdiskData</a> : 279</li></ul>
+<li><a href="KIWIAnalyseReport.html">KIWIAnalyseReport</a> : 61</li><li><a href="KIWIAnalyseSoftware.html">KIWIAnalyseSoftware</a> : 68</li><li><a href="KIWIAnalyseSystem.html">KIWIAnalyseSystem</a> : 65</li><li><a href="KIWIAnalyseTemplate.html">KIWIAnalyseTemplate</a> : 79</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 75</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 133</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 314</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 315</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 322</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 332</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 383</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 490</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 552</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 964</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1336</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1344</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1347</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1428</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1462</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1843</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1913</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2124</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2143</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2394</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2405</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2478</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2485</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2508</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2593</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2659</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2675</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2801</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2818</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2830</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2842</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 3357</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 3399</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 4369</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 5471</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 5794</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 5852</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 6999</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 7178</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 7183</li><li><a href="KIWICache.html">KIWICache</a> : 110</li><li><a href="KIWICollect.html">KIWICollect</a> : 124</li><li><a href="KIWICollect.html">KIWICollect</a> : 920</li><li><a href="KIWICollect.html">KIWICollect</a> : 1711</li><li><a href="KIWICollect.html">KIWICollect</a> : 1791</li><li><a href="KIWICommandLine.html">KIWICommandLine</a> : 66</li><li><a href="KIWIConfigure.html">KIWIConfigure</a> : 90</li><li><a href="KIWIContainerBuilder.html">KIWIContainerBuilder</a> : 334</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1335</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1483</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1514</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1603</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1639</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1674</li><li><a href="KIWIImage.html">KIWIImage</a> : 135</li><li><a href="KIWIImage.html">KIWIImage</a> : 159</li><li><a href="KIWIImage.html">KIWIImage</a> : 181</li><li><a href="KIWIImage.html">KIWIImage</a> : 1010</li><li><a href="KIWIImage.html">KIWIImage</a> : 1225</li><li><a href="KIWIImage.html">KIWIImage</a> : 1359</li><li><a href="KIWIImage.html">KIWIImage</a> : 1504</li><li><a href="KIWIImage.html">KIWIImage</a> : 2472</li><li><a href="KIWIImage.html">KIWIImage</a> : 2756</li><li><a href="KIWIImage.html">KIWIImage</a> : 2937</li><li><a href="KIWIImage.html">KIWIImage</a> : 3090</li><li><a href="KIWIImage.html">KIWIImage</a> : 3253</li><li><a href="KIWIImage.html">KIWIImage</a> : 3255</li><li><a href="KIWIImage.html">KIWIImage</a> : 3283</li><li><a href="KIWIImage.html">KIWIImage</a> : 3626</li><li><a href="KIWIImage.html">KIWIImage</a> : 3729</li><li><a href="KIWIImage.html">KIWIImage</a> : 4469</li><li><a href="KIWIImage.html">KIWIImage</a> : 4679</li><li><a href="KIWIImage.html">KIWIImage</a> : 4708</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 84</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 273</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 659</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 772</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 960</li><li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 71</li><li><a href="KIWIIsoLinux.html">KIWIIsoLinux</a> : 207</li><li><a href="KIWILocator.html">KIWILocator</a> : 179</li><li><a href="KIWIManager.html">KIWIManager</a> : 499</li><li><a href="KIWIOverlay.html">KIWIOverlay</a> : 88</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 236</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 1259</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 676</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 890</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 902</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 937</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 1444</li><li><a href="KIWITarArchiveBuilder.html">KIWITarArchiveBuilder</a> : 119</li><li><a href="KIWIURL.html">KIWIURL</a> : 68</li><li><a href="KIWIXML.html">KIWIXML</a> : 258</li><li><a href="KIWIXML.html">KIWIXML</a> : 307</li><li><a href="KIWIXML.html">KIWIXML</a> : 5836</li><li><a href="KIWIXML.html">KIWIXML</a> : 5945</li><li><a href="KIWIXML.html">KIWIXML</a> : 5977</li><li><a href="KIWIXML.html">KIWIXML</a> : 5997</li><li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 96</li><li><a href="KIWIXMLPreferenceData.html">KIWIXMLPreferenceData</a> : 135</li><li><a href="KIWIXMLSystemdiskData.html">KIWIXMLSystemdiskData</a> : 283</li></ul>
 <a name="isDisk"><h2>isDisk</h2></a>
 <p>
 Missing<p>
-Defined on line: 134
+Defined on line: 137
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 238</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 309</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 309</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1759</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 227</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1707</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1769</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1769</li></ul>
 <a name="isMountLVM"><h2>isMountLVM</h2></a>
 <p>
 Missing<p>
-Defined on line: 126
+Defined on line: 129
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 252</li></ul>
+<li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1703</li></ul>
+<a name="isXen"><h2>isXen</h2></a>
+<p>
+ Check if initrd is Xen based
+<p>
+Defined on line: 1476
+<p>
+Called in
+<ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 198</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1548</li></ul>
 <a name="isize"><h2>isize</h2></a>
 <p>
 Missing<p>
-Defined on line: 456
+Defined on line: 459
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 130</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 263</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 388</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 389</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 406</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1037</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2172</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2435</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2446</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2716</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 3543</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 3587</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 7261</li><li><a href="KIWIImage.html">KIWIImage</a> : 3297</li><li><a href="KIWIImage.html">KIWIImage</a> : 3743</li><li><a href="KIWIImage.html">KIWIImage</a> : 4555</li><li><a href="KIWIImage.html">KIWIImage</a> : 4689</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 133</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 314</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 315</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 332</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 965</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2124</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2394</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2405</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2675</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 3399</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 7184</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1639</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1712</li><li><a href="KIWIImage.html">KIWIImage</a> : 3283</li><li><a href="KIWIImage.html">KIWIImage</a> : 3729</li><li><a href="KIWIImage.html">KIWIImage</a> : 4545</li><li><a href="KIWIImage.html">KIWIImage</a> : 4679</li></ul>
 <a name="mount"><h2>mount</h2></a>
 <p>
 Missing<p>
-Defined on line: 146
+Defined on line: 149
 <p>
 Called in
 <ul>
-<li><a href="KIWIAnalyseSoftware.html">KIWIAnalyseSoftware</a> : 80</li><li><a href="KIWIAnalyseSoftware.html">KIWIAnalyseSoftware</a> : 262</li><li><a href="KIWIAnalyseSoftware.html">KIWIAnalyseSoftware</a> : 639</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 248</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1393</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1459</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2579</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2634</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2842</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2859</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 5573</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 5873</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 5931</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 7340</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 7354</li><li><a href="KIWIOverlay.html">KIWIOverlay</a> : 152</li><li><a href="KIWIOverlay.html">KIWIOverlay</a> : 175</li></ul>
+<li><a href="KIWIAnalyseSoftware.html">KIWIAnalyseSoftware</a> : 80</li><li><a href="KIWIAnalyseSoftware.html">KIWIAnalyseSoftware</a> : 262</li><li><a href="KIWIAnalyseSoftware.html">KIWIAnalyseSoftware</a> : 639</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1336</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1402</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2538</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2593</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2801</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2818</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 5471</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 5794</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 5852</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 7263</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 7277</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1699</li><li><a href="KIWIOverlay.html">KIWIOverlay</a> : 153</li><li><a href="KIWIOverlay.html">KIWIOverlay</a> : 176</li></ul>
+<a name="new"><h2>new</h2></a>
+<p>
+Missing documentation<p>
+Defined on line: Unknown
+<p>
+Called in
+<ul>
+<li><a href="KIWIImage.html">KIWIImage</a> : 1006</li></ul>
+<a name="readXMLFromImage"><h2>readXMLFromImage</h2></a>
+<p>
+ read the XML description stored inside of an image file
+ returns the XML object and parameters about the rootfs
+ living inside the image
+<p>
+Defined on line: 1663
+<p>
+Called in
+<ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 232</li><li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 86</li></ul>
 <a name="setKiwiConfigData"><h2>setKiwiConfigData</h2></a>
 <p>
  Set a configuration data key value pair
 <p>
-Defined on line: 66
+Defined on line: 69
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 474</li><li><a href="KIWIImage.html">KIWIImage</a> : 3640</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 400</li><li><a href="KIWIImage.html">KIWIImage</a> : 3626</li></ul>
 <a name="setupBTRFSSubVolumes"><h2>setupBTRFSSubVolumes</h2></a>
 <p>
 Missing<p>
-Defined on line: 890
+Defined on line: 893
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 2649</li><li><a href="KIWIImage.html">KIWIImage</a> : 3469</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 2608</li><li><a href="KIWIImage.html">KIWIImage</a> : 3455</li></ul>
+<a name="setupSplash"><h2>setupSplash</h2></a>
+<p>
+ setup kernel based bootsplash
+<p>
+Defined on line: 1506
+<p>
+Called in
+<ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 490</li><li><a href="KIWIImage.html">KIWIImage</a> : 1006</li><li><a href="KIWIImage.html">KIWIImage</a> : 1504</li><li><a href="KIWIImage.html">KIWIImage</a> : 3090</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1131</li></ul>
+<a name="setupSplashLink"><h2>setupSplashLink</h2></a>
+<p>
+ This function only makes sure the .splash.(g|x)z
+ file exists. This is done by creating a link to the
+ original initrd file
+<p>
+Defined on line: 1594
+<p>
+Called in
+<ul>
+<li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1572</li></ul>
 <a name="setupZFSPoolVolumes"><h2>setupZFSPoolVolumes</h2></a>
 <p>
 Missing<p>
-Defined on line: 825
+Defined on line: 828
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 2657</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 2616</li></ul>
 <a name="umount"><h2>umount</h2></a>
 <p>
 Missing<p>
-Defined on line: 424
+Defined on line: 427
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 298</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 310</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1401</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1404</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1485</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2700</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2871</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2883</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 3515</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 7340</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 7354</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 215</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 228</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 247</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 260</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 286</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 306</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 326</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 369</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 385</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 1344</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1347</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1428</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2659</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2830</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2842</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 3357</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 7263</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 7277</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 218</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 231</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 250</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 263</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 289</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 309</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 329</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 372</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 388</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1748</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1770</li></ul>
 <a name="umountSystemFileSystems"><h2>umountSystemFileSystems</h2></a>
 <p>
 Missing<p>
-Defined on line: 968
+Defined on line: 971
 <p>
 Called in
 <ul>
-<li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1069</li></ul>
+<li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1072</li></ul>
 <a name="_new_instance"><h2>_new_instance</h2></a>
 <p>
  Construct a KIWIGlobals object. The globals object holds configuration
  data for kiwi itself and provides methods
 <p>
-Defined on line: 1476
+Defined on line: 1795

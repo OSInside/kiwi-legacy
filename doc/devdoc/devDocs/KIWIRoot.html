@@ -21,8 +21,10 @@
 <li><a href="#cleanupResolvConf">cleanupResolvConf</a></li>
 <li><a href="#cleanupTestingEnvironment">cleanupTestingEnvironment</a></li>
 <li><a href="#copyBroken">copyBroken</a></li>
+<li><a href="#exportHostPackageKeys">exportHostPackageKeys</a></li>
 <li><a href="#fixupOverlayFilesOwnership">fixupOverlayFilesOwnership</a></li>
 <li><a href="#getRootPath">getRootPath</a></li>
+<li><a href="#importHostPackageKeys">importHostPackageKeys</a></li>
 <li><a href="#init">init</a></li>
 <li><a href="#install">install</a></li>
 <li><a href="#installArchives">installArchives</a></li>
@@ -41,20 +43,11 @@
 <li><a href="#__generateWanted">__generateWanted</a></li>
 </ul>
 <hr>
-<a name="__generateWanted"><h2>__generateWanted</h2></a>
-<p>
- generate search for given files in given directory
-<p>
-Defined on line: 1640
-<p>
-Called in
-<ul>
-<li><a href="KIWIRoot.html">KIWIRoot</a> : 922</li></ul>
 <a name="addToMountList"><h2>addToMountList</h2></a>
 <p>
  add mount path to mount list
 <p>
-Defined on line: 1356
+Defined on line: 1504
 <p>
 Called in
 <ul>
@@ -64,60 +57,60 @@ Called in
  Remove the .broken indicator to allow
  use of this root path for image creation
 <p>
-Defined on line: 355
+Defined on line: 356
 <p>
 Called in
 <ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1701</li></ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1696</li></ul>
 <a name="cleanLock"><h2>cleanLock</h2></a>
 <p>
  remove stale lock files
 <p>
-Defined on line: 1627
+Defined on line: 1770
 <p>
 Called in
 <ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1703</li></ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1698</li></ul>
 <a name="cleanManager"><h2>cleanManager</h2></a>
 <p>
  remove data and cache dir(s) of the packagemanager
  created for building the new root system
 <p>
-Defined on line: 1613
+Defined on line: 1756
 <p>
 Called in
 <ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1704</li></ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1699</li></ul>
 <a name="cleanMount"><h2>cleanMount</h2></a>
 <p>
  umount all mountList registered devices
 <p>
-Defined on line: 1525
+Defined on line: 1675
 <p>
 Called in
 <ul>
-<li><a href="KIWIRoot.html">KIWIRoot</a> : 109</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 253</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 266</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 276</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 281</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 326</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 330</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 561</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 567</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 575</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 579</li></ul>
+<li><a href="KIWIRoot.html">KIWIRoot</a> : 110</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 254</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 267</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 277</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 282</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 327</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 331</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 562</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 568</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 576</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 580</li></ul>
 <a name="cleanSource"><h2>cleanSource</h2></a>
 <p>
  remove all source locations created by kiwi
 <p>
-Defined on line: 1600
+Defined on line: 1743
 <p>
 Called in
 <ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1705</li></ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1700</li></ul>
 <a name="cleanupResolvConf"><h2>cleanupResolvConf</h2></a>
 <p>
 Missing<p>
-Defined on line: 740
+Defined on line: 741
 <p>
 Called in
 <ul>
-<li><a href="KIWIRoot.html">KIWIRoot</a> : 656</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 661</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 665</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 717</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 721</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 732</li></ul>
+<li><a href="KIWIRoot.html">KIWIRoot</a> : 657</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 662</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 666</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 718</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 722</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 733</li></ul>
 <a name="cleanupTestingEnvironment"><h2>cleanupTestingEnvironment</h2></a>
 <p>
 Missing<p>
-Defined on line: 728
+Defined on line: 729
 <a name="copyBroken"><h2>copyBroken</h2></a>
 <p>
  copy the current logfile contents into
@@ -125,57 +118,78 @@ Defined on line: 728
  is indicated to be broken for some reason
  mentioned in the log file
 <p>
-Defined on line: 369
+Defined on line: 370
+<a name="exportHostPackageKeys"><h2>exportHostPackageKeys</h2></a>
+<p>
+ remove kiwi imported host rpm package keys from the
+ new root system in order to cleanup the stage
+<p>
+Defined on line: 1463
+<p>
+Called in
+<ul>
+<li><a href="KIWIRoot.html">KIWIRoot</a> : 1251</li></ul>
 <a name="fixupOverlayFilesOwnership"><h2>fixupOverlayFilesOwnership</h2></a>
 <p>
  search for files and directories in the given path or
  table of contents (toc) file and make sure those files
  get the right ownership assigned
 <p>
-Defined on line: 904
+Defined on line: 905
 <p>
 Called in
 <ul>
-<li><a href="KIWIRoot.html">KIWIRoot</a> : 896</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 1076</li></ul>
+<li><a href="KIWIRoot.html">KIWIRoot</a> : 897</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 1079</li></ul>
 <a name="getRootPath"><h2>getRootPath</h2></a>
 <p>
  Return chroot path for this image
 <p>
-Defined on line: 344
+Defined on line: 345
+<a name="importHostPackageKeys"><h2>importHostPackageKeys</h2></a>
+<p>
+ import package keys to avoid warnings on installation
+ of packages. This is an rpm only task and needs to be
+ enhanced for non rpm based packages
+<p>
+Defined on line: 1369
+<p>
+Called in
+<ul>
+<li><a href="KIWIRoot.html">KIWIRoot</a> : 552</li></ul>
 <a name="init"><h2>init</h2></a>
 <p>
  Initialize root system. The method will create a secured
  tmp directory and extract all the given base files.
 <p>
-Defined on line: 389
+Defined on line: 390
 <p>
 Called in
 <ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1660</li></ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1655</li></ul>
 <a name="install"><h2>install</h2></a>
 <p>
  Install the given package set into the root
  directory of the image system
 <p>
-Defined on line: 792
+Defined on line: 793
 <p>
 Called in
 <ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1668</li><li><a href="KIWISatSolver.html">KIWISatSolver</a> : 565</li><li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 161</li><li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 235</li><li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 275</li></ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1663</li><li><a href="KIWISatSolver.html">KIWISatSolver</a> : 569</li><li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 165</li><li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 239</li><li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 279</li></ul>
 <a name="installArchives"><h2>installArchives</h2></a>
 <p>
  Install the given raw archives into the root
  directory of the image system
 <p>
-Defined on line: 862
+Defined on line: 863
 <p>
 Called in
 <ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1673</li></ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1668</li></ul>
 <a name="installTestingPackages"><h2>installTestingPackages</h2></a>
 <p>
 Missing<p>
-Defined on line: 764
+Defined on line: 765
 <a name="new"><h2>new</h2></a>
 <p>
  Create a new KIWIRoot object which is used for
@@ -183,15 +197,15 @@ Defined on line: 764
  object creates a chroot environment including all
  packages which makes the image
 <p>
-Defined on line: 47
+Defined on line: 48
 <p>
 Called in
 <ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1536</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1642</li></ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1531</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1637</li></ul>
 <a name="prepareTestingEnvironment"><h2>prepareTestingEnvironment</h2></a>
 <p>
 Missing<p>
-Defined on line: 673
+Defined on line: 674
 <a name="setup"><h2>setup</h2></a>
 <p>
  Setup the installed system. This method will:
@@ -208,43 +222,52 @@ Defined on line: 673
  7) configure the system with methods from KIWIConfigure
  8) cleanup temporary files
 <p>
-Defined on line: 1005
+Defined on line: 1006
 <p>
 Called in
 <ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1678</li></ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1673</li></ul>
 <a name="setupCacheMount"><h2>setupCacheMount</h2></a>
 <p>
  bind mount the specified cache directory into
  the chroot system. This is used to establish
  a shared cache over multiple prepare processes
 <p>
-Defined on line: 1376
+Defined on line: 1524
 <p>
 Called in
 <ul>
-<li><a href="KIWIRoot.html">KIWIRoot</a> : 556</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 1485</li></ul>
+<li><a href="KIWIRoot.html">KIWIRoot</a> : 557</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 1635</li></ul>
 <a name="setupMount"><h2>setupMount</h2></a>
 <p>
  mount all reachable local and nfs directories
  and register them in the mountList
 <p>
-Defined on line: 1423
+Defined on line: 1573
 <p>
 Called in
 <ul>
-<li><a href="KIWIRoot.html">KIWIRoot</a> : 617</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 682</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 822</li></ul>
+<li><a href="KIWIRoot.html">KIWIRoot</a> : 618</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 683</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 823</li></ul>
 <a name="uninstallTestingPackages"><h2>uninstallTestingPackages</h2></a>
 <p>
 Missing<p>
-Defined on line: 778
+Defined on line: 779
 <a name="upgrade"><h2>upgrade</h2></a>
 <p>
  Upgrade a previosly prepared image root tree
  with respect to changes of the installation source(s)
 <p>
-Defined on line: 601
+Defined on line: 602
 <p>
 Called in
 <ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1554</li></ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1549</li></ul>
+<a name="__generateWanted"><h2>__generateWanted</h2></a>
+<p>
+ generate search for given files in given directory
+<p>
+Defined on line: 1783
+<p>
+Called in
+<ul>
+<li><a href="KIWIRoot.html">KIWIRoot</a> : 923</li></ul>
