@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+                         "http://www.docbook.org/xml/4.5/docbookx.dtd">
+
+<chapter id="chap.signkey">
+  <title>Adding signing keys</title>
+  <indexterm>
+    <primary>package</primary>
+    <secondary>rpm key</secondary>
+  </indexterm>
+  <indexterm>
+    <primary>signing</primary>
+    <secondary>build key</secondary>
+  </indexterm>
+  <indexterm>
+    <primary>zypper</primary>
+    <secondary>unknown package key</secondary>
+  </indexterm>
+   <para>The KIWI image build process uses the distribution package
+management system to install the specified packages into the unpacked
+image tree that forms the basis for the target image. Installation of
+these packages requires KIWI to import the GPG keys from the build
+system to the target system. This allows signature verification of the
+package signatures, but also implies that repositories used to build
+the image are also know on the build host. Using a repository for
+image building if that signing key is not in the build system key ring
+will break the image build. After the unpacked image tree is created
+and the package installation is complete the GPG keys are removed from
+from the key ring of the image root system.</para>
+
+   <para>In order to permanently import the package signing keys into
+your appliance follow the steps outlined below:</para> 
+
+  <itemizedlist>
+    <listitem>
+      <para>Add the package containing the build key to the packages section</para>
+      <screen>&lt;package name="openSUSE-build-key">...&lt;/package></screen>
+    </listitem>
+    <listitem>
+      <para>Call the import KIWI helper function in the config.sh script</para>
+      <screen>suseImportBuildKey</screen>
+    </listitem>
+  </itemizedlist>
+
+  <para>If the image is built with these settings KIWI installs the package containing the keys and imports them permanently to the rpm keyring.</para>
+
+</chapter>
