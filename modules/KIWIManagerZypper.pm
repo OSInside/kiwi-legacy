@@ -81,8 +81,11 @@ sub new {
 		my ($uname, $pass) = $repo -> getCredentials();
 		if ($uname) {
 			$kiwi -> info ('Creating credentials data');
-			$repo -> getPath() =~ /credentials=(\w+)/;
-			my $credFile = $1;
+			my $uri = $repo -> getPath();
+			my $credFile = 'kiwiRepoCredentials';
+			if ($uri =~ /credentials=(\w+)/) {
+				$credFile = $1;
+			}
 			my $credDir = "$dataDir/credentials.d";
 			mkdir $credDir;
 			$zconfig->newval('main', 'credentials.global.dir', $credDir);
