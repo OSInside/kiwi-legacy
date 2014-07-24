@@ -244,6 +244,9 @@ sub new {
 		if ($read_result{split}) {
 			$haveSplit = $read_result{split};
 		}
+		if ($read_result{originXMLPath}) {
+			$this->{originXMLPath} = $read_result{originXMLPath};
+		}
 	}
 	#==========================================
 	# store type information
