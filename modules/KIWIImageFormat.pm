@@ -223,7 +223,7 @@ sub createMachineConfiguration {
 	my $xml    = $this->{xml};
 	my $bootp  = $this->{bootp};
 	my $vconf  = $this->{vmdata};
-	if ((! $vconf) && ($format =~ /qcow2|raw|vagrant/)) {
+	if ((! $vconf) || ($format =~ /qcow2|raw|vagrant/)) {
 		# a machine configuration doesn't make sense with these
 		# formats requested. Thus we can silently return here
 		return;
@@ -549,6 +549,19 @@ sub createVagrantBox {
 		if (! $img) {
 			return;
 		}
+		#==========================================
+		# create OVF file for virtualbox provider
+		#------------------------------------------
+		if ($provider eq 'virtualbox') {
+			$this->{image}  = $img;
+			$this->{ovfdir} = $dest;
+			$this->{format} = 'ovf';
+			my $ovf = $this -> createOVFConfiguration();
+			$this->{format} = 'vagrant';
+			if (! -e $ovf) {
+				return;
+			}
+		}
 		$kiwi -> info ("--> Creating box metadata files");
 		#==========================================
 		# create vagrant metadata.json
@@ -632,12 +645,24 @@ sub createVagrantBox {
 		# package vagrant box
 		#------------------------------------------
 		$kiwi -> info ("--> Creating box archive");
-		my $img_basename = basename $img;
-		KIWIQX::qxx ("cd $dest && mv $img_basename box.img");
 		my @components = ();
+		my $img_basename = basename $img;
+		if ($provider eq 'virtualbox') {
+			my $ovf_basename = $img_basename;
+			my $mf_basename = $img_basename;
+			$ovf_basename =~ s/vmdk$/ovf/;
+			$mf_basename =~ s/vmdk$/mf/;
+			KIWIQX::qxx ("cd $dest && mv $img_basename box-disk1.vmdk");
+			KIWIQX::qxx ("cd $dest && mv $ovf_basename box.ovf");
+			KIWIQX::qxx ("cd $dest && rm $mf_basename");
+			push @components, 'box.ovf';
+			push @components, 'box-disk1.vmdk';
+		} else {
+			KIWIQX::qxx ("cd $dest && mv $img_basename box.img");
+			push @components, 'box.img';
+		}
 		push @components, basename $json_meta;
 		push @components, basename $vagrant_meta;
-		push @components, 'box.img';
 		my $status = KIWIQX::qxx (
 			"tar -C $dest -czf $box @components 2>&1"
 		);
@@ -655,7 +680,7 @@ sub createVagrantBox {
 		#==========================================
 		# cleanup
 		#------------------------------------------
-		KIWIQX::qxx ("rm -f $json_meta $vagrant_meta $dest/box.img");
+		KIWIQX::qxx ("cd $dest && rm -f @components");
 	}
 	return @boxes;
 }
