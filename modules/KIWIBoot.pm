@@ -1742,6 +1742,22 @@ sub setupBootDisk {
 		$this->{md} = $md;
 	}
 	#==========================================
+	# check for LUKS extension
+	#------------------------------------------
+	if ($type->{luks}) {
+		$haveluks = 1;
+	}
+	#==========================================
+	# Check subsystem combination
+	#------------------------------------------
+	if (($md) && ($haveluks)) {
+		$kiwi -> error (
+			"LUKS encryption on Software RAID not yet supported"
+		);
+		$kiwi -> failed ();
+		return;
+	}
+	#==========================================
 	# Check if LVM is requested...
 	#------------------------------------------
 	if ((($systemDisk) && ($type->{lvm})) || ($lvm)) {
@@ -1967,12 +1983,6 @@ sub setupBootDisk {
 				$this -> __updateDiskSize ($addToDisk);
 			}
 		}
-	}
-	#==========================================
-	# check for LUKS extension
-	#------------------------------------------
-	if ($type->{luks}) {
-		$haveluks = 1;
 	}
 	#==========================================
 	# check for raw read-write overlay
@@ -2372,6 +2382,16 @@ sub setupBootDisk {
 			}
 		}
 		#==========================================
+		# setup luks device if requested
+		#------------------------------------------
+		if ($haveluks) {
+			%deviceMap = $this -> setupEncoding ('luksRoot',\%deviceMap);
+			if (! %deviceMap) {
+				$this -> cleanStack ();
+				return;
+			}
+		}
+		#==========================================
 		# setup volume group if requested
 		#------------------------------------------
 		if ($lvm) {
@@ -2666,7 +2686,7 @@ sub setupBootDisk {
 	#------------------------------------------
 	if (($syszip) && (! $haveSplit) && (! $rawRW)) {
 		my $rw = $deviceMap{readwrite};
-		if ($haveluks) {
+		if (($haveluks) && (! $lvm)) {
 			my $cipher = $type->{luks};
 			my $dist   = $type->{luksOS};
 			my $name   = 'luksReadWrite';
@@ -6585,6 +6605,66 @@ sub setLVMDeviceMap {
 		}
 	}
 	return %result;
+}
+
+#==========================================
+# setupEncoding
+#------------------------------------------
+sub setupEncoding {
+	# ...
+	# create luks device map for encryption capabilities
+	# The function returns a new device map which has
+	# the root device overwritten by the luks device
+	# ---
+	my $this      = shift;
+	my $name      = shift;
+	my $map       = shift;
+	my $kiwi      = $this->{kiwi};
+	my $type      = $this->{type};
+	my @cStack    = @{$this->{cleanupStack}};
+	my %deviceMap = %{$map};
+	my $cipher    = $type->{luks};
+	my $dist      = $type->{luksOS};
+	my $data;
+	my $code;
+	my $opts = '';
+	if (($dist) && ($dist eq 'sle11')) {
+		$opts = $this->{gdata}->{LuksDist}->{sle11};
+	}
+	my $size_bt = KIWIGlobals -> instance() -> isize ($deviceMap{root});
+	my $size_mb = int ($size_bt / 1048576);
+	$data = KIWIQX::qxx (
+		"dd if=/dev/urandom bs=1M count=$size_mb of=$deviceMap{root} 2>&1"
+	);
+	$code = $? >> 8;
+	if ($code != 0) {
+		$kiwi -> error  ("Couldn't fill image with random data: $data");
+		$kiwi -> failed ();
+		return;
+	}
+	$data = KIWIQX::qxx (
+		"echo $cipher | cryptsetup -q $opts luksFormat $deviceMap{root} 2>&1"
+	);
+	$code = $? >> 8;
+	if ($code != 0) {
+		$kiwi -> error  ("Couldn't setup luks format: $deviceMap{root}");
+		$kiwi -> failed ();
+		return;
+	}
+	$data = KIWIQX::qxx (
+		"echo $cipher | cryptsetup luksOpen $deviceMap{root} $name 2>&1"
+	);
+	$code = $? >> 8;
+	if ($code != 0) {
+		$kiwi -> error  ("Couldn't open luks device: $data");
+		$kiwi -> failed ();
+		$this -> cleanStack ();
+		return;
+	}
+	push @cStack,"cryptsetup luksClose $name";
+	$this->{cleanupStack} = \@cStack;
+	$deviceMap{root} = "/dev/mapper/$name";
+	return %deviceMap;
 }
 
 #==========================================

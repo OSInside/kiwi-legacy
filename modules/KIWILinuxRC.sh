@@ -4254,6 +4254,12 @@ function searchVolumeGroup {
 	if [ ! "$kiwi_lvm" = "true" ];then
 		return 1
 	fi
+	local rootdevice=$(ddn $imageDiskDevice $kiwi_RootPart)
+	probeFileSystem $rootdevice
+	if [ "$FSTYPE" = "luks" ];then
+		luksOpen $rootdevice
+		export haveLuks=yes
+	fi
 	for i in $(vgs --noheadings -o vg_name 2>/dev/null);do
 		vg_found=$(echo $i)
 		if [ "$vg_found" = "$kiwi_lvmgroup" ];then

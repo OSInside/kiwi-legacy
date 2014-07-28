@@ -884,10 +884,6 @@ sub createImageRootAndBoot {
 	}
 	my $lvm = $xmltype -> useLVM();
 	if (($sysdisk) && ($lvm)) {
-		if ($luks) {
-			$kiwi -> warning ("LUKS encryption on LVM not yet supported");
-			$kiwi -> skipped ();
-		}
 		$treeAccess = 1;
 	}
 	#==========================================
