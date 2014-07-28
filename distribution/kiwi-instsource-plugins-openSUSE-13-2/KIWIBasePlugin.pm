@@ -20,7 +20,9 @@ package KIWIBasePlugin;
 
 use strict;
 use warnings;
+use IO::Select;
 use IPC::Open3;
+use Symbol;
 
 sub new {
 	my $class = shift;
@@ -157,18 +159,40 @@ sub logMsg {
 sub callCmd {
 	my $this = shift;
 	my $cmd  = shift;
-	my $CHILDWRITE;
-	my $CHILDSTDOUT;
-	my $CHILDSTDERR;
+	my $BUFSIZE = 1024;
+	my @result;
+	my @errors;
+	my $result_buf;
+	my $errors_buf;
+	my ($CHILDWRITE, $CHILDSTDOUT, $CHILDSTDERR) = map { gensym } 1..3;
 	my $pid = open3 (
 		$CHILDWRITE, $CHILDSTDOUT, $CHILDSTDERR, "$cmd"
 	);
+	my $sel = IO::Select->new();
+	$sel->add($CHILDSTDOUT);
+	$sel->add($CHILDSTDERR);
+	while (my @ready = $sel->can_read()) {
+		foreach my $handle (@ready) {
+			while (sysread($handle, my $bytes_read, $BUFSIZE) != 0) {
+				if ($handle == $CHILDSTDOUT) {
+					$result_buf .= $bytes_read;
+				} else {
+					$errors_buf .= $bytes_read;
+				}
+			}
+			$sel->remove($handle);
+		}
+	}
+	if ($result_buf) {
+		@result = split (/\n/x,$result_buf);
+		chomp @result;
+	}
+	if ($errors_buf) {
+		@errors = split (/\n/x,$errors_buf);
+		chomp @errors;
+	}
 	waitpid( $pid, 0 );
 	my $status = $? >> 8;
-	my @result = <$CHILDSTDOUT>;
-	my @errors = <$CHILDSTDERR>;
-	chomp @result;
-	chomp @errors;
 	return [$status,\@result,\@errors];
 }
 
