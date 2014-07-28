@@ -21,6 +21,7 @@ package KIWIBasePlugin;
 use strict;
 use warnings;
 use IPC::Open3;
+use Symbol 'gensym';
 
 sub new {
 	my $class = shift;
@@ -159,7 +160,7 @@ sub callCmd {
 	my $cmd  = shift;
 	my $CHILDWRITE;
 	my $CHILDSTDOUT;
-	my $CHILDSTDERR;
+	my $CHILDSTDERR = gensym;
 	my $pid = open3 (
 		$CHILDWRITE, $CHILDSTDOUT, $CHILDSTDERR, "$cmd"
 	);
