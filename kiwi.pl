@@ -776,7 +776,7 @@ sub init {
 	my $EditBootConfig;        # allow to run script before bootloader install
 	my $EditBootInstall;       # allow to run script after bootloader install
 	my $PackageManager;        # package manager to use
-	my $DiskAlignment;         # partition alignment, default is 4096
+	my $DiskAlignment;         # partition alignment, default is 4096 KB
 	my $DiskBIOSSectorSize;    # sector size default is 512 bytes
 	my $Version;               # version information
 	#==========================================
@@ -1680,9 +1680,9 @@ sub usage {
 	print "      Overwrite the default 512 byte sector size value.\n";
 	print "      This will influence the partition alignment\n";
 	print "\n";
-	print "    [ --disk-alignment <number> ]\n";
+	print "    [ --disk-alignment <KBytes> ]\n";
 	print "      Align the start of each partition to the specified\n";
-	print "      value. By default 4096 bytes are used\n";
+	print "      value. By default 4096 Kbytes are used\n";
 	print "\n";
 	print "    [ --debug ]\n";
 	print "      Prints a stack trace in case of internal errors\n";
