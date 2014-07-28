@@ -3695,6 +3695,7 @@ sub setupEncoding {
 	my $dist   = shift;
 	my $device = shift;
 	my $kiwi   = $this->{kiwi};
+	my $cmdL   = $this->{cmdL};
 	my $data;
 	my $code;
 	if (($device) && (! -b $device)) {
@@ -3723,8 +3724,11 @@ sub setupEncoding {
 	if (($dist) && ($dist eq 'sle11')) {
 		$opts = $this->{gdata}->{LuksDist}->{sle11};
 	}
-	my $size_bt = KIWIGlobals -> instance() -> isize ($loop);
-	my $size_mb = int ($size_bt / 1048576);
+	# cryptsetup aligns in boundaries of 512-byte sectors
+	my $alignment = int ($cmdL->getDiskAlignment() * 2);
+	my $size_bt   = KIWIGlobals -> instance() -> isize ($loop);
+	my $size_mb   = int ($size_bt / 1048576);
+	$opts .= " --align-payload=$alignment";
 	$data = KIWIQX::qxx (
 		"dd if=/dev/urandom bs=1M count=$size_mb of=$loop 2>&1"
 	);
