@@ -110,7 +110,7 @@ sub loadPlugins {
 	unshift @INC, $dir;
 	if (not opendir(PLUGINDIR, "$dir")) {
 		$this->collect()->logMsg(
-			"W", "loadPlugins: cannot open directory $dir"
+			"E", "loadPlugins: cannot open directory $dir"
 		);
 		return ($loaded, $avail);
 	}
