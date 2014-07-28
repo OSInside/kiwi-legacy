@@ -249,7 +249,7 @@ sub getInfo {
 	if(not defined($info)) {
 		return;
 	} else {
-		if ($this->{'prodinfo'}->{$this->{'prodinfo-indices'}->{$info}}) {
+		if ($this->{'prodinfo-indices'}->{$info} && $this->{'prodinfo'}->{$this->{'prodinfo-indices'}->{$info}}) {
 			return $this->{'prodinfo'}
 				->{$this->{'prodinfo-indices'}->{$info}}->[1];
 		} else {

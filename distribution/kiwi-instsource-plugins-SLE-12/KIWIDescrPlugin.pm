@@ -153,8 +153,6 @@ sub executeDir {
 	my $descrdir = $coll->productData()->getInfo("DESCRDIR");
 	my $cpeid = $coll->productData()->getInfo("CPEID");
 	my $repoid = $coll->productData()->getInfo("REPOID");
-	my $distroname = $coll->productData()->getInfo("DISTRIBUTION")."."
-		. $coll->productData()->getInfo("VERSION");
 	my $createrepomd = $coll->productData()->getVar("CREATE_REPOMD");
 	my $targetdir;
 	my $newtargetdir;
@@ -189,7 +187,9 @@ sub executeDir {
 			return 0;
 		}
 	}
-	if ( $createrepomd eq "true" ) {
+	if ( $createrepomd && $createrepomd eq "true" ) {
+		my $distroname = $coll->productData()->getInfo("DISTRIBUTION")."."
+				. $coll->productData()->getInfo("VERSION");
 		my $result = $this -> createRepositoryMetadata(
 			\@paths, $repoid, $distroname, $cpeid, $datadir, $targetdir
 		);
