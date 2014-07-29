@@ -6586,6 +6586,10 @@ sub setupEncoding {
 	if ($name eq 'luksReadWrite') {
 		$device = $deviceMap{readwrite};
 	}
+	my $blktype = KIWIQX::qxx("blkid $device -s TYPE -o value");
+	if (($blktype) && ($blktype eq 'crypto_LUKS')) {
+		return %deviceMap;
+	}
 	if (($dist) && ($dist eq 'sle11')) {
 		$opts = $this->{gdata}->{LuksDist}->{sle11};
 	}
