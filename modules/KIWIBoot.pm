@@ -2379,7 +2379,17 @@ sub setupBootDisk {
 		# setup luks device if requested
 		#------------------------------------------
 		if ($haveluks) {
-			%deviceMap = $this -> setupEncoding ('luksRoot',\%deviceMap);
+			if (($syszip) && (! $haveSplit) && (! $rawRW)) {
+				# for compressed and split systems we encode the RW partition
+				%deviceMap = $this -> setupEncoding (
+					'luksReadWrite',\%deviceMap
+				);
+			} else {
+				# for everything else we encode the root partition
+				%deviceMap = $this -> setupEncoding (
+					'luksRoot',\%deviceMap
+				);
+			}
 			if (! %deviceMap) {
 				$this -> cleanStack ();
 				return;
@@ -2677,56 +2687,8 @@ sub setupBootDisk {
 	# create read/write filesystem if needed
 	#------------------------------------------
 	if (($syszip) && (! $haveSplit) && (! $rawRW)) {
+		$kiwi -> info ("Creating ext3 read-write filesystem");
 		my $rw = $deviceMap{readwrite};
-		if (($haveluks) && (! $lvm)) {
-			my $cipher = $type->{luks};
-			my $dist   = $type->{luksOS};
-			my $name   = 'luksReadWrite';
-			my $opts   = '';
-			$kiwi -> info ("Creating LUKS->ext3 read-write filesystem");
-			if (($dist) && ($dist eq 'sle11')) {
-				$opts = $this->{gdata}->{LuksDist}->{sle11};
-			}
-			my $size_bt = KIWIGlobals -> instance() -> isize ($rw);
-			my $size_mb = int ($size_bt / 1048576);
-			$status = KIWIQX::qxx (
-				"dd if=/dev/urandom bs=1M count=$size_mb of=$rw 2>&1"
-			);
-			$result = $? >> 8;
-			if ($status != 0) {
-				$kiwi -> failed ();
-				$kiwi -> error  (
-					"Couldn't fill image with random data: $status"
-				);
-				$kiwi -> failed ();
-				return;
-			}
-			$status = KIWIQX::qxx (
-				"echo $cipher|cryptsetup -q $opts luksFormat $rw 2>&1"
-			);
-			$result = $? >> 8;
-			if ($status != 0) {
-				$kiwi -> failed ();
-				$kiwi -> error  ("Couldn't setup luks format: $rw");
-				$kiwi -> failed ();
-				return;
-			}
-			$status = KIWIQX::qxx (
-				"echo $cipher|cryptsetup luksOpen $rw $name 2>&1"
-			);
-			$result = $? >> 8;
-			if ($result != 0) {
-				$kiwi -> failed ();
-				$kiwi -> error  ("Couldn't open luks device: $status");
-				$kiwi -> failed ();
-				return;
-			}
-			$rw = "/dev/mapper/$name";
-			$deviceMap{readwrite} = $rw;
-			$this->{luks} = $name;
-		} else {
-			$kiwi -> info ("Creating ext3 read-write filesystem");
-		}
 		my $fsOpts = $cmdL -> getFilesystemOptions();
 		my $createArgs = $fsOpts -> getOptionsStrExt();
 		my $fstool = "mkfs.ext3";
@@ -6620,14 +6582,18 @@ sub setupEncoding {
 	my $data;
 	my $code;
 	my $opts = '';
-	$kiwi -> info ("--> Filling LUKS root with random data\n");
+	my $device = $deviceMap{root};
+	if ($name eq 'luksReadWrite') {
+		$device = $deviceMap{readwrite};
+	}
 	if (($dist) && ($dist eq 'sle11')) {
 		$opts = $this->{gdata}->{LuksDist}->{sle11};
 	}
-	my $size_bt = KIWIGlobals -> instance() -> isize ($deviceMap{root});
+	my $size_bt = KIWIGlobals -> instance() -> isize ($device);
 	my $size_mb = int ($size_bt / 1048576);
+	$kiwi -> info ("--> Filling $name with random data\n");
 	$data = KIWIQX::qxx (
-		"dd if=/dev/urandom bs=1M count=$size_mb of=$deviceMap{root} 2>&1"
+		"dd if=/dev/urandom bs=1M count=$size_mb of=$device 2>&1"
 	);
 	$code = $? >> 8;
 	if ($code != 0) {
@@ -6637,16 +6603,16 @@ sub setupEncoding {
 	}
 	$kiwi -> info ("--> Creating LUKS encoding\n");
 	$data = KIWIQX::qxx (
-		"echo $cipher | cryptsetup -q $opts luksFormat $deviceMap{root} 2>&1"
+		"echo $cipher | cryptsetup -q $opts luksFormat $device 2>&1"
 	);
 	$code = $? >> 8;
 	if ($code != 0) {
-		$kiwi -> error  ("Couldn't setup luks format: $deviceMap{root}");
+		$kiwi -> error  ("Couldn't setup luks format: $device");
 		$kiwi -> failed ();
 		return;
 	}
 	$data = KIWIQX::qxx (
-		"echo $cipher | cryptsetup luksOpen $deviceMap{root} $name 2>&1"
+		"echo $cipher | cryptsetup luksOpen $device $name 2>&1"
 	);
 	$code = $? >> 8;
 	if ($code != 0) {
@@ -6657,7 +6623,13 @@ sub setupEncoding {
 	}
 	push @cStack,"cryptsetup luksClose $name";
 	$this->{cleanupStack} = \@cStack;
-	$deviceMap{root} = "/dev/mapper/$name";
+	my $luksdevice = "/dev/mapper/$name";
+	if ($name eq 'luksReadWrite') {
+		$deviceMap{readwrite} = $luksdevice;
+	} else {
+		$deviceMap{root} = $luksdevice;
+	}
+	$this->{luks} = $name;
 	return %deviceMap;
 }
 
