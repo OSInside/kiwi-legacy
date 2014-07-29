@@ -6026,7 +6026,7 @@ sub bindDiskDevice {
 	# bind file to loop device
 	#------------------------------------------
 	$status = KIWIQX::qxx (
-		"/sbin/losetup -f --show $system 2>&1"
+		"/sbin/losetup -f --show $system 2>/dev/null"
 	);
 	$result = $? >> 8;
 	chomp $status;

@@ -207,7 +207,9 @@ sub mount {
 				}
 				$source = $pdev;
 			} else {
-				$status = KIWIQX::qxx ("/sbin/losetup -f --show $source 2>&1");
+				$status = KIWIQX::qxx (
+					"/sbin/losetup -f --show $source 2>/dev/null"
+				);
 				chomp $status;
 				$result = $? >> 8;
 				if ($result != 0) {
@@ -280,7 +282,9 @@ sub mount {
 	#------------------------------------------
 	if ($type eq "luks") {
 		if (-f $source) {
-			$status = KIWIQX::qxx ("/sbin/losetup -f --show $source 2>&1");
+			$status = KIWIQX::qxx (
+				"/sbin/losetup -f --show $source 2>/dev/null"
+			);
 			chomp $status;
 			$result = $? >> 8;
 			if ($result != 0) {
