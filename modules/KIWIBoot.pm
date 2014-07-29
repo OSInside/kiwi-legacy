@@ -2204,7 +2204,7 @@ sub setupBootDisk {
 		$kiwi -> failed ();
 		return;
 	}
-	$kiwi -> info ("Setup disk image/device...");
+	$kiwi -> info ("Setup disk image/device\n");
 	while (1) {
 		if ($this->{gdata}->{StudioNode}) {
 			#==========================================
@@ -2216,7 +2216,6 @@ sub setupBootDisk {
 			$result = $? >> 8;
 			chomp $status;
 			if (($result != 0) || (! -b $status)) {
-				$kiwi -> failed ();
 				$kiwi -> error  (
 					"Failed creating Studio storage device: $status"
 				);
@@ -2231,7 +2230,6 @@ sub setupBootDisk {
 			#------------------------------------------
 			my $qemu_img = $locator -> getExecPath ("qemu-img");
 			if (! $qemu_img) {
-				$kiwi -> failed ();
 				$kiwi -> error  ("Mandatory qemu-img tool not found");
 				$kiwi -> failed ();
 				return;
@@ -2241,7 +2239,6 @@ sub setupBootDisk {
 			);
 			$result = $? >> 8;
 			if ($result != 0) {
-				$kiwi -> failed ();
 				$kiwi -> error  ("Failed creating virtual disk: $status");
 				$kiwi -> failed ();
 				return;
@@ -2258,7 +2255,6 @@ sub setupBootDisk {
 			#------------------------------------------
 			$this->{loop} = $haveDiskDevice;
 			if (! -b $this->{loop}) {
-				$kiwi -> failed ();
 				$kiwi -> error  ("No such block device: $this->{loop}");
 				$kiwi -> failed ();
 				return;
@@ -2332,8 +2328,8 @@ sub setupBootDisk {
 		#==========================================
 		# write partition table
 		#------------------------------------------
+		$kiwi -> info ("--> writing partition table\n");
 		if (! $this -> setStoragePartition ($this->{loop},\@commands)) {
-			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't create partition table");
 			$kiwi -> failed ();
 			$this -> cleanStack ();
@@ -2345,7 +2341,6 @@ sub setupBootDisk {
 			);
 			$result = $? >> 8;
 			if ($result != 0) {
-				$kiwi -> failed ();
 				$kiwi -> error ("Couldn't set bios_grub label: $status");
 				$kiwi -> failed ();
 				$this -> cleanStack ();
@@ -2357,7 +2352,6 @@ sub setupBootDisk {
 			# setup device mapper
 			#------------------------------------------
 			if (! $this -> bindDiskPartitions ($this->{loop})) {
-				$kiwi -> failed ();
 				$this -> cleanStack ();
 				return;
 			}
@@ -2442,7 +2436,6 @@ sub setupBootDisk {
 			# system partition(s) still too small
 			#------------------------------------------
 			if ($haveDiskDevice) {
-				$kiwi -> failed();
 				$kiwi -> error (
 					"Sorry given disk $haveDiskDevice is too small"
 				);
@@ -2472,7 +2465,6 @@ sub setupBootDisk {
 			return;
 		}
 	}
-	$kiwi -> done();
 	#==========================================
 	# Create partition IDs meta data file
 	#------------------------------------------
@@ -6628,6 +6620,7 @@ sub setupEncoding {
 	my $data;
 	my $code;
 	my $opts = '';
+	$kiwi -> info ("--> Filling LUKS root with random data\n");
 	if (($dist) && ($dist eq 'sle11')) {
 		$opts = $this->{gdata}->{LuksDist}->{sle11};
 	}
@@ -6642,6 +6635,7 @@ sub setupEncoding {
 		$kiwi -> failed ();
 		return;
 	}
+	$kiwi -> info ("--> Creating LUKS encoding\n");
 	$data = KIWIQX::qxx (
 		"echo $cipher | cryptsetup -q $opts luksFormat $deviceMap{root} 2>&1"
 	);
@@ -6687,6 +6681,7 @@ sub setMD {
 	my $mddev;
 	my $status;
 	my $result;
+	$kiwi -> info ("--> Creating MD raid\n");
 	if ($raidtype eq "striping") {
 		$level = 0;
 	}
@@ -6701,7 +6696,6 @@ sub setMD {
 		$mdcnt++;
 	}
 	if ($result != 0) {
-		$kiwi -> failed ();
 		$kiwi -> error  ("Software raid array creation failed: $status");
 		$kiwi -> failed ();
 		$this -> cleanStack ();
@@ -6742,12 +6736,12 @@ sub setVolumeGroup {
 	my $status;
 	my $result;
 	my $allFree = 'LVRoot';
+	$kiwi -> info ("--> Creating volume group\n");
 	$status = KIWIQX::qxx ("vgremove --force $VGroup 2>&1");
 	$status = KIWIQX::qxx ("test -d /dev/$VGroup && rm -rf /dev/$VGroup 2>&1");
 	$status = KIWIQX::qxx ("pvcreate $deviceMap{root} 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
-		$kiwi -> failed ();
 		$kiwi -> error  ("Failed creating physical extends: $status");
 		$kiwi -> failed ();
 		$this -> cleanStack ();
@@ -6756,7 +6750,6 @@ sub setVolumeGroup {
 	$status = KIWIQX::qxx ("vgcreate $VGroup $deviceMap{root} 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
-		$kiwi -> failed ();
 		$kiwi -> error  ("Failed creating volume group: $status");
 		$kiwi -> failed ();
 		$this -> cleanStack ();
@@ -6764,13 +6757,13 @@ sub setVolumeGroup {
 	}
 	push @cStack,"vgchange -an $VGroup";
 	$this->{cleanupStack} = \@cStack;
+	$kiwi -> info ("--> Creating logical volumes\n");
 	if (($syszip) || ($haveSplit)) {
 		$status = KIWIQX::qxx ("lvcreate -L $syszip -n LVComp $VGroup 2>&1");
 		$result = $? >> 8;
 		$status.= KIWIQX::qxx ("lvcreate -l +100%FREE -n LVRoot $VGroup 2>&1");
 		$result+= $? >> 8;
 		if ($result != 0) {
-			$kiwi -> failed ();
 			$kiwi -> error  ("Logical volume(s) setup failed: $status");
 			$kiwi -> failed ();
 			$this -> cleanStack ();
@@ -6818,9 +6811,13 @@ sub setVolumeGroup {
 		if ($result == 0) {
 			if (($lvmparts{'@root'}) && ($lvmparts{'@root'}->[3])) {
 				my $rootsize = $lvmparts{'@root'}->[3];
-				$status = KIWIQX::qxx ("lvcreate -L $rootsize -n LVRoot $VGroup 2>&1");
+				$status = KIWIQX::qxx (
+					"lvcreate -L $rootsize -n LVRoot $VGroup 2>&1"
+				);
 			} else {
-				$status = KIWIQX::qxx ("lvcreate -l +100%FREE -n LVRoot $VGroup 2>&1");
+				$status = KIWIQX::qxx (
+					"lvcreate -l +100%FREE -n LVRoot $VGroup 2>&1"
+				);
 			}
 			$result = $? >> 8;
 		}
@@ -6833,7 +6830,6 @@ sub setVolumeGroup {
 			}
 		}
 		if ($result != 0) {
-			$kiwi -> failed ();
 			$kiwi -> error  ("Logical volume(s) setup failed: $status");
 			$kiwi -> failed ();
 			$this -> cleanStack ();
