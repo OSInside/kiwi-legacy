@@ -1288,6 +1288,20 @@ sub checkType {
 	my $type = $xml -> getImageType();
 	my $para = "ok";
 	#==========================================
+	# check for selected/specified type
+	#------------------------------------------
+	if (($type) && ($cmdL -> getBuildType())) {
+		my $cmdltype = $cmdL -> getBuildType();
+		my $kiwitype = $type -> getTypeName();
+		if ($kiwitype ne $cmdltype) {
+			$kiwi -> error (
+				"no type configuration exists for the given type '$cmdltype'"
+			);
+			$kiwi -> failed();
+			return;
+		}
+	}
+	#==========================================
 	# check for required image attributes
 	#------------------------------------------
 	if ($cmdL->getFatStorage()) {
