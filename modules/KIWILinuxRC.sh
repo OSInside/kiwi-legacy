@@ -4294,6 +4294,7 @@ function deactivateVolumeGroup {
 	udevPending
 	Echo "Deactivating $kiwi_lvmgroup volume group..."
 	vgchange -a n $kiwi_lvmgroup
+	udevPending
 }
 #======================================
 # activateVolumeGroup
@@ -4308,6 +4309,7 @@ function activateVolumeGroup {
 	udevPending
 	Echo "Activating $kiwi_lvmgroup volume group..."
 	vgchange -a y $kiwi_lvmgroup
+	udevPending
 }
 #======================================
 # activateMDRaid
@@ -4338,6 +4340,9 @@ function resizeLVMPVs {
 	local device=$(ddn $imageDiskDevice $extendID)
 	if [ ! -z "$kiwi_RaidDev" ];then
 		device=$kiwi_RaidDev
+	fi
+	if [ ! -z "$luksDeviceOpened" ];then
+		device=$luksDeviceOpened
 	fi
 	local unixDevice=$(getDiskDevice $device)
 	pvresize $unixDevice
@@ -7942,6 +7947,15 @@ function luksOpen {
 	local name=$2
 	local retry=1
 	local info
+	if [ -z "$ldev" ];then
+		ldev=$(ddn $imageDiskDevice $kiwi_RootPart)
+	fi
+	#======================================
+	# check device for luks extension
+	#--------------------------------------
+	if ! cryptsetup isLuks $ldev &>/dev/null;then
+		return
+	fi
 	#======================================
 	# no map name set, build it from device
 	#--------------------------------------
@@ -7953,13 +7967,6 @@ function luksOpen {
 	#--------------------------------------
 	if [ -e /dev/mapper/$name ];then
 		export luksDeviceOpened=/dev/mapper/$name
-		return
-	fi
-	#======================================
-	# check device for luks extension
-	#--------------------------------------
-	if ! cryptsetup isLuks $ldev &>/dev/null;then
-		export luksDeviceOpened=$ldev
 		return
 	fi
 	#======================================
@@ -8008,19 +8015,13 @@ function luksOpen {
 #--------------------------------------
 function luksResize {
 	# /.../
-	# check given device if it is a mapped device name
-	# and run cryptsetup resize on the mapper name
+	# check if luksDeviceOpened is defined and
+	# run cryptsetup resize on the mapper name
 	# ----
-	local ldev=$1
-	if [ ! "$haveLuks" = "yes" ] || [ ! -e $ldev ];then
-		return
+	if [ ! -z "$luksDeviceOpened" ] && [ -e $luksDeviceOpened ];then
+		cryptsetup resize $luksDeviceOpened
+		udevPending
 	fi
-	local name=$(basename $ldev)
-	local dmap=$(dirname  $ldev)
-	if [ ! "$dmap" = "/dev/mapper" ];then
-		return
-	fi
-	cryptsetup resize $name
 }
 #======================================
 # luksClose
@@ -8926,7 +8927,6 @@ function resizeFilesystem {
 	local callme=$2
 	local ramdisk=0
 	local resize_fs
-	local resize_lucks
 	local check
 	local mnt=/mnt-resize
 	udevPending
@@ -8937,7 +8937,6 @@ function resizeFilesystem {
 	if [ -z "$FSTYPE" ];then
 		probeFileSystem $deviceResize
 	fi
-	resize_lucks="luksResize $deviceResize"
 	if [ "$FSTYPE" = "reiserfs" ];then
 		resize_fs="resize_reiserfs -q $deviceResize"
 		check="reiserfsck -y $deviceResize"
@@ -8987,7 +8986,6 @@ function resizeFilesystem {
 			eval $check
 		fi
 		Echo "Resizing $FSTYPE filesystem on ${deviceResize}..."
-		eval $resize_lucks
 		eval $resize_fs
 		if [ ! $? = 0 ];then
 			systemException \

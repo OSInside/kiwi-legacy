@@ -162,9 +162,7 @@ function OEMRepartStandard {
 		#======================================
 		# close open device mappings
 		#--------------------------------------
-		if [ "$haveLuks" = "yes" ];then
-			luksClose
-		fi
+		luksClose
 		#======================================
 		# clean/backup boot partition
 		#--------------------------------------
@@ -344,9 +342,7 @@ function OEMRepartSplit {
 		#======================================
 		# close open device mappings
 		#--------------------------------------
-		if [ "$haveLuks" = "yes" ];then
-			luksClose
-		fi
+		luksClose
 		#======================================
 		# count partitions to be created
 		#--------------------------------------
@@ -488,11 +484,9 @@ function OEMRepartLVM {
 		#======================================
 		# close open device mappings
 		#--------------------------------------
-		if [ "$haveLuks" = "yes" ];then
-			luksClose
-		fi
 		deactivateVolumeGroup
 		deactivateMDRaid
+		luksClose
 		#======================================
 		# resize LVM partition
 		#--------------------------------------
@@ -522,8 +516,13 @@ function OEMRepartLVM {
 			1 $swapParam $recoParam $bootParam yes $kiwi_lvmgroup
 		callPartitioner $input
 		waitForStorageDevice $(ddn $imageDiskDevice $extendID)
+		luksOpen
 		activateMDRaid
 		deactivateVolumeGroup
+		#======================================
+		# extend LUKS if required
+		#--------------------------------------
+		luksResize
 		#======================================
 		# extend mdraid array if required
 		#--------------------------------------
@@ -918,13 +917,17 @@ function createBootDeviceData {
 # createLuksMaps
 #--------------------------------------
 function createLuksMaps {
-	luksOpen $imageRootDevice
-	export imageRootDevice=$luksDeviceOpened
+	if [ -z "$luksDeviceOpened" ];then
+		luksOpen $imageRootDevice
+		export imageRootDevice=$luksDeviceOpened
+		luksResize
+	fi
 	if isFSTypeReadOnly;then
 		luksOpen $imageIOWRDevice luksReadWrite
 		export imageIOWRDevice=$luksDeviceOpened
 		export imageRWDevice=$imageIOWRDevice
 		export imageRODevice=$imageRootDevice
+		luksResize
 	fi
 }
 
