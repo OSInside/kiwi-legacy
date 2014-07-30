@@ -491,7 +491,7 @@ sub setupUpgrade {
 		);
 	} else {
 		$kiwi -> info (
-			"Upgrading/Checking for package install/remove requests....."
+			"Upgrading/Checking for package install/remove requests..."
 		);
 	}
 	print $fd "function clean { kill \$SPID;";
