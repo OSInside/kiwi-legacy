@@ -215,6 +215,15 @@ _kiwi() {
 		--add-package
 		--add-pattern
 		--del-package
+		--set-repo
+		--set-repotype
+		--set-repoalias
+		--set-repoprio
+		--add-repo
+		--add-repotype
+		--add-repoalias
+		--add-repoprio
+		--ignore-repos
 	"
 	opt_describe="
 	"
