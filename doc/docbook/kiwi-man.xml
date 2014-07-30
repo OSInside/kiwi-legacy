@@ -465,16 +465,6 @@
 		</listitem>
 	</varlistentry>
 	<varlistentry>
-		<term><optional><option>--log-port <replaceable>PortNumber</replaceable></option></optional></term>
-		<listitem>
-		<para>
-			Set the log server port. By default port 9000 is used. If
-			multiple KIWI processes runs on one system it's recommended
-			to set the logging port per process.
-		</para>
-		</listitem>
-	</varlistentry>
-	<varlistentry>
 		<term><optional><option>--package-manager <replaceable>smart|zypper</replaceable></option>
 		</optional></term>
 		<listitem>

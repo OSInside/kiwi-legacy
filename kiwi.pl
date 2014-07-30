@@ -74,9 +74,6 @@ binmode(STDOUT, ":encoding(UTF-8)");
 my $kiwi    = KIWILog -> instance();
 my $global  = KIWIGlobals -> instance();
 my $locator = KIWILocator -> instance();
-$kiwi -> setLogServer (
-	$global -> getKiwiConfig() -> {LogServerPort}
-);
 
 #============================================
 # Variables (operation mode)
@@ -746,7 +743,6 @@ sub init {
 	my $ForceBootstrap;        # force bootstrap, checked for recycle-root mode
 	my $ForceNewRoot;          # force creation of new root directory
 	my $NoColor;               # don't use colored output (done/failed messages)
-	my $LogPort;               # specify alternative log server port
 	my $GzipCmd;               # command to run to gzip things
 	my $TargetStudio;          # command to run to create on demand storage
 	my $Verbosity;             # control the verbosity level
@@ -844,7 +840,6 @@ sub init {
 		"installpxe-system=s"   => \$InstallPXESystem,
 		"isocheck"              => \$ISOCheck,
 		"list|l"                => \&listImage,
-		"log-port=i"            => \$LogPort,
 		"logfile=s"             => \$LogFile,
 		"lvm"                   => \$LVM,
 		"mbrid=o"               => \$MBRID,
@@ -1512,11 +1507,6 @@ sub init {
 		$kiwi -> failed ();
 		kiwiExit (1);
 	}
-	if (defined $LogPort) {
-		$kiwi -> info ("Setting log server port to: $LogPort");
-		$global -> setKiwiConfigData ("LogServerPort", $LogPort);
-		$kiwi -> done ();
-	}
 	if (defined $GzipCmd) {
 		$kiwi -> info ("Setting gzip command to: $GzipCmd");
 		$global -> setKiwiConfigData ("Gzip", $GzipCmd);
@@ -2029,9 +2019,6 @@ sub findLinksRelative {
 # exit
 #------------------------------------------
 sub kiwiExit {
-	# ...
-	# private Exit function, exit safely
-	# ---
 	my $code = shift;
 	#==========================================
 	# Reformat log file for human readers...
@@ -2044,7 +2031,6 @@ sub kiwiExit {
 		if ($cmdL -> getDebug()) {
 			$kiwi -> printBackTrace();
 		}
-		$kiwi -> printLogExcerpt();
 		$kiwi -> error  ("KIWI exited with error(s)\n");
 	} else {
 		$kiwi -> info ("KIWI exited successfully\n");
@@ -2056,7 +2042,6 @@ sub kiwiExit {
 	#==========================================
 	# Cleanup and exit now...
 	#------------------------------------------
-	$kiwi -> cleanSweep();
 	cleanup();
 	exit $code;
 }
@@ -2119,7 +2104,6 @@ sub version {
 	$kiwi -> info ("Version:\n");
 	$kiwi -> info ("--> vnr: $gdata->{Version}\n");
 	$kiwi -> info ("--> git: $rev\n");
-	$kiwi -> cleanSweep();
 	exit ($exit);
 }
 

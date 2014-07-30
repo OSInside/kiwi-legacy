@@ -23,7 +23,6 @@ _kiwi() {
 	#----------------------------------------
 	opt_global="
 		--logfile
-		--log-port
 		--debug
 		--yes
 		--nocolor
