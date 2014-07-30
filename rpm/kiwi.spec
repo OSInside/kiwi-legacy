@@ -108,7 +108,6 @@ Requires:       qemu-img
 %if 0%{?suse_version}
 Recommends:     db45-utils
 Recommends:     db48-utils
-Recommends:     git
 %endif
 # obsoletes
 Obsoletes:      kiwi-desc-usbboot <= 4.81
