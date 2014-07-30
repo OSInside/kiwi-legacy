@@ -171,11 +171,10 @@ sub callCmd {
 	my $sel = IO::Select->new();
 	$sel->add($CHILDSTDOUT);
 	$sel->add($CHILDSTDERR);
-	my $chunk_result = 1;
-	while ($chunk_result) {
+	while($sel->count()) {
 		foreach my $handle ($sel->can_read()) {
-			my $bytes_read;
-			$chunk_result = sysread($handle, $bytes_read, $BUFSIZE);
+			my $bytes_read = '';
+			my $chunk_result = sysread($handle, $bytes_read, $BUFSIZE);
 			if ($handle == $CHILDSTDOUT) {
 				$result_buf .= $bytes_read;
 			} else {
