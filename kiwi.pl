@@ -768,7 +768,7 @@ sub init {
 	my $LVM;                   # use LVM partition setup for virtual disk
 	my $GrubChainload;         # install grub loader in first partition not MBR
 	my $FatStorage;            # size of fat partition if syslinux is used
-	my $DiskStartSector;       # location of start sector (default is 32)
+	my $DiskStartSector;       # location of start sector (default is 2048)
 	my $EditBootConfig;        # allow to run script before bootloader install
 	my $EditBootInstall;       # allow to run script after bootloader install
 	my $PackageManager;        # package manager to use
