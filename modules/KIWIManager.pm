@@ -113,6 +113,7 @@ sub new {
 	$this->{lock}        = "/var/lock/kiwi-init.lock";
 	$this->{screenCall}  = $root."/screenrc.smart";
 	$this->{screenCtrl}  = $root."/screenrc.ctrls";
+	$this->{screenErrs}  = $root."/screenrc.err";
 	$this->{screenLogs}  = $kiwi -> getRootLog();
 	$this->{dataDir}     = $dataDir;
 	$this->{locator}     = $locator;
@@ -208,7 +209,7 @@ sub setupScreenCall {
 	my $kiwi = $this->{kiwi};
 	my $screenCall = $this->{screenCall};
 	my $screenCtrl = $this->{screenCtrl};
-	my $screenLogs = $this->{screenLogs};
+	my $screenLogs = $this->{screenErrs};
 	my $logs = 1;
 	my $code;
 	my $data;
@@ -220,13 +221,15 @@ sub setupScreenCall {
 		$logs = 0;
 	}
 	#==========================================
-	# activate shell set -x mode
+	# activate shell set -x mode and stderr log
 	#------------------------------------------
 	my $fd = FileHandle -> new();
 	if ($fd -> open ($screenCall)) {
 		local $/; $data = <$fd>; $fd -> close();
 		if ($fd -> open (">$screenCall")) {
+			print $fd "#!/bin/bash\n";
 			print $fd "set -x\n";
+			print $fd "exec 2> >(tee $this->{screenErrs} >&2)\n";
 			print $fd $data;
 			$fd -> close();
 		}
@@ -273,8 +276,9 @@ sub setupScreenCall {
 		#==========================================
 		# remove call and control files
 		#------------------------------------------
-		KIWIQX::qxx (" rm -f $screenCall* ");
-		KIWIQX::qxx (" rm -f $screenCtrl ");
+		KIWIQX::qxx ("rm -f $screenCall*");
+		KIWIQX::qxx ("rm -f $screenCtrl");
+		KIWIQX::qxx ("rm -f $screenLogs");
 	} else {
 		#==========================================
 		# do the job in the child process
@@ -295,13 +299,7 @@ sub setupScreenCall {
 	if ($code != 0) {
 		$kiwi -> failed ();
 		if (($logs) && ($data)) {
-			my @lines = split ("\n",$data);
-			@lines = @lines[-10,-9,-8,-7,-6,-5,-4,-3,-2,-1];
-			unshift (@lines,"[*** log excerpt follows, screen ***]");
-			push    (@lines,"[*** end ***]\n");
-			$data = join ("\n",@lines);
-			printf STDERR "%s", $data;
-			$kiwi -> doNorm();
+			print STDERR $data;
 		}
 		$this -> resetInstallationSource();
 		if ($kiwi -> trace()) {
