@@ -889,12 +889,6 @@ sub init {
 		}
 	}
 	#========================================
-	# set start sector for disk images
-	#----------------------------------------
-	$cmdL -> setDiskStartSector (
-		$DiskStartSector
-	);
-	#========================================
 	# set sector size for alignment
 	#----------------------------------------
 	$cmdL -> setDiskBIOSSectorSize (
@@ -905,6 +899,17 @@ sub init {
 	#----------------------------------------
 	$cmdL -> setDiskAlignment (
 		$DiskAlignment
+	);
+	#========================================
+	# set start sector for disk images
+	#----------------------------------------
+	if (! $DiskStartSector) {
+		$DiskStartSector = int (
+			$cmdL -> getDiskAlignment * 1024 / $cmdL -> getDiskBIOSSectorSize()
+		);
+	}
+	$cmdL -> setDiskStartSector (
+		$DiskStartSector
 	);
 	#========================================
 	# set list of filesystem options
