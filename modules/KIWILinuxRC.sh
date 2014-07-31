@@ -129,16 +129,16 @@ function Dialog {
   local code=1
   export DIALOG_CANCEL=1
   hideSplash
-  cat > /tmp/fbcode <<- EOF
-    dialog \
-      --ok-label "$TEXT_OK" \
-      --cancel-label "$TEXT_CANCEL" \
-      --yes-label "$TEXT_YES" \
-      --no-label "$TEXT_NO" \
-      --exit-label "$TEXT_EXIT" \
-      $@
-    echo \$? > /tmp/fbcode
-  EOF
+cat > /tmp/fbcode << EOF
+dialog \
+  --ok-label "$TEXT_OK" \
+  --cancel-label "$TEXT_CANCEL" \
+  --yes-label "$TEXT_YES" \
+  --no-label "$TEXT_NO" \
+  --exit-label "$TEXT_EXIT" \
+  $@
+echo \$? > /tmp/fbcode
+EOF
   if FBOK;then
     fbiterm -m $UFONT -- bash -e /tmp/fbcode
   else
@@ -1054,21 +1054,21 @@ function installBootLoaderGrub2 {
       if [ ! -z "$KIWI_BOOT_TIMEOUT" ];then
         timeout=$KIWI_BOOT_TIMEOUT
       fi
-      cat > /etc/elilo.conf <<- EOF
-        # Modified by YaST2.
-        timeout = $timeout
-        ##YaST - boot_efilabel = "SUSE Linux Enterprise Server 11"
-        vendor-directory = BOOT
-        secure-boot = on
-        prompt
-        image  = /boot/vmlinuz
-        ###Don't change this comment - YaST2 identifier: Original name: linux###
-        initrd = /boot/initrd
-        label  = linux
-        append = "$GRUB_CMDLINE_LINUX_DEFAULT"
-        description = Linux
-        root = $(getDiskID $imageRootDevice)
-      EOF
+cat > /etc/elilo.conf << EOF
+# Modified by YaST2.
+timeout = $timeout
+##YaST - boot_efilabel = "SUSE Linux Enterprise Server 11"
+vendor-directory = BOOT
+secure-boot = on
+prompt
+image  = /boot/vmlinuz
+###Don't change this comment - YaST2 identifier: Original name: linux###
+initrd = /boot/initrd
+label  = linux
+append = "$GRUB_CMDLINE_LINUX_DEFAULT"
+description = Linux
+root = $(getDiskID $imageRootDevice)
+EOF
       #======================================
       # update sysconfig/bootloader
       #--------------------------------------
@@ -1264,15 +1264,15 @@ function installBootLoaderGrub2Recovery {
   #======================================
   # create custom recovery entry
   #--------------------------------------
-  cat > /etc/grub.d/40_custom <<- DONE
-    #!/bin/sh
-    cat <<EOF
-    menuentry 'Recovery' --class os {
-       set root='hd0,$recoid'
-       configfile /boot/grub2/grub.cfg
-    }
-    EOF
-  DONE
+cat > /etc/grub.d/40_custom << DONE
+#!/bin/bash
+cat << EOF
+menuentry 'Recovery' --class os {
+  set root='hd0,$recoid'
+  configfile /boot/grub2/grub.cfg
+}
+EOF
+DONE
   #======================================
   # create grub2 config file
   #--------------------------------------
@@ -1894,80 +1894,80 @@ function setupBootLoaderGrub2Recovery {
   #======================================
   # create recovery grub.cfg
   #--------------------------------------
-  cat > $conf <<- EOF
-    insmod ext2
-    insmod gettext
-    insmod part_msdos
-    insmod chain
-    insmod png
-    insmod vbe
-    insmod vga
-    insmod gzio
-    set default=0
-    set root='hd0,$recoid'
-    set font=/boot/unicode.pf2
-    if loadfont \$font ;then
-      set gfxmode=auto
-      insmod gfxterm
-      insmod gfxmenu
-      terminal_input gfxterm
-      if terminal_output gfxterm; then true; else
-        terminal gfxterm
-      fi
-    fi
-    if loadfont /boot/grub2/themes/$theme/ascii.pf2;then
-      loadfont /boot/grub2/themes/$theme/DejaVuSans-Bold14.pf2
-      loadfont /boot/grub2/themes/$theme/DejaVuSans10.pf2
-      loadfont /boot/grub2/themes/$theme/DejaVuSans12.pf2
-      loadfont /boot/grub2/themes/$theme/ascii.pf2
-      set theme=/boot/grub2/themes/$theme/theme.txt
-      set bgimg=/boot/grub2/themes/$theme/background.png
-      background_image -m stretch \$bgimg
-    fi
-    set timeout=30
-  EOF
+cat > $conf << EOF
+insmod ext2
+insmod gettext
+insmod part_msdos
+insmod chain
+insmod png
+insmod vbe
+insmod vga
+insmod gzio
+set default=0
+set root='hd0,$recoid'
+set font=/boot/unicode.pf2
+if loadfont \$font ;then
+  set gfxmode=auto
+  insmod gfxterm
+  insmod gfxmenu
+  terminal_input gfxterm
+  if terminal_output gfxterm; then true; else
+    terminal gfxterm
+  fi
+fi
+if loadfont /boot/grub2/themes/$theme/ascii.pf2;then
+  loadfont /boot/grub2/themes/$theme/DejaVuSans-Bold14.pf2
+  loadfont /boot/grub2/themes/$theme/DejaVuSans10.pf2
+  loadfont /boot/grub2/themes/$theme/DejaVuSans12.pf2
+  loadfont /boot/grub2/themes/$theme/ascii.pf2
+  set theme=/boot/grub2/themes/$theme/theme.txt
+  set bgimg=/boot/grub2/themes/$theme/background.png
+  background_image -m stretch \$bgimg
+fi
+set timeout=30
+EOF
   if xenServer $kernel $mountPrefix;then
-    cat >> $conf <<- EOF
-    menuentry 'Recover/Repair System' --class os {
-      set root='hd0,$recoid'
-      echo Loading Xen...
-      multiboot /boot/xen.gz dummy
-      echo Loading $kernel...
-      set gfxpayload=keep
-      module /boot/$kernel dummy $cmdline showopts
-      echo Loading $initrd...
-      module /boot/$initrd dummy
-    }
-    menuentry 'Restore Factory System' --class os {
-      set root='hd0,$recoid'
-      echo Loading Xen...
-      multiboot /boot/xen.gz dummy
-      echo Loading $kernel...
-      set gfxpayload=keep
-      module /boot/$kernel dummy $cmdline RESTORE=1 showopts
-      echo Loading $initrd...
-      module /boot/$initrd dummy
-    }
-    EOF
+cat >> $conf << EOF
+menuentry 'Recover/Repair System' --class os {
+  set root='hd0,$recoid'
+  echo Loading Xen...
+  multiboot /boot/xen.gz dummy
+  echo Loading $kernel...
+  set gfxpayload=keep
+  module /boot/$kernel dummy $cmdline showopts
+  echo Loading $initrd...
+  module /boot/$initrd dummy
+}
+menuentry 'Restore Factory System' --class os {
+  set root='hd0,$recoid'
+  echo Loading Xen...
+  multiboot /boot/xen.gz dummy
+  echo Loading $kernel...
+  set gfxpayload=keep
+  module /boot/$kernel dummy $cmdline RESTORE=1 showopts
+  echo Loading $initrd...
+  module /boot/$initrd dummy
+}
+EOF
   else
-    cat >> $conf <<- EOF
-    menuentry 'Recover/Repair System' --class os {
-      set root='hd0,$recoid'
-      echo Loading $kernel...
-      set gfxpayload=keep
-      linux /boot/$kernel $cmdline showopts
-      echo Loading $initrd...
-      initrd /boot/$initrd
-    }
-    menuentry 'Restore Factory System' --class os {
-      set root='hd0,$recoid'
-      echo Loading $kernel...
-      set gfxpayload=keep
-      linux /boot/$kernel $cmdline RESTORE=1 showopts
-      echo Loading $initrd...
-      initrd /boot/$initrd
-    }
-    EOF
+cat >> $conf << EOF
+menuentry 'Recover/Repair System' --class os {
+  set root='hd0,$recoid'
+  echo Loading $kernel...
+  set gfxpayload=keep
+  linux /boot/$kernel $cmdline showopts
+  echo Loading $initrd...
+  initrd /boot/$initrd
+}
+menuentry 'Restore Factory System' --class os {
+  set root='hd0,$recoid'
+  echo Loading $kernel...
+  set gfxpayload=keep
+  linux /boot/$kernel $cmdline RESTORE=1 showopts
+  echo Loading $initrd...
+  initrd /boot/$initrd
+}
+EOF
   fi
 }
 #======================================
@@ -2759,15 +2759,15 @@ function setupBootLoaderGrub2 {
   # write etc/default/grub
   #--------------------------------------
   mkdir -p $destsPrefix/etc/default
-  cat > $inst_default_grub <<- EOF
-    GRUB_DISTRIBUTOR=$(printf %q "$title")
-    GRUB_DEFAULT=0
-    GRUB_HIDDEN_TIMEOUT=0
-    GRUB_HIDDEN_TIMEOUT_QUIET=true
-    GRUB_TIMEOUT=$timeout
-    GRUB_CMDLINE_LINUX_DEFAULT="$cmdline"
-    GRUB_CMDLINE_LINUX=""
-  EOF
+cat > $inst_default_grub << EOF
+GRUB_DISTRIBUTOR=$(printf %q "$title")
+GRUB_DEFAULT=0
+GRUB_HIDDEN_TIMEOUT=0
+GRUB_HIDDEN_TIMEOUT_QUIET=true
+GRUB_TIMEOUT=$timeout
+GRUB_CMDLINE_LINUX_DEFAULT="$cmdline"
+GRUB_CMDLINE_LINUX=""
+EOF
   #======================================
   # set terminal mode
   #--------------------------------------
@@ -2779,16 +2779,16 @@ function setupBootLoaderGrub2 {
   #======================================
   # write etc/default/grub_installdevice
   #--------------------------------------
-  cat > $inst_default_grubdev <<- EOF
-    $diskByID
-  EOF
+cat > $inst_default_grubdev << EOF
+$diskByID
+EOF
   #======================================
   # write boot/grub2/device.map
   #--------------------------------------
   mkdir -p $destsPrefix/boot/grub2
-  cat > $inst_default_grubmap <<- EOF
-    (hd0) $diskByID
-  EOF
+cat > $inst_default_grubmap << EOF
+(hd0) $diskByID
+EOF
   #======================================
   # activate secure boot if required
   #--------------------------------------
@@ -7631,13 +7631,13 @@ function bootImage {
     # setup shutdown script
     #--------------------------------------
     local halt=/mnt/run/initramfs/shutdown
-    cat > $halt <<- EOF
-      #!/bin/sh
-      # if systemd is used this script is called after all
-      # services are terminated and mount points unmounted
-      # ---
-      ACTION="\$1"
-    EOF
+cat > $halt << EOF
+#!/bin/sh
+# if systemd is used this script is called after all
+# services are terminated and mount points unmounted
+# ---
+ACTION="\$1"
+EOF
     #======================================
     # shutdown: zfs -> export pool
     #--------------------------------------
@@ -7645,25 +7645,25 @@ function bootImage {
     #======================================
     # shutdown: handle requested action
     #--------------------------------------
-    cat >> $halt <<- EOF
-      case "\$ACTION" in
-          reboot)
-              reboot -f -d
-          ;;
-          poweroff)
-              reboot -f -d -p
-          ;;
-          halt)
-              halt
-          ;;
-          kexec)
-              kexec -e
-          ;;
-          *)
-              reboot -f -d
-          ;;
-      esac
-    EOF
+cat >> $halt << EOF
+case "\$ACTION" in
+  reboot)
+    reboot -f -d
+  ;;
+  poweroff)
+    reboot -f -d -p
+  ;;
+  halt)
+    halt
+  ;;
+  kexec)
+    kexec -e
+  ;;
+  *)
+    reboot -f -d
+  ;;
+esac
+EOF
   fi
   #======================================
   # run preinit and cleanImage
