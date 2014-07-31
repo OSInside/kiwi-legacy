@@ -1,37 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <image schemaversion="5.7" name="container-test">
-	<description type="system">
-		<author>Robert Schweikert</author>
-		<contact>rjschwei@suse.com</contact>
-		<specification>Basic container</specification>
-	</description>
-	<preferences>
-		<type image="lxc" container="mycontainer"/>
-		<version>1.0.0</version>
-		<packagemanager>zypper</packagemanager>
-		<rpm-check-signatures>false</rpm-check-signatures>
-		<rpm-force>true</rpm-force>
-		<locale>en_US</locale>
-		<keytable>us.map.gz</keytable>
-	</preferences>
-	<users group="root">
-		<user password="linux" pwdformat="plain" home="/root" name="root"/>
-	</users>
-	<repository type="yast2">
-		<source path="/tmp"/>
-	</repository>
-	<packages type="image">
-		<package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>
-		<package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
-		<package name="kernel-default"/>
-		<package name="lxc"/>
-		<package name="ifplugd"/>
-		<package name="vim"/>
-		<namedCollection name="base"/>
-	</packages>
-	<packages type="bootstrap">
-		<package name="filesystem"/>
-		<package name="glibc-locale"/>
-	</packages>
+  <description type="system">
+    <author>Robert Schweikert</author>
+    <contact>rjschwei@suse.com</contact>
+    <specification>Basic container</specification>
+  </description>
+  <preferences>
+    <type image="lxc" container="mycontainer"/>
+    <version>1.0.0</version>
+    <packagemanager>zypper</packagemanager>
+    <rpm-check-signatures>false</rpm-check-signatures>
+    <rpm-force>true</rpm-force>
+    <locale>en_US</locale>
+    <keytable>us.map.gz</keytable>
+  </preferences>
+  <users group="root">
+    <user password="linux" pwdformat="plain" home="/root" name="root"/>
+  </users>
+  <repository type="yast2">
+    <source path="/tmp"/>
+  </repository>
+  <packages type="image">
+    <package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>
+    <package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
+    <package name="kernel-default"/>
+    <package name="lxc"/>
+    <package name="ifplugd"/>
+    <package name="vim"/>
+    <namedCollection name="base"/>
+  </packages>
+  <packages type="bootstrap">
+    <package name="filesystem"/>
+    <package name="glibc-locale"/>
+  </packages>
 </image>

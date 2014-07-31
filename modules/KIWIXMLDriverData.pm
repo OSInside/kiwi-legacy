@@ -35,18 +35,18 @@ our @EXPORT_OK = qw ();
 # Constructor
 #------------------------------------------
 sub new {
-	# ...
-	# Create the KIWIXMLDriverData object
-	# ---
-	#==========================================
-	# Object setup
-	#------------------------------------------
-	my $class = shift;
-	my $this  = $class->SUPER::new(@_);
-	if (! $this) {
-		return;
-	}
-	return $this;
+  # ...
+  # Create the KIWIXMLDriverData object
+  # ---
+  #==========================================
+  # Object setup
+  #------------------------------------------
+  my $class = shift;
+  my $this  = $class->SUPER::new(@_);
+  if (! $this) {
+    return;
+  }
+  return $this;
 }
 
 1;

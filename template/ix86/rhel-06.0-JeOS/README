@@ -5,7 +5,7 @@ Build instructions for local build
 
 * call kiwi:
   kiwi --build rhel-06.0-JeOS --set-repo /path/to/RHEL/repo \
-	   -d /tmp/myimage --type iso
+     -d /tmp/myimage --type iso
 
 NOTE:
 * the path to a RHEL repo has to specify the base name like 'Server'

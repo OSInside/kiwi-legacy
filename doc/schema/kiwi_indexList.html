@@ -2783,10 +2783,10 @@
                      
                      // The corresponding div is already visible conf. to its style attr.                     
                     
-                        	var selectToc = getElementObject('selectTOC');
-                        	if(selectToc != null){
-                        	    // It can be null when having chunking, the combo of the TOC is in another frame.
-                            	    selectToc.selectedIndex = 1;
+                          var selectToc = getElementObject('selectTOC');
+                          if(selectToc != null){
+                              // It can be null when having chunking, the combo of the TOC is in another frame.
+                                  selectToc.selectedIndex = 1;
                                     }
                         
                     
@@ -2794,26 +2794,26 @@
                      var globalControls = getElementObject("global_controls"); 
                      
                      if(globalControls != null){
-	                     var browser=navigator.appName;
-						 var version = parseFloat(navigator.appVersion.split('MSIE')[1]);
-						 
-						 var IE6 = false;
-						 if ((browser=="Microsoft Internet Explorer") && (version < 7)){
-						 	IE6 = true;
-						 }
-	
-	                     //alert (IE6 + " |V| " + version);
-	                     
-	                     if(IE6){
-	                     	// On IE 6 the 'fixed' property is not supported. We must use javascript. 
-	                         globalControls.style.position='absolute';                         
-	                         // The global controls will do not exist in the TOC frame, when chunking.
-	                         findAndFloat("global_controls", 225, 30);    
-	                     } else {
-	                      	  globalControls.style.position='fixed';                     	
-	                     }
-	                     
-	                     globalControls.style.right='0';                       
+                       var browser=navigator.appName;
+             var version = parseFloat(navigator.appVersion.split('MSIE')[1]);
+             
+             var IE6 = false;
+             if ((browser=="Microsoft Internet Explorer") && (version < 7)){
+              IE6 = true;
+             }
+  
+                       //alert (IE6 + " |V| " + version);
+                       
+                       if(IE6){
+                        // On IE 6 the 'fixed' property is not supported. We must use javascript. 
+                           globalControls.style.position='absolute';                         
+                           // The global controls will do not exist in the TOC frame, when chunking.
+                           findAndFloat("global_controls", 225, 30);    
+                       } else {
+                            globalControls.style.position='fixed';                      
+                       }
+                       
+                       globalControls.style.right='0';                       
                      }
                 --></script></body>
 </html>

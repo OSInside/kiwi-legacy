@@ -1,143 +1,143 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <image schemaversion="6.1" name="LimeJeOS-SLE12">
-	<description type="system">
-		<author>Marcus Schäfer</author>
-		<contact>ms@novell.com</contact>
-		<specification>SUSE Linux Enterprise 12 JeOS</specification>
-	</description>
-	<profiles>
-		<profile name="xenFlavour" description="VMX with Xen kernel"/>
-		<profile name="ec2Flavour" description="VMX with EC2/Xen kernel"/>
-		<profile name="vmxFlavour" description="VMX with default kernel" import="true"/>
-	</profiles>
-	<preferences>
-		<type image="iso" primary="true" boot="isoboot/suse-SLES12" flags="overlay" hybrid="true" firmware="efi"/>
-		<version>1.13.1</version>
-		<packagemanager>zypper</packagemanager>
-		<bootsplash-theme>SLE</bootsplash-theme>
-		<bootloader-theme>SLE</bootloader-theme>
-		<locale>en_US</locale>
-		<keytable>us.map.gz</keytable>
-		<timezone>Europe/Berlin</timezone>
-		<hwclock>utc</hwclock>
-		<rpm-excludedocs>true</rpm-excludedocs>
-	</preferences>
-	<preferences profiles="ec2Flavour">
-		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES12" bootprofile="ec2" bootkernel="ec2k" bootloader="grub" kernelcmdline="xencons=xvc0 console=xvc0 multipath=off splash=silent showopts"/>
-	</preferences>
-	<preferences profiles="xenFlavour">
-		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES12" bootprofile="xen" bootkernel="xenk" bootloader="grub2">
-			<machine memory="512" domain="domU">
-				<vmdisk id="0" device="/dev/xvda" controller="ide"/>
-				<vmnic interface=""/>
-			</machine>
-		</type>
-		<type image="oem" filesystem="ext3" boot="oemboot/suse-SLES12" bootprofile="xen" bootkernel="xenk" installiso="true" bootloader="grub2">
-			<oemconfig>
-				<oem-systemsize>2048</oem-systemsize>
-				<oem-swap>true</oem-swap>
-			</oemconfig>
-			<machine domain="dom0">
-				<vmdisk id="0" controller="ide"/>
-			</machine>
-		</type>
-	</preferences>
-	<preferences profiles="vmxFlavour">
-		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES12" format="vmdk" bootloader="grub2" firmware="efi">
-			<machine memory="512" guestOS="suse" HWversion="4">
-				<vmdisk id="0" controller="ide"/>
-				<vmnic driver="e1000" interface="0" mode="bridged"/>
-			</machine>
-		</type>
-		<type image="oem" filesystem="ext3" boot="oemboot/suse-SLES12" installiso="true" bootloader="grub2" firmware="efi" hybrid="true">
-			<oemconfig>
-				<oem-systemsize>2048</oem-systemsize>
-				<oem-swap>true</oem-swap>
-			</oemconfig>
-			<machine memory="512" guestOS="suse" HWversion="4">
-				<vmdisk id="0" controller="ide"/>
-				<vmnic driver="e1000" interface="0" mode="bridged"/>
-			</machine>
-		</type>
-	</preferences>
-	<users group="root">
-		<user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
-	</users>
-	<repository type="rpm-md">
-		<source path="http://download.suse.de/ibs/SUSE:/SLE-12:/GA/standard/"/>
-	</repository>
-	<packages type="image">
-		<namedCollection name="Minimal"/>
-		<package name="plymouth-branding-SLE" bootinclude="true"/>
-		<package name="grub2-branding-SLE" bootinclude="true"/>
-		<package name="iputils"/>
-		<package name="vim"/>
-		<package name="grub2"/>
-		<package name="syslinux"/>
-		<package name="lvm2"/>
-		<package name="plymouth"/>
-		<package name="fontconfig"/>
-		<package name="fonts-config"/>
-		<package name="tar"/>
-		<package name="parted"/>
-		<package name="systemd"/>
-		<package name="systemd-sysvinit"/>
-		<package name="dracut"/>
-		<package name="wicked"/>
-		<package name="iproute2"/>
-		<package name="kiwi"/>
-		<package name="kiwi-templates"/>
-		<package name="kiwi-desc-oemboot"/>
-		<package name="kiwi-desc-isoboot"/>
-		<package name="kiwi-desc-vmxboot"/>
-		<package name="kiwi-desc-netboot"/>
-		<package name="openssh"/>
-	</packages>
-	<packages type="iso">
-		<package name="gfxboot-branding-SLE" bootinclude="true" bootdelete="true"/>
-	</packages>
-	<packages type="image" profiles="ec2Flavour">
-		<package name="kernel-ec2" replaces="kernel-default"/>
-		<package name="kernel-ec2" replaces="kernel-xen"/>
-		<package name="xen-tools" arch="x86_64" replaces=""/>
-		<package name="xen" arch="x86_64" replaces=""/>
-	</packages>
-	<packages type="image" profiles="xenFlavour">
-		<package name="kernel-xen" replaces="kernel-default"/>
-		<package name="kernel-xen" replaces="kernel-ec2"/>
-		<package name="xen-tools" arch="x86_64" replaces=""/>
-		<package name="xen" arch="x86_64" replaces=""/>
-		<package name="gfxboot-branding-SLE" bootinclude="true" bootdelete="true"/>
-	</packages>
-	<packages type="image" profiles="vmxFlavour">
-		<package name="kernel-default" replaces="kernel-xen"/>
-		<package name="kernel-default" replaces="kernel-ec2"/>
-		<package name="kernel-default" replaces="xen-tools"/>
-		<package name="kernel-default" replaces="xen"/>
-		<package name="gfxboot-branding-SLE" bootinclude="true" bootdelete="true"/>
-	</packages>
-	<packages type="bootstrap">
-		<package name="udev"/>
-		<package name="filesystem"/>
-		<package name="glibc-locale"/>
-		<package name="cracklib-dict-full"/>
-		<package name="ca-certificates"/>
+  <description type="system">
+    <author>Marcus Schäfer</author>
+    <contact>ms@novell.com</contact>
+    <specification>SUSE Linux Enterprise 12 JeOS</specification>
+  </description>
+  <profiles>
+    <profile name="xenFlavour" description="VMX with Xen kernel"/>
+    <profile name="ec2Flavour" description="VMX with EC2/Xen kernel"/>
+    <profile name="vmxFlavour" description="VMX with default kernel" import="true"/>
+  </profiles>
+  <preferences>
+    <type image="iso" primary="true" boot="isoboot/suse-SLES12" flags="overlay" hybrid="true" firmware="efi"/>
+    <version>1.13.1</version>
+    <packagemanager>zypper</packagemanager>
+    <bootsplash-theme>SLE</bootsplash-theme>
+    <bootloader-theme>SLE</bootloader-theme>
+    <locale>en_US</locale>
+    <keytable>us.map.gz</keytable>
+    <timezone>Europe/Berlin</timezone>
+    <hwclock>utc</hwclock>
+    <rpm-excludedocs>true</rpm-excludedocs>
+  </preferences>
+  <preferences profiles="ec2Flavour">
+    <type image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES12" bootprofile="ec2" bootkernel="ec2k" bootloader="grub" kernelcmdline="xencons=xvc0 console=xvc0 multipath=off splash=silent showopts"/>
+  </preferences>
+  <preferences profiles="xenFlavour">
+    <type image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES12" bootprofile="xen" bootkernel="xenk" bootloader="grub2">
+      <machine memory="512" domain="domU">
+        <vmdisk id="0" device="/dev/xvda" controller="ide"/>
+        <vmnic interface=""/>
+      </machine>
+    </type>
+    <type image="oem" filesystem="ext3" boot="oemboot/suse-SLES12" bootprofile="xen" bootkernel="xenk" installiso="true" bootloader="grub2">
+      <oemconfig>
+        <oem-systemsize>2048</oem-systemsize>
+        <oem-swap>true</oem-swap>
+      </oemconfig>
+      <machine domain="dom0">
+        <vmdisk id="0" controller="ide"/>
+      </machine>
+    </type>
+  </preferences>
+  <preferences profiles="vmxFlavour">
+    <type image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES12" format="vmdk" bootloader="grub2" firmware="efi">
+      <machine memory="512" guestOS="suse" HWversion="4">
+        <vmdisk id="0" controller="ide"/>
+        <vmnic driver="e1000" interface="0" mode="bridged"/>
+      </machine>
+    </type>
+    <type image="oem" filesystem="ext3" boot="oemboot/suse-SLES12" installiso="true" bootloader="grub2" firmware="efi" hybrid="true">
+      <oemconfig>
+        <oem-systemsize>2048</oem-systemsize>
+        <oem-swap>true</oem-swap>
+      </oemconfig>
+      <machine memory="512" guestOS="suse" HWversion="4">
+        <vmdisk id="0" controller="ide"/>
+        <vmnic driver="e1000" interface="0" mode="bridged"/>
+      </machine>
+    </type>
+  </preferences>
+  <users group="root">
+    <user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
+  </users>
+  <repository type="rpm-md">
+    <source path="http://download.suse.de/ibs/SUSE:/SLE-12:/GA/standard/"/>
+  </repository>
+  <packages type="image">
+    <namedCollection name="Minimal"/>
+    <package name="plymouth-branding-SLE" bootinclude="true"/>
+    <package name="grub2-branding-SLE" bootinclude="true"/>
+    <package name="iputils"/>
+    <package name="vim"/>
+    <package name="grub2"/>
+    <package name="syslinux"/>
+    <package name="lvm2"/>
+    <package name="plymouth"/>
+    <package name="fontconfig"/>
+    <package name="fonts-config"/>
+    <package name="tar"/>
+    <package name="parted"/>
+    <package name="systemd"/>
+    <package name="systemd-sysvinit"/>
+    <package name="dracut"/>
+    <package name="wicked"/>
+    <package name="iproute2"/>
+    <package name="kiwi"/>
+    <package name="kiwi-templates"/>
+    <package name="kiwi-desc-oemboot"/>
+    <package name="kiwi-desc-isoboot"/>
+    <package name="kiwi-desc-vmxboot"/>
+    <package name="kiwi-desc-netboot"/>
+    <package name="openssh"/>
+  </packages>
+  <packages type="iso">
+    <package name="gfxboot-branding-SLE" bootinclude="true" bootdelete="true"/>
+  </packages>
+  <packages type="image" profiles="ec2Flavour">
+    <package name="kernel-ec2" replaces="kernel-default"/>
+    <package name="kernel-ec2" replaces="kernel-xen"/>
+    <package name="xen-tools" arch="x86_64" replaces=""/>
+    <package name="xen" arch="x86_64" replaces=""/>
+  </packages>
+  <packages type="image" profiles="xenFlavour">
+    <package name="kernel-xen" replaces="kernel-default"/>
+    <package name="kernel-xen" replaces="kernel-ec2"/>
+    <package name="xen-tools" arch="x86_64" replaces=""/>
+    <package name="xen" arch="x86_64" replaces=""/>
+    <package name="gfxboot-branding-SLE" bootinclude="true" bootdelete="true"/>
+  </packages>
+  <packages type="image" profiles="vmxFlavour">
+    <package name="kernel-default" replaces="kernel-xen"/>
+    <package name="kernel-default" replaces="kernel-ec2"/>
+    <package name="kernel-default" replaces="xen-tools"/>
+    <package name="kernel-default" replaces="xen"/>
+    <package name="gfxboot-branding-SLE" bootinclude="true" bootdelete="true"/>
+  </packages>
+  <packages type="bootstrap">
+    <package name="udev"/>
+    <package name="filesystem"/>
+    <package name="glibc-locale"/>
+    <package name="cracklib-dict-full"/>
+    <package name="ca-certificates"/>
 <!--
-		The installation of products in SLE12 requires the SLE12 zypper
-		Thus the following definition only works when building on SLE12
+    The installation of products in SLE12 requires the SLE12 zypper
+    Thus the following definition only works when building on SLE12
 
-		<product name="SLES"/>
+    <product name="SLES"/>
 
-		In order to stay compatible we just install the product rpm
-		package. It's required to install the release package in the
-		bootstrap phase in order to avoid the installation of an auto
-		selected dummy-release package which later conflicts with all
-		other release packages
+    In order to stay compatible we just install the product rpm
+    package. It's required to install the release package in the
+    bootstrap phase in order to avoid the installation of an auto
+    selected dummy-release package which later conflicts with all
+    other release packages
 -->
-		<package name="sles-release"/>
-	</packages>
-	<packages type="delete">
-		<package name="kernel-debug"/>
-	</packages>
+    <package name="sles-release"/>
+  </packages>
+  <packages type="delete">
+    <package name="kernel-debug"/>
+  </packages>
 </image>

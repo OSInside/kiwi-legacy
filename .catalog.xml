@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE catalog PUBLIC "-//OASIS//DTD Entity Resolution XML Catalog V1.0//EN" "http://www.oasis-open.org/committees/entity/release/1.0/catalog.dtd">
 <catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
-	<group id="kiwi">
-		<system systemId="/usr/share/kiwi/xsl/master.xsl" uri="xsl/master.xsl"/>
-	</group>
+  <group id="kiwi">
+    <system systemId="/usr/share/kiwi/xsl/master.xsl" uri="xsl/master.xsl"/>
+  </group>
 </catalog>

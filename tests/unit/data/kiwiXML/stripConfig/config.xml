@@ -1,43 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <image schemaversion="5.7" name="testCase-Strip-settings">
-	<description type="system">
-		<author>Robert Schweikert</author>
-		<contact>rjschwei@suse.com</contact>
-		<specification>Test configuration to verify strip lists are stored and returned properly in the XML object</specification>
-	</description>
-	<preferences>
-		<type image="oem" filesystem="ext4" boot="oemboot/suse-12.1" installiso="true"/>
-		<version>0.0.1</version>
-		<rpm-check-signatures>false</rpm-check-signatures>
-		<rpm-force>false</rpm-force>
-		<locale>en_US</locale>
-		<keytable>us.map.gz</keytable>
-	</preferences>
-	<users group="root">
-		<user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
-	</users>
-	<repository type="yast2">
-		<source path="/tmp"/>
-	</repository>
-	<packages type="image">
-		<package name="kernel-default"/>
-		<namedCollection name="base"/>
-	</packages>
-	<packages type="bootstrap">
-		<package name="filesystem"/>
-		<package name="glibc-locale"/>
-	</packages>
-	<strip type="delete">
-		<file name="/etc/resolv.conf"/>
-		<file name="/lib/libc.so"/>
-	</strip>
-	<strip type="tools">
-		<file name="megacli"/>
-		<file name="virt-mgr"/>
-	</strip>
-	<strip type="libs">
-		<file name="libdbus"/>
-		<file name="libnss"/>
-	</strip>
+  <description type="system">
+    <author>Robert Schweikert</author>
+    <contact>rjschwei@suse.com</contact>
+    <specification>Test configuration to verify strip lists are stored and returned properly in the XML object</specification>
+  </description>
+  <preferences>
+    <type image="oem" filesystem="ext4" boot="oemboot/suse-12.1" installiso="true"/>
+    <version>0.0.1</version>
+    <rpm-check-signatures>false</rpm-check-signatures>
+    <rpm-force>false</rpm-force>
+    <locale>en_US</locale>
+    <keytable>us.map.gz</keytable>
+  </preferences>
+  <users group="root">
+    <user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
+  </users>
+  <repository type="yast2">
+    <source path="/tmp"/>
+  </repository>
+  <packages type="image">
+    <package name="kernel-default"/>
+    <namedCollection name="base"/>
+  </packages>
+  <packages type="bootstrap">
+    <package name="filesystem"/>
+    <package name="glibc-locale"/>
+  </packages>
+  <strip type="delete">
+    <file name="/etc/resolv.conf"/>
+    <file name="/lib/libc.so"/>
+  </strip>
+  <strip type="tools">
+    <file name="megacli"/>
+    <file name="virt-mgr"/>
+  </strip>
+  <strip type="libs">
+    <file name="libdbus"/>
+    <file name="libnss"/>
+  </strip>
 </image>

@@ -33,18 +33,18 @@ Defaults env_keep = "LANG LC_ADDRESS LC_CTYPE LC_COLLATE LC_IDENTIFICATION LC_ME
 # installed system. When configuring sudo, delete the two
 # following lines:
 Defaults targetpw   # ask for the password of the target user i.e. root
-ALL	ALL=(ALL) ALL   # WARNING! Only use this together with 'Defaults targetpw'!
+ALL ALL=(ALL) ALL   # WARNING! Only use this together with 'Defaults targetpw'!
 
 # Runas alias specification
 
 # User privilege specification
-root	ALL=(ALL) ALL
+root  ALL=(ALL) ALL
 
 # Uncomment to allow people in group wheel to run all commands
-# %wheel	ALL=(ALL) ALL
+# %wheel  ALL=(ALL) ALL
 
 # Same thing without a password
-vagrant	ALL=(ALL) NOPASSWD: ALL
+vagrant ALL=(ALL) NOPASSWD: ALL
 
 # Samples
 # %users  ALL=/sbin/mount /cdrom,/sbin/umount /cdrom

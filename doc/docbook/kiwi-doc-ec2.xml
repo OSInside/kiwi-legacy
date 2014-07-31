@@ -472,8 +472,8 @@
         section.</para>
 
       <screen><command>aws ec2 register-image</command>
-		--image-location <replaceable>myImages/MANIFEST_NAME</replaceable>
-		<replaceable>ARCH</replaceable></screen>
+    --image-location <replaceable>myImages/MANIFEST_NAME</replaceable>
+    <replaceable>ARCH</replaceable></screen>
 
       <para>This completes the S3 specific setup. The next section
         explains the use of the disk image file created by KIWI to create

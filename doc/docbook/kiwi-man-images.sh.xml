@@ -81,7 +81,7 @@ exit</programlisting>
       The following list describes the functions available inside the
       <filename>images.sh</filename> script.
     </para>    
-	<variablelist>
+  <variablelist>
       <varlistentry>
         <term><optional>baseCleanMount</optional></term>
         <listitem>
@@ -117,9 +117,9 @@ exit</programlisting>
           <para>
              Writes the file <filename>/config.oempartition</filename> depending on the following
              <filename>config.xml</filename> parameters: oem-reboot, oem-swapsize, oem-systemsize,
-			 oem-swap,oem-boot-title,oem-recovery, oem-kiwi-initrd.
-			 kiwi takes the information from <filename>config.xml</filename> and creates the
-			 config.oempartition file as part of the automatically created
+       oem-swap,oem-boot-title,oem-recovery, oem-kiwi-initrd.
+       kiwi takes the information from <filename>config.xml</filename> and creates the
+       config.oempartition file as part of the automatically created
              boot image (initrd). The information must be available as part
              of the boot image because it controls the OEM repartition
              workflow on first boot of an OEM image. Detailed information
@@ -200,7 +200,7 @@ exit</programlisting>
     <para>
       The .profile environment file contains a specific set of variables which
       are listed below. Some of the functions above makes use of the variables.
-	</para>
+  </para>
     <variablelist>
       <varlistentry>
        <term><optional>$kiwi_iname</optional></term>
@@ -283,8 +283,8 @@ exit</programlisting>
         <term><optional>$kiwi_compressed</optional></term>
         <listitem>
           <para>
-			The value of the compressed attribute set in the type element 
-			in config.xml
+      The value of the compressed attribute set in the type element 
+      in config.xml
           </para>
         </listitem>
       </varlistentry>

@@ -71,11 +71,11 @@ rc_status -v -r
 
 if test -d /sys/kernel/debug ; then
     while read dev type ; do
-	if test "$type" = "debugfs" ; then
-	    echo -n "Mounting debugfs at /sys/kernel/debug"
-	    mount -n -t debugfs debugfs /sys/kernel/debug
-	    rc_status -v -r
-	fi
+  if test "$type" = "debugfs" ; then
+      echo -n "Mounting debugfs at /sys/kernel/debug"
+      mount -n -t debugfs debugfs /sys/kernel/debug
+      rc_status -v -r
+  fi
     done < /proc/filesystems
 fi
 #
@@ -83,8 +83,8 @@ fi
 #
 while read dev dir type options; do
     if test "$dir" = "/dev" -a "$type" = "tmpfs"; then
-	DEV_MOUNTED=1;
-	break;
+  DEV_MOUNTED=1;
+  break;
     fi
 done < /proc/mounts
 if test -z "$DEV_MOUNTED"; then
@@ -129,7 +129,7 @@ if test "$PROMPT_FOR_CONFIRM" = "yes" -a "$DO_CONFIRM" != "yes" ; then
     echo -en "${extd}Enter Interactive startup mode?${norm}"
     rc_timer_on "$CONFIRM_PROMPT_TIMEOUT" 37
     read -t "$CONFIRM_PROMPT_TIMEOUT" -n 1 \
-	-p " ${extd}y${norm}/[${extd}n${norm}]("${CONFIRM_PROMPT_TIMEOUT}s") " answer
+  -p " ${extd}y${norm}/[${extd}n${norm}]("${CONFIRM_PROMPT_TIMEOUT}s") " answer
     rc_timer_off
     case "$answer" in
     [yYiI]) DO_CONFIRM=yes ;;
@@ -147,9 +147,9 @@ export DO_CONFIRM
 test -x /sbin/blogd -a -n "$REDIRECT" && /sbin/blogd $REDIRECT
 if test -z "$REDIRECT" ; then
     if (echo -n > /dev/tty) 2>/dev/null ; then
-	REDIRECT=/dev/tty
+  REDIRECT=/dev/tty
     else
-	REDIRECT=/dev/console
+  REDIRECT=/dev/console
     fi
 fi
 
@@ -172,10 +172,10 @@ splashtrigger "rlchange B"
 # Check if we are able to use make for booting
 #
 test -s /etc/init.d/.depend.boot || RUN_PARALLEL="no"
-test -s /etc/init.d/Makefile	 || RUN_PARALLEL="no"
-test "$DO_CONFIRM"   = "yes"	 && RUN_PARALLEL="no"
+test -s /etc/init.d/Makefile   || RUN_PARALLEL="no"
+test "$DO_CONFIRM"   = "yes"   && RUN_PARALLEL="no"
 type -p startpar &> /dev/null    || RUN_PARALLEL="no"
-startpar -v &> /dev/null	 || RUN_PARALLEL="no"
+startpar -v &> /dev/null   || RUN_PARALLEL="no"
 
 #
 # Start bootup client scripts.
@@ -200,41 +200,41 @@ elif test -d ${bootrc}/ ; then
     #
     for i in ${bootrc}/S${rex}*; do
 
-	test -f $i || continue
+  test -f $i || continue
 
-	B=${i##*/}
-	script=${B#*S$rex}
-	B=${B%$script}
+  B=${i##*/}
+  script=${B#*S$rex}
+  B=${B%$script}
 
-	if test "$DO_CONFIRM" = "yes" ; then
-	    rc_confirm -t $CONFIRM_PROMPT_TIMEOUT "Start bootup script ${script}" < $REDIRECT > $REDIRECT 2>&1
-	    case "$?" in
-	    0) true     ;;
-	    1) continue ;;
-	    2) DO_CONFIRM=""
-	    esac
-	fi
+  if test "$DO_CONFIRM" = "yes" ; then
+      rc_confirm -t $CONFIRM_PROMPT_TIMEOUT "Start bootup script ${script}" < $REDIRECT > $REDIRECT 2>&1
+      case "$?" in
+      0) true     ;;
+      1) continue ;;
+      2) DO_CONFIRM=""
+      esac
+  fi
 
-	blogger "$script start"
+  blogger "$script start"
 
-	if test -x "$i" ; then
-		$i start
-	else
-	    echo Running $i
-	    /bin/sh $i b
-	    rc_status -v1 -r
-	fi
-	status=$?
-	echo -en "$rc_reset"
-	splashprogress "$script start"
+  if test -x "$i" ; then
+    $i start
+  else
+      echo Running $i
+      /bin/sh $i b
+      rc_status -v1 -r
+  fi
+  status=$?
+  echo -en "$rc_reset"
+  splashprogress "$script start"
 
-	case $status in
-	[1-47])  failed="${failed:+$failed }$script"   ;;
-	[56])   skipped="${skipped:+$skipped }$script" ;;
-	0|*) ;;
-	esac
+  case $status in
+  [1-47])  failed="${failed:+$failed }$script"   ;;
+  [56])   skipped="${skipped:+$skipped }$script" ;;
+  0|*) ;;
+  esac
 
-	blogger "'$script start' exits with status $status"
+  blogger "'$script start' exits with status $status"
     done
 fi
 
@@ -302,10 +302,10 @@ if test -f /var/lib/YaST2/runme_at_boot ; then
     #ulimit -c unlimited
     touch /var/lib/YaST2/run_suseconfig
     if test -x /usr/lib/YaST2/startup/YaST2.Second-Stage; then
-	/usr/lib/YaST2/startup/YaST2.Second-Stage
+  /usr/lib/YaST2/startup/YaST2.Second-Stage
     else
-	# oops, yast2 not installed
-	rm -f /var/lib/YaST2/runme_at_boot
+  # oops, yast2 not installed
+  rm -f /var/lib/YaST2/runme_at_boot
     fi
 fi
 if test -f /var/lib/YaST2/reconfig_system ; then
@@ -313,10 +313,10 @@ if test -f /var/lib/YaST2/reconfig_system ; then
     splashtrigger "YaST"
     exec 0<> $REDIRECT 1>&0 2>&0
     if test -x /usr/lib/YaST2/startup/YaST2.Firstboot; then
-	/usr/lib/YaST2/startup/YaST2.Firstboot
+  /usr/lib/YaST2/startup/YaST2.Firstboot
     else
-	# oops, yast2-firstboot not installed
-	rm -f /var/lib/YaST2/reconfig_system
+  # oops, yast2-firstboot not installed
+  rm -f /var/lib/YaST2/reconfig_system
     fi
 fi
 # run SuSEconfig (with args) if needed

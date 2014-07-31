@@ -328,7 +328,7 @@
             <code class="sgmltag-attvalue">true</code> in the
             <code class="filename">config.xml</code> file as shown below:
           </p><pre class="screen">&lt;packages type="image"&gt;
-	&lt;archive name="kiwi-hooks.tgz" bootinclude="true"/&gt;
+  &lt;archive name="kiwi-hooks.tgz" bootinclude="true"/&gt;
 &lt;/packages&gt;</pre><p>
           The concept of including an archive in the boot image follows
           the same concepts described for the system image previously.
@@ -338,69 +338,69 @@
           part of the boot image description in which case it is not
           necessary to set the <code class="sgmltag-attribute">bootinclude</code><a class="indexterm" name="idm139812154845968"></a> attribute.</p></li></ul></div><p>The following list provides information about the hook names,
       timing of the execution, and the applicable boot image.</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p><b>handleSplash. </b>
-			This hook is called prior to any dialog/exception message or
-			progress dialog. The hook can be used to customize the behavior
-			of the splash screen. kiwi automatically hides a plymouth or
-			kernel based splash screen if there is only one active console
-			</p></li><li class="listitem"><p><b>init. </b>
-			This hook is called before udev is started. The hook
-			exists only for the <span class="emphasis"><em>pxe</em></span> image type. 
-			</p></li><li class="listitem"><p><b>preconfig|postconfig. </b>
-			The hooks are called before and after the client configuration
+      This hook is called prior to any dialog/exception message or
+      progress dialog. The hook can be used to customize the behavior
+      of the splash screen. kiwi automatically hides a plymouth or
+      kernel based splash screen if there is only one active console
+      </p></li><li class="listitem"><p><b>init. </b>
+      This hook is called before udev is started. The hook
+      exists only for the <span class="emphasis"><em>pxe</em></span> image type. 
+      </p></li><li class="listitem"><p><b>preconfig|postconfig. </b>
+      The hooks are called before and after the client configuration
             files (CONF contents) are setup, respectively. The hooks exist
             only for the <span class="emphasis"><em>pxe</em></span> image type.
             </p></li><li class="listitem"><p><b>predownload|postdownload. </b>
-			The hooks are called before and after the client image receives
-			the root filesystem, respectively. The hooks exist only for
-			the <span class="emphasis"><em>pxe</em></span> image type.
+      The hooks are called before and after the client image receives
+      the root filesystem, respectively. The hooks exist only for
+      the <span class="emphasis"><em>pxe</em></span> image type.
             </p></li><li class="listitem"><p><b>preImageDump|postImageDump. </b>
-			The hooks are called before and after the install image is
-			dumped on the target disk, respectively. The hooks exist only for
-			the <span class="emphasis"><em>oem</em></span> image type.
+      The hooks are called before and after the install image is
+      dumped on the target disk, respectively. The hooks exist only for
+      the <span class="emphasis"><em>oem</em></span> image type.
             </p></li><li class="listitem"><p><b>preLoadConfiguration|postLoadConfiguration. </b>
-			The hooks are called before and after the client configuration
-			file config.MAC is loaded, respectively. The hooks exist only for
+      The hooks are called before and after the client configuration
+      file config.MAC is loaded, respectively. The hooks exist only for
             the <span class="emphasis"><em>pxe</em></span> image type.
             </p></li><li class="listitem"><p><b>premount|postmount. </b>
-			The hooks are called before and after the client root
-			filesystem is mounted, respectively. The hooks exist only for
+      The hooks are called before and after the client root
+      filesystem is mounted, respectively. The hooks exist only for
             the <span class="emphasis"><em>pxe</em></span> image type.
             </p></li><li class="listitem"><p><b>prenetwork|postnetwork. </b>
-			The hooks are called before and after the client network
-			is setup, respectively. The hooks exist only for
-			the <span class="emphasis"><em>pxe</em></span> image type.
+      The hooks are called before and after the client network
+      is setup, respectively. The hooks exist only for
+      the <span class="emphasis"><em>pxe</em></span> image type.
             </p></li><li class="listitem"><p><b>prepartition|postpartition. </b>
-			The hooks are called before and after the client creates
-			the partition table on the target disk, respectively. The hooks
+      The hooks are called before and after the client creates
+      the partition table on the target disk, respectively. The hooks
             exist only for the <span class="emphasis"><em>pxe</em></span> image type.
             </p></li><li class="listitem"><p><b>preprobe|postprobe. </b>
-			The hooks are called before and after the loading of modules
-			not handled by udev, respectively. The hooks exist only for the
-			<span class="emphasis"><em>pxe</em></span> image type.
+      The hooks are called before and after the loading of modules
+      not handled by udev, respectively. The hooks exist only for the
+      <span class="emphasis"><em>pxe</em></span> image type.
             </p></li><li class="listitem"><p><b>preswap|postswap. </b>
-			The hooks are called before and after the creation of the
-			swap space, respectively. The hooks exist only for the
+      The hooks are called before and after the creation of the
+      swap space, respectively. The hooks exist only for the
             <span class="emphasis"><em>pxe</em></span> image type.
             </p></li><li class="listitem"><p><b>preactivate. </b>
-			This hook is called before the root filesystem is moved to /
-			The hook exists only for the <span class="emphasis"><em>pxe</em></span>
+      This hook is called before the root filesystem is moved to /
+      The hook exists only for the <span class="emphasis"><em>pxe</em></span>
             image type.
             </p></li><li class="listitem"><p><b>preCallInit. </b>
-			This hook is called in before the initialization process,
+      This hook is called in before the initialization process,
             init or systemd, is started. At call time the root filesystem
             has already been moved to /. The hook exists only for the
             <span class="emphasis"><em>oem</em></span> and <span class="emphasis"><em>vmx</em></span> image types.
             </p></li><li class="listitem"><p><b>preException. </b>
-			This hook is called before a system error is handled, the
-			actual error message is passed as parameter. This hook can be
+      This hook is called before a system error is handled, the
+      actual error message is passed as parameter. This hook can be
             used for all image types.
             </p></li><li class="listitem"><p><b>preHWdetect|postHWdetect. </b>
-			The hooks are called before and after the install image boot
-			code detects the possible target storage device(s).
-			The hook exists only for the <span class="emphasis"><em>oem</em></span> image type.
+      The hooks are called before and after the install image boot
+      code detects the possible target storage device(s).
+      The hook exists only for the <span class="emphasis"><em>oem</em></span> image type.
             </p></li><li class="listitem"><p><b>preNetworkRelease. </b>
-			This hook is called before the network connection is released.
-			The hook exists only for the <span class="emphasis"><em>pxe</em></span> image type.
+      This hook is called before the network connection is released.
+      The hook exists only for the <span class="emphasis"><em>pxe</em></span> image type.
             </p></li></ul></div><p>The execution of hooks can be globaly deactivated by passing the
       following variable to the kernel commandline:
       </p><pre class="screen">KIWI_FORBID_HOOKS=1</pre><p> In addition to the hook
@@ -438,7 +438,7 @@
       is also possible. The following question and answer section provides
       solutions to the most common customization needs fro the initrd
       created by kiwi.
-	</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p><b>
+  </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p><b>
               Why is the boot image so big and can I reduce it's size ? </b> KIWI includes all required tools and libraries to boot the
             image in all circumstances in the target environment for the
             image type. If target environment is well defined it is
@@ -497,7 +497,7 @@
             Yes, as described in the <a class="xref" href="#sec.hooks" title="3.3. Boot Image Hook-Scripts">Section 3.3, “Boot Image Hook-Scripts”</a> section above,
             KIWI supports the execution of boot code at various times for
             various image types using <span class="emphasis"><em>hook</em></span> scripts.
-			</p></li><li class="listitem"><p><b>
+      </p></li><li class="listitem"><p><b>
               Is it possible to include completely custom boot code? </b>
             No. In cases where the provided hooks are insufficient and the
             KIWI provided boot code needs to be replaced completed it is
@@ -505,7 +505,7 @@
             all parts of the boot image description must be created by the
             user. It is best to use one of the KIWI provided boot descriptions
             as a template.
-			</p></li></ul></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sec.workflow.prebuiltbootimage"></a>3.5. Using Pre-built Boot Images<span class="permalink"><a alt="Permalink" title="3.5. Using Pre-built Boot Images" href="#sec.workflow.prebuiltbootimage">¶</a></span></h2></div></div></div><a class="indexterm" name="idm139812154764656"></a><a class="indexterm" name="idm139812154763264"></a><p>During the create step of the KIWI image building process kiwi,
+      </p></li></ul></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sec.workflow.prebuiltbootimage"></a>3.5. Using Pre-built Boot Images<span class="permalink"><a alt="Permalink" title="3.5. Using Pre-built Boot Images" href="#sec.workflow.prebuiltbootimage">¶</a></span></h2></div></div></div><a class="indexterm" name="idm139812154764656"></a><a class="indexterm" name="idm139812154763264"></a><p>During the create step of the KIWI image building process kiwi,
       creates the so called boot image, as described previously, based on
       the specified boot image description in the
       <code class="filename">config.xml</code> configuration file. This creation
@@ -617,32 +617,32 @@
       explicit hints to the user when distribution specific code is being
       used. The implemented SUSE specific code can be used as a guideline
       to support other distributions.</p></div></div><div class="chapter"><div class="titlepage"><div><div><h1 class="title"><a name="chap.caches"></a>Chapter 4. Image Caches</h1></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl class="toc"><dt><span class="sect1"><a href="#sec.caches.introduction">4.1. Introduction</a></span></dt><dt><span class="sect1"><a href="#sec.caches.example">4.2. Example</a></span></dt></dl></div><a class="indexterm" name="idm139812154716640"></a><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sec.caches.introduction"></a>4.1. Introduction<span class="permalink"><a alt="Permalink" title="4.1. Introduction" href="#sec.caches.introduction">¶</a></span></h2></div></div></div><p>
-			The process of creating an appliance could take quite some time
-			and often the same software is installed over and over again. In
-			order to speed up that process kiwi is able to create and re-use
-			so called image caches. An image cache in kiwi is a partial root tree
+      The process of creating an appliance could take quite some time
+      and often the same software is installed over and over again. In
+      order to speed up that process kiwi is able to create and re-use
+      so called image caches. An image cache in kiwi is a partial root tree
             created from a cache image description.
-		</p><div class="figure"><a name="fig.imagecachingarch"></a><p class="title"><b>Figure 4.1. Image Caching Architecture</b><span class="permalink"><a alt="Permalink" title="Figure 4.1. Image Caching Architecture" href="#fig.imagecachingarch">¶</a></span></p><div class="figure-contents"><div class="mediaobject"><img src="images/cache.png" alt="Image Caching Architecture"></div></div></div><br class="figure-break"><p>
-			Before one can use a cache it needs to be created. A cache can be
-			created from any standard kiwi image description. That means you can
-			simply use one of the template descriptions and create a cache from
-			it. But it might be more clever to create image descriptions for the
-			purpose of caching. Such descriptions could represent a set of patterns
-			for example. The less special a cache is the more often it can be re-used
-		</p><p>
-			Once there are caches in the system kiwi selects the best match and
-			mounts the cache in a way that all write actions (copy-on-write cache)
-			are redirected to the new root system. That way the cache itself is never changed
-			and can be re-used simultaniosly for other build processes. As result
-			the build process doesn't start with an empty tree but with a tree
-			almost complete. Only the missing parts are now installed and according
-			to how much the cache already covered this process can speedup the build
-		</p></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sec.caches.example"></a>4.2. Example<span class="permalink"><a alt="Permalink" title="4.2. Example" href="#sec.caches.example">¶</a></span></h2></div></div></div><p>
-			Let's say we know that we want to build some images of type 'vmx'
-			and based on the openSUSE 12.2 JeOS image description. In order to
-			create image caches for the system and the boot image the following
-			steps needs to be done:
-		</p><div class="procedure"><ol class="procedure" type="1"><li class="step"><p>Copy the base image descriptions used in the build:</p><pre class="screen"><span class="command"><strong>cp</strong></span> -a /usr/share/kiwi/image/vmxboot/suse-12.2 /tmp/boot-cache
+    </p><div class="figure"><a name="fig.imagecachingarch"></a><p class="title"><b>Figure 4.1. Image Caching Architecture</b><span class="permalink"><a alt="Permalink" title="Figure 4.1. Image Caching Architecture" href="#fig.imagecachingarch">¶</a></span></p><div class="figure-contents"><div class="mediaobject"><img src="images/cache.png" alt="Image Caching Architecture"></div></div></div><br class="figure-break"><p>
+      Before one can use a cache it needs to be created. A cache can be
+      created from any standard kiwi image description. That means you can
+      simply use one of the template descriptions and create a cache from
+      it. But it might be more clever to create image descriptions for the
+      purpose of caching. Such descriptions could represent a set of patterns
+      for example. The less special a cache is the more often it can be re-used
+    </p><p>
+      Once there are caches in the system kiwi selects the best match and
+      mounts the cache in a way that all write actions (copy-on-write cache)
+      are redirected to the new root system. That way the cache itself is never changed
+      and can be re-used simultaniosly for other build processes. As result
+      the build process doesn't start with an empty tree but with a tree
+      almost complete. Only the missing parts are now installed and according
+      to how much the cache already covered this process can speedup the build
+    </p></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sec.caches.example"></a>4.2. Example<span class="permalink"><a alt="Permalink" title="4.2. Example" href="#sec.caches.example">¶</a></span></h2></div></div></div><p>
+      Let's say we know that we want to build some images of type 'vmx'
+      and based on the openSUSE 12.2 JeOS image description. In order to
+      create image caches for the system and the boot image the following
+      steps needs to be done:
+    </p><div class="procedure"><ol class="procedure" type="1"><li class="step"><p>Copy the base image descriptions used in the build:</p><pre class="screen"><span class="command"><strong>cp</strong></span> -a /usr/share/kiwi/image/vmxboot/suse-12.2 /tmp/boot-cache
 <span class="command"><strong>cp</strong></span> -a /usr/share/kiwi/image/suse-12.2-JeOS /tmp/image-cache</pre></li><li class="step"><p>Modify boot-cache and image-cache to contain the package
           manager. This is required for the later use of the
           caches.</p><pre class="screen">&lt;package name="zypper"/&gt;</pre></li><li class="step"><p>Build the caches:</p><pre class="screen"><span class="command"><strong>kiwi</strong></span> --init-cache /tmp/image-cache
@@ -650,13 +650,13 @@
         <code class="filename">/var/cache/kiwi/image</code>. To run a build which
       makes use of the cache the following command is used: </p><pre class="screen"><span class="command"><strong>kiwi</strong></span> --build suse-12.2-JeOS -d /tmp/myimage --type vmx \
      --cache /var/cache/kiwi/image</pre><p>
-			This call is about 50% faster compared to the creation without a
-			cache. It's important to understand that a cache based build will
-			create a root tree which contains only the differences 
-			compared to the used cache. Thus at any time you want
-			to create an image out of it you have to make sure that the cache
-			exists and is accessible on the system.
-		</p></div></div><div class="chapter"><div class="titlepage"><div><div><h1 class="title"><a name="chap.description"></a>Chapter 5. KIWI Image Description</h1></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl class="toc"><dt><span class="sect1"><a href="#sec.description.config.xml">5.1. The config.xml File</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec.description.image">5.1.1. <code class="sgmltag-element">image</code> Element</a></span></dt><dt><span class="sect2"><a href="#sec.description.description">5.1.2. <code class="sgmltag-element">description</code> Element</a></span></dt><dt><span class="sect2"><a href="#sec.description.profiles">5.1.3. <code class="sgmltag-element">profiles</code> Element</a></span></dt><dt><span class="sect2"><a href="#sec.description.preferences">5.1.4. <code class="sgmltag-element">preferences</code> Element</a></span></dt><dt><span class="sect2"><a href="#sec.description.users">5.1.5. <code class="sgmltag-element">users</code> Element</a></span></dt><dt><span class="sect2"><a href="#sec.description.drivers">5.1.6. <code class="sgmltag-element">drivers</code> Element</a></span></dt><dt><span class="sect2"><a href="#sec.description.repository">5.1.7. <code class="sgmltag-element">repository</code> Element</a></span></dt><dt><span class="sect2"><a href="#sec.description.packages">5.1.8. <code class="sgmltag-element">packages</code> Element</a></span></dt></dl></dd></dl></div><a class="indexterm" name="idm139812154695536"></a><p>In order to be able to create an image with KIWI, a so called
+      This call is about 50% faster compared to the creation without a
+      cache. It's important to understand that a cache based build will
+      create a root tree which contains only the differences 
+      compared to the used cache. Thus at any time you want
+      to create an image out of it you have to make sure that the cache
+      exists and is accessible on the system.
+    </p></div></div><div class="chapter"><div class="titlepage"><div><div><h1 class="title"><a name="chap.description"></a>Chapter 5. KIWI Image Description</h1></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl class="toc"><dt><span class="sect1"><a href="#sec.description.config.xml">5.1. The config.xml File</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec.description.image">5.1.1. <code class="sgmltag-element">image</code> Element</a></span></dt><dt><span class="sect2"><a href="#sec.description.description">5.1.2. <code class="sgmltag-element">description</code> Element</a></span></dt><dt><span class="sect2"><a href="#sec.description.profiles">5.1.3. <code class="sgmltag-element">profiles</code> Element</a></span></dt><dt><span class="sect2"><a href="#sec.description.preferences">5.1.4. <code class="sgmltag-element">preferences</code> Element</a></span></dt><dt><span class="sect2"><a href="#sec.description.users">5.1.5. <code class="sgmltag-element">users</code> Element</a></span></dt><dt><span class="sect2"><a href="#sec.description.drivers">5.1.6. <code class="sgmltag-element">drivers</code> Element</a></span></dt><dt><span class="sect2"><a href="#sec.description.repository">5.1.7. <code class="sgmltag-element">repository</code> Element</a></span></dt><dt><span class="sect2"><a href="#sec.description.packages">5.1.8. <code class="sgmltag-element">packages</code> Element</a></span></dt></dl></dd></dl></div><a class="indexterm" name="idm139812154695536"></a><p>In order to be able to create an image with KIWI, a so called
     image description must be created. The image description is
     represented by a directory which has to contain at least one file
     named <code class="filename">config.xml</code> or <code class="filename">*.kiwi</code><a class="indexterm" name="idm139812154692304"></a>. A good start for such a
@@ -839,7 +839,7 @@
               below:</p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="sgmltag-attvalue">clic</code></span></dt><dd><p>Creates a fuse based compressed read-only
                     filesystem which allows write operations into a cow
                     file. If the iso is bigger than 4G you can use the
-					clic_udf flag instead</p></dd><dt><span class="term"><code class="sgmltag-attvalue">seed</code></span></dt><dd><p>Creates a btrfs based compressed read-only
+          clic_udf flag instead</p></dd><dt><span class="term"><code class="sgmltag-attvalue">seed</code></span></dt><dd><p>Creates a btrfs based compressed read-only
                     filesystem which allows write operations into a btrfs
                     seed device. </p></dd><dt><span class="term"><code class="sgmltag-attvalue">overlay</code></span></dt><dd><p>Creates a squashfs based compressed read-only
                     filesystem which is combined with a write space via
@@ -928,20 +928,20 @@
         The directory KIWI searches for the prebuilt boot images can
         also be specified at the commandline with the
           <code class="option">--prebuiltbootimage</code> parameter. </p><p>Within the type section, there could be other optional
-		attributes which are either universally valid or can be used
-		for different image types in the same way. The following list
+    attributes which are either universally valid or can be used
+    for different image types in the same way. The following list
         explains these attributes: </p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="sgmltag-attribute">kernelcmdline</code><a class="indexterm" name="idm139812154467312"></a></span></dt><dd><p>Specifies additional kernel parameters.
-					The following example disables kernel messages:
-					<code class="literal">kernelcmdline="quiet"</code></p></dd><dt><span class="term"><code class="sgmltag-attribute">mdraid</code><a class="indexterm" name="idm139812154463920"></a></span></dt><dd><p>For disk based image types, aka oem and vmx,
-					mdraid activates the creation of a software raid image.
-					The raid inside the image is created in degraded mode
-					because at creation time we only know about one disk.
-					It's in the hand of the user to add devices to the raid
-					after the image runs on the target machine. The value
-					for mdraid can be either <span class="emphasis"><em>mirroring</em></span>
-					or <span class="emphasis"><em>striping</em></span>, which means the raid
-					level is set to RAID1 (mirroring) or
-					RAID0 (striping).</p></dd></dl></div><p>Within the preferences section, there are the following
+          The following example disables kernel messages:
+          <code class="literal">kernelcmdline="quiet"</code></p></dd><dt><span class="term"><code class="sgmltag-attribute">mdraid</code><a class="indexterm" name="idm139812154463920"></a></span></dt><dd><p>For disk based image types, aka oem and vmx,
+          mdraid activates the creation of a software raid image.
+          The raid inside the image is created in degraded mode
+          because at creation time we only know about one disk.
+          It's in the hand of the user to add devices to the raid
+          after the image runs on the target machine. The value
+          for mdraid can be either <span class="emphasis"><em>mirroring</em></span>
+          or <span class="emphasis"><em>striping</em></span>, which means the raid
+          level is set to RAID1 (mirroring) or
+          RAID0 (striping).</p></dd></dl></div><p>Within the preferences section, there are the following
         optional elements: </p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="sgmltag-attribute">showlicense</code><a class="indexterm" name="idm139812154459024"></a></span></dt><dd><p>
                Specifies the base name of a license file which is displayed in oem
                images before the installation happens. It's possible to add more showlicense
@@ -1122,20 +1122,20 @@
                     boot time. This value is represented by the
                       <code class="varname">OEM_SWAPSIZE</code> variable in
                       <code class="filename">config.oempartition</code>.</p></dd><dt><span class="term"><code class="sgmltag-starttag">&lt;oem-systemsize&gt;</code>number in MB<code class="sgmltag-endtag">&lt;/oem-systemsize&gt;</code></span></dt><dd><p>Set the size the operating system is allowed to
-					consume on the target disk. The size limit does not
-					include any consideration for swap space or a
-					recovery partition.
-					In a setup <span class="emphasis"><em>without</em></span> a
-					<code class="sgmltag-element">systemdisk</code> element
-					this value specifies the size of the root partition.
-					In a setup <span class="emphasis"><em>including</em></span>
-					a <code class="sgmltag-element">systemdisk</code> element
-					this value specifies the size of the LVM partition which
-					contains all specified volumes.	Thus, the sum of all
-					specified volume sizes plus	the sum of the specified
-					freespace for each volume must be smaller or equal
-					to the size specified with the
-					<code class="sgmltag-element">oem-systemsize</code>.
+          consume on the target disk. The size limit does not
+          include any consideration for swap space or a
+          recovery partition.
+          In a setup <span class="emphasis"><em>without</em></span> a
+          <code class="sgmltag-element">systemdisk</code> element
+          this value specifies the size of the root partition.
+          In a setup <span class="emphasis"><em>including</em></span>
+          a <code class="sgmltag-element">systemdisk</code> element
+          this value specifies the size of the LVM partition which
+          contains all specified volumes. Thus, the sum of all
+          specified volume sizes plus the sum of the specified
+          freespace for each volume must be smaller or equal
+          to the size specified with the
+          <code class="sgmltag-element">oem-systemsize</code>.
                     This value is represented by the variable
                       <code class="varname">OEM_SYSTEMSIZE</code> in
                       <code class="filename">config.oempartition</code>.</p></dd><dt><span class="term"><code class="sgmltag-starttag">&lt;oem-unattended&gt;</code>true|false<code class="sgmltag-endtag">&lt;/oem-unattended&gt;</code></span></dt><dd><p>The installation of the image to the target system
@@ -1449,12 +1449,12 @@
                username</code><a class="indexterm" name="idm139812154108176"></a> attribute. Dependent on the
                repository location this information may not be used.
              </p></dd><dt><span class="term"><code class="sgmltag-attribute">prefer-license</code><a class="indexterm" name="idm139812154105776"></a>="<code class="sgmltag-attvalue">true|false</code>"</span></dt><dd><p>The repository providing this attribute will be used
-				primarly to install the license tarball if found on that
-				repository. If no repository with a prefered license attribute
-				exists, the search happens over all repositories. It's not
-				guaranteed in that case that the search order follows the
-				repository order like they are written into the XML
-				description.</p></dd><dt><span class="term"><code class="sgmltag-attribute">priority</code><a class="indexterm" name="idm139812154101840"></a>="<code class="sgmltag-attvalue">number</code>"</span></dt><dd><p>Specifies the repository priority for this given repository.
+        primarly to install the license tarball if found on that
+        repository. If no repository with a prefered license attribute
+        exists, the search happens over all repositories. It's not
+        guaranteed in that case that the search order follows the
+        repository order like they are written into the XML
+        description.</p></dd><dt><span class="term"><code class="sgmltag-attribute">priority</code><a class="indexterm" name="idm139812154101840"></a>="<code class="sgmltag-attvalue">number</code>"</span></dt><dd><p>Specifies the repository priority for this given repository.
               Priority values are treated differently by different package
               managers. Repository priorities allow the package management
               system to disambiguate packages that may be contained in more
@@ -1828,7 +1828,7 @@ $(<span class="command"><strong>rpm</strong></span> -q ‘baseGetPackagesForDele
     branches. As a consequence an image must be prepared from scratch
     and the old physical extend could be removed. </p></div><div class="chapter"><div class="titlepage"><div><div><h1 class="title"><a name="chap.migration"></a>Chapter 8. System Analysis/Migration</h1></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl class="toc"><dt><span class="sect1"><a href="#sec.migrate.create-clean-repository">8.1. Create a Clean Repository Set First</a></span></dt><dt><span class="sect1"><a href="#sec.migrate.watch-overlay">8.2. Watch the Custom Files</a></span></dt><dt><span class="sect1"><a href="#sec.migrate.checklist">8.3. Checklist</a></span></dt><dt><span class="sect1"><a href="#sec.migrate.turn-system-into-image">8.4. Turn Into an Image…</a></span></dt></dl></div><a class="indexterm" name="idm139812153878032"></a><p>KIWI provides a module which allows you to analyse
     the running system and create a report and an image description
-	representing the current state of the machine. Among others this allows
+  representing the current state of the machine. Among others this allows
     you to clone your currently running system into an image. The
     process has the following limitations at the moment: </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Works for SUSE systems only (with zypper on board) </p></li><li class="listitem"><p>The process works semi automatically which means depending
         on the complexity of the system some manual postprocessing might
@@ -1930,8 +1930,8 @@ $(<span class="command"><strong>rpm</strong></span> -q ‘baseGetPackagesForDele
     work with it like on any other system. All write actions takes place
     in RAM space and therefore all changes will be lost as soon as the
     computer shuts down. </p><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sec.iso.building"></a>10.1. Building the suse-live-iso Example<span class="permalink"><a alt="Permalink" title="10.1. Building the suse-live-iso Example" href="#sec.iso.building">¶</a></span></h2></div></div></div><p>
-		This example is based on openSUSE and includes the KDE desktop.
-	</p><pre class="screen"><span class="command"><strong>cd</strong></span> /usr/share/doc/packages/kiwi/examples
+    This example is based on openSUSE and includes the KDE desktop.
+  </p><pre class="screen"><span class="command"><strong>cd</strong></span> /usr/share/doc/packages/kiwi/examples
 ==&gt; select the example directory for the desired distribution change into it
 <span class="command"><strong>cd</strong></span> suse-...  
 <span class="command"><strong>kiwi</strong></span> --build ./suse-live-iso -d /tmp/myiso-result --type iso</pre></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sec.iso.using"></a>10.2. Using the Image<span class="permalink"><a alt="Permalink" title="10.2. Using the Image" href="#sec.iso.using">¶</a></span></h2></div></div></div><p>There are two ways to use the generated ISO image: </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Burn the <code class="filename">.iso</code><a class="indexterm" name="idm139812153804896"></a> file
@@ -1942,24 +1942,24 @@ $(<span class="command"><strong>rpm</strong></span> -q ‘baseGetPackagesForDele
           Testing an iso can be done with any full virtual system for
           example: </p><pre class="screen"><span class="command"><strong>cd</strong></span> /tmp/myiso-result
 <span class="command"><strong>qemu</strong></span> -cdrom ./suse-*-live-iso.*.iso</pre></li></ul></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sec.iso.flavours"></a>10.3. Flavours<span class="permalink"><a alt="Permalink" title="10.3. Flavours" href="#sec.iso.flavours">¶</a></span></h2></div></div></div><p>
-		KIWI supports different filesystems and boot methods along
-		with the ISO image type. The provided example by default uses a
-		<code class="systemitem">clicfs</code><a class="indexterm" name="idm139812153798448"></a> compressed
-		root filesystem. clicfs is a fuse user space filesystem which
-		reads in data from a compressed image and writes data into a
-		cow file which can exist in RAM or in persistent area on a disk.
-		The result is a full writable live-system. The flags attribute
-		in <code class="filename">config.xml</code> exists to be able to have the
-		following alternative solutions:
-	</p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="sgmltag-attribute">flags</code><a class="indexterm" name="idm139812153795184"></a>="<code class="sgmltag-attvalue">compressed</code>"</span></dt><dd><p> Does filesystem compression with squashfs, but don’t
+    KIWI supports different filesystems and boot methods along
+    with the ISO image type. The provided example by default uses a
+    <code class="systemitem">clicfs</code><a class="indexterm" name="idm139812153798448"></a> compressed
+    root filesystem. clicfs is a fuse user space filesystem which
+    reads in data from a compressed image and writes data into a
+    cow file which can exist in RAM or in persistent area on a disk.
+    The result is a full writable live-system. The flags attribute
+    in <code class="filename">config.xml</code> exists to be able to have the
+    following alternative solutions:
+  </p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="sgmltag-attribute">flags</code><a class="indexterm" name="idm139812153795184"></a>="<code class="sgmltag-attvalue">compressed</code>"</span></dt><dd><p> Does filesystem compression with squashfs, but don’t
             use an overlay filesystem for write support. A symbolic link
             list is used instead and thus a split element is required in
             <code class="filename">config.xml</code>. See the split mode
             section below for details. </p></dd><dt><span class="term"><code class="sgmltag-attribute">flags</code><a class="indexterm" name="idm139812153790496"></a>="<code class="sgmltag-attvalue">clic|clic_udf</code>"</span></dt><dd><p> Creates a FUSE based <code class="systemitem">clicfs</code><a class="indexterm" name="idm139812153787488"></a> image and allows write operations
             into a cow file. In case of an ISO the write happens into a
             ramdisk. If clic_udf is specified the the iso is created
-			with an udf filesystem and thus this allows to create
-			live systems bigger than 4G</p></dd><dt><span class="term">Flags Not Set</span></dt><dd><p>If no <code class="sgmltag-attribute">flags</code><a class="indexterm" name="idm139812153784176"></a>
+      with an udf filesystem and thus this allows to create
+      live systems bigger than 4G</p></dd><dt><span class="term">Flags Not Set</span></dt><dd><p>If no <code class="sgmltag-attribute">flags</code><a class="indexterm" name="idm139812153784176"></a>
             attribute is set no compressed filesystem, no overlay
             filesystem will be used. The root tree will be directly part
             of the ISO filesystem and the paths:
@@ -1989,27 +1989,27 @@ $(<span class="command"><strong>rpm</strong></span> -q ‘baseGetPackagesForDele
      &lt;file name="/tmp/*"/&gt;
   &lt;/persistent&gt; 
 &lt;/split&gt;</pre></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="sec.iso.hybrid-mode"></a>10.3.2. Hybrid mode<span class="permalink"><a alt="Permalink" title="10.3.2. Hybrid mode" href="#sec.iso.hybrid-mode">¶</a></span></h3></div></div></div><a class="indexterm" name="idm139812153768768"></a><a class="indexterm" name="idm139812153767376"></a><p>
-			A hybrid image is a iso image including a partition table and can
-			therefore be attached as a CD/DVD <span class="emphasis"><em>and</em></span> as a
-			normal disk to the system. This has the advantage that a hybrid
-			iso live system can be burned to a CD/DVD as well as uploaded to
-			a USB stick. In order to activate the hybrid feature the hybrid
-			flag must be set to true as indicated below. 
-		</p><pre class="screen">&lt;type image="iso" ... hybrid="true"/&gt;</pre></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idm139812153763840"></a>10.4. USB stick images<span class="permalink"><a alt="Permalink" title="10.4. USB stick images" href="#idm139812153763840">¶</a></span></h2></div></div></div><a class="indexterm" name="idm139812153763200"></a><p>
-		kiwi supports two types of USB stick images. The first type which
-		are the hybrid ISO images and basically the same as the live ISO images
-		and the second type which are the OEM virtual disk images.
-		The deployment of both types can be performed from any OS including
-		Windows as long as a tool to dump data onto a disk device exists
-		and is used.
-	</p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="idm139812153761056"></a>10.4.1. ISO Hybrid stick<span class="permalink"><a alt="Permalink" title="10.4.1. ISO Hybrid stick" href="#idm139812153761056">¶</a></span></h3></div></div></div><a class="indexterm" name="idm139812153760416"></a><p>
-			As indicated above a hybrid iso image also works as USB stick image.
-			If a hybrid iso is used like a disk image on a writable medium
-			like a USB stick it's possible to write into a persistent area on
-			the stick instead of the RAM. kiwi will create an additional ext2
-			partition to store that information on the disk if the attribute
-			hybridpersistent is set to true.
-		</p><pre class="screen">&lt;type image="iso" ... hybridpersistent="true"/&gt;</pre></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="idm139812153757376"></a>10.4.2. OEM USB stick<span class="permalink"><a alt="Permalink" title="10.4.2. OEM USB stick" href="#idm139812153757376">¶</a></span></h3></div></div></div><a class="indexterm" name="idm139812153756736"></a><p> In contrast to the hybrid iso image it's also possible to
+      A hybrid image is a iso image including a partition table and can
+      therefore be attached as a CD/DVD <span class="emphasis"><em>and</em></span> as a
+      normal disk to the system. This has the advantage that a hybrid
+      iso live system can be burned to a CD/DVD as well as uploaded to
+      a USB stick. In order to activate the hybrid feature the hybrid
+      flag must be set to true as indicated below. 
+    </p><pre class="screen">&lt;type image="iso" ... hybrid="true"/&gt;</pre></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idm139812153763840"></a>10.4. USB stick images<span class="permalink"><a alt="Permalink" title="10.4. USB stick images" href="#idm139812153763840">¶</a></span></h2></div></div></div><a class="indexterm" name="idm139812153763200"></a><p>
+    kiwi supports two types of USB stick images. The first type which
+    are the hybrid ISO images and basically the same as the live ISO images
+    and the second type which are the OEM virtual disk images.
+    The deployment of both types can be performed from any OS including
+    Windows as long as a tool to dump data onto a disk device exists
+    and is used.
+  </p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="idm139812153761056"></a>10.4.1. ISO Hybrid stick<span class="permalink"><a alt="Permalink" title="10.4.1. ISO Hybrid stick" href="#idm139812153761056">¶</a></span></h3></div></div></div><a class="indexterm" name="idm139812153760416"></a><p>
+      As indicated above a hybrid iso image also works as USB stick image.
+      If a hybrid iso is used like a disk image on a writable medium
+      like a USB stick it's possible to write into a persistent area on
+      the stick instead of the RAM. kiwi will create an additional ext2
+      partition to store that information on the disk if the attribute
+      hybridpersistent is set to true.
+    </p><pre class="screen">&lt;type image="iso" ... hybridpersistent="true"/&gt;</pre></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="idm139812153757376"></a>10.4.2. OEM USB stick<span class="permalink"><a alt="Permalink" title="10.4.2. OEM USB stick" href="#idm139812153757376">¶</a></span></h3></div></div></div><a class="indexterm" name="idm139812153756736"></a><p> In contrast to the hybrid iso image it's also possible to
         create a oem virtual disk image which is dumped on the stick.
         The big advantage with this approach is, that it's possible to
         create a stick which contains a live OS but also a data
@@ -2105,7 +2105,7 @@ $(<span class="command"><strong>rpm</strong></span> -q ‘baseGetPackagesForDele
       <em class="citetitle">Linux Containers (LXC)</em></a> provide operating
        system-level virtualization, utilizing
       <a class="ulink" href="https://www.kernel.org/doc/Documentation/cgroups/cgroups.txt" target="_top">
-	      <em class="citetitle">Control Groups (cgroups)</em></a>. The
+        <em class="citetitle">Control Groups (cgroups)</em></a>. The
       virtualization is similar to technologies in OpenVZ, Linux-VServer,
       FreeBSD jails, AIX Workload Partitions, and Solaris Containers. The
       network and process space of the container is separated from the
@@ -2305,18 +2305,18 @@ DISK=device</pre><div class="variablelist"><dl class="variablelist"><dt><span cl
               path on the TFTP server and is loaded via TFTP. The
               download is made to the file on the netboot client
               indicated by the target (dest). Download only happens when
-	      configuration files are missing on the client or, if md5sum hash
-	      is supplied ([hash]), when different. To achieve this, list of
-	      CONF files (and VENDOR_CONF) files is kept on the client in
-	      the <code class="filename">/etc/KIWI/InstalledConfigFiles</code> backup file, and
+        configuration files are missing on the client or, if md5sum hash
+        is supplied ([hash]), when different. To achieve this, list of
+        CONF files (and VENDOR_CONF) files is kept on the client in
+        the <code class="filename">/etc/KIWI/InstalledConfigFiles</code> backup file, and
               is compared to the CONF data gathered from the config.MAC and also
-	      from other configuration files, e.g. config.group, if supplied.
+        from other configuration files, e.g. config.group, if supplied.
               Configuration files selected for comparison are those with
-	      same (dest) path. If destination path (dest) is same for more configuration
-	      files, only the last one is used (and VENDOR_CONF has always
-	      precedence to CONF). By comparing configuration file lists
-	      present in the current CONF, VENDOR_CONF variables and stored in
-	      the backup file, following actions can result:
+        same (dest) path. If destination path (dest) is same for more configuration
+        files, only the last one is used (and VENDOR_CONF has always
+        precedence to CONF). By comparing configuration file lists
+        present in the current CONF, VENDOR_CONF variables and stored in
+        the backup file, following actions can result:
 
 </p><div class="table"><a name="tab.configuration.files.synchronization"></a><p class="title"><b>Table 13.1. Configuration files synchronization possibilities</b><span class="permalink"><a alt="Permalink" title="Table 13.1. Configuration files synchronization possibilities" href="#tab.configuration.files.synchronization">¶</a></span></p><div class="table-contents"><table summary="Configuration files synchronization possibilities" border="1"><colgroup><col><col><col></colgroup><thead><tr><th>cfg file in CONF,VENDOR_CONF</th><th>cfg file in InstalledConfigFiles backup</th><th>action</th></tr></thead><tbody><tr><td>hash_a</td><td>hash_a</td><td>nothing, keep</td></tr><tr><td>hash_a</td><td>hash_b</td><td>download from server</td></tr><tr><td>none</td><td>hash</td><td>download from server</td></tr><tr><td>hash</td><td>none</td><td>download from server</td></tr><tr><td>none</td><td>none</td><td>nothing, keep</td></tr><tr><td>present</td><td>not present</td><td>download from server (regardless hash)</td></tr><tr><td>not present</td><td>present</td><td>delete on client (regardles hash)</td></tr></tbody></table></div></div><p><br class="table-break">
     Note that actual configuration files (or their md5sum hashes) on the client machine are not tested, only data from the backup file are used. This means that
@@ -2346,11 +2346,11 @@ IMAGE='/dev/md1;LimeJeOS-openSUSE-##.#.i686;1.11.3;192.168.100.2;4096'
 PART='5;S;x,2000;83;/'</pre></dd><dt><span class="term"><code class="varname">DISK</code></span></dt><dd><p>Specifies the hard disk. Used only with PART and
               defines the device via which the hard disk can be
               addressed, e.g., <code class="filename">/dev/hda</code><a class="indexterm" name="idm139812153510112"></a>. </p></dd><dt><span class="term"><code class="varname">REBOOT_IMAGE</code></span></dt><dd><p>If set to a non-empty string, this will reboot the
-			  system after the initial deployment process is done.
+        system after the initial deployment process is done.
               This means before the system init process is activated
               the system is rebooted. If the machine's default boot
               setup is to boot via PXE it will again boot from the
-			  network.
+        network.
             </p></dd><dt><span class="term"><code class="varname">FORCE_KEXEC</code></span></dt><dd><p>During the initial deployment process kiwi checks
               if the running kernel is the same as the kernel installed
               via the system image. If there is a mismatch kiwi activates
@@ -2515,16 +2515,16 @@ NBD-Write-Export-Name;/dev/NBD-Write-Device</pre><p>The server IP and the export
         read-write filesystem is a solution for this problem. In order
         to use a compressed root filesystem based on clicfs make sure your
         <code class="filename">config.xml</code>’s filesystem attribute
-		contains <code class="systemitem">clicfs</code><a class="indexterm" name="idm139812153414880"></a>.
-		As an alternative to clicfs kiwi also supports the fuse
+    contains <code class="systemitem">clicfs</code><a class="indexterm" name="idm139812153414880"></a>.
+    As an alternative to clicfs kiwi also supports the fuse
         based unionfs utility. In contrast to clicfs which writes
-		a block list on the write device, unionfs points all write operations
-		into another filesystem which allows to mount and watch this
-		location separately. In order
+    a block list on the write device, unionfs points all write operations
+    into another filesystem which allows to mount and watch this
+    location separately. In order
         to use a compressed root filesystem based on unionfs make sure your
-		<code class="filename">config.xml</code>’s filesystem attribute
-		contains <code class="systemitem">squashfs</code><a class="indexterm" name="idm139812153412128"></a>.
-		Below find examples for the different union modes.</p><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a name="sec.pxe.union.local.local"></a>13.4.5.1. Download to Local Storage, Write to Local Storage<span class="permalink"><a alt="Permalink" title="13.4.5.1. Download to Local Storage, Write to Local Storage" href="#sec.pxe.union.local.local">¶</a></span></h4></div></div></div><a class="indexterm" name="idm139812153410112"></a><pre class="screen">DISK=/dev/sda
+    <code class="filename">config.xml</code>’s filesystem attribute
+    contains <code class="systemitem">squashfs</code><a class="indexterm" name="idm139812153412128"></a>.
+    Below find examples for the different union modes.</p><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a name="sec.pxe.union.local.local"></a>13.4.5.1. Download to Local Storage, Write to Local Storage<span class="permalink"><a alt="Permalink" title="13.4.5.1. Download to Local Storage, Write to Local Storage" href="#sec.pxe.union.local.local">¶</a></span></h4></div></div></div><a class="indexterm" name="idm139812153410112"></a><pre class="screen">DISK=/dev/sda
 PART='5;S;x,400;L;/,x;L;x'
 IMAGE='/dev/sda2;suse-##.#-pxe-client.i386;1.2.8;192.168.100.2;4096'
 UNIONFS_CONFIG=/dev/sda3,/dev/sda2,unionfs
@@ -2532,12 +2532,12 @@ KIWI_INITRD=/boot/initrd</pre></div><div class="sect3"><div class="titlepage"><d
 PART='5;S;x,400;L;/'
 IMAGE='/dev/sda2;suse-##.#-pxe-client.i386;1.2.8;192.168.100.2;4096'
 UNIONFS_CONFIG=tmpfs,/dev/sda2,unionfs</pre></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a name="sec.pxe.union.remote.local"></a>13.4.5.3. Mount from Remote, Write to Local Storage<span class="permalink"><a alt="Permalink" title="13.4.5.3. Mount from Remote, Write to Local Storage" href="#sec.pxe.union.remote.local">¶</a></span></h4></div></div></div><a class="indexterm" name="idm139812153403712"></a><p>For all of the following modes I strongly recommend to check
-			on a separate client machine in the network if it is possible to
+      on a separate client machine in the network if it is possible to
             access the exported read-only and read-write device locations. If
             accessing devices works the image should also be able to access
             them on boot. If the boot fails it should be clear that the reason
             is not the exported device.
-			</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>NFSROOT</p><pre class="screen">PART='5;S;x,x;L;x'
+      </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>NFSROOT</p><pre class="screen">PART='5;S;x,x;L;x'
 NFSROOT="192.168.100.2;/srv/kiwi-read-only-path"
 UNIONFS_CONFIG=/dev/sda2,nfs,unionfs</pre></li><li class="listitem"><p>AOEROOT</p><pre class="screen">PART='5;S;x,x;L;x'
 AOEROOT=/dev/etherd/e0.1,/dev/sda2
@@ -3204,8 +3204,8 @@ VENDOR_CONF='xorg.conf.maxterm_3500;/etc/X11/xorg.conf;192.168.1.2;4096,
         Use this AMI ID to launch your instance as described in the
         <a class="xref" href="#sec.ec2.using.general" title="16.2.1. Using a registered AMI">Using a registered AMI</a>
         section.</p><pre class="screen"><span class="command"><strong>aws ec2 register-image</strong></span>
-		--image-location <em class="replaceable"><code>myImages/MANIFEST_NAME</code></em>
-		<em class="replaceable"><code>ARCH</code></em></pre><p>This completes the S3 specific setup. The next section
+    --image-location <em class="replaceable"><code>myImages/MANIFEST_NAME</code></em>
+    <em class="replaceable"><code>ARCH</code></em></pre><p>This completes the S3 specific setup. The next section
         explains the use of the disk image file created by KIWI to create
         and EBS backed AMI.</p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="sec.ec2.using.EBS"></a>16.2.3. Using the disk image for and EBS backed AMI<span class="permalink"><a alt="Permalink" title="16.2.3. Using the disk image for and EBS backed AMI" href="#sec.ec2.using.EBS">¶</a></span></h3></div></div></div><p>For the EBS backed image we will also use the
         <span class="emphasis"><em>.raw</em></span> file. Find this file in the
@@ -3455,7 +3455,7 @@ VENDOR_CONF='xorg.conf.maxterm_3500;/etc/X11/xorg.conf;192.168.1.2;4096,
       attributes but it's also possible to call them manually.
     </p><div class="cmdsynopsis"><p><code class="command">kiwi</code>   --bootvm <em class="replaceable"><code>initrd</code></em>   --bootvm-system <em class="replaceable"><code>systemImage</code></em>  [--bootvm-disksize <em class="replaceable"><code>size</code></em>]</p></div><div class="cmdsynopsis"><p><code class="command">kiwi</code>   --bootcd <em class="replaceable"><code>initrd</code></em> </p></div><div class="cmdsynopsis"><p><code class="command">kiwi</code>   --installcd <em class="replaceable"><code>initrd</code></em>   --installcd-system <em class="replaceable"><code>raw-system-image</code></em> </p></div><div class="cmdsynopsis"><p><code class="command">kiwi</code>   --installstick <em class="replaceable"><code>initrd</code></em>   --installstick-system <em class="replaceable"><code>raw-system-image</code></em> </p></div><div class="cmdsynopsis"><p><code class="command">kiwi</code>   --installpxe <em class="replaceable"><code>initrd</code></em>   --installpxe-system <em class="replaceable"><code>raw-system-image</code></em> </p></div></div><div class="refsect1"><a name="idm139812152824736"></a><h2>Image Format Conversion</h2><p>
       The KIWI format conversion is useful to perform the creation of
-	  another image output format like vmdk for VMware or ovf the open
+    another image output format like vmdk for VMware or ovf the open
       virtual machine format. Along with the conversion KIWI also creates
       the virtual machine configuration according to the format if
       there is a machine section specified in the XML description
@@ -3468,157 +3468,157 @@ VENDOR_CONF='xorg.conf.maxterm_3500;/etc/X11/xorg.conf;192.168.1.2;4096,
     </p><div class="cmdsynopsis"><p><code class="command">kiwi</code>   --createpassword </p></div><div class="cmdsynopsis"><p><code class="command">kiwi</code>   --createhash
       <em class="replaceable"><code>image-path</code></em> </p></div><div class="cmdsynopsis"><p><code class="command">kiwi</code>  { -i  |   --info }  <em class="replaceable"><code>ImagePath</code></em>  {--select
       <em class="replaceable"><code>
-		repo-patterns|patterns|types|sources|size|profiles|packages|version
-	  </code></em>}</p></div><div class="cmdsynopsis"><p><code class="command">kiwi</code>   --setup-splash <em class="replaceable"><code>initrd</code></em> </p></div><p>
-	The following list describes the helper tools more detailed
-	</p><div class="variablelist"><dl class="variablelist"><dt><span class="term">[<span class="optional"><code class="option">--createpassword</code></span>]</span></dt><dd><p>
-			Create a crypted password hash and prints it on the console.
-			The user can use the string as value for the pwd attribute in
-			the XML users section
-		</p></dd><dt><span class="term">[<span class="optional"><code class="option">--createhash <em class="replaceable"><code>image-path</code></em></code>
-		</span>]</span></dt><dd><p>
-			Sign your image description with a md5sum. The result is written to a file
-			named <code class="filename">.checksum.md</code> and is checked if KIWI creates
-			an image from this description.
-		</p></dd><dt><span class="term">[<span class="optional">
-			<code class="option">-i</code> | <code class="option">--info <em class="replaceable"><code>image-path</code></em></code>
-			<code class="option">--select <em class="replaceable"><code>selection</code></em></code>
-		</span>]</span></dt><dd><p>
-			List general information about the image description. So far you can get
-			information about the available patterns in the configured repositories with
-			<em class="replaceable"><code>repo-patterns</code></em>, a list of used patterns for this image
-			with <em class="replaceable"><code>patterns</code></em>, a list of supported image types
-			with <em class="replaceable"><code>types</code></em>, a list of source URLs with
-			<em class="replaceable"><code>sources</code></em>, an estimation about the install size and
-			the size of the packages marked as to be deleted with <em class="replaceable"><code>size</code></em>,
-			a list of profiles with <em class="replaceable"><code>profiles</code></em>, 
+    repo-patterns|patterns|types|sources|size|profiles|packages|version
+    </code></em>}</p></div><div class="cmdsynopsis"><p><code class="command">kiwi</code>   --setup-splash <em class="replaceable"><code>initrd</code></em> </p></div><p>
+  The following list describes the helper tools more detailed
+  </p><div class="variablelist"><dl class="variablelist"><dt><span class="term">[<span class="optional"><code class="option">--createpassword</code></span>]</span></dt><dd><p>
+      Create a crypted password hash and prints it on the console.
+      The user can use the string as value for the pwd attribute in
+      the XML users section
+    </p></dd><dt><span class="term">[<span class="optional"><code class="option">--createhash <em class="replaceable"><code>image-path</code></em></code>
+    </span>]</span></dt><dd><p>
+      Sign your image description with a md5sum. The result is written to a file
+      named <code class="filename">.checksum.md</code> and is checked if KIWI creates
+      an image from this description.
+    </p></dd><dt><span class="term">[<span class="optional">
+      <code class="option">-i</code> | <code class="option">--info <em class="replaceable"><code>image-path</code></em></code>
+      <code class="option">--select <em class="replaceable"><code>selection</code></em></code>
+    </span>]</span></dt><dd><p>
+      List general information about the image description. So far you can get
+      information about the available patterns in the configured repositories with
+      <em class="replaceable"><code>repo-patterns</code></em>, a list of used patterns for this image
+      with <em class="replaceable"><code>patterns</code></em>, a list of supported image types
+      with <em class="replaceable"><code>types</code></em>, a list of source URLs with
+      <em class="replaceable"><code>sources</code></em>, an estimation about the install size and
+      the size of the packages marked as to be deleted with <em class="replaceable"><code>size</code></em>,
+      a list of profiles with <em class="replaceable"><code>profiles</code></em>, 
             a list of solved packages to become installed with <em class="replaceable"><code>packages</code></em>,
-			and the information about the appliance name and version with <em class="replaceable"><code>version</code></em>
-		</p></dd><dt><span class="term">[<span class="optional"><code class="option">--setup-splash <em class="replaceable"><code>initrd</code></em></code>
-		</span>]</span></dt><dd><p>
-			Create splash screen from the data inside the initrd
-			and re-create the initrd with the splash screen attached
-			to the initrd cpio archive. This enables the kernel
-			to load the splash screen at boot time. If splashy is used
-			only a link to the original initrd will be created
-		</p></dd></dl></div></div><div class="refsect1"><a name="kiwi..global.options"></a><h2>Global Options</h2><div class="variablelist"><dl class="variablelist"><dt><span class="term">[<span class="optional"><code class="option">--add-profile</code>
-			<em class="replaceable"><code>profile-name</code></em></span>]</span></dt><dd><p>
-			Use the specified profile. A profile is a part of the
-			XML image description and therefore can enhance each section
-			with additional information. For example adding packages.
-		</p></dd><dt><span class="term">[<span class="optional"><code class="option">--set-repo</code>
-			<em class="replaceable"><code>URL</code></em></span>]</span></dt><dd><p>
-			Set/Overwrite the repo URL for the first repo listed in the
+      and the information about the appliance name and version with <em class="replaceable"><code>version</code></em>
+    </p></dd><dt><span class="term">[<span class="optional"><code class="option">--setup-splash <em class="replaceable"><code>initrd</code></em></code>
+    </span>]</span></dt><dd><p>
+      Create splash screen from the data inside the initrd
+      and re-create the initrd with the splash screen attached
+      to the initrd cpio archive. This enables the kernel
+      to load the splash screen at boot time. If splashy is used
+      only a link to the original initrd will be created
+    </p></dd></dl></div></div><div class="refsect1"><a name="kiwi..global.options"></a><h2>Global Options</h2><div class="variablelist"><dl class="variablelist"><dt><span class="term">[<span class="optional"><code class="option">--add-profile</code>
+      <em class="replaceable"><code>profile-name</code></em></span>]</span></dt><dd><p>
+      Use the specified profile. A profile is a part of the
+      XML image description and therefore can enhance each section
+      with additional information. For example adding packages.
+    </p></dd><dt><span class="term">[<span class="optional"><code class="option">--set-repo</code>
+      <em class="replaceable"><code>URL</code></em></span>]</span></dt><dd><p>
+      Set/Overwrite the repo URL for the first repo listed in the
             configuration file that does not have a "fixed" status.
-			The change is temporary and will not be written to the
-			XML file.
-		</p></dd><dt><span class="term">[<span class="optional"><code class="option">--set-repotype</code>
-			<em class="replaceable"><code>type</code></em></span>]</span></dt><dd><p>
-			Set/Overwrite repo type for the first listed repo.
-			The supported repo types depends on the packagemanager.
-			Commonly supported are rpm-md, rpm-dir and yast2.
-			The change is temporary and will not be written to the
-			XML file.
-		</p></dd><dt><span class="term">[<span class="optional"><code class="option">--set-repoalias</code>
-			<em class="replaceable"><code>name</code></em></span>]</span></dt><dd><p>
-			Set/Overwrite alias name for the first listed repo.
-			Alias names are optional free form text. If not set the source
-			attribute value is used and builds the alias name by replacing
-			each <span class="quote">“<span class="quote">/</span>”</span> with a <span class="quote">“<span class="quote">_</span>”</span>. An alias name should be set if the
-			source argument doesn't really explain what this repository
-			contains. The change is temporary and will not be written to the
-			XML file.
-		</p></dd><dt><span class="term">[<span class="optional"><code class="option">--set-repoprio</code>
-			<em class="replaceable"><code>number</code></em></span>]</span></dt><dd><p>
-			Set/Overwrite priority for the first listed repo.
-			Works with the smart packagemanager only. The Channel
-			priority assigned to all packages available in
-			this channel (0 if not set). If the exact same package
-			is available in more than one channel, the highest
-			priority is used.
-		</p></dd><dt><span class="term">[<span class="optional"><code class="option">--add-repo
-			<em class="replaceable"><code>URL</code></em></code>,
-			<code class="option">--add-repotype <em class="replaceable"><code>type</code></em></code>
-			<code class="option">--add-repoalias <em class="replaceable"><code>name</code></em></code>
-			<code class="option">--add-repoprio <em class="replaceable"><code>number</code></em></code>
-		</span>]</span></dt><dd><p>
-			Add the given repository and type for this run of an
-			image prepare or upgrade process. Multiple
+      The change is temporary and will not be written to the
+      XML file.
+    </p></dd><dt><span class="term">[<span class="optional"><code class="option">--set-repotype</code>
+      <em class="replaceable"><code>type</code></em></span>]</span></dt><dd><p>
+      Set/Overwrite repo type for the first listed repo.
+      The supported repo types depends on the packagemanager.
+      Commonly supported are rpm-md, rpm-dir and yast2.
+      The change is temporary and will not be written to the
+      XML file.
+    </p></dd><dt><span class="term">[<span class="optional"><code class="option">--set-repoalias</code>
+      <em class="replaceable"><code>name</code></em></span>]</span></dt><dd><p>
+      Set/Overwrite alias name for the first listed repo.
+      Alias names are optional free form text. If not set the source
+      attribute value is used and builds the alias name by replacing
+      each <span class="quote">“<span class="quote">/</span>”</span> with a <span class="quote">“<span class="quote">_</span>”</span>. An alias name should be set if the
+      source argument doesn't really explain what this repository
+      contains. The change is temporary and will not be written to the
+      XML file.
+    </p></dd><dt><span class="term">[<span class="optional"><code class="option">--set-repoprio</code>
+      <em class="replaceable"><code>number</code></em></span>]</span></dt><dd><p>
+      Set/Overwrite priority for the first listed repo.
+      Works with the smart packagemanager only. The Channel
+      priority assigned to all packages available in
+      this channel (0 if not set). If the exact same package
+      is available in more than one channel, the highest
+      priority is used.
+    </p></dd><dt><span class="term">[<span class="optional"><code class="option">--add-repo
+      <em class="replaceable"><code>URL</code></em></code>,
+      <code class="option">--add-repotype <em class="replaceable"><code>type</code></em></code>
+      <code class="option">--add-repoalias <em class="replaceable"><code>name</code></em></code>
+      <code class="option">--add-repoprio <em class="replaceable"><code>number</code></em></code>
+    </span>]</span></dt><dd><p>
+      Add the given repository and type for this run of an
+      image prepare or upgrade process. Multiple
             <code class="option">--add-repo</code>/<code class="option">--add-repotype</code>
-			options are possible. The change will not be written to the
-			<code class="filename">config.xml</code> file</p></dd><dt><span class="term">[<span class="optional"><code class="option">--ignore-repos</code></span>]</span></dt><dd><p>
-			Ignore all repositories specified so far, in XML or
-			elsewhere. This option should be used in conjunction with
-			subsequent calls to <code class="option">--add-repo</code> to specify
-			repositories at the commandline that override previous
-			specifications.
-		</p></dd><dt><span class="term">[<span class="optional"><code class="option">--logfile <em class="replaceable"><code>Filename</code></em></code>
-			| <code class="option">terminal</code></span>]</span></dt><dd><p>
-			Write to the log file
-			<em class="replaceable"><code>Filename</code></em> instead of the terminal.
-		</p></dd><dt><span class="term">[<span class="optional"><code class="option">--gzip-cmd <em class="replaceable"><code>cmd</code></em></code></span>]</span></dt><dd><p>
-			Specify an alternate command to run when compressing
-			boot and system images. Command must accept
-			<span class="command"><strong>gzip</strong></span> options.
-		</p></dd><dt><span class="term">[<span class="optional"><code class="option">--package-manager <em class="replaceable"><code>smart|zypper</code></em></code>
-		</span>]</span></dt><dd><p>
-			Set the package manager to use for this image. If set it
-			will temporarily overwrite the value set in the xml
-			description.
-		</p></dd><dt><span class="term">[<span class="optional"><code class="option">-A</code> | <code class="option">--target-arch <em class="replaceable"><code>i586|x86_64|armv5tel|ppc</code></em></code>
-		</span>]</span></dt><dd><p>
-			Set a special target-architecture. This overrides the 
-			used architecture for the image-packages in <code class="filename">zypp.conf</code>.
-			When used with smart this option doesn't have any effect.
-		</p></dd><dt><span class="term">[<span class="optional"><code class="option">--debug</code></span>]</span></dt><dd><p>
-			Prints a stack trace in case of internal errors
-		</p></dd><dt><span class="term">[<span class="optional"><code class="option">--verbose <em class="replaceable"><code>1|2|3</code></em></code>
-		</span>]</span></dt><dd><p>
-			Controls the verbosity level for the instsource module
-		</p></dd></dl></div></div><div class="refsect1"><a name="kiwi.prepare.options"></a><h2>Image Preparation Options</h2><div class="variablelist"><dl class="variablelist"><dt><span class="term">[<span class="optional"><code class="option">-r</code> | <code class="option">--root
-			<em class="replaceable"><code>RootPath</code></em></code></span>]</span></dt><dd><p>
-			Set up the physical extend, chroot system below the given
-			root-path path. If no <code class="option">--root</code> option is
-			given, KIWI will search for the attribute defaultroot in
-			<code class="filename">config.xml</code>. If no root directory is
-			known, a <span class="command"><strong>mktemp</strong></span> directory will be created
-			and used as root directory.
-		</p></dd><dt><span class="term">[<span class="optional"><code class="option">--force-new-root</code></span>]</span></dt><dd><p>
-			Force creation of new root directory. If the directory
-			already exists, it is deleted.
-		</p></dd></dl></div></div><div class="refsect1"><a name="kiwi.prepare.upgrade.options"></a><h2>Image Upgrade/Preparation Options</h2><div class="variablelist"><dl class="variablelist"><dt><span class="term">[<span class="optional"><code class="option">--cache</code> <em class="replaceable"><code>directory</code></em>
+      options are possible. The change will not be written to the
+      <code class="filename">config.xml</code> file</p></dd><dt><span class="term">[<span class="optional"><code class="option">--ignore-repos</code></span>]</span></dt><dd><p>
+      Ignore all repositories specified so far, in XML or
+      elsewhere. This option should be used in conjunction with
+      subsequent calls to <code class="option">--add-repo</code> to specify
+      repositories at the commandline that override previous
+      specifications.
+    </p></dd><dt><span class="term">[<span class="optional"><code class="option">--logfile <em class="replaceable"><code>Filename</code></em></code>
+      | <code class="option">terminal</code></span>]</span></dt><dd><p>
+      Write to the log file
+      <em class="replaceable"><code>Filename</code></em> instead of the terminal.
+    </p></dd><dt><span class="term">[<span class="optional"><code class="option">--gzip-cmd <em class="replaceable"><code>cmd</code></em></code></span>]</span></dt><dd><p>
+      Specify an alternate command to run when compressing
+      boot and system images. Command must accept
+      <span class="command"><strong>gzip</strong></span> options.
+    </p></dd><dt><span class="term">[<span class="optional"><code class="option">--package-manager <em class="replaceable"><code>smart|zypper</code></em></code>
+    </span>]</span></dt><dd><p>
+      Set the package manager to use for this image. If set it
+      will temporarily overwrite the value set in the xml
+      description.
+    </p></dd><dt><span class="term">[<span class="optional"><code class="option">-A</code> | <code class="option">--target-arch <em class="replaceable"><code>i586|x86_64|armv5tel|ppc</code></em></code>
+    </span>]</span></dt><dd><p>
+      Set a special target-architecture. This overrides the 
+      used architecture for the image-packages in <code class="filename">zypp.conf</code>.
+      When used with smart this option doesn't have any effect.
+    </p></dd><dt><span class="term">[<span class="optional"><code class="option">--debug</code></span>]</span></dt><dd><p>
+      Prints a stack trace in case of internal errors
+    </p></dd><dt><span class="term">[<span class="optional"><code class="option">--verbose <em class="replaceable"><code>1|2|3</code></em></code>
+    </span>]</span></dt><dd><p>
+      Controls the verbosity level for the instsource module
+    </p></dd></dl></div></div><div class="refsect1"><a name="kiwi.prepare.options"></a><h2>Image Preparation Options</h2><div class="variablelist"><dl class="variablelist"><dt><span class="term">[<span class="optional"><code class="option">-r</code> | <code class="option">--root
+      <em class="replaceable"><code>RootPath</code></em></code></span>]</span></dt><dd><p>
+      Set up the physical extend, chroot system below the given
+      root-path path. If no <code class="option">--root</code> option is
+      given, KIWI will search for the attribute defaultroot in
+      <code class="filename">config.xml</code>. If no root directory is
+      known, a <span class="command"><strong>mktemp</strong></span> directory will be created
+      and used as root directory.
+    </p></dd><dt><span class="term">[<span class="optional"><code class="option">--force-new-root</code></span>]</span></dt><dd><p>
+      Force creation of new root directory. If the directory
+      already exists, it is deleted.
+    </p></dd></dl></div></div><div class="refsect1"><a name="kiwi.prepare.upgrade.options"></a><h2>Image Upgrade/Preparation Options</h2><div class="variablelist"><dl class="variablelist"><dt><span class="term">[<span class="optional"><code class="option">--cache</code> <em class="replaceable"><code>directory</code></em>
         </span>]</span></dt><dd><p>
             When specifying a cache directory, KIWI will create a cache each for
-			patterns and packages and re-use them, if possible, for subsequent
+      patterns and packages and re-use them, if possible, for subsequent
             root tree preparations of this and/or other images 
         </p></dd><dt><span class="term">[<span class="optional"><code class="option">--add-package</code> <em class="replaceable"><code>package</code></em>
-		</span>]</span></dt><dd><p>
-			Add the given package name to the list of image packages
-			multiple <code class="option">--add-package</code> options are possible. The change
-			will not be written to the XML description.
-		</p></dd><dt><span class="term">[<span class="optional"><code class="option">--add-pattern</code> <em class="replaceable"><code>name</code></em>
+    </span>]</span></dt><dd><p>
+      Add the given package name to the list of image packages
+      multiple <code class="option">--add-package</code> options are possible. The change
+      will not be written to the XML description.
+    </p></dd><dt><span class="term">[<span class="optional"><code class="option">--add-pattern</code> <em class="replaceable"><code>name</code></em>
         </span>]</span></dt><dd><p>
             Add the given pattern name to the list of image packages
             multiple <code class="option">--add-pattern</code> options are possible. The change
             will not be written to the xml description. Patterns can be handled
             by SUSE based repositories only.
         </p></dd><dt><span class="term">[<span class="optional"><code class="option">--del-package</code> <em class="replaceable"><code>package</code></em>
-		</span>]</span></dt><dd><p>
-			Removes the given package by adding it the list of packages
-			to become removed. The change will not be written to the xml
-			description.
-		</p></dd></dl></div></div><div class="refsect1"><a name="kiwi.create.options"></a><h2>Image Creation Options</h2><div class="variablelist"><dl class="variablelist"><dt><span class="term">[<span class="optional"><code class="option">-d</code> | <code class="option">--destdir
-			<em class="replaceable"><code>DestinationPath</code></em></code></span>]</span></dt><dd><p>
-			Specify destination directory to store the image file(s)
-			If not specified, KIWI will try to find the attribute 
-			<em class="replaceable"><code>defaultdestination</code></em> which can be
-			specified in the <em class="replaceable"><code>preferences</code></em> section
-			of the <code class="filename">config.xml</code> file. If it exists its value is used as
-			destination directory. If no destination information can be found,
-			an error occurs.
-		</p></dd><dt><span class="term">[<span class="optional"><code class="option">-t</code> | <code class="option">--type
-			<em class="replaceable"><code>Imagetype</code></em></code></span>]</span></dt><dd><p>
-			Specify the output image type to use for this image. Each type
+    </span>]</span></dt><dd><p>
+      Removes the given package by adding it the list of packages
+      to become removed. The change will not be written to the xml
+      description.
+    </p></dd></dl></div></div><div class="refsect1"><a name="kiwi.create.options"></a><h2>Image Creation Options</h2><div class="variablelist"><dl class="variablelist"><dt><span class="term">[<span class="optional"><code class="option">-d</code> | <code class="option">--destdir
+      <em class="replaceable"><code>DestinationPath</code></em></code></span>]</span></dt><dd><p>
+      Specify destination directory to store the image file(s)
+      If not specified, KIWI will try to find the attribute 
+      <em class="replaceable"><code>defaultdestination</code></em> which can be
+      specified in the <em class="replaceable"><code>preferences</code></em> section
+      of the <code class="filename">config.xml</code> file. If it exists its value is used as
+      destination directory. If no destination information can be found,
+      an error occurs.
+    </p></dd><dt><span class="term">[<span class="optional"><code class="option">-t</code> | <code class="option">--type
+      <em class="replaceable"><code>Imagetype</code></em></code></span>]</span></dt><dd><p>
+      Specify the output image type to use for this image. Each type
             is described in a <em class="replaceable"><code>type</code></em> section of the
             preferences section. At least one type has to be specified in the
             <code class="filename">config.xml</code> description. By default,
@@ -3629,85 +3629,85 @@ VENDOR_CONF='xorg.conf.maxterm_3500;/etc/X11/xorg.conf;192.168.1.2;4096,
             <code class="option">--create</code> step. With the
             option <code class="option">--type</code> one can distinguish between the
             types stored in <code class="filename">config.xml</code>
-		</p></dd><dt><span class="term">[<span class="optional"><code class="option">-s</code> | <code class="option">--strip</code></span>]</span></dt><dd><p>
-			Strip shared objects and executables - only makes sense in
-			combination with <code class="option">--create</code>
-		</p></dd><dt><span class="term">[<span class="optional"><code class="option">--prebuiltbootimage
-			<em class="replaceable"><code>Directory</code></em></code></span>]</span></dt><dd><p>
-			Search in <em class="replaceable"><code>Directory</code></em> for
-			pre-built boot images.
-		</p></dd><dt><span class="term">[<span class="optional"><code class="option">--isocheck</code></span>]</span></dt><dd><p>
-			in case of an iso image the checkmedia program generates
-			a md5sum into the ISO header. If the <code class="option">--isocheck</code> option is
-			specified a new boot menu entry will be generated which
-			allows to check this media
-		</p></dd><dt><span class="term">[<span class="optional"><code class="option">--lvm</code></span>]</span></dt><dd><p>
-			Use the logical volume manager to control the disk.
-			The partition table will include one lvm partition and
-			one standard ext2 boot partition. Use of this option
-			makes sense for the create step only and also only for
-			the image types: vmx, oem, and usb
-		</p></dd><dt><span class="term">[<span class="optional"><code class="option">--fs-blocksize <em class="replaceable"><code>number</code></em></code>
-		</span>]</span></dt><dd><p>
-			When calling KIWI in creation mode this option will set
-			the block size in bytes. For ISO images with the old style
-			ramdisk setup a blocksize of 4096 bytes is required
-		</p></dd><dt><span class="term">[<span class="optional"><code class="option">--fs-journalsize <em class="replaceable"><code>number</code></em></code>
-		</span>]</span></dt><dd><p>
-			When calling KIWI in creation mode this option will set
-			the journal size in mega bytes for ext[23] based filesystems
-			and in blocks if the reiser filesystem is used
-		</p></dd><dt><span class="term">[<span class="optional"><code class="option">--fs-inodesize <em class="replaceable"><code>number</code></em></code>
-		</span>]</span></dt><dd><p>
-			When calling KIWI in creation mode this option will set
-			the inode size in bytes. This option has no effect if the
-			reiser filesystem is used
-		</p></dd><dt><span class="term">[<span class="optional"><code class="option">--fs-inoderatio <em class="replaceable"><code>number</code></em></code>
+    </p></dd><dt><span class="term">[<span class="optional"><code class="option">-s</code> | <code class="option">--strip</code></span>]</span></dt><dd><p>
+      Strip shared objects and executables - only makes sense in
+      combination with <code class="option">--create</code>
+    </p></dd><dt><span class="term">[<span class="optional"><code class="option">--prebuiltbootimage
+      <em class="replaceable"><code>Directory</code></em></code></span>]</span></dt><dd><p>
+      Search in <em class="replaceable"><code>Directory</code></em> for
+      pre-built boot images.
+    </p></dd><dt><span class="term">[<span class="optional"><code class="option">--isocheck</code></span>]</span></dt><dd><p>
+      in case of an iso image the checkmedia program generates
+      a md5sum into the ISO header. If the <code class="option">--isocheck</code> option is
+      specified a new boot menu entry will be generated which
+      allows to check this media
+    </p></dd><dt><span class="term">[<span class="optional"><code class="option">--lvm</code></span>]</span></dt><dd><p>
+      Use the logical volume manager to control the disk.
+      The partition table will include one lvm partition and
+      one standard ext2 boot partition. Use of this option
+      makes sense for the create step only and also only for
+      the image types: vmx, oem, and usb
+    </p></dd><dt><span class="term">[<span class="optional"><code class="option">--fs-blocksize <em class="replaceable"><code>number</code></em></code>
+    </span>]</span></dt><dd><p>
+      When calling KIWI in creation mode this option will set
+      the block size in bytes. For ISO images with the old style
+      ramdisk setup a blocksize of 4096 bytes is required
+    </p></dd><dt><span class="term">[<span class="optional"><code class="option">--fs-journalsize <em class="replaceable"><code>number</code></em></code>
+    </span>]</span></dt><dd><p>
+      When calling KIWI in creation mode this option will set
+      the journal size in mega bytes for ext[23] based filesystems
+      and in blocks if the reiser filesystem is used
+    </p></dd><dt><span class="term">[<span class="optional"><code class="option">--fs-inodesize <em class="replaceable"><code>number</code></em></code>
+    </span>]</span></dt><dd><p>
+      When calling KIWI in creation mode this option will set
+      the inode size in bytes. This option has no effect if the
+      reiser filesystem is used
+    </p></dd><dt><span class="term">[<span class="optional"><code class="option">--fs-inoderatio <em class="replaceable"><code>number</code></em></code>
         </span>]</span></dt><dd><p>
             Set the bytes/inode ratio. This option has no
             effect if the reiser filesystem is used
         </p></dd><dt><span class="term">[<span class="optional"><code class="option">--fs-max-mount-count <em class="replaceable"><code>number</code></em></code>
-		</span>]</span></dt><dd><p>
-			When calling kiwi in creation mode this option will set the number
-			of mounts after which the filesystem will be checked. Set to 0 to
-			disable checks.
-			This option applies only to ext[234] filesystems.
-		</p></dd><dt><span class="term">[<span class="optional"><code class="option">--fs-check-interval <em class="replaceable"><code>number</code></em></code>
-		</span>]</span></dt><dd><p>
-			When calling kiwi in creation mode this option will set the maximal time
-			between two filesystem checks. Set to 0 to disable time-dependent checks.
-			This option applies only to ext[234] filesystems.
-		</p></dd><dt><span class="term">[<span class="optional"><code class="option">--fat-storage <em class="replaceable"><code>size in MB</code></em></code>
-		</span>]</span></dt><dd><p>
-			if the syslinux bootlaoder is used this option allows to
-			specify the size of the fat partition. This is useful if
-			the fat space is not only used for booting the system but
-			also for custom data. Therefore this option makes sense
-			when building a USB stick image (image type: usb or oem)
-		</p></dd><dt><span class="term">[<span class="optional"><code class="option">--partitioner <em class="replaceable"><code>parted|fdasd</code></em></code>
+    </span>]</span></dt><dd><p>
+      When calling kiwi in creation mode this option will set the number
+      of mounts after which the filesystem will be checked. Set to 0 to
+      disable checks.
+      This option applies only to ext[234] filesystems.
+    </p></dd><dt><span class="term">[<span class="optional"><code class="option">--fs-check-interval <em class="replaceable"><code>number</code></em></code>
+    </span>]</span></dt><dd><p>
+      When calling kiwi in creation mode this option will set the maximal time
+      between two filesystem checks. Set to 0 to disable time-dependent checks.
+      This option applies only to ext[234] filesystems.
+    </p></dd><dt><span class="term">[<span class="optional"><code class="option">--fat-storage <em class="replaceable"><code>size in MB</code></em></code>
+    </span>]</span></dt><dd><p>
+      if the syslinux bootlaoder is used this option allows to
+      specify the size of the fat partition. This is useful if
+      the fat space is not only used for booting the system but
+      also for custom data. Therefore this option makes sense
+      when building a USB stick image (image type: usb or oem)
+    </p></dd><dt><span class="term">[<span class="optional"><code class="option">--partitioner <em class="replaceable"><code>parted|fdasd</code></em></code>
         </span>]</span></dt><dd><p>
-			Select the tool to create partition tables. Supported are
-			parted and fdasd (s390). By default parted is used
+      Select the tool to create partition tables. Supported are
+      parted and fdasd (s390). By default parted is used
         </p></dd><dt><span class="term">[<span class="optional"><code class="option">--check-kernel</code></span>]</span></dt><dd><p>
-			Activates check for matching kernels between boot and
-			system image. The kernel check also tries to fix the boot
-			image if no matching kernel was found.
+      Activates check for matching kernels between boot and
+      system image. The kernel check also tries to fix the boot
+      image if no matching kernel was found.
         </p></dd><dt><span class="term">[<span class="optional"><code class="option">--mbrid <em class="replaceable"><code>number</code></em></code></span>]</span></dt><dd><p>
-			Specifies a custom mbrid. The number value is treated as
-			decimal number which is internally translated into a 4byte
-			hex value. The allowed range therefore is from 0x0 to
-			max 0xffffffff. By default kiwi creates a random value
-		</p></dd><dt><span class="term">[<span class="optional"><code class="option">--edit-bootconfig <em class="replaceable"><code>script</code></em></code></span>]</span></dt><dd><p>
-			Specifies the location of a custom script which is called
-			right before the bootloader is installed. This allows to modify
-			the bootloader configuration file written by kiwi. The scripts
-			working directory is the one which represents the image
-			structure including the bootloader configuration files. Please
-			have in mind that according to the image type, architecture
-			and bootloader type the files/directory structure and also
-			the name of the bootloader configuration files might be
-			different.
-		</p></dd></dl></div></div><div class="refsect1"><a name="kiwi.moreinfo"></a><h2>For More Information</h2><p>More information about KIWI, its files can be found at:</p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><a class="ulink" href="http://en.opensuse.org/Portal:KIWI" target="_top">http://en.opensuse.org/Portal:KIWI</a></span></dt><dd><p>KIWI wiki</p></dd><dt><span class="term"><code class="filename">config.xml</code></span></dt><dd><p>The configuration XML file that contains every
+      Specifies a custom mbrid. The number value is treated as
+      decimal number which is internally translated into a 4byte
+      hex value. The allowed range therefore is from 0x0 to
+      max 0xffffffff. By default kiwi creates a random value
+    </p></dd><dt><span class="term">[<span class="optional"><code class="option">--edit-bootconfig <em class="replaceable"><code>script</code></em></code></span>]</span></dt><dd><p>
+      Specifies the location of a custom script which is called
+      right before the bootloader is installed. This allows to modify
+      the bootloader configuration file written by kiwi. The scripts
+      working directory is the one which represents the image
+      structure including the bootloader configuration files. Please
+      have in mind that according to the image type, architecture
+      and bootloader type the files/directory structure and also
+      the name of the bootloader configuration files might be
+      different.
+    </p></dd></dl></div></div><div class="refsect1"><a name="kiwi.moreinfo"></a><h2>For More Information</h2><p>More information about KIWI, its files can be found at:</p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><a class="ulink" href="http://en.opensuse.org/Portal:KIWI" target="_top">http://en.opensuse.org/Portal:KIWI</a></span></dt><dd><p>KIWI wiki</p></dd><dt><span class="term"><code class="filename">config.xml</code></span></dt><dd><p>The configuration XML file that contains every
             aspect for the image creation.</p></dd><dt><span class="term"><a class="ulink" href="file:///usr/share/doc/packages/kiwi/kiwi.pdf" target="_top">file:///usr/share/doc/packages/kiwi/kiwi.pdf</a></span></dt><dd><p>The system documentation which describes the supported image
             types in detail.</p></dd><dt><span class="term"><a class="ulink" href="file:///usr/share/doc/packages/kiwi/schema/kiwi.xsd.html" target="_top">file:///usr/share/doc/packages/kiwi/schema/kiwi.xsd.html</a></span></dt><dd><p>The KIWI RELAX NG XML Schema documentation.
           </p></dd></dl></div></div></div><div class="refentry"><div class="refentry.separator"><hr></div><a name="ref.kiwi.config.sh"></a><div class="titlepage"></div><div class="refnamediv"><h2><span class="refentrytitle">kiwi::config.sh</span></h2><p>KIWI::config.sh — Configuration File for KIWI image description</p></div><div class="refsect1"><a name="kiwi.config.description"></a><h2>Description</h2><p>
@@ -3863,9 +3863,9 @@ exit 0</pre></div></div><br class="example-break"></div><div class="refsect1"><a
           </p></dd></dl></div></div><div class="refsect1"><a name="kiwi.config.environment"></a><h2>Profile environment variables</h2><p>
       The .profile environment file contains a specific set of variables which
       are listed below. Some of the functions above makes use of the variables.
-	</p><div class="variablelist"><dl class="variablelist"><dt><span class="term">[<span class="optional">$kiwi_compressed</span>]</span></dt><dd><p>
-			The value of the compressed attribute set in the type element
-			in <code class="filename">config.xml</code>
+  </p><div class="variablelist"><dl class="variablelist"><dt><span class="term">[<span class="optional">$kiwi_compressed</span>]</span></dt><dd><p>
+      The value of the compressed attribute set in the type element
+      in <code class="filename">config.xml</code>
           </p></dd><dt><span class="term">[<span class="optional">$kiwi_delete</span>]</span></dt><dd><p>
             A list of all packages which are part of the packages section
             with <code class="sgmltag-attribute">type</code><a class="indexterm" name="idm139812152560256"></a>="<code class="sgmltag-attvalue">delete</code>" in <code class="filename">config.xml</code>
@@ -3942,9 +3942,9 @@ exit</pre></div></div><br class="example-break"></div><div class="refsect1"><a n
           </p></dd><dt><span class="term">[<span class="optional">baseSetupOEMPartition</span>]</span></dt><dd><p>
              Writes the file <code class="filename">/config.oempartition</code> depending on the following
              <code class="filename">config.xml</code> parameters: oem-reboot, oem-swapsize, oem-systemsize,
-			 oem-swap,oem-boot-title,oem-recovery, oem-kiwi-initrd.
-			 kiwi takes the information from <code class="filename">config.xml</code> and creates the
-			 config.oempartition file as part of the automatically created
+       oem-swap,oem-boot-title,oem-recovery, oem-kiwi-initrd.
+       kiwi takes the information from <code class="filename">config.xml</code> and creates the
+       config.oempartition file as part of the automatically created
              boot image (initrd). The information must be available as part
              of the boot image because it controls the OEM repartition
              workflow on first boot of an OEM image. Detailed information
@@ -3976,7 +3976,7 @@ exit</pre></div></div><br class="example-break"></div><div class="refsect1"><a n
           </p></dd></dl></div></div><div class="refsect1"><a name="kiwi.images.environment"></a><h2>Profile environment variables</h2><p>
       The .profile environment file contains a specific set of variables which
       are listed below. Some of the functions above makes use of the variables.
-	</p><div class="variablelist"><dl class="variablelist"><dt><span class="term">[<span class="optional">$kiwi_iname</span>]</span></dt><dd><p>
+  </p><div class="variablelist"><dl class="variablelist"><dt><span class="term">[<span class="optional">$kiwi_iname</span>]</span></dt><dd><p>
             The name of the image as listed in config.xml
           </p></dd><dt><span class="term">[<span class="optional">$kiwi_iversion</span>]</span></dt><dd><p>
             The image version string major.minor.release
@@ -3999,8 +3999,8 @@ exit</pre></div></div><br class="example-break"></div><div class="refsect1"><a n
             size but only the optional size value of the preferences section
             in <code class="filename">config.xml</code>
           </p></dd><dt><span class="term">[<span class="optional">$kiwi_compressed</span>]</span></dt><dd><p>
-			The value of the compressed attribute set in the type element 
-			in config.xml
+      The value of the compressed attribute set in the type element 
+      in config.xml
           </p></dd><dt><span class="term">[<span class="optional">$kiwi_type</span>]</span></dt><dd><p>
             The basic image type. Can be a simply filesystem image type of
             ext2, ext3, reiserfs, squashfs, and cpio or one of the following complex

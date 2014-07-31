@@ -28,8 +28,8 @@
     <title>Building the suse-live-iso Example</title>
 
     <para>
-		This example is based on openSUSE and includes the KDE desktop.
-	</para>
+    This example is based on openSUSE and includes the KDE desktop.
+  </para>
 
 <screen><command>cd</command> /usr/share/doc/packages/kiwi/examples
 ==> select the example directory for the desired distribution change into it
@@ -65,16 +65,16 @@
   <sect1 id="sec.iso.flavours">
     <title>Flavours</title>
     <para>
-		KIWI supports different filesystems and boot methods along
-		with the ISO image type. The provided example by default uses a
-		<systemitem class="filesystem">clicfs</systemitem> compressed
-		root filesystem. clicfs is a fuse user space filesystem which
-		reads in data from a compressed image and writes data into a
-		cow file which can exist in RAM or in persistent area on a disk.
-		The result is a full writable live-system. The flags attribute
-		in <filename>config.xml</filename> exists to be able to have the
-		following alternative solutions:
-	</para>
+    KIWI supports different filesystems and boot methods along
+    with the ISO image type. The provided example by default uses a
+    <systemitem class="filesystem">clicfs</systemitem> compressed
+    root filesystem. clicfs is a fuse user space filesystem which
+    reads in data from a compressed image and writes data into a
+    cow file which can exist in RAM or in persistent area on a disk.
+    The result is a full writable live-system. The flags attribute
+    in <filename>config.xml</filename> exists to be able to have the
+    following alternative solutions:
+  </para>
     <variablelist>
       <varlistentry>
         <term><sgmltag class="attribute">flags</sgmltag>="<sgmltag
@@ -95,8 +95,8 @@
               >clicfs</systemitem> image and allows write operations
             into a cow file. In case of an ISO the write happens into a
             ramdisk. If clic_udf is specified the the iso is created
-			with an udf filesystem and thus this allows to create
-			live systems bigger than 4G</para>
+      with an udf filesystem and thus this allows to create
+      live systems bigger than 4G</para>
         </listitem>
       </varlistentry>
       <varlistentry>
@@ -152,68 +152,68 @@
 
     </sect2>
 
-	<sect2 id="sec.iso.hybrid-mode">
-		<title>Hybrid mode</title>
-		<indexterm>
-			<primary>KIWI</primary>
-			<secondary>hybrid mode</secondary>
-		</indexterm>
-		<indexterm>
-			<primary>KIWI</primary>
-			<secondary>USB sticks</secondary>
-		</indexterm>
-		<para>
-			A hybrid image is a iso image including a partition table and can
-			therefore be attached as a CD/DVD <emphasis>and</emphasis> as a
-			normal disk to the system. This has the advantage that a hybrid
-			iso live system can be burned to a CD/DVD as well as uploaded to
-			a USB stick. In order to activate the hybrid feature the hybrid
-			flag must be set to true as indicated below. 
-		</para>
+  <sect2 id="sec.iso.hybrid-mode">
+    <title>Hybrid mode</title>
+    <indexterm>
+      <primary>KIWI</primary>
+      <secondary>hybrid mode</secondary>
+    </indexterm>
+    <indexterm>
+      <primary>KIWI</primary>
+      <secondary>USB sticks</secondary>
+    </indexterm>
+    <para>
+      A hybrid image is a iso image including a partition table and can
+      therefore be attached as a CD/DVD <emphasis>and</emphasis> as a
+      normal disk to the system. This has the advantage that a hybrid
+      iso live system can be burned to a CD/DVD as well as uploaded to
+      a USB stick. In order to activate the hybrid feature the hybrid
+      flag must be set to true as indicated below. 
+    </para>
 
-<screen>&lt;type image="iso" ... hybrid="true"/&gt;</screen>		
-	</sect2>
+<screen>&lt;type image="iso" ... hybrid="true"/&gt;</screen>    
+  </sect2>
   </sect1>
 
   <sect1>
-	<title>USB stick images</title>
-	<indexterm>
-		<primary>KIWI</primary>
-		<secondary>USB</secondary>
-	</indexterm>
-	<para>
-		kiwi supports two types of USB stick images. The first type which
-		are the hybrid ISO images and basically the same as the live ISO images
-		and the second type which are the OEM virtual disk images.
-		The deployment of both types can be performed from any OS including
-		Windows as long as a tool to dump data onto a disk device exists
-		and is used.
-	</para>
+  <title>USB stick images</title>
+  <indexterm>
+    <primary>KIWI</primary>
+    <secondary>USB</secondary>
+  </indexterm>
+  <para>
+    kiwi supports two types of USB stick images. The first type which
+    are the hybrid ISO images and basically the same as the live ISO images
+    and the second type which are the OEM virtual disk images.
+    The deployment of both types can be performed from any OS including
+    Windows as long as a tool to dump data onto a disk device exists
+    and is used.
+  </para>
 
-	<sect2>
-		<title>ISO Hybrid stick</title>
-		<indexterm>
-			<primary>KIWI</primary>
-			<secondary>Hybrid stick</secondary>
-		</indexterm>
-		<para>
-			As indicated above a hybrid iso image also works as USB stick image.
-			If a hybrid iso is used like a disk image on a writable medium
-			like a USB stick it's possible to write into a persistent area on
-			the stick instead of the RAM. kiwi will create an additional ext2
-			partition to store that information on the disk if the attribute
-			hybridpersistent is set to true.
-		</para>
+  <sect2>
+    <title>ISO Hybrid stick</title>
+    <indexterm>
+      <primary>KIWI</primary>
+      <secondary>Hybrid stick</secondary>
+    </indexterm>
+    <para>
+      As indicated above a hybrid iso image also works as USB stick image.
+      If a hybrid iso is used like a disk image on a writable medium
+      like a USB stick it's possible to write into a persistent area on
+      the stick instead of the RAM. kiwi will create an additional ext2
+      partition to store that information on the disk if the attribute
+      hybridpersistent is set to true.
+    </para>
 
 <screen>&lt;type image="iso" ... hybridpersistent="true"/&gt;</screen>
-	</sect2>
-	<sect2>
-		<title>OEM USB stick</title>
-		<indexterm>
-			<primary>KIWI</primary>
-			<secondary>OEM stick</secondary>
-		</indexterm>
-		<para> In contrast to the hybrid iso image it's also possible to
+  </sect2>
+  <sect2>
+    <title>OEM USB stick</title>
+    <indexterm>
+      <primary>KIWI</primary>
+      <secondary>OEM stick</secondary>
+    </indexterm>
+    <para> In contrast to the hybrid iso image it's also possible to
         create a oem virtual disk image which is dumped on the stick.
         The big advantage with this approach is, that it's possible to
         create a stick which contains a live OS but also a data
@@ -229,13 +229,13 @@
         information about the OEM image type please refer to the OEM
         chapter <xref linkend="chap.oem"/>
       </para>
-		<sect3>
-			<title>OEM compressed / readonly USB stick</title>
-			<indexterm>
-				<primary>KIWI</primary>
-				<secondary>compressed root</secondary>
-			</indexterm>
-		<para> If a compressed filesystem type like clicfs is used for the
+    <sect3>
+      <title>OEM compressed / readonly USB stick</title>
+      <indexterm>
+        <primary>KIWI</primary>
+        <secondary>compressed root</secondary>
+      </indexterm>
+    <para> If a compressed filesystem type like clicfs is used for the
           image root directory it's also possible to allow persistent
           writing on the USB stick or alternatively disallow that and
           let all write actions perfom in RAM only. kiwi provides the
@@ -244,8 +244,8 @@
           following type section is required:
           <screen>&lt;type image="oem" filesystem="clicfs" ramonly="true" .../&gt;</screen>
         </para>
-		</sect3>
-	</sect2>
+    </sect3>
+  </sect2>
   </sect1>
 
 </chapter>

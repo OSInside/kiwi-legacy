@@ -17,7 +17,7 @@
 
 # If using normal root, avoid changing anything.
 if [ -z "$RPM_BUILD_ROOT" ]; then
-	exit 0
+  exit 0
 fi
 
 LC_ALL=
@@ -42,18 +42,18 @@ do
     link_dir=`$DIRNAME $link`
 
     case $link_dest in
-	.|..|../..) # link to current dir
-	  continue ;;
-	.*) # relative links up
-	  link_dest="$link_dir/$link_dest"
-	  ;;
+  .|..|../..) # link to current dir
+    continue ;;
+  .*) # relative links up
+    link_dest="$link_dir/$link_dest"
+    ;;
         /*) # absolute links
-	  ;;
+    ;;
         */*) # relative links down
-	  link_dest="$link_dir/$link_dest"
-	  ;;
-	*) # the rest
-	  continue
+    link_dest="$link_dir/$link_dest"
+    ;;
+  *) # the rest
+    continue
     esac
 
     # cleaning out double slash
@@ -67,54 +67,54 @@ do
     while echo $link_dest | egrep -q '/\.\.'; do
        link_dest=`echo $link_dest | sed -e "s,/[^/]*/\.\.,,"`;
        case $link_dest in
-	/..*) # this is very mean
-	    echo "ERROR: $link points to illegal $link_dest"
-	    exit 1
-	    ;;
-	esac
-	counter=$((counter + 1))
-	if test $counter -gt 10; then
-	    echo "ERROR: more than 10 back references in $link?"
-	    exit 1
-	fi
+  /..*) # this is very mean
+      echo "ERROR: $link points to illegal $link_dest"
+      exit 1
+      ;;
+  esac
+  counter=$((counter + 1))
+  if test $counter -gt 10; then
+      echo "ERROR: more than 10 back references in $link?"
+      exit 1
+  fi
     done
 
     # black list
     case "$link,$link_dest" in
-	*,/var/lib/named*)
-	    continue;;
-	/usr/etc,*|/usr/tmp,*)
-	    continue;;
-	*/share/texmf/*|/usr/share/terminfo/*)
-	     continue;;
-	*share/automake-*)
-	     echo "ERROR: link target $link points into automake directory"
-	     echo " You might want to add a -c to the automake call (or just"
-	     echo " skip the files from packaging)"
-	     exit 1
-	     ;;
-	*,/opt/kde3/share/doc/HTML/*/common) # white listed for not existant
-	     ;;
-	*,/proc/*) # links pointing into /proc file system
-	     ;;
-	*)
-	  if test ! -L ./$link_dest && test ! -e $link_dest && test ! -e ./$link_dest; then
-	    echo "ERROR: link target doesn't exist (neither in build root nor in installed system):"
-	    echo "  $link -> $link_dest"
-	    echo "Add the package providing the target to neededforbuild and Requires"
-	    test "$NO_BRP_STALE_LINK_ERROR" != "yes" && had_errors=1
-	  fi
-	  ;;
+  *,/var/lib/named*)
+      continue;;
+  /usr/etc,*|/usr/tmp,*)
+      continue;;
+  */share/texmf/*|/usr/share/terminfo/*)
+       continue;;
+  *share/automake-*)
+       echo "ERROR: link target $link points into automake directory"
+       echo " You might want to add a -c to the automake call (or just"
+       echo " skip the files from packaging)"
+       exit 1
+       ;;
+  *,/opt/kde3/share/doc/HTML/*/common) # white listed for not existant
+       ;;
+  *,/proc/*) # links pointing into /proc file system
+       ;;
+  *)
+    if test ! -L ./$link_dest && test ! -e $link_dest && test ! -e ./$link_dest; then
+      echo "ERROR: link target doesn't exist (neither in build root nor in installed system):"
+      echo "  $link -> $link_dest"
+      echo "Add the package providing the target to neededforbuild and Requires"
+      test "$NO_BRP_STALE_LINK_ERROR" != "yes" && had_errors=1
+    fi
+    ;;
     esac
 
     forced_absolute=0
     for prefix in /usr/X11R6/lib/X11 /usr/X11R6/include/X11 /usr/X11R6/lib/X11/app-defaults ; do
       if echo $link | grep -q "^$prefix/"; then
-	 if echo $link_dest | grep -q "^$prefix/"; then
-	    # if it's below it, it's fine
-	    :
+   if echo $link_dest | grep -q "^$prefix/"; then
+      # if it's below it, it's fine
+      :
          else
-	    forced_absolute=1
+      forced_absolute=1
          fi
       fi
     done
@@ -123,57 +123,57 @@ do
 
     # figuring out (currently) correct destination
     if test "$link_dir" = "$dest_dir" || test "$dest_dir" = "."; then
-	new_link_dest=`$BASENAME $link_dest`
+  new_link_dest=`$BASENAME $link_dest`
     else
-	# figuring out top level directory
-	top_link=`echo $link | sed -e 's,^\(/[^/]*\)/.*,\1,'`
+  # figuring out top level directory
+  top_link=`echo $link | sed -e 's,^\(/[^/]*\)/.*,\1,'`
         top_dest=`echo $link_dest | sed -e 's,^\(/[^/]*\)/.*,\1,'`
-	if test "$forced_absolute" = 0 && test "$top_link" = "$top_dest"; then # supposed to be relative
+  if test "$forced_absolute" = 0 && test "$top_link" = "$top_dest"; then # supposed to be relative
 
-	    # first we need to cut out the common prefix
-	    link_tmp=$link
-	    while test "$top_link" = "$top_dest"; do
-		link_orig=$link_tmp
-		dest_orig=$link_dest
-		link_tmp=`echo $link_tmp | sed -e 's,^\(/[^/]*\)/,/,'`
-		link_dest=`echo $link_dest | sed -e 's,^\(/[^/]*\)/,/,'`
-		top_link=`echo $link_tmp | sed -e 's,^\(/[^/]*\)/.*,\1,'`
-		top_dest=`echo $link_dest | sed -e 's,^\(/[^/]*\)/.*,\1,'`
+      # first we need to cut out the common prefix
+      link_tmp=$link
+      while test "$top_link" = "$top_dest"; do
+    link_orig=$link_tmp
+    dest_orig=$link_dest
+    link_tmp=`echo $link_tmp | sed -e 's,^\(/[^/]*\)/,/,'`
+    link_dest=`echo $link_dest | sed -e 's,^\(/[^/]*\)/,/,'`
+    top_link=`echo $link_tmp | sed -e 's,^\(/[^/]*\)/.*,\1,'`
+    top_dest=`echo $link_dest | sed -e 's,^\(/[^/]*\)/.*,\1,'`
 
-		if test "$top_dest" = "$dest_orig" || test "$top_link" = "$link_orig"; then
-		    link_tmp=$link_orig
-		    link_dest=$dest_orig
-		    break
-		fi
-	    done
+    if test "$top_dest" = "$dest_orig" || test "$top_link" = "$link_orig"; then
+        link_tmp=$link_orig
+        link_dest=$dest_orig
+        break
+    fi
+      done
 
-	    # now we add a .. for every directory component
-	    link_tmp=`$DIRNAME $link_tmp`
+      # now we add a .. for every directory component
+      link_tmp=`$DIRNAME $link_tmp`
 
-	    if test "$link_tmp" = "$link_dest"; then
-		new_link_dest=.
-	    elif test "$link_tmp" != "/"; then # we have a directory component
-		link_rel=
+      if test "$link_tmp" = "$link_dest"; then
+    new_link_dest=.
+      elif test "$link_tmp" != "/"; then # we have a directory component
+    link_rel=
 
-		while test -n "$link_tmp"; do
-		    link_tmp=`echo $link_tmp | sed -e 's,^\(/[^/]*\),,'`
-		    link_rel="../$link_rel"
-		done
+    while test -n "$link_tmp"; do
+        link_tmp=`echo $link_tmp | sed -e 's,^\(/[^/]*\),,'`
+        link_rel="../$link_rel"
+    done
 
-		new_link_dest=`echo $link_rel/$link_dest | sed -e "s,//*,/,g"`
-	    else
-		# get rid of the slash
-		link_dest=`echo $link_dest | sed -e 's,^/,,'`
-		new_link_dest=$link_dest
-	    fi
-	else
-	    new_link_dest=$link_dest
-	fi
+    new_link_dest=`echo $link_rel/$link_dest | sed -e "s,//*,/,g"`
+      else
+    # get rid of the slash
+    link_dest=`echo $link_dest | sed -e 's,^/,,'`
+    new_link_dest=$link_dest
+      fi
+  else
+      new_link_dest=$link_dest
+  fi
     fi
 
     if test "$new_link_dest" != NONE && test "$new_link_dest" != "$orig_link_dest"; then
-	#echo "INFO: relinking $link -> $new_link_dest (was $orig_link_dest)"
-	rm ./$link && ln -s $new_link_dest ./$link
+  #echo "INFO: relinking $link -> $new_link_dest (was $orig_link_dest)"
+  rm ./$link && ln -s $new_link_dest ./$link
     fi
 done
 

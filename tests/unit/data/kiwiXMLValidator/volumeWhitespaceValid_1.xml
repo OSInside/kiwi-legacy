@@ -1,43 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <image schemaversion="5.7" name="suse-12.1-test-image">
-	<description type="system">
-		<author>Robert Schweikert</author>
-		<contact>rjschwei@suse.com</contact>
-		<specification>test whitespace in volume name attribute value</specification>
-	</description>
-	<preferences>
-		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-12.1">
-			<machine memory="512">
-				<vmdisk controller="scsi" id="0"/>
-			</machine>
-			<systemdisk name="myLVMname">
-				<volume name="tmp"/>
-			</systemdisk>
-		</type>
-		<version>0.0.1</version>
-		<packagemanager>zypper</packagemanager>
-		<rpm-check-signatures>false</rpm-check-signatures>
-		<rpm-force>true</rpm-force>
-		<locale>en_US</locale>
-		<keytable>us.map.gz</keytable>
-	</preferences>
-	<users group="root">
-		<user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
-	</users>
-	<repository type="yast2">
-		<source path="/tmp"/>
-	</repository>
-	<packages type="image">
-		<package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>
-		<package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
-		<package name="ifplugd"/>
-		<package name="kernel-default"/>
-		<package name="vim"/>
-		<namedCollection name="base"/>
-	</packages>
-	<packages type="bootstrap">
-		<package name="filesystem"/>
-		<package name="glibc-locale"/>
-	</packages>
+  <description type="system">
+    <author>Robert Schweikert</author>
+    <contact>rjschwei@suse.com</contact>
+    <specification>test whitespace in volume name attribute value</specification>
+  </description>
+  <preferences>
+    <type image="vmx" filesystem="ext3" boot="vmxboot/suse-12.1">
+      <machine memory="512">
+        <vmdisk controller="scsi" id="0"/>
+      </machine>
+      <systemdisk name="myLVMname">
+        <volume name="tmp"/>
+      </systemdisk>
+    </type>
+    <version>0.0.1</version>
+    <packagemanager>zypper</packagemanager>
+    <rpm-check-signatures>false</rpm-check-signatures>
+    <rpm-force>true</rpm-force>
+    <locale>en_US</locale>
+    <keytable>us.map.gz</keytable>
+  </preferences>
+  <users group="root">
+    <user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
+  </users>
+  <repository type="yast2">
+    <source path="/tmp"/>
+  </repository>
+  <packages type="image">
+    <package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>
+    <package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
+    <package name="ifplugd"/>
+    <package name="kernel-default"/>
+    <package name="vim"/>
+    <namedCollection name="base"/>
+  </packages>
+  <packages type="bootstrap">
+    <package name="filesystem"/>
+    <package name="glibc-locale"/>
+  </packages>
 </image>

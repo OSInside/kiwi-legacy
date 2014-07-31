@@ -16,11 +16,11 @@ echo 'printenv kerneladdr || setenv kerneladdr ${kernel_addr_r}'   >> $boot_scr
 echo 'printenv ramdiskaddr|| setenv ramdiskaddr ${ramdisk_addr_r}' >> $boot_scr
 echo -n 'setenv bootcmd "'                                         >> $boot_scr
 if [[ $bootfs =~ fat ]];then
-	echo -n 'fatload mmc 0:1 ${kerneladdr} boot/linux.vmx; '      >> $boot_scr
-	echo -n 'fatload mmc 0:1 ${ramdiskaddr} boot/initrd.uboot; '  >> $boot_scr
+  echo -n 'fatload mmc 0:1 ${kerneladdr} boot/linux.vmx; '      >> $boot_scr
+  echo -n 'fatload mmc 0:1 ${ramdiskaddr} boot/initrd.uboot; '  >> $boot_scr
 else
-	echo -n 'ext2load mmc 0:1 ${kerneladdr} boot/linux.vmx; '      >> $boot_scr
-	echo -n 'ext2load mmc 0:1 ${ramdiskaddr} boot/initrd.uboot; '  >> $boot_scr
+  echo -n 'ext2load mmc 0:1 ${kerneladdr} boot/linux.vmx; '      >> $boot_scr
+  echo -n 'ext2load mmc 0:1 ${ramdiskaddr} boot/initrd.uboot; '  >> $boot_scr
 fi
 echo 'bootm ${kerneladdr} ${ramdiskaddr}";'                        >> $boot_scr
 echo 'boot' >> $boot_scr
@@ -30,6 +30,6 @@ echo 'boot' >> $boot_scr
 #------------------------------------------
 mkopts="-A arm -O linux -a 0 -e 0 -T script -C none";
 if ! mkimage $mkopts -n 'Boot-Script' -d $boot_scr $boot_bin;then
-	echo "Failed to create uboot script image"
-	exit 1
+  echo "Failed to create uboot script image"
+  exit 1
 fi

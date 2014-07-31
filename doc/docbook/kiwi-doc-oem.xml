@@ -141,7 +141,7 @@
               This script is executed prior to the hardware scan on the
                   target machine.</para>
             </listitem>
-			<listitem>
+      <listitem>
               <para><filename>postHWdetect.sh</filename>
               This script is executed after the hardware scan on the
                   target machine.</para>
@@ -252,10 +252,10 @@
       </itemizedlist>
 
     </sect2>
-	
-	<sect2 id="sec.oem.pxe-based-installation">
-		<title>Network Based Installation</title>
-		<para> Instead of manually dumping the OEM image on the target device
+  
+  <sect2 id="sec.oem.pxe-based-installation">
+    <title>Network Based Installation</title>
+    <para> Instead of manually dumping the OEM image on the target device
         or creating a KIWI install CD, USB stick, there is a third
         method of deploying the OEM image on the target device. It's
         possible to let the image be downloaded from a PXE boot server
@@ -264,36 +264,36 @@
         refer to the chapter: <xref linkend="chap.pxe"/>. If your pxe
         server is running the following steps are required to setup the
         install process over the network </para>
-		<itemizedlist>
-			<listitem>
-				<para> Make sure you have created an install PXE tarball along with
+    <itemizedlist>
+      <listitem>
+        <para> Make sure you have created an install PXE tarball along with
             your oem image:
             <screen>&lt;type image="oem" ... installpxe="true"/&gt;</screen>
           </para>
-			</listitem>
-			<listitem>
-				<para> unpack the created &lt;image-name&gt;.tgz file and copy the
+      </listitem>
+      <listitem>
+        <para> unpack the created &lt;image-name&gt;.tgz file and copy the
             initrd and kernel images over to your PXE server
             <screen><command>tar</command> -xf &lt;image-name&gt;.tgz
 <command>scp</command> initrd-oemboot-*.install.* pxe.server.ip:/srv/tftpboot/boot/initrd
 <command>scp</command> initrd-oemboot-*.kernel.*  pxe.server.ip:/srv/tftpboot/boot/linux</screen>
           </para>
             </listitem>
-			<listitem>
-				<para> Next copy the system image and md5 sum over to to the PXE
+      <listitem>
+        <para> Next copy the system image and md5 sum over to to the PXE
             boot server
             <screen><command>scp</command> &lt;image-file&gt;.xz  pxe.server.ip:/srv/tftpboot/image/
 <command>scp</command> &lt;image-file&gt;.md5 pxe.server.ip:/srv/tftpboot/image/</screen>
           </para>
-			</listitem>
-			<listitem>
-				<para> At last set the kernel commandline parameters to the append
+      </listitem>
+      <listitem>
+        <para> At last set the kernel commandline parameters to the append
             line in your PXE configuration (for example:
               <filename>pxelinux.cfg/default</filename>). The required
             parameters are stored in the file
               <filename>&lt;image-file&gt;.append</filename> from the
             KIWI generated install tarball </para>
-				<para> Optionally the image can be stored on a FTP,HTTP server
+        <para> Optionally the image can be stored on a FTP,HTTP server
             specified via the <command>kiwiserver</command> and
               <command>kiwiservertype</command> append information. In
             this case make sure you copied the system image and md5 file
@@ -303,7 +303,7 @@
             the specified server. initrd and linux kernel are loaded by
             PXE thus they require a tftp server to be present. </para>
             </listitem>
-		</itemizedlist>
-	</sect2>
+    </itemizedlist>
+  </sect2>
   </sect1>
 </chapter>

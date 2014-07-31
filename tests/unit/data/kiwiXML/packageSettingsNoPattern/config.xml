@@ -1,34 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <image schemaversion="5.4" name="testCase-package-settings">
-	<description type="system">
-		<author>Robert Schweikert</author>
-		<contact>rjschwei@suse.com</contact>
-		<specification>Test configuration to verify package settingsare stored and returned properly in the XML object</specification>
-	</description>
-	<preferences>
-		<type image="oem" filesystem="ext4" boot="oemboot/suse-12.1" installiso="true"/>
-		<version>0.0.1</version>
-		<rpm-check-signatures>false</rpm-check-signatures>
-		<rpm-force>false</rpm-force>
-		<locale>en_US</locale>
-		<keytable>us.map.gz</keytable>
-	</preferences>
-	<users group="root">
-	<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
-	</users>
-	<repository type="yast2">
-		<source path="/tmp"/>
-	</repository>
-	<packages type="image">
-		<archive name="myInitStuff.tar" bootinclude="true"/>
-		<archive name="myImageStuff.tgz"/>
-		<package name="ed"/>
-		<package name="kernel-default"/>
-		<package name="python" bootinclude="true"/>
-		<package name="vim" bootinclude="true"/>
-	</packages>
-	<packages type="bootstrap">
-		<package name="filesystem"/>
-		<package name="glibc-locale"/>
-	</packages>
+  <description type="system">
+    <author>Robert Schweikert</author>
+    <contact>rjschwei@suse.com</contact>
+    <specification>Test configuration to verify package settingsare stored and returned properly in the XML object</specification>
+  </description>
+  <preferences>
+    <type image="oem" filesystem="ext4" boot="oemboot/suse-12.1" installiso="true"/>
+    <version>0.0.1</version>
+    <rpm-check-signatures>false</rpm-check-signatures>
+    <rpm-force>false</rpm-force>
+    <locale>en_US</locale>
+    <keytable>us.map.gz</keytable>
+  </preferences>
+  <users group="root">
+  <user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
+  </users>
+  <repository type="yast2">
+    <source path="/tmp"/>
+  </repository>
+  <packages type="image">
+    <archive name="myInitStuff.tar" bootinclude="true"/>
+    <archive name="myImageStuff.tgz"/>
+    <package name="ed"/>
+    <package name="kernel-default"/>
+    <package name="python" bootinclude="true"/>
+    <package name="vim" bootinclude="true"/>
+  </packages>
+  <packages type="bootstrap">
+    <package name="filesystem"/>
+    <package name="glibc-locale"/>
+  </packages>
 </image>

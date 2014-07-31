@@ -1,93 +1,93 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <image schemaversion="5.7" name="testCase-strip-settings">
-	<description type="system">
-		<author>Robert Schweikert</author>
-		<contact>rjschwei@suse.com</contact>
-		<specification>Test configuration to verify handling of strip in the XML object</specification>
-	</description>
-	<profiles>
-		<profile description="Test prof A" import="false" name="profA"/>
-		<profile description="Test prof B" name="profB"/>
-		<profile description="Test prof C" name="profC"/>
-	</profiles>
-	<preferences>
-		<type image="vmx" filesystem="ext4" boot="vmxboot/suse-12.1" format="vmdk">
-			<machine memory="1024" ncpus="2">
-				<vmdisk device="/dev/sda" disktype="scsi"/>
-				<vmnic interface="eth0"/>
-			</machine>
-		</type>
-		<version>0.0.1</version>
-		<rpm-check-signatures>false</rpm-check-signatures>
-		<rpm-force>false</rpm-force>
-		<locale>en_US</locale>
-		<keytable>us.map.gz</keytable>
-	</preferences>
-	<users group="root">
-		<user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
-	</users>
-	<repository type="yast2">
-		<source path="/tmp"/>
-	</repository>
-	<strip type="delete">
-		<file name="/usr/bin/zoo"/>
-		<file name="/lib/lsb/init-functions"/>
-		<file name="/usr/lib/libogg.so.0"/>
-	</strip>
-	<strip type="libs">
-		<file name="libxml2.so"/>
-		<file name="libcrack.so"/>
-	</strip>
-	<strip type="tools">
-		<file name="megacli"/>
-		<file name="ping"/>
-	</strip>
-	<strip type="delete" profiles="profA">
-		<file name="/usr/lib/trashapplet"/>
-		<file name="/usr/lib/sushi-start" arch="ppc64"/>
-		<file name="/usr/lib/null_applet" arch="s390"/>
-	</strip>
-	<strip type="libs" profiles="profA">
-		<file name="libjson.so"/>
-		<file name="libldap-2.4.so" arch="ppc64"/>
-		<file name="virt-manager-launch" arch="s390"/>
-	</strip>
-	<strip type="tools" profiles="profA">
-		<file name="cp"/>
-		<file name="traceroute" arch="ppc64"/>
-		<file name="wireshark" arch="s390"/>
-	</strip>
-	<strip type="delete" profiles="profB,profC">
-		<file name="/etc/polkit-default-privs.local"/>
-		<file name="/etc/wgetrc" arch="ia64"/>
-		<file name="/etc/vimrc" arch="s390"/>
-	</strip>
-	<strip type="libs" profiles="profB,profC">
-		<file name="libz.so"/>
-		<file name="libzypp.so" arch="ia64"/>
-		<file name="libyui.so" arch="s390"/>
-	</strip>
-	<strip type="tools" profiles="profB,profC">
-		<file name="zgrep"/>
-		<file name="zdiff" arch="ia64"/>
-		<file name="yacc" arch="s390"/>
-	</strip>
-	<strip type="delete" profiles="profC">
-		<file name="/usr/bin/yuv4mpeg"/>
-	</strip>
-	<strip type="libs" profiles="profC">
-		<file name="virtodbcu.so"/>
-	</strip>
-	<strip type="tools" profiles="profC">
-		<file name="xhost"/>
-	</strip>
-	<packages type="image">
-		<package name="kernel-default"/>
-		<namedCollection name="base"/>
-	</packages>
-	<packages type="bootstrap">
-		<package name="filesystem"/>
-		<package name="glibc-locale"/>
-	</packages>
+  <description type="system">
+    <author>Robert Schweikert</author>
+    <contact>rjschwei@suse.com</contact>
+    <specification>Test configuration to verify handling of strip in the XML object</specification>
+  </description>
+  <profiles>
+    <profile description="Test prof A" import="false" name="profA"/>
+    <profile description="Test prof B" name="profB"/>
+    <profile description="Test prof C" name="profC"/>
+  </profiles>
+  <preferences>
+    <type image="vmx" filesystem="ext4" boot="vmxboot/suse-12.1" format="vmdk">
+      <machine memory="1024" ncpus="2">
+        <vmdisk device="/dev/sda" disktype="scsi"/>
+        <vmnic interface="eth0"/>
+      </machine>
+    </type>
+    <version>0.0.1</version>
+    <rpm-check-signatures>false</rpm-check-signatures>
+    <rpm-force>false</rpm-force>
+    <locale>en_US</locale>
+    <keytable>us.map.gz</keytable>
+  </preferences>
+  <users group="root">
+    <user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
+  </users>
+  <repository type="yast2">
+    <source path="/tmp"/>
+  </repository>
+  <strip type="delete">
+    <file name="/usr/bin/zoo"/>
+    <file name="/lib/lsb/init-functions"/>
+    <file name="/usr/lib/libogg.so.0"/>
+  </strip>
+  <strip type="libs">
+    <file name="libxml2.so"/>
+    <file name="libcrack.so"/>
+  </strip>
+  <strip type="tools">
+    <file name="megacli"/>
+    <file name="ping"/>
+  </strip>
+  <strip type="delete" profiles="profA">
+    <file name="/usr/lib/trashapplet"/>
+    <file name="/usr/lib/sushi-start" arch="ppc64"/>
+    <file name="/usr/lib/null_applet" arch="s390"/>
+  </strip>
+  <strip type="libs" profiles="profA">
+    <file name="libjson.so"/>
+    <file name="libldap-2.4.so" arch="ppc64"/>
+    <file name="virt-manager-launch" arch="s390"/>
+  </strip>
+  <strip type="tools" profiles="profA">
+    <file name="cp"/>
+    <file name="traceroute" arch="ppc64"/>
+    <file name="wireshark" arch="s390"/>
+  </strip>
+  <strip type="delete" profiles="profB,profC">
+    <file name="/etc/polkit-default-privs.local"/>
+    <file name="/etc/wgetrc" arch="ia64"/>
+    <file name="/etc/vimrc" arch="s390"/>
+  </strip>
+  <strip type="libs" profiles="profB,profC">
+    <file name="libz.so"/>
+    <file name="libzypp.so" arch="ia64"/>
+    <file name="libyui.so" arch="s390"/>
+  </strip>
+  <strip type="tools" profiles="profB,profC">
+    <file name="zgrep"/>
+    <file name="zdiff" arch="ia64"/>
+    <file name="yacc" arch="s390"/>
+  </strip>
+  <strip type="delete" profiles="profC">
+    <file name="/usr/bin/yuv4mpeg"/>
+  </strip>
+  <strip type="libs" profiles="profC">
+    <file name="virtodbcu.so"/>
+  </strip>
+  <strip type="tools" profiles="profC">
+    <file name="xhost"/>
+  </strip>
+  <packages type="image">
+    <package name="kernel-default"/>
+    <namedCollection name="base"/>
+  </packages>
+  <packages type="bootstrap">
+    <package name="filesystem"/>
+    <package name="glibc-locale"/>
+  </packages>
 </image>

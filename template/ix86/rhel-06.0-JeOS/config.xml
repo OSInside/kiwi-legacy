@@ -1,127 +1,127 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <image schemaversion="6.1" name="LimeJeOS-RHEL-06.5">
-	<description type="system">
-		<author>Marcus Schäfer</author>
-		<contact>ms@suse.com</contact>
-		<specification>RHEL Enterprise 6 JeOS</specification>
-	</description>
-	<profiles>
-		<profile name="RedHat" description="Build for RHEL" import="true"/>
-		<profile name="CentOS" description="Build for CentOS"/>
-		<profile name="Oracle" description="Build for Oracle Linux"/>
-	</profiles>
-	<strip type="delete">
-		<file name="/usr/lib*/python2.6"/>
-		<file name="/usr/lib*/gconv"/>
-		<file name="/usr/share/zoneinfo"/>
-		<file name="/usr/share/i18n"/>
-		<file name="/lib/i686/nosegneg"/>
-		<file name="/lib/kbd"/>
-	</strip>
-	<preferences>
-		<version>1.2.0</version>
-		<packagemanager>yum</packagemanager>
-		<bootsplash-theme>upstream</bootsplash-theme>
-		<bootloader-theme>upstream</bootloader-theme>
-		<locale>en_US</locale>
-		<keytable>us.map.gz</keytable>
-		<timezone>UTC</timezone>
-		<hwclock>utc</hwclock>
-		<rpm-check-signatures>false</rpm-check-signatures>
-		<type image="iso" primary="true" boot="isoboot/rhel-06.0" flags="compressed" firmware="bios"/>
-		<type image="vmx" boot="vmxboot/rhel-06.0" filesystem="ext3" format="vmdk" kernelcmdline="rhgb">
-			<machine memory="1024" guestOS="rhel6">
-				<vmdisk id="0" controller="ide"/>
-				<vmnic driver="e1000" interface="0" mode="bridged"/>
-			</machine>
-			<systemdisk name="Vgroup1">
-				<volume name="home" freespace="200M"/>
-			</systemdisk>
-		</type>
-		<type image="oem" boot="oemboot/rhel-06.0" filesystem="ext3" installiso="true">
-			<oemconfig>
-				<oem-systemsize>2048</oem-systemsize>
-				<oem-swap>true</oem-swap>
-				<oem-swapsize>200</oem-swapsize>
-			</oemconfig>
-		</type>
-	</preferences>
-	<users group="root">
-		<user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
-	</users>
-	<repository type="rpm-md" profiles="RedHat">
+  <description type="system">
+    <author>Marcus Schäfer</author>
+    <contact>ms@suse.com</contact>
+    <specification>RHEL Enterprise 6 JeOS</specification>
+  </description>
+  <profiles>
+    <profile name="RedHat" description="Build for RHEL" import="true"/>
+    <profile name="CentOS" description="Build for CentOS"/>
+    <profile name="Oracle" description="Build for Oracle Linux"/>
+  </profiles>
+  <strip type="delete">
+    <file name="/usr/lib*/python2.6"/>
+    <file name="/usr/lib*/gconv"/>
+    <file name="/usr/share/zoneinfo"/>
+    <file name="/usr/share/i18n"/>
+    <file name="/lib/i686/nosegneg"/>
+    <file name="/lib/kbd"/>
+  </strip>
+  <preferences>
+    <version>1.2.0</version>
+    <packagemanager>yum</packagemanager>
+    <bootsplash-theme>upstream</bootsplash-theme>
+    <bootloader-theme>upstream</bootloader-theme>
+    <locale>en_US</locale>
+    <keytable>us.map.gz</keytable>
+    <timezone>UTC</timezone>
+    <hwclock>utc</hwclock>
+    <rpm-check-signatures>false</rpm-check-signatures>
+    <type image="iso" primary="true" boot="isoboot/rhel-06.0" flags="compressed" firmware="bios"/>
+    <type image="vmx" boot="vmxboot/rhel-06.0" filesystem="ext3" format="vmdk" kernelcmdline="rhgb">
+      <machine memory="1024" guestOS="rhel6">
+        <vmdisk id="0" controller="ide"/>
+        <vmnic driver="e1000" interface="0" mode="bridged"/>
+      </machine>
+      <systemdisk name="Vgroup1">
+        <volume name="home" freespace="200M"/>
+      </systemdisk>
+    </type>
+    <type image="oem" boot="oemboot/rhel-06.0" filesystem="ext3" installiso="true">
+      <oemconfig>
+        <oem-systemsize>2048</oem-systemsize>
+        <oem-swap>true</oem-swap>
+        <oem-swapsize>200</oem-swapsize>
+      </oemconfig>
+    </type>
+  </preferences>
+  <users group="root">
+    <user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
+  </users>
+  <repository type="rpm-md" profiles="RedHat">
 <!-- Use the set-repo option to replace this first repo if needed -->
-		<source path="iso:///image/CDs/RHEL-6.2-x86_64-DVD.iso"/>
-	</repository>
+    <source path="iso:///image/CDs/RHEL-6.2-x86_64-DVD.iso"/>
+  </repository>
 <!-- Don't remove the following repos, they contain tools needed by kiwi -->
-	<repository type="rpm-md" priority="1" profiles="RedHat,Oracle">
-		<source path="obs://Virtualization:/Appliances/RedHat_RHEL-6"/>
-	</repository>
-	<repository type="rpm-md" priority="1" profiles="CentOS">
-		<source path="obs://Virtualization:/Appliances/CentOS_CentOS-6"/>
-	</repository>
-	<packages type="image">
-		<package name="bash"/>
-		<package name="bc"/>
-		<package name="bind-libs"/>
-		<package name="bind-utils"/>
-		<package name="chkconfig"/>
-		<package name="compat-libtermcap"/>
-		<package name="coreutils"/>
-		<package name="cronie"/>
-		<package name="cronie-anacron"/>
-		<package name="curl"/>
-		<package name="device-mapper-multipath"/>
-		<package name="dhclient"/>
-		<package name="dialog"/>
-		<package name="e2fsprogs"/>
-		<package name="elfutils"/>
-		<package name="file"/>
-		<package name="filesystem"/>
-		<package name="fipscheck"/>
-		<package name="firstboot"/>
-		<package name="fuse"/>
-		<package name="fuse-libs"/>
-		<package name="grub"/>
-		<package name="hdparm"/>
-		<package name="initscripts"/>
-		<package name="iproute"/>
-		<package name="iputils"/>
-		<package name="irqbalance"/>
-		<package name="kbd"/>
-		<package name="kernel"/>
-		<package name="libselinux-utils"/>
-		<package name="lvm2"/>
-		<package name="memtest86+"/>
-		<package name="module-init-tools"/>
-		<package name="openssh-server"/>
-		<package name="pam"/>
-		<package name="parted"/>
-		<package name="perl-Digest-SHA1"/>
-		<package name="procps"/>
-		<package name="rpm"/>
-		<package name="screen"/>
-		<package name="selinux-policy-targeted"/>
-		<package name="sysfsutils"/>
-		<package name="tar"/>
-		<package name="tcsh"/>
-		<package name="vim-enhanced"/>
-		<package name="vim-minimal"/>
-		<package name="w3m"/>
-		<namedCollection name="Base"/>
-		<namedCollection name="Console internet tools"/>
-		<package name="gfxboot-branding-upstream" bootinclude="true" bootdelete="true"/>
-		<package name="yum-plugin-priorities" bootinclude="true"/>
-	</packages>
-	<packages type="image" profiles="RedHat">
-		<package name="redhat-logos" bootinclude="true" bootdelete="true"/>
-	</packages>
-	<packages type="image" profiles="Oracle">
-		<package name="oracle-logos" bootinclude="true" bootdelete="true"/>
-	</packages>
-	<packages type="bootstrap">
-		<package name="filesystem"/>
-		<package name="basesystem"/>
-	</packages>
+  <repository type="rpm-md" priority="1" profiles="RedHat,Oracle">
+    <source path="obs://Virtualization:/Appliances/RedHat_RHEL-6"/>
+  </repository>
+  <repository type="rpm-md" priority="1" profiles="CentOS">
+    <source path="obs://Virtualization:/Appliances/CentOS_CentOS-6"/>
+  </repository>
+  <packages type="image">
+    <package name="bash"/>
+    <package name="bc"/>
+    <package name="bind-libs"/>
+    <package name="bind-utils"/>
+    <package name="chkconfig"/>
+    <package name="compat-libtermcap"/>
+    <package name="coreutils"/>
+    <package name="cronie"/>
+    <package name="cronie-anacron"/>
+    <package name="curl"/>
+    <package name="device-mapper-multipath"/>
+    <package name="dhclient"/>
+    <package name="dialog"/>
+    <package name="e2fsprogs"/>
+    <package name="elfutils"/>
+    <package name="file"/>
+    <package name="filesystem"/>
+    <package name="fipscheck"/>
+    <package name="firstboot"/>
+    <package name="fuse"/>
+    <package name="fuse-libs"/>
+    <package name="grub"/>
+    <package name="hdparm"/>
+    <package name="initscripts"/>
+    <package name="iproute"/>
+    <package name="iputils"/>
+    <package name="irqbalance"/>
+    <package name="kbd"/>
+    <package name="kernel"/>
+    <package name="libselinux-utils"/>
+    <package name="lvm2"/>
+    <package name="memtest86+"/>
+    <package name="module-init-tools"/>
+    <package name="openssh-server"/>
+    <package name="pam"/>
+    <package name="parted"/>
+    <package name="perl-Digest-SHA1"/>
+    <package name="procps"/>
+    <package name="rpm"/>
+    <package name="screen"/>
+    <package name="selinux-policy-targeted"/>
+    <package name="sysfsutils"/>
+    <package name="tar"/>
+    <package name="tcsh"/>
+    <package name="vim-enhanced"/>
+    <package name="vim-minimal"/>
+    <package name="w3m"/>
+    <namedCollection name="Base"/>
+    <namedCollection name="Console internet tools"/>
+    <package name="gfxboot-branding-upstream" bootinclude="true" bootdelete="true"/>
+    <package name="yum-plugin-priorities" bootinclude="true"/>
+  </packages>
+  <packages type="image" profiles="RedHat">
+    <package name="redhat-logos" bootinclude="true" bootdelete="true"/>
+  </packages>
+  <packages type="image" profiles="Oracle">
+    <package name="oracle-logos" bootinclude="true" bootdelete="true"/>
+  </packages>
+  <packages type="bootstrap">
+    <package name="filesystem"/>
+    <package name="basesystem"/>
+  </packages>
 </image>

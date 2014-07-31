@@ -28,94 +28,94 @@ use File::Find;
 use File::Basename;
 
 sub new {
-	# ...
-	# Create a new KIWIPromoDVDPlugin object
-	# ---
-	my $class   = shift;
-	my $handler = shift;
-	my $config  = shift;
-	my $configpath;
-	my $configfile;
-	my $this = KIWIBasePlugin -> new($handler);
-	bless ($this, $class);
+  # ...
+  # Create a new KIWIPromoDVDPlugin object
+  # ---
+  my $class   = shift;
+  my $handler = shift;
+  my $config  = shift;
+  my $configpath;
+  my $configfile;
+  my $this = KIWIBasePlugin -> new($handler);
+  bless ($this, $class);
 
-	if ($config =~ m{(.*)/([^/]+)$}x) {
-		$configpath = $1;
-		$configfile = $2;
-	}
-	if ((! $configpath) || (! $configfile)) {
-		$this->logMsg("E",
-			"wrong parameters in plugin initialisation\n"
-		);
-		return;
-	}
-	## plugin content:
-	#-----------------
-	#[base]
-	# name = KIWIEulaPlugin
-	# order = 3
-	# defaultenable = 1
-	#
-	#[target]
-	# targetfile = content
-	# targetdir = $PRODUCT_DIR
-	# media = (list of numbers XOR "all")
-	#
-	my $ini = Config::IniFiles -> new(
-		-file => "$configpath/$configfile"
-	);
-	my $name   = $ini->val('base', 'name');
-	my $order  = $ini->val('base', 'order');
-	my $enable = $ini->val('base', 'defaultenable');
-	# if any of those isn't set, complain!
-	if(not defined($name)
-		or not defined($order)
-		or not defined($enable)
-	) {
-		$this->logMsg("E",
-			"Plugin ini file <$config> seems broken!\n"
-		);
-		return;
-	}
-	$this->name($name);
-	$this->order($order);
-	if($enable != 0) {
-		$this->ready(1);
-	}
-	return $this;
+  if ($config =~ m{(.*)/([^/]+)$}x) {
+    $configpath = $1;
+    $configfile = $2;
+  }
+  if ((! $configpath) || (! $configfile)) {
+    $this->logMsg("E",
+      "wrong parameters in plugin initialisation\n"
+    );
+    return;
+  }
+  ## plugin content:
+  #-----------------
+  #[base]
+  # name = KIWIEulaPlugin
+  # order = 3
+  # defaultenable = 1
+  #
+  #[target]
+  # targetfile = content
+  # targetdir = $PRODUCT_DIR
+  # media = (list of numbers XOR "all")
+  #
+  my $ini = Config::IniFiles -> new(
+    -file => "$configpath/$configfile"
+  );
+  my $name   = $ini->val('base', 'name');
+  my $order  = $ini->val('base', 'order');
+  my $enable = $ini->val('base', 'defaultenable');
+  # if any of those isn't set, complain!
+  if(not defined($name)
+    or not defined($order)
+    or not defined($enable)
+  ) {
+    $this->logMsg("E",
+      "Plugin ini file <$config> seems broken!\n"
+    );
+    return;
+  }
+  $this->name($name);
+  $this->order($order);
+  if($enable != 0) {
+    $this->ready(1);
+  }
+  return $this;
 }
 
 sub execute {
-	my $this = shift;
-	if(not ref($this)) {
-		return;
-	}
-	if($this->{m_ready} == 0) {
-		return 0;
-	}
-	my $ismini = $this->collect()
-		->productData()->getVar("FLAVOR");
-	if(not defined($ismini)) {
-		$this->logMsg("W", "FLAVOR not set?");
-		return 0;
-	}
-	if ($ismini !~ m{dvd-promo}ix) {
-		return 0;
-	}
-	my $medium = $this->collect()
-		->productData()->getVar("MEDIUM_NAME");
-	find( sub { 
-			if (m/initrd.liv/x) { 
-				my $cd = $File::Find::name; 
-				system("mkdir -p boot; echo $medium > boot/mbrid");
-				system("echo boot/mbrid | cpio --create --format=newc --quiet | gzip -9 -f >> $cd");
-				system("rm boot/mbrid; rmdir boot");
-				$this->logMsg("I", "updated $cd");
-			}
-		},
-		$this->handler()->collect()->basedir()
-	);
-	return 0;
+  my $this = shift;
+  if(not ref($this)) {
+    return;
+  }
+  if($this->{m_ready} == 0) {
+    return 0;
+  }
+  my $ismini = $this->collect()
+    ->productData()->getVar("FLAVOR");
+  if(not defined($ismini)) {
+    $this->logMsg("W", "FLAVOR not set?");
+    return 0;
+  }
+  if ($ismini !~ m{dvd-promo}ix) {
+    return 0;
+  }
+  my $medium = $this->collect()
+    ->productData()->getVar("MEDIUM_NAME");
+  find( sub { 
+      if (m/initrd.liv/x) { 
+        my $cd = $File::Find::name; 
+        system("mkdir -p boot; echo $medium > boot/mbrid");
+        system("echo boot/mbrid | cpio --create --format=newc --quiet | gzip -9 -f >> $cd");
+        system("rm boot/mbrid; rmdir boot");
+        $this->logMsg("I", "updated $cd");
+      }
+    },
+    $this->handler()->collect()->basedir()
+  );
+  return 0;
 }
 
 1;

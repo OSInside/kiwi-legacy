@@ -100,12 +100,12 @@ udevStart
 #--------------------------------------
 includeKernelParameters
 if [ ! -z $UNIONFS_CONFIG ] || [ "$COMBINED_IMAGE" = "local" ];then
-	# /.../
-	# if the unionfs/combined information is already in place at this
-	# stage it comes from the cmdline data which means we are not
-	# booting the first time
-	# ----
-	export LOCAL_BOOT="yes"
+  # /.../
+  # if the unionfs/combined information is already in place at this
+  # stage it comes from the cmdline data which means we are not
+  # booting the first time
+  # ----
+  export LOCAL_BOOT="yes"
 fi
 
 #======================================
@@ -128,14 +128,14 @@ selectLanguage
 #--------------------------------------
 Echo "Searching for boot device..."
 if [ "$LOCAL_BOOT" = "no" ];then
-	searchOFBootDevice
-	if [ ! -e "$biosBootDevice" ];then
-		systemException "$biosBootDevice" "reboot"
-	fi
-	export imageDiskDevice=$biosBootDevice
+  searchOFBootDevice
+  if [ ! -e "$biosBootDevice" ];then
+    systemException "$biosBootDevice" "reboot"
+  fi
+  export imageDiskDevice=$biosBootDevice
 else
-	waitForStorageDevice $disk
-	export imageDiskDevice=$(dn $disk)
+  waitForStorageDevice $disk
+  export imageDiskDevice=$(dn $disk)
 fi
 Echo "Found boot device: $imageDiskDevice"
 
@@ -143,51 +143,51 @@ Echo "Found boot device: $imageDiskDevice"
 # 9) Setup device names a)...
 #--------------------------------------
 if [ -z "$imageDiskDevice" ];then
-	systemException \
-		"Couldn't find any boot device... abort" \
-	"reboot"
+  systemException \
+    "Couldn't find any boot device... abort" \
+  "reboot"
 fi
 #======================================
 # 9) Setup device names b)...
 #--------------------------------------
 if [ ! -f $PART_IDS ];then
-	systemException \
-		"Couldn't find partition IDs meta data... abort" \
-	"reboot"
+  systemException \
+    "Couldn't find partition IDs meta data... abort" \
+  "reboot"
 fi
 importFile < $PART_IDS
 export imageBootDevice=$(ddn $imageDiskDevice $kiwi_BootPart)
 if searchVolumeGroup; then
-	export haveLVM=yes
-	export imageRootDevice=/dev/$kiwi_lvmgroup/$kiwi_RootPartVol
-	if [ ! -z "$kiwi_ROPartVol" ];then
-		export imageRODevice=/dev/$kiwi_lvmgroup/$kiwi_ROPartVol
-	fi
-	if [ ! -z "$kiwi_RWPartVol" ];then
-		export imageRWDevice=/dev/$kiwi_lvmgroup/$kiwi_RWPartVol
-	fi
+  export haveLVM=yes
+  export imageRootDevice=/dev/$kiwi_lvmgroup/$kiwi_RootPartVol
+  if [ ! -z "$kiwi_ROPartVol" ];then
+    export imageRODevice=/dev/$kiwi_lvmgroup/$kiwi_ROPartVol
+  fi
+  if [ ! -z "$kiwi_RWPartVol" ];then
+    export imageRWDevice=/dev/$kiwi_lvmgroup/$kiwi_RWPartVol
+  fi
 elif [ ! -z "$kiwi_RaidDev" ];then
-	if [ ! -z "$kiwi_ROPart" ] || [ ! -z "$kiwi_RWPart" ];then
-		systemException \
-			"split systems not supported in software raid mode"
-		"reboot"
-	fi
-	activateMDRaid
-	export imageRootDevice=$kiwi_RaidDev
+  if [ ! -z "$kiwi_ROPart" ] || [ ! -z "$kiwi_RWPart" ];then
+    systemException \
+      "split systems not supported in software raid mode"
+    "reboot"
+  fi
+  activateMDRaid
+  export imageRootDevice=$kiwi_RaidDev
 else
-	export imageRootDevice=$(ddn $imageDiskDevice $kiwi_RootPart)
-	if [ ! -z "$kiwi_ROPart" ];then
-		export imageRODevice=$(ddn $imageDiskDevice $kiwi_ROPart)
-	fi
-	if [ ! -z "$kiwi_RWPart" ];then
-		export imageRWDevice=$(ddn $imageDiskDevice $kiwi_RWPart)
-	fi
+  export imageRootDevice=$(ddn $imageDiskDevice $kiwi_RootPart)
+  if [ ! -z "$kiwi_ROPart" ];then
+    export imageRODevice=$(ddn $imageDiskDevice $kiwi_ROPart)
+  fi
+  if [ ! -z "$kiwi_RWPart" ];then
+    export imageRWDevice=$(ddn $imageDiskDevice $kiwi_RWPart)
+  fi
 fi
 #======================================
 # 9) Setup device names c)...
 #--------------------------------------
 if [ ! -z "$kiwi_ramonly" ];then
-	export imageRWDevice=/dev/ram1
+  export imageRWDevice=/dev/ram1
 fi
 
 #======================================
@@ -195,16 +195,16 @@ fi
 #--------------------------------------
 probeFileSystem $imageRootDevice
 if [ "$FSTYPE" = "luks" ];then
-	luksOpen $imageRootDevice
-	imageRootDevice=$luksDeviceOpened
-	imageRODevice=$imageRootDevice
-	probeFileSystem $imageRootDevice
-	export haveLuks=yes
+  luksOpen $imageRootDevice
+  imageRootDevice=$luksDeviceOpened
+  imageRODevice=$imageRootDevice
+  probeFileSystem $imageRootDevice
+  export haveLuks=yes
 fi
 if [ "$FSTYPE" = "unknown" ];then
-	systemException \
-		"Couldn't determine filesystem type... abort" \
-	"reboot"
+  systemException \
+    "Couldn't determine filesystem type... abort" \
+  "reboot"
 fi
 
 #======================================
@@ -212,14 +212,14 @@ fi
 #--------------------------------------
 Echo "Filesystem of VMX system is: $FSTYPE -> $imageRootDevice"
 if isFSTypeReadOnly;then
-	setupUnionFS $imageRWDevice $imageRODevice $unionFST
+  setupUnionFS $imageRWDevice $imageRODevice $unionFST
 fi
 
 #======================================
 # 12) Mount VM (boot)
 #--------------------------------------
 if ! mountSystem $imageRootDevice;then
-	systemException "Failed to mount root filesystem" "reboot"
+  systemException "Failed to mount root filesystem" "reboot"
 fi
 validateRootTree
 
@@ -227,38 +227,38 @@ validateRootTree
 # 13) Get kernel list for local boot
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "no" ];then
-	kernelList /mnt
+  kernelList /mnt
 fi
 
 #======================================
 # 14) setup ird/kernel links for union
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "no" ];then
-	setupKernelLinks
+  setupKernelLinks
 fi
 
 #======================================
 # 15) Create system dependant files
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "no" ];then
-	setupDefaultFstab /config
-	updateRootDeviceFstab /config $imageRootDevice
-	updateBootDeviceFstab /config $imageBootDevice
-	if [ ! -z "$UNIONFS_CONFIG" ]; then
-		export KIWI_INITRD_PARAMS="UNIONFS_CONFIG=yes"
-	fi
-	if [ ! -z "$COMBINED_IMAGE" ]; then
-		export KIWI_INITRD_PARAMS="COMBINED_IMAGE=local"
-	fi
-	setupBootLoader /mnt /config $(($bootid - 1)) $imageRootDevice VMX
-	setupKernelModules /config
+  setupDefaultFstab /config
+  updateRootDeviceFstab /config $imageRootDevice
+  updateBootDeviceFstab /config $imageBootDevice
+  if [ ! -z "$UNIONFS_CONFIG" ]; then
+    export KIWI_INITRD_PARAMS="UNIONFS_CONFIG=yes"
+  fi
+  if [ ! -z "$COMBINED_IMAGE" ]; then
+    export KIWI_INITRD_PARAMS="COMBINED_IMAGE=local"
+  fi
+  setupBootLoader /mnt /config $(($bootid - 1)) $imageRootDevice VMX
+  setupKernelModules /config
 fi
 
 #======================================
 # 16) copy system dependant files
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "no" ];then
-	setupConfigFiles
+  setupConfigFiles
 fi
 
 #======================================
@@ -280,10 +280,10 @@ umountSystemFilesystems
 # 20) copy initrd files to image
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "no" ];then
-	importBranding
+  importBranding
 fi
 if [ -f /etc/mdadm.conf ];then
-	cp /etc/mdadm.conf /mnt/etc
+  cp /etc/mdadm.conf /mnt/etc
 fi
 cp /preinit /mnt
 cp /include /mnt

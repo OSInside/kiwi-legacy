@@ -1,31 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <image schemaversion="6.0" name="migration-template">
-	<description type="system">
-		<author>John Doe</author>
-		<contact>john@example.com</contact>
-		<specification>
-			migration-template
-		</specification>
-	</description>
-	<preferences>
-		<packagemanager>zypper</packagemanager>
-		<version>1.1.1</version>
-		<type image="oem" filesystem="ext3" installiso="true">
-			<oemconfig/>
-		</type>
-	</preferences>
-	<users group="root">
-		<user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
-	</users>
-	<packages patternType="plusRecommended">
-	</packages>
-	<packages type="bootstrap">
-		<package name="udev"/>
-		<package name="filesystem"/>
-		<package name="glibc-locale"/>
-		<package name="cracklib-dict-full"/>
-		<package name="ca-certificates"/>
-		<package name="module-init-tools"/>
-	</packages>
+  <description type="system">
+    <author>John Doe</author>
+    <contact>john@example.com</contact>
+    <specification>
+      migration-template
+    </specification>
+  </description>
+  <preferences>
+    <packagemanager>zypper</packagemanager>
+    <version>1.1.1</version>
+    <type image="oem" filesystem="ext3" installiso="true">
+      <oemconfig/>
+    </type>
+  </preferences>
+  <users group="root">
+    <user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
+  </users>
+  <packages patternType="plusRecommended">
+  </packages>
+  <packages type="bootstrap">
+    <package name="udev"/>
+    <package name="filesystem"/>
+    <package name="glibc-locale"/>
+    <package name="cracklib-dict-full"/>
+    <package name="ca-certificates"/>
+    <package name="module-init-tools"/>
+  </packages>
 </image>

@@ -1,270 +1,270 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <image schemaversion="6.1" name="initrd-netboot-suse-SLES11">
-	<description type="boot">
-		<author>Marcus Schaefer</author>
-		<contact>ms@novell.com</contact>
-		<specification>boot/initrd image used for PXE</specification>
-	</description>
-	<preferences>
-		<type image="cpio" bootprofile="ppc64" bootkernel="ppc64"/>
-		<version>2.1.1</version>
-		<packagemanager>zypper</packagemanager>
-		<rpm-check-signatures>false</rpm-check-signatures>
-	</preferences>
-	<profiles>
-		<profile name="default" description="Boot with default kernel"/>
-		<profile name="diskless" description="Booting diskless thin clients"/>
-		<profile name="std" description="KERNEL: Default"/>
-		<profile name="ppc64" description="KERNEL: PPC64 kernel"/>
-		<profile name="custom" description="KERNEL: specified by bootinclude in system XML"/>
-	</profiles>
-	<drivers profiles="default,ppc64">
-		<file name="crypto/*"/>
-		<file name="drivers/usb/core/usbcore.ko"/>
-		<file name="drivers/usb/host/*"/>
-		<file name="drivers/usb/storage/usb-storage.ko"/>
-		<file name="drivers/block/loop.ko"/>
-		<file name="drivers/net/e1000/e1000.ko"/>
-		<file name="drivers/net/e1000e/e1000e.ko"/>
-		<file name="drivers/net/ehea/ehea.ko"/>
-		<file name="drivers/net/ibmveth.ko"/>
-		<file name="drivers/net/tg3.ko"/>
-		<file name="drivers/net/veth.ko"/>
-		<file name="drivers/scsi/ibmvscsi"/>
-		<file name="drivers/scsi/ibmvscsi/ibmvscsic.ko"/>
-		<file name="drivers/scsi/ipr.ko"/>
-		<file name="drivers/scsi/lpfc/*"/>
-		<file name="drivers/scsi/scsi_mod.ko"/>
-		<file name="drivers/scsi/scsi_tgt.ko"/>
-		<file name="drivers/scsi/scsi_transport_fc.ko"/>
-		<file name="drivers/scsi/scsi_transport_srp.ko"/>
-		<file name="drivers/scsi/sd_mod.ko"/>
-		<file name="drivers/usb/*"/>
-		<file name="fs/binfmt_aout.ko"/>
-		<file name="fs/binfmt_misc.ko"/>
-		<file name="fs/btrfs/*"/>
-		<file name="fs/ext2/*"/>
-		<file name="fs/ext3/*"/>
-		<file name="fs/ext4/*"/>
-		<file name="fs/fuse/*"/>
-		<file name="fs/jbd/*"/>
-		<file name="fs/jbd2/*"/>
-		<file name="fs/lockd/*"/>
-		<file name="fs/squashfs/*"/>
-		<file name="fs/xfs/*"/>
-		<file name="lib/crc-t10dif.ko"/>
-		<file name="lib/libcrc32c.ko"/>
-		<file name="lib/zlib_deflate/zlib_deflate.ko"/>
-		<file name="net/ipv6/*"/>
-		<file name="net/packet/*"/>
-	</drivers>
-	<drivers profiles="diskless">
-		<file name="drivers/block/aoe/aoe.ko"/>
-		<file name="drivers/block/brd.ko"/>
-		<file name="drivers/block/loop.ko"/>
-		<file name="drivers/block/nbd.ko"/>
-		<file name="drivers/char/agp/intel-agp.ko"/>
-		<file name="drivers/gpu/drm/i915/i915.ko"/>
-		<file name="drivers/ide/*"/>
-		<file name="drivers/md/*"/>
-		<file name="drivers/message/fusion/*"/>
-		<file name="drivers/net/3c59x.ko"/>
-		<file name="drivers/net/8139cp.ko"/>
-		<file name="drivers/net/8139too.ko"/>
-		<file name="drivers/net/8390.ko"/>
-		<file name="drivers/net/b44.ko"/>
-		<file name="drivers/net/bnx2.ko"/>
-		<file name="drivers/net/defxx.ko"/>
-		<file name="drivers/net/dl2k.ko"/>
-		<file name="drivers/net/e100.ko"/>
-		<file name="drivers/net/e1000/*"/>
-		<file name="drivers/net/epic100.ko"/>
-		<file name="drivers/net/eql.ko"/>
-		<file name="drivers/net/fealnx.ko"/>
-		<file name="drivers/net/forcedeth.ko"/>
-		<file name="drivers/net/hp100.ko"/>
-		<file name="drivers/net/mii.ko"/>
-		<file name="drivers/net/myri10ge"/>
-		<file name="drivers/net/natsemi.ko"/>
-		<file name="drivers/net/ne2k-pci.ko"/>
-		<file name="drivers/net/netconsole.ko"/>
-		<file name="drivers/net/ns83820.ko"/>
-		<file name="drivers/net/pcnet32.ko"/>
-		<file name="drivers/net/qla3xxx.ko"/>
-		<file name="drivers/net/r8169.ko"/>
-		<file name="drivers/net/s2io.ko"/>
-		<file name="drivers/net/sis900.ko"/>
-		<file name="drivers/net/skge.ko"/>
-		<file name="drivers/net/slhc.ko"/>
-		<file name="drivers/net/starfire.ko"/>
-		<file name="drivers/net/sundance.ko"/>
-		<file name="drivers/net/sungem.ko"/>
-		<file name="drivers/net/sungem_phy.ko"/>
-		<file name="drivers/net/sunhme.ko"/>
-		<file name="drivers/net/tg3.ko"/>
-		<file name="drivers/net/tlan.ko"/>
-		<file name="drivers/net/tulip/*"/>
-		<file name="drivers/net/via-rhine.ko"/>
-		<file name="drivers/net/via-velocity.ko"/>
-		<file name="drivers/net/yellowfin.ko"/>
-		<file name="fs/exportfs/*"/>
-		<file name="fs/ext2/*"/>
-		<file name="fs/ext3/*"/>
-		<file name="fs/lockd/*"/>
-		<file name="fs/mbcache.ko"/>
-		<file name="fs/nfs/*"/>
-		<file name="fs/nfs_common/*"/>
-		<file name="fs/squashfs/*"/>
-		<file name="net/packet/*"/>
-		<file name="net/sunrpc/*"/>
-	</drivers>
-	<repository type="yast2" status="replaceable">
-		<source path="http://download.suse.de/install/SLP/SLES-11-SP1-GM/%arch/DVD1/"/>
-	</repository>
-	<packages type="image" profiles="std">
-		<package name="kernel-default"/>
-		<package name="kernel-default-base"/>
-	</packages>
-	<packages type="image" profiles="ppc64">
-		<package name="kernel-ppc64"/>
-		<package name="kernel-ppc64-base"/>
-	</packages>
-	<packages type="image" profiles="default,ppc64">
-		<package name="adaptec-firmware"/>
-		<package name="atftp"/>
-		<package name="bc"/>
-		<package name="bind-libs"/>
-		<package name="bind-utils"/>
-		<package name="bootsplash"/>
-		<package name="btrfsprogs"/>
-		<package name="busybox"/>
-		<package name="cryptsetup"/>
-		<package name="curl"/>
-		<package name="cyrus-sasl"/>
-		<package name="dhcpcd"/>
-		<package name="diffutils"/>
-		<package name="e2fsprogs"/>
-		<package name="file"/>
-		<package name="fribidi"/>
-		<package name="hwinfo"/>
-		<package name="iputils"/>
-		<package name="kiwi-tools"/>
-		<package name="lvm2"/>
-		<package name="make"/>
-		<package name="mdadm"/>
-		<package name="module-init-tools"/>
-		<package name="net-tools"/>
-		<package name="netcfg"/>
-		<package name="nfs-client"/>
-		<package name="parted"/>
-		<package name="procps"/>
-		<package name="psmisc"/>
-		<package name="reiserfs"/>
-		<package name="tar"/>
-		<package name="util-linux"/>
-		<package name="xfsprogs"/>
-		<package name="iproute2"/>
-	</packages>
-	<packages type="image" profiles="diskless">
-		<package name="atftp"/>
-		<package name="bc"/>
-		<package name="bootsplash"/>
-		<package name="busybox"/>
-		<package name="cyrus-sasl"/>
-		<package name="dhcpcd"/>
-		<package name="diffutils"/>
-		<package name="file"/>
-		<package name="fribidi"/>
-		<package name="hwinfo"/>
-		<package name="iputils"/>
-		<package name="kiwi-tools"/>
-		<package name="module-init-tools"/>
-		<package name="net-tools"/>
-		<package name="netcfg"/>
-		<package name="nfs-client"/>
-		<package name="procps"/>
-		<package name="tar"/>
-		<package name="util-linux"/>
-		<package name="psmisc"/>
-		<package name="iproute2"/>
-	</packages>
-	<packages type="image" profiles="custom"><!-- empty custom section to allow bootincluding custom kernel --></packages>
-	<packages type="bootstrap">
-		<package name="dialog"/>
-		<package name="fbiterm"/>
-		<package name="filesystem"/>
-		<package name="gettext-runtime"/>
-		<package name="glibc"/>
-		<package name="glibc-locale"/>
-		<package name="openssl-certs"/>
-	</packages>
-	<packages type="delete" profiles="default,diskless,ppc64">
-		<package name="PolicyKit"/>
-		<package name="audit-libs"/>
-		<package name="blocxx"/>
-		<package name="cracklib-dict-full"/>
-		<package name="cracklib-dict-small"/>
-		<package name="db"/>
-		<package name="diffutils"/>
-		<package name="expat"/>
-		<package name="fillup"/>
-		<package name="fribidi"/>
-		<package name="gdbm"/>
-		<package name="glib2"/>
-		<package name="glibc-locale"/>
-		<package name="gpg"/>
-		<package name="info"/>
-		<package name="insserv"/>
-		<package name="iptables"/>
-		<package name="irqbalance"/>
-		<package name="libxcrypt"/>
-		<package name="libxml2"/>
-		<package name="libzio"/>
-		<package name="licenses"/>
-		<package name="limal"/>
-		<package name="limal-perl"/>
-		<package name="logrotate"/>
-		<package name="make"/>
-		<package name="mingetty"/>
-		<package name="openldap2-client"/>
-		<package name="openslp"/>
-		<package name="pam"/>
-		<package name="pam-modules"/>
-		<package name="pcre"/>
-		<package name="perl"/>
-		<package name="perl-Bootloader"/>
-		<package name="perl-gettext"/>
-		<package name="permissions"/>
-		<package name="pm-utils"/>
-		<package name="pmtools"/>
-		<package name="suse-build-key"/>
-	</packages>
-	<packages type="delete" profiles="diskless">
-		<package name="PolicyKit"/>
-		<package name="bundle-lang-common-zh"/>
-		<package name="cracklib-dict-full"/>
-		<package name="cracklib-dict-small"/>
-		<package name="e2fsprogs"/>
-		<package name="iptables"/>
-		<package name="krb5"/>
-		<package name="libjpeg"/>
-		<package name="liblcms"/>
-		<package name="libmng"/>
-		<package name="libtiff3"/>
-		<package name="licenses"/>
-		<package name="make"/>
-		<package name="openldap2-client"/>
-		<package name="openslp"/>
-		<package name="pam-config"/>
-		<package name="pam-modules"/>
-		<package name="pciutils"/>
-		<package name="perl"/>
-		<package name="perl-HTML-Tagset"/>
-		<package name="perl-gettext"/>
-		<package name="setserial"/>
-		<package name="xorg-x11-libX11"/>
-		<package name="xorg-x11-libXau"/>
-		<package name="xorg-x11-libxcb"/>
-	</packages>
+  <description type="boot">
+    <author>Marcus Schaefer</author>
+    <contact>ms@novell.com</contact>
+    <specification>boot/initrd image used for PXE</specification>
+  </description>
+  <preferences>
+    <type image="cpio" bootprofile="ppc64" bootkernel="ppc64"/>
+    <version>2.1.1</version>
+    <packagemanager>zypper</packagemanager>
+    <rpm-check-signatures>false</rpm-check-signatures>
+  </preferences>
+  <profiles>
+    <profile name="default" description="Boot with default kernel"/>
+    <profile name="diskless" description="Booting diskless thin clients"/>
+    <profile name="std" description="KERNEL: Default"/>
+    <profile name="ppc64" description="KERNEL: PPC64 kernel"/>
+    <profile name="custom" description="KERNEL: specified by bootinclude in system XML"/>
+  </profiles>
+  <drivers profiles="default,ppc64">
+    <file name="crypto/*"/>
+    <file name="drivers/usb/core/usbcore.ko"/>
+    <file name="drivers/usb/host/*"/>
+    <file name="drivers/usb/storage/usb-storage.ko"/>
+    <file name="drivers/block/loop.ko"/>
+    <file name="drivers/net/e1000/e1000.ko"/>
+    <file name="drivers/net/e1000e/e1000e.ko"/>
+    <file name="drivers/net/ehea/ehea.ko"/>
+    <file name="drivers/net/ibmveth.ko"/>
+    <file name="drivers/net/tg3.ko"/>
+    <file name="drivers/net/veth.ko"/>
+    <file name="drivers/scsi/ibmvscsi"/>
+    <file name="drivers/scsi/ibmvscsi/ibmvscsic.ko"/>
+    <file name="drivers/scsi/ipr.ko"/>
+    <file name="drivers/scsi/lpfc/*"/>
+    <file name="drivers/scsi/scsi_mod.ko"/>
+    <file name="drivers/scsi/scsi_tgt.ko"/>
+    <file name="drivers/scsi/scsi_transport_fc.ko"/>
+    <file name="drivers/scsi/scsi_transport_srp.ko"/>
+    <file name="drivers/scsi/sd_mod.ko"/>
+    <file name="drivers/usb/*"/>
+    <file name="fs/binfmt_aout.ko"/>
+    <file name="fs/binfmt_misc.ko"/>
+    <file name="fs/btrfs/*"/>
+    <file name="fs/ext2/*"/>
+    <file name="fs/ext3/*"/>
+    <file name="fs/ext4/*"/>
+    <file name="fs/fuse/*"/>
+    <file name="fs/jbd/*"/>
+    <file name="fs/jbd2/*"/>
+    <file name="fs/lockd/*"/>
+    <file name="fs/squashfs/*"/>
+    <file name="fs/xfs/*"/>
+    <file name="lib/crc-t10dif.ko"/>
+    <file name="lib/libcrc32c.ko"/>
+    <file name="lib/zlib_deflate/zlib_deflate.ko"/>
+    <file name="net/ipv6/*"/>
+    <file name="net/packet/*"/>
+  </drivers>
+  <drivers profiles="diskless">
+    <file name="drivers/block/aoe/aoe.ko"/>
+    <file name="drivers/block/brd.ko"/>
+    <file name="drivers/block/loop.ko"/>
+    <file name="drivers/block/nbd.ko"/>
+    <file name="drivers/char/agp/intel-agp.ko"/>
+    <file name="drivers/gpu/drm/i915/i915.ko"/>
+    <file name="drivers/ide/*"/>
+    <file name="drivers/md/*"/>
+    <file name="drivers/message/fusion/*"/>
+    <file name="drivers/net/3c59x.ko"/>
+    <file name="drivers/net/8139cp.ko"/>
+    <file name="drivers/net/8139too.ko"/>
+    <file name="drivers/net/8390.ko"/>
+    <file name="drivers/net/b44.ko"/>
+    <file name="drivers/net/bnx2.ko"/>
+    <file name="drivers/net/defxx.ko"/>
+    <file name="drivers/net/dl2k.ko"/>
+    <file name="drivers/net/e100.ko"/>
+    <file name="drivers/net/e1000/*"/>
+    <file name="drivers/net/epic100.ko"/>
+    <file name="drivers/net/eql.ko"/>
+    <file name="drivers/net/fealnx.ko"/>
+    <file name="drivers/net/forcedeth.ko"/>
+    <file name="drivers/net/hp100.ko"/>
+    <file name="drivers/net/mii.ko"/>
+    <file name="drivers/net/myri10ge"/>
+    <file name="drivers/net/natsemi.ko"/>
+    <file name="drivers/net/ne2k-pci.ko"/>
+    <file name="drivers/net/netconsole.ko"/>
+    <file name="drivers/net/ns83820.ko"/>
+    <file name="drivers/net/pcnet32.ko"/>
+    <file name="drivers/net/qla3xxx.ko"/>
+    <file name="drivers/net/r8169.ko"/>
+    <file name="drivers/net/s2io.ko"/>
+    <file name="drivers/net/sis900.ko"/>
+    <file name="drivers/net/skge.ko"/>
+    <file name="drivers/net/slhc.ko"/>
+    <file name="drivers/net/starfire.ko"/>
+    <file name="drivers/net/sundance.ko"/>
+    <file name="drivers/net/sungem.ko"/>
+    <file name="drivers/net/sungem_phy.ko"/>
+    <file name="drivers/net/sunhme.ko"/>
+    <file name="drivers/net/tg3.ko"/>
+    <file name="drivers/net/tlan.ko"/>
+    <file name="drivers/net/tulip/*"/>
+    <file name="drivers/net/via-rhine.ko"/>
+    <file name="drivers/net/via-velocity.ko"/>
+    <file name="drivers/net/yellowfin.ko"/>
+    <file name="fs/exportfs/*"/>
+    <file name="fs/ext2/*"/>
+    <file name="fs/ext3/*"/>
+    <file name="fs/lockd/*"/>
+    <file name="fs/mbcache.ko"/>
+    <file name="fs/nfs/*"/>
+    <file name="fs/nfs_common/*"/>
+    <file name="fs/squashfs/*"/>
+    <file name="net/packet/*"/>
+    <file name="net/sunrpc/*"/>
+  </drivers>
+  <repository type="yast2" status="replaceable">
+    <source path="http://download.suse.de/install/SLP/SLES-11-SP1-GM/%arch/DVD1/"/>
+  </repository>
+  <packages type="image" profiles="std">
+    <package name="kernel-default"/>
+    <package name="kernel-default-base"/>
+  </packages>
+  <packages type="image" profiles="ppc64">
+    <package name="kernel-ppc64"/>
+    <package name="kernel-ppc64-base"/>
+  </packages>
+  <packages type="image" profiles="default,ppc64">
+    <package name="adaptec-firmware"/>
+    <package name="atftp"/>
+    <package name="bc"/>
+    <package name="bind-libs"/>
+    <package name="bind-utils"/>
+    <package name="bootsplash"/>
+    <package name="btrfsprogs"/>
+    <package name="busybox"/>
+    <package name="cryptsetup"/>
+    <package name="curl"/>
+    <package name="cyrus-sasl"/>
+    <package name="dhcpcd"/>
+    <package name="diffutils"/>
+    <package name="e2fsprogs"/>
+    <package name="file"/>
+    <package name="fribidi"/>
+    <package name="hwinfo"/>
+    <package name="iputils"/>
+    <package name="kiwi-tools"/>
+    <package name="lvm2"/>
+    <package name="make"/>
+    <package name="mdadm"/>
+    <package name="module-init-tools"/>
+    <package name="net-tools"/>
+    <package name="netcfg"/>
+    <package name="nfs-client"/>
+    <package name="parted"/>
+    <package name="procps"/>
+    <package name="psmisc"/>
+    <package name="reiserfs"/>
+    <package name="tar"/>
+    <package name="util-linux"/>
+    <package name="xfsprogs"/>
+    <package name="iproute2"/>
+  </packages>
+  <packages type="image" profiles="diskless">
+    <package name="atftp"/>
+    <package name="bc"/>
+    <package name="bootsplash"/>
+    <package name="busybox"/>
+    <package name="cyrus-sasl"/>
+    <package name="dhcpcd"/>
+    <package name="diffutils"/>
+    <package name="file"/>
+    <package name="fribidi"/>
+    <package name="hwinfo"/>
+    <package name="iputils"/>
+    <package name="kiwi-tools"/>
+    <package name="module-init-tools"/>
+    <package name="net-tools"/>
+    <package name="netcfg"/>
+    <package name="nfs-client"/>
+    <package name="procps"/>
+    <package name="tar"/>
+    <package name="util-linux"/>
+    <package name="psmisc"/>
+    <package name="iproute2"/>
+  </packages>
+  <packages type="image" profiles="custom"><!-- empty custom section to allow bootincluding custom kernel --></packages>
+  <packages type="bootstrap">
+    <package name="dialog"/>
+    <package name="fbiterm"/>
+    <package name="filesystem"/>
+    <package name="gettext-runtime"/>
+    <package name="glibc"/>
+    <package name="glibc-locale"/>
+    <package name="openssl-certs"/>
+  </packages>
+  <packages type="delete" profiles="default,diskless,ppc64">
+    <package name="PolicyKit"/>
+    <package name="audit-libs"/>
+    <package name="blocxx"/>
+    <package name="cracklib-dict-full"/>
+    <package name="cracklib-dict-small"/>
+    <package name="db"/>
+    <package name="diffutils"/>
+    <package name="expat"/>
+    <package name="fillup"/>
+    <package name="fribidi"/>
+    <package name="gdbm"/>
+    <package name="glib2"/>
+    <package name="glibc-locale"/>
+    <package name="gpg"/>
+    <package name="info"/>
+    <package name="insserv"/>
+    <package name="iptables"/>
+    <package name="irqbalance"/>
+    <package name="libxcrypt"/>
+    <package name="libxml2"/>
+    <package name="libzio"/>
+    <package name="licenses"/>
+    <package name="limal"/>
+    <package name="limal-perl"/>
+    <package name="logrotate"/>
+    <package name="make"/>
+    <package name="mingetty"/>
+    <package name="openldap2-client"/>
+    <package name="openslp"/>
+    <package name="pam"/>
+    <package name="pam-modules"/>
+    <package name="pcre"/>
+    <package name="perl"/>
+    <package name="perl-Bootloader"/>
+    <package name="perl-gettext"/>
+    <package name="permissions"/>
+    <package name="pm-utils"/>
+    <package name="pmtools"/>
+    <package name="suse-build-key"/>
+  </packages>
+  <packages type="delete" profiles="diskless">
+    <package name="PolicyKit"/>
+    <package name="bundle-lang-common-zh"/>
+    <package name="cracklib-dict-full"/>
+    <package name="cracklib-dict-small"/>
+    <package name="e2fsprogs"/>
+    <package name="iptables"/>
+    <package name="krb5"/>
+    <package name="libjpeg"/>
+    <package name="liblcms"/>
+    <package name="libmng"/>
+    <package name="libtiff3"/>
+    <package name="licenses"/>
+    <package name="make"/>
+    <package name="openldap2-client"/>
+    <package name="openslp"/>
+    <package name="pam-config"/>
+    <package name="pam-modules"/>
+    <package name="pciutils"/>
+    <package name="perl"/>
+    <package name="perl-HTML-Tagset"/>
+    <package name="perl-gettext"/>
+    <package name="setserial"/>
+    <package name="xorg-x11-libX11"/>
+    <package name="xorg-x11-libXau"/>
+    <package name="xorg-x11-libxcb"/>
+  </packages>
 </image>

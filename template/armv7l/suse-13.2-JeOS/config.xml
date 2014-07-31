@@ -1,84 +1,84 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <image schemaversion="6.1" name="LimeJeOS-13.2">
-	<description type="system">
-		<author>Marcus Schäfer</author>
-		<contact>ms@novell.com</contact>
-		<specification>
-			13.2 JeOS image for arm boards
-		</specification>
-	</description>
-	<profiles>
-		<profile name="raspberryFlavour" description="Kernel/Tools setup for raspberry boards"/>
-	</profiles>
-	<preferences>
-		<type image="tbz" primary="true"/>
-		<version>1.13.2</version>
-		<packagemanager>zypper</packagemanager>
-		<locale>en_US</locale>
-		<keytable>us.map.gz</keytable>
-		<timezone>Europe/Berlin</timezone>
-		<hwclock>utc</hwclock>
-		<rpm-excludedocs>true</rpm-excludedocs>
-		<bootsplash-theme>openSUSE</bootsplash-theme>
-		<bootloader-theme>openSUSE</bootloader-theme>
-	</preferences>
-	<preferences profiles="raspberryFlavour">
-		<type image="oem" filesystem="ext4" boot="oemboot/suse-13.2" firmware="vboot" bootloader="berryboot" fsmountoptions="noatime,nobarrier" kernelcmdline="dwc_otg.lpm_enable=0 console=ttyAMA0,115200 kgdboc=ttyAMA0,115200 console=tty1 rootfstype=ext4 rootflags=commit=120,data=writeback rootwait rw" editbootconfig="berryboot-image-setup">
-			<systemdisk/>
-			<oemconfig>
-				<oem-swapsize>500</oem-swapsize>
-				<oem-swap>true</oem-swap>
-			</oemconfig>
-		</type>
-	</preferences>
-	<users group="root">
-		<user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
-	</users>
-	<repository type="yast2" profiles="raspberryFlavour">
-		<source path="http://download.opensuse.org/ports/armv6hl/factory/repo/oss"/>
-	</repository>
-	<repository type="rpm-md" priority="5" profiles="raspberryFlavour">
-		<source path="obs://devel:ARM:Factory:Contrib:RaspberryPi/standard"/>
-	</repository>
-	<repository type="rpm-md" priority="10" profiles="raspberryFlavour">
-		<source path="obs://devel:ARM:Factory:Contrib:RaspberryPi:upstream/standard"/>
-	</repository>
-	<packages type="bootstrap" profiles="raspberryFlavour">
-		<package name="kernel-default" bootinclude="true"/>
-		<package name="raspberrypi-firmware" bootinclude="true"/>
-		<package name="u-boot-rpib" bootinclude="true"/>
-		<package name="dtb-bcm2835" bootinclude="true"/>
-		<package name="raspberrypi-gfx"/>
-		<archive name="berryboot-setup.tgz" bootinclude="true"/>
-	</packages>
-	<packages type="bootstrap">
-		<package name="ifplugd"/>
-		<package name="iputils"/>
-		<package name="vim"/>
-		<package name="lvm2"/>
-		<package name="filesystem"/>
-		<package name="glibc-locale"/>
-		<package name="cracklib-dict-full"/>
-		<package name="kbd"/>
-		<package name="aaa_base"/>
-		<package name="hwinfo"/>
-		<package name="procps"/>
-		<package name="sysconfig"/>
-		<package name="openssh"/>
-		<package name="dhcpcd"/>
-		<package name="polkit"/>
-		<package name="netcfg"/>
-		<package name="rpcbind"/>
-		<package name="mkinitrd"/>
-		<package name="rpm"/>
-		<package name="rsyslog"/>
-		<package name="systemd-sysvinit"/>
-		<package name="u-boot-tools"/>
-		<package name="less"/>
-		<package name="zypper"/>
-		<package name="nfs-client"/>
-		<package name="wicked"/>
-		<package name="wicked-service"/>
-	</packages>
+  <description type="system">
+    <author>Marcus Schäfer</author>
+    <contact>ms@novell.com</contact>
+    <specification>
+      13.2 JeOS image for arm boards
+    </specification>
+  </description>
+  <profiles>
+    <profile name="raspberryFlavour" description="Kernel/Tools setup for raspberry boards"/>
+  </profiles>
+  <preferences>
+    <type image="tbz" primary="true"/>
+    <version>1.13.2</version>
+    <packagemanager>zypper</packagemanager>
+    <locale>en_US</locale>
+    <keytable>us.map.gz</keytable>
+    <timezone>Europe/Berlin</timezone>
+    <hwclock>utc</hwclock>
+    <rpm-excludedocs>true</rpm-excludedocs>
+    <bootsplash-theme>openSUSE</bootsplash-theme>
+    <bootloader-theme>openSUSE</bootloader-theme>
+  </preferences>
+  <preferences profiles="raspberryFlavour">
+    <type image="oem" filesystem="ext4" boot="oemboot/suse-13.2" firmware="vboot" bootloader="berryboot" fsmountoptions="noatime,nobarrier" kernelcmdline="dwc_otg.lpm_enable=0 console=ttyAMA0,115200 kgdboc=ttyAMA0,115200 console=tty1 rootfstype=ext4 rootflags=commit=120,data=writeback rootwait rw" editbootconfig="berryboot-image-setup">
+      <systemdisk/>
+      <oemconfig>
+        <oem-swapsize>500</oem-swapsize>
+        <oem-swap>true</oem-swap>
+      </oemconfig>
+    </type>
+  </preferences>
+  <users group="root">
+    <user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
+  </users>
+  <repository type="yast2" profiles="raspberryFlavour">
+    <source path="http://download.opensuse.org/ports/armv6hl/factory/repo/oss"/>
+  </repository>
+  <repository type="rpm-md" priority="5" profiles="raspberryFlavour">
+    <source path="obs://devel:ARM:Factory:Contrib:RaspberryPi/standard"/>
+  </repository>
+  <repository type="rpm-md" priority="10" profiles="raspberryFlavour">
+    <source path="obs://devel:ARM:Factory:Contrib:RaspberryPi:upstream/standard"/>
+  </repository>
+  <packages type="bootstrap" profiles="raspberryFlavour">
+    <package name="kernel-default" bootinclude="true"/>
+    <package name="raspberrypi-firmware" bootinclude="true"/>
+    <package name="u-boot-rpib" bootinclude="true"/>
+    <package name="dtb-bcm2835" bootinclude="true"/>
+    <package name="raspberrypi-gfx"/>
+    <archive name="berryboot-setup.tgz" bootinclude="true"/>
+  </packages>
+  <packages type="bootstrap">
+    <package name="ifplugd"/>
+    <package name="iputils"/>
+    <package name="vim"/>
+    <package name="lvm2"/>
+    <package name="filesystem"/>
+    <package name="glibc-locale"/>
+    <package name="cracklib-dict-full"/>
+    <package name="kbd"/>
+    <package name="aaa_base"/>
+    <package name="hwinfo"/>
+    <package name="procps"/>
+    <package name="sysconfig"/>
+    <package name="openssh"/>
+    <package name="dhcpcd"/>
+    <package name="polkit"/>
+    <package name="netcfg"/>
+    <package name="rpcbind"/>
+    <package name="mkinitrd"/>
+    <package name="rpm"/>
+    <package name="rsyslog"/>
+    <package name="systemd-sysvinit"/>
+    <package name="u-boot-tools"/>
+    <package name="less"/>
+    <package name="zypper"/>
+    <package name="nfs-client"/>
+    <package name="wicked"/>
+    <package name="wicked-service"/>
+  </packages>
 </image>

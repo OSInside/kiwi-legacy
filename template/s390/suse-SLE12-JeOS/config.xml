@@ -1,52 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <image schemaversion="6.1" name="LimeJeOS-SLE12">
-	<description type="system">
-		<author>Marcus Schaefer</author>
-		<contact>cthiel@novell.com</contact>
-		<specification>SUSE Linux Enterprise 12 JeOS</specification>
-	</description>
-	<preferences>
-		<version>1.1.0</version>
-		<packagemanager>zypper</packagemanager>
-		<bootsplash-theme>SLES</bootsplash-theme>
-		<bootloader-theme>SLES</bootloader-theme>
-		<rpm-excludedocs>true</rpm-excludedocs>
-		<locale>en_US</locale>
-		<keytable>us.map.gz</keytable>
-		<timezone>Europe/Berlin</timezone>
-		<hwclock>utc</hwclock>
-		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES12" bootloader="zipl" primary="true"/>
-		<type image="oem" filesystem="ext3" boot="oemboot/suse-SLES12" bootloader="zipl">
-			<systemdisk/>
-			<oemconfig>
-				<oem-swap>true</oem-swap>
-				<oem-swapsize>512</oem-swapsize>
-			</oemconfig>
-		</type>
-		<type image="pxe" filesystem="ext3" boot="netboot/suse-SLES12" bootloader="zipl"/>
-	</preferences>
-	<users group="root">
-		<user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
-	</users>
-	<repository type="yast2">
-		<source path="obs://SUSE:SLE-12:GA/standard"/>
-	</repository>
-	<packages type="image">
-		<namedCollection name="base"/>
-		<product name="SUSE_SLES"/>
-		<package name="cmsfs"/>
-		<package name="kernel-default"/>
-		<package name="ifplugd"/>
-		<package name="iputils"/>
-		<package name="vim"/>
-		<package name="s390-tools"/>
-		<package name="syslog-ng"/>
-	</packages>
-	<packages type="bootstrap">
-		<package name="filesystem"/>
-		<package name="glibc-locale"/>
-		<package name="cracklib-dict-full"/>
-		<package name="openssl-certs"/>
-	</packages>
+  <description type="system">
+    <author>Marcus Schaefer</author>
+    <contact>cthiel@novell.com</contact>
+    <specification>SUSE Linux Enterprise 12 JeOS</specification>
+  </description>
+  <preferences>
+    <version>1.1.0</version>
+    <packagemanager>zypper</packagemanager>
+    <bootsplash-theme>SLES</bootsplash-theme>
+    <bootloader-theme>SLES</bootloader-theme>
+    <rpm-excludedocs>true</rpm-excludedocs>
+    <locale>en_US</locale>
+    <keytable>us.map.gz</keytable>
+    <timezone>Europe/Berlin</timezone>
+    <hwclock>utc</hwclock>
+    <type image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES12" bootloader="zipl" primary="true"/>
+    <type image="oem" filesystem="ext3" boot="oemboot/suse-SLES12" bootloader="zipl">
+      <systemdisk/>
+      <oemconfig>
+        <oem-swap>true</oem-swap>
+        <oem-swapsize>512</oem-swapsize>
+      </oemconfig>
+    </type>
+    <type image="pxe" filesystem="ext3" boot="netboot/suse-SLES12" bootloader="zipl"/>
+  </preferences>
+  <users group="root">
+    <user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
+  </users>
+  <repository type="yast2">
+    <source path="obs://SUSE:SLE-12:GA/standard"/>
+  </repository>
+  <packages type="image">
+    <namedCollection name="base"/>
+    <product name="SUSE_SLES"/>
+    <package name="cmsfs"/>
+    <package name="kernel-default"/>
+    <package name="ifplugd"/>
+    <package name="iputils"/>
+    <package name="vim"/>
+    <package name="s390-tools"/>
+    <package name="syslog-ng"/>
+  </packages>
+  <packages type="bootstrap">
+    <package name="filesystem"/>
+    <package name="glibc-locale"/>
+    <package name="cracklib-dict-full"/>
+    <package name="openssl-certs"/>
+  </packages>
 </image>

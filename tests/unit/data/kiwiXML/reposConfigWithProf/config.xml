@@ -1,50 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <image schemaversion="5.7" name="testCase-repo-settings">
-	<description type="system">
-		<author>Robert Schweikert</author>
-		<contact>rjschwei@suse.com</contact>
-		<specification>Test configuration to verify repository configuration is handled correctly</specification>
-	</description>
-	<profiles>
-		<profile description="Test prof A" import="false" name="profA"/>
-		<profile description="Test prof B" name="profB"/>
-		<profile description="Test prof C" name="profC"/>
-	</profiles>
-	<preferences>
-		<type image="vmx" filesystem="ext4" boot="vmxboot/suse-12.1" format="ovf">
-			<machine max_memory="2048" memory="1024" min_memory="512" max_cpu="4" ncpus="2" min_cpu="1" ovftype="powervm">
-				<vmdisk device="/dev/sda" disktype="scsi"/>
-				<vmnic interface="eth0"/>
-			</machine>
-		</type>
-		<version>0.0.1</version>
-		<rpm-check-signatures>false</rpm-check-signatures>
-		<rpm-force>false</rpm-force>
-		<locale>en_US</locale>
-		<keytable>us.map.gz</keytable>
-	</preferences>
-	<users group="root">
-		<user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
-	</users>
-	<repository type="yast2" prefer-license="true" priority="2" status="fixed">
-		<source path="/tmp/12.1/repo/oss/"/>
-	</repository>
-	<repository type="rpm-md" alias="update" imageinclude="true" profiles="profA">
-		<source path="http://download.opensuse.org/update/12.1"/>
-	</repository>
-	<repository type="rpm-dir" status="replaceable" profiles="profA,profC">
-		<source path="/repos/12.1-additional"/>
-	</repository>
-	<repository type="yast2" username="foo" password="bar" status="replaceable" profiles="profB">
-		<source path="https://myreposerver/protectedrepos/12.1"/>
-	</repository>
-	<packages type="image">
-		<package name="kernel-default"/>
-		<namedCollection name="base"/>
-	</packages>
-	<packages type="bootstrap">
-		<package name="filesystem"/>
-		<package name="glibc-locale"/>
-	</packages>
+  <description type="system">
+    <author>Robert Schweikert</author>
+    <contact>rjschwei@suse.com</contact>
+    <specification>Test configuration to verify repository configuration is handled correctly</specification>
+  </description>
+  <profiles>
+    <profile description="Test prof A" import="false" name="profA"/>
+    <profile description="Test prof B" name="profB"/>
+    <profile description="Test prof C" name="profC"/>
+  </profiles>
+  <preferences>
+    <type image="vmx" filesystem="ext4" boot="vmxboot/suse-12.1" format="ovf">
+      <machine max_memory="2048" memory="1024" min_memory="512" max_cpu="4" ncpus="2" min_cpu="1" ovftype="powervm">
+        <vmdisk device="/dev/sda" disktype="scsi"/>
+        <vmnic interface="eth0"/>
+      </machine>
+    </type>
+    <version>0.0.1</version>
+    <rpm-check-signatures>false</rpm-check-signatures>
+    <rpm-force>false</rpm-force>
+    <locale>en_US</locale>
+    <keytable>us.map.gz</keytable>
+  </preferences>
+  <users group="root">
+    <user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
+  </users>
+  <repository type="yast2" prefer-license="true" priority="2" status="fixed">
+    <source path="/tmp/12.1/repo/oss/"/>
+  </repository>
+  <repository type="rpm-md" alias="update" imageinclude="true" profiles="profA">
+    <source path="http://download.opensuse.org/update/12.1"/>
+  </repository>
+  <repository type="rpm-dir" status="replaceable" profiles="profA,profC">
+    <source path="/repos/12.1-additional"/>
+  </repository>
+  <repository type="yast2" username="foo" password="bar" status="replaceable" profiles="profB">
+    <source path="https://myreposerver/protectedrepos/12.1"/>
+  </repository>
+  <packages type="image">
+    <package name="kernel-default"/>
+    <namedCollection name="base"/>
+  </packages>
+  <packages type="bootstrap">
+    <package name="filesystem"/>
+    <package name="glibc-locale"/>
+  </packages>
 </image>

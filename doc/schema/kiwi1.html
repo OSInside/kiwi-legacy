@@ -7,20 +7,20 @@
       <link rel="stylesheet" href="xsdDocHtml.css" type="text/css" /><script type="text/javascript">
          <!--
         var propertiesBoxes= new Array('properties_id1', 
-				'properties_id15', 
-				'properties_id17');
+        'properties_id15', 
+        'properties_id17');
 
         
         var usedByBoxes= new Array('usedBy_id15', 
-				'usedBy_id17');
+        'usedBy_id17');
 
         var sourceBoxes= new Array('source_id15', 
-				'source_id17');
+        'source_id17');
 
         
         
         var annotationBoxes= new Array('annotations_id15', 
-				'annotations_id17');
+        'annotations_id17');
 
         
         
@@ -581,10 +581,10 @@
                      
                      // The corresponding div is already visible conf. to its style attr.                     
                     
-                        	var selectToc = getElementObject('selectTOC');
-                        	if(selectToc != null){
-                        	    // It can be null when having chunking, the combo of the TOC is in another frame.
-                            	    selectToc.selectedIndex = 1;
+                          var selectToc = getElementObject('selectTOC');
+                          if(selectToc != null){
+                              // It can be null when having chunking, the combo of the TOC is in another frame.
+                                  selectToc.selectedIndex = 1;
                                     }
                         
                     
@@ -592,26 +592,26 @@
                      var globalControls = getElementObject("global_controls"); 
                      
                      if(globalControls != null){
-	                     var browser=navigator.appName;
-						 var version = parseFloat(navigator.appVersion.split('MSIE')[1]);
-						 
-						 var IE6 = false;
-						 if ((browser=="Microsoft Internet Explorer") && (version < 7)){
-						 	IE6 = true;
-						 }
-	
-	                     //alert (IE6 + " |V| " + version);
-	                     
-	                     if(IE6){
-	                     	// On IE 6 the 'fixed' property is not supported. We must use javascript. 
-	                         globalControls.style.position='absolute';                         
-	                         // The global controls will do not exist in the TOC frame, when chunking.
-	                         findAndFloat("global_controls", 225, 30);    
-	                     } else {
-	                      	  globalControls.style.position='fixed';                     	
-	                     }
-	                     
-	                     globalControls.style.right='0';                       
+                       var browser=navigator.appName;
+             var version = parseFloat(navigator.appVersion.split('MSIE')[1]);
+             
+             var IE6 = false;
+             if ((browser=="Microsoft Internet Explorer") && (version < 7)){
+              IE6 = true;
+             }
+  
+                       //alert (IE6 + " |V| " + version);
+                       
+                       if(IE6){
+                        // On IE 6 the 'fixed' property is not supported. We must use javascript. 
+                           globalControls.style.position='absolute';                         
+                           // The global controls will do not exist in the TOC frame, when chunking.
+                           findAndFloat("global_controls", 225, 30);    
+                       } else {
+                            globalControls.style.position='fixed';                      
+                       }
+                       
+                       globalControls.style.right='0';                       
                      }
                 --></script></body>
 </html>

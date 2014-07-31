@@ -1,5 +1,5 @@
 #!/bin/bash
-for file in $(find | grep -v Makefile | grep -v .git); do
+for file in $(find -type f | grep -v Makefile | grep -v .git); do
   mode=$(stat -c %a $file)
   expand -t 2 $file > $file.tmp && mv $file.tmp $file
   chmod $mode $file

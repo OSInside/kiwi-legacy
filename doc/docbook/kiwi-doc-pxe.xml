@@ -307,18 +307,18 @@ DISK=device</screen>
               path on the TFTP server and is loaded via TFTP. The
               download is made to the file on the netboot client
               indicated by the target (dest). Download only happens when
-	      configuration files are missing on the client or, if md5sum hash
-	      is supplied ([hash]), when different. To achieve this, list of
-	      CONF files (and VENDOR_CONF) files is kept on the client in
-	      the <filename>/etc/KIWI/InstalledConfigFiles</filename> backup file, and
+        configuration files are missing on the client or, if md5sum hash
+        is supplied ([hash]), when different. To achieve this, list of
+        CONF files (and VENDOR_CONF) files is kept on the client in
+        the <filename>/etc/KIWI/InstalledConfigFiles</filename> backup file, and
               is compared to the CONF data gathered from the config.MAC and also
-	      from other configuration files, e.g. config.group, if supplied.
+        from other configuration files, e.g. config.group, if supplied.
               Configuration files selected for comparison are those with
-	      same (dest) path. If destination path (dest) is same for more configuration
-	      files, only the last one is used (and VENDOR_CONF has always
-	      precedence to CONF). By comparing configuration file lists
-	      present in the current CONF, VENDOR_CONF variables and stored in
-	      the backup file, following actions can result:
+        same (dest) path. If destination path (dest) is same for more configuration
+        files, only the last one is used (and VENDOR_CONF has always
+        precedence to CONF). By comparing configuration file lists
+        present in the current CONF, VENDOR_CONF variables and stored in
+        the backup file, following actions can result:
 
 <table id="tab.configuration.files.synchronization">
       <title>Configuration files synchronization possibilities</title>
@@ -424,7 +424,7 @@ DISK=device</screen>
 RAID='1;/dev/sda;/dev/sdb'
 IMAGE='/dev/md1;LimeJeOS-openSUSE-##.#.i686;1.11.3;192.168.100.2;4096'
 PART='5;S;x,2000;83;/'</screen>
-		  </listitem>
+      </listitem>
         </varlistentry>
         <varlistentry>
           <term><varname>DISK</varname></term>
@@ -435,19 +435,19 @@ PART='5;S;x,2000;83;/'</screen>
                 >/dev/hda</filename>. </para>
           </listitem>
         </varlistentry>
-		<varlistentry>
-		  <term><varname>REBOOT_IMAGE</varname></term>
+    <varlistentry>
+      <term><varname>REBOOT_IMAGE</varname></term>
           <listitem>
             <para>If set to a non-empty string, this will reboot the
-			  system after the initial deployment process is done.
+        system after the initial deployment process is done.
               This means before the system init process is activated
               the system is rebooted. If the machine's default boot
               setup is to boot via PXE it will again boot from the
-			  network.
+        network.
             </para>
           </listitem>
         </varlistentry>
-		<varlistentry>
+    <varlistentry>
           <term><varname>FORCE_KEXEC</varname></term>
           <listitem>
             <para>During the initial deployment process kiwi checks
@@ -785,32 +785,32 @@ NBD-Write-Export-Name;/dev/NBD-Write-Device</screen>
         read-write filesystem is a solution for this problem. In order
         to use a compressed root filesystem based on clicfs make sure your
         <filename>config.xml</filename>’s filesystem attribute
-		contains <systemitem class="filesystem">clicfs</systemitem>.
-		As an alternative to clicfs kiwi also supports the fuse
+    contains <systemitem class="filesystem">clicfs</systemitem>.
+    As an alternative to clicfs kiwi also supports the fuse
         based unionfs utility. In contrast to clicfs which writes
-		a block list on the write device, unionfs points all write operations
-		into another filesystem which allows to mount and watch this
-		location separately. In order
+    a block list on the write device, unionfs points all write operations
+    into another filesystem which allows to mount and watch this
+    location separately. In order
         to use a compressed root filesystem based on unionfs make sure your
-		<filename>config.xml</filename>’s filesystem attribute
-		contains <systemitem class="filesystem">squashfs</systemitem>.
-		Below find examples for the different union modes.</para>
+    <filename>config.xml</filename>’s filesystem attribute
+    contains <systemitem class="filesystem">squashfs</systemitem>.
+    Below find examples for the different union modes.</para>
 
-		<sect3 id="sec.pxe.union.local.local">
-			<title>Download to Local Storage, Write to Local Storage</title>
-			<indexterm>
-				<primary>union image</primary>
-				<secondary>local-local</secondary>
-			</indexterm>
+    <sect3 id="sec.pxe.union.local.local">
+      <title>Download to Local Storage, Write to Local Storage</title>
+      <indexterm>
+        <primary>union image</primary>
+        <secondary>local-local</secondary>
+      </indexterm>
 <screen>DISK=/dev/sda
 PART='5;S;x,400;L;/,x;L;x'
 IMAGE='/dev/sda2;suse-##.#-pxe-client.i386;1.2.8;192.168.100.2;4096'
 UNIONFS_CONFIG=/dev/sda3,/dev/sda2,unionfs
 KIWI_INITRD=/boot/initrd</screen>
-		</sect3>
-		<sect3 id="sec.pxe.union.local.ram">
-			<title>Download to Local Storage, Write to RAM</title>
-			<indexterm>
+    </sect3>
+    <sect3 id="sec.pxe.union.local.ram">
+      <title>Download to Local Storage, Write to RAM</title>
+      <indexterm>
                 <primary>union image</primary>
                 <secondary>local-ram</secondary>
             </indexterm>
@@ -819,44 +819,44 @@ PART='5;S;x,400;L;/'
 IMAGE='/dev/sda2;suse-##.#-pxe-client.i386;1.2.8;192.168.100.2;4096'
 UNIONFS_CONFIG=tmpfs,/dev/sda2,unionfs</screen>
         </sect3>
-		<sect3 id="sec.pxe.union.remote.local">
-			<title>Mount from Remote, Write to Local Storage</title>
-			<indexterm>
+    <sect3 id="sec.pxe.union.remote.local">
+      <title>Mount from Remote, Write to Local Storage</title>
+      <indexterm>
                 <primary>union image</primary>
                 <secondary>remote-local</secondary>
             </indexterm>
-			<para>For all of the following modes I strongly recommend to check
-			on a separate client machine in the network if it is possible to
+      <para>For all of the following modes I strongly recommend to check
+      on a separate client machine in the network if it is possible to
             access the exported read-only and read-write device locations. If
             accessing devices works the image should also be able to access
             them on boot. If the boot fails it should be clear that the reason
             is not the exported device.
-			</para>
-			<itemizedlist>
-				<listitem><para>NFSROOT</para>
+      </para>
+      <itemizedlist>
+        <listitem><para>NFSROOT</para>
 <screen>PART='5;S;x,x;L;x'
 NFSROOT="192.168.100.2;/srv/kiwi-read-only-path"
 UNIONFS_CONFIG=/dev/sda2,nfs,unionfs</screen>
-				</listitem>
-				<listitem><para>AOEROOT</para>
+        </listitem>
+        <listitem><para>AOEROOT</para>
 <screen>PART='5;S;x,x;L;x'
 AOEROOT=/dev/etherd/e0.1,/dev/sda2
 UNIONFS_CONFIG=/dev/sda2,aoe,unionfs</screen>
                 </listitem>
-				<listitem><para>NBDROOT</para>
+        <listitem><para>NBDROOT</para>
 <screen>PART='5;S;x,x;L;x'
 NBDROOT=192.168.100.7;root1;/dev/nbd0;;;;/dev/sda2
 UNIONFS_CONFIG=/dev/sda2,nbd,unionfs</screen>
                 </listitem>
-			</itemizedlist>
+      </itemizedlist>
         </sect3>
-		<sect3 id="sec.pxe.union.remote.ram">
-			<title>Mount from Remote, Write to RAM</title>
-			<indexterm>
+    <sect3 id="sec.pxe.union.remote.ram">
+      <title>Mount from Remote, Write to RAM</title>
+      <indexterm>
                 <primary>union image</primary>
                 <secondary>remote-ram</secondary>
             </indexterm>
-			<itemizedlist>
+      <itemizedlist>
                 <listitem><para>NFSROOT</para>
 <screen>NFSROOT="192.168.100.2;/srv/kiwi-read-only-path"
 UNIONFS_CONFIG=tmpfs,nfs,unionfs</screen>
@@ -871,13 +871,13 @@ UNIONFS_CONFIG=tmpfs,nbd,unionfs</screen>
                 </listitem>
             </itemizedlist>
         </sect3>
-		<sect3 id="sec.pxe.union.remote.remote">
-			<title>Mount from Remote, Write to Remote</title>
-			<indexterm>
+    <sect3 id="sec.pxe.union.remote.remote">
+      <title>Mount from Remote, Write to Remote</title>
+      <indexterm>
                 <primary>union image</primary>
                 <secondary>remote-remote</secondary>
             </indexterm>
-			<itemizedlist>
+      <itemizedlist>
                 <listitem><para>NFSROOT</para>
 <screen>NFSROOT="192.168.100.2;/srv/kiwi-read-only-path"
 UNIONFS_CONFIG=/srv/kiwi-read-write-path,nfs,unionfs</screen>

@@ -1,43 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <image schemaversion="5.7" name="suse-11.3-oem-preload">
-	<description type="system">
-		<author>Robert Schweikert</author>
-		<contact>rjschwei@suse.com</contact>
-		<specification>test multiple equal type settings</specification>
-	</description>
-	<preferences>
-		<type image="oem" filesystem="ext4" boot="oemboot/suse-11.3" installiso="true" installboot="install">
-			<oemconfig>
-				<oem-shutdown>true</oem-shutdown>
-				<oem-swap>false</oem-swap>
-				<oem-unattended>true</oem-unattended>
-			</oemconfig>
-		</type>
-		<type image="oem" filesystem="ext4" boot="oemboot/suse-11.3" installiso="true" installboot="install"/>
-		<type image="vmx" filesystem="ext4" boot="vmxboot/suse-11.3"/>
-		<version>1.0.0</version>
-		<packagemanager>zypper</packagemanager>
-		<rpm-check-signatures>false</rpm-check-signatures>
-		<rpm-force>true</rpm-force>
-		<locale>en_US</locale>
-		<keytable>us.map.gz</keytable>
-	</preferences>
-	<users group="root">
-		<user password="linux" pwdformat="plain" home="/root" name="root"/>
-	</users>
-	<repository type="yast2">
-		<source path="/tmp"/>
-	</repository>
-	<packages type="image" patternType="plusRecommended">
-		<package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>
-		<package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
-		<package name="kernel-default"/>
-		<package name="vi"/>
-		<namedCollection name="default"/>
-	</packages>
-	<packages type="bootstrap">
-		<package name="filesystem"/>
-		<package name="glibc-locale"/>
-	</packages>
+  <description type="system">
+    <author>Robert Schweikert</author>
+    <contact>rjschwei@suse.com</contact>
+    <specification>test multiple equal type settings</specification>
+  </description>
+  <preferences>
+    <type image="oem" filesystem="ext4" boot="oemboot/suse-11.3" installiso="true" installboot="install">
+      <oemconfig>
+        <oem-shutdown>true</oem-shutdown>
+        <oem-swap>false</oem-swap>
+        <oem-unattended>true</oem-unattended>
+      </oemconfig>
+    </type>
+    <type image="oem" filesystem="ext4" boot="oemboot/suse-11.3" installiso="true" installboot="install"/>
+    <type image="vmx" filesystem="ext4" boot="vmxboot/suse-11.3"/>
+    <version>1.0.0</version>
+    <packagemanager>zypper</packagemanager>
+    <rpm-check-signatures>false</rpm-check-signatures>
+    <rpm-force>true</rpm-force>
+    <locale>en_US</locale>
+    <keytable>us.map.gz</keytable>
+  </preferences>
+  <users group="root">
+    <user password="linux" pwdformat="plain" home="/root" name="root"/>
+  </users>
+  <repository type="yast2">
+    <source path="/tmp"/>
+  </repository>
+  <packages type="image" patternType="plusRecommended">
+    <package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>
+    <package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
+    <package name="kernel-default"/>
+    <package name="vi"/>
+    <namedCollection name="default"/>
+  </packages>
+  <packages type="bootstrap">
+    <package name="filesystem"/>
+    <package name="glibc-locale"/>
+  </packages>
 </image>

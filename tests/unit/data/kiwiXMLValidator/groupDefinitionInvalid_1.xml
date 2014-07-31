@@ -1,43 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <image schemaversion="5.7" name="testCase-group-consitency">
-	<description type="system">
-		<author>Robert Schweikert</author>
-		<contact>rjschwei@suse.com</contact>
-		<specification>Test configuration to verify group definition inconsitencies are reported</specification>
-	</description>
-	<preferences>
-		<type image="vmx" filesystem="ext4" boot="vmxboot/suse-12.1" format="vmdk">
-			<machine memory="1024">
-				<vmdisk device="/dev/sda" disktype="scsi"/>
-				<vmnic interface="eth0"/>
-			</machine>
-		</type>
-		<version>0.0.1</version>
-		<rpm-check-signatures>false</rpm-check-signatures>
-		<rpm-force>false</rpm-force>
-		<locale>en_US</locale>
-		<keytable>us.map.gz</keytable>
-	</preferences>
-	<users group="root">
-		<user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
-	</users>
-	<users group="mygrp" id="2000">
-		<user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/home/auser" id="2001" name="auser" shell="/bin/ksh"/>
-		<user password="linux" home="/home/buser" pwdformat="plain" name="buser" realname="Bert"/>
-	</users>
-	<users group="mygrp" id="1111">
-		<user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/home/cuser" id="2001" name="cuser" shell="/bin/ksh"/>
-	</users>
-	<repository type="yast2">
-		<source path="/tmp"/>
-	</repository>
-	<packages type="image">
-		<package name="kernel-default"/>
-		<namedCollection name="base"/>
-	</packages>
-	<packages type="bootstrap">
-		<package name="filesystem"/>
-		<package name="glibc-locale"/>
-	</packages>
+  <description type="system">
+    <author>Robert Schweikert</author>
+    <contact>rjschwei@suse.com</contact>
+    <specification>Test configuration to verify group definition inconsitencies are reported</specification>
+  </description>
+  <preferences>
+    <type image="vmx" filesystem="ext4" boot="vmxboot/suse-12.1" format="vmdk">
+      <machine memory="1024">
+        <vmdisk device="/dev/sda" disktype="scsi"/>
+        <vmnic interface="eth0"/>
+      </machine>
+    </type>
+    <version>0.0.1</version>
+    <rpm-check-signatures>false</rpm-check-signatures>
+    <rpm-force>false</rpm-force>
+    <locale>en_US</locale>
+    <keytable>us.map.gz</keytable>
+  </preferences>
+  <users group="root">
+    <user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
+  </users>
+  <users group="mygrp" id="2000">
+    <user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/home/auser" id="2001" name="auser" shell="/bin/ksh"/>
+    <user password="linux" home="/home/buser" pwdformat="plain" name="buser" realname="Bert"/>
+  </users>
+  <users group="mygrp" id="1111">
+    <user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/home/cuser" id="2001" name="cuser" shell="/bin/ksh"/>
+  </users>
+  <repository type="yast2">
+    <source path="/tmp"/>
+  </repository>
+  <packages type="image">
+    <package name="kernel-default"/>
+    <namedCollection name="base"/>
+  </packages>
+  <packages type="bootstrap">
+    <package name="filesystem"/>
+    <package name="glibc-locale"/>
+  </packages>
 </image>

@@ -21,7 +21,7 @@
                 <proposal_module>x11</proposal_module>
                 <proposal_module>printer</proposal_module>
                 <proposal_module>sound</proposal_module>
-		<proposal_module>bluetooth</proposal_module>
+    <proposal_module>bluetooth</proposal_module>
             </proposal_modules>
         </proposal>
         <proposal>

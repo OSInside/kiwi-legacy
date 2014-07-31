@@ -1,28 +1,28 @@
 <initrd>
-	<!---
-	remove all files listed here
-	-->
-	<strip type="delete">
-		<file name="/usr/share/info"/>
-		<file name="/usr/share/splashy"/>
-	</strip>
+  <!---
+  remove all files listed here
+  -->
+  <strip type="delete">
+    <file name="/usr/share/info"/>
+    <file name="/usr/share/splashy"/>
+  </strip>
 
-	<!--
-	remove all binaries from bin|sbin /usr/bin|sbin
-	locations except for the ones listed here
-	-->
-	<strip type="tools">
-		<file name="date"/>
-		<file name="zfs"/>
-	</strip>
+  <!--
+  remove all binaries from bin|sbin /usr/bin|sbin
+  locations except for the ones listed here
+  -->
+  <strip type="tools">
+    <file name="date"/>
+    <file name="zfs"/>
+  </strip>
 
-	<!--
-	check with ldd and remove all those libraries with
-	no reference except for the ones listed here
-	-->
-	<strip type="libs">
-		<file name="libdmraid-events-isw"/>
-		<file name="libfontenc"/>
-	</strip>
+  <!--
+  check with ldd and remove all those libraries with
+  no reference except for the ones listed here
+  -->
+  <strip type="libs">
+    <file name="libdmraid-events-isw"/>
+    <file name="libfontenc"/>
+  </strip>
 
 </initrd>

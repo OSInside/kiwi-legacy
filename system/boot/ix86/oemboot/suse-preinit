@@ -29,7 +29,7 @@ Echo "Calling pre-init stage in system image"
 # 2) check for LOCAL_BOOT
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "yes" ] && [ -z "$KIWI_RECOVERY" ];then
-	exit 0
+  exit 0
 fi
 
 #======================================
@@ -52,78 +52,78 @@ createFramebufferDevices
 # 6) create initrd on diskful
 #--------------------------------------
 if \
-	[ -z "$UNIONFS_CONFIG" ] && [ -z "$COMBINED_IMAGE" ] && \
-	[ ! "$OEM_KIWI_INITRD" = "true" ]
+  [ -z "$UNIONFS_CONFIG" ] && [ -z "$COMBINED_IMAGE" ] && \
+  [ ! "$OEM_KIWI_INITRD" = "true" ]
 then
-	#======================================
-	# use distro initrd tool
-	#--------------------------------------
-	setupInitrd
+  #======================================
+  # use distro initrd tool
+  #--------------------------------------
+  setupInitrd
 else
-	#======================================
-	# use kiwi initrd from RW partition
-	#--------------------------------------
-	bootLoaderOK=1
+  #======================================
+  # use kiwi initrd from RW partition
+  #--------------------------------------
+  bootLoaderOK=1
 fi
 
 #======================================
 # 7) Install boot loader if ok
 #--------------------------------------
 if [ $bootLoaderOK = 1 ];then
-	installBootLoader
+  installBootLoader
 fi
 
 #======================================
 # 8) copy recovery related files
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "no" ] && [ ! -z "$OEM_RECOVERY" ];then
-	IFS=$IFS_ORIG
-	Echo "Setting up recovery configuration archive..."
-	mkdir -p /reco-save
-	if ! mount $imageRecoveryDevice /reco-save >/dev/null;then
-		systemException "Failed to mount recovery device" "reboot"
-	fi
-	Echo "Installing boot loader into recovery partition"
-	setupBootLoaderRecovery / /reco-save OEM
-	installBootLoaderRecovery
-	Echo "Store recovery boot files phase 1)..."
-	backupBootFiles=""
-	for i in \
-		/etc/fstab \
-		/etc/sysconfig/kernel \
-		/etc/sysconfig/bootloader \
-		/etc/grub.conf \
-		/etc/lilo.conf \
-		/etc/default/grub \
-		/etc/grub.d/40_custom
-	do
-		test -e $i && backupBootFiles="$backupBootFiles $i"
-	done
-	if ! tar -czf /reco-save/boot-1.tgz $backupBootFiles;then
-		systemException "Failed to tar up recovery boot-1.tgz" "reboot"
-	fi
-	Echo "Store recovery boot files phase 2)..."
-	backupBootFiles=""
-	for i in $(find /boot -type f); do
-		if ! echo $i | grep -q -E "\.sys";then
-			backupBootFiles="$backupBootFiles $i"
-		fi
-	done
-	if ! tar -czf /reco-save/boot-2.tgz $backupBootFiles;then
-		systemException "Failed to tar up recovery boot-2.tgz" "reboot"
-	fi
-	umount /reco-save
-	rmdir /reco-save
+  IFS=$IFS_ORIG
+  Echo "Setting up recovery configuration archive..."
+  mkdir -p /reco-save
+  if ! mount $imageRecoveryDevice /reco-save >/dev/null;then
+    systemException "Failed to mount recovery device" "reboot"
+  fi
+  Echo "Installing boot loader into recovery partition"
+  setupBootLoaderRecovery / /reco-save OEM
+  installBootLoaderRecovery
+  Echo "Store recovery boot files phase 1)..."
+  backupBootFiles=""
+  for i in \
+    /etc/fstab \
+    /etc/sysconfig/kernel \
+    /etc/sysconfig/bootloader \
+    /etc/grub.conf \
+    /etc/lilo.conf \
+    /etc/default/grub \
+    /etc/grub.d/40_custom
+  do
+    test -e $i && backupBootFiles="$backupBootFiles $i"
+  done
+  if ! tar -czf /reco-save/boot-1.tgz $backupBootFiles;then
+    systemException "Failed to tar up recovery boot-1.tgz" "reboot"
+  fi
+  Echo "Store recovery boot files phase 2)..."
+  backupBootFiles=""
+  for i in $(find /boot -type f); do
+    if ! echo $i | grep -q -E "\.sys";then
+      backupBootFiles="$backupBootFiles $i"
+    fi
+  done
+  if ! tar -czf /reco-save/boot-2.tgz $backupBootFiles;then
+    systemException "Failed to tar up recovery boot-2.tgz" "reboot"
+  fi
+  umount /reco-save
+  rmdir /reco-save
 fi
 
 #======================================
 # 9) create /etc/ImagePackages
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "no" ];then
-	if [ -x /bin/rpm ];then
-		Echo "Creating initial image package info file"
-		rpm -qa --last > /etc/ImagePackages
-	fi
+  if [ -x /bin/rpm ];then
+    Echo "Creating initial image package info file"
+    rpm -qa --last > /etc/ImagePackages
+  fi
 fi
 
 #======================================

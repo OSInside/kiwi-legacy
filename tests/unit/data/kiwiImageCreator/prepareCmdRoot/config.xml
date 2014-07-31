@@ -1,31 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <image schemaversion="5.2" name="test-imagecreate-prepare">
-	<description type="system">
-		<author>Robert Schweikert</author>
-		<contact>rjschwei@suse.com</contact>
-		<specification>test case for the ImageCreator prepare</specification>
-	</description>
-	<preferences>
-		<type image="iso" boot="isoboot/suse-11.4"/>
-		<packagemanager>zypper</packagemanager>
-		<rpm-check-signatures>false</rpm-check-signatures>
-		<rpm-force>true</rpm-force>
-		<locale>en_US</locale>
-		<keytable>us.map.gz</keytable>
-		<version>1.0.0</version>
-	</preferences>
-	<repository type="yast2">
-		<source path="http://download.opensuse.org/factory-tested/repo/oss/"/>
-	</repository>
-	<repository type="rpm-dir">
-		<source path="/tmp/kiwiDevTests/kiwiTestRepo"/>
-	</repository>
-	<packages type="image" patternType="onlyRequired">
-		<package name="kiwi-test-dummy"/>
-	</packages>
-	<packages type="bootstrap">
-		<package name="filesystem"/>
-		<package name="glibc-locale"/>
-	</packages>
+  <description type="system">
+    <author>Robert Schweikert</author>
+    <contact>rjschwei@suse.com</contact>
+    <specification>test case for the ImageCreator prepare</specification>
+  </description>
+  <preferences>
+    <type image="iso" boot="isoboot/suse-11.4"/>
+    <packagemanager>zypper</packagemanager>
+    <rpm-check-signatures>false</rpm-check-signatures>
+    <rpm-force>true</rpm-force>
+    <locale>en_US</locale>
+    <keytable>us.map.gz</keytable>
+    <version>1.0.0</version>
+  </preferences>
+  <repository type="yast2">
+    <source path="http://download.opensuse.org/factory-tested/repo/oss/"/>
+  </repository>
+  <repository type="rpm-dir">
+    <source path="/tmp/kiwiDevTests/kiwiTestRepo"/>
+  </repository>
+  <packages type="image" patternType="onlyRequired">
+    <package name="kiwi-test-dummy"/>
+  </packages>
+  <packages type="bootstrap">
+    <package name="filesystem"/>
+    <package name="glibc-locale"/>
+  </packages>
 </image>

@@ -95,7 +95,7 @@ exit 0</programlisting>
       The following list describes the functions available inside the 
       <filename>config.sh</filename> script.
     </para>    
-	<variablelist>
+  <variablelist>
       <varlistentry>
         <term><optional>baseCleanMount</optional></term>
         <listitem>
@@ -377,7 +377,7 @@ exit 0</programlisting>
           </para>
         </listitem>
       </varlistentry>
-	  <varlistentry>
+    <varlistentry>
         <term><optional>suseServiceDefaultOn</optional></term>
         <listitem>
           <para>
@@ -406,7 +406,7 @@ exit 0</programlisting>
           </para>
         </listitem>
       </varlistentry>
-	   </variablelist>
+     </variablelist>
   </refsect1>
   
   <refsect1 id="kiwi.config.environment">
@@ -414,14 +414,14 @@ exit 0</programlisting>
     <para>
       The .profile environment file contains a specific set of variables which
       are listed below. Some of the functions above makes use of the variables.
-	</para>
+  </para>
     <variablelist>
       <varlistentry>
         <term><optional>$kiwi_compressed</optional></term>
         <listitem>
           <para>
-			The value of the compressed attribute set in the type element
-			in <filename>config.xml</filename>
+      The value of the compressed attribute set in the type element
+      in <filename>config.xml</filename>
           </para>
         </listitem>
       </varlistentry>

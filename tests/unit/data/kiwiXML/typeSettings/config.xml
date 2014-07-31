@@ -1,58 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <image schemaversion="5.7" name="testCase-type-settings">
-	<description type="system">
-		<author>Robert Schweikert</author>
-		<contact>rjschwei@suse.com</contact>
-		<specification>Test configuration to verify type configuration settings are stored and returned properly in the XML object</specification>
-	</description>
-	<profiles>
-		<profile description="test profile" name="aTest"/>
-	</profiles>
-	<preferences>
-		<type image="vmx" filesystem="ext4" boot="vmxboot/suse-12.1" format="vmdk" primary="false" editbootconfig="data/kiwiXML/typeSettings/fixupBootEnter">
-			<machine memory="1024">
-				<vmdisk device="/dev/sda" disktype="scsi"/>
-				<vmnic interface="eth0"/>
-			</machine>
-		</type>
-		<type image="oem" bootloader="grub2" bootprofile="desktop" boottimeout="5" checkprebuilt="true" compressed="false" filesystem="ext3" installboot="install" installprovidefailsafe="false" installiso="false" installstick="true" kernelcmdline="kiwidebug=1" primary="false" vga="0x367" volid="baseSys"/>
-		<version>0.0.1</version>
-		<rpm-check-signatures>false</rpm-check-signatures>
-		<rpm-force>false</rpm-force>
-		<locale>en_US</locale>
-		<keytable>us.map.gz</keytable>
-	</preferences>
-	<preferences profiles="aTest">
-		<type image="pxe" filesystem="clicfs" boot="netboot/suse-12.1">
-			<pxedeploy server="192.168.100.2" blocksize="4096">
-				<partitions device="/dev/sda">
-					<partition type="swap" number="1" size="5"/>
-					<partition type="L" number="2" size="image" mountpoint="/" target="true"/>
-					<partition type="L" number="3" target="false"/>
-				</partitions>
-				<union ro="/dev/sda2" rw="/dev/sda3" type="clicfs"/>
-			</pxedeploy>
-		</type>
-		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-12.1" bootprofile="xen" bootkernel="xenk">
-			<machine memory="128" domain="domU">
-				<vmdisk device="/dev/xvda"/>
-				<vmnic interface="br0" mac="00:0C:6E:AA:57:2F"/>
-			</machine>
-		</type>
-	</preferences>
-	<users group="root">
-		<user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
-	</users>
-	<repository type="yast2">
-		<source path="/tmp"/>
-	</repository>
-	<packages type="image">
-		<package name="kernel-default"/>
-		<namedCollection name="base"/>
-	</packages>
-	<packages type="bootstrap">
-		<package name="filesystem"/>
-		<package name="glibc-locale"/>
-	</packages>
+  <description type="system">
+    <author>Robert Schweikert</author>
+    <contact>rjschwei@suse.com</contact>
+    <specification>Test configuration to verify type configuration settings are stored and returned properly in the XML object</specification>
+  </description>
+  <profiles>
+    <profile description="test profile" name="aTest"/>
+  </profiles>
+  <preferences>
+    <type image="vmx" filesystem="ext4" boot="vmxboot/suse-12.1" format="vmdk" primary="false" editbootconfig="data/kiwiXML/typeSettings/fixupBootEnter">
+      <machine memory="1024">
+        <vmdisk device="/dev/sda" disktype="scsi"/>
+        <vmnic interface="eth0"/>
+      </machine>
+    </type>
+    <type image="oem" bootloader="grub2" bootprofile="desktop" boottimeout="5" checkprebuilt="true" compressed="false" filesystem="ext3" installboot="install" installprovidefailsafe="false" installiso="false" installstick="true" kernelcmdline="kiwidebug=1" primary="false" vga="0x367" volid="baseSys"/>
+    <version>0.0.1</version>
+    <rpm-check-signatures>false</rpm-check-signatures>
+    <rpm-force>false</rpm-force>
+    <locale>en_US</locale>
+    <keytable>us.map.gz</keytable>
+  </preferences>
+  <preferences profiles="aTest">
+    <type image="pxe" filesystem="clicfs" boot="netboot/suse-12.1">
+      <pxedeploy server="192.168.100.2" blocksize="4096">
+        <partitions device="/dev/sda">
+          <partition type="swap" number="1" size="5"/>
+          <partition type="L" number="2" size="image" mountpoint="/" target="true"/>
+          <partition type="L" number="3" target="false"/>
+        </partitions>
+        <union ro="/dev/sda2" rw="/dev/sda3" type="clicfs"/>
+      </pxedeploy>
+    </type>
+    <type image="vmx" filesystem="ext3" boot="vmxboot/suse-12.1" bootprofile="xen" bootkernel="xenk">
+      <machine memory="128" domain="domU">
+        <vmdisk device="/dev/xvda"/>
+        <vmnic interface="br0" mac="00:0C:6E:AA:57:2F"/>
+      </machine>
+    </type>
+  </preferences>
+  <users group="root">
+    <user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
+  </users>
+  <repository type="yast2">
+    <source path="/tmp"/>
+  </repository>
+  <packages type="image">
+    <package name="kernel-default"/>
+    <namedCollection name="base"/>
+  </packages>
+  <packages type="bootstrap">
+    <package name="filesystem"/>
+    <package name="glibc-locale"/>
+  </packages>
 </image>

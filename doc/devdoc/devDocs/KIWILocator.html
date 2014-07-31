@@ -56,54 +56,54 @@ my $bootImgPath   = shift;
 my $addlSearchDir = shift;
 my $kiwi = $this->{kiwi};
 if (! $bootImgPath) {
-	my $msg = 'KIWILocator:getBootImageDescription called without '
-		. 'boot image to look for. Internal error, please file a bug.';
-	$kiwi -> error ($msg);
-	$kiwi -> failed();
-	return;
+  my $msg = 'KIWILocator:getBootImageDescription called without '
+    . 'boot image to look for. Internal error, please file a bug.';
+  $kiwi -> error ($msg);
+  $kiwi -> failed();
+  return;
 }
  Check if we received an absolute path
 my $firstC = substr $bootImgPath, 0 , 1;
 if ($firstC eq '/') {
-	if (! -d $bootImgPath) {
-		my $msg = "Could not find given directory '$bootImgPath'.";
-		$kiwi -> error ($msg);
-		$kiwi -> failed();
-		return;
-	}
-	my $config = $this -> getControlFile($bootImgPath);
-	if (! $config) {
-		my $msg = "Given boot image description '$bootImgPath' does "
-			. 'not contain configuration file.';
-		$kiwi -> error ($msg);
-		$kiwi -> failed();
-		return;
-	}
-	return $bootImgPath;
+  if (! -d $bootImgPath) {
+    my $msg = "Could not find given directory '$bootImgPath'.";
+    $kiwi -> error ($msg);
+    $kiwi -> failed();
+    return;
+  }
+  my $config = $this -> getControlFile($bootImgPath);
+  if (! $config) {
+    my $msg = "Given boot image description '$bootImgPath' does "
+      . 'not contain configuration file.';
+    $kiwi -> error ($msg);
+    $kiwi -> failed();
+    return;
+  }
+  return $bootImgPath;
 }
  Look in the current working directory
 my $cwd = getcwd();
 $cwd .= '/';
 my $potBootImgPath = $cwd . $bootImgPath;
 if ( -d $potBootImgPath) {
-	my $config = $this -> getControlFile($potBootImgPath);
-	if ($config) {
-		return $potBootImgPath;
-	}
+  my $config = $this -> getControlFile($potBootImgPath);
+  if ($config) {
+    return $potBootImgPath;
+  }
 }
  Look in the additional search directory
 if ($addlSearchDir) {
-	my $absSearchDir = abs_path($addlSearchDir);
-	if ( -d $absSearchDir) {
-		$absSearchDir .= '/';
-		my $probBootImgPath = $absSearchDir . $bootImgPath;
-		if ( -d $probBootImgPath) {
-			my $config = $this -> getControlFile($probBootImgPath);
-			if ($config) {
-				return $probBootImgPath;
-			}
-		}
-	}
+  my $absSearchDir = abs_path($addlSearchDir);
+  if ( -d $absSearchDir) {
+    $absSearchDir .= '/';
+    my $probBootImgPath = $absSearchDir . $bootImgPath;
+    if ( -d $probBootImgPath) {
+      my $config = $this -> getControlFile($probBootImgPath);
+      if ($config) {
+        return $probBootImgPath;
+      }
+    }
+  }
 }
  Look in the default location
 my $global = KIWIGlobals -> instance();
@@ -112,13 +112,13 @@ my $sysBootImgPath = $confData{System};
 $sysBootImgPath .= '/';
 my $kiwiBootImgDescript = $sysBootImgPath . $bootImgPath;
 if ( -d $kiwiBootImgDescript) {
-	my $config = $this -> getControlFile($kiwiBootImgDescript);
-	if ($config) {
-		return $kiwiBootImgDescript
-	}
+  my $config = $this -> getControlFile($kiwiBootImgDescript);
+  if ($config) {
+    return $kiwiBootImgDescript
+  }
 }
 my $msg = 'Could not find valid boot image description for'
-	. "'$bootImgPath'.";
+  . "'$bootImgPath'.";
 $kiwi -> error($msg);
 $kiwi -> failed();
 return ();

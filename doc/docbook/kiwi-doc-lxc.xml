@@ -20,7 +20,7 @@
       <citetitle>Linux Containers (LXC)</citetitle></ulink> provide operating
        system-level virtualization, utilizing
       <ulink url="https://www.kernel.org/doc/Documentation/cgroups/cgroups.txt">
-	      <citetitle>Control Groups (cgroups)</citetitle></ulink>. The
+        <citetitle>Control Groups (cgroups)</citetitle></ulink>. The
       virtualization is similar to technologies in OpenVZ, Linux-VServer,
       FreeBSD jails, AIX Workload Partitions, and Solaris Containers. The
       network and process space of the container is separated from the

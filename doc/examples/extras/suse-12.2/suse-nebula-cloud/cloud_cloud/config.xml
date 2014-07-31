@@ -1,70 +1,70 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <image schemaversion="6.1" name="suse-12.2-OpenNebula-Cloud-Node">
-	<description type="system">
-		<author>Robert Schweikert</author>
-		<contact>rjschwei@suse.com</contact>
-		<specification>OpenNebula Cloud Node configuration</specification>
-	</description>
-	<preferences>
-		<type image="oem" filesystem="ext3" boot="oemboot/suse-12.2" installstick="true" installboot="install" boottimeout="2">
-			<oemconfig>
-				<oem-boot-title>OpenNebula Cloud Node</oem-boot-title>
-				<oem-shutdown>true</oem-shutdown>
-				<oem-swap>true</oem-swap>
-				<oem-swapsize>2048</oem-swapsize>
-				<oem-unattended>true</oem-unattended>
-			</oemconfig>
-		</type>
-		<version>1.3.0</version>
-		<packagemanager>zypper</packagemanager>
-		<rpm-check-signatures>false</rpm-check-signatures>
-		<rpm-force>true</rpm-force>
-		<locale>en_US</locale>
-		<keytable>us.map.gz</keytable>
-	</preferences>
-	<users group="root">
-		<user password="cloudDemo" pwdformat="plain" home="/root" name="root"/>
-	</users>
-	<repository type="yast2">
-		<source path="opensuse://12.2/repo/oss/"/>
-	</repository>
-	<repository type="rpm-md">
-		<source path="http://download.opensuse.org/repositories/Virtualization:/Cloud:/OpenNebula/openSUSE_12.2"/>
-	</repository>
-	<packages type="image">
-		<namedCollection name="base"/>
-		<package name="bootsplash"/>
-		<package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>
-		<package name="bridge-utils"/>
-		<package name="dhcp-client"/>
-		<package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
-		<package name="ifplugd"/>
-		<package name="iptables"/>
-		<package name="iputils"/>
-		<package name="kernel-default"/>
-		<package name="kvm"/>
-		<package name="libvirt"/>
-		<package name="nfs-client"/>
-		<package name="openssh"/>
-		<package name="openssl"/>
-		<package name="pciutils"/>
-		<package name="qemu"/>
-		<package name="rsyslog"/>
-		<package name="ruby"/>
-		<package name="rubygems"/>
-		<package name="rubygem-libxml-ruby"/>
-		<package name="rubygem-nokogiri"/>
-		<package name="terminfo"/>
-		<package name="vi"/>
-		<package name="xmlrpc-c"/>
-		<package name="yast2-country"/>
-		<package name="yast2-ncurses"/>
-		<package name="yast2-nfs-client"/>
-		<package name="grub"/>
-	</packages>
-	<packages type="bootstrap">
-		<package name="filesystem"/>
-		<package name="glibc-locale"/>
-	</packages>
+  <description type="system">
+    <author>Robert Schweikert</author>
+    <contact>rjschwei@suse.com</contact>
+    <specification>OpenNebula Cloud Node configuration</specification>
+  </description>
+  <preferences>
+    <type image="oem" filesystem="ext3" boot="oemboot/suse-12.2" installstick="true" installboot="install" boottimeout="2">
+      <oemconfig>
+        <oem-boot-title>OpenNebula Cloud Node</oem-boot-title>
+        <oem-shutdown>true</oem-shutdown>
+        <oem-swap>true</oem-swap>
+        <oem-swapsize>2048</oem-swapsize>
+        <oem-unattended>true</oem-unattended>
+      </oemconfig>
+    </type>
+    <version>1.3.0</version>
+    <packagemanager>zypper</packagemanager>
+    <rpm-check-signatures>false</rpm-check-signatures>
+    <rpm-force>true</rpm-force>
+    <locale>en_US</locale>
+    <keytable>us.map.gz</keytable>
+  </preferences>
+  <users group="root">
+    <user password="cloudDemo" pwdformat="plain" home="/root" name="root"/>
+  </users>
+  <repository type="yast2">
+    <source path="opensuse://12.2/repo/oss/"/>
+  </repository>
+  <repository type="rpm-md">
+    <source path="http://download.opensuse.org/repositories/Virtualization:/Cloud:/OpenNebula/openSUSE_12.2"/>
+  </repository>
+  <packages type="image">
+    <namedCollection name="base"/>
+    <package name="bootsplash"/>
+    <package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>
+    <package name="bridge-utils"/>
+    <package name="dhcp-client"/>
+    <package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
+    <package name="ifplugd"/>
+    <package name="iptables"/>
+    <package name="iputils"/>
+    <package name="kernel-default"/>
+    <package name="kvm"/>
+    <package name="libvirt"/>
+    <package name="nfs-client"/>
+    <package name="openssh"/>
+    <package name="openssl"/>
+    <package name="pciutils"/>
+    <package name="qemu"/>
+    <package name="rsyslog"/>
+    <package name="ruby"/>
+    <package name="rubygems"/>
+    <package name="rubygem-libxml-ruby"/>
+    <package name="rubygem-nokogiri"/>
+    <package name="terminfo"/>
+    <package name="vi"/>
+    <package name="xmlrpc-c"/>
+    <package name="yast2-country"/>
+    <package name="yast2-ncurses"/>
+    <package name="yast2-nfs-client"/>
+    <package name="grub"/>
+  </packages>
+  <packages type="bootstrap">
+    <package name="filesystem"/>
+    <package name="glibc-locale"/>
+  </packages>
 </image>

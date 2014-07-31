@@ -208,7 +208,7 @@ subnet %3 netmask %4 {
     string oneauth = sformat ("oneadmin:%1", cadminp);
     SCR::Write (.target.string, "/var/lib/one/.one/one_auth", oneauth);
  
-	return true;
+  return true;
     }
  
     // initialize network data

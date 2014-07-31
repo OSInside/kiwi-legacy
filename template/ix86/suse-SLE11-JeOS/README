@@ -5,6 +5,6 @@ Build instructions for local build
 
 * call kiwi:
   kiwi --build suse-SLE11-JeOS --ignore-repos \
-	   --add-repo /path/to/SLE11/repo --add-repotype yast2 \
+     --add-repo /path/to/SLE11/repo --add-repotype yast2 \
        --add-repo obs://Virtualization:/Appliances:/suse-sle11/SLE_11_SP1 --add-repotype rpm-md \
-	   -d /tmp/myimage --type vmx
+     -d /tmp/myimage --type vmx

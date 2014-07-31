@@ -5,4 +5,4 @@ Build instructions for local build
 
 * call kiwi:
   kiwi --build suse-13.1-JeOS --set-repo /path/to/13.1/repo \
-	   -d /tmp/myimage --type vmx
+     -d /tmp/myimage --type vmx

@@ -5,8 +5,8 @@
 
 <!-- default rule -->
 <xsl:template match="*|processing-instruction()|comment()" mode="conv39to41">
-   	<xsl:copy>
-  	    <xsl:copy-of select="@*"/>
+    <xsl:copy>
+        <xsl:copy-of select="@*"/>
            <xsl:apply-templates mode="conv39to41"/>
     </xsl:copy>  
 </xsl:template>
@@ -22,26 +22,26 @@
     children of the <tag class="element">type</tag> element.
 </para>
 <xsl:template match="image" mode="conv39to41">
-	<xsl:choose>
-		<!-- nothing to do if already at 4.1 -->
-		<xsl:when test="@schemaversion > 3.9">
-			<xsl:copy-of select="/"/>
-		</xsl:when>
-		<!-- otherwise apply templates -->
-		<xsl:otherwise>
-			<image schemaversion="4.1">
-				<xsl:copy-of select="@*[local-name() != 'schemaversion']"/>
-				<xsl:apply-templates  mode="conv39to41"/>  
-			</image>
-		</xsl:otherwise>
-	</xsl:choose>
+  <xsl:choose>
+    <!-- nothing to do if already at 4.1 -->
+    <xsl:when test="@schemaversion > 3.9">
+      <xsl:copy-of select="/"/>
+    </xsl:when>
+    <!-- otherwise apply templates -->
+    <xsl:otherwise>
+      <image schemaversion="4.1">
+        <xsl:copy-of select="@*[local-name() != 'schemaversion']"/>
+        <xsl:apply-templates  mode="conv39to41"/>  
+      </image>
+    </xsl:otherwise>
+  </xsl:choose>
 </xsl:template>
 
 <xsl:template match="preferences" mode="conv39to41">
-	<preferences>
-	    <xsl:copy-of select="@*"/>
-	    <xsl:apply-templates mode="conv39to41"/>
-	</preferences>
+  <preferences>
+      <xsl:copy-of select="@*"/>
+      <xsl:apply-templates mode="conv39to41"/>
+  </preferences>
 </xsl:template>
 
 <!-- modify the type element -->
@@ -55,8 +55,8 @@
         <xsl:when test="text()='iso'">
             <type>
                 <xsl:call-template name="insertcomprops"/>
-				<xsl:call-template name="insertvmconfig"/>
-				<xsl:call-template name="insertxenconfig"/>
+        <xsl:call-template name="insertvmconfig"/>
+        <xsl:call-template name="insertxenconfig"/>
             </type>
         </xsl:when>
         <xsl:when test="text()='oem'">

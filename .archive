@@ -23,11 +23,11 @@ tar -cjf ../kiwi-repo.tar.bz2 system/*repo
 cd ..
 touch -c -r kiwi/kiwi.pl kiwi
 tar -cjf kiwi.tar.bz2 \
-	--exclude=system/*repo \
-	--exclude=rpm \
-	--exclude=doc \
-	--exclude=.git \
-	kiwi/
+  --exclude=system/*repo \
+  --exclude=rpm \
+  --exclude=doc \
+  --exclude=.git \
+  kiwi/
 
 mv kiwi.tar.bz2      kiwi/
 mv kiwi-repo.tar.bz2 kiwi/

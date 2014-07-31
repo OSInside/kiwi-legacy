@@ -376,25 +376,25 @@
               the image to view the contents e.g image="ext3":</para>
               <itemizedlist>
                  <listitem>
-					<para>ext2</para>
+          <para>ext2</para>
                  </listitem>
                  <listitem>
-					<para>ext3</para>
+          <para>ext3</para>
                  </listitem>
                  <listitem>
-					<para>ext4</para>
+          <para>ext4</para>
                  </listitem>
                  <listitem>
-					<para>btrfs</para>
+          <para>btrfs</para>
                  </listitem>
                  <listitem>
-					<para>squashfs</para>
+          <para>squashfs</para>
                  </listitem>
                  <listitem>
-					<para>xfs</para>
+          <para>xfs</para>
                  </listitem>
                  <listitem>
-					<para>reiserfs</para>
+          <para>reiserfs</para>
                  </listitem>
               </itemizedlist>
           </listitem>
@@ -461,7 +461,7 @@
                   <para>Creates a fuse based compressed read-only
                     filesystem which allows write operations into a cow
                     file. If the iso is bigger than 4G you can use the
-					clic_udf flag instead</para>
+          clic_udf flag instead</para>
                 </listitem>
               </varlistentry>
               <varlistentry>
@@ -624,37 +624,37 @@
           <option>--prebuiltbootimage</option> parameter. </para>
 
       <para>Within the type section, there could be other optional
-		attributes which are either universally valid or can be used
-		for different image types in the same way. The following list
+    attributes which are either universally valid or can be used
+    for different image types in the same way. The following list
         explains these attributes: </para>
 
-		<variablelist>
-			<varlistentry>
-				<term><sgmltag class="attribute"
-					>kernelcmdline</sgmltag></term>
-				<listitem>
-					<para>Specifies additional kernel parameters.
-					The following example disables kernel messages:
-					<literal>kernelcmdline="quiet"</literal></para>
-				</listitem>
-			</varlistentry>
+    <variablelist>
+      <varlistentry>
+        <term><sgmltag class="attribute"
+          >kernelcmdline</sgmltag></term>
+        <listitem>
+          <para>Specifies additional kernel parameters.
+          The following example disables kernel messages:
+          <literal>kernelcmdline="quiet"</literal></para>
+        </listitem>
+      </varlistentry>
             <varlistentry>
-				<term><sgmltag class="attribute"
+        <term><sgmltag class="attribute"
                     >mdraid</sgmltag></term>
                 <listitem>
                     <para>For disk based image types, aka oem and vmx,
-					mdraid activates the creation of a software raid image.
-					The raid inside the image is created in degraded mode
-					because at creation time we only know about one disk.
-					It's in the hand of the user to add devices to the raid
-					after the image runs on the target machine. The value
-					for mdraid can be either <emphasis>mirroring</emphasis>
-					or <emphasis>striping</emphasis>, which means the raid
-					level is set to RAID1 (mirroring) or
-					RAID0 (striping).</para>
+          mdraid activates the creation of a software raid image.
+          The raid inside the image is created in degraded mode
+          because at creation time we only know about one disk.
+          It's in the hand of the user to add devices to the raid
+          after the image runs on the target machine. The value
+          for mdraid can be either <emphasis>mirroring</emphasis>
+          or <emphasis>striping</emphasis>, which means the raid
+          level is set to RAID1 (mirroring) or
+          RAID0 (striping).</para>
                 </listitem>
-			</varlistentry>
-		</variablelist>
+      </varlistentry>
+    </variablelist>
 
       <para>Within the preferences section, there are the following
         optional elements: </para>
@@ -746,7 +746,7 @@
             <para>Specifies the name of the bootsplash theme to use </para>
           </listitem>
         </varlistentry>
-		<varlistentry>
+    <varlistentry>
           <term><sgmltag class="attribute">bootloader-theme</sgmltag></term>
           <listitem>
             <para>Specifies the name of the gfxboot theme to use </para>
@@ -1059,20 +1059,20 @@
                     class="endtag">oem-systemsize</sgmltag></term>
                 <listitem>
                   <para>Set the size the operating system is allowed to
-					consume on the target disk. The size limit does not
-					include any consideration for swap space or a
-					recovery partition.
-					In a setup <emphasis>without</emphasis> a
-					<sgmltag class="element">systemdisk</sgmltag> element
-					this value specifies the size of the root partition.
-					In a setup <emphasis>including</emphasis>
-					a <sgmltag class="element">systemdisk</sgmltag> element
-					this value specifies the size of the LVM partition which
-					contains all specified volumes.	Thus, the sum of all
-					specified volume sizes plus	the sum of the specified
-					freespace for each volume must be smaller or equal
-					to the size specified with the
-					<sgmltag class="element">oem-systemsize</sgmltag>.
+          consume on the target disk. The size limit does not
+          include any consideration for swap space or a
+          recovery partition.
+          In a setup <emphasis>without</emphasis> a
+          <sgmltag class="element">systemdisk</sgmltag> element
+          this value specifies the size of the root partition.
+          In a setup <emphasis>including</emphasis>
+          a <sgmltag class="element">systemdisk</sgmltag> element
+          this value specifies the size of the LVM partition which
+          contains all specified volumes. Thus, the sum of all
+          specified volume sizes plus the sum of the specified
+          freespace for each volume must be smaller or equal
+          to the size specified with the
+          <sgmltag class="element">oem-systemsize</sgmltag>.
                     This value is represented by the variable
                       <varname>OEM_SYSTEMSIZE</varname> in
                       <filename>config.oempartition</filename>.</para>
@@ -1705,19 +1705,19 @@
              </para>
            </listitem>
         </varlistentry>
-		<varlistentry>
-			<term><sgmltag class="attribute">prefer-license</sgmltag>="<sgmltag
-			  class="attvalue">true|false</sgmltag>"</term>
-			<listitem>
-				<para>The repository providing this attribute will be used
-				primarly to install the license tarball if found on that
-				repository. If no repository with a prefered license attribute
-				exists, the search happens over all repositories. It's not
-				guaranteed in that case that the search order follows the
-				repository order like they are written into the XML
-				description.</para>
-			</listitem>
-		</varlistentry>
+    <varlistentry>
+      <term><sgmltag class="attribute">prefer-license</sgmltag>="<sgmltag
+        class="attvalue">true|false</sgmltag>"</term>
+      <listitem>
+        <para>The repository providing this attribute will be used
+        primarly to install the license tarball if found on that
+        repository. If no repository with a prefered license attribute
+        exists, the search happens over all repositories. It's not
+        guaranteed in that case that the search order follows the
+        repository order like they are written into the XML
+        description.</para>
+      </listitem>
+    </varlistentry>
         <varlistentry>
           <term><sgmltag class="attribute">priority</sgmltag>="<sgmltag
               class="attvalue">number</sgmltag>"</term>

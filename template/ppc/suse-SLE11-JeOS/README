@@ -12,11 +12,11 @@ Build instructions for local build
 
 * call kiwi create for physical device:
   kiwi --create /tmp/kiwi-sle11 --ignore-repos \
-	   --add-repo /path/to/SLE11/repo \
+     --add-repo /path/to/SLE11/repo \
        --add-repotype yast2 \
        --add-repo /usr/share/kiwi/repo/suse-repo/suse-sle11-repo/ \
        --add-repotype rpm-dir \
-	   -d /tmp/myimage --type vmx --targetDevice /dev/sdaX
+     -d /tmp/myimage --type vmx --targetDevice /dev/sdaX
 
 * call kiwi create for virtio device (VIO image):
   kiwi --create /tmp/kiwi-sle11 --ignore-repos \

@@ -35,19 +35,19 @@ our @EXPORT_OK = qw ();
 # Constructor
 #------------------------------------------
 sub new {
-	# ...
-	# Create the KIWIXMLPackageIgnoreData object
-	# ---
-	#==========================================
-	# Object setup
-	#------------------------------------------
-	my $class = shift;
-	my $this  = $class->SUPER::new(@_);
-	if (! $this) {
-		return;
-	}
-	$this->{elname} = 'ignore';
-	return $this;
+  # ...
+  # Create the KIWIXMLPackageIgnoreData object
+  # ---
+  #==========================================
+  # Object setup
+  #------------------------------------------
+  my $class = shift;
+  my $this  = $class->SUPER::new(@_);
+  if (! $this) {
+    return;
+  }
+  $this->{elname} = 'ignore';
+  return $this;
 }
 
 1;

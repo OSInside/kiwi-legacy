@@ -10,7 +10,7 @@
   </indexterm>
   <para>KIWI provides a module which allows you to analyse
     the running system and create a report and an image description
-	representing the current state of the machine. Among others this allows
+  representing the current state of the machine. Among others this allows
     you to clone your currently running system into an image. The
     process has the following limitations at the moment: </para>
 

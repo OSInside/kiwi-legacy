@@ -1,17 +1,17 @@
 #!/bin/bash
 
 function dn {
-	local part=$1
-	local part_new=$(echo $part | sed -e 's@\(^.*\)\(p.*$\)@\1@')
-	if [ $part = $part_new ];then
-		part_new=$(echo $part | sed -e 's@\(^.*\)\([0-9].*$\)@\1@')
-	fi
-	echo $part_new
+  local part=$1
+  local part_new=$(echo $part | sed -e 's@\(^.*\)\(p.*$\)@\1@')
+  if [ $part = $part_new ];then
+    part_new=$(echo $part | sed -e 's@\(^.*\)\([0-9].*$\)@\1@')
+  fi
+  echo $part_new
 }
 
 bootdev=$(dn $(pvdisplay -c | cut -f1 -d:))
 if [ ! -e ${bootdev}1 ];then
-	return
+  return
 fi
 
 mkdir -p /media/stickstorage

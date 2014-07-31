@@ -143,7 +143,7 @@ named /etc/ImageID</a:documentation>
     </define>
     <define name="k.image">
       <element name="image">
-        <a:documentation>The root element of the configuration file		</a:documentation>
+        <a:documentation>The root element of the configuration file   </a:documentation>
         <db:para>Each KIWI configuration file consists of a root element
 image.</db:para>
         <interleave>
@@ -2187,7 +2187,6 @@ the standard x86 bios firmware setup is used</a:documentation>
           <value>efi</value>
           <value>uefi</value>
           <value>vboot</value>
-          <value>ofw</value>
         </choice>
       </attribute>
     </define>
@@ -3225,7 +3224,7 @@ product option its name and its fallback (productoptional).</db:para>
           <text/>
         </interleave>
         <!--
-          k.productinfo.text.content	
+          k.productinfo.text.content 
           xsd:normalizedString { maxLength = "2048" }
         -->
       </element>
@@ -3319,7 +3318,7 @@ carriage return or combinations are converted to spaces
           <text/>
         </interleave>
         <!--
-          k.productinfo.text.content	
+          k.productinfo.text.content 
           xsd:normalizedString { maxLength = "2048" }
         -->
       </element>
@@ -3346,7 +3345,7 @@ The value is used to create the content file.</db:para>
           <text/>
         </interleave>
         <!--
-          k.productvar	
+          k.productvar 
           xsd:normalizedString { maxLength = "2048" }
         -->
       </element>

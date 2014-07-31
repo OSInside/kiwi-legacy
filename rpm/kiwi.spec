@@ -225,8 +225,8 @@ the image creation process afterwards. This package allows using the
 
 Authors:
 --------
-	Adrian Schroeter <adrian@suse.com>
-	Stephan Kulow <coolo@suse.com>
+  Adrian Schroeter <adrian@suse.com>
+  Stephan Kulow <coolo@suse.com>
 
 %package -n kiwi-doc
 Summary:        KIWI - Appliance Builder Documentation
@@ -624,20 +624,20 @@ make buildroot=$RPM_BUILD_ROOT \
 touch kiwi.loader
 
 %ifarch %ix86 x86_64
-	install -m 644 pxeboot/pxelinux.0.config \
-		$RPM_BUILD_ROOT/srv/tftpboot/pxelinux.cfg/default.default
+  install -m 644 pxeboot/pxelinux.0.config \
+    $RPM_BUILD_ROOT/srv/tftpboot/pxelinux.cfg/default.default
 %else
-	# no PXE boot setup for non x86 archs
-	rm -rf $RPM_BUILD_ROOT/srv/tftpboot
-	rm -rf $RPM_BUILD_ROOT/etc/permissions.d/kiwi
+  # no PXE boot setup for non x86 archs
+  rm -rf $RPM_BUILD_ROOT/srv/tftpboot
+  rm -rf $RPM_BUILD_ROOT/etc/permissions.d/kiwi
 %endif
 
 mkdir -p $RPM_BUILD_ROOT/var/cache/kiwi
 
 test -f $RPM_BUILD_ROOT/srv/tftpboot/pxelinux.0 && \
-	echo /srv/tftpboot/pxelinux.0 > kiwi.loader
+  echo /srv/tftpboot/pxelinux.0 > kiwi.loader
 test -f $RPM_BUILD_ROOT/srv/tftpboot/mboot.c32 && \
-	echo /srv/tftpboot/mboot.c32 >> kiwi.loader
+  echo /srv/tftpboot/mboot.c32 >> kiwi.loader
 ./.links
 %if 0%{?suse_version} > 1020
 %fdupes $RPM_BUILD_ROOT/srv/tftpboot
@@ -673,19 +673,19 @@ EOF
 #============================================================
 # create user and group tftp if they does not exist
 if ! /usr/bin/getent group tftp >/dev/null; then
-	%{_sbindir}/groupadd -r tftp 2>/dev/null || :
+  %{_sbindir}/groupadd -r tftp 2>/dev/null || :
 fi
 if ! /usr/bin/getent passwd tftp >/dev/null; then
-	%{_sbindir}/useradd -c "TFTP account" -d /srv/tftpboot -G tftp -g tftp \
-		-r -s /bin/false tftp 2>/dev/null || :
+  %{_sbindir}/useradd -c "TFTP account" -d /srv/tftpboot -G tftp -g tftp \
+    -r -s /bin/false tftp 2>/dev/null || :
 fi
 
 %post -n kiwi-pxeboot
 #============================================================
 # create /srv/tftpboot/pxelinux.cfg/default only if not exist
 if ( [ ! -e srv/tftpboot/pxelinux.cfg/default  ] ) ; then
-	cp /srv/tftpboot/pxelinux.cfg/default.default \
-		/srv/tftpboot/pxelinux.cfg/default
+  cp /srv/tftpboot/pxelinux.cfg/default.default \
+    /srv/tftpboot/pxelinux.cfg/default
 fi
 %endif
 
@@ -696,7 +696,7 @@ fi
 # Clean up old old template directories if the exists
 oldDists=( 10.1 10.2 10.3 11.0 11.1 11.2 11.3 12.1 SLE10 SLED10 )
 for dist in ${oldDists[@]};do
-	rm -rf /usr/share/kiwi/image/suse-$dist-JeOS
+  rm -rf /usr/share/kiwi/image/suse-$dist-JeOS
 done
 %endif
 

@@ -1,11 +1,11 @@
 <initrd>
-	<strip type="delete">
-		<file name="/usr/lib/rpm"/>  
-		<file name="/var/log/*"/>
-	</strip>
+  <strip type="delete">
+    <file name="/usr/lib/rpm"/>  
+    <file name="/var/log/*"/>
+  </strip>
 
-	<strip type="tools">
-		<!-- Error missing " and / -->
-		<file name="zfcp_host_configure>
-	</strip>
+  <strip type="tools">
+    <!-- Error missing " and / -->
+    <file name="zfcp_host_configure>
+  </strip>
 </initrd>

@@ -1,41 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <image schemaversion="5.7" name="testCase-LVM-settings">
-	<description type="system">
-		<author>Robert Schweikert</author>
-		<contact>rjschwei@suse.com</contact>
-		<specification>Test configuration to verify boot may not be used as LVM volume</specification>
-	</description>
-	<preferences>
-		<type image="vmx" filesystem="ext4" boot="vmxboot/suse-12.1" format="ovf">
-			<machine max_memory="2048" memory="1024" min_memory="512" max_cpu="4" ncpus="2" min_cpu="1" ovftype="vmware">
-				<vmdisk device="/dev/sda" disktype="scsi"/>
-				<vmnic interface="eth0"/>
-			</machine>
-			<systemdisk name="test_Volume">
-				<volume name="/boot"/>
-				<volume name="tmp" freespace="all"/>
-				<volume name="var" size="50"/>
-			</systemdisk>
-		</type>
-		<version>0.0.1</version>
-		<rpm-check-signatures>false</rpm-check-signatures>
-		<rpm-force>false</rpm-force>
-		<locale>en_US</locale>
-		<keytable>us.map.gz</keytable>
-	</preferences>
-	<users group="root">
-		<user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
-	</users>
-	<repository type="yast2">
-		<source path="/tmp"/>
-	</repository>
-	<packages type="image">
-		<package name="kernel-default"/>
-		<namedCollection name="base"/>
-	</packages>
-	<packages type="bootstrap">
-		<package name="filesystem"/>
-		<package name="glibc-locale"/>
-	</packages>
+  <description type="system">
+    <author>Robert Schweikert</author>
+    <contact>rjschwei@suse.com</contact>
+    <specification>Test configuration to verify boot may not be used as LVM volume</specification>
+  </description>
+  <preferences>
+    <type image="vmx" filesystem="ext4" boot="vmxboot/suse-12.1" format="ovf">
+      <machine max_memory="2048" memory="1024" min_memory="512" max_cpu="4" ncpus="2" min_cpu="1" ovftype="vmware">
+        <vmdisk device="/dev/sda" disktype="scsi"/>
+        <vmnic interface="eth0"/>
+      </machine>
+      <systemdisk name="test_Volume">
+        <volume name="/boot"/>
+        <volume name="tmp" freespace="all"/>
+        <volume name="var" size="50"/>
+      </systemdisk>
+    </type>
+    <version>0.0.1</version>
+    <rpm-check-signatures>false</rpm-check-signatures>
+    <rpm-force>false</rpm-force>
+    <locale>en_US</locale>
+    <keytable>us.map.gz</keytable>
+  </preferences>
+  <users group="root">
+    <user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
+  </users>
+  <repository type="yast2">
+    <source path="/tmp"/>
+  </repository>
+  <packages type="image">
+    <package name="kernel-default"/>
+    <namedCollection name="base"/>
+  </packages>
+  <packages type="bootstrap">
+    <package name="filesystem"/>
+    <package name="glibc-locale"/>
+  </packages>
 </image>

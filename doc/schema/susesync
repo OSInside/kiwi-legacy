@@ -1,3 +1,3 @@
 rsync -rlvt images kiwi.html index.html \
-	kiwi0.html kiwi1.html kiwi_indexList.html xsdDocHtml.css \
-	community.opensuse.org:doc.opensuse.org/htdocs/projects/kiwi/schema-doc
+  kiwi0.html kiwi1.html kiwi_indexList.html xsdDocHtml.css \
+  community.opensuse.org:doc.opensuse.org/htdocs/projects/kiwi/schema-doc

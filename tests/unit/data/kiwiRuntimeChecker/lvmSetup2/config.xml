@@ -1,46 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <image schemaversion="5.7" name="test-oem-size-lvm">
-	<description type="system">
-		<author>Robert Schweikert</author>
-		<contact>rjschwei@suse.com</contact>
-		<specification>test case for runtime checker oem with systemdisk setup</specification>
-	</description>
-	<preferences>
-		<type image="oem" filesystem="ext4" boot="oemboot/suse-12.3" installstick="true">
-			<oemconfig>
-				<oem-swap>true</oem-swap>
-				<oem-swapsize>1</oem-swapsize>
-				<oem-systemsize>5</oem-systemsize>
-				<oem-unattended>true</oem-unattended>
-			</oemconfig>
-			<systemdisk>
-				<volume name="/home" freespace="1"/>
-				<volume name="/usr" freespace="1"/>
-				<volume name="/var" size="1"/>
-			</systemdisk>
-		</type>
-		<version>0.0.1</version>
-		<packagemanager>zypper</packagemanager>
-		<rpm-check-signatures>false</rpm-check-signatures>
-		<rpm-force>true</rpm-force>
-		<locale>en_US</locale>
-		<keytable>us.map.gz</keytable>
-	</preferences>
-	<users group="root">
-		<user password="linux" pwdformat="plain" home="/root" name="root"/>
-	</users>
-	<repository type="rpm-dir">
-		<source path="tmp"/>
-	</repository>
-	<packages type="image">
-		<package name="kernel-default"/>
-		<package name="ifplugd"/>
-		<package name="vim"/>
-		<namedCollection name="base"/>
-	</packages>
-	<packages type="bootstrap">
-		<package name="filesystem"/>
-		<package name="glibc-locale"/>
-	</packages>
+  <description type="system">
+    <author>Robert Schweikert</author>
+    <contact>rjschwei@suse.com</contact>
+    <specification>test case for runtime checker oem with systemdisk setup</specification>
+  </description>
+  <preferences>
+    <type image="oem" filesystem="ext4" boot="oemboot/suse-12.3" installstick="true">
+      <oemconfig>
+        <oem-swap>true</oem-swap>
+        <oem-swapsize>1</oem-swapsize>
+        <oem-systemsize>5</oem-systemsize>
+        <oem-unattended>true</oem-unattended>
+      </oemconfig>
+      <systemdisk>
+        <volume name="/home" freespace="1"/>
+        <volume name="/usr" freespace="1"/>
+        <volume name="/var" size="1"/>
+      </systemdisk>
+    </type>
+    <version>0.0.1</version>
+    <packagemanager>zypper</packagemanager>
+    <rpm-check-signatures>false</rpm-check-signatures>
+    <rpm-force>true</rpm-force>
+    <locale>en_US</locale>
+    <keytable>us.map.gz</keytable>
+  </preferences>
+  <users group="root">
+    <user password="linux" pwdformat="plain" home="/root" name="root"/>
+  </users>
+  <repository type="rpm-dir">
+    <source path="tmp"/>
+  </repository>
+  <packages type="image">
+    <package name="kernel-default"/>
+    <package name="ifplugd"/>
+    <package name="vim"/>
+    <namedCollection name="base"/>
+  </packages>
+  <packages type="bootstrap">
+    <package name="filesystem"/>
+    <package name="glibc-locale"/>
+  </packages>
 </image>

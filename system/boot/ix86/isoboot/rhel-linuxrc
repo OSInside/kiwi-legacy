@@ -63,7 +63,7 @@ mountSystemFilesystems &>/dev/null
 #--------------------------------------
 includeKernelParameters
 if grep -i -q "livecd_config=[a-zA-Z0-9/]" /proc/cmdline; then
-	export LIVECD_CONFIG=`sed 's/.*livecd_config=\([^ ]*\).*/\1/' /proc/cmdline`
+  export LIVECD_CONFIG=`sed 's/.*livecd_config=\([^ ]*\).*/\1/' /proc/cmdline`
 fi
 
 #======================================
@@ -91,13 +91,13 @@ probeDevices
 # 7) Mount the live image device
 #--------------------------------------
 if searchImageISODevice;then
-	if [ ! -z "$mediacheck" ]; then
-		runMediaCheck
-	fi
-	if [ ! -z "$kiwi_hybrid" ];then
-		setupHybridPersistent
-	fi
-	kiwiMount "$biosBootDevice" "/cdrom" "-o ro" 1>&2
+  if [ ! -z "$mediacheck" ]; then
+    runMediaCheck
+  fi
+  if [ ! -z "$kiwi_hybrid" ];then
+    setupHybridPersistent
+  fi
+  kiwiMount "$biosBootDevice" "/cdrom" "-o ro" 1>&2
 fi
 
 #======================================
@@ -105,75 +105,75 @@ fi
 #--------------------------------------
 importFile < $LIVECD_CONFIG
 if [ ! -z "$HYBRID_RW" ];then
-	if [ ! -z "$UNIONFS_CONFIG" ];then
-		UNIONFS_CONFIG=$(echo $UNIONFS_CONFIG | sed -e s@/dev/ram1@$HYBRID_RW@)
-	else
-		IMAGE=$(echo $IMAGE | sed -e s@/dev/ram1@$HYBRID_RW@)
-	fi
+  if [ ! -z "$UNIONFS_CONFIG" ];then
+    UNIONFS_CONFIG=$(echo $UNIONFS_CONFIG | sed -e s@/dev/ram1@$HYBRID_RW@)
+  else
+    IMAGE=$(echo $IMAGE | sed -e s@/dev/ram1@$HYBRID_RW@)
+  fi
 fi
 
 #======================================
 # 9) Download RW part of the CD image
 #--------------------------------------
 IFS="," ; for i in $IMAGE;do
-	field=0
-	IFS=";" ; for n in $i;do
-	case $field in
-		0) imageDevice=$n ; field=1 ;;
-		1) imageName=$n   ; field=2 ;;
-		2) imageVersion=$n
-	esac
-	done
-	IFS=$IFS_ORIG
-	imageReadOnly="$imageName"
-	imageReadOnly=$(echo $imageReadOnly | sed -e "s@\.${ARCH}\$@@")
-	imageReadOnly="$imageReadOnly-read-only.$ARCH-$imageVersion"
-	imageName="/cdrom/$imageName-$imageVersion"
-	gzippName=$imageName.gz
-	imageMD5s="$imageName.md5"
-	if [ ! -z "$UNIONFS_CONFIG" ] || [ ! -z "$COMBINED_IMAGE" ];then
-		continue
-	fi
-	while true;do
-		read sum1 blocks blocksize zblocks zblocksize < $imageMD5s
-		if ! validateSize;then
-			systemException \
-				"Not enough RAM available for this image" \
-			"reboot"
-		fi
-		needBytes=$(gzip -l $gzippName|tail -n1|sed -e "s@ \+@:@g"|cut -f3 -d:)
-		needMByte=$((needBytes / 1024 / 1024))
-		if [ -x /usr/bin/dcounter ];then
-			errorLogStop
-			Echo -n "Loading $imageName [$imageDevice] "
-			gzip -cd $gzippName |\
-				dcounter -s $needMByte | dd of=$imageDevice &>/dev/null
-			errorLogContinue
-			echo
-		else
-			Echo "Loading $imageName [$imageDevice]..."
-			gzip -cd $gzippName | dd of=$imageDevice
-		fi
-		dd if=$imageDevice bs=1024 |\
-			head --bytes=$((blocks * blocksize)) |\
-			md5sum - > /etc/ireal.md5
-		read sum2 dumy < /etc/ireal.md5
-		if test $sum1 = $sum2;then
-			Echo "Image checksum test: fine :-)"
-			break
-		fi
-		Echo "Image checksum test failed:"
-		echo
-		Echo -b "1) Data corruption while loading the image:"
-		Echo -b "   will give it a new try..."
-		echo
-		Echo -b "2) ramdisk size is too small for the image:"
-		Echo -b "   try to set the kernel parameter ramdisk_size=<size>"
-		echo
-		Echo "Retry to load image..."
-		sleep 15
-	done
-	rm -f /etc/ireal.md5
+  field=0
+  IFS=";" ; for n in $i;do
+  case $field in
+    0) imageDevice=$n ; field=1 ;;
+    1) imageName=$n   ; field=2 ;;
+    2) imageVersion=$n
+  esac
+  done
+  IFS=$IFS_ORIG
+  imageReadOnly="$imageName"
+  imageReadOnly=$(echo $imageReadOnly | sed -e "s@\.${ARCH}\$@@")
+  imageReadOnly="$imageReadOnly-read-only.$ARCH-$imageVersion"
+  imageName="/cdrom/$imageName-$imageVersion"
+  gzippName=$imageName.gz
+  imageMD5s="$imageName.md5"
+  if [ ! -z "$UNIONFS_CONFIG" ] || [ ! -z "$COMBINED_IMAGE" ];then
+    continue
+  fi
+  while true;do
+    read sum1 blocks blocksize zblocks zblocksize < $imageMD5s
+    if ! validateSize;then
+      systemException \
+        "Not enough RAM available for this image" \
+      "reboot"
+    fi
+    needBytes=$(gzip -l $gzippName|tail -n1|sed -e "s@ \+@:@g"|cut -f3 -d:)
+    needMByte=$((needBytes / 1024 / 1024))
+    if [ -x /usr/bin/dcounter ];then
+      errorLogStop
+      Echo -n "Loading $imageName [$imageDevice] "
+      gzip -cd $gzippName |\
+        dcounter -s $needMByte | dd of=$imageDevice &>/dev/null
+      errorLogContinue
+      echo
+    else
+      Echo "Loading $imageName [$imageDevice]..."
+      gzip -cd $gzippName | dd of=$imageDevice
+    fi
+    dd if=$imageDevice bs=1024 |\
+      head --bytes=$((blocks * blocksize)) |\
+      md5sum - > /etc/ireal.md5
+    read sum2 dumy < /etc/ireal.md5
+    if test $sum1 = $sum2;then
+      Echo "Image checksum test: fine :-)"
+      break
+    fi
+    Echo "Image checksum test failed:"
+    echo
+    Echo -b "1) Data corruption while loading the image:"
+    Echo -b "   will give it a new try..."
+    echo
+    Echo -b "2) ramdisk size is too small for the image:"
+    Echo -b "   try to set the kernel parameter ramdisk_size=<size>"
+    echo
+    Echo "Retry to load image..."
+    sleep 15
+  done
+  rm -f /etc/ireal.md5
 done
 CDUmount
 
@@ -181,14 +181,14 @@ CDUmount
 # 10) Get filesystem type
 #--------------------------------------
 if [ -z "$UNIONFS_CONFIG" ] && [ -e "$imageDevice" ];then
-	probeFileSystem $imageDevice
-	if [ "$FSTYPE" = "luks" ];then
-		luksOpen $imageDevice
-		imageDevice=$luksDeviceOpened
-		probeFileSystem $imageDevice
-		export haveLuks=yes
-	fi
-	resizeFilesystem $imageDevice
+  probeFileSystem $imageDevice
+  if [ "$FSTYPE" = "luks" ];then
+    luksOpen $imageDevice
+    imageDevice=$luksDeviceOpened
+    probeFileSystem $imageDevice
+    export haveLuks=yes
+  fi
+  resizeFilesystem $imageDevice
 fi
 
 #======================================
@@ -196,7 +196,7 @@ fi
 #--------------------------------------
 swapSpace=$(searchSwapSpace)
 if [ ! -z "$swapSpace" ];then
-	Echo "Found swap space on: $swapSpace"
+  Echo "Found swap space on: $swapSpace"
 fi
 
 #======================================
@@ -204,54 +204,54 @@ fi
 #--------------------------------------
 runHook premount
 if [ -z "$UNIONFS_CONFIG" ] && [ -z "$COMBINED_IMAGE" ];then
-	#======================================
-	# 12.1) mount RW part and CD to /mnt
-	#--------------------------------------
-	if ! mount $imageDevice /mnt >/dev/null;then
-		systemException "Failed to mount RW root filesystem" "reboot"
-	fi
-	cdopt=$(CDMountOption $biosBootDevice)
-	mkdir -p $LIVECD && eval mount $cdopt $biosBootDevice $LIVECD
-	#======================================
-	# 12.2) Create RO Link list
-	#--------------------------------------
-	cd /mnt
-	if [ ! -d $LIVECD/read-only-system ];then
-		Echo "Mounting compressed read only tree..."
-		rosys="/read-only"
-		rosrc="$LIVECD/$imageReadOnly"
-		mkdir -p $rosys
-		if ! kiwiMount $rosrc $rosys "-o loop";then
-			systemException "Failed to mount RO root filesystem" "reboot"
-		fi
-		Echo "Creating live media links..."
-		for dir in bin boot lib lib64 opt sbin usr;do
-			ln -s read-only/$dir $dir
-		done
-	else
-		Echo "Creating live media links..."
-		for dir in bin boot lib lib64 opt sbin usr;do
-			if [ -d $LIVECD/read-only-system/$dir ];then
-				ln -s $LIVECD/read-only-system/$dir $dir
-			fi
-		done
-	fi
-	cd /
+  #======================================
+  # 12.1) mount RW part and CD to /mnt
+  #--------------------------------------
+  if ! mount $imageDevice /mnt >/dev/null;then
+    systemException "Failed to mount RW root filesystem" "reboot"
+  fi
+  cdopt=$(CDMountOption $biosBootDevice)
+  mkdir -p $LIVECD && eval mount $cdopt $biosBootDevice $LIVECD
+  #======================================
+  # 12.2) Create RO Link list
+  #--------------------------------------
+  cd /mnt
+  if [ ! -d $LIVECD/read-only-system ];then
+    Echo "Mounting compressed read only tree..."
+    rosys="/read-only"
+    rosrc="$LIVECD/$imageReadOnly"
+    mkdir -p $rosys
+    if ! kiwiMount $rosrc $rosys "-o loop";then
+      systemException "Failed to mount RO root filesystem" "reboot"
+    fi
+    Echo "Creating live media links..."
+    for dir in bin boot lib lib64 opt sbin usr;do
+      ln -s read-only/$dir $dir
+    done
+  else
+    Echo "Creating live media links..."
+    for dir in bin boot lib lib64 opt sbin usr;do
+      if [ -d $LIVECD/read-only-system/$dir ];then
+        ln -s $LIVECD/read-only-system/$dir $dir
+      fi
+    done
+  fi
+  cd /
 else
-	#======================================
-	# 12.1) mount CD to /mnt and unify
-	#--------------------------------------
-	if [ ! -z "$COMBINED_IMAGE" ]; then
-		Echo "Mounting compressed split tree..."
-		imageReadOnly=$(echo $imageReadOnly | sed -e "s/-read-only//")
-	else
-		Echo "Mounting compressed unified tree..."
-	fi
-	cdopt=$(CDMountOption $biosBootDevice)
-	mkdir -p $LIVECD && eval mount $cdopt $biosBootDevice $LIVECD
-	if ! mountSystem /dev/loop1 $LIVECD/$imageReadOnly;then
-		systemException "Failed to mount root filesystem" "reboot"
-	fi
+  #======================================
+  # 12.1) mount CD to /mnt and unify
+  #--------------------------------------
+  if [ ! -z "$COMBINED_IMAGE" ]; then
+    Echo "Mounting compressed split tree..."
+    imageReadOnly=$(echo $imageReadOnly | sed -e "s/-read-only//")
+  else
+    Echo "Mounting compressed unified tree..."
+  fi
+  cdopt=$(CDMountOption $biosBootDevice)
+  mkdir -p $LIVECD && eval mount $cdopt $biosBootDevice $LIVECD
+  if ! mountSystem /dev/loop1 $LIVECD/$imageReadOnly;then
+    systemException "Failed to mount root filesystem" "reboot"
+  fi
 fi
 validateRootTree
 runHook postmount
@@ -262,7 +262,7 @@ runHook postmount
 setupDefaultFstab /config
 updateRootDeviceFstab /config $imageDevice
 if [ ! -z "$swapSpace" ];then
-	updateSwapDeviceFstab /config $swapSpace
+  updateSwapDeviceFstab /config $swapSpace
 fi
 
 #======================================

@@ -1,10 +1,10 @@
 DEFAULT KIWI-Boot
 
 LABEL KIWI-Boot
-	kernel mboot.c32
-	append boot/xen.gz --- boot/linux vga=normal ramdisk_size=256000 ramdisk_blocksize=4096 kiwiserver=192.168.0.254 --- boot/initrd
-	IPAPPEND 2
+  kernel mboot.c32
+  append boot/xen.gz --- boot/linux vga=normal ramdisk_size=256000 ramdisk_blocksize=4096 kiwiserver=192.168.0.254 --- boot/initrd
+  IPAPPEND 2
 
 LABEL Local-Boot
-	localboot 0
+  localboot 0
 

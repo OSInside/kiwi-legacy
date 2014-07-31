@@ -44,7 +44,7 @@
     </para>
 
   <example>
-	  <title>Template for .kiwi.rc</title>
+    <title>Template for .kiwi.rc</title>
     <screen>$BasePath='/usr/share/kiwi';
 $Gzip='bzip2';
 $LogServerPort='4455';
