@@ -782,6 +782,7 @@ sub init {
 	if (! $cmdL) {
 		kiwiExit (1);
 	}
+	my $gdata = $global -> getKiwiConfig();
 	#==========================================
 	# get options and call non-root tasks
 	#------------------------------------------
@@ -907,6 +908,10 @@ sub init {
 		$DiskStartSector = int (
 			$cmdL -> getDiskAlignment * 1024 / $cmdL -> getDiskBIOSSectorSize()
 		);
+		my $defaultStartSector = $gdata -> {DiskStartSector};
+		if ($DiskStartSector < $defaultStartSector) {
+			$DiskStartSector = $defaultStartSector;
+		}
 	}
 	$cmdL -> setDiskStartSector (
 		$DiskStartSector
@@ -1266,7 +1271,6 @@ sub init {
 	#========================================
 	# turn destdir into absolute path
 	#----------------------------------------
-	my $gdata = $global -> getKiwiConfig();
 	if (defined $Destination) {
 		$Destination = File::Spec->rel2abs ($Destination);
 		$cmdL -> setImageTargetDir ($Destination);
