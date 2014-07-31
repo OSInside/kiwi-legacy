@@ -2205,6 +2205,12 @@ sub setupBootDisk {
 		return;
 	}
 	$kiwi -> info ("Setup disk image/device\n");
+	$kiwi -> info (
+		"--> Disk start sector:\t" . $cmdL -> getDiskStartSector() . "\n"
+	);
+	$kiwi -> info (
+		"--> Disk alignment:\t" . $cmdL -> getDiskAlignment() . " KBytes\n"
+	);
 	while (1) {
 		if ($this->{gdata}->{StudioNode}) {
 			#==========================================
