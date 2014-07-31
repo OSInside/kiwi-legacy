@@ -1107,6 +1107,10 @@ sub setup {
 	if (! $status) {
 		return;
 	}
+	$status = $profile -> updateFromCommandline ($cmdL);
+	if (! $status) {
+		return;
+	}
 	$status = $profile -> writeProfile ($root);
 	if (! $status) {
 		return;

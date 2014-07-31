@@ -19,6 +19,7 @@ package KIWIProfileFile;
 #------------------------------------------
 use strict;
 use warnings;
+use Readonly;
 
 #==========================================
 # Base class
@@ -57,6 +58,7 @@ sub new {
 	#------------------------------------------
 	my $kiwi = KIWILog -> instance();
 	my %supportedEntries = map { ($_ => 1) } qw(
+		kiwi_align
 		kiwi_allFreeVolume
 		kiwi_bootloader
 		kiwi_bootprofile
@@ -111,6 +113,7 @@ sub new {
 		kiwi_revision
 		kiwi_showlicense
 		kiwi_splash_theme
+		kiwi_startsector
 		kiwi_strip_delete
 		kiwi_strip_libs
 		kiwi_strip_tools
@@ -151,7 +154,9 @@ sub addEntry {
 		delete $this->{profile}{$key};
 	}
 	my %allowedVars = %{$this->{vars}};
-	if ((! $allowedVars{$key}) && ($key !~ /^kiwi_LVM_|^kiwi_allFreeVolume_/msx)) {
+	if ((! $allowedVars{$key}) &&
+		($key !~ /^kiwi_LVM_|^kiwi_allFreeVolume_/msx)
+	) {
 		my $msg = "Unrecognized variable: $key";
 		$kiwi -> warning ($msg);
 		$kiwi -> skipped ();
@@ -167,6 +172,39 @@ sub addEntry {
 	} else {
 		$this->{profile}{$key} = $value;
 	}
+	return $this;
+}
+
+#==========================================
+# updateFromCommandline
+#------------------------------------------
+sub updateFromCommandline {
+	# ...
+	# Update the existing data from a Commandline object.
+	# the onus is on the client to avoid duplicates
+	# in the data
+	# ---
+	my $this = shift;
+	my $cmdL = shift;
+	my $kiwi = $this->{kiwi};
+	Readonly my $UNIT_MB => 1024;
+	if (! $cmdL || ref($cmdL) ne 'KIWICommandLine') {
+		my $msg = 'updateFromCommandline: expecting KIWICommandLine '.
+			'object as first argument';
+		$kiwi -> error($msg);
+		$kiwi -> failed();
+		return;
+	}
+	#==========================================
+	# kiwi_align
+	#------------------------------------------
+	my $align = $cmdL -> getDiskAlignment * $UNIT_MB;
+	$this -> addEntry('kiwi_align', $align);
+	#==========================================
+	# kiwi_startsector
+	#------------------------------------------
+	my $start_sector = $cmdL -> getDiskStartSector();
+	$this -> addEntry('kiwi_startsector', $start_sector);
 	return $this;
 }
 

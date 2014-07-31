@@ -8621,7 +8621,7 @@ function partedSectorInit {
 	local s_stopp
 	unset startSectors
 	unset endSectors
-	local align=4096
+	local align=$kiwi_align
 	for i in $(
 		parted -m -s $disk unit s print |\
 		grep -E ^[1-9]+:| cut -f2-3 -d: | tr -d s
@@ -8640,10 +8640,10 @@ function partedSectorInit {
 		fi
 	done
 	# /.../
-	# in case of an empty disk we use the following start sector
+	# in case of an empty disk we use the default start sector
 	# ----
 	if [ -z "$startSectors" ];then
-		startSectors=2048s
+		startSectors=${kiwi_startsector}s
 	fi
 }
 #======================================

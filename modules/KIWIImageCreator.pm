@@ -2332,6 +2332,10 @@ sub __updateProfileEnvironment {
 	if (! $status) {
 		return;
 	}
+	$status = $profile -> updateFromCommandline ($this->{cmdL});
+	if (! $status) {
+		return;
+	}
 	$status = $profile -> writeProfile ($tree);
 	if (! $status) {
 		return;
