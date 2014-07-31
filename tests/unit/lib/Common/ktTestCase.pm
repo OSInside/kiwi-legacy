@@ -21,6 +21,7 @@ use base qw /Test::Unit::TestCase/;
 
 use FindBin;
 use File::Basename qw /dirname/;
+use File::Slurp;
 
 use KIWIGlobals;
 
@@ -101,6 +102,52 @@ sub assert_file_exists {
 }
 
 #==========================================
+# compareFiles
+#------------------------------------------
+sub compareFiles {
+	# ...
+	# Compare two files for equality
+	#    return 1 if content is equal
+	# We do not implement assert_file_equal to give the test a chance to
+	# recover and preserve the non matching file for manual debugging.
+	# ---
+	my $this    = shift;
+	my $refFile = shift;
+	my $cmpFile = shift;
+	if (! -f $refFile) {
+		$this -> assert(0, "Reference file '$refFile' not found.");
+	}
+	if (! -f $cmpFile) {
+		my $msg = "Could not find given file '$cmpFile' for comparison.";
+		$this -> assert(0, $msg);
+	}
+	my $reference = read_file($refFile);
+	my $target = read_file($cmpFile);
+	if ($reference eq $target) {
+		return 1;
+	}
+	return;
+}
+
+#==========================================
+# createResultSaveDir
+#------------------------------------------
+sub createResultSaveDir {
+	# ...
+	# Create a directoy that is not cleaned up that may be used to
+	# preserve results for debugging purposes.
+	# ---
+	my $this = shift;
+	# Lets assume /tmp exists
+	my $saveDir = '/tmp/kiwiResultsSaved';
+	if (! -d $saveDir) {
+		my $res = mkdir $saveDir;
+		$this -> assert_equals(1, $res);
+	}
+	return $saveDir;
+}
+
+#==========================================
 # createTestTmpDir
 #------------------------------------------
 sub createTestTmpDir {
@@ -135,6 +182,18 @@ sub getDataDir {
   # ---
   my $dir = dirname ( $FindBin::Bin ) . '/unit/data';
   return $dir;
+}
+
+#==========================================
+# getRefResultsDir
+#------------------------------------------
+sub getRefResultsDir {
+	# ...
+	# Return the location of the directory containing the reference results
+	# files
+	# ---
+	my $dir = dirname ( $FindBin::Bin ) . '/unit/refresults';
+	return $dir;
 }
 
 #==========================================
