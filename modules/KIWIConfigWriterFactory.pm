@@ -93,13 +93,23 @@ sub getConfigWriter {
   my $xml  = $this->{xml};
   my $typeName = $xml -> getImageType() -> getTypeName();
   SWITCH: for ($typeName) {
-    /^lxc|^docker/smx && do {
-      my $writer = KIWIContainerConfigWriter -> new($xml, $confDir);
+  	/^lxc|^docker/smx && do {
+  	  my $writer = KIWIContainerConfigWriter -> new($xml, $confDir);
       if (($writer) && ($typeName eq 'docker')) {
         $writer -> setConfigFileName('default.conf');
       }
       return $writer;
-      };
+    };
+  	/^vmx/smx && do {
+  	  my $vmConfig = $xml -> getVMachineConfig();
+      if ($vmConfig) {
+        my $ovfType = $vmConfig  -> getOVFType();
+        if ($ovfType) {
+          my $writer = KIWIOVFConfigWriter -> new($xml, $confDir);
+          return $writer;
+        }
+  	  }
+  	};
   }
   return;
 }
