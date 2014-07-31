@@ -209,7 +209,7 @@ sub setupScreenCall {
 	my $kiwi = $this->{kiwi};
 	my $screenCall = $this->{screenCall};
 	my $screenCtrl = $this->{screenCtrl};
-	my $screenLogs = $this->{screenErrs};
+	my $screenErrs = $this->{screenErrs};
 	my $logs = 1;
 	my $code;
 	my $data;
@@ -228,13 +228,13 @@ sub setupScreenCall {
 		local $/; $data = <$fd>; $fd -> close();
 		if ($fd -> open (">$screenCall")) {
 			print $fd "#!/bin/bash\n";
-			print $fd "set -x\n";
 			print $fd "exec 2> >(tee $this->{screenErrs} >&2)\n";
+			print $fd "set -x\n";
 			print $fd $data;
 			$fd -> close();
 		}
 	}
-	KIWIQX::qxx (" chmod 755 $screenCall ");
+	KIWIQX::qxx ("chmod 755 $screenCall");
 	if ($logs) {
 		$kiwi -> closeRootChannel();
 	}
@@ -261,7 +261,7 @@ sub setupScreenCall {
 		#------------------------------------------
 		if ($logs) {
 			$kiwi -> reopenRootChannel();
-			if ($fd -> open ($screenLogs)) {
+			if ($fd -> open ($screenErrs)) {
 				local $/; $data = <$fd>; $fd -> close();
 			}   
 			if ($code == 0) {
@@ -278,7 +278,7 @@ sub setupScreenCall {
 		#------------------------------------------
 		KIWIQX::qxx ("rm -f $screenCall*");
 		KIWIQX::qxx ("rm -f $screenCtrl");
-		KIWIQX::qxx ("rm -f $screenLogs");
+		KIWIQX::qxx ("rm -f $screenErrs");
 	} else {
 		#==========================================
 		# do the job in the child process
