@@ -60,9 +60,9 @@ sub new {
   #        system = {
   #            controller = '',
   #            device     = '',
-  #            disktype 	= '',
+  #            disktype   = '',
   #            id         = '',
-  #            diskmode	= ''
+  #            diskmode = ''
   #        }
   #    }
   #    vmdvd  = {
@@ -98,36 +98,36 @@ sub new {
   # Argument checking and object data store
   #------------------------------------------
   if (! $this -> p_hasInitArg($init) ) {
-  	return;
+    return;
   }
   my %keywords = map { ($_ => 1) } qw(
-  	HWversion
-  	arch
-  	des_cpu
-  	des_memory
-  	domain
-  	guestOS
-  	max_cpu
-  	max_memory
-  	memory
-  	min_cpu
-  	min_memory
-  	ncpus
-  	ovftype
-  	vmconfig_entries
-  	vmdisks
-  	vmdvd
-  	vmnics
+    HWversion
+    arch
+    des_cpu
+    des_memory
+    domain
+    guestOS
+    max_cpu
+    max_memory
+    memory
+    min_cpu
+    min_memory
+    ncpus
+    ovftype
+    vmconfig_entries
+    vmdisks
+    vmdvd
+    vmnics
   );
   $this->{supportedKeywords} = \%keywords;
   if (! $this -> p_isInitHashRef($init) ) {
-  	return;
+    return;
   }
   if (! $this -> p_areKeywordArgsValid($init) ) {
-  	return;
+    return;
   }
   if (! $this -> __isInitConsistent($init) ) {
-  	return;
+    return;
   }
   $this->{HWversion}     = $init->{HWversion};
   $this->{arch}          = $init->{arch};
@@ -146,19 +146,19 @@ sub new {
   $this->{vmnics}        = $init->{vmnics};
   # Default settings
   if (! $init->{HWversion} ) {
-  	# There may be a subtle bug here. It is not know if all
-  	# formats that have a HWversion setting have the same version
-  	# index. We use the "most popular" and known version index from VMWare
-  	$this->{HWversion} = '9';
-  	$this->{defaultHWversion} = 1;
+    # There may be a subtle bug here. It is not know if all
+    # formats that have a HWversion setting have the same version
+    # index. We use the "most popular" and known version index from VMWare
+    $this->{HWversion} = '9';
+    $this->{defaultHWversion} = 1;
   }
   if (! $init->{guestOS}) {
-  	$this->{defaultguestOS} = 1;
-  	if ($this->{arch} && $this->{arch} =~ /64/smx) {
-  	  $this->{guestOS} = 'suse-64';
-  	} else {
-  	  $this->{guestOS} = 'suse';
-  	}
+    $this->{defaultguestOS} = 1;
+    if ($this->{arch} && $this->{arch} =~ /64/smx) {
+      $this->{guestOS} = 'suse-64';
+    } else {
+      $this->{guestOS} = 'suse';
+    }
   }
   return $this;
 }

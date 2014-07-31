@@ -1030,8 +1030,8 @@ sub createOVFConfiguration {
   $kiwi -> info ("Creating image OVF configuration file...");
   my $image = $base;
   if ($base =~ /(.*)\.(.*?)$/) {
-  	$image = $1;
-  	$base  = $image.".ovf";
+    $image = $1;
+    $base  = $image.".ovf";
   }
   $ovf  = $ovfdir."/".$base;
   $vmdk = $base;
@@ -1043,96 +1043,96 @@ sub createOVFConfiguration {
   my $locator = KIWILocator -> instance();
   my $ovftool = $locator -> getExecPath ('ovftool');
   if (($format eq 'ova') && (! $ovftool)) {
-  	$kiwi -> skipped ();
-  	$kiwi -> warning ('ovftool not found, will create only ova tarball');
-  	$kiwi -> skipped ();
+    $kiwi -> skipped ();
+    $kiwi -> warning ('ovftool not found, will create only ova tarball');
+    $kiwi -> skipped ();
   }
   my $writer = KIWIOVFConfigWriter -> new($xml, $ovfdir);
   my $res = $writer -> writeConfigFile();
   if (! $res) {
-  	return;
+    return;
   }
   #==========================================
   # create manifest file
   #------------------------------------------
   if ($format eq 'ova') {
-  	my $mf = $ovf;
-  	$mf =~ s/\.ovf$/\.mf/;
-  	my $MFFD = FileHandle -> new();
-  	if (! $MFFD -> open (">$mf")) {
-  	  $kiwi -> error ("Couldn't create manifest file: $!");
+    my $mf = $ovf;
+    $mf =~ s/\.ovf$/\.mf/;
+    my $MFFD = FileHandle -> new();
+    if (! $MFFD -> open (">$mf")) {
+      $kiwi -> error ("Couldn't create manifest file: $!");
       $kiwi -> failed ();
       return;
-  	}
-  	my $base_image = basename $this->{image};
-  	my $base_config= basename $ovf;
-  	my $ovfsha1 = KIWIQX::qxx ("sha1sum $ovf | cut -f1 -d ' ' 2>&1");
-  	chomp ($ovfsha1);
-  	my $imagesha1 = KIWIQX::qxx ("sha1sum $this->{image} | cut -f1 -d ' ' 2>&1");
-  	chomp ($imagesha1);
-  	print $MFFD "SHA1($base_config)= $ovfsha1"."\n";
-  	print $MFFD "SHA1($base_image)= $imagesha1"."\n";
-  	$MFFD -> close();
-  	#==========================================
-  	# create OVA tarball
-  	#------------------------------------------
-  	my $destdir  = dirname $this->{image};
-  	my $ovaimage = basename $ovfdir;
-  	$ovaimage =~ s/\.ovf$/\.ova/;
-  	my $ovabasis = $ovaimage;
-  	$ovabasis =~ s/\.ova$//;
-  	my $ovapath = $destdir."/".$ovaimage;
-  	my $vmdata = $this->{vmdata};
-  	my $diskmode = $vmdata -> getSystemDiskMode();
-  	my $status;
-  	if ($ovftool) {
-  	  my $options;
+    }
+    my $base_image = basename $this->{image};
+    my $base_config= basename $ovf;
+    my $ovfsha1 = KIWIQX::qxx ("sha1sum $ovf | cut -f1 -d ' ' 2>&1");
+    chomp ($ovfsha1);
+    my $imagesha1 = KIWIQX::qxx ("sha1sum $this->{image} | cut -f1 -d ' ' 2>&1");
+    chomp ($imagesha1);
+    print $MFFD "SHA1($base_config)= $ovfsha1"."\n";
+    print $MFFD "SHA1($base_image)= $imagesha1"."\n";
+    $MFFD -> close();
+    #==========================================
+    # create OVA tarball
+    #------------------------------------------
+    my $destdir  = dirname $this->{image};
+    my $ovaimage = basename $ovfdir;
+    $ovaimage =~ s/\.ovf$/\.ova/;
+    my $ovabasis = $ovaimage;
+    $ovabasis =~ s/\.ova$//;
+    my $ovapath = $destdir."/".$ovaimage;
+    my $vmdata = $this->{vmdata};
+    my $diskmode = $vmdata -> getSystemDiskMode();
+    my $status;
+    if ($ovftool) {
+      my $options;
       if ($diskmode) {
         $options = " --diskMode=$diskmode";
       }
       $status = KIWIQX::qxx (
         "cd $ovfdir && ovftool $options $ovabasis.ovf $ovapath 2>&1"
       );
-  	} else {
-  	  my $files = "$ovabasis.ovf $ovabasis.mf $ovabasis.vmdk";
+    } else {
+      my $files = "$ovabasis.ovf $ovabasis.mf $ovabasis.vmdk";
       $status = KIWIQX::qxx (
-  	    "tar -h -C $ovfdir -cf $ovapath $files 2>&1"
-  	  );
-  	}
-  	my $result = $? >> 8;
-  	if ($result != 0) {
-  	  $kiwi -> failed ();
-  	  $kiwi -> error  ("Couldn't create $format image: $status");
-  	  $kiwi -> failed ();
-  	  return;
-  	}
-  	if ($ovftool) {
-  	  $kiwi -> info (
-  	    "Replacing qemu's vmdk file with version from generated OVA"
-  	  );
-  	  KIWIQX::qxx ("rm -f $ovabasis.vmdk $ovfdir/$ovabasis.vmdk");
-  	  my $extract = "$ovabasis-disk1.vmdk";
-  	  $status = KIWIQX::qxx (
-  	    "tar -h -C $ovfdir -xf $destdir/$ovaimage $extract 2>&1"
-  	  );
-  	  $result = $? >> 8;
-  	  if ($result == 0) {
-  	    $status = KIWIQX::qxx ("mv $ovfdir/$extract $ovabasis.vmdk 2>&1");
-  		$result = $? >> 8;
-  	  }
-  	  if ($result != 0) {
-  	    $kiwi -> failed ();
-  		$kiwi -> error  ("Couldn't unpack vmdk file: $status");
+        "tar -h -C $ovfdir -cf $ovapath $files 2>&1"
+      );
+    }
+    my $result = $? >> 8;
+    if ($result != 0) {
+      $kiwi -> failed ();
+      $kiwi -> error  ("Couldn't create $format image: $status");
+      $kiwi -> failed ();
+      return;
+    }
+    if ($ovftool) {
+      $kiwi -> info (
+        "Replacing qemu's vmdk file with version from generated OVA"
+      );
+      KIWIQX::qxx ("rm -f $ovabasis.vmdk $ovfdir/$ovabasis.vmdk");
+      my $extract = "$ovabasis-disk1.vmdk";
+      $status = KIWIQX::qxx (
+        "tar -h -C $ovfdir -xf $destdir/$ovaimage $extract 2>&1"
+      );
+      $result = $? >> 8;
+      if ($result == 0) {
+        $status = KIWIQX::qxx ("mv $ovfdir/$extract $ovabasis.vmdk 2>&1");
+      $result = $? >> 8;
+      }
+      if ($result != 0) {
+        $kiwi -> failed ();
+      $kiwi -> error  ("Couldn't unpack vmdk file: $status");
         $kiwi -> failed ();
         return;
-  	  }
+      }
       $kiwi -> info (
-  	    "Replacing kiwi's ovf file with version from generated OVA"
-  	  );
+        "Replacing kiwi's ovf file with version from generated OVA"
+      );
       KIWIQX::qxx ("rm -f $ovfdir/$ovabasis.ovf $ovfdir/$ovabasis.mf");
       $extract = "$ovabasis.ovf";
       $status = KIWIQX::qxx (
-  	    "tar -h -C $ovfdir -xf $destdir/$ovaimage $extract"
+        "tar -h -C $ovfdir -xf $destdir/$ovaimage $extract"
       );
       $result = $? >> 8;
       if ($result != 0) {
@@ -1140,8 +1140,8 @@ sub createOVFConfiguration {
         $kiwi -> error  ("Couldn't unpack ovf and mf file: $status");
         $kiwi -> failed ();
         return;
-  	  }
-  	}
+      }
+    }
   }
   $kiwi -> done();
   return $ovf;

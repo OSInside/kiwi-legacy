@@ -235,17 +235,17 @@ sub getMessageType {
 # getNotsetState
 #------------------------------------------
 sub getNotsetState {
-	# ...
-	# Retrieve the state of the notset flag.
-	# Generally the getState method should be used. However, under certain
-	# circumstances the code issues a set of messages together. The individual
-	# get*State methods allow to retrieve the expected state and clear the
-	# flag for this state. The final call in any test should always be to
-	# getState to assure there are no unexpected messages.
-	my $this = shift;
-	my $val = $this -> {notset} ? 'notset' : 0;
-	$this -> {notset} = 0;
-	return $val;
+  # ...
+  # Retrieve the state of the notset flag.
+  # Generally the getState method should be used. However, under certain
+  # circumstances the code issues a set of messages together. The individual
+  # get*State methods allow to retrieve the expected state and clear the
+  # flag for this state. The final call in any test should always be to
+  # getState to assure there are no unexpected messages.
+  my $this = shift;
+  my $val = $this -> {notset} ? 'notset' : 0;
+  $this -> {notset} = 0;
+  return $val;
 }
 
 #==========================================
@@ -288,30 +288,30 @@ sub getState {
   my $state;
   my $stateCnt = 0;
   if ( $this -> {completed} ) {
-  	$state = 'completed';
-  	$stateCnt += 1;
+    $state = 'completed';
+    $stateCnt += 1;
   }
   if ($this -> {failed} ) {
-  	$state = 'failed';
-  	$stateCnt += 1;
+    $state = 'failed';
+    $stateCnt += 1;
   }
   if ($this -> {notset} ) {
-  	$state = 'notset';
-  	$stateCnt += 1;
+    $state = 'notset';
+    $stateCnt += 1;
   }
   if ( $this -> {oops} ) {
-  	$state = 'oops';
-  	$stateCnt += 1;
+    $state = 'oops';
+    $stateCnt += 1;
   }
   if ( $this -> {skipped} ) {
-  	$state = 'skipped';
-  	$stateCnt += 1;
+    $state = 'skipped';
+    $stateCnt += 1;
   }
   if ( $stateCnt == 0 ) {
-  	$state = 'No state set';
+    $state = 'No state set';
   }
   if ( $stateCnt > 1 ) {
-  	$state = 'Log error: Multiple states defined';
+    $state = 'Log error: Multiple states defined';
   }
   $this -> __reset();
   return $state;
@@ -403,12 +403,12 @@ sub note {
 # notset
 #------------------------------------------
 sub notset {
-	# ...
-	# notset state
-	# ---
-	my $this = shift;
-	$this -> {notset} = 1;
-	return $this;
+  # ...
+  # notset state
+  # ---
+  my $this = shift;
+  $this -> {notset} = 1;
+  return $this;
 }
 
 #==========================================
