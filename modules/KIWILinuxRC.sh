@@ -8621,7 +8621,7 @@ function partedSectorInit {
   local s_stopp
   unset startSectors
   unset endSectors
-  local align=$kiwi_align
+  local align=$((kiwi_align / kiwi_sectorsize))
   for i in $(
     parted -m -s $disk unit s print |\
     grep -E ^[1-9]+:| cut -f2-3 -d: | tr -d s

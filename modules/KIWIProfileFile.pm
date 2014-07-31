@@ -114,6 +114,7 @@ sub new {
     kiwi_showlicense
     kiwi_splash_theme
     kiwi_startsector
+    kiwi_sectorsize
     kiwi_strip_delete
     kiwi_strip_libs
     kiwi_strip_tools
@@ -205,6 +206,11 @@ sub updateFromCommandline {
   #------------------------------------------
   my $start_sector = $cmdL -> getDiskStartSector();
   $this -> addEntry('kiwi_startsector', $start_sector);
+  #==========================================
+  # kiwi_sectorsize
+  #------------------------------------------
+  my $sector_size = $cmdL -> getDiskBIOSSectorSize();
+  $this -> addEntry('kiwi_sectorsize', $sector_size);
   return $this;
 }
 

@@ -2206,10 +2206,10 @@ sub setupBootDisk {
   }
   $kiwi -> info ("Setup disk image/device\n");
   $kiwi -> info (
-    "--> Disk start sector:\t" . $cmdL -> getDiskStartSector() . "\n"
+    "--> Disk start sector: ".$cmdL->getDiskStartSector."\n"
   );
   $kiwi -> info (
-    "--> Disk alignment:\t" . $cmdL -> getDiskAlignment() . " KBytes\n"
+    "--> Disk alignment: ".$cmdL->getDiskAlignment." KBytes\n"
   );
   while (1) {
     if ($this->{gdata}->{StudioNode}) {
@@ -6171,14 +6171,14 @@ sub getSector {
   # ...
   # turn the given size in MB to the number of
   # required sectors aligned to the value of
-  # getDiskAlignment (default 4MB)
+  # getDiskAlignment
   # ----
   my $this  = shift;
   my $size  = shift;
   my $cmdL  = $this->{cmdL};
   my $count = $this->{pDiskSectors};
-  my $secsz = $cmdL->getDiskBIOSSectorSize();
-  my $align = $cmdL->getDiskAlignment() * 1024;
+  my $secsz = $cmdL->getDiskBIOSSectorSize;
+  my $align = ($cmdL->getDiskAlignment * 1024) / $secsz;
   my $sectors;
   if ($size =~ /\+(.*)M$/) {
     # turn value into bytes
@@ -6191,7 +6191,9 @@ sub getSector {
   if ($size < $align) {
     $size = $align;
   }
-  $size = (int ($size / $align) * $align) + $align;
+  $size = sprintf ("%.0f",$size / $align);
+  $size*= $align;
+  $size+= $align;
   $sectors = sprintf ("%.0f",$size / $secsz);
   $sectors-= 1;
   return $sectors;
@@ -6230,7 +6232,8 @@ sub initGeometry {
   my $size   = shift;
   my $kiwi   = $this->{kiwi};
   my $cmdL   = $this->{cmdL};
-  my $align  = $cmdL->getDiskAlignment();
+  my $secsz  = $cmdL->getDiskBIOSSectorSize;
+  my $align  = ($cmdL->getDiskAlignment * 1024) / $secsz;
   my $locator= KIWILocator -> instance();
   if (! defined $this->{pStart}) {
     $this->{pStart} = $cmdL->getDiskStartSector();
@@ -6244,7 +6247,7 @@ sub initGeometry {
     chomp $status;
     $status=~ s/s//;
     if ($status >= $align) {
-      $status = int ($status / $align);
+      $status = sprintf ("%.0f",$status / $align);
       $status*= $align;
       $status+= $align;
     }
