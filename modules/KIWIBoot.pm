@@ -6172,7 +6172,7 @@ sub getSector {
 	my $cmdL  = $this->{cmdL};
 	my $count = $this->{pDiskSectors};
 	my $secsz = $cmdL->getDiskBIOSSectorSize();
-	my $align = $cmdL->getDiskAlignment();
+	my $align = $cmdL->getDiskAlignment() * 1024;
 	my $sectors;
 	if ($size =~ /\+(.*)M$/) {
 		# turn value into bytes
