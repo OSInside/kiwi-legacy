@@ -2205,6 +2205,12 @@ sub setupBootDisk {
 		return;
 	}
 	$kiwi -> info ("Setup disk image/device\n");
+	$kiwi -> info (
+		"--> Disk start sector:\t" . $cmdL -> getDiskStartSector() . "\n"
+	);
+	$kiwi -> info (
+		"--> Disk alignment:\t" . $cmdL -> getDiskAlignment() . " KBytes\n"
+	);
 	while (1) {
 		if ($this->{gdata}->{StudioNode}) {
 			#==========================================
@@ -6172,7 +6178,7 @@ sub getSector {
 	my $cmdL  = $this->{cmdL};
 	my $count = $this->{pDiskSectors};
 	my $secsz = $cmdL->getDiskBIOSSectorSize();
-	my $align = $cmdL->getDiskAlignment();
+	my $align = $cmdL->getDiskAlignment() * 1024;
 	my $sectors;
 	if ($size =~ /\+(.*)M$/) {
 		# turn value into bytes
@@ -6579,6 +6585,7 @@ sub setupEncoding {
 	my %deviceMap = %{$map};
 	my $cipher    = $type->{luks};
 	my $dist      = $type->{luksOS};
+	my $cmdL      = $this->{cmdL};
 	my $data;
 	my $code;
 	my $opts = '';
@@ -6593,8 +6600,11 @@ sub setupEncoding {
 	if (($dist) && ($dist eq 'sle11')) {
 		$opts = $this->{gdata}->{LuksDist}->{sle11};
 	}
+	# cryptsetup aligns in boundaries of 512-byte sectors
+	my $alignment = int ($cmdL->getDiskAlignment() * 2);
 	my $size_bt = KIWIGlobals -> instance() -> isize ($device);
 	my $size_mb = int ($size_bt / 1048576);
+	$opts .= " --align-payload=$alignment";
 	$kiwi -> info ("--> Filling $name with random data\n");
 	$data = KIWIQX::qxx (
 		"dd if=/dev/urandom bs=1M count=$size_mb of=$device 2>&1"
@@ -6708,6 +6718,7 @@ sub setVolumeGroup {
 	my $VGroup    = $this->{lvmgroup};
 	my $fsopts    = $cmdL -> getFilesystemOptions();
 	my $inoderatio= $fsopts -> getInodeRatio();
+	my $align     = $cmdL -> getDiskAlignment();
 	my %newmap;
 	my $status;
 	my $result;
@@ -6715,7 +6726,7 @@ sub setVolumeGroup {
 	$kiwi -> info ("--> Creating volume group\n");
 	$status = KIWIQX::qxx ("vgremove --force $VGroup 2>&1");
 	$status = KIWIQX::qxx ("test -d /dev/$VGroup && rm -rf /dev/$VGroup 2>&1");
-	$status = KIWIQX::qxx ("pvcreate $deviceMap{root} 2>&1");
+	$status = KIWIQX::qxx ("pvcreate --dataalignment $align $deviceMap{root} 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> error  ("Failed creating physical extends: $status");

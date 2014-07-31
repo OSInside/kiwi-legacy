@@ -1840,14 +1840,14 @@ sub _new_instance {
 	$data{PackageManager}  = "zypper";
 	$data{FSInodeRatio}    = 16384;
 	$data{FSMinInodes}     = 20000;
-	$data{FSInodeSize}     = 256;
-	$data{DiskStartSector} = 2048;
-	$data{DiskSectorSize}  = 512;
-	$data{DiskAlignment}   = 4096;
-	$data{SnapshotChunk}   = 4096;
-	$data{SnapshotCount}   = "5G";
 	$data{OverlayRootTree} = 0;
-	$data{VolumeFree}      = 20;
+	$data{FSInodeSize}     = 256;   # Bytes
+	$data{DiskStartSector} = 2048;  # Sector-Number
+	$data{DiskSectorSize}  = 512;   # Bytes
+	$data{DiskAlignment}   = 1024;  # Kilo-Bytes
+	$data{SnapshotChunk}   = 4096;  # Bytes
+	$data{SnapshotCount}   = "5G";  # Unit-String
+	$data{VolumeFree}      = 20;    # Mega-Bytes
 	#============================================
 	# Read .kiwirc
 	#--------------------------------------------
