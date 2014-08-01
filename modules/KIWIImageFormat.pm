@@ -1068,7 +1068,9 @@ sub createOVFConfiguration {
     my $base_config= basename $ovf;
     my $ovfsha1 = KIWIQX::qxx ("sha1sum $ovf | cut -f1 -d ' ' 2>&1");
     chomp ($ovfsha1);
-    my $imagesha1 = KIWIQX::qxx ("sha1sum $this->{image} | cut -f1 -d ' ' 2>&1");
+    my $imagesha1 = KIWIQX::qxx (
+      "sha1sum $this->{image} | cut -f1 -d ' ' 2>&1"
+    );
     chomp ($imagesha1);
     print $MFFD "SHA1($base_config)= $ovfsha1"."\n";
     print $MFFD "SHA1($base_image)= $imagesha1"."\n";
@@ -1118,11 +1120,11 @@ sub createOVFConfiguration {
       $result = $? >> 8;
       if ($result == 0) {
         $status = KIWIQX::qxx ("mv $ovfdir/$extract $ovabasis.vmdk 2>&1");
-      $result = $? >> 8;
+        $result = $? >> 8;
       }
       if ($result != 0) {
         $kiwi -> failed ();
-      $kiwi -> error  ("Couldn't unpack vmdk file: $status");
+        $kiwi -> error  ("Couldn't unpack vmdk file: $status");
         $kiwi -> failed ();
         return;
       }
