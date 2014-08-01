@@ -56,6 +56,7 @@ my @kiwiModules = qw (
 	KIWIAnalyseTemplate.pm
 	KIWIMiniIsoPlugin.pm
 	KIWIOverlay.pm
+	KIWIOVFConfigWriter.pm
 	KIWIPatternsPlugin.pm
 	KIWIProductData.pm
 	KIWIProfileFile.pm
@@ -115,6 +116,7 @@ my @kiwiModules = qw (
 	KTImageBuildFactory.t
 	KTImageCreator.t
 	KTLocator.t
+	KTOVFVConfigWriter.t
 	KTProfileFile.t
 	KTRuntimeChecker.t
 	KTTarArchiveBuilder.t
@@ -163,6 +165,7 @@ my @kiwiModules = qw (
 	kiwiImageBuilderBase.pm
 	kiwiImageBuildFactory.pm
 	kiwiImageCreator.pm
+	kiwiOVFConfigWriter.pm
 	kiwiProfileFile.pm
 	kiwiRuntimeChecker.pm
 	kiwiTarArchiveBuilder.pm
@@ -246,6 +249,7 @@ my @notClean1 = qw (
 	KIWIAnalyseTemplate.pm
 	KIWIMiniIsoPlugin.pm
 	KIWIOverlay.pm
+	KIWIOVFConfigWriter.pm
 	KIWIPatternsPlugin.pm
 	KIWIProductData.pm
 	KIWIProfileFile.pm
@@ -305,6 +309,7 @@ my @notClean1 = qw (
 	KTImageBuildFactory.t
 	KTImageCreator.t
 	KTLocator.t
+	KTOVFVConfigWriter.t
 	KTProfileFile.t
 	KTRuntimeChecker.t
 	KTTarArchiveBuilder.t
@@ -353,6 +358,7 @@ my @notClean1 = qw (
 	kiwiImageBuilderBase.pm
 	kiwiImageBuildFactory.pm
 	kiwiImageCreator.pm
+	kiwiOVFConfigWriter.pm
 	kiwiProfileFile.pm
 	kiwiRuntimeChecker.pm
 	kiwiTarArchiveBuilder.pm
@@ -431,6 +437,7 @@ my @notClean2 = qw (
 	KIWIAnalyseTemplate.pm
 	KIWIMiniIsoPlugin.pm
 	KIWIOverlay.pm
+	KIWIOVFConfigWriter.pm
 	KIWIPatternsPlugin.pm
 	KIWIProductData.pm
 	KIWIQX.pm

@@ -146,6 +146,9 @@ sub new {
   $this->{vmnics}        = $init->{vmnics};
   # Default settings
   if (! $init->{HWversion} ) {
+    # There may be a subtle bug here. It is not know if all
+    # formats that have a HWversion setting have the same version
+    # index. We use the "most popular" and known version index from VMWare
     $this->{HWversion} = '9';
     $this->{defaultHWversion} = 1;
   }

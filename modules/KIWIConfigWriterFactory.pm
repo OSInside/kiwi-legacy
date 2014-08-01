@@ -99,7 +99,17 @@ sub getConfigWriter {
         $writer -> setConfigFileName('default.conf');
       }
       return $writer;
-      };
+    };
+    /^vmx/smx && do {
+      my $vmConfig = $xml -> getVMachineConfig();
+      if ($vmConfig) {
+        my $ovfType = $vmConfig  -> getOVFType();
+        if ($ovfType) {
+          my $writer = KIWIOVFConfigWriter -> new($xml, $confDir);
+          return $writer;
+        }
+      }
+    };
   }
   return;
 }

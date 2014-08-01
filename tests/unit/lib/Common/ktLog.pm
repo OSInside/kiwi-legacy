@@ -232,6 +232,23 @@ sub getMessageType {
 }
 
 #==========================================
+# getNotsetState
+#------------------------------------------
+sub getNotsetState {
+  # ...
+  # Retrieve the state of the notset flag.
+  # Generally the getState method should be used. However, under certain
+  # circumstances the code issues a set of messages together. The individual
+  # get*State methods allow to retrieve the expected state and clear the
+  # flag for this state. The final call in any test should always be to
+  # getState to assure there are no unexpected messages.
+  my $this = shift;
+  my $val = $this -> {notset} ? 'notset' : 0;
+  $this -> {notset} = 0;
+  return $val;
+}
+
+#==========================================
 # getOopsState
 #------------------------------------------
 sub getOopsState {
@@ -276,6 +293,10 @@ sub getState {
   }
   if ($this -> {failed} ) {
     $state = 'failed';
+    $stateCnt += 1;
+  }
+  if ($this -> {notset} ) {
+    $state = 'notset';
     $stateCnt += 1;
   }
   if ( $this -> {oops} ) {
@@ -376,6 +397,18 @@ sub note {
   $this -> {noteMsg} = shift;
   $this -> {msgType} = 'note';
   return;
+}
+
+#==========================================
+# notset
+#------------------------------------------
+sub notset {
+  # ...
+  # notset state
+  # ---
+  my $this = shift;
+  $this -> {notset} = 1;
+  return $this;
 }
 
 #==========================================
@@ -522,6 +555,7 @@ sub _new_instance {
   $this -> {completed} = 0;
   $this -> {failed}    = 0;
   $this -> {msgType}   = 'none';
+  $this -> {notset}    = 0;
   $this -> {oops}      = 0;
   $this -> {skipped}   = 0;
   #==========================================
@@ -603,6 +637,7 @@ sub __resetState {
   $this -> {completed} = 0;
   $this -> {failed}    = 0;
   $this -> {msgType}   = 'none';
+  $this -> {notset}    = 0;
   $this -> {oops}      = 0;
   $this -> {skipped}   = 0;
   return $this;
