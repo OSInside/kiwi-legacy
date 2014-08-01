@@ -206,7 +206,8 @@ sub test_getConfigFileName {
     my $state = $kiwi -> getState();
     $this -> assert_str_equals('No state set', $state);
     # Test this condition last to get potential error messages
-    $this -> assert_matches(qr/ovfconfig-test.*-1.0.0.ovf/sxm, $cName);
+    my $arch = $xml -> getArch();
+    $this -> assert_str_equals('ovfconfig-test.' . $arch . '-1.0.0.ovf', $cName);
     return;
 }
 
@@ -225,8 +226,10 @@ sub test_noImagePresent {
     my $writer = KIWIOVFConfigWriter -> new($xml, '/tmp');
     my $res = $writer -> writeConfigFile();
     my $msg = $kiwi -> getMessage();
-    my $expected = 'Could.not.find.expected.image';
-    $this -> assert_matches(qr/$expected/sxm, $msg);
+    my $arch = $xml -> getArch();
+    my $expected = 'Could not find expected image '
+        . "'/tmp/ovfconfig-test." . $arch . "-1.0.0.vmdk'";
+    $this -> assert_str_equals($expected, $msg);
     my $msgT = $kiwi -> getMessageType();
     $this -> assert_str_equals('error', $msgT);
     my $state = $kiwi -> getState();
@@ -292,11 +295,6 @@ sub test_powerWriteNoDVD {
     # ...
     # Test the creation of the config file for Powe
     # ---
-    if ((KIWIQX::qxx ("uname -m")) ne 'x86_64') {
-        print "\t\tInfo: x86_64 arch only, skipping ";
-        print "test_powerWriteNoDVD\n";
-        return;
-    }
     my $this = shift;
     my $kiwi = $this -> {kiwi};
     my $confDir = $this -> {dataDir} . '/powerOVFConfig';
@@ -320,7 +318,8 @@ sub test_powerWriteNoDVD {
     $this -> assert_str_equals('completed', $state);
     $this -> assert_not_null($res);
     $this -> assert_file_exists($cfgFile);
-    my $refFile = $this -> getRefResultsDir() . '/power.ovf';
+    my $arch = $xml -> getArch();
+    my $refFile = $this -> getRefResultsDir() . '/power.ovf' . ".$arch";
     $res = $this -> compareFiles($refFile, $cfgFile);
     if ($res) {
         $this -> removeTestTmpDir();
@@ -424,11 +423,6 @@ sub test_vmwareWriteDVDide {
     # ...
     # Test the creation of the config file for VMWare with IDE DVD
     # ---
-    if ((KIWIQX::qxx ("uname -m")) ne 'x86_64') {
-        print "\t\tInfo: x86_64 arch only, skipping ";
-        print "test_vmwareWriteDVDide\n";
-        return;
-    }
     my $this = shift;
     my $kiwi = $this -> {kiwi};
     my $confDir = $this -> {dataDir} . '/dvdIdeConfig';
@@ -452,7 +446,8 @@ sub test_vmwareWriteDVDide {
     $this -> assert_str_equals('completed', $state);
     $this -> assert_not_null($res);
     $this -> assert_file_exists($cfgFile);
-    my $refFile = $this -> getRefResultsDir() . '/dvdIdeVMWare.ovf';
+    my $arch = $xml -> getArch();
+    my $refFile = $this -> getRefResultsDir() . '/dvdIdeVMWare.ovf' . ".$arch";
     $res = $this -> compareFiles($refFile, $cfgFile);
     if ($res) {
         $this -> removeTestTmpDir();
@@ -474,11 +469,6 @@ sub test_vmwareWriteDVDscsi {
     # ...
     # Test the creation of the config file for VMWare with SCSI DVD
     # ---
-    if ((KIWIQX::qxx ("uname -m")) ne 'x86_64') {
-        print "\t\tInfo: x86_64 arch only, skipping ";
-        print "test_vmwareWriteDVDscsi\n";
-        return;
-    }
     my $this = shift;
     my $kiwi = $this -> {kiwi};
     my $confDir = $this -> {dataDir} . '/dvdScsiConfig';
@@ -502,7 +492,10 @@ sub test_vmwareWriteDVDscsi {
     $this -> assert_str_equals('completed', $state);
     $this -> assert_not_null($res);
     $this -> assert_file_exists($cfgFile);
-    my $refFile = $this -> getRefResultsDir() . '/dvdScsiVMWare.ovf';
+    my $arch = $xml -> getArch();
+    my $refFile = $this -> getRefResultsDir()
+        . '/dvdScsiVMWare.ovf'
+        . ".$arch";
     $res = $this -> compareFiles($refFile, $cfgFile);
     if ($res) {
         $this -> removeTestTmpDir();
@@ -524,11 +517,6 @@ sub test_vmwareWriteGenericGuestOS {
     # ...
     # Test the creation of the config file for VMWare with unknown guest OS
     # ---
-    if ((KIWIQX::qxx ("uname -m")) ne 'x86_64') {
-        print "\t\tInfo: x86_64 arch only, skipping ";
-        print "test_vmwareWriteGenericGuestOS\n";
-        return;
-    }
     my $this = shift;
     my $kiwi = $this -> {kiwi};
     my $confDir = $this -> {dataDir} . '/genericGuestOSConfig';
@@ -553,7 +541,10 @@ sub test_vmwareWriteGenericGuestOS {
     $this -> assert_str_equals('completed', $state);
     $this -> assert_not_null($res);
     $this -> assert_file_exists($cfgFile);
-    my $refFile = $this -> getRefResultsDir() . '/genericOSVMWare.ovf';
+    my $arch = $xml -> getArch();
+    my $refFile = $this -> getRefResultsDir()
+        . '/genericOSVMWare.ovf'
+        . ".$arch";
     $res = $this -> compareFiles($refFile, $cfgFile);
     if ($res) {
         $this -> removeTestTmpDir();
@@ -575,11 +566,6 @@ sub test_vmwareWriteHWver8 {
     # ...
     # Test the creation of the config file for VMWare with HW version 8
     # ---
-    if ((KIWIQX::qxx ("uname -m")) ne 'x86_64') {
-        print "\t\tInfo: x86_64 arch only, skipping ";
-        print "test_vmwareWriteHWver8\n";
-        return;
-    }
     my $this = shift;
     my $kiwi = $this -> {kiwi};
     my $confDir = $this -> {dataDir} . '/hwEightConfig';
@@ -603,7 +589,10 @@ sub test_vmwareWriteHWver8 {
     $this -> assert_str_equals('completed', $state);
     $this -> assert_not_null($res);
     $this -> assert_file_exists($cfgFile);
-    my $refFile = $this -> getRefResultsDir() . '/hwEightVMWare.ovf';
+    my $arch = $xml -> getArch();
+    my $refFile = $this -> getRefResultsDir()
+        . '/hwEightVMWare.ovf'
+        . ".$arch";
     $res = $this -> compareFiles($refFile, $cfgFile);
     if ($res) {
         $this -> removeTestTmpDir();
@@ -625,11 +614,6 @@ sub test_vmwareWriteIdeCntrl {
     # ...
     # Test the creation of the config file for VMWare with HW version 8
     # ---
-    if ((KIWIQX::qxx ("uname -m")) ne 'x86_64') {
-        print "\t\tInfo: x86_64 arch only, skipping ";
-        print "test_vmwareWriteIdeCntrl\n";
-        return;
-    }
     my $this = shift;
     my $kiwi = $this -> {kiwi};
     my $confDir = $this -> {dataDir} . '/ideCntrlConfig';
@@ -653,7 +637,10 @@ sub test_vmwareWriteIdeCntrl {
     $this -> assert_str_equals('completed', $state);
     $this -> assert_not_null($res);
     $this -> assert_file_exists($cfgFile);
-    my $refFile = $this -> getRefResultsDir() . '/ideCntrlVMWare.ovf';
+    my $arch = $xml -> getArch();
+    my $refFile = $this -> getRefResultsDir()
+        . '/ideCntrlVMWare.ovf'
+        . ".$arch";
     $res = $this -> compareFiles($refFile, $cfgFile);
     if ($res) {
         $this -> removeTestTmpDir();
@@ -675,11 +662,6 @@ sub test_vmwareWriteKnownGuestOS {
     # ...
     # Test the creation of the config file for VMWare with known guest OS
     # ---
-    if ((KIWIQX::qxx ("uname -m")) ne 'x86_64') {
-        print "\t\tInfo: x86_64 arch only, skipping ";
-        print "test_vmwareWriteKnownGuestOS\n";
-        return;
-    }
     my $this = shift;
     my $kiwi = $this -> {kiwi};
     my @knownDists = qw (rhel rhel-64 sles sles-64 suse suse-64);
@@ -710,7 +692,11 @@ sub test_vmwareWriteKnownGuestOS {
         $this -> assert_str_equals('completed', $state);
         $this -> assert_not_null($res);
         $this -> assert_file_exists($cfgFile);
-        my $refFile = $this -> getRefResultsDir() . "/$dist" . '_OSVMWare.ovf';
+        my $arch = $xml -> getArch();
+        my $refFile = $this -> getRefResultsDir()
+            . "/$dist"
+            . '_OSVMWare.ovf'
+            . ".$arch";
         $res = $this -> compareFiles($refFile, $cfgFile);
         if ($res) {
             $this -> removeTestTmpDir();
@@ -733,11 +719,6 @@ sub test_vmwareWriteMaxCPU {
     # ...
     # Test the creation of the config file for VMWare with max CPU count set
     # ---
-    if ((KIWIQX::qxx ("uname -m")) ne 'x86_64') {
-        print "\t\tInfo: x86_64 arch only, skipping ";
-        print "test_vmwareWriteMaxCPU\n";
-        return;
-    }
     my $this = shift;
     my $kiwi = $this -> {kiwi};
     my $confDir = $this -> {dataDir} . '/maxCPUOVFConfig';
@@ -761,7 +742,8 @@ sub test_vmwareWriteMaxCPU {
     $this -> assert_str_equals('completed', $state);
     $this -> assert_not_null($res);
     $this -> assert_file_exists($cfgFile);
-    my $refFile = $this -> getRefResultsDir() . '/maxCPUVMWare.ovf';
+    my $arch = $xml -> getArch();
+    my $refFile = $this -> getRefResultsDir() . '/maxCPUVMWare.ovf' . ".$arch";
     $res = $this -> compareFiles($refFile, $cfgFile);
     if ($res) {
         $this -> removeTestTmpDir();
@@ -783,11 +765,6 @@ sub test_vmwareWriteMinCPU {
     # ...
     # Test the creation of the config file for VMWare with min CPU count set
     # ---
-    if ((KIWIQX::qxx ("uname -m")) ne 'x86_64') {
-        print "\t\tInfo: x86_64 arch only, skipping ";
-        print "test_vmwareWriteMinCPU\n";
-        return;
-    }
     my $this = shift;
     my $kiwi = $this -> {kiwi};
     my $confDir = $this -> {dataDir} . '/minCPUOVFConfig';
@@ -811,7 +788,8 @@ sub test_vmwareWriteMinCPU {
     $this -> assert_str_equals('completed', $state);
     $this -> assert_not_null($res);
     $this -> assert_file_exists($cfgFile);
-    my $refFile = $this -> getRefResultsDir() . '/minCPUVMWare.ovf';
+    my $arch = $xml -> getArch();
+    my $refFile = $this -> getRefResultsDir() . '/minCPUVMWare.ovf' . ".$arch";
     $res = $this -> compareFiles($refFile, $cfgFile);
     if ($res) {
         $this -> removeTestTmpDir();
@@ -834,11 +812,6 @@ sub test_vmwareWriteMinGTMaxCPU {
     # Test the creation of the config file for VMWare with min memory set
     # larger than max memory
     # ---
-    if ((KIWIQX::qxx ("uname -m")) ne 'x86_64') {
-        print "\t\tInfo: x86_64 arch only, skipping ";
-        print "test_vmwareWriteMinGTMaxCPU\n";
-        return;
-    }
     my $this = shift;
     my $kiwi = $this -> {kiwi};
     my $confDir = $this -> {dataDir} . '/minGTMaxCPUOVFConfig';
@@ -874,11 +847,6 @@ sub test_vmwareWriteMinMaxCPU {
     # Test the creation of the config file for VMWare with max and min CPU
     # count set
     # ---
-    if ((KIWIQX::qxx ("uname -m")) ne 'x86_64') {
-        print "\t\tInfo: x86_64 arch only, skipping ";
-        print "test_vmwareWriteMinMaxCPU\n";
-        return;
-    }
     my $this = shift;
     my $kiwi = $this -> {kiwi};
     my $confDir = $this -> {dataDir} . '/minMaxCPUOVFConfig';
@@ -902,7 +870,10 @@ sub test_vmwareWriteMinMaxCPU {
     $this -> assert_str_equals('completed', $state);
     $this -> assert_not_null($res);
     $this -> assert_file_exists($cfgFile);
-    my $refFile = $this -> getRefResultsDir() . '/minMaxCPUVMWare.ovf';
+    my $arch = $xml -> getArch();
+    my $refFile = $this -> getRefResultsDir()
+        . '/minMaxCPUVMWare.ovf'
+        . ".$arch";
     $res = $this -> compareFiles($refFile, $cfgFile);
     if ($res) {
         $this -> removeTestTmpDir();
@@ -924,11 +895,6 @@ sub test_vmwareWriteMaxMemory {
     # ...
     # Test the creation of the config file for VMWare with max memory set
     # ---
-    if ((KIWIQX::qxx ("uname -m")) ne 'x86_64') {
-        print "\t\tInfo: x86_64 arch only, skipping ";
-        print "test_vmwareWriteMaxMemory\n";
-        return;
-    }
     my $this = shift;
     my $kiwi = $this -> {kiwi};
     my $confDir = $this -> {dataDir} . '/maxMemoryOVFConfig';
@@ -952,7 +918,10 @@ sub test_vmwareWriteMaxMemory {
     $this -> assert_str_equals('completed', $state);
     $this -> assert_not_null($res);
     $this -> assert_file_exists($cfgFile);
-    my $refFile = $this -> getRefResultsDir() . '/maxMemoryVMWare.ovf';
+    my $arch = $xml -> getArch();
+    my $refFile = $this -> getRefResultsDir()
+        . '/maxMemoryVMWare.ovf'
+        . ".$arch";
     $res = $this -> compareFiles($refFile, $cfgFile);
     if ($res) {
         $this -> removeTestTmpDir();
@@ -974,11 +943,6 @@ sub test_vmwareWriteMinMemory {
     # ...
     # Test the creation of the config file for VMWare with min memory set
     # ---
-    if ((KIWIQX::qxx ("uname -m")) ne 'x86_64') {
-        print "\t\tInfo: x86_64 arch only, skipping ";
-        print "test_vmwareWriteMinMemory\n";
-        return;
-    }
     my $this = shift;
     my $kiwi = $this -> {kiwi};
     my $confDir = $this -> {dataDir} . '/minMemoryOVFConfig';
@@ -1002,7 +966,10 @@ sub test_vmwareWriteMinMemory {
     $this -> assert_str_equals('completed', $state);
     $this -> assert_not_null($res);
     $this -> assert_file_exists($cfgFile);
-    my $refFile = $this -> getRefResultsDir() . '/minMemoryVMWare.ovf';
+    my $arch = $xml -> getArch();
+    my $refFile = $this -> getRefResultsDir()
+        . '/minMemoryVMWare.ovf'
+        . ".$arch";
     $res = $this -> compareFiles($refFile, $cfgFile);
     if ($res) {
         $this -> removeTestTmpDir();
@@ -1059,11 +1026,6 @@ sub test_vmwareWriteMinMaxMemory {
     # ...
     # Test the creation of the config file for VMWare with minMax memory set
     # ---
-    if ((KIWIQX::qxx ("uname -m")) ne 'x86_64') {
-        print "\t\tInfo: x86_64 arch only, skipping ";
-        print "test_vmwareWriteMinMaxMemory\n";
-        return;
-    }
     my $this = shift;
     my $kiwi = $this -> {kiwi};
     my $confDir = $this -> {dataDir} . '/minMaxMemoryOVFConfig';
@@ -1087,7 +1049,10 @@ sub test_vmwareWriteMinMaxMemory {
     $this -> assert_str_equals('completed', $state);
     $this -> assert_not_null($res);
     $this -> assert_file_exists($cfgFile);
-    my $refFile = $this -> getRefResultsDir() . '/minMaxMemoryVMWare.ovf';
+    my $arch = $xml -> getArch();
+    my $refFile = $this -> getRefResultsDir()
+        . '/minMaxMemoryVMWare.ovf'
+        . ".$arch";
     $res = $this -> compareFiles($refFile, $cfgFile);
     if ($res) {
         $this -> removeTestTmpDir();
@@ -1109,11 +1074,6 @@ sub test_vmwareWriteMultiNIC {
     # ...
     # Test the creation of the config file for VMWare with multiple NICS
     # ---
-    if ((KIWIQX::qxx ("uname -m")) ne 'x86_64') {
-        print "\t\tInfo: x86_64 arch only, skipping ";
-        print "test_vmwareWriteMultiNIC\n";
-        return;
-    }
     my $this = shift;
     my $kiwi = $this -> {kiwi};
     my $confDir = $this -> {dataDir} . '/multiNICOVFConfig';
@@ -1137,7 +1097,10 @@ sub test_vmwareWriteMultiNIC {
     $this -> assert_str_equals('completed', $state);
     $this -> assert_not_null($res);
     $this -> assert_file_exists($cfgFile);
-    my $refFile = $this -> getRefResultsDir() . '/multiNICVMWare.ovf';
+    my $arch = $xml -> getArch();
+    my $refFile = $this -> getRefResultsDir()
+        . '/multiNICVMWare.ovf'
+        . ".$arch";
     $res = $this -> compareFiles($refFile, $cfgFile);
     if ($res) {
         $this -> removeTestTmpDir();
@@ -1159,11 +1122,6 @@ sub test_vmwareWriteNoDiskCrtl {
     # ...
     # Test the creation of the config file when no disk controller is specified
     # ---
-    if ((KIWIQX::qxx ("uname -m")) ne 'x86_64') {
-        print "\t\tInfo: x86_64 arch only, skipping ";
-        print "test_vmwareWriteNoDiskCrtl\n";
-        return;
-    }
     my $this = shift;
     my $kiwi = $this -> {kiwi};
     my $confDir = $this -> {dataDir} . '/noDiskCrtlSpec';
@@ -1194,7 +1152,10 @@ sub test_vmwareWriteNoDiskCrtl {
     $this -> assert_str_equals('completed', $state);
     $this -> assert_not_null($res);
     $this -> assert_file_exists($cfgFile);
-    my $refFile = $this -> getRefResultsDir() . '/noDiskCrtlVMWare.ovf';
+    my $arch = $xml -> getArch();
+    my $refFile = $this -> getRefResultsDir()
+        . '/noDiskCrtlVMWare.ovf'
+        . ".$arch";
     $res = $this -> compareFiles($refFile, $cfgFile);
     if ($res) {
         $this -> removeTestTmpDir();
@@ -1216,11 +1177,6 @@ sub test_vmwareWriteNoDVD {
     # ...
     # Test the creation of the config file for VMWare with no DVD device
     # ---
-    if ((KIWIQX::qxx ("uname -m")) ne 'x86_64') {
-        print "\t\tInfo: x86_64 arch only, skipping ";
-        print "test_vmwareWriteNoDVD\n";
-        return;
-    }
     my $this = shift;
     my $kiwi = $this -> {kiwi};
     my $confDir = $this -> {dataDir} . '/baseOVFConfig';
@@ -1244,7 +1200,8 @@ sub test_vmwareWriteNoDVD {
     $this -> assert_str_equals('completed', $state);
     $this -> assert_not_null($res);
     $this -> assert_file_exists($cfgFile);
-    my $refFile = $this -> getRefResultsDir() . '/basicVMWare.ovf';
+    my $arch = $xml -> getArch();
+    my $refFile = $this -> getRefResultsDir() . '/basicVMWare.ovf' . ".$arch";
     $res = $this -> compareFiles($refFile, $cfgFile);
     if ($res) {
         $this -> removeTestTmpDir();
@@ -1266,11 +1223,6 @@ sub test_vmwareWriteNoCPUspec {
     # ...
     # Test the creation of the config file when no CPU is specified
     # ---
-    if ((KIWIQX::qxx ("uname -m")) ne 'x86_64') {
-        print "\t\tInfo: x86_64 arch only, skipping ";
-        print "test_vmwareWriteNoCPUspec\n";
-        return;
-    }
     my $this = shift;
     my $kiwi = $this -> {kiwi};
     my $confDir = $this -> {dataDir} . '/noCPUspec';
@@ -1301,7 +1253,8 @@ sub test_vmwareWriteNoCPUspec {
     $this -> assert_str_equals('completed', $state);
     $this -> assert_not_null($res);
     $this -> assert_file_exists($cfgFile);
-    my $refFile = $this -> getRefResultsDir() . '/noCPUVMWare.ovf';
+    my $arch = $xml -> getArch();
+    my $refFile = $this -> getRefResultsDir() . '/noCPUVMWare.ovf' . ".$arch";
     $res = $this -> compareFiles($refFile, $cfgFile);
     if ($res) {
         $this -> removeTestTmpDir();
@@ -1323,11 +1276,6 @@ sub test_vmwareWriteNoDiskCntrl {
     # ...
     # Test the creation of the config file when no Memory is specified
     # ---
-    if ((KIWIQX::qxx ("uname -m")) ne 'x86_64') {
-        print "\t\tInfo: x86_64 arch only, skipping ";
-        print "test_vmwareWriteNoDiskCntrl\n";
-        return;
-    }
     my $this = shift;
     my $kiwi = $this -> {kiwi};
     my $confDir = $this -> {dataDir} . '/noDiskCntrl';
@@ -1358,7 +1306,10 @@ sub test_vmwareWriteNoDiskCntrl {
     $this -> assert_str_equals('completed', $state);
     $this -> assert_not_null($res);
     $this -> assert_file_exists($cfgFile);
-    my $refFile = $this -> getRefResultsDir() . '/noDiskCntrlVMWare.ovf';
+    my $arch = $xml -> getArch();
+    my $refFile = $this -> getRefResultsDir()
+        . '/noDiskCntrlVMWare.ovf'
+        . ".$arch";
     $res = $this -> compareFiles($refFile, $cfgFile);
     if ($res) {
         $this -> removeTestTmpDir();
@@ -1380,11 +1331,6 @@ sub test_vmwareWriteNoMemoryspec {
     # ...
     # Test the creation of the config file when no Memory is specified
     # ---
-    if ((KIWIQX::qxx ("uname -m")) ne 'x86_64') {
-        print "\t\tInfo: x86_64 arch only, skipping ";
-        print "test_vmwareWriteNoMemoryspec\n";
-        return;
-    }
     my $this = shift;
     my $kiwi = $this -> {kiwi};
     my $confDir = $this -> {dataDir} . '/noMemorySpec';
@@ -1415,7 +1361,10 @@ sub test_vmwareWriteNoMemoryspec {
     $this -> assert_str_equals('completed', $state);
     $this -> assert_not_null($res);
     $this -> assert_file_exists($cfgFile);
-    my $refFile = $this -> getRefResultsDir() . '/noMemoryVMWare.ovf';
+    my $arch = $xml -> getArch();
+    my $refFile = $this -> getRefResultsDir()
+        . '/noMemoryVMWare.ovf'
+        . ".$arch";
     $res = $this -> compareFiles($refFile, $cfgFile);
     if ($res) {
         $this -> removeTestTmpDir();
@@ -1437,11 +1386,6 @@ sub test_writeNoOvfType {
     # ...
     # Test the creation of the config file for the "default" ovf type
     # ---
-    if ((KIWIQX::qxx ("uname -m")) ne 'x86_64') {
-        print "\t\tInfo: x86_64 arch only, skipping ";
-        print "test_writeNoOvfType\n";
-        return;
-    }
     my $this = shift;
     my $kiwi = $this -> {kiwi};
     my $confDir = $this -> {dataDir} . '/noOVFTypeConfig';
@@ -1470,7 +1414,8 @@ sub test_writeNoOvfType {
     $this -> assert_str_equals('completed', $state);
     $this -> assert_not_null($res);
     $this -> assert_file_exists($cfgFile);
-    my $refFile = $this -> getRefResultsDir() . '/basicVMWare.ovf';
+    my $arch = $xml -> getArch();
+    my $refFile = $this -> getRefResultsDir() . '/basicVMWare.ovf' . ".$arch";
     $res = $this -> compareFiles($refFile, $cfgFile);
     if ($res) {
         $this -> removeTestTmpDir();
@@ -1492,11 +1437,6 @@ sub test_xenWriteNoDVD {
     # ...
     # Test the creation of the config file for XEN
     # ---
-    if ((KIWIQX::qxx ("uname -m")) ne 'x86_64') {
-        print "\t\tInfo: x86_64 arch only, skipping ";
-        print "test_xenWriteNoDVD\n";
-        return;
-    }
     my $this = shift;
     my $kiwi = $this -> {kiwi};
     my $confDir = $this -> {dataDir} . '/xenOVFConfig';
@@ -1520,7 +1460,8 @@ sub test_xenWriteNoDVD {
     $this -> assert_str_equals('completed', $state);
     $this -> assert_not_null($res);
     $this -> assert_file_exists($cfgFile);
-    my $refFile = $this -> getRefResultsDir() . '/xen.ovf';
+    my $arch = $xml -> getArch();
+    my $refFile = $this -> getRefResultsDir() . '/xen.ovf' . ".$arch";
     $res = $this -> compareFiles($refFile, $cfgFile);
     if ($res) {
         $this -> removeTestTmpDir();
@@ -1542,11 +1483,6 @@ sub test_zvmWriteNoDVD {
     # ...
     # Test the creation of the config file for zvm
     # ---
-    if ((KIWIQX::qxx ("uname -m")) ne 'x86_64') {
-        print "\t\tInfo: x86_64 arch only, skipping ";
-        print "test_zvmWriteNoDVD\n";
-        return;
-    }
     my $this = shift;
     my $kiwi = $this -> {kiwi};
     my $confDir = $this -> {dataDir} . '/zvmOVFConfig';
@@ -1570,7 +1506,8 @@ sub test_zvmWriteNoDVD {
     $this -> assert_str_equals('completed', $state);
     $this -> assert_not_null($res);
     $this -> assert_file_exists($cfgFile);
-    my $refFile = $this -> getRefResultsDir() . '/zvm.ovf';
+    my $arch = $xml -> getArch();
+    my $refFile = $this -> getRefResultsDir() . '/zvm.ovf' . ".$arch";
     $res = $this -> compareFiles($refFile, $cfgFile);
     if ($res) {
         $this -> removeTestTmpDir();
