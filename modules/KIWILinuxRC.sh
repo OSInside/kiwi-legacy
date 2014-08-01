@@ -852,6 +852,7 @@ function installBootLoader {
         i*86-grub)       installBootLoaderGrub ;;
         x86_64-grub)     installBootLoaderGrub ;;
         i*86-grub2)      installBootLoaderGrub2 ;;
+        s390*-grub2)     installBootLoaderGrub2 ;;
         x86_64-grub2)    installBootLoaderGrub2 ;;
         ppc64*-grub2)    installBootLoaderGrub2 ;;
         ppc*)            installBootLoaderYaboot ;;
@@ -908,6 +909,7 @@ function installBootLoaderRecovery {
         x86_64-grub)     installBootLoaderGrubRecovery ;;
         i*86-grub2)      installBootLoaderGrub2Recovery ;;
         x86_64-grub2)    installBootLoaderGrub2Recovery ;;
+        s390*-grub2)     installBootLoaderGrub2Recovery ;;
         i*86-syslinux)   installBootLoaderSyslinuxRecovery ;;
         x86_64-syslinux) installBootLoaderSyslinuxRecovery ;;
         i*86-extlinux)   installBootLoaderSyslinuxRecovery ;;
@@ -1489,6 +1491,7 @@ function setupBootLoader {
         i*86-grub2)      eval setupBootLoaderGrub2 $para ;;
         x86_64-grub2)    eval setupBootLoaderGrub2 $para ;;
         ppc64*-grub2)    eval setupBootLoaderGrub2 $para ;;
+        s390*-grub2)     eval setupBootLoaderGrub2 $para ;;
         i*86-syslinux)   eval setupBootLoaderSyslinux $para ;;
         x86_64-syslinux) eval setupBootLoaderSyslinux $para ;;
         i*86-extlinux)   eval setupBootLoaderSyslinux $para ;;
@@ -1587,6 +1590,7 @@ function setupBootLoaderRecovery {
         x86_64-grub)     eval setupBootLoaderGrubRecovery $para ;;
         i*86-grub2)      eval setupBootLoaderGrub2Recovery $para ;;
         x86_64-grub2)    eval setupBootLoaderGrub2Recovery $para ;;
+        s390*-grub2)     eval setupBootLoaderGrub2Recovery $para ;;
         i*86-syslinux)   eval setupBootLoaderSyslinuxRecovery $para ;;
         x86_64-syslinux) eval setupBootLoaderSyslinuxRecovery $para ;;
         i*86-extlinux)   eval setupBootLoaderSyslinuxRecovery $para ;;
@@ -5182,7 +5186,7 @@ function setupDefaultGateway {
         #======================================
         # activate GW route
         #--------------------------------------
-        route add default gw $gateway
+        ip route add default via $gateway
     else
         #======================================
         # write GW configuration
@@ -5197,6 +5201,7 @@ function setupDNS {
     # /.../
     # setup DNS. write data to resolv.conf
     # ----
+    local IFS
     local file="/etc/resolv.conf"
     if [ -n "$domain" ];then
         export DOMAIN=$domain
@@ -5593,7 +5598,7 @@ function validateSize {
     haveBytes=$(partitionSize $imageDevice)
     haveBytes=$((haveBytes * 1024))
     haveMByte=$((haveBytes / 1048576))
-    needBytes=$((blocks * $blocksize))
+    needBytes=$((blocks * blocksize))
     needMByte=$((needBytes / 1048576))
     Echo "Have size: $imageDevice -> $haveBytes Bytes [ $haveMByte MB ]"
     Echo "Need size: $needBytes Bytes [ $needMByte MB ]"
@@ -9254,7 +9259,7 @@ function pxePartitionInputFDASD {
             partID=2
         elif [ "$partID" = '83' ] || [ "$partID" = 'L' ];then
             partID=1
-        elif [ "$partID" -eq '8e' ] || [ "$partID" = 'V' ];then
+        elif [ "$partID" = '8e' ] || [ "$partID" = 'V' ];then
             partID=4
         else
             partID=1

@@ -60,6 +60,7 @@
         <file name="curl"/>
         <file name="cut"/>
         <file name="dasd_configure"/>
+        <file name="dasdinfo"/>
         <file name="dcounter"/>
         <file name="dd"/>
         <file name="debugreiserfs"/>
