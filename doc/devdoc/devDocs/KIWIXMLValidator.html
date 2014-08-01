@@ -63,10 +63,37 @@
 <li><a href="#__validateXML">__validateXML</a></li>
 </ul>
 <hr>
+<a name="getDOM"><h2>getDOM</h2></a>
+<p>
+     Return the DOM for the configuration file.
+<p>
+Defined on line: 118
+<p>
+Called in
+<ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 333</li></ul>
+<a name="new"><h2>new</h2></a>
+<p>
+     Create the validator object.
+<p>
+Defined on line: 45
+<p>
+Called in
+<ul>
+<li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1758</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 445</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 511</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 723</li><li><a href="KIWIXML.html">KIWIXML</a> : 327</li><li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 988</li></ul>
+<a name="validate"><h2>validate</h2></a>
+<p>
+     Validate the XML for syntactic correctness and consistency
+<p>
+Defined on line: 129
+<p>
+Called in
+<ul>
+<li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1764</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 451</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 517</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 729</li><li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 994</li><li><a href="KIWIXMLValidator.html">KIWIXMLValidator</a> : 1878</li></ul>
 <a name="__checkArchiveUnique"><h2>__checkArchiveUnique</h2></a>
 <p>
- Check that a specified archive is unique, i.e. specified only
- once per architecture per <packages> section
+     Check that a specified archive is unique, i.e. specified only
+     once per architecture per <packages> section
 <p>
 Defined on line: 159
 <p>
@@ -75,8 +102,8 @@ Called in
 <li><a href="KIWIXMLValidator.html">KIWIXMLValidator</a> : 1749</li></ul>
 <a name="__checkBootSpecPresent"><h2>__checkBootSpecPresent</h2></a>
 <p>
- Check that the boot attribute is set for types that require an
- initrd.
+     Check that the boot attribute is set for types that require an
+     initrd.
 <p>
 Defined on line: 190
 <p>
@@ -85,7 +112,7 @@ Called in
 <li><a href="KIWIXMLValidator.html">KIWIXMLValidator</a> : 1752</li></ul>
 <a name="__checkContainerSpec"><h2>__checkContainerSpec</h2></a>
 <p>
- Check that the container attribute is set and has a valid name
+     Check that the container attribute is set and has a valid name
 <p>
 Defined on line: 225
 <p>
@@ -94,7 +121,7 @@ Called in
 <li><a href="KIWIXMLValidator.html">KIWIXMLValidator</a> : 1755</li></ul>
 <a name="__checkDefaultProfSetting"><h2>__checkDefaultProfSetting</h2></a>
 <p>
- Make sure only one profile is marked as default.
+     Make sure only one profile is marked as default.
 <p>
 Defined on line: 258
 <p>
@@ -103,7 +130,7 @@ Called in
 <li><a href="KIWIXMLValidator.html">KIWIXMLValidator</a> : 1758</li></ul>
 <a name="__checkDefaultTypeSetting"><h2>__checkDefaultTypeSetting</h2></a>
 <p>
- Check that only one type is marked as primary per profile
+     Check that only one type is marked as primary per profile
 <p>
 Defined on line: 329
 <p>
@@ -112,9 +139,9 @@ Called in
 <li><a href="KIWIXMLValidator.html">KIWIXMLValidator</a> : 1761</li></ul>
 <a name="__checkDeletePackNoPatNoTar"><h2>__checkDeletePackNoPatNoTar</h2></a>
 <p>
- A <packages type="delete"> section may not specify patterns or archives.
- We do not support deletion of archives and the underlying package
- management systems do not support the deletion of patterns.
+     A <packages type="delete"> section may not specify patterns or archives.
+     We do not support deletion of archives and the underlying package
+     management systems do not support the deletion of patterns.
 <p>
 Defined on line: 286
 <p>
@@ -123,7 +150,7 @@ Called in
 <li><a href="KIWIXMLValidator.html">KIWIXMLValidator</a> : 1764</li></ul>
 <a name="__checkDisplaynameValid"><h2>__checkDisplaynameValid</h2></a>
 <p>
- The displayname attribute of the image may not contain spaces
+     The displayname attribute of the image may not contain spaces
 <p>
 Defined on line: 360
 <p>
@@ -132,8 +159,8 @@ Called in
 <li><a href="KIWIXMLValidator.html">KIWIXMLValidator</a> : 1767</li></ul>
 <a name="__checkFilesysSpec"><h2>__checkFilesysSpec</h2></a>
 <p>
- It is necessary to specify the filesystem attribute for certain
- image types. Make sure the attribute is specified when required.
+     It is necessary to specify the filesystem attribute for certain
+     image types. Make sure the attribute is specified when required.
 <p>
 Defined on line: 413
 <p>
@@ -142,9 +169,9 @@ Called in
 <li><a href="KIWIXMLValidator.html">KIWIXMLValidator</a> : 1773</li></ul>
 <a name="__checkGroupSettingsConsistent"><h2>__checkGroupSettingsConsistent</h2></a>
 <p>
- Check that the group seetings are consistent across all <users> elements
- A group may only be specified with one ID and ID may not be used
- twice
+     Check that the group seetings are consistent across all <users> elements
+     A group may only be specified with one ID and ID may not be used
+     twice
 <p>
 Defined on line: 446
 <p>
@@ -153,9 +180,9 @@ Called in
 <li><a href="KIWIXMLValidator.html">KIWIXMLValidator</a> : 1776</li></ul>
 <a name="__checkHttpsCredentialsConsistent"><h2>__checkHttpsCredentialsConsistent</h2></a>
 <p>
- username and password attributes for all repositories configured
- as https: must have the same value. Any repository that has a
- username attribute must also have a password attribute.
+     username and password attributes for all repositories configured
+     as https: must have the same value. Any repository that has a
+     username attribute must also have a password attribute.
 <p>
 Defined on line: 484
 <p>
@@ -164,7 +191,7 @@ Called in
 <li><a href="KIWIXMLValidator.html">KIWIXMLValidator</a> : 1779</li></ul>
 <a name="__checkInstallVerifyAction"><h2>__checkInstallVerifyAction</h2></a>
 <p>
- Check that the install verification settings do not conflict
+     Check that the install verification settings do not conflict
 <p>
 Defined on line: 546
 <p>
@@ -173,8 +200,8 @@ Called in
 <li><a href="KIWIXMLValidator.html">KIWIXMLValidator</a> : 1782</li></ul>
 <a name="__checkIsFormatEC2"><h2>__checkIsFormatEC2</h2></a>
 <p>
- We changed the EC2 build in an incompatible way we need to allert
- users if they still have the old setup.
+     We changed the EC2 build in an incompatible way we need to allert
+     users if they still have the old setup.
 <p>
 Defined on line: 386
 <p>
@@ -183,8 +210,8 @@ Called in
 <li><a href="KIWIXMLValidator.html">KIWIXMLValidator</a> : 1770</li></ul>
 <a name="__checkNetInterfaceMACUnique"><h2>__checkNetInterfaceMACUnique</h2></a>
 <p>
- Check that the interface name used is unique within one <machine>
- definition.
+     Check that the interface name used is unique within one <machine>
+     definition.
 <p>
 Defined on line: 583
 <p>
@@ -193,8 +220,8 @@ Called in
 <li><a href="KIWIXMLValidator.html">KIWIXMLValidator</a> : 1785</li></ul>
 <a name="__checkNetInterfaceNameUnique"><h2>__checkNetInterfaceNameUnique</h2></a>
 <p>
- Check that the interface name used is unique within one <machine>
- definition.
+     Check that the interface name used is unique within one <machine>
+     definition.
 <p>
 Defined on line: 614
 <p>
@@ -203,8 +230,8 @@ Called in
 <li><a href="KIWIXMLValidator.html">KIWIXMLValidator</a> : 1788</li></ul>
 <a name="__checkNoBootVolume"><h2>__checkNoBootVolume</h2></a>
 <p>
- Check that the boot directory, i.e. /boot is not specified as
- a logical volume.
+     Check that the boot directory, i.e. /boot is not specified as
+     a logical volume.
 <p>
 Defined on line: 643
 <p>
@@ -213,8 +240,8 @@ Called in
 <li><a href="KIWIXMLValidator.html">KIWIXMLValidator</a> : 1791</li></ul>
 <a name="__checkNoIDSystemGroups"><h2>__checkNoIDSystemGroups</h2></a>
 <p>
- Check that no group ID is specified if the specieife group name
- is part of the system groups.
+     Check that no group ID is specified if the specieife group name
+     is part of the system groups.
 <p>
 Defined on line: 671
 <p>
@@ -223,8 +250,8 @@ Called in
 <li><a href="KIWIXMLValidator.html">KIWIXMLValidator</a> : 1794</li></ul>
 <a name="__checkOVFTypeSet"><h2>__checkOVFTypeSet</h2></a>
 <p>
- If the format attribute on the <type> is set to ovf the user must
- specify the ovftype in the <machine> definition
+     If the format attribute on the <type> is set to ovf the user must
+     specify the ovftype in the <machine> definition
 <p>
 Defined on line: 756
 <p>
@@ -233,8 +260,8 @@ Called in
 <li><a href="KIWIXMLValidator.html">KIWIXMLValidator</a> : 1797</li></ul>
 <a name="__checkPackageUnique"><h2>__checkPackageUnique</h2></a>
 <p>
- Check that a specified package is unique, i.e. specified only
- once per architecture per <packages> section
+     Check that a specified package is unique, i.e. specified only
+     once per architecture per <packages> section
 <p>
 Defined on line: 787
 <p>
@@ -243,12 +270,12 @@ Called in
 <li><a href="KIWIXMLValidator.html">KIWIXMLValidator</a> : 1800</li></ul>
 <a name="__checkPatternTypeAttrConsistent"><h2>__checkPatternTypeAttrConsistent</h2></a>
 <p>
- Check that the values for the patternType attribute do not conflict.
- This means patternTypes set for profiles must be uniq for this
- profile. This also applies to sections without a profile which
- are handled as __standard in this check. The getInstallOption
- function from KIWIXML will use the highest prio patternType
- according to the selected profiles.
+     Check that the values for the patternType attribute do not conflict.
+     This means patternTypes set for profiles must be uniq for this
+     profile. This also applies to sections without a profile which
+     are handled as __standard in this check. The getInstallOption
+     function from KIWIXML will use the highest prio patternType
+     according to the selected profiles.
 <p>
 Defined on line: 850
 <p>
@@ -257,8 +284,8 @@ Called in
 <li><a href="KIWIXMLValidator.html">KIWIXMLValidator</a> : 1809</li></ul>
 <a name="__checkPatternTypeAttrUse"><h2>__checkPatternTypeAttrUse</h2></a>
 <p>
- The PatternType attribute may only be used for image and bootstrap
- packages. Check that this is set appropriately.
+     The PatternType attribute may only be used for image and bootstrap
+     packages. Check that this is set appropriately.
 <p>
 Defined on line: 916
 <p>
@@ -267,9 +294,9 @@ Called in
 <li><a href="KIWIXMLValidator.html">KIWIXMLValidator</a> : 1806</li></ul>
 <a name="__checkPatternUnique"><h2>__checkPatternUnique</h2></a>
 <p>
- Check that a specified namedCollection is unique,
- i.e. specified only once per architecture
- per <packages> section
+     Check that a specified namedCollection is unique,
+     i.e. specified only once per architecture
+     per <packages> section
 <p>
 Defined on line: 818
 <p>
@@ -278,10 +305,10 @@ Called in
 <li><a href="KIWIXMLValidator.html">KIWIXMLValidator</a> : 1803</li></ul>
 <a name="__checkPostDumpAction"><h2>__checkPostDumpAction</h2></a>
 <p>
- Check that only one post dump action for the OEM
- image type is set, spare oem-bootwait
- It is reasonable to use oem-bootwait with other actions such
- as shutdown or reboot.
+     Check that only one post dump action for the OEM
+     image type is set, spare oem-bootwait
+     It is reasonable to use oem-bootwait with other actions such
+     as shutdown or reboot.
 <p>
 Defined on line: 943
 <p>
@@ -290,8 +317,8 @@ Called in
 <li><a href="KIWIXMLValidator.html">KIWIXMLValidator</a> : 1812</li></ul>
 <a name="__checkPreferLicenseUnique"><h2>__checkPreferLicenseUnique</h2></a>
 <p>
- Check that the prefer-license attribute is set to true on only one
- repository per profile.
+     Check that the prefer-license attribute is set to true on only one
+     repository per profile.
 <p>
 Defined on line: 1024
 <p>
@@ -300,8 +327,8 @@ Called in
 <li><a href="KIWIXMLValidator.html">KIWIXMLValidator</a> : 1818</li></ul>
 <a name="__checkPreferencesDefinition"><h2>__checkPreferencesDefinition</h2></a>
 <p>
- Check that only one <preference> definition exists without
- use of the profiles attribute.
+     Check that only one <preference> definition exists without
+     use of the profiles attribute.
 <p>
 Defined on line: 984
 <p>
@@ -310,8 +337,8 @@ Called in
 <li><a href="KIWIXMLValidator.html">KIWIXMLValidator</a> : 1815</li></ul>
 <a name="__checkProfileNames"><h2>__checkProfileNames</h2></a>
 <p>
- Check that a profile name does not contain whitespace, and is not
- named "all". "all" has a special meaning in Kiwi :(
+     Check that a profile name does not contain whitespace, and is not
+     named "all". "all" has a special meaning in Kiwi :(
 <p>
 Defined on line: 1082
 <p>
@@ -320,8 +347,8 @@ Called in
 <li><a href="KIWIXMLValidator.html">KIWIXMLValidator</a> : 1821</li></ul>
 <a name="__checkReferencedProfDefined"><h2>__checkReferencedProfDefined</h2></a>
 <p>
- Check that any reference of profiles has a defined
- target, i.e. the profile must be defined
+     Check that any reference of profiles has a defined
+     target, i.e. the profile must be defined
 <p>
 Defined on line: 1113
 <p>
@@ -330,7 +357,7 @@ Called in
 <li><a href="KIWIXMLValidator.html">KIWIXMLValidator</a> : 1824</li></ul>
 <a name="__checkRevision"><h2>__checkRevision</h2></a>
 <p>
- Check that the current revision meets the minimum requirement
+     Check that the current revision meets the minimum requirement
 <p>
 Defined on line: 1156
 <p>
@@ -339,8 +366,8 @@ Called in
 <li><a href="KIWIXMLValidator.html">KIWIXMLValidator</a> : 1827</li></ul>
 <a name="__checkSysdiskNameNoWhitespace"><h2>__checkSysdiskNameNoWhitespace</h2></a>
 <p>
- Check that the name attribute of the <systemdisk> element does not
- contain white space
+     Check that the name attribute of the <systemdisk> element does not
+     contain white space
 <p>
 Defined on line: 1182
 <p>
@@ -349,8 +376,8 @@ Called in
 <li><a href="KIWIXMLValidator.html">KIWIXMLValidator</a> : 1830</li></ul>
 <a name="__checkTypeConfigConsist"><h2>__checkTypeConfigConsist</h2></a>
 <p>
- Check that a specified <*config> section is consistent with the
- specified image type.
+     Check that a specified <*config> section is consistent with the
+     specified image type.
 <p>
 Defined on line: 1212
 <p>
@@ -359,12 +386,12 @@ Called in
 <li><a href="KIWIXMLValidator.html">KIWIXMLValidator</a> : 1833</li></ul>
 <a name="__checkTypeInstallMediaConsist"><h2>__checkTypeInstallMediaConsist</h2></a>
 <p>
- Cehck that the install media settings are consistent
- Valid combinations
- installiso="true"
- installstick="true"
- installstick="true" installiso="true"
- installiso="true" hybrid="true"
+     Cehck that the install media settings are consistent
+     Valid combinations
+     installiso="true"
+     installstick="true"
+     installstick="true" installiso="true"
+     installiso="true" hybrid="true"
 <p>
 Defined on line: 1281
 <p>
@@ -373,8 +400,8 @@ Called in
 <li><a href="KIWIXMLValidator.html">KIWIXMLValidator</a> : 1836</li></ul>
 <a name="__checkTypePckgsTypeExists"><h2>__checkTypePckgsTypeExists</h2></a>
 <p>
- Check that the type for which packages are specified exists
- for each profile
+     Check that the type for which packages are specified exists
+     for each profile
 <p>
 Defined on line: 1313
 <p>
@@ -383,8 +410,8 @@ Called in
 <li><a href="KIWIXMLValidator.html">KIWIXMLValidator</a> : 1839</li></ul>
 <a name="__checkTypeUnique"><h2>__checkTypeUnique</h2></a>
 <p>
- Check that only one type with image="myName" exists per
- <preferences section>
+     Check that only one type with image="myName" exists per
+     <preferences section>
 <p>
 Defined on line: 1393
 <p>
@@ -401,9 +428,9 @@ Called in
 <li><a href="KIWIXMLValidator.html">KIWIXMLValidator</a> : 1845</li></ul>
 <a name="__checkVersionDefinition"><h2>__checkVersionDefinition</h2></a>
 <p>
- Check image version format
- This check should be implemented in the schema but there is a
- bug in libxml2 that prevents proper type validation for elements
+     Check image version format
+     This check should be implemented in the schema but there is a
+     bug in libxml2 that prevents proper type validation for elements
 <p>
 Defined on line: 1526
 <p>
@@ -412,8 +439,8 @@ Called in
 <li><a href="KIWIXMLValidator.html">KIWIXMLValidator</a> : 1848</li></ul>
 <a name="__checkVolAttrsConsist"><h2>__checkVolAttrsConsist</h2></a>
 <p>
- Check that the attributes size and freespace are not used in
- combination on the <volume> element.
+     Check that the attributes size and freespace are not used in
+     combination on the <volume> element.
 <p>
 Defined on line: 1563
 <p>
@@ -422,8 +449,8 @@ Called in
 <li><a href="KIWIXMLValidator.html">KIWIXMLValidator</a> : 1851</li></ul>
 <a name="__checkVolNameNoWhitespace"><h2>__checkVolNameNoWhitespace</h2></a>
 <p>
- Check that the name attribute of the <volume> element does not
- contain white space
+     Check that the name attribute of the <volume> element does not
+     contain white space
 <p>
 Defined on line: 1592
 <p>
@@ -432,8 +459,8 @@ Called in
 <li><a href="KIWIXMLValidator.html">KIWIXMLValidator</a> : 1854</li></ul>
 <a name="__checkVolNameUnique"><h2>__checkVolNameUnique</h2></a>
 <p>
- Check that the given volume name is unique across all volumes in a
- systemdisk configuration.
+     Check that the given volume name is unique across all volumes in a
+     systemdisk configuration.
 <p>
 Defined on line: 1617
 <p>
@@ -442,7 +469,7 @@ Called in
 <li><a href="KIWIXMLValidator.html">KIWIXMLValidator</a> : 1857</li></ul>
 <a name="__getXMLDocTree"><h2>__getXMLDocTree</h2></a>
 <p>
- Generate the XML Document tree for perl
+     Generate the XML Document tree for perl
 <p>
 Defined on line: 1646
 <p>
@@ -451,8 +478,8 @@ Called in
 <li><a href="KIWIXMLValidator.html">KIWIXMLValidator</a> : 107</li></ul>
 <a name="__loadControlfile"><h2>__loadControlfile</h2></a>
 <p>
- Load the XML file and pass it to the XSLT stylesheet
- processor for internal version conversion
+     Load the XML file and pass it to the XSLT stylesheet
+     processor for internal version conversion
 <p>
 Defined on line: 1670
 <p>
@@ -461,9 +488,9 @@ Called in
 <li><a href="KIWIXMLValidator.html">KIWIXMLValidator</a> : 100</li></ul>
 <a name="__uniqueInPackages"><h2>__uniqueInPackages</h2></a>
 <p>
- Loop through all packages sections and check that
- specified names are unique for the given child
- element.
+     Loop through all packages sections and check that
+     specified names are unique for the given child
+     element.
 <p>
 Defined on line: 1701
 <p>
@@ -472,13 +499,13 @@ Called in
 <li><a href="KIWIXMLValidator.html">KIWIXMLValidator</a> : 165</li><li><a href="KIWIXMLValidator.html">KIWIXMLValidator</a> : 793</li><li><a href="KIWIXMLValidator.html">KIWIXMLValidator</a> : 825</li></ul>
 <a name="__validateConsistency"><h2>__validateConsistency</h2></a>
 <p>
- Validate XML data that cannot be validated through Schema and
- structure validation. This includes conditional presence of
- elements and attributes as well as certain values.
- Note that any checks need to work off $this->{systemTree}. The
- consistency check occurs prior to this object being porpulated
- with XML data. This allows us to basically have no error checking
- in any code that populates this object from XML data.
+     Validate XML data that cannot be validated through Schema and
+     structure validation. This includes conditional presence of
+     elements and attributes as well as certain values.
+     Note that any checks need to work off $this->{systemTree}. The
+     consistency check occurs prior to this object being porpulated
+     with XML data. This allows us to basically have no error checking
+     in any code that populates this object from XML data.
 <p>
 Defined on line: 1738
 <p>
@@ -487,38 +514,11 @@ Called in
 <li><a href="KIWIXMLValidator.html">KIWIXMLValidator</a> : 146</li></ul>
 <a name="__validateXML"><h2>__validateXML</h2></a>
 <p>
- Validate the control file for syntactic and
- structural correctness according to current schema
+     Validate the control file for syntactic and
+     structural correctness according to current schema
 <p>
 Defined on line: 1866
 <p>
 Called in
 <ul>
 <li><a href="KIWIXMLValidator.html">KIWIXMLValidator</a> : 140</li></ul>
-<a name="getDOM"><h2>getDOM</h2></a>
-<p>
- Return the DOM for the configuration file.
-<p>
-Defined on line: 118
-<p>
-Called in
-<ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 333</li></ul>
-<a name="new"><h2>new</h2></a>
-<p>
- Create the validator object.
-<p>
-Defined on line: 45
-<p>
-Called in
-<ul>
-<li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1758</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 445</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 511</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 723</li><li><a href="KIWIXML.html">KIWIXML</a> : 327</li><li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 988</li></ul>
-<a name="validate"><h2>validate</h2></a>
-<p>
- Validate the XML for syntactic correctness and consistency
-<p>
-Defined on line: 129
-<p>
-Called in
-<ul>
-<li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1764</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 451</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 517</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 729</li><li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 994</li><li><a href="KIWIXMLValidator.html">KIWIXMLValidator</a> : 1878</li></ul>

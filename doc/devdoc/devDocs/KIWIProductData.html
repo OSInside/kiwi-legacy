@@ -102,30 +102,30 @@ Missing<p>
 Defined on line: 226
 <a name="new"><h2>new</h2></a>
 <p>
- This module deals with the following datasets:
-   <productvar name="DISTNAME">JeOS</productvar>
-   <productinfo name="PROVIDES">
-      product:$DISTNAME = $DISTVERSION
-   </productinfo>
-   <productoption name="SOURCEMEDIUM">2</productoption>
- These three types of information have two different
- kinds of representations. For details look at KIWIXML.pl
- and the following methods there in:
-
- - sub getInstSourceProductVar
- - sub getInstSourceProductOption
- - sub getInstSourceProductStuff
- - sub getInstSourceProductInfo
-
- The information has these structures:
- - var/option:
-   + name=value hashes
- - info:
-   + index=[name, value] hash of lists
-
- Reason for the difference is that the info flows into
- the content file and there the order matters
- (according to Rudi)
+     This module deals with the following datasets:
+       <productvar name="DISTNAME">JeOS</productvar>
+       <productinfo name="PROVIDES">
+          product:$DISTNAME = $DISTVERSION
+       </productinfo>
+       <productoption name="SOURCEMEDIUM">2</productoption>
+     These three types of information have two different
+     kinds of representations. For details look at KIWIXML.pl
+     and the following methods there in:
+    
+     - sub getInstSourceProductVar
+     - sub getInstSourceProductOption
+     - sub getInstSourceProductStuff
+     - sub getInstSourceProductInfo
+    
+     The information has these structures:
+     - var/option:
+       + name=value hashes
+     - info:
+       + index=[name, value] hash of lists
+    
+     Reason for the difference is that the info flows into
+     the content file and there the order matters
+     (according to Rudi)
 <p>
 Defined on line: 28
 <p>

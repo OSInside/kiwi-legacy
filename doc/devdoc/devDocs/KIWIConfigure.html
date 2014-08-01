@@ -31,30 +31,30 @@
 <hr>
 <a name="new"><h2>new</h2></a>
 <p>
- Create a new KIWIConfigure object which is used to provide
- different image configuration functions. Configurations are
- done within the pyhsical extend
+     Create a new KIWIConfigure object which is used to provide
+     different image configuration functions. Configurations are
+     done within the pyhsical extend
 <p>
 Defined on line: 43
 <p>
 Called in
 <ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 916</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 2320</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 1118</li></ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 916</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 2320</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 1122</li></ul>
 <a name="quoteFile"><h2>quoteFile</h2></a>
 <p>
- ensure proper quoting of the given file
+     ensure proper quoting of the given file
 <p>
 Defined on line: 851
 <p>
 Called in
 <ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 2339</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 1125</li></ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 2343</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 1129</li></ul>
 <a name="quoteshell"><h2>quoteshell</h2></a>
 <p>
- Enclosing characters in double quotes preserves the
- literal value of all characters within the quotes,
- with the exception of $, `, \, and, when history
- expansion is enabled, !.
+     Enclosing characters in double quotes preserves the
+     literal value of all characters within the quotes,
+     with the exception of $, `, \, and, when history
+     expansion is enabled, !.
 <p>
 Defined on line: 836
 <p>
@@ -63,17 +63,17 @@ Called in
 <li><a href="KIWIConfigure.html">KIWIConfigure</a> : 472</li><li><a href="KIWIConfigure.html">KIWIConfigure</a> : 777</li><li><a href="KIWIConfigure.html">KIWIConfigure</a> : 793</li></ul>
 <a name="setupAugeasImport"><h2>setupAugeasImport</h2></a>
 <p>
- Apply configuration data from an augeas XML export
- requires augeas and augeas-lenses to be installed as part
- of the appliance. For the format of the augeas XML
- schema please refer to the augeas documentation and/or
- take a look at: 'augtool dump-xml /files/*'
+     Apply configuration data from an augeas XML export
+     requires augeas and augeas-lenses to be installed as part
+     of the appliance. For the format of the augeas XML
+     schema please refer to the augeas documentation and/or
+     take a look at: 'augtool dump-xml /files/*'
 <p>
 Defined on line: 324
 <p>
 Called in
 <ul>
-<li><a href="KIWIRoot.html">KIWIRoot</a> : 1244</li></ul>
+<li><a href="KIWIRoot.html">KIWIRoot</a> : 1248</li></ul>
 <a name="setupAugeasTraverse"><h2>setupAugeasTraverse</h2></a>
 <p>
 Missing<p>
@@ -84,45 +84,45 @@ Called in
 <li><a href="KIWIConfigure.html">KIWIConfigure</a> : 373</li><li><a href="KIWIConfigure.html">KIWIConfigure</a> : 438</li></ul>
 <a name="setupAutoYaST"><h2>setupAutoYaST</h2></a>
 <p>
- This function will make use of the autoyast system and setup
- the image to call the autoyast automatically on first boot of
- the system. To activate the call of yast on first boot the
- file /var/lib/YaST2/runme_at_boot is created. Please note
- according to the YaST people this is not the preferred method
- of calling YaST to perform tasks on first boot. Use the function
- setupFirstBootYaST below which uses yast2-firstboot to do the job
+     This function will make use of the autoyast system and setup
+     the image to call the autoyast automatically on first boot of
+     the system. To activate the call of yast on first boot the
+     file /var/lib/YaST2/runme_at_boot is created. Please note
+     according to the YaST people this is not the preferred method
+     of calling YaST to perform tasks on first boot. Use the function
+     setupFirstBootYaST below which uses yast2-firstboot to do the job
 <p>
 Defined on line: 97
 <p>
 Called in
 <ul>
-<li><a href="KIWIRoot.html">KIWIRoot</a> : 1233</li></ul>
+<li><a href="KIWIRoot.html">KIWIRoot</a> : 1237</li></ul>
 <a name="setupFirstBootAnaconda"><h2>setupFirstBootAnaconda</h2></a>
 <p>
- This function activates the RHEL firstboot mechanism.
- So far I did not find a way to tell firstboot what
- modules it should call. firstboot is activated if the
- file config-anaconda-firstboot exists as part of your
- image description
+     This function activates the RHEL firstboot mechanism.
+     So far I did not find a way to tell firstboot what
+     modules it should call. firstboot is activated if the
+     file config-anaconda-firstboot exists as part of your
+     image description
 <p>
 Defined on line: 151
 <p>
 Called in
 <ul>
-<li><a href="KIWIRoot.html">KIWIRoot</a> : 1237</li></ul>
+<li><a href="KIWIRoot.html">KIWIRoot</a> : 1241</li></ul>
 <a name="setupFirstBootYaST"><h2>setupFirstBootYaST</h2></a>
 <p>
- This function is based on the yast2-firstboot functionality which
- is a service which will be enabled by insserv. The firstboot service
- uses a different xml format than the autoyast system. According to
- this the input file has a different name. the firstboot input file
- is preferred over the config-yast-autoyast.xml file
+     This function is based on the yast2-firstboot functionality which
+     is a service which will be enabled by insserv. The firstboot service
+     uses a different xml format than the autoyast system. According to
+     this the input file has a different name. the firstboot input file
+     is preferred over the config-yast-autoyast.xml file
 <p>
 Defined on line: 190
 <p>
 Called in
 <ul>
-<li><a href="KIWIRoot.html">KIWIRoot</a> : 1229</li></ul>
+<li><a href="KIWIRoot.html">KIWIRoot</a> : 1233</li></ul>
 <a name="setupGroups"><h2>setupGroups</h2></a>
 <p>
 Missing<p>
@@ -130,20 +130,20 @@ Defined on line: 447
 <p>
 Called in
 <ul>
-<li><a href="KIWIRoot.html">KIWIRoot</a> : 1207</li></ul>
+<li><a href="KIWIRoot.html">KIWIRoot</a> : 1211</li></ul>
 <a name="setupHWclock"><h2>setupHWclock</h2></a>
 <p>
- Setup the configuration for the HW clock timezone
+     Setup the configuration for the HW clock timezone
 <p>
 Defined on line: 496
 <a name="setupKeyboardMap"><h2>setupKeyboardMap</h2></a>
 <p>
- Setup the configuration for the keyboard
+     Setup the configuration for the keyboard
 <p>
 Defined on line: 527
 <a name="setupLocale"><h2>setupLocale</h2></a>
 <p>
- Setup the configuration for the locale
+     Setup the configuration for the locale
 <p>
 Defined on line: 554
 <a name="setupRecoveryArchive"><h2>setupRecoveryArchive</h2></a>
@@ -156,7 +156,7 @@ Called in
 <li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 922</li></ul>
 <a name="setupTimezone"><h2>setupTimezone</h2></a>
 <p>
- Setup the configuration for the timezone
+     Setup the configuration for the timezone
 <p>
 Defined on line: 702
 <a name="setupUsers"><h2>setupUsers</h2></a>
@@ -166,4 +166,4 @@ Defined on line: 730
 <p>
 Called in
 <ul>
-<li><a href="KIWIRoot.html">KIWIRoot</a> : 1210</li></ul>
+<li><a href="KIWIRoot.html">KIWIRoot</a> : 1214</li></ul>

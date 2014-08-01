@@ -43,7 +43,7 @@ Called in
 <li><a href="KIWIURL.html">KIWIURL</a> : 130</li><li><a href="KIWIURL.html">KIWIURL</a> : 167</li><li><a href="KIWIURL.html">KIWIURL</a> : 260</li></ul>
 <a name="getRepoType"><h2>getRepoType</h2></a>
 <p>
- return repo type, could be unknown
+     return repo type, could be unknown
 <p>
 Defined on line: 81
 <p>
@@ -52,9 +52,9 @@ Called in
 <li><a href="KIWIRoot.html">KIWIRoot</a> : 164</li></ul>
 <a name="isoPath"><h2>isoPath</h2></a>
 <p>
- This method builds a valid path from a iso://...
- description. The iso woll be loop mounted and
- the loop location serves as source path
+     This method builds a valid path from a iso://...
+     description. The iso woll be loop mounted and
+     the loop location serves as source path
 <p>
 Defined on line: 466
 <p>
@@ -63,9 +63,9 @@ Called in
 <li><a href="KIWIURL.html">KIWIURL</a> : 118</li></ul>
 <a name="new"><h2>new</h2></a>
 <p>
- Create a new KIWIURL object which is used to solve
- the high level location information into a low level
- distribution independent network url
+     Create a new KIWIURL object which is used to solve
+     the high level location information into a low level
+     distribution independent network url
 <p>
 Defined on line: 37
 <p>
@@ -74,16 +74,16 @@ Called in
 <li><a href="KIWICollect.html">KIWICollect</a> : 159</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 148</li><li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 158</li><li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 939</li></ul>
 <a name="normalizeBootPath"><h2>normalizeBootPath</h2></a>
 <p>
- check local path functions and normalize the high level
- URLs if required. This function is meant to be called
- on the value of the boot attribute only
+     check local path functions and normalize the high level
+     URLs if required. This function is meant to be called
+     on the value of the boot attribute only
 <p>
 Defined on line: 141
 <a name="normalizePath"><h2>normalizePath</h2></a>
 <p>
- check all path functions and normalize the high level
- URLs if required. This function also quotes reserved
- characters in an URL.
+     check all path functions and normalize the high level
+     URLs if required. This function also quotes reserved
+     characters in an URL.
 <p>
 Defined on line: 92
 <p>
@@ -92,11 +92,11 @@ Called in
 <li><a href="KIWICollect.html">KIWICollect</a> : 683</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 149</li><li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 159</li><li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 940</li></ul>
 <a name="obsPath"><h2>obsPath</h2></a>
 <p>
- This method will create an openSUSE buildservice
- path as this:// url with the predefined subdirectories
- images/ if called as part of a boot attribute or
- repos if called as part of a repository source path
- attribute
+     This method will create an openSUSE buildservice
+     path as this:// url with the predefined subdirectories
+     images/ if called as part of a boot attribute or
+     repos if called as part of a repository source path
+     attribute
 <p>
 Defined on line: 430
 <p>
@@ -105,11 +105,11 @@ Called in
 <li><a href="KIWIURL.html">KIWIURL</a> : 110</li><li><a href="KIWIURL.html">KIWIURL</a> : 159</li></ul>
 <a name="openSUSEpath"><h2>openSUSEpath</h2></a>
 <p>
- This method builds a valid URL path to be used as
- source location for an openSUSE installation source.
- The method needs the basic openSUSE distribution or
- module repository name information to be able to
- complete this data into a valid path
+     This method builds a valid URL path to be used as
+     source location for an openSUSE installation source.
+     The method needs the basic openSUSE distribution or
+     module repository name information to be able to
+     complete this data into a valid path
 <p>
 Defined on line: 560
 <p>
@@ -118,9 +118,9 @@ Called in
 <li><a href="KIWIURL.html">KIWIURL</a> : 114</li></ul>
 <a name="plainPath"><h2>plainPath</h2></a>
 <p>
- This method forwards the URL (everything following "plain://")
- unmodified to the package manager. This can be used if kiwi
- does not support a special URL but the package manager does.
+     This method forwards the URL (everything following "plain://")
+     unmodified to the package manager. This can be used if kiwi
+     does not support a special URL but the package manager does.
 <p>
 Defined on line: 643
 <p>
@@ -129,17 +129,17 @@ Called in
 <li><a href="KIWIURL.html">KIWIURL</a> : 126</li></ul>
 <a name="quote"><h2>quote</h2></a>
 <p>
- Each part of a URL, e.g. the path info,
- the query, etc., has a different set of reserved characters that
- must be quoted.
-
- RFC 2396 Uniform Resource Identifiers (URI): Generic Syntax lists
- the following reserved characters.
-
- reserved    = ";" | "?" | ":" | "@" | "&" | "=" | "+" | "$" | "," | "/"
-
- This function will quote the user name and password of a given
- URL string identified by .*://<user>:<pwd>@...
+     Each part of a URL, e.g. the path info,
+     the query, etc., has a different set of reserved characters that
+     must be quoted.
+    
+     RFC 2396 Uniform Resource Identifiers (URI): Generic Syntax lists
+     the following reserved characters.
+    
+     reserved    = ";" | "?" | ":" | "@" | "&" | "=" | "+" | "$" | "," | "/"
+    
+     This function will quote the user name and password of a given
+     URL string identified by .*://<user>:<pwd>@...
 <p>
 Defined on line: 177
 <p>
@@ -148,11 +148,11 @@ Called in
 <li><a href="KIWIURL.html">KIWIURL</a> : 105</li><li><a href="KIWIURL.html">KIWIURL</a> : 154</li></ul>
 <a name="readRepoAliasTable"><h2>readRepoAliasTable</h2></a>
 <p>
- There is the optional /etc/kiwi/repoalias file which
- contains an alternative location for a specific repo
- This function reads in the file and provides an alias
- hash table which is used to check if the given repo
- has an alternative location to use
+     There is the optional /etc/kiwi/repoalias file which
+     contains an alternative location for a specific repo
+     This function reads in the file and provides an alias
+     hash table which is used to check if the given repo
+     has an alternative location to use
 <p>
 Defined on line: 668
 <p>
@@ -161,9 +161,9 @@ Called in
 <li><a href="KIWIURL.html">KIWIURL</a> : 74</li></ul>
 <a name="smbPath"><h2>smbPath</h2></a>
 <p>
- This method pass along the smb mount path to the
- packagemanager. The smb prefix will only work for
- zypper at the moment
+     This method pass along the smb mount path to the
+     packagemanager. The smb prefix will only work for
+     zypper at the moment
 <p>
 Defined on line: 371
 <p>
@@ -180,9 +180,9 @@ Called in
 <li><a href="KIWIURL.html">KIWIURL</a> : 163</li></ul>
 <a name="thisPath"><h2>thisPath</h2></a>
 <p>
- This method builds a valid path from a this://..
- description. The this path is the same as where the
- image description tree resides
+     This method builds a valid path from a this://..
+     description. The this path is the same as where the
+     image description tree resides
 <p>
 Defined on line: 267
 <p>
@@ -191,8 +191,8 @@ Called in
 <li><a href="KIWIURL.html">KIWIURL</a> : 106</li><li><a href="KIWIURL.html">KIWIURL</a> : 155</li><li><a href="KIWIURL.html">KIWIURL</a> : 456</li></ul>
 <a name="__realPath"><h2>__realPath</h2></a>
 <p>
- make sure a local path is stored with its absolute
- path. in any other case leave it untouched
+     make sure a local path is stored with its absolute
+     path. in any other case leave it untouched
 <p>
 Defined on line: 696
 <p>

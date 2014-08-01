@@ -29,12 +29,12 @@
 <hr>
 <a name="expandFilename"><h2>expandFilename</h2></a>
 <p>
- This method receives a pair of (path, pattern)
- containing a regular expression for a filename
- (e.g. ".*\.[rs]pm") set by the caller.
- The method returns a list of files matching the
- pattern as full URI.
- This method works for both HTTP(S) and FTP.
+     This method receives a pair of (path, pattern)
+     containing a regular expression for a filename
+     (e.g. ".*\.[rs]pm") set by the caller.
+     The method returns a list of files matching the
+     pattern as full URI.
+     This method works for both HTTP(S) and FTP.
 <p>
 Defined on line: 299
 <p>
@@ -43,14 +43,14 @@ Called in
 <li><a href="KIWICollect.html">KIWICollect</a> : 1313</li></ul>
 <a name="expandFilenameHTTP"><h2>expandFilenameHTTP</h2></a>
 <p>
- Does the concrete work of "expandFilename"
- for a http/ftp type connection.
- No need for further safety checks, those
- have been handled by the surrounding
- method before.
- CAUTION:
- For the reason mentioned above, please
- consider this method "private" :)
+     Does the concrete work of "expandFilename"
+     for a http/ftp type connection.
+     No need for further safety checks, those
+     have been handled by the surrounding
+     method before.
+     CAUTION:
+     For the reason mentioned above, please
+     consider this method "private" :)
 <p>
 Defined on line: 339
 <p>
@@ -59,14 +59,14 @@ Called in
 <li><a href="KIWIUtil.html">KIWIUtil</a> : 327</li></ul>
 <a name="expandFilenameLocal"><h2>expandFilenameLocal</h2></a>
 <p>
- Does the concrete work of "expandFilename"
- for local filesystem.
- No need for further safety checks, those
- have been handled by the surrounding
- method before.
- CAUTION:
- For the reason mentioned above, please
- consider this method "private" :)
+     Does the concrete work of "expandFilename"
+     for local filesystem.
+     No need for further safety checks, those
+     have been handled by the surrounding
+     method before.
+     CAUTION:
+     For the reason mentioned above, please
+     consider this method "private" :)
 <p>
 Defined on line: 392
 <p>
@@ -87,17 +87,17 @@ Called in
 <li><a href="KIWICollect.html">KIWICollect</a> : 152</li></ul>
 <a name="normaliseDirname"><h2>normaliseDirname</h2></a>
 <p>
- Create a name without slashes, colons et cetera, replace
- all funny characters by dots and thus create a string which
- can be used as directory name.
-------------------------------------------
- Parameters:
-   $this - reference to the object for which it is called
-   $dirname - the RAW name, in the usual case an URL
-   $sepchar - the character that shall be used for token separation
-  Defaults to `.' if omitted.
- Returns:
-   a string consisting of letter tokens separated by dots
+     Create a name without slashes, colons et cetera, replace
+     all funny characters by dots and thus create a string which
+     can be used as directory name.
+    ------------------------------------------
+     Parameters:
+       $this - reference to the object for which it is called
+       $dirname - the RAW name, in the usual case an URL
+       $sepchar - the character that shall be used for token separation
+     Defaults to `.' if omitted.
+     Returns:
+       a string consisting of letter tokens separated by dots
 <p>
 Defined on line: 530
 <p>
@@ -114,20 +114,20 @@ Missing<p>
 Defined on line: 431
 <a name="splitPath"><h2>splitPath</h2></a>
 <p>
- does some plausibility checks and then
- calls the protocol dependent method
- (which may omit the checks)
- This method receives a pair of (hostname, path)
- containing arbitrary regular expressions as
- parameters.
- It creates a list of pathnames that match the
- expressions. Depending on the "leafonly" parameter
- it returns only paths mathing the *whole* expression
- (leafonly==0) or any part in between (leafonly==1).
- The call depends on how the repo is structured.
-
- The result list has to be defined elsewhere before
- the call and contains the directories after the caol.
+     does some plausibility checks and then
+     calls the protocol dependent method
+     (which may omit the checks)
+     This method receives a pair of (hostname, path)
+     containing arbitrary regular expressions as
+     parameters.
+     It creates a list of pathnames that match the
+     expressions. Depending on the "leafonly" parameter
+     it returns only paths mathing the *whole* expression
+     (leafonly==0) or any part in between (leafonly==1).
+     The call depends on how the repo is structured.
+    
+     The result list has to be defined elsewhere before
+     the call and contains the directories after the caol.
 <p>
 Defined on line: 55
 <p>
@@ -136,14 +136,14 @@ Called in
 <li><a href="KIWICollect.html">KIWICollect</a> : 709</li></ul>
 <a name="splitPathHTTP"><h2>splitPathHTTP</h2></a>
 <p>
- This method receives a pair of (hostname, path)
- containing arbitrary regular expressions as
- parameters.
- It creates a list of pathnames that match the
- expressions. Depending on the "leafonly" parameter
- it returns only paths mathing the *whole* expression
- (leafonly==0) or any part in between (leafonly==1).
- The call depends on how the repo is structured.
+     This method receives a pair of (hostname, path)
+     containing arbitrary regular expressions as
+     parameters.
+     It creates a list of pathnames that match the
+     expressions. Depending on the "leafonly" parameter
+     it returns only paths mathing the *whole* expression
+     (leafonly==0) or any part in between (leafonly==1).
+     The call depends on how the repo is structured.
 <p>
 Defined on line: 127
 <p>
@@ -152,14 +152,14 @@ Called in
 <li><a href="KIWIUtil.html">KIWIUtil</a> : 105</li><li><a href="KIWIUtil.html">KIWIUtil</a> : 174</li><li><a href="KIWIUtil.html">KIWIUtil</a> : 214</li></ul>
 <a name="splitPathLocal"><h2>splitPathLocal</h2></a>
 <p>
- This method receives a local path
- containing arbitrary regular expressions as
- parameters.
- It creates a list of pathnames that match the
- expressions. Depending on the "leafonly" parameter
- it returns only paths mathing the *whole* expression
- (leafonly==0) or any part in between (leafonly==1).
- The call depends on how the repo is structured.
+     This method receives a local path
+     containing arbitrary regular expressions as
+     parameters.
+     It creates a list of pathnames that match the
+     expressions. Depending on the "leafonly" parameter
+     it returns only paths mathing the *whole* expression
+     (leafonly==0) or any part in between (leafonly==1).
+     The call depends on how the repo is structured.
 <p>
 Defined on line: 238
 <p>
@@ -172,14 +172,14 @@ Missing<p>
 Defined on line: 467
 <a name="unpac_package"><h2>unpac_package</h2></a>
 <p>
- implementation of the pac_unpack script
- of the SuSE autobuild team
- original: /mounts/work/src/bin/tools/pac_unpack
---------------------------------------
- params
-   $this - class name; always call as member
-   $p_uri - uri of the rpm file to unpack
-   $dir - target dir for the unpacking, created if necessary
+     implementation of the pac_unpack script
+     of the SuSE autobuild team
+     original: /mounts/work/src/bin/tools/pac_unpack
+    --------------------------------------
+     params
+       $this - class name; always call as member
+       $p_uri - uri of the rpm file to unpack
+       $dir - target dir for the unpacking, created if necessary
 <p>
 Defined on line: 476
 <p>
