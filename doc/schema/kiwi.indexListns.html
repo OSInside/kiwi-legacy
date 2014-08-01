@@ -1,0 +1,814 @@
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Frameset//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+      <title>Schema documentation for </title>
+      <link rel="stylesheet" href="docHtml.css" type="text/css" /><script type="text/javascript">
+         <!--
+        
+      
+        var button_prefix = 'button_';
+        
+        /**
+        * Returns an element in the current HTML document.
+        *
+        * @param elementID Identifier of HTML element
+        * @return               HTML element object
+        */
+        function getElementObject(elementID) {
+            var elemObj = null;
+            if (document.getElementById) {
+                elemObj = document.getElementById(elementID);
+            }
+            return elemObj;
+        }
+        
+        /**
+        * Switches the state of a collapseable box, e.g.
+        * if it's opened, it'll be closed, and vice versa.
+        *
+        * @param boxID Identifier of box
+        */
+        function switchState(boxID) {
+            var boxObj = getElementObject(boxID);
+            var buttonObj = getElementObject(button_prefix + boxID);
+            if (boxObj == null || buttonObj == null) {
+                // Box or button not found
+            } else if (boxObj.style.display == "none") {
+                // Box is closed, so open it
+                openBox(boxObj, buttonObj);
+            } else if (boxObj.style.display == "block") {
+                // Box is opened, so close it
+                closeBox(boxObj, buttonObj);
+            }
+        }
+        
+        /**
+        * Opens a collapseable box.
+        *
+        * @param boxObj       Collapseable box
+        * @param buttonObj Button controlling box
+        */
+        function openBox(boxObj, buttonObj) {
+            if (boxObj == null || buttonObj == null) {
+                // Box or button not found
+            } else {
+                // Change 'display' CSS property of box
+                boxObj.style.display = "block";
+                
+                // Change text of button
+                if (boxObj.style.display == "block") {
+                    buttonObj.src = "img/btM.gif";
+                }
+            }
+        }
+        
+        /**
+        * Closes a collapseable box.
+        *
+        * @param boxObj       Collapseable box
+        * @param buttonObj Button controlling box
+        */
+        function closeBox(boxObj, buttonObj) {
+            if (boxObj == null || buttonObj == null) {
+                // Box or button not found
+            } else {
+                // Change 'display' CSS property of box
+                boxObj.style.display = "none";
+                
+                // Change text of button
+                if (boxObj.style.display == "none") {
+                    buttonObj.src = "img/btP.gif";
+                }
+            }
+        }
+    
+       function switchStateForAll(buttonObj, boxList) {
+            if (buttonObj == null) {
+                // button not found
+            } else if (buttonObj.value == "+") {
+                // Expand all
+                expandAll(boxList);
+                buttonObj.value = "-";
+            } else if (buttonObj.value == "-") {
+                // Collapse all
+                collapseAll(boxList);
+                buttonObj.value = "+";
+            }
+        }
+        
+        /**
+        * Closes all boxes in a given list.
+        *
+        * @param boxList Array of box IDs
+        */
+        function collapseAll(boxList) {
+            var idx;
+            for (idx = 0; idx < boxList.length; idx++) {
+                var boxObj = getElementObject(boxList[idx]);
+                var buttonObj = getElementObject(button_prefix + boxList[idx]);
+                closeBox(boxObj, buttonObj);
+            }
+        }
+            
+        /**
+        * Open all boxes in a given list.
+        *
+        * @param boxList Array of box IDs
+        */
+        function expandAll(boxList) {
+            var idx;
+            for (idx = 0; idx < boxList.length; idx++) {
+                var boxObj = getElementObject(boxList[idx]);
+                var buttonObj = getElementObject(button_prefix + boxList[idx]);
+                openBox(boxObj, buttonObj);
+            }
+        }
+        
+        /**
+         * Update the message presented in the title of the html page.
+         * - If the documentation was splited by namespace we present something like: "Documentation for namespace 'ns'"
+         * - If the documentation was splited by location we present somehing like: "Documentation for 'Schema.xsd'"
+         * - If no split we always present: "Documentation for 'MainSchema.xsd'"
+         */
+        function updatePageTitle(message) {
+            top.document.title = message;
+        }
+        
+          
+                    
+         /**
+          * Finds an HTML element by its ID and makes it floatable over the normal content.
+          *
+          * @param x_displacement The difference in pixels to the right side of the window from 
+          *           the left side of the element.
+          * @param y_displacement The difference in pixels to the right side of the window from 
+          *           the top of the element.          
+          */
+         function findAndFloat(id, x_displacement, y_displacement){
+
+            var element = getElementObject(id);            
+            
+            window[id + "_obj"] = element;
+            
+            if(document.layers) {
+               element.style = element;
+            }
+            
+            element.current_y = y_displacement;      
+            element.first_time = true;
+         
+            element.floatElement = function(){
+               // It may be closed by an user action.
+                
+               // Target X and Y coordinates.
+               var x, y;
+               
+               var myWidth = 0, myHeight = 0;
+               if( typeof( window.innerWidth ) == 'number' ) {
+                  //Non-IE
+                  myWidth = window.innerWidth;
+                  myHeight = window.innerHeight;
+               } else if( document.documentElement && ( document.documentElement.clientWidth || document.documentElement.clientHeight ) ) {
+                  //IE 6+ in 'standards compliant mode'
+                  myWidth = document.documentElement.clientWidth;
+                  myHeight = document.documentElement.clientHeight;
+               } else if( document.body && ( document.body.clientWidth || document.body.clientHeight ) ) {
+                  //IE 4 compatible
+                  myWidth = document.body.clientWidth;
+                  myHeight = document.body.clientHeight;
+               }
+               
+               
+               x = myWidth - x_displacement;
+               
+               var ns = (navigator.appName.indexOf("Netscape") != -1);               
+               y = ns ? pageYOffset : document.documentElement && document.documentElement.scrollTop ? 
+                  document.documentElement.scrollTop : document.body.scrollTop;               
+               y = y + y_displacement;               
+               
+               // The current y is the current coordinate of the floating element.
+               // This should be at the limit the y target coordinate.
+               this.current_y += (y - this.current_y)/1.25;
+               
+               // Add the pixels constant after the values
+               // and move the element.
+               var px = document.layers ? "" : "px";
+               this.style.left =  x + px;
+               this.style.top =  this.current_y + px;
+                              
+               setTimeout(this.id + "_obj.floatElement()", 100);
+            }
+            
+            element.floatElement();
+            return element;
+          }
+
+         /**
+          * Finds an HTML element by its ID and makes it floatable over the normal content.
+          *
+          * @param x_displacement The difference in pixels to the right side of the window from 
+          *           the left side of the element.
+          * @param y_displacement The difference in pixels to the right side of the window from 
+          *           the top of the element.          
+          */
+         function selectTOCGroupBy(id, isChunked, indexFileLocation, indexFileNamespace, indexFileComponent){
+
+            if (!isChunked) {
+             var selectIds = new Array('toc_group_by_namespace', 'toc_group_by_location', 'toc_group_by_component_type');
+             // Make all the tabs invisible.
+               for (i = 0; i < 3; i++){
+                  var tab = getElementObject(selectIds[i]);
+                  tab.style.display = 'none';
+               }
+               var selTab = getElementObject(id);
+               selTab.style.display = 'block';
+            } else {
+             if (id == 'toc_group_by_namespace') {
+               parent.indexFrame.location = indexFileNamespace;
+             } else  if (id == 'toc_group_by_location') {
+               parent.indexFrame.location = indexFileLocation;
+             } else  if (id == 'toc_group_by_component_type') {
+              parent.indexFrame.location = indexFileComponent;
+             }
+            }
+         }
+          
+
+    
+                        //--></script></head>
+   <body>
+      <h2><a id="INDEX">Table of Contents</a></h2>
+      <p><a href="kiwi.indexList.html">Components</a><span> | </span><a href="schHierarchy.html">Resource Hierarchy</a></p>
+      <hr />
+      <div class="toc">
+         <form action="none">
+            <div><span> Group by: <select id="selectTOC" onchange="selectTOCGroupBy(this.options[this.selectedIndex].value, true, 'kiwi.indexList.html', 'kiwi.indexListns.html', 'kiwi.indexListcomp.html');">
+                     <option value="toc_group_by_namespace" selected="selected">Namespace</option>
+                     <option value="toc_group_by_location">Location</option>
+                     <option value="toc_group_by_component_type">Component Type</option></select></span></div>
+         </form>
+         <div class="level1" id="toc_group_by_namespace" style="display:block">
+            <div>
+               <div class="level2">
+                  <p><input id="button_boxIdNamespace1" type="image" value="-" src="img/btM.gif" onclick="switchState('boxIdNamespace1');" class="control" /><span class="indexGroupTitle">No namespace</span></p>
+                  <div id="boxIdNamespace1" style="display:block">
+                     <div class="horizontalLayout">
+                        <table class="rt">
+                           <tr>
+                              <td class="rt_cornerTopLeft"></td>
+                              <td class="rt_lineTop"></td>
+                              <td class="rt_cornerTopRight"></td>
+                           </tr>
+                           <tr>
+                              <td class="rt_lineLeft"></td>
+                              <td class="rt_content">
+                                 <table class="componentGroup">
+                                    <tbody>
+                                       <tr>
+                                          <td class="componentGroup"><input id="button_boxIdNamespace1Element" type="image" value="-" src="img/btM.gif" onclick="switchState('boxIdNamespace1Element');" class="control" /></td>
+                                          <td class="componentGroup">
+                                             <div class="componentGroupTitle">Elements</div>
+                                          </td>
+                                       </tr>
+                                       <tr>
+                                          <td class="componentGroup"></td>
+                                          <td class="componentGroup">
+                                             <div id="boxIdNamespace1Element" class="componentGroup" style="display:block">
+                                                <div><b><a href="kiwi_xsd.html#arch" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">arch</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#architectures" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">architectures</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#archive" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">archive</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#author" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">author</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#bootloader-theme" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">bootloader-theme</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#bootsplash-theme" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">bootsplash-theme</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#chroot" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">chroot</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#configuration" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">configuration</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#contact" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">contact</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#defaultdestination" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">defaultdestination</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#defaultprebuilt" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">defaultprebuilt</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#defaultroot" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">defaultroot</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#description" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">description</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#drivers" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">drivers</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#driverupdate" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">driverupdate</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#except" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">except</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#file" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">file</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#hwclock" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">hwclock</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#ignore" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">ignore</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#image" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">image</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#initrd" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">initrd</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#install" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">install</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#instrepo" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">instrepo</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#instsource" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">instsource</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#instsys" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">instsys</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#kernel" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">kernel</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#keytable" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">keytable</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#locale" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">locale</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#machine" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">machine</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#metadata" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">metadata</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#metafile" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">metafile</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#modules" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">modules</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#namedCollection" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">namedCollection</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#oem-ataraid-scan" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">oem-ataraid-scan</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#oem-boot-title" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">oem-boot-title</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#oem-bootwait" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">oem-bootwait</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#oem-inplace-recovery" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">oem-inplace-recovery</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#oem-kiwi-initrd" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">oem-kiwi-initrd</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#oem-multipath-scan" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">oem-multipath-scan</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#oem-partition-install" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">oem-partition-install</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#oem-reboot" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">oem-reboot</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#oem-reboot-interactive" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">oem-reboot-interactive</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#oem-recovery" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">oem-recovery</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#oem-recovery-part-size" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">oem-recovery-part-size</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#oem-recoveryID" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">oem-recoveryID</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#oem-shutdown" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">oem-shutdown</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#oem-shutdown-interactive" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">oem-shutdown-interactive</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#oem-silent-boot" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">oem-silent-boot</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#oem-silent-install" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">oem-silent-install</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#oem-silent-verify" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">oem-silent-verify</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#oem-skip-verify" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">oem-skip-verify</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#oem-swap" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">oem-swap</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#oem-swapsize" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">oem-swapsize</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#oem-systemsize" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">oem-systemsize</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#oem-unattended" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">oem-unattended</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#oem-unattended-id" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">oem-unattended-id</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#oemconfig" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">oemconfig</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#package" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">package</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#packagemanager" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">packagemanager</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#packages" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">packages</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#partition" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">partition</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#partitioner" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">partitioner</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#partitions" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">partitions</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#persistent" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">persistent</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#preferences" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">preferences</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#product" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">product</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#productinfo" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">productinfo</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#productoption" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">productoption</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#productoptions" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">productoptions</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#productvar" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">productvar</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#profile" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">profile</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#profiles" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">profiles</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#pxedeploy" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">pxedeploy</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#repopackage" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">repopackage</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#repopackages" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">repopackages</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#repository" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">repository</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#requiredarch" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">requiredarch</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#rpm-check-signatures" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">rpm-check-signatures</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#rpm-excludedocs" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">rpm-excludedocs</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#rpm-force" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">rpm-force</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#showlicense" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">showlicense</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#size" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">size</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#source" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">source</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#specification" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">specification</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#split" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">split</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#strip" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">strip</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#systemdisk" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">systemdisk</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#target" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">target</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#temporary" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">temporary</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#timeout" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">timeout</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#timezone" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">timezone</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#type" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">type</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#union" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">union</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#user" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">user</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#users" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">users</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#vagrantconfig" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">vagrantconfig</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#version" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">version</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#vmconfig-entry" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">vmconfig-entry</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#vmdisk" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">vmdisk</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#vmdvd" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">vmdvd</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#vmnic" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">vmnic</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#volume" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">volume</a></b></div>
+                                             </div>
+                                          </td>
+                                       </tr>
+                                    </tbody>
+                                 </table>
+                              </td>
+                              <td class="rt_lineRight"></td>
+                           </tr>
+                           <tr>
+                              <td class="rt_cornerBottomLeft"></td>
+                              <td class="rt_lineBottom"></td>
+                              <td class="rt_cornerBottomRight"></td>
+                           </tr>
+                        </table>
+                     </div>
+                     <div class="horizontalLayout">
+                        <table class="rt">
+                           <tr>
+                              <td class="rt_cornerTopLeft"></td>
+                              <td class="rt_lineTop"></td>
+                              <td class="rt_cornerTopRight"></td>
+                           </tr>
+                           <tr>
+                              <td class="rt_lineLeft"></td>
+                              <td class="rt_content">
+                                 <table class="componentGroup">
+                                    <tbody>
+                                       <tr>
+                                          <td class="componentGroup"><input id="button_boxIdNamespace1Simple_Type" type="image" value="-" src="img/btM.gif" onclick="switchState('boxIdNamespace1Simple_Type');" class="control" /></td>
+                                          <td class="componentGroup">
+                                             <div class="componentGroupTitle">Simple Types</div>
+                                          </td>
+                                       </tr>
+                                       <tr>
+                                          <td class="componentGroup"></td>
+                                          <td class="componentGroup">
+                                             <div id="boxIdNamespace1Simple_Type" class="componentGroup" style="display:block">
+                                                <div><b><a href="kiwi_xsd.html#image-name" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">image-name</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.hwclock.content" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.hwclock.content</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.oem-ataraid-scan.content" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.oem-ataraid-scan.content</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.oem-bootwait.content" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.oem-bootwait.content</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.oem-inplace-recovery.content" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.oem-inplace-recovery.content</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.oem-kiwi-initrd.content" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.oem-kiwi-initrd.content</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.oem-multipath-scan.content" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.oem-multipath-scan.content</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.oem-partition-install.content" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.oem-partition-install.content</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.oem-reboot-interactive.content" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.oem-reboot-interactive.content</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.oem-reboot.content" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.oem-reboot.content</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.oem-recovery.content" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.oem-recovery.content</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.oem-shutdown-interactive.content" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.oem-shutdown-interactive.content</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.oem-shutdown.content" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.oem-shutdown.content</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.oem-silent-boot.content" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.oem-silent-boot.content</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.oem-silent-install.content" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.oem-silent-install.content</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.oem-silent-verify.content" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.oem-silent-verify.content</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.oem-skip-verify.content" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.oem-skip-verify.content</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.oem-swap.content" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.oem-swap.content</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.oem-unattended.content" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.oem-unattended.content</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.packagemanager.content" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.packagemanager.content</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.partitioner.content" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.partitioner.content</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.rpm-check-signatures.content" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.rpm-check-signatures.content</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.rpm-excludedocs.content" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.rpm-excludedocs.content</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.rpm-force.content" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.rpm-force.content</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#locale-name" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">locale-name</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#mac-address-type" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">mac-address-type</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#size-type" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">size-type</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#vhd-tag-type" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">vhd-tag-type</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#volume-size-type" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">volume-size-type</a></b></div>
+                                             </div>
+                                          </td>
+                                       </tr>
+                                    </tbody>
+                                 </table>
+                              </td>
+                              <td class="rt_lineRight"></td>
+                           </tr>
+                           <tr>
+                              <td class="rt_cornerBottomLeft"></td>
+                              <td class="rt_lineBottom"></td>
+                              <td class="rt_cornerBottomRight"></td>
+                           </tr>
+                        </table>
+                     </div>
+                     <div class="horizontalLayout">
+                        <table class="rt">
+                           <tr>
+                              <td class="rt_cornerTopLeft"></td>
+                              <td class="rt_lineTop"></td>
+                              <td class="rt_cornerTopRight"></td>
+                           </tr>
+                           <tr>
+                              <td class="rt_lineLeft"></td>
+                              <td class="rt_content">
+                                 <table class="componentGroup">
+                                    <tbody>
+                                       <tr>
+                                          <td class="componentGroup"><input id="button_boxIdNamespace1Complex_Type" type="image" value="-" src="img/btM.gif" onclick="switchState('boxIdNamespace1Complex_Type');" class="control" /></td>
+                                          <td class="componentGroup">
+                                             <div class="componentGroupTitle">Complex Types</div>
+                                          </td>
+                                       </tr>
+                                       <tr>
+                                          <td class="componentGroup"></td>
+                                          <td class="componentGroup">
+                                             <div id="boxIdNamespace1Complex_Type" class="componentGroup" style="display:block">
+                                                <div><b><a href="kiwi_xsd.html#k.source" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.source</a></b></div>
+                                             </div>
+                                          </td>
+                                       </tr>
+                                    </tbody>
+                                 </table>
+                              </td>
+                              <td class="rt_lineRight"></td>
+                           </tr>
+                           <tr>
+                              <td class="rt_cornerBottomLeft"></td>
+                              <td class="rt_lineBottom"></td>
+                              <td class="rt_cornerBottomRight"></td>
+                           </tr>
+                        </table>
+                     </div>
+                     <div class="horizontalLayout">
+                        <table class="rt">
+                           <tr>
+                              <td class="rt_cornerTopLeft"></td>
+                              <td class="rt_lineTop"></td>
+                              <td class="rt_cornerTopRight"></td>
+                           </tr>
+                           <tr>
+                              <td class="rt_lineLeft"></td>
+                              <td class="rt_content">
+                                 <table class="componentGroup">
+                                    <tbody>
+                                       <tr>
+                                          <td class="componentGroup"><input id="button_boxIdNamespace1Attribute_Group" type="image" value="-" src="img/btM.gif" onclick="switchState('boxIdNamespace1Attribute_Group');" class="control" /></td>
+                                          <td class="componentGroup">
+                                             <div class="componentGroupTitle">Attribute Groups</div>
+                                          </td>
+                                       </tr>
+                                       <tr>
+                                          <td class="componentGroup"></td>
+                                          <td class="componentGroup">
+                                             <div id="boxIdNamespace1Attribute_Group" class="componentGroup" style="display:block">
+                                                <div><b><a href="kiwi_xsd.html#k.arch.attlist" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.arch.attlist</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.arch.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.arch.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.arch.fallback.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.arch.fallback.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.arch.id.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.arch.id.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.arch.name.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.arch.name.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.archive.attlist" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.archive.attlist</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.archive.bootinclude.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.archive.bootinclude.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.archive.name.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.archive.name.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.bootdelete.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.bootdelete.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.bootinclude.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.bootinclude.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.chroot.attlist" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.chroot.attlist</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.configuration.arch.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.configuration.arch.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.configuration.attlist" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.configuration.attlist</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.configuration.dest.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.configuration.dest.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.configuration.source.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.configuration.source.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.description.attlist" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.description.attlist</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.description.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.description.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.description.type.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.description.type.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.dest.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.dest.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.displayname.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.displayname.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.drivers.attlist" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.drivers.attlist</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.drivers.profiles.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.drivers.profiles.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.except.attlist" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.except.attlist</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.except.name.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.except.name.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.file.arch.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.file.arch.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.file.attlist" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.file.attlist</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.file.name.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.file.name.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.id.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.id.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.ignore.attlist" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.ignore.attlist</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.ignore.name.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.ignore.name.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.image.attlist" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.image.attlist</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.image.displayname.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.image.displayname.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.image.id" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.image.id</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.image.kiwirevision.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.image.kiwirevision.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.image.name.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.image.name.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.image.noNamespaceSchemaLocation.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.image.noNamespaceSchemaLocation.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.image.schemaLocation.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.image.schemaLocation.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.image.schemaversion.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.image.schemaversion.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.imagename.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.imagename.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.instrepo.attlist" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.instrepo.attlist</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.instrepo.local.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.instrepo.local.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.instrepo.name.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.instrepo.name.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.instrepo.password.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.instrepo.password.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.instrepo.priority.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.instrepo.priority.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.instrepo.username.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.instrepo.username.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.machine.HWversion.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.machine.HWversion.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.machine.arch.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.machine.arch.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.machine.attlist" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.machine.attlist</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.machine.domain.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.machine.domain.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.machine.guestOS.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.machine.guestOS.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.machine.max_cpu.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.machine.max_cpu.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.machine.max_memory.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.machine.max_memory.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.machine.memory.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.machine.memory.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.machine.min_cpu.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.machine.min_cpu.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.machine.min_memory.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.machine.min_memory.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.machine.ncpus.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.machine.ncpus.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.machine.ovftype.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.machine.ovftype.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.metafile.attlist" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.metafile.attlist</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.metafile.script.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.metafile.script.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.metafile.target.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.metafile.target.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.metafile.url.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.metafile.url.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.name.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.name.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.namedCollection.arch.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.namedCollection.arch.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.namedCollection.attlist" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.namedCollection.attlist</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.namedCollection.name.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.namedCollection.name.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.package.arch.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.package.arch.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.package.attlist" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.package.attlist</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.package.bootdelete.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.package.bootdelete.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.package.bootinclude.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.package.bootinclude.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.package.name.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.package.name.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.package.replaces.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.package.replaces.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.packages.attlist" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.packages.attlist</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.packages.patternType.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.packages.patternType.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.packages.profiles.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.packages.profiles.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.packages.type.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.packages.type.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.partition.attlist" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.partition.attlist</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.partition.mountpoint.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.partition.mountpoint.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.partition.number.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.partition.number.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.partition.size.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.partition.size.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.partition.target.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.partition.target.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.partition.type.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.partition.type.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.partitions.attlist" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.partitions.attlist</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.partitions.device.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.partitions.device.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.password.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.password.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.path.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.path.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.preferences.attlist" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.preferences.attlist</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.preferences.profiles.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.preferences.profiles.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.product.arch.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.product.arch.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.product.attlist" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.product.attlist</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.product.name.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.product.name.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.productinfo.attlist" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.productinfo.attlist</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.productoption.attlist" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.productoption.attlist</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.productvar.attlist" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.productvar.attlist</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.profile.attlist" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.profile.attlist</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.profile.description.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.profile.description.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.profile.import.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.profile.import.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.profile.name.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.profile.name.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.profiles.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.profiles.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.pxedeploy.attlist" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.pxedeploy.attlist</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.pxedeploy.blocksize.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.pxedeploy.blocksize.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.pxedeploy.server.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.pxedeploy.server.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.replaces.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.replaces.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.repopackage.addarch.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.repopackage.addarch.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.repopackage.arch.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.repopackage.arch.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.repopackage.attlist" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.repopackage.attlist</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.repopackage.forcerepo.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.repopackage.forcerepo.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.repopackage.medium.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.repopackage.medium.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.repopackage.name.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.repopackage.name.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.repopackage.onlyarch.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.repopackage.onlyarch.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.repopackage.removearch.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.repopackage.removearch.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.repopackage.script.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.repopackage.script.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.repopackage.source.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.repopackage.source.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.repository.alias.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.repository.alias.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.repository.attlist" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.repository.attlist</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.repository.components.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.repository.components.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.repository.distribution.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.repository.distribution.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.repository.imageinclude.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.repository.imageinclude.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.repository.password.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.repository.password.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.repository.prefer-license.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.repository.prefer-license.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.repository.priority.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.repository.priority.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.repository.profiles.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.repository.profiles.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.repository.status.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.repository.status.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.repository.type.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.repository.type.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.repository.username.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.repository.username.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.requiredarch.attlist" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.requiredarch.attlist</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.requiredarch.ref.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.requiredarch.ref.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.script.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.script.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.size.additive.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.size.additive.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.size.attlist" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.size.attlist</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.size.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.size.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.size.unit.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.size.unit.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.source.attlist" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.source.attlist</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.source.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.source.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.source.path.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.source.path.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.strip.attlist" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.strip.attlist</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.strip.profiles.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.strip.profiles.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.strip.type.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.strip.type.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.systemdisk.attlist" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.systemdisk.attlist</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.systemdisk.lvmgroup.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.systemdisk.lvmgroup.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.target.arch.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.target.arch.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.target.attlist" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.target.attlist</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.type.attlist" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.type.attlist</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.type.boot.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.type.boot.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.type.bootfilesystem.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.type.bootfilesystem.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.type.bootkernel.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.type.bootkernel.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.type.bootloader.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.type.bootloader.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.type.bootpartsize.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.type.bootpartsize.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.type.bootprofile.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.type.bootprofile.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.type.boottimeout.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.type.boottimeout.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.type.checkprebuilt.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.type.checkprebuilt.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.type.compressed.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.type.compressed.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.type.container.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.type.container.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.type.devicepersistency.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.type.devicepersistency.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.type.editbootconfig.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.type.editbootconfig.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.type.editbootinstall.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.type.editbootinstall.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.type.filesystem.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.type.filesystem.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.type.firmware.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.type.firmware.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.type.flags.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.type.flags.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.type.format.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.type.format.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.type.fsmountoptions.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.type.fsmountoptions.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.type.fsnocheck.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.type.fsnocheck.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.type.fsreadonly.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.type.fsreadonly.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.type.fsreadwrite.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.type.fsreadwrite.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.type.hybrid.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.type.hybrid.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.type.hybridpersistent.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.type.hybridpersistent.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.type.image.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.type.image.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.type.installboot.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.type.installboot.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.type.installiso.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.type.installiso.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.type.installprovidefailsafe.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.type.installprovidefailsafe.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.type.installpxe.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.type.installpxe.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.type.installstick.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.type.installstick.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.type.kernelcmdline.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.type.kernelcmdline.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.type.luks.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.type.luks.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.type.luksOS.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.type.luksOS.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.type.mdraid.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.type.mdraid.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.type.primary.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.type.primary.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.type.ramonly.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.type.ramonly.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.type.vga.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.type.vga.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.type.vhd-fixed-tag.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.type.vhd-fixed-tag.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.type.volid.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.type.volid.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.type.zfsoptions.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.type.zfsoptions.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.union.attlist" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.union.attlist</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.union.ro.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.union.ro.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.union.rw.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.union.rw.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.union.type.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.union.type.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.user.attlist" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.user.attlist</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.user.home.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.user.home.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.user.id.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.user.id.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.user.name.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.user.name.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.user.password.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.user.password.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.user.pwdformat" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.user.pwdformat</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.user.realname.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.user.realname.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.user.shell.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.user.shell.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.username.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.username.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.users.attlist" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.users.attlist</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.users.group.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.users.group.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.users.id.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.users.id.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.users.profiles.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.users.profiles.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.vagrantconfig.attlist" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.vagrantconfig.attlist</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.vagrantconfig.provider.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.vagrantconfig.provider.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.vagrantconfig.virtualsize.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.vagrantconfig.virtualsize.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.vmdisk.attlist" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.vmdisk.attlist</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.vmdisk.controller.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.vmdisk.controller.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.vmdisk.device.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.vmdisk.device.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.vmdisk.diskmode.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.vmdisk.diskmode.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.vmdisk.disktype.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.vmdisk.disktype.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.vmdisk.id.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.vmdisk.id.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.vmdvd.attlist" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.vmdvd.attlist</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.vmdvd.controller.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.vmdvd.controller.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.vmdvd.id.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.vmdvd.id.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.vmnic.attlist" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.vmnic.attlist</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.vmnic.driver.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.vmnic.driver.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.vmnic.interface.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.vmnic.interface.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.vmnic.mac.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.vmnic.mac.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.vmnic.mode.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.vmnic.mode.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.volume.attlist" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.volume.attlist</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.volume.freespace.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.volume.freespace.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.volume.mountpoint.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.volume.mountpoint.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.volume.name.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.volume.name.attribute</a></b></div>
+                                                <div><b><a href="kiwi_xsd.html#k.volume.size.attribute" target="mainFrame" title="No namespace" onclick="updatePageTitle('Schema documentation for kiwi.xsd')">k.volume.size.attribute</a></b></div>
+                                             </div>
+                                          </td>
+                                       </tr>
+                                    </tbody>
+                                 </table>
+                              </td>
+                              <td class="rt_lineRight"></td>
+                           </tr>
+                           <tr>
+                              <td class="rt_cornerBottomLeft"></td>
+                              <td class="rt_lineBottom"></td>
+                              <td class="rt_cornerBottomRight"></td>
+                           </tr>
+                        </table>
+                     </div>
+                     <div style="clear:left"></div>
+                  </div>
+               </div>
+               <div class="level2">
+                  <p><input id="button_boxIdNamespace2" type="image" value="-" src="img/btM.gif" onclick="switchState('boxIdNamespace2');" class="control" /><span class="indexGroupTitle">http://www.w3.org/2001/XMLSchema-instance</span></p>
+                  <div id="boxIdNamespace2" style="display:block">
+                     <div class="horizontalLayout">
+                        <table class="rt">
+                           <tr>
+                              <td class="rt_cornerTopLeft"></td>
+                              <td class="rt_lineTop"></td>
+                              <td class="rt_cornerTopRight"></td>
+                           </tr>
+                           <tr>
+                              <td class="rt_lineLeft"></td>
+                              <td class="rt_content">
+                                 <table class="componentGroup">
+                                    <tbody>
+                                       <tr>
+                                          <td class="componentGroup"><input id="button_boxIdNamespace2Attribute" type="image" value="-" src="img/btM.gif" onclick="switchState('boxIdNamespace2Attribute');" class="control" /></td>
+                                          <td class="componentGroup">
+                                             <div class="componentGroupTitle">Attributes</div>
+                                          </td>
+                                       </tr>
+                                       <tr>
+                                          <td class="componentGroup"></td>
+                                          <td class="componentGroup">
+                                             <div id="boxIdNamespace2Attribute" class="componentGroup" style="display:block">
+                                                <div><b><a href="XMLSchema-instance_xsd.html#noNamespaceSchemaLocation" target="mainFrame" title="http://www.w3.org/2001/XMLSchema-instance" onclick="updatePageTitle('Schema documentation for XMLSchema-instance.xsd')">@xsi:noNamespaceSchemaLocation</a></b></div>
+                                                <div><b><a href="XMLSchema-instance_xsd.html#schemaLocation" target="mainFrame" title="http://www.w3.org/2001/XMLSchema-instance" onclick="updatePageTitle('Schema documentation for XMLSchema-instance.xsd')">@xsi:schemaLocation</a></b></div>
+                                             </div>
+                                          </td>
+                                       </tr>
+                                    </tbody>
+                                 </table>
+                              </td>
+                              <td class="rt_lineRight"></td>
+                           </tr>
+                           <tr>
+                              <td class="rt_cornerBottomLeft"></td>
+                              <td class="rt_lineBottom"></td>
+                              <td class="rt_cornerBottomRight"></td>
+                           </tr>
+                        </table>
+                     </div>
+                     <div style="clear:left"></div>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+      <div class="footer">
+         <hr />
+         <div align="center">XML Schema documentation generated by <a href="http://www.oxygenxml.com" target="_parent"><span class="oXygenLogo"><span class="redX">&lt;</span>o<span class="redX">X</span>ygen<span class="redX">/&gt;</span></span></a><sup>®</sup> XML Editor Trial Edition.
+         </div>
+      </div>
+   </body>
+</html>
