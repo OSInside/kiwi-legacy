@@ -6,7 +6,7 @@
   encoding="utf-8"/>
 <xsl:strip-space elements="*"/>
 
-<xsl:param name="indent-increment" select="'&#32;&#32;'"/>
+<xsl:param name="indent-increment" select="'&#32;&#32;&#32;&#32;'"/>
 
 <xsl:template name="newline">
   <xsl:text>&#10;</xsl:text>

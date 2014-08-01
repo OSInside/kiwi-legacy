@@ -10,7 +10,7 @@
   <xsl:apply-templates mode="pretty"/>
 </xsl:template>
 
-<xsl:param name="indent-increment" select="'&#32;&#32;'"/>
+<xsl:param name="indent-increment" select="'&#32;&#32;&#32;&#32;'"/>
 
 <xsl:template name="newline">
   <xsl:text>&#10;</xsl:text>
