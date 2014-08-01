@@ -1906,7 +1906,9 @@ sub __validateXML {
         my $locator = KIWILocator -> instance();
         my $jingExec = $locator -> getExecPath('jing');
         if ($jingExec) {
-            KIWIQX::qxx ("$jingExec $this->{schema} $upgradedContolFile 1>&2");
+            KIWIQX::qxx (
+				"$jingExec $this->{schema} $upgradedContolFile 2>/dev/null"
+			);
             return;
         } else {
             $kiwi -> error ("$evaldata\n");
