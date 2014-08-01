@@ -19,62 +19,62 @@ rc_reset
 
 kernel=`uname -r | grep -qi "\-xen" && echo xen || echo none`
 if [ ! -e /proc/xen/capabilities ]; then
-  domain=native
+    domain=native
 elif ! grep control_d /proc/xen/capabilities >/dev/null 2>&1; then
-  domain=domU
+    domain=domU
 else
-  domain=dom0
+    domain=dom0
 fi
 
 case "$1" in
-    start|restart)
-    #
-    # Check and Prepare xen environment
-    #
-    echo -n "Setting up xen environment"
-    if test ! "$kernel" = "xen";then
-      rc_status -s
-      rc_failed 6
-    else
-      if test "$domain" = "dom0";then
-        rc_status -s
-        rc_failed 6
-      else
-        insserv -r /etc/init.d/kbd
-        insserv -r /etc/init.d/acpid
-        sed -ie "s/^[2-6]:/#\\0/" /etc/inittab
-        init q
-        rc_status
-        rc_status -v -r
-      fi
-    fi
-  ;;
-    stop)
-    echo -n "Restoring default environment"
-    if test ! "$kernel" = "xen";then
-      rc_status -s
-      rc_failed 6
-    else
-      if test "$domain" = "dom0";then
-        rc_status -s
-        rc_failed 6
-      else
-        insserv /etc/init.d/acpid
-        insserv /etc/init.d/kbd
-        sed -ie "s/^#\([2-6]:\)/\\1/" /etc/inittab
-        init q
-        rc_status -v -r
-      fi
-    fi
-  ;;
-    status)
-    rc_failed 4
-    rc_status -v
-  ;;
-  *)
-    echo "Usage: $0 {start|stop|status|restart}"
-    exit 1
-  ;;
+        start|restart)
+        #
+        # Check and Prepare xen environment
+        #
+        echo -n "Setting up xen environment"
+        if test ! "$kernel" = "xen";then
+            rc_status -s
+            rc_failed 6
+        else
+            if test "$domain" = "dom0";then
+                rc_status -s
+                rc_failed 6
+            else
+                insserv -r /etc/init.d/kbd
+                insserv -r /etc/init.d/acpid
+                sed -ie "s/^[2-6]:/#\\0/" /etc/inittab
+                init q
+                rc_status
+                rc_status -v -r
+            fi
+        fi
+    ;;
+        stop)
+        echo -n "Restoring default environment"
+        if test ! "$kernel" = "xen";then
+            rc_status -s
+            rc_failed 6
+        else
+            if test "$domain" = "dom0";then
+                rc_status -s
+                rc_failed 6
+            else
+                insserv /etc/init.d/acpid
+                insserv /etc/init.d/kbd
+                sed -ie "s/^#\([2-6]:\)/\\1/" /etc/inittab
+                init q
+                rc_status -v -r
+            fi
+        fi
+    ;;
+        status)
+        rc_failed 4
+        rc_status -v
+    ;;
+    *)
+        echo "Usage: $0 {start|stop|status|restart}"
+        exit 1
+    ;;
 esac
 
 rc_exit

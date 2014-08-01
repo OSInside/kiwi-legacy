@@ -35,19 +35,19 @@ our @EXPORT_OK = qw ();
 # Constructor
 #------------------------------------------
 sub new {
-  # ...
-  # Create the KIWIXMLExceptData object
-  # ---
-  #==========================================
-  # Object setup
-  #------------------------------------------
-  my $class = shift;
-  my $this  = $class->SUPER::new(@_);
-  if (! $this) {
-    return;
-  }
-  $this->{elname} = 'except';
-  return $this;
+    # ...
+    # Create the KIWIXMLExceptData object
+    # ---
+    #==========================================
+    # Object setup
+    #------------------------------------------
+    my $class = shift;
+    my $this  = $class->SUPER::new(@_);
+    if (! $this) {
+        return;
+    }
+    $this->{elname} = 'except';
+    return $this;
 }
 
 1;

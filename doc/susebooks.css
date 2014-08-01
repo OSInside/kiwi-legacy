@@ -1,623 +1,623 @@
 body
 {
-  -moz-border-radius:1em;
-  -moz-box-shadow:0 2px 20px rgba(0,0,0,0.15);
-  -webkit-border-radius:1em;
-  -webkit-box-shadow:0 2px 20px rgba(0,0,0,0.15);
-  background-color:#fff;
-  color:#333;
-  font-family:DejaVuSans,LiberationSans,FreeSans,Arial,Helvetica,sans;
-  line-height:1.65;
-  margin:2em auto;
-  padding:2em;
-  position:relative;
+    -moz-border-radius:1em;
+    -moz-box-shadow:0 2px 20px rgba(0,0,0,0.15);
+    -webkit-border-radius:1em;
+    -webkit-box-shadow:0 2px 20px rgba(0,0,0,0.15);
+    background-color:#fff;
+    color:#333;
+    font-family:DejaVuSans,LiberationSans,FreeSans,Arial,Helvetica,sans;
+    line-height:1.65;
+    margin:2em auto;
+    padding:2em;
+    position:relative;
 }
 
 body div.preface,body div.glossary,body div.appendix,body div.bibliography,body div.index,body div.chapter,body div.sect1,body div.sect2,body div.sect3
 {
-  padding-left:5pt;
-  padding-right:5pt;
-  padding-top:20pt;
+    padding-left:5pt;
+    padding-right:5pt;
+    padding-top:20pt;
 }
 
 div.set div.titlepage .title
 {
-  background-color:#FFF;
-  color:#666;
-  font-size:300%;
-  font-style:normal;
-  font-weight:400;
-  text-align:center;
+    background-color:#FFF;
+    color:#666;
+    font-size:300%;
+    font-style:normal;
+    font-weight:400;
+    text-align:center;
 }
 
 div.preface div.sect1,div.glossary div.sect,div.appendix div.sect,div.bibliography div.sect1,div.chapter div.sect1,div.sect1 div.sect2,div.sect2 div.sect3
 {
-  padding:0;
+    padding:0;
 }
 
 div.book div.titlepage
 {
-  margin-top:3em;
+    margin-top:3em;
 }
 
 div.book div.titlepage h1.title,div.book div.titlepage h1.productname,div.article div.titlepage h2.title
 {
-  color:#6a9d00;
-  font-size:300%;
-  font-style:normal;
-  font-weight:400;
-  margin-bottom:0;
-  margin-top:-.5em;
-  text-align:center;
+    color:#6a9d00;
+    font-size:300%;
+    font-style:normal;
+    font-weight:400;
+    margin-bottom:0;
+    margin-top:-.5em;
+    text-align:center;
 }
 
 div.book div.titlepage h2.subtitle,div.article div.titlepage h3.subtitle
 {
-  color:#6a9d00;
-  font-size:200%;
-  font-style:normal;
-  font-weight:400;
-  margin-top:0;
-  text-align:center;
+    color:#6a9d00;
+    font-size:200%;
+    font-style:normal;
+    font-weight:400;
+    margin-top:0;
+    text-align:center;
 }
 
 div.userfootercontent
 {
-  font-size:50%;
+    font-size:50%;
 }
 
 div.toc p
 {
-  font-size:100%;
-  margin-bottom:-.75em;
+    font-size:100%;
+    margin-bottom:-.75em;
 }
 
 div.set div.toc dt >.book *,div.set div.toc dt >.book em,div.set div.toc dt >.article *
 {
-  display:block;
-  font-size:larger;
-  font-style:normal;
-  margin-top:1.5em;
+    display:block;
+    font-size:larger;
+    font-style:normal;
+    margin-top:1.5em;
 }
 
 div.set div.toc dt >.article
 {
-  display:block;
-  margin-left:-1em;
-  padding-left:0;
-  text-indent:0;
+    display:block;
+    margin-left:-1em;
+    padding-left:0;
+    text-indent:0;
 }
 
 div.set div.toc dt >.part,div.book div.toc dt >.part
 {
-  display:block;
-  font-size:x-large;
-  margin-top:1.5em;
+    display:block;
+    font-size:x-large;
+    margin-top:1.5em;
 }
 
 div.book div.toc dt >.chapter,div.book div.toc dt >.preface,div.part div.toc dt >.chapter
 {
-  display:block;
-  font-size:larger;
-  margin-top:1.25em;
+    display:block;
+    font-size:larger;
+    margin-top:1.25em;
 }
 
 div.list-of-examples p,div.list-of-figures p,div.list-of-tables p
 {
-  margin-bottom:-.75em;
+    margin-bottom:-.75em;
 }
 
 div.preface div.titlepage .title,div.appendix div.titlepage .title,div.chapter div.titlepage .title,div.glossary div.titlepage .title,div.glossary div.titlepage .title,div.bibliography div.titlepage .title,div.index div.titlepage .title
 {
-  background-color:transparent;
-  color:#6a9d00;
-  font-size:180%;
-  text-align:center;
+    background-color:transparent;
+    color:#6a9d00;
+    font-size:180%;
+    text-align:center;
 }
 
 div.part div.titlepage h1.title
 {
-  color:#6a9d00;
-  font-size:300%;
-  text-align:center;
+    color:#6a9d00;
+    font-size:300%;
+    text-align:center;
 }
 
 div.abstract
 {
-  margin-left:5ex;
-  margin-right:5ex;
+    margin-left:5ex;
+    margin-right:5ex;
 }
 
 div.abstract p.title
 {
-  margin-bottom:-.5em;
+    margin-bottom:-.5em;
 }
 
 div.abstract p
 {
-  margin-top:.25em;
+    margin-top:.25em;
 }
 
 div.sect1 div.titlepage .title,div.sect2 div.titlepage .title,div.sect3 div.titlepage .title
 {
-  color:#6a9d00;
-  font-style:normal;
-  margin-bottom:-.75em;
-  margin-top:.5em;
-  text-align:left;
+    color:#6a9d00;
+    font-style:normal;
+    margin-bottom:-.75em;
+    margin-top:.5em;
+    text-align:left;
 }
 
 div.sect1 div.titlepage .title
 {
-  font-size:150%;
+    font-size:150%;
 }
 
 div.sect2 div.titlepage .title
 {
-  font-size:125%;
+    font-size:125%;
 }
 
 div.sect3 div.titlepage .title
 {
-  font-size:112%;
+    font-size:112%;
 }
 
 div.sect1 div.titlepage h4.title,div.sect2 div.titlepage h4.title,div.sect3 div.titlepage h4.title
 {
-  color:#6a9d00;
-  font-size:medium;
+    color:#6a9d00;
+    font-size:medium;
 }
 
 div.sect1 >em.remark
 {
-  display:block;
-  margin-top:1em;
+    display:block;
+    margin-top:1em;
 }
 
 div.figure .title,div.procedure .title,div.table .title
 {
-  border-style:none;
-  color:#000;
-  font-style:oblique;
-  font-weight:bolder;
-  margin-bottom:-.5em;
+    border-style:none;
+    color:#000;
+    font-style:oblique;
+    font-weight:bolder;
+    margin-bottom:-.5em;
 }
 
 div.example
 {
-  margin-bottom:1em;
-  margin-top:1em;
+    margin-bottom:1em;
+    margin-top:1em;
 }
 
 div.example-contents
 {
-  margin-top:-.75em;
+    margin-top:-.75em;
 }
 
 h2.title
 {
-  font-size:large;
-  font-style:normal;
-  font-weight:700;
+    font-size:large;
+    font-style:normal;
+    font-weight:700;
 }
 
 h1.title
 {
-  font-size:x-large;
-  font-style:normal;
-  font-weight:700;
+    font-size:x-large;
+    font-style:normal;
+    font-weight:700;
 }
 
 h2.subtitle
 {
-  font-size:large;
+    font-size:large;
 }
 
 .synopfragment
 {
-  display:block;
+    display:block;
 }
 
 .mediaobject
 {
-  margin-bottom:.5em;
-  margin-top:.5em;
+    margin-bottom:.5em;
+    margin-top:.5em;
 }
 
 div.important,div.warning,div.tip,div.caution,div.note
 {
-  margin-bottom:2ex;
-  margin-left:.5in;
-  margin-top:2ex;
-  overflow:auto;
-  width:70%;
+    margin-bottom:2ex;
+    margin-left:.5in;
+    margin-top:2ex;
+    overflow:auto;
+    width:70%;
 }
 
 div.note,div.tip
 {
-  border:1px solid #629900;
+    border:1px solid #629900;
 }
 
 div.important,div.warning
 {
-  border:1px solid #f60;
+    border:1px solid #f60;
 }
 
 div.important h3.title,div.note h3.title
 {
-  background-color:#f60;
-  color:#fff;
-  font-size:large;
-  font-style:oblique;
-  padding:3px;
+    background-color:#f60;
+    color:#fff;
+    font-size:large;
+    font-style:oblique;
+    padding:3px;
 }
 
 div.warning h3.title
 {
-  background-color:#C00000;
-  color:#fff;
-  font-style:oblique;
-  padding:3px;
+    background-color:#C00000;
+    color:#fff;
+    font-style:oblique;
+    padding:3px;
 }
 
 div.warning table tr.head td,div.warning table tr.head th
 {
-  background-color:#f60;
-  color:#fff;
-  padding:3px;
-  vertical-align:middle;
+    background-color:#f60;
+    color:#fff;
+    padding:3px;
+    vertical-align:middle;
 }
 
 div.important table tr.head td,div.important table tr.head th
 {
-  background-color:#ff8000;
-  color:#fff;
-  padding:3px;
-  vertical-align:middle;
+    background-color:#ff8000;
+    color:#fff;
+    padding:3px;
+    vertical-align:middle;
 }
 
 div.tip table tr.head td,div.tip table tr.head th,div.note table tr.head td,div.note table tr.head th
 {
-  background-color:#690;
-  color:#fff;
-  padding:3px;
-  vertical-align:middle;
+    background-color:#690;
+    color:#fff;
+    padding:3px;
+    vertical-align:middle;
 }
 
 td img
 {
-  border:0;
+    border:0;
 }
 
 .docstatus
 {
-  background-color:red;
-  border-top:1pt dotted #000;
-  color:#FFF;
-  margin-top:1em;
-  padding-bottom:.5em;
-  padding-top:.5em;
+    background-color:red;
+    border-top:1pt dotted #000;
+    color:#FFF;
+    margin-top:1em;
+    padding-bottom:.5em;
+    padding-top:.5em;
 }
 
 p.boxtext
 {
-  margin:10px;
+    margin:10px;
 }
 
 b.keycap,.keycap
 {
-  background-color:#eeeee6;
-  border:1px solid #999;
-  font-size:small;
-  margin:0;
-  padding:1px 5px;
+    background-color:#eeeee6;
+    border:1px solid #999;
+    font-size:small;
+    margin:0;
+    padding:1px 5px;
 }
 
 .guibutton
 {
-  border:1px outset #999;
+    border:1px outset #999;
 }
 
 .guilabel
 {
-  color:#80AA50;
+    color:#80AA50;
 }
 
 .permalink
 {
-   background-color:transparent;
-   color:transparent;
-   text-decoration:none;
-   font-size:smaller;
-   margin-left:0.25em;
-   margin-right:0.25em;
-   padding-left:0.5em;
-   padding-right:0.5em;
+     background-color:transparent;
+     color:transparent;
+     text-decoration:none;
+     font-size:smaller;
+     margin-left:0.25em;
+     margin-right:0.25em;
+     padding-left:0.5em;
+     padding-right:0.5em;
 }
 
 .permalink a:link
 {
-  background-color:transparent;
-  color:lightgray;
-  text-decoration:none;
+    background-color:transparent;
+    color:lightgray;
+    text-decoration:none;
 }
 
 .permalink a:visited
 {
-  background-color:transparent;
-  color:lightgray;
-  text-decoration:none;
+    background-color:transparent;
+    color:lightgray;
+    text-decoration:none;
 }
 
 .permalink a:hover
 {
-  background-color:transparent;
-  color:#6a9d00;
-  text-decoration:none;
+    background-color:transparent;
+    color:#6a9d00;
+    text-decoration:none;
 }
 
 .remark
 {
-  color:red;
+    color:red;
 }
 
 em .identifier
 {
-  color:#C30;
-  font-weight:700;
+    color:#C30;
+    font-weight:700;
 }
 
 .informaltable table thead th,.table table thead th
 {
-  background-color:#eeeee6;
-  border-top:1px solid #000;
-  padding:.25em;
+    background-color:#eeeee6;
+    border-top:1px solid #000;
+    padding:.25em;
 }
 
 .table table
 {
-  margin-top:.5em;
+    margin-top:.5em;
 }
 
 .informaltable table td,.table table td
 {
-  padding:.25em;
+    padding:.25em;
 }
 
 .table table .itemizedlist,.informaltable table .itemizedlist
 {
-  margin-left:0;
-  padding-left:.5em;
+    margin-left:0;
+    padding-left:.5em;
 }
 
 .table table,.informaltable table
 {
-  border:none;
-  border-bottom:1pt solid #000;
-  border-collapse:collapse;
-  border-top:1pt solid #000;
+    border:none;
+    border-bottom:1pt solid #000;
+    border-collapse:collapse;
+    border-top:1pt solid #000;
 }
 
 .table td,.informaltable td
 {
-  border-color:#000;
-  border-left:none;
-  border-right:none;
-  border-style:dotted;
-  border-width:1.5pt;
+    border-color:#000;
+    border-left:none;
+    border-right:none;
+    border-style:dotted;
+    border-width:1.5pt;
 }
 
 span.profarch
 {
-  font-weight:700;
+    font-weight:700;
 }
 
 .variablelist dt
 {
-  margin-bottom:0;
+    margin-bottom:0;
 }
 
 .variablelist dd
 {
-  margin-bottom:1.5em;
-  margin-top:-.75em;
+    margin-bottom:1.5em;
+    margin-top:-.75em;
 }
 
 div.calloutlist table td
 {
-  line-height:1.5;
+    line-height:1.5;
 }
 
 .navheader
 {
-  -moz-border-radius:.65em;
-  -webkit-border-radius:.65em;
-  background-color:#fff);
-  border-bottom:none;
-  margin:-1.5em!important;
-  padding:0 1em;
+    -moz-border-radius:.65em;
+    -webkit-border-radius:.65em;
+    background-color:#fff);
+    border-bottom:none;
+    margin:-1.5em!important;
+    padding:0 1em;
 }
 
 .navfooter
 {
-  background-color:#f9f9f9;
-  border-top:2px groove #fff;
+    background-color:#f9f9f9;
+    border-top:2px groove #fff;
 }
 
 :link
 {
-  color:#6a9d00;
+    color:#6a9d00;
 }
 
 :visited
 {
-  color:#444;
+    color:#444;
 }
 
 .filename,.systemitem,.envar,.command,.option,.replaceable
 {
-  font-family:DejaVuSansMono,LiberationMono,FreeMono,monospace;
+    font-family:DejaVuSansMono,LiberationMono,FreeMono,monospace;
 }
 
 div.breadcrumbs
 {
-  display:inline;
-  font-size:normal;
-  line-height:1.5em;
-  margin-left:2em;
+    display:inline;
+    font-size:normal;
+    line-height:1.5em;
+    margin-left:2em;
 }
 
 div.breadcrumbs strong
 {
-  display:block;
-  font-style:normal;
-  font-weight:400;
-  padding-bottom:2pt;
+    display:block;
+    font-style:normal;
+    font-weight:400;
+    padding-bottom:2pt;
 }
 
 div.breadcrumbs strong a
 {
-  background-color:#6a9d00;
-  border:groove 2pt #000;
-  color:#FFF;
-  margin-right:.25em;
-  min-width:5em;
-  padding-left:4pt;
-  padding-right:4pt;
-  text-align:center;
-  text-decoration:none;
+    background-color:#6a9d00;
+    border:groove 2pt #000;
+    color:#FFF;
+    margin-right:.25em;
+    min-width:5em;
+    padding-left:4pt;
+    padding-right:4pt;
+    text-align:center;
+    text-decoration:none;
 }
 
 div.bgnavi
 {
-  border-left:inset 1.25pt #000;
-  padding-left:1em;
+    border-left:inset 1.25pt #000;
+    padding-left:1em;
 }
 
 div.bgnavi p
 {
-  margin-bottom:.1em;
+    margin-bottom:.1em;
 }
 
 span.bg-part,span.bg-chapter,span.bg-appendix
 {
-  border:dotted 1pt #000;
-  padding:1pt 3pt;
+    border:dotted 1pt #000;
+    padding:1pt 3pt;
 }
 
 span.bg-part-current,span.bg-chapter-current,span.bg-appendix-current,span.bg-article-current,span.bg-sect1-current
 {
-  background-color:#6a9d00;
-  color:#FFF;
-  padding:1pt 3pt;
+    background-color:#6a9d00;
+    color:#FFF;
+    padding:1pt 3pt;
 }
 
 .sgmltag-attribute
 {
-  background-color:transparent;
-  color: navy;
+    background-color:transparent;
+    color: navy;
 }
 
 .sgmltag-attvalue
 {
-  background-color:transparent;
-  color: brown;
+    background-color:transparent;
+    color: brown;
 }
 
 .sgmltag-sgmlcomment
 {
-  background-color:transparent;
-  color: orange;
+    background-color:transparent;
+    color: orange;
 }
 
 div.navheader table td,div.navfooter table td
 {
-  text-align:left;
+    text-align:left;
 }
 
 .screen
 {
-  font-size:larger;
+    font-size:larger;
 }
 
 body,img
 {
-  font-family:"liberation sans",arial,helvetica,sans-serif;
-  font-size:100%;
-  max-width:50em;
+    font-family:"liberation sans",arial,helvetica,sans-serif;
+    font-size:100%;
+    max-width:50em;
 }
 
 p
 {
-  line-height:1.4em;
+    line-height:1.4em;
 }
 
 img
 {
-  -moz-box-shadow:0 2px 8px rgba(0,0,0,0.2);
-  -webkit-box-shadow:0 2px 8px rgba(0,0,0,0.2);
-  border:1px solid rgba(0,0,0,0.2)!important;
-  padding:8px;
+    -moz-box-shadow:0 2px 8px rgba(0,0,0,0.2);
+    -webkit-box-shadow:0 2px 8px rgba(0,0,0,0.2);
+    border:1px solid rgba(0,0,0,0.2)!important;
+    padding:8px;
 }
 
 table img
 {
-  -moz-box-shadow:none;
-  -webkit-box-shadow:none;
-  border:none!important;
-  padding:0;
+    -moz-box-shadow:none;
+    -webkit-box-shadow:none;
+    border:none!important;
+    padding:0;
 }
 
 pre.screen
 {
-  -moz-border-radius:.5em;
-  -webkit-border-radius:.5em;
-  background-color:rgba(0,0,0,0.6);
-  color:#fff;
-  font-family:"droid mono",monospace;
-  font-size:smaller;
-  overflow:auto;
-  padding:.5em 1em;
+    -moz-border-radius:.5em;
+    -webkit-border-radius:.5em;
+    background-color:rgba(0,0,0,0.6);
+    color:#fff;
+    font-family:"droid mono",monospace;
+    font-size:smaller;
+    overflow:auto;
+    padding:.5em 1em;
 }
 
 .abstract
 {
-  border:.2em solid #ccc;
-  border-style:solid none;
-  margin:2em 0!important;
-  padding:.5em 2em;
+    border:.2em solid #ccc;
+    border-style:solid none;
+    margin:2em 0!important;
+    padding:.5em 2em;
 }
 
 .abstract .title
 {
-  padding-bottom:1em;
+    padding-bottom:1em;
 }
 
 .toc a
 {
-  padding-left:2em;
-  text-decoration:none;
+    padding-left:2em;
+    text-decoration:none;
 }
 
 
 
 .navheader a,div.breadcrumbs a
 {
-  -moz-border-radius:.5em;
-  -moz-box-shadow:0 1px 3px rgba(0,0,0,0.2);
-  -webkit-border-radius:1em;
-  -webkit-box-shadow:0 1px 3px rgba(0,0,0,0.2);
-  background-color:#777;
-  background-image:0 0 rgba(255,255,255,0.35) 100%;
-  border:1px solid rgba(0,0,0,0.1)!important;
-  border-style:none!important;
-  color:#fff;
-  float:left;
-  margin-bottom:1em;
-  margin-right:1em;
-  padding:.5em 1em;
-  text-decoration:none;
-  text-shadow:0 -1px 0 rgba(0,0,0,0.25);
+    -moz-border-radius:.5em;
+    -moz-box-shadow:0 1px 3px rgba(0,0,0,0.2);
+    -webkit-border-radius:1em;
+    -webkit-box-shadow:0 1px 3px rgba(0,0,0,0.2);
+    background-color:#777;
+    background-image:0 0 rgba(255,255,255,0.35) 100%;
+    border:1px solid rgba(0,0,0,0.1)!important;
+    border-style:none!important;
+    color:#fff;
+    float:left;
+    margin-bottom:1em;
+    margin-right:1em;
+    padding:.5em 1em;
+    text-decoration:none;
+    text-shadow:0 -1px 0 rgba(0,0,0,0.25);
 
 background-image:-webkit-gradient( linear, left bottom, left top, color-stop(0,rgba(255,255,255,0)), color-stop(1,rgba(255,255,255,0.35))); 
 background-image:-moz-linear-gradient( center bottom, rgba(255,255,255,0.0) 0%, rgba(255,255,255,0.35) 100%); 
@@ -626,18 +626,18 @@ background-image:-moz-linear-gradient( center bottom, rgba(255,255,255,0.0) 0%, 
 
 .breadcrumbs a:hover
 {
-  background-color:#ccc;
-  color:#000;
-  text-shadow:0 1px rgba(255,255,255,0.35);
+    background-color:#ccc;
+    color:#000;
+    text-shadow:0 1px rgba(255,255,255,0.35);
 }
 
 .breadcrumbs a:focus, .breadcrumbs a:active
 {
-  -moz-box-shadow:none;
-  -webkit-box-shadow:none;
-  background-color:#666 !important;
-  color:#fff;
-  text-shadow:0 -1px rgba(0,0,0,0.25);
+    -moz-box-shadow:none;
+    -webkit-box-shadow:none;
+    background-color:#666 !important;
+    color:#fff;
+    text-shadow:0 -1px rgba(0,0,0,0.25);
 
 background-image:-webkit-gradient( linear, left bottom, left top, color-stop(0,rgba(0,0,0,0)), color-stop(1,rgba(0,0,0,0.35))) !important; 
 background-image:-moz-linear-gradient( center bottom, rgba(0,0,0,0.0) 0%, rgba(0,0,0,0.35) 100%) !important; 
@@ -648,31 +648,31 @@ background-image:-moz-linear-gradient( center bottom, rgba(0,0,0,0.0) 0%, rgba(0
 
 .warning,.tip,.note,.caution
 {
-  -moz-border-radius:.4em;
-  -moz-box-shadow:0 2px 17px rgba(0,0,0,0.4);
-  -webkit-border-radius:.4em;
-  margin:1em 0em!important;
-  width:100%!important;
+    -moz-border-radius:.4em;
+    -moz-box-shadow:0 2px 17px rgba(0,0,0,0.4);
+    -webkit-border-radius:.4em;
+    margin:1em 0em!important;
+    width:100%!important;
 }
 
 div.authorgroup,div p.edition
 {
-  color:#000;
+    color:#000;
 }
 
 .guimenu,.guisubmenu,.replaceable
 {
-  font-style:italic;
+    font-style:italic;
 }
 
 div.logo,.bgnavi,.breadcrumbs-sep
 {
-  display:none;
+    display:none;
 }
 
 div.bgnavi p.bg-part,div.bgnavi p.bg-chapter
 {
-  margin-top:.5em;
+    margin-top:.5em;
 }
 
 

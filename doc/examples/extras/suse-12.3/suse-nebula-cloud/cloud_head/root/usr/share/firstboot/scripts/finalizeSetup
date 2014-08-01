@@ -15,20 +15,20 @@ import time
 confFiles = glob.glob('/etc/sysconfig/network/ifcfg-eth*')
 numConfInterf = len(confFiles)
 if numConfInterf > 1:
-  syslog.openlog('[BR_SETUP]', syslog.LOG_PID, syslog.LOG_DAEMON)
-  syslog.syslog(syslog.LOG_INFO, 'Bridge setup\n')
-  msg = 'Multiple configured eth devices found, cannot resolve ambiguity\n'
-  syslog.syslog(syslog.LOG_ERR, msg)
-  syslog.closelog()
-  sys.exit(1)
+    syslog.openlog('[BR_SETUP]', syslog.LOG_PID, syslog.LOG_DAEMON)
+    syslog.syslog(syslog.LOG_INFO, 'Bridge setup\n')
+    msg = 'Multiple configured eth devices found, cannot resolve ambiguity\n'
+    syslog.syslog(syslog.LOG_ERR, msg)
+    syslog.closelog()
+    sys.exit(1)
 
 if numConfInterf < 1:
-  syslog.openlog('[BR_SETUP]', syslog.LOG_PID, syslog.LOG_DAEMON)
-  syslog.syslog(syslog.LOG_INFO, 'Bridge setup\n')
-  msg = 'No eth interface configured, cannot setup bridge\n'
-  syslog.syslog(syslog.LOG_ERR, msg)
-  syslog.closelog()
-  sys.exit(1)
+    syslog.openlog('[BR_SETUP]', syslog.LOG_PID, syslog.LOG_DAEMON)
+    syslog.syslog(syslog.LOG_INFO, 'Bridge setup\n')
+    msg = 'No eth interface configured, cannot setup bridge\n'
+    syslog.syslog(syslog.LOG_ERR, msg)
+    syslog.closelog()
+    sys.exit(1)
 
 # Get the configured IP address (includes the subnet mask)
 interfConf = confFiles[0]
@@ -36,9 +36,9 @@ interfaceName = interfConf.split('-')[-1]
 lines = open(interfConf, 'r').readlines()
 ipAddr = None
 for ln in lines:
-  if ln.find('IPADDR') != -1:
-    ipAddr = ln.strip().split('=')[-1]
-    break
+    if ln.find('IPADDR') != -1:
+        ipAddr = ln.strip().split('=')[-1]
+        break
 
 # Stop the running network services
 os.system('/bin/systemctl stop dhcpd.service >& /dev/null')
@@ -68,10 +68,10 @@ brCfg.close()
 lines = open('/etc/sysconfig/dhcpd', 'r').readlines()
 conf = open('/etc/sysconfig/dhcpd', 'w')
 for ln in lines:
-  if ln.find('DHCPD_INTERFACE') != -1:
-    conf.write('DHCPD_INTERFACE="br0"\n')
-    continue
-  conf.write(ln)
+    if ln.find('DHCPD_INTERFACE') != -1:
+        conf.write('DHCPD_INTERFACE="br0"\n')
+        continue
+    conf.write(ln)
 conf.close()
 
 # Remove the old network configuration file
@@ -91,20 +91,20 @@ os.system('/sbin/SuSEconfig >& /dev/null')
 os.system('/bin/chown oneadmin:cloud /var/lib/one/.one/one_auth')
 
 if not os.path.exists('/var/lock/one'):
-  os.mkdir('/var/lock/one')
+    os.mkdir('/var/lock/one')
 
 os.system('/bin/chown -R oneadmin:cloud /var/lock/one')
 
 # Initial setup of the cloud service
 res = os.system('/usr/bin/sudo -u oneadmin /usr/bin/env ONE_AUTH=/var/lib/one/.one/one_auth /usr/sbin/onedsetup >& /var/log/one/onedsetup.log')
 if res:
-  if os.path.exists('/var/log/one/oned.log'):
-    os.rename('/var/log/one/oned.log','/var/log/one/oned.setup.log')
-  syslog.openlog('[ONED_INIT]', syslog.LOG_PID, syslog.LOG_DAEMON)
-  msg = 'Possible error with initialization of oned, check log files\n'
-  msg += 'in /var/log/one'
-  syslog.syslog(syslog.LOG_INFO, msg)
-  syslog.closelog()
-  
+    if os.path.exists('/var/log/one/oned.log'):
+        os.rename('/var/log/one/oned.log','/var/log/one/oned.setup.log')
+    syslog.openlog('[ONED_INIT]', syslog.LOG_PID, syslog.LOG_DAEMON)
+    msg = 'Possible error with initialization of oned, check log files\n'
+    msg += 'in /var/log/one'
+    syslog.syslog(syslog.LOG_INFO, msg)
+    syslog.closelog()
+    
 # Everything needs to catch up
 time.sleep(5)

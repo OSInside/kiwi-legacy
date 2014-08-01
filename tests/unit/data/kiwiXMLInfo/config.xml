@@ -1,41 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <image schemaversion="5.7" name="test-xml-infod">
-  <description type="system">
-    <author>Robert Schweikert</author>
-    <contact>rjschwei@suse.com</contact>
-    <specification>test case for the XMLInfo object</specification>
-  </description>
-  <profiles>
-    <profile name="first" description="a profile"/>
-    <profile name="second" description="another profile"/>
-  </profiles>
-  <preferences>
-    <type image="iso" boot="isoboot/suse-11.4"/>
-    <type image="oem" boot="oemboot/suse-11.4" filesystem="ext4" installiso="true">
-      <oemconfig>
-        <oem-swap>true</oem-swap>
-        <oem-swapsize>1024</oem-swapsize>
-      </oemconfig>
-    </type>
-    <type image="xfs"/>
-    <packagemanager>zypper</packagemanager>
-    <rpm-check-signatures>false</rpm-check-signatures>
-    <rpm-force>true</rpm-force>
-    <locale>en_US</locale>
-    <keytable>us.map.gz</keytable>
-    <version>1.0.0</version>
-  </preferences>
-  <users group="root">
-    <user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
-  </users>
-  <repository type="rpm-dir">
+    <description type="system">
+        <author>Robert Schweikert</author>
+        <contact>rjschwei@suse.com</contact>
+        <specification>test case for the XMLInfo object</specification>
+    </description>
+    <profiles>
+        <profile name="first" description="a profile"/>
+        <profile name="second" description="another profile"/>
+    </profiles>
+    <preferences>
+        <type image="iso" boot="isoboot/suse-11.4"/>
+        <type image="oem" boot="oemboot/suse-11.4" filesystem="ext4" installiso="true">
+            <oemconfig>
+                <oem-swap>true</oem-swap>
+                <oem-swapsize>1024</oem-swapsize>
+            </oemconfig>
+        </type>
+        <type image="xfs"/>
+        <packagemanager>zypper</packagemanager>
+        <rpm-check-signatures>false</rpm-check-signatures>
+        <rpm-force>true</rpm-force>
+        <locale>en_US</locale>
+        <keytable>us.map.gz</keytable>
+        <version>1.0.0</version>
+    </preferences>
+    <users group="root">
+        <user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
+    </users>
+    <repository type="rpm-dir">
 <!-- repo replaced during test, therefore path is insignificant -->
-    <source path="/tmp"/>
-  </repository>
-  <packages type="image" patternType="onlyRequired">
-    <archive name="testArchive.tgz"/>
-    <package name="kiwi-test-dummy"/>
+        <source path="/tmp"/>
+    </repository>
+    <packages type="image" patternType="onlyRequired">
+        <archive name="testArchive.tgz"/>
+        <package name="kiwi-test-dummy"/>
 <!--<namedCollection name="base"/>-->
-  </packages>
+    </packages>
 </image>

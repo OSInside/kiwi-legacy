@@ -1,68 +1,68 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <image schemaversion="5.7" name="testCase-package-settings">
-  <description type="system">
-    <author>Robert Schweikert</author>
-    <contact>rjschwei@suse.com</contact>
-    <specification>Test configuration to verify package settings are stored and returned properly in the XML object</specification>
-  </description>
-  <profiles>
-    <profile description="test profile" name="aTest"/>
-  </profiles>
-  <preferences>
-    <packagemanager>ensconce</packagemanager>
-    <type image="oem" filesystem="ext4" boot="oemboot/suse-12.1" installiso="true"/>
-    <version>0.0.1</version>
-    <rpm-check-signatures>false</rpm-check-signatures>
-    <rpm-force>false</rpm-force>
-    <locale>en_US</locale>
-    <keytable>us.map.gz</keytable>
-  </preferences>
-  <users group="root">
-    <user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
-  </users>
-  <repository type="yast2">
-    <source path="/tmp"/>
-  </repository>
-  <packages type="image">
-    <archive name="myInitStuff.tar" bootinclude="true"/>
-    <archive name="myImageStuff.tgz"/>
-    <namedCollection name="base"/>
-    <namedCollection name="xfce"/>
-    <opensuseProduct name="SLES"/>
-    <package name="ed"/>
-    <package name="kernel-default"/>
-    <package name="python" bootinclude="true" bootdelete="true"/>
-    <package name="vim" bootinclude="true"/>
-  </packages>
-  <packages type="image" profiles="aTest" patternType="plusRecommended">
-    <archive name="myAppArch.tgz"/>
-    <namedCollection name="kde"/>
-    <package name="emacs"/>
-    <package name="kernel-desktop" replaces="kernel-default"/>
-    <package name="perl" bootinclude="true"/>
-  </packages>
-  <packages type="delete">
-    <package name="java"/>
-  </packages>
-  <packages type="delete" profiles="aTest">
-    <package name="libreOffice"/>
-  </packages>
-  <packages type="oem">
-    <archive name="myOEMstuffProf.tar.bz2"/>
-    <package name="kernel-firmware"/>
-    <package name="sane"/>
-    <namedCollection name="compatAddon"/>
-  </packages>
-  <packages type="oem" profiles="aTest">
-    <archive name="myOEMstuffProf.tar.bz2"/>
-    <ignore name="python"/>
-    <package name="xemacs" replaces="vim"/>
-    <package name="gimp"/>
-    <namedCollection name="lamp"/>
-  </packages>
-  <packages type="bootstrap">
-    <package name="filesystem"/>
-    <package name="glibc-locale"/>
-  </packages>
+    <description type="system">
+        <author>Robert Schweikert</author>
+        <contact>rjschwei@suse.com</contact>
+        <specification>Test configuration to verify package settings are stored and returned properly in the XML object</specification>
+    </description>
+    <profiles>
+        <profile description="test profile" name="aTest"/>
+    </profiles>
+    <preferences>
+        <packagemanager>ensconce</packagemanager>
+        <type image="oem" filesystem="ext4" boot="oemboot/suse-12.1" installiso="true"/>
+        <version>0.0.1</version>
+        <rpm-check-signatures>false</rpm-check-signatures>
+        <rpm-force>false</rpm-force>
+        <locale>en_US</locale>
+        <keytable>us.map.gz</keytable>
+    </preferences>
+    <users group="root">
+        <user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
+    </users>
+    <repository type="yast2">
+        <source path="/tmp"/>
+    </repository>
+    <packages type="image">
+        <archive name="myInitStuff.tar" bootinclude="true"/>
+        <archive name="myImageStuff.tgz"/>
+        <namedCollection name="base"/>
+        <namedCollection name="xfce"/>
+        <opensuseProduct name="SLES"/>
+        <package name="ed"/>
+        <package name="kernel-default"/>
+        <package name="python" bootinclude="true" bootdelete="true"/>
+        <package name="vim" bootinclude="true"/>
+    </packages>
+    <packages type="image" profiles="aTest" patternType="plusRecommended">
+        <archive name="myAppArch.tgz"/>
+        <namedCollection name="kde"/>
+        <package name="emacs"/>
+        <package name="kernel-desktop" replaces="kernel-default"/>
+        <package name="perl" bootinclude="true"/>
+    </packages>
+    <packages type="delete">
+        <package name="java"/>
+    </packages>
+    <packages type="delete" profiles="aTest">
+        <package name="libreOffice"/>
+    </packages>
+    <packages type="oem">
+        <archive name="myOEMstuffProf.tar.bz2"/>
+        <package name="kernel-firmware"/>
+        <package name="sane"/>
+        <namedCollection name="compatAddon"/>
+    </packages>
+    <packages type="oem" profiles="aTest">
+        <archive name="myOEMstuffProf.tar.bz2"/>
+        <ignore name="python"/>
+        <package name="xemacs" replaces="vim"/>
+        <package name="gimp"/>
+        <namedCollection name="lamp"/>
+    </packages>
+    <packages type="bootstrap">
+        <package name="filesystem"/>
+        <package name="glibc-locale"/>
+    </packages>
 </image>

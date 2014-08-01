@@ -1,44 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <image schemaversion="5.7" name="testCase-PXE-settings">
-  <description type="system">
-    <author>Robert Schweikert</author>
-    <contact>rjschwei@suse.com</contact>
-    <specification>Test configuration to verify PXE settings are stored and returned properly in the XML object</specification>
-  </description>
-  <preferences>
-    <type image="pxe" filesystem="clicfs" boot="netboot/suse-12.1" installiso="true">
-      <pxedeploy server="192.168.100.2" blocksize="4096">
-        <configuration arch="x86_64,i686,armv95,ppc64,ppc" dest="target" source="installSource"/>
-        <initrd>/pxeSetup/specialInitrd</initrd>
-        <kernel>/pxeSetup/specialKernel</kernel>
-        <partitions device="/dev/sda">
-          <partition type="swap" number="1" size="5"/>
-          <partition type="L" number="2" size="image" mountpoint="/" target="true"/>
-          <partition type="L" number="3" target="false"/>
-        </partitions>
-        <timeout>20</timeout>
-        <union ro="/dev/sda2" rw="/dev/sda3" type="clicfs"/>
-      </pxedeploy>
-    </type>
-    <version>0.0.1</version>
-    <rpm-check-signatures>false</rpm-check-signatures>
-    <rpm-force>true</rpm-force>
-    <locale>en_US</locale>
-    <keytable>us.map.gz</keytable>
-  </preferences>
-  <users group="root">
-    <user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
-  </users>
-  <repository type="yast2">
-    <source path="/tmp"/>
-  </repository>
-  <packages type="image">
-    <package name="kernel-default"/>
-    <namedCollection name="base"/>
-  </packages>
-  <packages type="bootstrap">
-    <package name="filesystem"/>
-    <package name="glibc-locale"/>
-  </packages>
+    <description type="system">
+        <author>Robert Schweikert</author>
+        <contact>rjschwei@suse.com</contact>
+        <specification>Test configuration to verify PXE settings are stored and returned properly in the XML object</specification>
+    </description>
+    <preferences>
+        <type image="pxe" filesystem="clicfs" boot="netboot/suse-12.1" installiso="true">
+            <pxedeploy server="192.168.100.2" blocksize="4096">
+                <configuration arch="x86_64,i686,armv95,ppc64,ppc" dest="target" source="installSource"/>
+                <initrd>/pxeSetup/specialInitrd</initrd>
+                <kernel>/pxeSetup/specialKernel</kernel>
+                <partitions device="/dev/sda">
+                    <partition type="swap" number="1" size="5"/>
+                    <partition type="L" number="2" size="image" mountpoint="/" target="true"/>
+                    <partition type="L" number="3" target="false"/>
+                </partitions>
+                <timeout>20</timeout>
+                <union ro="/dev/sda2" rw="/dev/sda3" type="clicfs"/>
+            </pxedeploy>
+        </type>
+        <version>0.0.1</version>
+        <rpm-check-signatures>false</rpm-check-signatures>
+        <rpm-force>true</rpm-force>
+        <locale>en_US</locale>
+        <keytable>us.map.gz</keytable>
+    </preferences>
+    <users group="root">
+        <user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
+    </users>
+    <repository type="yast2">
+        <source path="/tmp"/>
+    </repository>
+    <packages type="image">
+        <package name="kernel-default"/>
+        <namedCollection name="base"/>
+    </packages>
+    <packages type="bootstrap">
+        <package name="filesystem"/>
+        <package name="glibc-locale"/>
+    </packages>
 </image>

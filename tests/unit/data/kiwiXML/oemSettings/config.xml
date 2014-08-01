@@ -1,51 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <image schemaversion="5.7" name="testCase-OEM-settings">
-  <description type="system">
-    <author>Robert Schweikert</author>
-    <contact>rjschwei@suse.com</contact>
-    <specification>Test configuration to verify OEM settings are stored and returned properly in the XML object</specification>
-  </description>
-  <preferences>
-    <type image="oem" filesystem="ext4" boot="oemboot/suse-12.1" installiso="true">
-      <oemconfig>
-        <oem-boot-title>Unit Test</oem-boot-title>
-        <oem-bootwait>false</oem-bootwait>
-        <oem-inplace-recovery>true</oem-inplace-recovery>
-        <oem-kiwi-initrd>true</oem-kiwi-initrd>
-        <oem-partition-install>false</oem-partition-install>
-        <oem-reboot>false</oem-reboot>
-        <oem-reboot-interactive>false</oem-reboot-interactive>
-        <oem-recovery>true</oem-recovery>
-        <oem-recoveryID>20</oem-recoveryID>
-        <oem-silent-boot>true</oem-silent-boot>
-        <oem-shutdown>false</oem-shutdown>
-        <oem-shutdown-interactive>true</oem-shutdown-interactive>
-        <oem-swap>true</oem-swap>
-        <oem-swapsize>2048</oem-swapsize>
-        <oem-systemsize>20G</oem-systemsize>
-        <oem-unattended>true</oem-unattended>
-        <oem-unattended-id>scsi-SATA_ST9500420AS_5VJ5JL6T-part1</oem-unattended-id>
-      </oemconfig>
-    </type>
-    <version>0.0.1</version>
-    <rpm-check-signatures>false</rpm-check-signatures>
-    <rpm-force>false</rpm-force>
-    <locale>en_US</locale>
-    <keytable>us.map.gz</keytable>
-  </preferences>
-  <users group="root">
-    <user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
-  </users>
-  <repository type="yast2">
-    <source path="/tmp"/>
-  </repository>
-  <packages type="image">
-    <package name="kernel-default"/>
-    <namedCollection name="base"/>
-  </packages>
-  <packages type="bootstrap">
-    <package name="filesystem"/>
-    <package name="glibc-locale"/>
-  </packages>
+    <description type="system">
+        <author>Robert Schweikert</author>
+        <contact>rjschwei@suse.com</contact>
+        <specification>Test configuration to verify OEM settings are stored and returned properly in the XML object</specification>
+    </description>
+    <preferences>
+        <type image="oem" filesystem="ext4" boot="oemboot/suse-12.1" installiso="true">
+            <oemconfig>
+                <oem-boot-title>Unit Test</oem-boot-title>
+                <oem-bootwait>false</oem-bootwait>
+                <oem-inplace-recovery>true</oem-inplace-recovery>
+                <oem-kiwi-initrd>true</oem-kiwi-initrd>
+                <oem-partition-install>false</oem-partition-install>
+                <oem-reboot>false</oem-reboot>
+                <oem-reboot-interactive>false</oem-reboot-interactive>
+                <oem-recovery>true</oem-recovery>
+                <oem-recoveryID>20</oem-recoveryID>
+                <oem-silent-boot>true</oem-silent-boot>
+                <oem-shutdown>false</oem-shutdown>
+                <oem-shutdown-interactive>true</oem-shutdown-interactive>
+                <oem-swap>true</oem-swap>
+                <oem-swapsize>2048</oem-swapsize>
+                <oem-systemsize>20G</oem-systemsize>
+                <oem-unattended>true</oem-unattended>
+                <oem-unattended-id>scsi-SATA_ST9500420AS_5VJ5JL6T-part1</oem-unattended-id>
+            </oemconfig>
+        </type>
+        <version>0.0.1</version>
+        <rpm-check-signatures>false</rpm-check-signatures>
+        <rpm-force>false</rpm-force>
+        <locale>en_US</locale>
+        <keytable>us.map.gz</keytable>
+    </preferences>
+    <users group="root">
+        <user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
+    </users>
+    <repository type="yast2">
+        <source path="/tmp"/>
+    </repository>
+    <packages type="image">
+        <package name="kernel-default"/>
+        <namedCollection name="base"/>
+    </packages>
+    <packages type="bootstrap">
+        <package name="filesystem"/>
+        <package name="glibc-locale"/>
+    </packages>
 </image>

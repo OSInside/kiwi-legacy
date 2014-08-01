@@ -29,7 +29,7 @@ Echo "Calling pre-init stage in system image"
 # 2) check for LOCAL_BOOT
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "yes" ];then
-  exit 0
+    exit 0
 fi
 
 #======================================
@@ -52,43 +52,43 @@ createFramebufferDevices
 # 6) check preinit services
 #--------------------------------------
 if isVirtioDevice;then
-  runPreinitServices virtio
+    runPreinitServices virtio
 fi
 if isDASDDevice;then
-  runPreinitServices dasd
+    runPreinitServices dasd
 fi
 if isZFCPDevice;then
-  runPreinitServices zfcp
+    runPreinitServices zfcp
 fi
 
 #======================================
 # 7) create /etc/ImagePackages
 #--------------------------------------
 if [ -x /bin/rpm ];then
-  Echo "Creating initial image package info file"
-  rpm -qa --last > /etc/ImagePackages
+    Echo "Creating initial image package info file"
+    rpm -qa --last > /etc/ImagePackages
 fi
 
 #======================================
 # 8) create initrd on diskful
 #--------------------------------------
 if [ -z "$UNIONFS_CONFIG" ] && [ -z "$COMBINED_IMAGE" ]; then
-  #======================================
-  # use distro initrd tool
-  #--------------------------------------
-  setupInitrd
+    #======================================
+    # use distro initrd tool
+    #--------------------------------------
+    setupInitrd
 else
-  #======================================
-  # use kiwi initrd from RW partition
-  #--------------------------------------
-  bootLoaderOK=1
+    #======================================
+    # use kiwi initrd from RW partition
+    #--------------------------------------
+    bootLoaderOK=1
 fi
 
 #======================================
 # 9) Install boot loader if ok
 #--------------------------------------
 if [ $bootLoaderOK = 1 ];then
-  installBootLoader
+    installBootLoader
 fi
 
 #======================================
@@ -100,13 +100,13 @@ setupConsole
 # 10.1) load network module
 #--------------------------------------
 if loadNetworkCardS390 "0.0.0191";then
-  #======================================
-  # 10.2) Setup network interface and DNS
-  #--------------------------------------
-  setupNetworkInterfaceS390
-  udevPending
-  setupNetworkStatic 1
-  setupNetworkStatic 0
+    #======================================
+    # 10.2) Setup network interface and DNS
+    #--------------------------------------
+    setupNetworkInterfaceS390
+    udevPending
+    setupNetworkStatic 1
+    setupNetworkStatic 0
 fi
 
 #======================================

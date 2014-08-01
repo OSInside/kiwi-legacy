@@ -1,147 +1,147 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <image schemaversion="6.1" name="initrd-vmxboot-suse-SLES11">
-  <description type="boot">
-    <author>Marcus Schaefer</author>
-    <contact>ms@novell.com</contact>
-    <specification>boot/initrd image for virtual machines</specification>
-  </description>
-  <preferences>
-    <type image="cpio" bootprofile="ppc64" bootkernel="ppc64"/>
-    <version>2.7.1</version>
-    <packagemanager>zypper</packagemanager>
-    <rpm-check-signatures>false</rpm-check-signatures>
-  </preferences>
-  <profiles>
-    <profile name="default" description="Boot with default setup"/>
-    <profile name="ppc64" description="KERNEL: ppc64 kernel"/>
-    <profile name="custom" description="KERNEL: specified by bootinclude in system XML"/>
-  </profiles>
-  <drivers>
-    <file name="crypto/*"/>
-    <file name="drivers/block/loop.ko"/>
-    <file name="drivers/net/e1000/e1000.ko"/>
-    <file name="drivers/net/e1000e/e1000e.ko"/>
-    <file name="drivers/net/ehea/ehea.ko"/>
-    <file name="drivers/net/ibmveth.ko"/>
-    <file name="drivers/net/tg3.ko"/>
-    <file name="drivers/net/veth.ko"/>
-    <file name="drivers/scsi/ibmvscsi"/>
-    <file name="drivers/scsi/ibmvscsi/ibmvscsic.ko"/>
-    <file name="drivers/scsi/ipr.ko"/>
-    <file name="drivers/scsi/lpfc/*"/>
-    <file name="drivers/scsi/scsi_mod.ko"/>
-    <file name="drivers/scsi/scsi_tgt.ko"/>
-    <file name="drivers/scsi/scsi_transport_fc.ko"/>
-    <file name="drivers/scsi/scsi_transport_srp.ko"/>
-    <file name="drivers/scsi/sd_mod.ko"/>
-    <file name="drivers/usb/*"/>
-    <file name="fs/binfmt_aout.ko"/>
-    <file name="fs/binfmt_misc.ko"/>
-    <file name="fs/btrfs/*"/>
-    <file name="fs/ext2/*"/>
-    <file name="fs/ext3/*"/>
-    <file name="fs/ext4/*"/>
-    <file name="fs/fuse/*"/>
-    <file name="fs/jbd/*"/>
-    <file name="fs/jbd2/*"/>
-    <file name="fs/lockd/*"/>
-    <file name="fs/squashfs/*"/>
-    <file name="fs/xfs/*"/>
-    <file name="lib/crc-t10dif.ko"/>
-    <file name="lib/libcrc32c.ko"/>
-    <file name="lib/zlib_deflate/zlib_deflate.ko"/>
-    <file name="net/ipv6/*"/>
-    <file name="net/packet/*"/>
-  </drivers>
-  <repository type="yast2" status="replaceable">
-    <source path="http://download.suse.de/install/SLP/SLES-11-SP1-GM/%arch/DVD1/"/>
-  </repository>
-  <packages type="image" profiles="default">
-    <package name="kernel-default"/>
-    <package name="kernel-default-base"/>
-  </packages>
-  <packages type="image" profiles="ppc64">
-    <package name="kernel-ppc64"/>
-    <package name="kernel-ppc64-base"/>
-  </packages>
-  <packages type="image">
-    <package name="bind-libs"/>
-    <package name="bind-utils"/>
-    <package name="btrfsprogs"/>
-    <package name="cryptsetup"/>
-    <package name="dhcpcd"/>
-    <package name="dialog"/>
-    <package name="e2fsprogs"/>
-    <package name="fbiterm"/>
-    <package name="file"/>
-    <package name="fribidi"/>
-    <package name="gettext-runtime"/>
-    <package name="hwinfo"/>
-    <package name="kexec-tools"/>
-    <package name="kiwi-tools"/>
-    <package name="lvm2"/>
-    <package name="make"/>
-    <package name="module-init-tools"/>
-    <package name="net-tools"/>
-    <package name="netcfg"/>
-    <package name="parted"/>
-    <package name="pciutils"/>
-    <package name="psmisc"/>
-    <package name="sysconfig"/>
-    <package name="sysfsutils"/>
-    <package name="tar"/>
-    <package name="util-linux"/>
-    <package name="xfsprogs"/>
-    <package name="iproute2"/>
-  </packages>
-  <packages type="image" profiles="custom"><!-- empty custom section to allow bootincluding custom kernel --></packages>
-  <packages type="bootstrap">
-    <package name="diffutils"/>
-    <package name="filesystem"/>
-    <package name="glibc"/>
-    <package name="glibc-locale"/>
-    <package name="openssl-certs"/>
-    <package name="procps"/>
-  </packages>
-  <packages type="delete">
-    <package name="PolicyKit"/>
-    <package name="audit-libs"/>
-    <package name="blocxx"/>
-    <package name="cracklib-dict-full"/>
-    <package name="cracklib-dict-small"/>
-    <package name="cyrus-sasl"/>
-    <package name="db"/>
-    <package name="expat"/>
-    <package name="fillup"/>
-    <package name="gdbm"/>
-    <package name="glib2"/>
-    <package name="gpg"/>
-    <package name="info"/>
-    <package name="insserv"/>
-    <package name="iptables"/>
-    <package name="irqbalance"/>
-    <package name="libxcrypt"/>
-    <package name="libxml2"/>
-    <package name="libzio"/>
-    <package name="licenses"/>
-    <package name="limal"/>
-    <package name="limal-perl"/>
-    <package name="logrotate"/>
-    <package name="make"/>
-    <package name="mdadm"/>
-    <package name="mingetty"/>
-    <package name="openldap2-client"/>
-    <package name="openslp"/>
-    <package name="pam"/>
-    <package name="pam-modules"/>
-    <package name="pcre"/>
-    <package name="perl"/>
-    <package name="perl-Bootloader"/>
-    <package name="perl-gettext"/>
-    <package name="permissions"/>
-    <package name="pm-utils"/>
-    <package name="pmtools"/>
-    <package name="suse-build-key"/>
-  </packages>
+    <description type="boot">
+        <author>Marcus Schaefer</author>
+        <contact>ms@novell.com</contact>
+        <specification>boot/initrd image for virtual machines</specification>
+    </description>
+    <preferences>
+        <type image="cpio" bootprofile="ppc64" bootkernel="ppc64"/>
+        <version>2.7.1</version>
+        <packagemanager>zypper</packagemanager>
+        <rpm-check-signatures>false</rpm-check-signatures>
+    </preferences>
+    <profiles>
+        <profile name="default" description="Boot with default setup"/>
+        <profile name="ppc64" description="KERNEL: ppc64 kernel"/>
+        <profile name="custom" description="KERNEL: specified by bootinclude in system XML"/>
+    </profiles>
+    <drivers>
+        <file name="crypto/*"/>
+        <file name="drivers/block/loop.ko"/>
+        <file name="drivers/net/e1000/e1000.ko"/>
+        <file name="drivers/net/e1000e/e1000e.ko"/>
+        <file name="drivers/net/ehea/ehea.ko"/>
+        <file name="drivers/net/ibmveth.ko"/>
+        <file name="drivers/net/tg3.ko"/>
+        <file name="drivers/net/veth.ko"/>
+        <file name="drivers/scsi/ibmvscsi"/>
+        <file name="drivers/scsi/ibmvscsi/ibmvscsic.ko"/>
+        <file name="drivers/scsi/ipr.ko"/>
+        <file name="drivers/scsi/lpfc/*"/>
+        <file name="drivers/scsi/scsi_mod.ko"/>
+        <file name="drivers/scsi/scsi_tgt.ko"/>
+        <file name="drivers/scsi/scsi_transport_fc.ko"/>
+        <file name="drivers/scsi/scsi_transport_srp.ko"/>
+        <file name="drivers/scsi/sd_mod.ko"/>
+        <file name="drivers/usb/*"/>
+        <file name="fs/binfmt_aout.ko"/>
+        <file name="fs/binfmt_misc.ko"/>
+        <file name="fs/btrfs/*"/>
+        <file name="fs/ext2/*"/>
+        <file name="fs/ext3/*"/>
+        <file name="fs/ext4/*"/>
+        <file name="fs/fuse/*"/>
+        <file name="fs/jbd/*"/>
+        <file name="fs/jbd2/*"/>
+        <file name="fs/lockd/*"/>
+        <file name="fs/squashfs/*"/>
+        <file name="fs/xfs/*"/>
+        <file name="lib/crc-t10dif.ko"/>
+        <file name="lib/libcrc32c.ko"/>
+        <file name="lib/zlib_deflate/zlib_deflate.ko"/>
+        <file name="net/ipv6/*"/>
+        <file name="net/packet/*"/>
+    </drivers>
+    <repository type="yast2" status="replaceable">
+        <source path="http://download.suse.de/install/SLP/SLES-11-SP1-GM/%arch/DVD1/"/>
+    </repository>
+    <packages type="image" profiles="default">
+        <package name="kernel-default"/>
+        <package name="kernel-default-base"/>
+    </packages>
+    <packages type="image" profiles="ppc64">
+        <package name="kernel-ppc64"/>
+        <package name="kernel-ppc64-base"/>
+    </packages>
+    <packages type="image">
+        <package name="bind-libs"/>
+        <package name="bind-utils"/>
+        <package name="btrfsprogs"/>
+        <package name="cryptsetup"/>
+        <package name="dhcpcd"/>
+        <package name="dialog"/>
+        <package name="e2fsprogs"/>
+        <package name="fbiterm"/>
+        <package name="file"/>
+        <package name="fribidi"/>
+        <package name="gettext-runtime"/>
+        <package name="hwinfo"/>
+        <package name="kexec-tools"/>
+        <package name="kiwi-tools"/>
+        <package name="lvm2"/>
+        <package name="make"/>
+        <package name="module-init-tools"/>
+        <package name="net-tools"/>
+        <package name="netcfg"/>
+        <package name="parted"/>
+        <package name="pciutils"/>
+        <package name="psmisc"/>
+        <package name="sysconfig"/>
+        <package name="sysfsutils"/>
+        <package name="tar"/>
+        <package name="util-linux"/>
+        <package name="xfsprogs"/>
+        <package name="iproute2"/>
+    </packages>
+    <packages type="image" profiles="custom"><!-- empty custom section to allow bootincluding custom kernel --></packages>
+    <packages type="bootstrap">
+        <package name="diffutils"/>
+        <package name="filesystem"/>
+        <package name="glibc"/>
+        <package name="glibc-locale"/>
+        <package name="openssl-certs"/>
+        <package name="procps"/>
+    </packages>
+    <packages type="delete">
+        <package name="PolicyKit"/>
+        <package name="audit-libs"/>
+        <package name="blocxx"/>
+        <package name="cracklib-dict-full"/>
+        <package name="cracklib-dict-small"/>
+        <package name="cyrus-sasl"/>
+        <package name="db"/>
+        <package name="expat"/>
+        <package name="fillup"/>
+        <package name="gdbm"/>
+        <package name="glib2"/>
+        <package name="gpg"/>
+        <package name="info"/>
+        <package name="insserv"/>
+        <package name="iptables"/>
+        <package name="irqbalance"/>
+        <package name="libxcrypt"/>
+        <package name="libxml2"/>
+        <package name="libzio"/>
+        <package name="licenses"/>
+        <package name="limal"/>
+        <package name="limal-perl"/>
+        <package name="logrotate"/>
+        <package name="make"/>
+        <package name="mdadm"/>
+        <package name="mingetty"/>
+        <package name="openldap2-client"/>
+        <package name="openslp"/>
+        <package name="pam"/>
+        <package name="pam-modules"/>
+        <package name="pcre"/>
+        <package name="perl"/>
+        <package name="perl-Bootloader"/>
+        <package name="perl-gettext"/>
+        <package name="permissions"/>
+        <package name="pm-utils"/>
+        <package name="pmtools"/>
+        <package name="suse-build-key"/>
+    </packages>
 </image>

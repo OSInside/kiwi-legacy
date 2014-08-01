@@ -14,34 +14,34 @@ my $config;
 my $target;
 
 my $result = GetOptions(
-  'config=s' => \$config,
-  'target=s' => \$target
+    'config=s' => \$config,
+    'target=s' => \$target
 );
 
 if (($result != 1 ) || (! $config)) {
-  print 'writeTester --config KIWI_CONFIG_DIR '
-    . "--target PATH_TO_FILE_TO_BE_WRITTEN\n";
-  exit 1;
+    print 'writeTester --config KIWI_CONFIG_DIR '
+        . "--target PATH_TO_FILE_TO_BE_WRITTEN\n";
+    exit 1;
 }
 if (! $target) {
-  $target = '/tmp/write-tester.xml';
+    $target = '/tmp/write-tester.xml';
 }
 if (-f $target) {
-  unlink $target;
+    unlink $target;
 }
 
 my $cmdL = KIWICommandLine -> new();
 my $xml  = KIWIXML -> new (
-  $config, undef, undef, $cmdL, undef
+    $config, undef, undef, $cmdL, undef
 );
 if (! $xml) {
-  exit 1;
+    exit 1;
 }
 $xml -> writeXML ($target);
 
 # Pretty print
 my $cmd = '/usr/bin/xsltproc -o /tmp/pretty.xml '
-  . "/usr/share/kiwi/xsl/print.xsl $target";
+    . "/usr/share/kiwi/xsl/print.xsl $target";
 system $cmd;
 # Move to the target
 $cmd = "mv /tmp/pretty.xml $target";

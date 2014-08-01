@@ -35,27 +35,27 @@ our @EXPORT_OK = qw ();
 # Constructor
 #------------------------------------------
 sub new {
-  # ...
-  # Create the KIWIXMLPackageProductData object
-  #
-  # Internal data structure
-  #
-  # this = {
-  #    arch        = '' (inherited from KIWIXMLFileData)
-  #    name        = '' (inherited from KIWIXMLFileData)
-  #    elname      = 'product'
-  # }
-  # ---
-  #==========================================
-  # Object setup
-  #------------------------------------------
-  my $class = shift;
-  my $this  = $class->SUPER::new(@_);
-  if (! $this) {
-    return;
-  }
-  $this->{elname} = 'product';
-  return $this;
+    # ...
+    # Create the KIWIXMLPackageProductData object
+    #
+    # Internal data structure
+    #
+    # this = {
+    #    arch        = '' (inherited from KIWIXMLFileData)
+    #    name        = '' (inherited from KIWIXMLFileData)
+    #    elname      = 'product'
+    # }
+    # ---
+    #==========================================
+    # Object setup
+    #------------------------------------------
+    my $class = shift;
+    my $this  = $class->SUPER::new(@_);
+    if (! $this) {
+        return;
+    }
+    $this->{elname} = 'product';
+    return $this;
 }
 
 1;

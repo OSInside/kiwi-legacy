@@ -1,75 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <image schemaversion="5.7" name="suse-11.3-xen-guest">
-  <description type="system">
-    <author>Robert Schweikert</author>
-    <contact>rjschwei@suse.com</contact>
-    <specification>test use of default type</specification>
-  </description>
-  <profiles>
-    <profile name="xenFlavour" description="VMX with Xen kernel" import="true"/>
-    <profile name="vmwFlavor" description="VMX with default kernel"/>
-  </profiles>
-  <preferences>
-    <type primary="true" image="oem" filesystem="ext4" boot="oemboot/suse-11.3" installiso="true" installboot="install">
-      <oemconfig>
-        <oem-reboot>true</oem-reboot>
-        <oem-swap>false</oem-swap>
-        <oem-unattended>true</oem-unattended>
-      </oemconfig>
-    </type>
-    <version>1.1.2</version>
-    <packagemanager>zypper</packagemanager>
-    <rpm-check-signatures>false</rpm-check-signatures>
-    <rpm-force>true</rpm-force>
-    <locale>en_US</locale>
-    <keytable>us.map.gz</keytable>
-  </preferences>
-  <preferences profiles="xenFlavour">
-    <type primary="true" image="vmx" filesystem="ext3" boot="vmxboot/suse-11.3" bootprofile="xen" bootkernel="xenk">
-      <machine memory="128" domain="domU">
-        <vmdisk controller="ide" id="0" device="/dev/xvda"/>
-        <vmnic interface="br0" mac="00:0C:6E:AA:57:2F"/>
-      </machine>
-    </type>
-    <type primary="false" image="oem" filesystem="ext4" boot="oemboot/suse-11.3" installiso="true" installboot="install">
-      <oemconfig>
-        <oem-reboot>true</oem-reboot>
-        <oem-swap>false</oem-swap>
-        <oem-unattended>true</oem-unattended>
-      </oemconfig>
-    </type>
-  </preferences>
-  <preferences profiles="vmwFlavor">
-    <type primary="true" image="vmx" filesystem="ext3" boot="vmxboot/suse-11.3" format="vmdk">
-      <machine memory="128">
-        <vmdisk controller="ide" id="0"/>
-      </machine>
-    </type>
-  </preferences>
-  <users group="root">
-    <user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
-  </users>
-  <repository type="yast2">
-    <source path="/tmp"/>
-  </repository>
-  <packages type="image">
-    <package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>
-    <package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
-    <package name="ifplugd"/>
-    <package name="vim"/>
-    <package name="xen-tools-domU"/>
-    <package name="xen"/>
-    <namedCollection name="base"/>
-  </packages>
-  <packages type="image" profiles="xenFlavour">
-    <package name="kernel-xen" replaces="kernel-default"/>
-  </packages>
-  <packages type="image" profiles="vmwFlavor">
-    <package name="kernel-default" replaces="kernel-xen"/>
-  </packages>
-  <packages type="bootstrap">
-    <package name="filesystem"/>
-    <package name="glibc-locale"/>
-  </packages>
+    <description type="system">
+        <author>Robert Schweikert</author>
+        <contact>rjschwei@suse.com</contact>
+        <specification>test use of default type</specification>
+    </description>
+    <profiles>
+        <profile name="xenFlavour" description="VMX with Xen kernel" import="true"/>
+        <profile name="vmwFlavor" description="VMX with default kernel"/>
+    </profiles>
+    <preferences>
+        <type primary="true" image="oem" filesystem="ext4" boot="oemboot/suse-11.3" installiso="true" installboot="install">
+            <oemconfig>
+                <oem-reboot>true</oem-reboot>
+                <oem-swap>false</oem-swap>
+                <oem-unattended>true</oem-unattended>
+            </oemconfig>
+        </type>
+        <version>1.1.2</version>
+        <packagemanager>zypper</packagemanager>
+        <rpm-check-signatures>false</rpm-check-signatures>
+        <rpm-force>true</rpm-force>
+        <locale>en_US</locale>
+        <keytable>us.map.gz</keytable>
+    </preferences>
+    <preferences profiles="xenFlavour">
+        <type primary="true" image="vmx" filesystem="ext3" boot="vmxboot/suse-11.3" bootprofile="xen" bootkernel="xenk">
+            <machine memory="128" domain="domU">
+                <vmdisk controller="ide" id="0" device="/dev/xvda"/>
+                <vmnic interface="br0" mac="00:0C:6E:AA:57:2F"/>
+            </machine>
+        </type>
+        <type primary="false" image="oem" filesystem="ext4" boot="oemboot/suse-11.3" installiso="true" installboot="install">
+            <oemconfig>
+                <oem-reboot>true</oem-reboot>
+                <oem-swap>false</oem-swap>
+                <oem-unattended>true</oem-unattended>
+            </oemconfig>
+        </type>
+    </preferences>
+    <preferences profiles="vmwFlavor">
+        <type primary="true" image="vmx" filesystem="ext3" boot="vmxboot/suse-11.3" format="vmdk">
+            <machine memory="128">
+                <vmdisk controller="ide" id="0"/>
+            </machine>
+        </type>
+    </preferences>
+    <users group="root">
+        <user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
+    </users>
+    <repository type="yast2">
+        <source path="/tmp"/>
+    </repository>
+    <packages type="image">
+        <package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>
+        <package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
+        <package name="ifplugd"/>
+        <package name="vim"/>
+        <package name="xen-tools-domU"/>
+        <package name="xen"/>
+        <namedCollection name="base"/>
+    </packages>
+    <packages type="image" profiles="xenFlavour">
+        <package name="kernel-xen" replaces="kernel-default"/>
+    </packages>
+    <packages type="image" profiles="vmwFlavor">
+        <package name="kernel-default" replaces="kernel-xen"/>
+    </packages>
+    <packages type="bootstrap">
+        <package name="filesystem"/>
+        <package name="glibc-locale"/>
+    </packages>
 </image>

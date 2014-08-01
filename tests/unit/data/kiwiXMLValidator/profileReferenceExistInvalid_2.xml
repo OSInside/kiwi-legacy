@@ -1,49 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <image schemaversion="5.7" name="suse-11.3-xen-guest">
-  <description type="system">
-    <author>Robert Schweikert</author>
-    <contact>rjschwei@suse.com</contact>
-    <specification>test profile cross references</specification>
-  </description>
-  <preferences>
-    <type primary="true" image="oem" filesystem="ext4" boot="oemboot/suse-11.3" installiso="true" installboot="install">
-      <oemconfig>
-        <oem-reboot>true</oem-reboot>
-        <oem-swap>false</oem-swap>
-        <oem-unattended>true</oem-unattended>
-      </oemconfig>
-    </type>
-    <version>1.1.2</version>
-    <packagemanager>zypper</packagemanager>
-    <rpm-check-signatures>false</rpm-check-signatures>
-    <rpm-force>true</rpm-force>
-    <locale>en_US</locale>
-    <keytable>us.map.gz</keytable>
-  </preferences>
-  <users group="root">
-    <user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
-  </users>
-  <repository type="yast2">
-    <source path="/tmp"/>
-  </repository>
-  <packages type="image" profiles="ola">
-    <package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>
-    <package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
-    <package name="ifplugd"/>
-    <package name="vim"/>
-    <namedCollection name="base"/>
-  </packages>
-  <packages type="image" profiles="xenFlavor">
-    <package name="kernel-xen" replaces="kernel-default"/>
-    <package name="xen-tools-domU"/>
-    <package name="xen"/>
-  </packages>
-  <packages type="image" profiles="vmwFlavor">
-    <package name="kernel-default" replaces="kernel-xen"/>
-  </packages>
-  <packages type="bootstrap">
-    <package name="filesystem"/>
-    <package name="glibc-locale"/>
-  </packages>
+    <description type="system">
+        <author>Robert Schweikert</author>
+        <contact>rjschwei@suse.com</contact>
+        <specification>test profile cross references</specification>
+    </description>
+    <preferences>
+        <type primary="true" image="oem" filesystem="ext4" boot="oemboot/suse-11.3" installiso="true" installboot="install">
+            <oemconfig>
+                <oem-reboot>true</oem-reboot>
+                <oem-swap>false</oem-swap>
+                <oem-unattended>true</oem-unattended>
+            </oemconfig>
+        </type>
+        <version>1.1.2</version>
+        <packagemanager>zypper</packagemanager>
+        <rpm-check-signatures>false</rpm-check-signatures>
+        <rpm-force>true</rpm-force>
+        <locale>en_US</locale>
+        <keytable>us.map.gz</keytable>
+    </preferences>
+    <users group="root">
+        <user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
+    </users>
+    <repository type="yast2">
+        <source path="/tmp"/>
+    </repository>
+    <packages type="image" profiles="ola">
+        <package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>
+        <package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
+        <package name="ifplugd"/>
+        <package name="vim"/>
+        <namedCollection name="base"/>
+    </packages>
+    <packages type="image" profiles="xenFlavor">
+        <package name="kernel-xen" replaces="kernel-default"/>
+        <package name="xen-tools-domU"/>
+        <package name="xen"/>
+    </packages>
+    <packages type="image" profiles="vmwFlavor">
+        <package name="kernel-default" replaces="kernel-xen"/>
+    </packages>
+    <packages type="bootstrap">
+        <package name="filesystem"/>
+        <package name="glibc-locale"/>
+    </packages>
 </image>

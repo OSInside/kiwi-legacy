@@ -30,49 +30,49 @@ sub main {
 # main routine to prepare for all the
 # package and version stuff
 #
-  my $result = GetOptions(
-    "prepare|p"       => \$Prepare,
-    "local|L"         => \$LocalSource,
-    "help|h"          => \&usage,
-    "<>"              => \&usage
-  );
-  if ( $result != 1 ) {
-    usage();
-  }
-  #==============================================
-  # Check user privileges...
-  #----------------------------------------------
-  if (! defined $Prepare) {
-    usage();
-  }
-  #==============================================
-  # Checkout source
-  #----------------------------------------------
-  my $pacdir = checkout ( $LocalSource );
-  #==============================================
-  # Add %changelog
-  #----------------------------------------------
-  if (open (FD,">>$pacdir/kiwi.spec")) {
-    print FD "\n";
-    print FD '%changelog -n kiwi';
-    print FD "\n";
-    convert_changes_to_rpm_changelog ("$pacdir/kiwi.changes",*FD);
-    close FD;
-  }
-  #==============================================
-  # convert spec to utf8
-  #----------------------------------------------
-  qx (iconv -f ISO-8859-1 -t utf8 $pacdir/kiwi.spec > $pacdir/kiwi.spec.new);
-  qx (mv $pacdir/kiwi.spec.new $pacdir/kiwi.spec);
-  qx (iconv -f ISO-8859-1 -t utf8 $pacdir/kiwi.changes > $pacdir/kiwi.c.new);
-  qx (mv $pacdir/kiwi.c.new $pacdir/kiwi.changes);
-  #==============================================
-  # Cleanup
-  #----------------------------------------------
-  my $host = qx (hostname);
-  chomp ($host);
-  print 'Retrieve archive with: ';
-  print '[ scp -r root@'.$host.':'.$pacdir." . ]\n";
+    my $result = GetOptions(
+        "prepare|p"       => \$Prepare,
+        "local|L"         => \$LocalSource,
+        "help|h"          => \&usage,
+        "<>"              => \&usage
+    );
+    if ( $result != 1 ) {
+        usage();
+    }
+    #==============================================
+    # Check user privileges...
+    #----------------------------------------------
+    if (! defined $Prepare) {
+        usage();
+    }
+    #==============================================
+    # Checkout source
+    #----------------------------------------------
+    my $pacdir = checkout ( $LocalSource );
+    #==============================================
+    # Add %changelog
+    #----------------------------------------------
+    if (open (FD,">>$pacdir/kiwi.spec")) {
+        print FD "\n";
+        print FD '%changelog -n kiwi';
+        print FD "\n";
+        convert_changes_to_rpm_changelog ("$pacdir/kiwi.changes",*FD);
+        close FD;
+    }
+    #==============================================
+    # convert spec to utf8
+    #----------------------------------------------
+    qx (iconv -f ISO-8859-1 -t utf8 $pacdir/kiwi.spec > $pacdir/kiwi.spec.new);
+    qx (mv $pacdir/kiwi.spec.new $pacdir/kiwi.spec);
+    qx (iconv -f ISO-8859-1 -t utf8 $pacdir/kiwi.changes > $pacdir/kiwi.c.new);
+    qx (mv $pacdir/kiwi.c.new $pacdir/kiwi.changes);
+    #==============================================
+    # Cleanup
+    #----------------------------------------------
+    my $host = qx (hostname);
+    chomp ($host);
+    print 'Retrieve archive with: ';
+    print '[ scp -r root@'.$host.':'.$pacdir." . ]\n";
 }
 
 #---[ checkout ]-----#
@@ -81,15 +81,15 @@ sub checkout {
 # checkout sources and create a package directory
 # ready to go to /work/src/done
 #
-  my $pacdir = repoup (@_);
-  chdir $pacdir;
-  qx( cp -a -p kiwi/rpm/* . );
-  chdir "./kiwi";
-  qx (./.archive);
-  chdir $pacdir;
-  qx( mv kiwi/*.bz2 . );
-  qx( rm -rf kiwi );
-  return $pacdir;
+    my $pacdir = repoup (@_);
+    chdir $pacdir;
+    qx( cp -a -p kiwi/rpm/* . );
+    chdir "./kiwi";
+    qx (./.archive);
+    chdir $pacdir;
+    qx( mv kiwi/*.bz2 . );
+    qx( rm -rf kiwi );
+    return $pacdir;
 }
 
 #----[ repoup ]----------------#
@@ -99,26 +99,26 @@ sub repoup {
 # tag and return the pathname of the temp directory
 # where the new sources are located
 #
-  #===========================================
-  # create tmp directory and change into it
-  #-------------------------------------------
-  my $parent = qx ( pwd );
-  my $tmpdir = qx (
-    mktemp -q -d /tmp/gitkiwi.XXXXXX
-  );
-  chomp $parent;
-  chomp $tmpdir;
-  chdir $tmpdir
-    || die "Could not create temp dir: $!";
-  #===========================================
-  # pack up local source
-  #-------------------------------------------
-  print "Checkout source level [local]...\n";
-  qx( cp -a -p $parent/ $tmpdir/kiwi );
-  qx ($parent/.lutime $parent $tmpdir);
-  chdir $tmpdir
-    || die "Could not create temp dir: $!";
-  return $tmpdir;
+    #===========================================
+    # create tmp directory and change into it
+    #-------------------------------------------
+    my $parent = qx ( pwd );
+    my $tmpdir = qx (
+        mktemp -q -d /tmp/gitkiwi.XXXXXX
+    );
+    chomp $parent;
+    chomp $tmpdir;
+    chdir $tmpdir
+        || die "Could not create temp dir: $!";
+    #===========================================
+    # pack up local source
+    #-------------------------------------------
+    print "Checkout source level [local]...\n";
+    qx( cp -a -p $parent/ $tmpdir/kiwi );
+    qx ($parent/.lutime $parent $tmpdir);
+    chdir $tmpdir
+        || die "Could not create temp dir: $!";
+    return $tmpdir;
 }
 
 #----[ usage ]------------#
@@ -126,9 +126,9 @@ sub usage {
 #----------------------------------------
 # give me a usage message
 # 
-  print "usage: doit -p --local\n";
-  print "--\n";
-  exit (0);
+    print "usage: doit -p --local\n";
+    print "--\n";
+    exit (0);
 }
 
 #----[ convert_changes_to_rpm_changelog ]------------#
@@ -136,127 +136,127 @@ sub convert_changes_to_rpm_changelog {
 #----------------------------------------
 # convert changes to rpm changelog
 #
-  my $file = shift;
-  local *FD = shift;
-  my @entries = ();
-  my %entries = ();
-  my @datarray= ();
-  my @hourarray=();
-  my $outstr;
-  my $rpm_birth = 852159600;
-  my $rpm_birth_str = "Thu Jan 02 1997";
-  my $actual = 999999999999;
-  my %month_to_num = (Jan=>0,Feb=>1,Mar=>2,Apr=>3,May=>4,Jun=>5,Jul=>6,Aug=>7,Sep=>8,Oct=>9,Nov=>10,Dec=>11);
-  # handle first line in entry specially
-  my $firstline = 0;
-  open (LG,$file);
-  while (<LG>) {
-    chomp ($_);
-    next if (/^--------------/);
-    next if (/^========================/);
-    if (
-      /^[A-Za-z]*\s*[A-Za-z]*\s*[0-9]*\s*[0-9][0-9]:[0-9][0-9].*-.*\@.*/ 
-      || /^[A-Za-z]*\s*[A-Za-z]*\s*[0-9]*\s*[0-9][0-9][0-9][0-9]\s*-.*\@.*/
-    ) {
-      #warn ("found changes style dateline $_\n");
-      if (
-        /^Mon / || /^Tue / || /^Wed / || /^Thu / || /^Fri /
-        || /^Sat / || /^Sun /
-      ) {
-        my @xline = split ( '-', $_);
-        my $datestr = shift ( @xline );
-        my $address = join ('-', @xline);
-        #my ($datestr,$address) = split ( '-', $_);
-        $datestr =~ s/CEST/MEST/;
-        @datarray = split ( ' ',$datestr);
-        if ($datarray[3] =~ /:/) {
-          @hourarray = split ( ':',$datarray[3]);
-        } else {
-          @hourarray = ("00","00","00");
+    my $file = shift;
+    local *FD = shift;
+    my @entries = ();
+    my %entries = ();
+    my @datarray= ();
+    my @hourarray=();
+    my $outstr;
+    my $rpm_birth = 852159600;
+    my $rpm_birth_str = "Thu Jan 02 1997";
+    my $actual = 999999999999;
+    my %month_to_num = (Jan=>0,Feb=>1,Mar=>2,Apr=>3,May=>4,Jun=>5,Jul=>6,Aug=>7,Sep=>8,Oct=>9,Nov=>10,Dec=>11);
+    # handle first line in entry specially
+    my $firstline = 0;
+    open (LG,$file);
+    while (<LG>) {
+        chomp ($_);
+        next if (/^--------------/);
+        next if (/^========================/);
+        if (
+            /^[A-Za-z]*\s*[A-Za-z]*\s*[0-9]*\s*[0-9][0-9]:[0-9][0-9].*-.*\@.*/ 
+            || /^[A-Za-z]*\s*[A-Za-z]*\s*[0-9]*\s*[0-9][0-9][0-9][0-9]\s*-.*\@.*/
+        ) {
+            #warn ("found changes style dateline $_\n");
+            if (
+                /^Mon / || /^Tue / || /^Wed / || /^Thu / || /^Fri /
+                || /^Sat / || /^Sun /
+            ) {
+                my @xline = split ( '-', $_);
+                my $datestr = shift ( @xline );
+                my $address = join ('-', @xline);
+                #my ($datestr,$address) = split ( '-', $_);
+                $datestr =~ s/CEST/MEST/;
+                @datarray = split ( ' ',$datestr);
+                if ($datarray[3] =~ /:/) {
+                    @hourarray = split ( ':',$datarray[3]);
+                } else {
+                    @hourarray = ("00","00","00");
+                }
+                $actual = timelocal ($hourarray[2],$hourarray[1],$hourarray[0],
+                $datarray[2],$month_to_num{$datarray[1]},
+                $datarray[$#datarray]-1900);
+                $address =~ s/^\s*(.*)/\1/;
+                $address =~ s/\s+/ /g;
+                my $datestr;
+                if ( ! $actual ) {
+                    print "INVALID DATESTR=\"$datestr\" !!!";
+                    print "$actual Skipping rest...";
+                    exit 1;
+                }
+                if ( $actual < $rpm_birth ) {
+                    $datestr = $rpm_birth_str;
+                } else {
+                    my $ltime = localtime $actual;
+                    $datestr = sprintf("%s %s %02d %4d",
+                    (qw(Sun Mon Tue Wed Thu Fri Sat Sun))[$ltime->wday],
+                    (qw(Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec))[$ltime->mon],
+                    $ltime->mday,1900+$ltime->year);
+                }
+                chomp ($datestr);
+                $outstr = "$datestr - $address";
+                if ( $entries{$actual} =~ /$outstr/ ) {
+                    # nope
+                } else {
+                    $entries{$actual} .= "* $outstr\n";
+                }
+                $firstline = 1;
+                next;
+            } else {
+                warn ("$_ is not in english locale\n");
+                $actual = timelocal ( 0,0,0,1,0,100); # Jan 1st 2000
+                $entries{$actual} .= "* Tue Jan 01 2000 - nobody\@suse.de\n" unless ( $entries{$actual} =~ /$outstr/ );
+            }
         }
-        $actual = timelocal ($hourarray[2],$hourarray[1],$hourarray[0],
-        $datarray[2],$month_to_num{$datarray[1]},
-        $datarray[$#datarray]-1900);
-        $address =~ s/^\s*(.*)/\1/;
-        $address =~ s/\s+/ /g;
-        my $datestr;
-        if ( ! $actual ) {
-          print "INVALID DATESTR=\"$datestr\" !!!";
-          print "$actual Skipping rest...";
-          exit 1;
+        if (
+            /^\* Mon / || /^\* Tue / || /^\* Wed / || /^\* Thu / ||
+            /^\* Fri / || /^\* Sat / || /^\* Sun /
+        ) {
+            my ($datestr,$address) = split ( '-', $_);
+            @datarray = split ( ' ',$datestr);
+            $actual = timelocal(0,0,0,$datarray[3],$month_to_num{$datarray[2]},
+            $datarray[$#datarray]-1900);
+            $address =~ s/^\s*(.*)/\1/;
+            $address =~ s/\s+/ /g;
+            if ( ! $actual ) {
+                print "INVALID DATESTR=\"$datestr\" !!!";
+                print "$actual Skipping rest...";
+                exit 1;
+            }
+            $entries{$actual} .= "$_\n";
+            $firstline = 1;
+            next;
         }
-        if ( $actual < $rpm_birth ) {
-          $datestr = $rpm_birth_str;
-        } else {
-          my $ltime = localtime $actual;
-          $datestr = sprintf("%s %s %02d %4d",
-          (qw(Sun Mon Tue Wed Thu Fri Sat Sun))[$ltime->wday],
-          (qw(Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec))[$ltime->mon],
-          $ltime->mday,1900+$ltime->year);
+        $_ =~ s/([^%])%([^%])/\1%%\2/g;
+        if (/^-/ || /^\s*-/) {
+            $_ =~ s/^\s*(\S*)/\1/ if($firstline);
+            $_ =~ s/(\S*)\s*$/\1/;
+            $entries{$actual} .= "$_\n";
+            $firstline = 0;
+            next;
         }
-        chomp ($datestr);
-        $outstr = "$datestr - $address";
-        if ( $entries{$actual} =~ /$outstr/ ) {
-          # nope
-        } else {
-          $entries{$actual} .= "* $outstr\n";
+        if (/^\s*\#/) {
+            # hash is comment, try to escape
+            s/^(\s*)(\#\d*)/$1\[$2\]/;
         }
-        $firstline = 1;
-        next;
-      } else {
-        warn ("$_ is not in english locale\n");
-        $actual = timelocal ( 0,0,0,1,0,100); # Jan 1st 2000
-        $entries{$actual} .= "* Tue Jan 01 2000 - nobody\@suse.de\n" unless ( $entries{$actual} =~ /$outstr/ );
-      }
+        if (/\S/) {
+            $_ =~ s/^\s*(\S*)/\1/;
+            $_ =~ s/(\S*)\s*$/\1/;
+            $entries{$actual} .= "  $_\n";
+            $firstline = 0;
+        }
     }
-    if (
-      /^\* Mon / || /^\* Tue / || /^\* Wed / || /^\* Thu / ||
-      /^\* Fri / || /^\* Sat / || /^\* Sun /
-    ) {
-      my ($datestr,$address) = split ( '-', $_);
-      @datarray = split ( ' ',$datestr);
-      $actual = timelocal(0,0,0,$datarray[3],$month_to_num{$datarray[2]},
-      $datarray[$#datarray]-1900);
-      $address =~ s/^\s*(.*)/\1/;
-      $address =~ s/\s+/ /g;
-      if ( ! $actual ) {
-        print "INVALID DATESTR=\"$datestr\" !!!";
-        print "$actual Skipping rest...";
-        exit 1;
-      }
-      $entries{$actual} .= "$_\n";
-      $firstline = 1;
-      next;
+    my $first = "1";
+    foreach my $key (sort {0+$b <=> 0+$a} (keys %entries)) {
+        if ( $first eq "1" && $entries{$key} !~ /^\*/ ) {
+            my $dst = `date`;
+            chomp ($dst);
+            print "* $dst - broken\@suse.de\n";
+        }
+        $first = "0";
+        print FD "$entries{$key}";
     }
-    $_ =~ s/([^%])%([^%])/\1%%\2/g;
-    if (/^-/ || /^\s*-/) {
-      $_ =~ s/^\s*(\S*)/\1/ if($firstline);
-      $_ =~ s/(\S*)\s*$/\1/;
-      $entries{$actual} .= "$_\n";
-      $firstline = 0;
-      next;
-    }
-    if (/^\s*\#/) {
-      # hash is comment, try to escape
-      s/^(\s*)(\#\d*)/$1\[$2\]/;
-    }
-    if (/\S/) {
-      $_ =~ s/^\s*(\S*)/\1/;
-      $_ =~ s/(\S*)\s*$/\1/;
-      $entries{$actual} .= "  $_\n";
-      $firstline = 0;
-    }
-  }
-  my $first = "1";
-  foreach my $key (sort {0+$b <=> 0+$a} (keys %entries)) {
-    if ( $first eq "1" && $entries{$key} !~ /^\*/ ) {
-      my $dst = `date`;
-      chomp ($dst);
-      print "* $dst - broken\@suse.de\n";
-    }
-    $first = "0";
-    print FD "$entries{$key}";
-  }
 }
 
 main();

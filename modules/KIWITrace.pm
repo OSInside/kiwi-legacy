@@ -34,22 +34,22 @@ use base qw /Class::Singleton/;
 # One time initialization code
 #------------------------------------------
 sub _new_instance {
-  # ...
-  # Construct a KIWITrace object.
-  # ---
-  #==========================================
-  # Object setup
-  #------------------------------------------
-  my $this  = {};
-  my $class = shift;
-  bless $this,$class;
-  #==========================================
-  # Globals (call trace)
-  #------------------------------------------
-  $this->{TT} = "Trace Level ";
-  $this->{TL} = 1;
-  $this->{BT} = [];
-  return $this;
+    # ...
+    # Construct a KIWITrace object.
+    # ---
+    #==========================================
+    # Object setup
+    #------------------------------------------
+    my $this  = {};
+    my $class = shift;
+    bless $this,$class;
+    #==========================================
+    # Globals (call trace)
+    #------------------------------------------
+    $this->{TT} = "Trace Level ";
+    $this->{TL} = 1;
+    $this->{BT} = [];
+    return $this;
 }
 
 1;

@@ -1,41 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <image schemaversion="5.7" name="testCase-preference-settings" displayname="testcase" id="3030150">
-  <description type="system">
-    <author>Robert Schweikert</author>
-    <contact>rjschwei@suse.com</contact>
-    <specification>Test configuration to verify preferences settings and image attributes are stored and returned properly in the XML object</specification>
-  </description>
-  <preferences>
-    <bootsplash-theme>bluestar</bootsplash-theme>
-    <bootloader-theme>silverlining</bootloader-theme>
-    <defaultdestination>/work/tmp</defaultdestination>
-    <defaultprebuilt>/work/kiwibootimgs</defaultprebuilt>
-    <defaultroot>/var/tmp</defaultroot>
-    <type image="vmx" filesystem="ext4" boot="vmxboot/suse-12.1">
-      <size unit="G">20</size>
-    </type>
-    <rpm-check-signatures>true</rpm-check-signatures>
-    <rpm-excludedocs>true</rpm-excludedocs>
-    <rpm-force>true</rpm-force>
-    <showlicense>/opt/myApp/lic.txt</showlicense>
-    <showlicense>/opt/myApp/thirdParty/appA/lic.txt</showlicense>
-    <locale>en_US</locale>
-    <keytable>us.map.gz</keytable>
-    <version>13.20.26</version>
-  </preferences>
-  <users group="root">
-    <user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
-  </users>
-  <repository type="yast2">
-    <source path="/tmp"/>
-  </repository>
-  <packages type="image">
-    <package name="kernel-default"/>
-    <namedCollection name="base"/>
-  </packages>
-  <packages type="bootstrap">
-    <package name="filesystem"/>
-    <package name="glibc-locale"/>
-  </packages>
+    <description type="system">
+        <author>Robert Schweikert</author>
+        <contact>rjschwei@suse.com</contact>
+        <specification>Test configuration to verify preferences settings and image attributes are stored and returned properly in the XML object</specification>
+    </description>
+    <preferences>
+        <bootsplash-theme>bluestar</bootsplash-theme>
+        <bootloader-theme>silverlining</bootloader-theme>
+        <defaultdestination>/work/tmp</defaultdestination>
+        <defaultprebuilt>/work/kiwibootimgs</defaultprebuilt>
+        <defaultroot>/var/tmp</defaultroot>
+        <type image="vmx" filesystem="ext4" boot="vmxboot/suse-12.1">
+            <size unit="G">20</size>
+        </type>
+        <rpm-check-signatures>true</rpm-check-signatures>
+        <rpm-excludedocs>true</rpm-excludedocs>
+        <rpm-force>true</rpm-force>
+        <showlicense>/opt/myApp/lic.txt</showlicense>
+        <showlicense>/opt/myApp/thirdParty/appA/lic.txt</showlicense>
+        <locale>en_US</locale>
+        <keytable>us.map.gz</keytable>
+        <version>13.20.26</version>
+    </preferences>
+    <users group="root">
+        <user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
+    </users>
+    <repository type="yast2">
+        <source path="/tmp"/>
+    </repository>
+    <packages type="image">
+        <package name="kernel-default"/>
+        <namedCollection name="base"/>
+    </packages>
+    <packages type="bootstrap">
+        <package name="filesystem"/>
+        <package name="glibc-locale"/>
+    </packages>
 </image>

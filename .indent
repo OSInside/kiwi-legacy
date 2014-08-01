@@ -1,8 +1,15 @@
 #!/bin/bash
-for file in $(find -type f | grep -v Makefile | grep -v .git | grep -v refresults | grep -v kiwiTestRepo ); do
-  mode=$(stat -c %a $file)
-  expand -t 4 $file > $file.tmp && mv $file.tmp $file
-  chmod $mode $file
+for file in $(find -type f |\
+    grep -v Makefile |\
+    grep -v .git |\
+    grep -v refresults |\
+    grep -v kiwiTestRepo |\
+    grep -v .indent
+); do
+    mode=$(stat -c %a $file)
+    unexpand --first-only -t 2 $file > $file.tmp && \
+        expand -t 4 $file.tmp > $file
+    chmod $mode $file
 done
 rm modules/KIWISchema.rng
 make modules/KIWISchema.rng

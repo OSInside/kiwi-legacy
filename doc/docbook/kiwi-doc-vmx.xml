@@ -1,201 +1,201 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
-                         "http://www.docbook.org/xml/4.5/docbookx.dtd">
+                                                 "http://www.docbook.org/xml/4.5/docbookx.dtd">
 
 <chapter id="chap.vmx">
-  <title>VMX Image—Virtual Disks</title>
-  <indexterm>
-    <primary>KIWI</primary>
-    <secondary>VMX image</secondary>
-  </indexterm>
-  <indexterm>
-    <primary>images</primary>
-    <secondary>VMX</secondary>
-  </indexterm>
-  <indexterm>
-    <primary>VMX images</primary>
-  </indexterm>
-  <para>A VMX image is a virtual disk image for use in full
-    virtualization systems like Qemu or VMware. The image is a file
-    containing the system represented by the configured packages in
-    <filename>config.xml</filename> as well as partition data and bootloader
-    information. The size of this virtual disk can be specified by using the size element
-    in the <filename>config.xml</filename> file or by adding the
-      <option>--bootvm-disksize</option> command line argument. </para>
-  
-  <sect1 id="sec.vmx.building">
-    <title>Building the suse-vm-guest Example</title>
-    <para> The vm-guest example provided with KIWI is based on recent
-      openSUSE releases, one example configuration per release. The
-      example uses base pattern and the virtual disk is formatted using
-      the distribution default filesystem. </para>
+    <title>VMX Image—Virtual Disks</title>
+    <indexterm>
+        <primary>KIWI</primary>
+        <secondary>VMX image</secondary>
+    </indexterm>
+    <indexterm>
+        <primary>images</primary>
+        <secondary>VMX</secondary>
+    </indexterm>
+    <indexterm>
+        <primary>VMX images</primary>
+    </indexterm>
+    <para>A VMX image is a virtual disk image for use in full
+        virtualization systems like Qemu or VMware. The image is a file
+        containing the system represented by the configured packages in
+        <filename>config.xml</filename> as well as partition data and bootloader
+        information. The size of this virtual disk can be specified by using the size element
+        in the <filename>config.xml</filename> file or by adding the
+            <option>--bootvm-disksize</option> command line argument. </para>
+    
+    <sect1 id="sec.vmx.building">
+        <title>Building the suse-vm-guest Example</title>
+        <para> The vm-guest example provided with KIWI is based on recent
+            openSUSE releases, one example configuration per release. The
+            example uses base pattern and the virtual disk is formatted using
+            the distribution default filesystem. </para>
 
-    <screen><command>cd</command> /usr/share/doc/packages/kiwi/examples 
+        <screen><command>cd</command> /usr/share/doc/packages/kiwi/examples 
 <command>cd</command> suse-...
 <command>kiwi</command> --prepare ./suse-vm-guest --root /tmp/myvm </screen>
 
-    <screen><command>kiwi</command> --create /tmp/myvm --type vmx -d /tmp/myvm-result</screen>
-  </sect1>
+        <screen><command>kiwi</command> --create /tmp/myvm --type vmx -d /tmp/myvm-result</screen>
+    </sect1>
 
-  <sect1 id="sec.vmx.using">
-    <title>Using the Image</title>
-    <para>The generated virtual disk image serves as the hard disk of
-      the selected virtualization system (QEMU, VMware, etc.). The
-      virtual hard disk format differs across virtualization
-      environments. Some virtualization environments support multiple
-      virtual disk formats. Using the QEMU virtualization environment
-      test the created image with the following command: </para>
+    <sect1 id="sec.vmx.using">
+        <title>Using the Image</title>
+        <para>The generated virtual disk image serves as the hard disk of
+            the selected virtualization system (QEMU, VMware, etc.). The
+            virtual hard disk format differs across virtualization
+            environments. Some virtualization environments support multiple
+            virtual disk formats. Using the QEMU virtualization environment
+            test the created image with the following command: </para>
 
-    <screen><command>cd</command> /tmp/myvm-result 
+        <screen><command>cd</command> /tmp/myvm-result 
 <command>qemu</command> suse-##.#-vm-guest.i686-1.1.2.raw -m 256 </screen>
-  </sect1>
-  
-  <sect1 id="sec.vmx.flavours">
-    <title>Flavours</title>
-    <para>KIWI always generates a file in the <filename
-        class="extension">.raw</filename> format. The .raw file is a
-      disk image with a structure equivalent to the structure of a
-      physical hard disk. Individual virtualization systems have
-      specific formats to facilitate improved I/O performance to the
-      virtual disk, represented by the image file, or additional
-      specified virtual hard disk files. KIWI will generate a specific
-      format when the format attribute of the type element is added. </para>
+    </sect1>
+    
+    <sect1 id="sec.vmx.flavours">
+        <title>Flavours</title>
+        <para>KIWI always generates a file in the <filename
+                class="extension">.raw</filename> format. The .raw file is a
+            disk image with a structure equivalent to the structure of a
+            physical hard disk. Individual virtualization systems have
+            specific formats to facilitate improved I/O performance to the
+            virtual disk, represented by the image file, or additional
+            specified virtual hard disk files. KIWI will generate a specific
+            format when the format attribute of the type element is added. </para>
 
-    <screen>&lt;type image="vmx"... format="name"/&gt;</screen>
+        <screen>&lt;type image="vmx"... format="name"/&gt;</screen>
 
-    <para>The following table lists the supported virtual disk
-      formats:</para>
+        <para>The following table lists the supported virtual disk
+            formats:</para>
 
-    <table id="tab.vmx.supported-disk-formats">
-      <title>Supported Virtual Disk Formats</title>
-      <indexterm>
-        <primary>KIWI</primary>
-        <secondary>virtual disk formats</secondary>
-      </indexterm>
-      <indexterm>
-        <primary>virtual disk formats</primary>
-      </indexterm>
-      <tgroup cols="2">
-        <colspec colwidth="1*"/>
-        <colspec colwidth="3*"/>
-        <thead>
-          <row>
-            <entry>Name</entry>
-            <entry>Description</entry>
-          </row>
-        </thead>
-        <tbody>
-          <row>
-            <entry>vmdk</entry>
-            <entry>Disk format for VMware</entry>
-          </row>
-          <row>
-            <entry>vhd</entry>
-            <entry>Disk format for Microsoft HyperV</entry>
-          </row>
-          <row>
-            <entry>ovf</entry>
-            <entry>Open Virtual Format requires VMware's ovftool</entry>
-          </row>
-          <row>
-            <entry>qcow2</entry>
-            <entry>QEMU virtual disk format</entry>
-          </row>
-        </tbody>
-      </tgroup>      
-    </table>
+        <table id="tab.vmx.supported-disk-formats">
+            <title>Supported Virtual Disk Formats</title>
+            <indexterm>
+                <primary>KIWI</primary>
+                <secondary>virtual disk formats</secondary>
+            </indexterm>
+            <indexterm>
+                <primary>virtual disk formats</primary>
+            </indexterm>
+            <tgroup cols="2">
+                <colspec colwidth="1*"/>
+                <colspec colwidth="3*"/>
+                <thead>
+                    <row>
+                        <entry>Name</entry>
+                        <entry>Description</entry>
+                    </row>
+                </thead>
+                <tbody>
+                    <row>
+                        <entry>vmdk</entry>
+                        <entry>Disk format for VMware</entry>
+                    </row>
+                    <row>
+                        <entry>vhd</entry>
+                        <entry>Disk format for Microsoft HyperV</entry>
+                    </row>
+                    <row>
+                        <entry>ovf</entry>
+                        <entry>Open Virtual Format requires VMware's ovftool</entry>
+                    </row>
+                    <row>
+                        <entry>qcow2</entry>
+                        <entry>QEMU virtual disk format</entry>
+                    </row>
+                </tbody>
+            </tgroup>      
+        </table>
 
-    <sect2 id="sec.vmx.vmware-support">
-      <title>VMware support</title>
-      <indexterm>
-        <primary>KIWI</primary>
-        <secondary>VMware</secondary>
-      </indexterm>
-      <indexterm>
-        <primary>VMware</primary>
-      </indexterm>
-      <para>A VMware image is accompanied by a guest configuration file.
-        This file includes information about the hardware to be
-        represented to the guest image by the VMware virtualization
-        environment as well as specification of resources such as
-        memory. </para>
+        <sect2 id="sec.vmx.vmware-support">
+            <title>VMware support</title>
+            <indexterm>
+                <primary>KIWI</primary>
+                <secondary>VMware</secondary>
+            </indexterm>
+            <indexterm>
+                <primary>VMware</primary>
+            </indexterm>
+            <para>A VMware image is accompanied by a guest configuration file.
+                This file includes information about the hardware to be
+                represented to the guest image by the VMware virtualization
+                environment as well as specification of resources such as
+                memory. </para>
 
-      <para>Within the <filename>config.xml</filename> file it is
-        possible to specify the VMware configuration settings. In
-        addition it is possible to include selected packages in the
-        created image that are specific to the VM image generation. The
-        following <filename>config.xml</filename> snippet provides
-        general guidance on the elements in
-          <filename>config.xml</filename>. </para>
+            <para>Within the <filename>config.xml</filename> file it is
+                possible to specify the VMware configuration settings. In
+                addition it is possible to include selected packages in the
+                created image that are specific to the VM image generation. The
+                following <filename>config.xml</filename> snippet provides
+                general guidance on the elements in
+                    <filename>config.xml</filename>. </para>
 
-      <screen>&lt;packages type="vmx"&gt; 
-   <sgmltag class="sgmlcomment"> packages you need in VMware only </sgmltag>
+            <screen>&lt;packages type="vmx"&gt; 
+     <sgmltag class="sgmlcomment"> packages you need in VMware only </sgmltag>
 &lt;/packages&gt; 
 &lt;type......&gt;
-  &lt;machine memory="512"&gt; 
-    &lt;vmdisk controller="ide" id="0"/&gt; 
-  &lt;/machine&gt; 
+    &lt;machine memory="512"&gt; 
+        &lt;vmdisk controller="ide" id="0"/&gt; 
+    &lt;/machine&gt; 
 &lt;/type&gt;</screen>
 
-      <para>Given the specification above KIWI will create a VMware
-        guest configuration specifying the availability of 512&nbsp;MB
-        of RAM and an IDE disk controller interface for the VM guest.
-        For additional information about the configuration settings
-        please refer to the <emphasis>machine</emphasis> section. </para>
+            <para>Given the specification above KIWI will create a VMware
+                guest configuration specifying the availability of 512&nbsp;MB
+                of RAM and an IDE disk controller interface for the VM guest.
+                For additional information about the configuration settings
+                please refer to the <emphasis>machine</emphasis> section. </para>
 
-      <para>The guest configuration can be loaded through VMware user
-        interface and may be modified through the GUI. The configuration
-        file has the <filename class="extension">.vmx</filename>
-        extension as shown in the example below. </para>
+            <para>The guest configuration can be loaded through VMware user
+                interface and may be modified through the GUI. The configuration
+                file has the <filename class="extension">.vmx</filename>
+                extension as shown in the example below. </para>
 
-      <screen>/tmp/myvm-result/suse-##.#-vm-guest.i686-1.1.2.vmx</screen>
+            <screen>/tmp/myvm-result/suse-##.#-vm-guest.i686-1.1.2.vmx</screen>
 
-      <para>Using the <sgmltag class="attribute"
-          >format</sgmltag>="<sgmltag class="attvalue">vmdk</sgmltag>"
-        attribute of the <sgmltag class="starttag">type</sgmltag> start
-        tag will create the VMware formatted disk image (<filename
-          class="extension">.vmdk</filename> file) and the required
-        VMware guest configuration (<filename class="extension"
-          >.vmx</filename>) file. </para>
+            <para>Using the <sgmltag class="attribute"
+                    >format</sgmltag>="<sgmltag class="attvalue">vmdk</sgmltag>"
+                attribute of the <sgmltag class="starttag">type</sgmltag> start
+                tag will create the VMware formatted disk image (<filename
+                    class="extension">.vmdk</filename> file) and the required
+                VMware guest configuration (<filename class="extension"
+                    >.vmx</filename>) file. </para>
 
-      <para>In addition it is possible to create an image for the Xen
-        virtualization framework. By adding the <sgmltag
-          class="attribute">bootprofile</sgmltag> and <sgmltag
-          class="attribute">bootkernel</sgmltag> attributes to the
-          <sgmltag class="starttag">type</sgmltag> start tag with values
-        of <sgmltag class="attvalue">xen</sgmltag> and <sgmltag
-          class="attvalue">xenboot</sgmltag>, respectively. Please refer
-        to the <xref linkend="chap.xen"/> for additional details.</para>
-    </sect2>
+            <para>In addition it is possible to create an image for the Xen
+                virtualization framework. By adding the <sgmltag
+                    class="attribute">bootprofile</sgmltag> and <sgmltag
+                    class="attribute">bootkernel</sgmltag> attributes to the
+                    <sgmltag class="starttag">type</sgmltag> start tag with values
+                of <sgmltag class="attvalue">xen</sgmltag> and <sgmltag
+                    class="attvalue">xenboot</sgmltag>, respectively. Please refer
+                to the <xref linkend="chap.xen"/> for additional details.</para>
+        </sect2>
 
-    <sect2 id="sec.vmx.lvm">
-      <title>LVM Support</title>
-      <indexterm>
-        <primary>KIWI</primary>
-        <secondary>LVM support</secondary>
-      </indexterm>
-      <para>KIWI also provides support for LVM (Logical Volume
-        Management). In this mode the disk partition table will include
-        one lvm partition and one standard <systemitem
-          class="filesystem">ext2</systemitem> boot partition. KIWI
-        creates the kiwiVG volume group and adds logical volumes as they
-        are needed and configured according to the image type and
-        filesystem. After boot of the system the user has full control
-        over the volume group and is free to change/resize/increase the
-        group and the volumes inside. Support for LVM has been added for
-        all image types which are disk based. This includes vmx, oem and
-        usb. In order to use LVM for the vmx type just add the
-          <option>--lvm</option> option as part of the KIWI create step
-        or add the attribute lvm="true" as part of the type section in
-        your <filename>config.xml</filename> file. </para>
+        <sect2 id="sec.vmx.lvm">
+            <title>LVM Support</title>
+            <indexterm>
+                <primary>KIWI</primary>
+                <secondary>LVM support</secondary>
+            </indexterm>
+            <para>KIWI also provides support for LVM (Logical Volume
+                Management). In this mode the disk partition table will include
+                one lvm partition and one standard <systemitem
+                    class="filesystem">ext2</systemitem> boot partition. KIWI
+                creates the kiwiVG volume group and adds logical volumes as they
+                are needed and configured according to the image type and
+                filesystem. After boot of the system the user has full control
+                over the volume group and is free to change/resize/increase the
+                group and the volumes inside. Support for LVM has been added for
+                all image types which are disk based. This includes vmx, oem and
+                usb. In order to use LVM for the vmx type just add the
+                    <option>--lvm</option> option as part of the KIWI create step
+                or add the attribute lvm="true" as part of the type section in
+                your <filename>config.xml</filename> file. </para>
 
-      <screen><command>kiwi</command> --create /tmp/myvm --type vmx<!--
-       --> -d /tmp/myvm-result --lvm </screen>
+            <screen><command>kiwi</command> --create /tmp/myvm --type vmx<!--
+             --> -d /tmp/myvm-result --lvm </screen>
 
-      <para>With the optional systemdisk section you can set one or more
-        top level directories into a separate volume. See <xref
-          linkend="chap.description"/> for a detailed explanation.
-      </para>
-    </sect2>
-  </sect1>
+            <para>With the optional systemdisk section you can set one or more
+                top level directories into a separate volume. See <xref
+                    linkend="chap.description"/> for a detailed explanation.
+            </para>
+        </sect2>
+    </sect1>
 </chapter>

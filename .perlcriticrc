@@ -2,4 +2,4 @@
 [-NamingConventions::Capitalization]
 [-InputOutput::RequireBriefOpen]
 [Subroutines::ProhibitUnusedPrivateSubroutines]
-    allow = _new_instance
+        allow = _new_instance

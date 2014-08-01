@@ -35,76 +35,76 @@ our @EXPORT_OK = qw ();
 # Constructor
 #------------------------------------------
 sub new {
-  # ...
-  # Create the KIWIXMLProductMetaFileData object
-  # ---
-  #==========================================
-  # Object setup
-  #------------------------------------------
-  my $class = shift;
-  my $this  = $class->SUPER::new(@_);
-  #==========================================
-  # Module Parameters
-  #------------------------------------------
-  my $init  = shift;
-  #==========================================
-  # Argument checking and object data store
-  #------------------------------------------
-  if (! $this -> p_hasInitArg($init) ) {
-    return;
-  }
-  my %keywords = map { ($_ => 1) } qw(
-      script
-    target
-    url
-  );
-  $this->{supportedKeywords} = \%keywords;
-  if (! $this -> p_isInitHashRef($init) ) {
-    return;
-  }
-  if (! $this -> p_areKeywordArgsValid($init) ) {
-    return;
-  }
-  if (! $this -> __isInitConsistent($init)) {
-    return;
-  }
-  $this->{script} = $init->{script};
-  $this->{target} = $init->{target};
-  $this->{url}    = $init->{url};
-  return $this;
+    # ...
+    # Create the KIWIXMLProductMetaFileData object
+    # ---
+    #==========================================
+    # Object setup
+    #------------------------------------------
+    my $class = shift;
+    my $this  = $class->SUPER::new(@_);
+    #==========================================
+    # Module Parameters
+    #------------------------------------------
+    my $init  = shift;
+    #==========================================
+    # Argument checking and object data store
+    #------------------------------------------
+    if (! $this -> p_hasInitArg($init) ) {
+        return;
+    }
+    my %keywords = map { ($_ => 1) } qw(
+            script
+        target
+        url
+    );
+    $this->{supportedKeywords} = \%keywords;
+    if (! $this -> p_isInitHashRef($init) ) {
+        return;
+    }
+    if (! $this -> p_areKeywordArgsValid($init) ) {
+        return;
+    }
+    if (! $this -> __isInitConsistent($init)) {
+        return;
+    }
+    $this->{script} = $init->{script};
+    $this->{target} = $init->{target};
+    $this->{url}    = $init->{url};
+    return $this;
 }
 
 #==========================================
 # getScript
 #------------------------------------------
 sub getScript {
-  # ...
-  # Return the configured script
-  # ---
-  my $this = shift;
-  return $this->{script};
+    # ...
+    # Return the configured script
+    # ---
+    my $this = shift;
+    return $this->{script};
 }
 
 #==========================================
 # getTarget
 #------------------------------------------
 sub getTarget {
-  # ...
-  # Return the configured target
-  # ---
-  my $this = shift;
-  return $this->{target};
+    # ...
+    # Return the configured target
+    # ---
+    my $this = shift;
+    return $this->{target};
 }
 
 #==========================================
 # getURL
 #------------------------------------------
 sub getURL {
-  # ...
-  # Return the configured url
-  # ---
-  my $this = shift;
-  return $this->{url};
+    # ...
+    # Return the configured url
+    # ---
+    my $this = shift;
+    return $this->{url};
 }
 
 #==========================================
@@ -114,34 +114,34 @@ sub getURL {
 # __isInitConsistent
 #------------------------------------------
 sub __isInitConsistent {
-  # ...
-  # Verify that the initialization hash is valid
-  # ---
-  my $this = shift;
-  my $init = shift;
-  my $kiwi = $this->{kiwi};
-  if (! $init->{script} ) {
-    my $msg = 'KIWIXMLProductMetaFileData: no "script" specified in '
-      . 'initialization structure.';
-    $kiwi -> error($msg);
-    $kiwi -> failed();
-    return;
-  }
-  if (! $init->{target} ) {
-    my $msg = 'KIWIXMLProductMetaFileData: no "target" specified in '
-      . 'initialization structure.';
-    $kiwi -> error($msg);
-    $kiwi -> failed();
-    return;
-  }
-  if (! $init->{url} ) {
-    my $msg = 'KIWIXMLProductMetaFileData: no "url" specified in '
-      . 'initialization structure.';
-    $kiwi -> error($msg);
-    $kiwi -> failed();
-    return;
-  }
-  return 1;
+    # ...
+    # Verify that the initialization hash is valid
+    # ---
+    my $this = shift;
+    my $init = shift;
+    my $kiwi = $this->{kiwi};
+    if (! $init->{script} ) {
+        my $msg = 'KIWIXMLProductMetaFileData: no "script" specified in '
+            . 'initialization structure.';
+        $kiwi -> error($msg);
+        $kiwi -> failed();
+        return;
+    }
+    if (! $init->{target} ) {
+        my $msg = 'KIWIXMLProductMetaFileData: no "target" specified in '
+            . 'initialization structure.';
+        $kiwi -> error($msg);
+        $kiwi -> failed();
+        return;
+    }
+    if (! $init->{url} ) {
+        my $msg = 'KIWIXMLProductMetaFileData: no "url" specified in '
+            . 'initialization structure.';
+        $kiwi -> error($msg);
+        $kiwi -> failed();
+        return;
+    }
+    return 1;
 }
 
 1;

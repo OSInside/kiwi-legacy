@@ -29,7 +29,7 @@ Echo "Calling pre-init stage in system image"
 # 2) check for LOCAL_BOOT
 #--------------------------------------
 if [ $LOCAL_BOOT = "yes" ];then
-  exit 0
+    exit 0
 fi
 
 #======================================
@@ -47,86 +47,86 @@ updateMTAB
 # 5) create framebuffer devices
 #--------------------------------------
 if [ "$systemIntegrity" = "clean" ];then
-  createFramebufferDevices
+    createFramebufferDevices
 fi
 
 #======================================
 # 6) create initrd on diskful
 #--------------------------------------
 if  [ ! -z "$imageDiskDevice" ]      && \
-  [ "$systemIntegrity" = "clean" ] && \
-  [ -z "$NETBOOT_ONLY" ]
+    [ "$systemIntegrity" = "clean" ] && \
+    [ -z "$NETBOOT_ONLY" ]
 then
-  if [ -z "$UNIONFS_CONFIG" ] && [ -z "$COMBINED_IMAGE" ];then
-    #======================================
-    # use distro initrd tool
-    #--------------------------------------
-    setupInitrd
-  else
-    #======================================
-    # use kiwi initrd downloaded before
-    #--------------------------------------
-    bootLoaderOK=1
-  fi
+    if [ -z "$UNIONFS_CONFIG" ] && [ -z "$COMBINED_IMAGE" ];then
+        #======================================
+        # use distro initrd tool
+        #--------------------------------------
+        setupInitrd
+    else
+        #======================================
+        # use kiwi initrd downloaded before
+        #--------------------------------------
+        bootLoaderOK=1
+    fi
 fi
 
 #======================================
 # 7) Install boot loader on diskful
 #--------------------------------------
 if [ "$bootLoaderOK" = 1 ] && [ -z "$DO_NOT_INSTALL_BOOTLOADER" ]; then
-  installBootLoader
+    installBootLoader
 fi
 
 #======================================
 # 8) create /etc/ImagePackages
 #--------------------------------------
 if [ "$systemIntegrity" = "clean" ];then
-  if [ -x /bin/rpm ];then
-    Echo "Creating initial image package info file"
-    rpm -qa --last > /etc/ImagePackages
-  fi
+    if [ -x /bin/rpm ];then
+        Echo "Creating initial image package info file"
+        rpm -qa --last > /etc/ImagePackages
+    fi
 fi
 
 #======================================
 # 9) check for valid mount points
 #--------------------------------------
 if [ ! -z "$imageDiskDevice" ] && [ "$systemIntegrity" = "clean" ];then
-  IFS=":" ; for i in $PART_MOUNT;do
-  if [ ! -z "$i" ] && [ ! -e "$i" ] && [ ! "$i" = "x" ];then
-    mkdir -p $i
-  fi
-  done
+    IFS=":" ; for i in $PART_MOUNT;do
+    if [ ! -z "$i" ] && [ ! -e "$i" ] && [ ! "$i" = "x" ];then
+        mkdir -p $i
+    fi
+    done
 fi
 
 #======================================
 # 10) Update /etc/ImageVersion files
 #--------------------------------------
 if [ ! -z "$imageDiskDevice" ] && [ "$systemIntegrity" = "clean" ];then
-  count=0
-  IFS="," ; for i in $IMAGE;do
-    count=$(($count + 1))
-    field=0
-    IFS=";" ; for n in $i;do
-    case $field in
-      0) field=1 ;;
-      1) imageName=$n   ; field=2 ;;
-      2) imageVersion=$n; field=3
-    esac
+    count=0
+    IFS="," ; for i in $IMAGE;do
+        count=$(($count + 1))
+        field=0
+        IFS=";" ; for n in $i;do
+        case $field in
+            0) field=1 ;;
+            1) imageName=$n   ; field=2 ;;
+            2) imageVersion=$n; field=3
+        esac
+        done
+        atversion="$imageName-$imageVersion"
+        versionFile="/etc/ImageVersion-$atversion"
+        md5sum=`getSystemMD5Status $count`
+        if test `getSystemIntegrity $count` = "clean";then
+            echo "$atversion $md5sum" > $versionFile
+        fi
     done
-    atversion="$imageName-$imageVersion"
-    versionFile="/etc/ImageVersion-$atversion"
-    md5sum=`getSystemMD5Status $count`
-    if test `getSystemIntegrity $count` = "clean";then
-      echo "$atversion $md5sum" > $versionFile
-    fi
-  done
 fi
 
 #======================================
 # 11) setup console
 #--------------------------------------
 if [ "$systemIntegrity" = "clean" ];then
-  setupConsole
+    setupConsole
 fi
 
 #======================================

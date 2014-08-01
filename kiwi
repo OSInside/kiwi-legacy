@@ -6,18 +6,18 @@ callpath=$(dirname $0)
 pushd $callpath &>/dev/null
 
 if [ ! -s ".revision" ];then
-  ./.version > .revision
+    ./.version > .revision
 fi
 if [ ! -s ".kiwirc" ];then
 cat > .kiwirc << EOF
-  use File::Spec;
-  my \$arch = qx(uname -m);
-  chomp \$arch;
-  if (\$arch =~ /i.86/) {
-    \$arch = 'ix86';
-  }
-  our \$BasePath = File::Spec->rel2abs (".");
-  our \$System = File::Spec->rel2abs ("./system/boot/\$arch");
+    use File::Spec;
+    my \$arch = qx(uname -m);
+    chomp \$arch;
+    if (\$arch =~ /i.86/) {
+        \$arch = 'ix86';
+    }
+    our \$BasePath = File::Spec->rel2abs (".");
+    our \$System = File::Spec->rel2abs ("./system/boot/\$arch");
 EOF
 fi
 

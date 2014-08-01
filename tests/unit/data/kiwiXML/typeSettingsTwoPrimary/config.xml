@@ -1,80 +1,80 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <image schemaversion="5.7" name="testCase-preference-set-profs" displayname="testcase" id="3030150">
-  <description type="system">
-    <author>Robert Schweikert</author>
-    <contact>rjschwei@suse.com</contact>
-    <specification>Test configuration to verify setup of the default built type works as expected. Create an error for 2 primary types</specification>
-  </description>
-  <profiles>
-    <profile description="Test prof A" import="true" name="profA"/>
-    <profile description="Test prof B" import="false" name="profB"/>
-    <profile description="Test prof C" name="profC"/>
-    <profile description="Test prof D" name="profD"/>
-  </profiles>
-  <preferences>
-    <type image="vmx" primary="true" filesystem="ext4" boot="vmxboot/suse-12.1" format="ovf">
-      <machine max_memory="2048" memory="1024" min_memory="512" max_cpu="4" ncpus="2" min_cpu="1" ovftype="powervm">
-        <vmdisk device="/dev/sda" disktype="scsi"/>
-        <vmnic interface="eth0"/>
-      </machine>
-    </type>
-    <version>0.0.1</version>
-    <rpm-check-signatures>false</rpm-check-signatures>
-    <rpm-force>false</rpm-force>
-    <locale>en_US</locale>
-    <keytable>us.map.gz</keytable>
-  </preferences>
-  <preferences profiles="profA">
-    <bootsplash-theme>bluestar</bootsplash-theme>
-    <bootloader-theme>silverlining</bootloader-theme>
-    <defaultdestination>/work/tmp</defaultdestination>
-    <defaultprebuilt>/work/kiwibootimgs</defaultprebuilt>
-    <defaultroot>/var/tmp</defaultroot>
-    <type image="oem" primary="true" filesystem="ext4" boot="oemboot/suse-12.1">
-      <size unit="G">20</size>
-      <oemconfig>
-        <oem-boot-title>Unit Test</oem-boot-title>
-        <oem-bootwait>false</oem-bootwait>
-        <oem-inplace-recovery>true</oem-inplace-recovery>
-        <oem-swap>true</oem-swap>
-        <oem-swapsize>2048</oem-swapsize>
-        <oem-systemsize>20G</oem-systemsize>
-        <oem-unattended>true</oem-unattended>
-      </oemconfig>
-    </type>
-    <showlicense>/opt/myApp/lic.txt</showlicense>
-    <showlicense>/opt/myApp/thirdParty/appA/lic.txt</showlicense>
-  </preferences>
+    <description type="system">
+        <author>Robert Schweikert</author>
+        <contact>rjschwei@suse.com</contact>
+        <specification>Test configuration to verify setup of the default built type works as expected. Create an error for 2 primary types</specification>
+    </description>
+    <profiles>
+        <profile description="Test prof A" import="true" name="profA"/>
+        <profile description="Test prof B" import="false" name="profB"/>
+        <profile description="Test prof C" name="profC"/>
+        <profile description="Test prof D" name="profD"/>
+    </profiles>
+    <preferences>
+        <type image="vmx" primary="true" filesystem="ext4" boot="vmxboot/suse-12.1" format="ovf">
+            <machine max_memory="2048" memory="1024" min_memory="512" max_cpu="4" ncpus="2" min_cpu="1" ovftype="powervm">
+                <vmdisk device="/dev/sda" disktype="scsi"/>
+                <vmnic interface="eth0"/>
+            </machine>
+        </type>
+        <version>0.0.1</version>
+        <rpm-check-signatures>false</rpm-check-signatures>
+        <rpm-force>false</rpm-force>
+        <locale>en_US</locale>
+        <keytable>us.map.gz</keytable>
+    </preferences>
+    <preferences profiles="profA">
+        <bootsplash-theme>bluestar</bootsplash-theme>
+        <bootloader-theme>silverlining</bootloader-theme>
+        <defaultdestination>/work/tmp</defaultdestination>
+        <defaultprebuilt>/work/kiwibootimgs</defaultprebuilt>
+        <defaultroot>/var/tmp</defaultroot>
+        <type image="oem" primary="true" filesystem="ext4" boot="oemboot/suse-12.1">
+            <size unit="G">20</size>
+            <oemconfig>
+                <oem-boot-title>Unit Test</oem-boot-title>
+                <oem-bootwait>false</oem-bootwait>
+                <oem-inplace-recovery>true</oem-inplace-recovery>
+                <oem-swap>true</oem-swap>
+                <oem-swapsize>2048</oem-swapsize>
+                <oem-systemsize>20G</oem-systemsize>
+                <oem-unattended>true</oem-unattended>
+            </oemconfig>
+        </type>
+        <showlicense>/opt/myApp/lic.txt</showlicense>
+        <showlicense>/opt/myApp/thirdParty/appA/lic.txt</showlicense>
+    </preferences>
 <!-- The default and the profB preferences conflict in the type -->
-  <preferences profiles="profB">
-    <type image="vmx" filesystem="ext4" boot="vmxboot/suse-12.1" format="ovf">
-      <machine max_memory="2048" memory="1024" min_memory="512" max_cpu="4" ncpus="2" min_cpu="1" ovftype="powervm">
-        <vmdisk device="/dev/sda" disktype="scsi"/>
-        <vmnic interface="eth0"/>
-      </machine>
-    </type>
-    <hwclock>utc</hwclock>
-  </preferences>
+    <preferences profiles="profB">
+        <type image="vmx" filesystem="ext4" boot="vmxboot/suse-12.1" format="ovf">
+            <machine max_memory="2048" memory="1024" min_memory="512" max_cpu="4" ncpus="2" min_cpu="1" ovftype="powervm">
+                <vmdisk device="/dev/sda" disktype="scsi"/>
+                <vmnic interface="eth0"/>
+            </machine>
+        </type>
+        <hwclock>utc</hwclock>
+    </preferences>
 <!-- The default and profC preferences do not conflict but profC and profA
-    conflict -->
-  <preferences profiles="profC">
-    <type image="iso" boot="isoboot/suse-12.2" hybrid="true" flags="clic"/>
-    <defaultroot>/var/tmp</defaultroot>
-    <packagemanager>zypper</packagemanager>
-  </preferences>
-  <users group="root">
-    <user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
-  </users>
-  <repository type="yast2">
-    <source path="/tmp"/>
-  </repository>
-  <packages type="image">
-    <package name="kernel-default"/>
-    <namedCollection name="base"/>
-  </packages>
-  <packages type="bootstrap">
-    <package name="filesystem"/>
-    <package name="glibc-locale"/>
-  </packages>
+        conflict -->
+    <preferences profiles="profC">
+        <type image="iso" boot="isoboot/suse-12.2" hybrid="true" flags="clic"/>
+        <defaultroot>/var/tmp</defaultroot>
+        <packagemanager>zypper</packagemanager>
+    </preferences>
+    <users group="root">
+        <user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
+    </users>
+    <repository type="yast2">
+        <source path="/tmp"/>
+    </repository>
+    <packages type="image">
+        <package name="kernel-default"/>
+        <namedCollection name="base"/>
+    </packages>
+    <packages type="bootstrap">
+        <package name="filesystem"/>
+        <package name="glibc-locale"/>
+    </packages>
 </image>

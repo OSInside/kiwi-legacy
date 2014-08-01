@@ -28,20 +28,20 @@ repo=$3
 arch=$4
 hop=$5
 if [ -z "$hop" ];then
-  osc rbl $project \
-    $product $repo $arch > /tmp/${product}.result
+    osc rbl $project \
+        $product $repo $arch > /tmp/${product}.result
 else
-  su - jenkins -c \
-    "ssh $hop rbl $project $product $repo $arch > /tmp/${product}.result"
+    su - jenkins -c \
+        "ssh $hop rbl $project $product $repo $arch > /tmp/${product}.result"
 fi
 if [ ! $? = 0 ];then
-  # osc call failed for some reason
-  exit 1
+    # osc call failed for some reason
+    exit 1
 fi
 cat /tmp/${product}.result
 if ! grep -qi "KIWI exited successfully" /tmp/${product}.result;then
-  # product build failed for some reason
-  exit 1
+    # product build failed for some reason
+    exit 1
 fi
 
 rm -f /tmp/${product}.result

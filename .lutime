@@ -14,16 +14,16 @@ my $Source = $ARGV[0];
 my $Target = $ARGV[1]."/kiwi";
 
 sub generateWanted {
-  my $filehash = shift;
-  my $base     = shift;
-  return sub {
-    if ((-l $File::Find::name) && (-e $File::Find::name)) {
-      my $file = $File::Find::name;
-      my $attr = lstat ($file);
-      $file =~ s/$base//;
-      $filehash->{$file} = $attr;
+    my $filehash = shift;
+    my $base     = shift;
+    return sub {
+        if ((-l $File::Find::name) && (-e $File::Find::name)) {
+            my $file = $File::Find::name;
+            my $attr = lstat ($file);
+            $file =~ s/$base//;
+            $filehash->{$file} = $attr;
+        }
     }
-  }
 };
 
 my $wref = generateWanted (\%reference,$Source);
@@ -33,10 +33,10 @@ my $wref = generateWanted (\%result,$Target);
 find ({ wanted => $wref }, $Target );
 
 foreach my $name (keys %result) {
-  my $atime;
-  my $mtime;
-  $atime = $mtime = $reference{$name}->mtime;
-  lutimes $atime, $mtime, $Target."/".$name;
+    my $atime;
+    my $mtime;
+    $atime = $mtime = $reference{$name}->mtime;
+    lutimes $atime, $mtime, $Target."/".$name;
 }
 
 

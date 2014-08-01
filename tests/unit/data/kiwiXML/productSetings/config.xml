@@ -1,73 +1,73 @@
 <?xml version="1.0" encoding="utf-8"?>
 <image schemaversion="5.6" name="testCase-product-settings">
-  <description type="system">
-    <author>Robert Schweikert</author>
-    <contact>rjschwei@suse.com</contact>
-    <specification>Test configuration to verify product settings are handled properly in the XML object</specification>
-  </description>
-  <preferences>
-    <type image="product"/>
-    <version>1.0.0</version>
-    <packagemanager>zypper</packagemanager>
-  </preferences>
-  <instsource>
-    <architectures>
-      <arch id="i586" name="dummy"/>
-      <arch id="i686" name="dummy"/>
-      <arch id="noarch" name="dummy"/>
-      <requiredarch ref="i586"/>
-      <requiredarch ref="i686"/>
-    </architectures>
-    <driverupdate>
-      <install>
-        <repopackage name="specialNetDriver-KMP"/>
-        <repopackage name="specialRaidDriver-KMP"/>
-      </install>
-      <instsys>
-        <repopackage name="dudsetup"/>
-        <repopackage name="yast"/>
-      </instsys>
-      <modules>
-        <repopackage name="weirdDrive_KMP"/>
-        <repopackage name="weirdNet_KMP"/>
-      </modules>
-      <target arch="i586"/>
-      <target arch="i686"/>
-    </driverupdate>
-    <instrepo local="true" name="repo1" priority="1">
-      <source path="/mnt/baserepo"/>
-    </instrepo>
-    <instrepo local="true" name="repo2" priority="10">
-      <source path="/mnt/addrepo"/>
-    </instrepo>
-    <metadata>
-      <chroot requires="foo">true</chroot>
-      <chroot requires="bar">false</chroot>
-      <metafile script="myDbusHandler" target="dbus" url="http://dowload.opensuse.org/instscripts"/>
-      <metafile script="myViHandler" target="vi" url="http://dowload.opensuse.org/instscripts"/>
-      <repopackage name="dbus"/>
-      <repopackage name="gtk"/>
-      <repopackage name="vi"/>
-    </metadata>
-    <productoptions>
-      <productinfo name="DATADIR">/</productinfo>
-      <productinfo name="DISTRIBUTION">openSUSE</productinfo>
-      <productinfo name="LABEL">openSUSE</productinfo>
-      <productoption name="INI_DIR">/usr/share/kiwi/modules/plugins</productoption>
-      <productoption name="REPO LOCATION">http://download.opensuse.org</productoption>
-      <productoption name="SOURCEMEDIUM">0</productoption>
-      <productvar name="DISTNAME">openSUSE</productvar>
-      <productvar name="FLAVOR">dvd</productvar>
-      <productvar name="PRODUCT THEME">openSUSE</productvar>
-    </productoptions>
-    <repopackages>
-      <repopackage name="emacs"/>
-      <repopackage name="glibc"/>
-      <repopackage name="kernel-default"/>
-      <repopackage name="vi"/>
-    </repopackages>
-  </instsource>
-  <repository type="yast2">
-    <source path="/dummy"/>
-  </repository>
+    <description type="system">
+        <author>Robert Schweikert</author>
+        <contact>rjschwei@suse.com</contact>
+        <specification>Test configuration to verify product settings are handled properly in the XML object</specification>
+    </description>
+    <preferences>
+        <type image="product"/>
+        <version>1.0.0</version>
+        <packagemanager>zypper</packagemanager>
+    </preferences>
+    <instsource>
+        <architectures>
+            <arch id="i586" name="dummy"/>
+            <arch id="i686" name="dummy"/>
+            <arch id="noarch" name="dummy"/>
+            <requiredarch ref="i586"/>
+            <requiredarch ref="i686"/>
+        </architectures>
+        <driverupdate>
+            <install>
+                <repopackage name="specialNetDriver-KMP"/>
+                <repopackage name="specialRaidDriver-KMP"/>
+            </install>
+            <instsys>
+                <repopackage name="dudsetup"/>
+                <repopackage name="yast"/>
+            </instsys>
+            <modules>
+                <repopackage name="weirdDrive_KMP"/>
+                <repopackage name="weirdNet_KMP"/>
+            </modules>
+            <target arch="i586"/>
+            <target arch="i686"/>
+        </driverupdate>
+        <instrepo local="true" name="repo1" priority="1">
+            <source path="/mnt/baserepo"/>
+        </instrepo>
+        <instrepo local="true" name="repo2" priority="10">
+            <source path="/mnt/addrepo"/>
+        </instrepo>
+        <metadata>
+            <chroot requires="foo">true</chroot>
+            <chroot requires="bar">false</chroot>
+            <metafile script="myDbusHandler" target="dbus" url="http://dowload.opensuse.org/instscripts"/>
+            <metafile script="myViHandler" target="vi" url="http://dowload.opensuse.org/instscripts"/>
+            <repopackage name="dbus"/>
+            <repopackage name="gtk"/>
+            <repopackage name="vi"/>
+        </metadata>
+        <productoptions>
+            <productinfo name="DATADIR">/</productinfo>
+            <productinfo name="DISTRIBUTION">openSUSE</productinfo>
+            <productinfo name="LABEL">openSUSE</productinfo>
+            <productoption name="INI_DIR">/usr/share/kiwi/modules/plugins</productoption>
+            <productoption name="REPO LOCATION">http://download.opensuse.org</productoption>
+            <productoption name="SOURCEMEDIUM">0</productoption>
+            <productvar name="DISTNAME">openSUSE</productvar>
+            <productvar name="FLAVOR">dvd</productvar>
+            <productvar name="PRODUCT THEME">openSUSE</productvar>
+        </productoptions>
+        <repopackages>
+            <repopackage name="emacs"/>
+            <repopackage name="glibc"/>
+            <repopackage name="kernel-default"/>
+            <repopackage name="vi"/>
+        </repopackages>
+    </instsource>
+    <repository type="yast2">
+        <source path="/dummy"/>
+    </repository>
 </image>

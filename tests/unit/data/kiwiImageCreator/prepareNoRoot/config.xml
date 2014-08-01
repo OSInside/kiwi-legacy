@@ -1,27 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <image schemaversion="5.6" name="test-imagecreate-prepare">
-  <description type="system">
-    <author>Robert Schweikert</author>
-    <contact>rjschwei@suse.com</contact>
-    <specification>test case for the ImageCreator prepare</specification>
-  </description>
-  <preferences>
-    <type image="iso" boot="isoboot/suse-12.2"/>
-    <packagemanager>zypper</packagemanager>
-    <rpm-check-signatures>false</rpm-check-signatures>
-    <rpm-force>true</rpm-force>
-    <locale>en_US</locale>
-    <keytable>us.map.gz</keytable>
-    <version>1.0.0</version>
-  </preferences>
-  <users group="root">
-    <user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
-  </users>
-  <repository type="rpm-dir">
-    <source path="/tmp"/>
-  </repository>
-  <packages type="image" patternType="onlyRequired">
-    <package name="kiwi-test-dummy"/>
-  </packages>
+    <description type="system">
+        <author>Robert Schweikert</author>
+        <contact>rjschwei@suse.com</contact>
+        <specification>test case for the ImageCreator prepare</specification>
+    </description>
+    <preferences>
+        <type image="iso" boot="isoboot/suse-12.2"/>
+        <packagemanager>zypper</packagemanager>
+        <rpm-check-signatures>false</rpm-check-signatures>
+        <rpm-force>true</rpm-force>
+        <locale>en_US</locale>
+        <keytable>us.map.gz</keytable>
+        <version>1.0.0</version>
+    </preferences>
+    <users group="root">
+        <user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
+    </users>
+    <repository type="rpm-dir">
+        <source path="/tmp"/>
+    </repository>
+    <packages type="image" patternType="onlyRequired">
+        <package name="kiwi-test-dummy"/>
+    </packages>
 </image>

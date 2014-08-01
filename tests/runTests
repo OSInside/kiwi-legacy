@@ -34,84 +34,84 @@ use File::Basename;
 use FindBin;
 
 sub runTests {
-  #...
-  # Run a test if a trigger file exists and the test execution timestamp
-  # is older than the modification timestamp of the file being evaluated
-  # ---
-  my @checkFiles = @_;
+    #...
+    # Run a test if a trigger file exists and the test execution timestamp
+    # is older than the modification timestamp of the file being evaluated
+    # ---
+    my @checkFiles = @_;
 
-  my $trigDir = "$FindBin::Bin/triggers";
-  my @triggers = glob "$trigDir/*.trig";
-  my @timestamps = glob "$FindBin::Bin/.timestamps/*.ts";
+    my $trigDir = "$FindBin::Bin/triggers";
+    my @triggers = glob "$trigDir/*.trig";
+    my @timestamps = glob "$FindBin::Bin/.timestamps/*.ts";
 
-  # Examine the arguments
-  for my $checkF (@checkFiles) {
-    # Extract the filename without extension
-    my $fname = (split /\./x, basename($checkF) )[0];
-    # Get the modification time of the file is a corresponding test
-    # trigger exists
-    if ( grep { /$fname.trig/x } @triggers ) {
-      my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,
-        $atime,$mtime,$ctime,$blksize,$blocks) = stat $checkF;
-      my $lastMod = $mtime;
-      # Figure out what tests to potentiallly run for this file
-      my $trigFile = (grep { /$fname.trig/x } @triggers)[0];
-      my $TRIG;
-      if (! open $TRIG, '<', $trigFile) {
-        print {*STDERR} "ERROR: Could not open $trigFile\n";
-        exit 1;
-      }
-      my @tests = <$TRIG>;
-      close $TRIG;
-      # Get the creation time for the timestamp file if it exists
-      # and generate of list of tests to run
-      my @testsToRun;
-      for my $test (@tests) {
-        my $testNameNoEx = (split /\./x, $test)[0];
-        my $ts;
-        if ( grep { /$testNameNoEx.ts/x } @timestamps) {
-          my $tsFile = (grep { /$testNameNoEx.ts/x } @timestamps)[0];
-          ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,
-          $atime,$mtime,$ctime,$blksize,$blocks) = stat $tsFile;
-          $ts = $ctime;
-        } else {
-          $ts = 0;
+    # Examine the arguments
+    for my $checkF (@checkFiles) {
+        # Extract the filename without extension
+        my $fname = (split /\./x, basename($checkF) )[0];
+        # Get the modification time of the file is a corresponding test
+        # trigger exists
+        if ( grep { /$fname.trig/x } @triggers ) {
+            my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,
+                $atime,$mtime,$ctime,$blksize,$blocks) = stat $checkF;
+            my $lastMod = $mtime;
+            # Figure out what tests to potentiallly run for this file
+            my $trigFile = (grep { /$fname.trig/x } @triggers)[0];
+            my $TRIG;
+            if (! open $TRIG, '<', $trigFile) {
+                print {*STDERR} "ERROR: Could not open $trigFile\n";
+                exit 1;
+            }
+            my @tests = <$TRIG>;
+            close $TRIG;
+            # Get the creation time for the timestamp file if it exists
+            # and generate of list of tests to run
+            my @testsToRun;
+            for my $test (@tests) {
+                my $testNameNoEx = (split /\./x, $test)[0];
+                my $ts;
+                if ( grep { /$testNameNoEx.ts/x } @timestamps) {
+                    my $tsFile = (grep { /$testNameNoEx.ts/x } @timestamps)[0];
+                    ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,
+                    $atime,$mtime,$ctime,$blksize,$blocks) = stat $tsFile;
+                    $ts = $ctime;
+                } else {
+                    $ts = 0;
+                }
+                # File modified since the tast has been run last
+                if ($lastMod > $ts) {
+                    push @testsToRun , $test;
+                }
+            }
+            # Run tests and collect failures
+            my @testFailed;
+            for my $test (@testsToRun) {
+                my $result = system "cd tests/unit && /usr/bin/prove -f $test";
+                if ($result != 0) {
+                    push @testFailed, $test;
+                    # Remove the timestamp file if the test fails
+                    my $testNameNoEx = (split /\./x, $test)[0];
+                    unlink "$FindBin::Bin/.timestamps/$testNameNoEx.ts";
+                }
+                chomp $test;
+                my $cmd = "touch $FindBin::Bin/.timestamps/$test" . 's';
+                $result = system $cmd;
+            }
+            if (@testFailed) {
+                print {*STDERR} "Following tests failed:\n";
+                for my $t (@testFailed) {
+                    print {*STDERR} "\t$t";
+                }
+                exit 1;
+            }
         }
-        # File modified since the tast has been run last
-        if ($lastMod > $ts) {
-          push @testsToRun , $test;
-        }
-      }
-      # Run tests and collect failures
-      my @testFailed;
-      for my $test (@testsToRun) {
-        my $result = system "cd tests/unit && /usr/bin/prove -f $test";
-        if ($result != 0) {
-          push @testFailed, $test;
-          # Remove the timestamp file if the test fails
-          my $testNameNoEx = (split /\./x, $test)[0];
-          unlink "$FindBin::Bin/.timestamps/$testNameNoEx.ts";
-        }
-        chomp $test;
-        my $cmd = "touch $FindBin::Bin/.timestamps/$test" . 's';
-        $result = system $cmd;
-      }
-      if (@testFailed) {
-        print {*STDERR} "Following tests failed:\n";
-        for my $t (@testFailed) {
-          print {*STDERR} "\t$t";
-        }
-        exit 1;
-      }
     }
-  }
-  return;
+    return;
 }
 
 if (! @ARGV) {
-  my @testsToRun = glob "$FindBin::Bin/unit/*.t";
-  runTests(@testsToRun);
+    my @testsToRun = glob "$FindBin::Bin/unit/*.t";
+    runTests(@testsToRun);
 }
 else {
-  runTests(@ARGV);
+    runTests(@ARGV);
 }

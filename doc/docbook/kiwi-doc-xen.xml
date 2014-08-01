@@ -1,83 +1,83 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
-                         "http://www.docbook.org/xml/4.5/docbookx.dtd">
+                                                 "http://www.docbook.org/xml/4.5/docbookx.dtd">
 
 <chapter id="chap.xen">
-  <title>Xen Image—Paravirtual Systems</title>
-  <indexterm>
-    <primary>KIWI</primary>
-    <secondary>XEN image</secondary>
-  </indexterm>
-  <indexterm>
-    <primary>images</primary>
-    <secondary>XEN</secondary>
-  </indexterm>
-  <indexterm>
-    <primary>XEN image</primary>
-  </indexterm>
-  <para>Xen is a free software virtual machine monitor. It allows
-    several guest operating systems to be executed on the same computer
-    hardware at the same time. </para>
+    <title>Xen Image—Paravirtual Systems</title>
+    <indexterm>
+        <primary>KIWI</primary>
+        <secondary>XEN image</secondary>
+    </indexterm>
+    <indexterm>
+        <primary>images</primary>
+        <secondary>XEN</secondary>
+    </indexterm>
+    <indexterm>
+        <primary>XEN image</primary>
+    </indexterm>
+    <para>Xen is a free software virtual machine monitor. It allows
+        several guest operating systems to be executed on the same computer
+        hardware at the same time. </para>
 
-  <para>A Xen system is structured with the Xen hypervisor as the lowest
-    and most privileged layer. Above this layer are one or more guest
-    operating systems, which the hypervisor schedules across the
-    physical CPUs. The first guest operating system, called in Xen
-    terminology <quote>domain 0</quote> (dom0), is booted automatically
-    when the hypervisor boots and given special management privileges
-    and direct access to the physical hardware. The system administrator
-    logs into dom0 in order to start any further guest operating
-    systems, called <quote>domain 0</quote> (domU) in Xen terminology. </para>
-  <para>A Xen image is a virtual disk like a vmx but with the xen kernel
-    installed. In order to run it a Xen dom0 server needs to run. Xen
-    images in KIWI makes use of the PVGrub method supported by current
-    Xen versions. Xen extracts the kernel and initrd from the virtual
-    disk as well as the grub configuration and displays the menu which
-    allows emulation of the Grub console </para>
-  
-  <sect1 id="sec.xen.building">
-    <title>Building the suse-xen-guest Example</title>
-    <para>The latest example provided with KIWI is based on openSUSE
-      and includes the base pattern. </para>
+    <para>A Xen system is structured with the Xen hypervisor as the lowest
+        and most privileged layer. Above this layer are one or more guest
+        operating systems, which the hypervisor schedules across the
+        physical CPUs. The first guest operating system, called in Xen
+        terminology <quote>domain 0</quote> (dom0), is booted automatically
+        when the hypervisor boots and given special management privileges
+        and direct access to the physical hardware. The system administrator
+        logs into dom0 in order to start any further guest operating
+        systems, called <quote>domain 0</quote> (domU) in Xen terminology. </para>
+    <para>A Xen image is a virtual disk like a vmx but with the xen kernel
+        installed. In order to run it a Xen dom0 server needs to run. Xen
+        images in KIWI makes use of the PVGrub method supported by current
+        Xen versions. Xen extracts the kernel and initrd from the virtual
+        disk as well as the grub configuration and displays the menu which
+        allows emulation of the Grub console </para>
+    
+    <sect1 id="sec.xen.building">
+        <title>Building the suse-xen-guest Example</title>
+        <para>The latest example provided with KIWI is based on openSUSE
+            and includes the base pattern. </para>
 
-    <screen><command>cd</command> /usr/share/doc/packages/kiwi/examples cd suse-...
+        <screen><command>cd</command> /usr/share/doc/packages/kiwi/examples cd suse-...
 <command>kiwi</command> --prepare ./suse-xen-guest --root /tmp/myxen</screen>
 
-    <screen><command>kiwi</command> --create /tmp/myxen --type vmx -d /tmp/myxen-result</screen>
-  </sect1>
+        <screen><command>kiwi</command> --create /tmp/myxen --type vmx -d /tmp/myxen-result</screen>
+    </sect1>
 
-  <sect1 id="sec.xen.using">
-    <title>Using the Image</title>
-    <para>In order to run a domain U the Xen tool <command>xm</command>
-      needs to be called in conjunction with the KIWI generated domainU
-      configuration file </para>
+    <sect1 id="sec.xen.using">
+        <title>Using the Image</title>
+        <para>In order to run a domain U the Xen tool <command>xm</command>
+            needs to be called in conjunction with the KIWI generated domainU
+            configuration file </para>
 
-    <screen><command>xm</command> create -c /tmp/myxen-result/
-        the-file-with-suffix.xenconfig    </screen>
-  </sect1>
+        <screen><command>xm</command> create -c /tmp/myxen-result/
+                the-file-with-suffix.xenconfig    </screen>
+    </sect1>
 
-  <sect1 id="sec.xen.flavours">
-    <title>Flavours</title>
-    <para>With KIWI you can provide the information required to create a
-      guest configuration as part of the <filename>config.xml</filename> file. Additionally
-      you can group special packages which you may only need in this
-      para virtual environment with a profile. </para>
+    <sect1 id="sec.xen.flavours">
+        <title>Flavours</title>
+        <para>With KIWI you can provide the information required to create a
+            guest configuration as part of the <filename>config.xml</filename> file. Additionally
+            you can group special packages which you may only need in this
+            para virtual environment with a profile. </para>
 
-    <screen>&lt;packages type="image" profiles="xenFlavour"&gt;
-  &lt;package name="kernel-xen" replaces="kernel-ec2"/&gt;
+        <screen>&lt;packages type="image" profiles="xenFlavour"&gt;
+    &lt;package name="kernel-xen" replaces="kernel-ec2"/&gt;
 &lt;/packages&gt;
 &lt;type ....&gt; 
-  &lt;machine memory="512" domain="domU"&gt; 
-    &lt;vmdisk ... device="/dev/xvda"/&gt;
-  &lt;/machine&gt;
+    &lt;machine memory="512" domain="domU"&gt; 
+        &lt;vmdisk ... device="/dev/xvda"/&gt;
+    &lt;/machine&gt;
 &lt;/type&gt; </screen>
 
-    <para>If this information is present KIWI will create a Xen domain U
-      configuration with 512 MB of RAM and expects the disk at <filename
-        class="devicefile">/dev/xvda</filename>. Additional information
-      to setup the Xen guest machine properties are explained in the
-      machine section. The KIWI Xen domain U configuration is stored in
-      the file <filename>/tmp/myxen-result/suse-##.#-xen-guest.####-#.#.#.xenconfig</filename>.</para>
+        <para>If this information is present KIWI will create a Xen domain U
+            configuration with 512 MB of RAM and expects the disk at <filename
+                class="devicefile">/dev/xvda</filename>. Additional information
+            to setup the Xen guest machine properties are explained in the
+            machine section. The KIWI Xen domain U configuration is stored in
+            the file <filename>/tmp/myxen-result/suse-##.#-xen-guest.####-#.#.#.xenconfig</filename>.</para>
 
-  </sect1>
+    </sect1>
 </chapter>

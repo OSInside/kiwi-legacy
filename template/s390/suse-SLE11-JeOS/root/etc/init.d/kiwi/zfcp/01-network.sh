@@ -21,5 +21,5 @@ includeKernelParameters
 # Bring the device online
 #--------------------------------------
 qeth_configure -p $portname -l \
-  $readchannel $writechannel $datachannel $qeth_up
+    $readchannel $writechannel $datachannel $qeth_up
 

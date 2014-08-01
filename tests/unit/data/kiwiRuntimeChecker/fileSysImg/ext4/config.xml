@@ -1,36 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <image schemaversion="5.7" name="ext4-test-config">
-  <description type="system">
-    <author>Robert Schweikert</author>
-    <contact>rjschwei@suse.com</contact>
-    <specification>Test configuration for runtime validtaion using ext4 as image type.</specification>
-  </description>
-  <preferences>
-    <version>1.0.0</version>
-    <packagemanager>zypper</packagemanager>
-    <rpm-check-signatures>false</rpm-check-signatures>
-    <rpm-force>true</rpm-force>
-    <locale>en_US</locale>
-    <keytable>us.map.gz</keytable>
-    <type image="ext4"/>
-  </preferences>
-  <users group="root">
-    <user password="linux" pwdformat="plain" home="/root" name="root"/>
-  </users>
-  <repository type="rpm-dir">
-    <source path="/tmp"/>
-  </repository>
-  <packages type="image">
-    <package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>
-    <package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
-    <package name="ifplugd"/>
-    <package name="kernel-default"/>
-    <package name="vim"/>
-    <namedCollection name="base"/>
-  </packages>
-  <packages type="bootstrap">
-    <package name="filesystem"/>
-    <package name="glibc-locale"/>
-  </packages>
+    <description type="system">
+        <author>Robert Schweikert</author>
+        <contact>rjschwei@suse.com</contact>
+        <specification>Test configuration for runtime validtaion using ext4 as image type.</specification>
+    </description>
+    <preferences>
+        <version>1.0.0</version>
+        <packagemanager>zypper</packagemanager>
+        <rpm-check-signatures>false</rpm-check-signatures>
+        <rpm-force>true</rpm-force>
+        <locale>en_US</locale>
+        <keytable>us.map.gz</keytable>
+        <type image="ext4"/>
+    </preferences>
+    <users group="root">
+        <user password="linux" pwdformat="plain" home="/root" name="root"/>
+    </users>
+    <repository type="rpm-dir">
+        <source path="/tmp"/>
+    </repository>
+    <packages type="image">
+        <package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>
+        <package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
+        <package name="ifplugd"/>
+        <package name="kernel-default"/>
+        <package name="vim"/>
+        <namedCollection name="base"/>
+    </packages>
+    <packages type="bootstrap">
+        <package name="filesystem"/>
+        <package name="glibc-locale"/>
+    </packages>
 </image>

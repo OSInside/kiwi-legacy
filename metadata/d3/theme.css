@@ -1,92 +1,92 @@
 /* Theme for the reports */
 body {
-  font-size: 13px;
-  font-family: arial;
-  color: #6b6b6b
+    font-size: 13px;
+    font-family: arial;
+    color: #6b6b6b
 }
 header {
-  background: #333;
-  border-bottom: 5px solid #7ac143;
-  width: 100%;
-  padding: 1em 0;
+    background: #333;
+    border-bottom: 5px solid #7ac143;
+    width: 100%;
+    padding: 1em 0;
 }
 a, a:visited, a:active, a:link {
-  color: #2281d1
+    color: #2281d1
 }
 .menu a {
-  display: inline-block;
-  height: 50px;
-  padding: 0 .7em;
-  text-align: center;
-  color: #d5d5d5;
-  text-decoration: none;
+    display: inline-block;
+    height: 50px;
+    padding: 0 .7em;
+    text-align: center;
+    color: #d5d5d5;
+    text-decoration: none;
 }
 .menu a:hover h3 {
-  color: #7ac143 
+    color: #7ac143 
 }
 .menu a:first-child {
-  padding: 0 .7em 0 0
+    padding: 0 .7em 0 0
 }
 .menu a:last-child {
-  padding:0 0 0 .7em;
+    padding:0 0 0 .7em;
 }
 .menu h3 {
-  margin: 0;
-  padding: 0;
-  font-size: .9em;
-  font-weight: normal;
-  letter-spacing: 1px;
-  color: #d5d5d5
+    margin: 0;
+    padding: 0;
+    font-size: .9em;
+    font-weight: normal;
+    letter-spacing: 1px;
+    color: #d5d5d5
 }
 
 pre {
-  font-size: 13px;
-  color: #fff;
-  background: #000;
-  display: block;
-  padding: .5em;
-  overflow-x: scroll;
+    font-size: 13px;
+    color: #fff;
+    background: #000;
+    display: block;
+    padding: .5em;
+    overflow-x: scroll;
 }
 hr {
-  height: 1px;
-  background: #dedede;
-  border: 0;
-  width: 100%;
-  margin: 2em 0
+    height: 1px;
+    background: #dedede;
+    border: 0;
+    width: 100%;
+    margin: 2em 0
 }
 .infoPanel {
-  background: #fff;
-  border: 1px solid #d5d5d5;
-  box-shadow: 0px 1px 0px 0px #d5d5d5;
-  -moz-box-shadow: 0px 1px 0px 0px #d5d5d5;
-  -webkit-box-shadow: 0px 1px 0px 0px #d5d5d5;
-  -webkit-border-radius: 4px;
-  -moz-border-radius: 4px;
-  border-radius: 4px;
-  padding: 1em;
-  margin: 2em 0
+    background: #fff;
+    border: 1px solid #d5d5d5;
+    box-shadow: 0px 1px 0px 0px #d5d5d5;
+    -moz-box-shadow: 0px 1px 0px 0px #d5d5d5;
+    -webkit-box-shadow: 0px 1px 0px 0px #d5d5d5;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    padding: 1em;
+    margin: 2em 0
 }
 h1, h2, h3, h4, h5, h6 {
-  margin-top: .3em;
-  margin-bottom: 1em;
-  color: #4d4b4b
+    margin-top: .3em;
+    margin-bottom: 1em;
+    color: #4d4b4b
 }
 table {
-  border-collapse: collapse;
-  border-spacing: 0;
-  width: 100%
+    border-collapse: collapse;
+    border-spacing: 0;
+    width: 100%
 }
 table td {
-  padding: .5em;
-  border: 1px solid #dedede;
-  background: #f7f7f7
+    padding: .5em;
+    border: 1px solid #dedede;
+    background: #f7f7f7
 }
 table tr:first-child td:first-child {
-  -webkit-border-radius: 4px 0 0 0;
-  -moz-border-radius: 4px 0 0 0;
-  border-radius: 4px 0 0 0; 
+    -webkit-border-radius: 4px 0 0 0;
+    -moz-border-radius: 4px 0 0 0;
+    border-radius: 4px 0 0 0; 
 }
 table tr:hover td {
-  background: #fff
+    background: #fff
 }
 

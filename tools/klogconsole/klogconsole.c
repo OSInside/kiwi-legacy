@@ -35,72 +35,72 @@ void usage(void) __attribute__((noreturn));
 static void console_level(int level)
 {
 #if !(defined __GLIBC__ && __GLIBC__ >= 2)
-  syslog(8,0,level);
+    syslog(8,0,level);
 #else
-  klogctl(8, 0, level);
+    klogctl(8, 0, level);
 #endif
 }
 
 static void switch_printk_console(int new_console)
 {
-  char newvt[2];
-  int vt;
+    char newvt[2];
+    int vt;
 
-  if ((new_console < 0) || (new_console > MAX_CONSOLE)) {
-    fprintf(stderr,"wrong console number\n");
-    exit(1);
-  }
+    if ((new_console < 0) || (new_console > MAX_CONSOLE)) {
+        fprintf(stderr,"wrong console number\n");
+        exit(1);
+    }
 
-  newvt[0] = 11;
-  newvt[1] = new_console;
-  vt = open( "/dev/tty1", O_RDONLY );
-  if( vt == -1 ) {
-    perror("open(/dev/tty1)");
-    exit(1);
-  }
-  if( ioctl( vt, TIOCLINUX, &newvt ) ) {
-    /* shut up perror("ioctl(TIOCLINUX)"); */
-    exit(1);
-  }
-  close(vt);
+    newvt[0] = 11;
+    newvt[1] = new_console;
+    vt = open( "/dev/tty1", O_RDONLY );
+    if( vt == -1 ) {
+        perror("open(/dev/tty1)");
+        exit(1);
+    }
+    if( ioctl( vt, TIOCLINUX, &newvt ) ) {
+        /* shut up perror("ioctl(TIOCLINUX)"); */
+        exit(1);
+    }
+    close(vt);
 }
 
 void usage(void)
 {
-  printf(
-    "USAGE:\n"
-    "  klogconsole [-l console_loglevel ] [ -r console ]\n\n"
-    "  console_loglevel  0..7 (kernel may dissallow values <5)\n"
-    "  console           0..%i console to which printk() dups messages\n"
-    "                     (0 = current console)\n", MAX_CONSOLE
-  );
-  exit(1);
+    printf(
+        "USAGE:\n"
+        "  klogconsole [-l console_loglevel ] [ -r console ]\n\n"
+        "  console_loglevel  0..7 (kernel may dissallow values <5)\n"
+        "  console           0..%i console to which printk() dups messages\n"
+        "                     (0 = current console)\n", MAX_CONSOLE
+    );
+    exit(1);
 }
 
 int
 main (int argc, char** argv)
 {
-  int op,i;
-  
-  if (argc <= 1) usage();
-  opterr = 0;
-  while ((op = getopt(argc, argv, "l:r:")) != EOF) {
-    switch (op) {
-      case 'l': {
-        i=atoi(optarg);
-        console_level(i);
-        break;
-      }
-      case 'r': {
-        i=atoi(optarg);
-        switch_printk_console(i);
-        break;
-      }
-      default: {
-        usage();
-        /* doesn't return */
-      }
+    int op,i;
+    
+    if (argc <= 1) usage();
+    opterr = 0;
+    while ((op = getopt(argc, argv, "l:r:")) != EOF) {
+        switch (op) {
+            case 'l': {
+                i=atoi(optarg);
+                console_level(i);
+                break;
+            }
+            case 'r': {
+                i=atoi(optarg);
+                switch_printk_console(i);
+                break;
+            }
+            default: {
+                usage();
+                /* doesn't return */
+            }
+        }
     }
-  }
-  return 0;
+    return 0;
 }

@@ -1,213 +1,213 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <image schemaversion="6.1" name="LimeJeOS-SLE11">
-  <description type="system">
-    <author>Marcus Schäfer</author>
-    <contact>ms@suse.de</contact>
-    <specification>SUSE Linux Enterprise 11 JeOS</specification>
-  </description>
-  <profiles>
-    <profile name="vmxFlavour" description="VMX with default kernel" import="true"/>
-    <profile name="ec2Flavour" description="VMX with EC2/Xen kernel"/>
-    <profile name="vmxFlavour-uefi" description="VMX with default kernel and UEFI support"/>
-    <profile name="xenFlavour" description="VMX with Xen kernel"/>
-    <profile name="xenFlavour-uefi" description="VMX with Xen kernel and UEFI support"/>
-    <profile name="vmxFlavour-s390" description="VMX for s390 with default kernel"/>
-  </profiles>
-  <preferences>
-    <version>1.11.3</version>
-    <packagemanager>zypper</packagemanager>
-    <bootsplash-theme>SLES</bootsplash-theme>
-    <bootloader-theme>SLES</bootloader-theme>
-    <rpm-excludedocs>true</rpm-excludedocs>
-    <locale>en_US</locale>
-    <keytable>us.map.gz</keytable>
-    <timezone>Europe/Berlin</timezone>
-    <hwclock>utc</hwclock>
-    <type image="iso" boot="isoboot/suse-SLES11" flags="compressed" hybrid="true"/>
-  </preferences>
-  <preferences profiles="ec2Flavour">
-    <type image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES11" bootprofile="ec2" bootkernel="ec2k" bootloader="grub" kernelcmdline="xencons=xvc0 console=xvc0 multipath=off splash=silent showopts"/>
-  </preferences>
-  <preferences profiles="xenFlavour">
-    <type image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES11" bootprofile="xen" bootkernel="xenk">
-      <machine memory="512" domain="domU">
-        <vmdisk id="0" device="/dev/xvda" controller="ide"/>
-        <vmnic interface=""/>
-      </machine>
-    </type>
-    <type image="oem" filesystem="ext3" boot="oemboot/suse-SLES11" bootprofile="xen" bootkernel="xenk" installiso="true">
-      <oemconfig>
-        <oem-systemsize>2048</oem-systemsize>
-        <oem-swap>true</oem-swap>
-      </oemconfig>
-      <machine domain="dom0">
-        <vmdisk id="0" controller="ide"/>
-      </machine>
-    </type>
-  </preferences>
-  <preferences profiles="vmxFlavour,vmxFlavour-s390">
-    <type image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES11" format="vmdk">
-      <machine memory="512" guestOS="suse" HWversion="4">
-        <vmdisk id="0" controller="ide"/>
-        <vmnic driver="e1000" interface="0" mode="bridged"/>
-      </machine>
-    </type>
-    <type image="oem" filesystem="ext3" boot="oemboot/suse-SLES11" installiso="true">
-      <oemconfig>
-        <oem-systemsize>2048</oem-systemsize>
-        <oem-swap>true</oem-swap>
-      </oemconfig>
-      <machine memory="512" guestOS="suse" HWversion="4">
-        <vmdisk id="0" controller="ide"/>
-        <vmnic driver="e1000" interface="0" mode="bridged"/>
-      </machine>
-    </type>
-  </preferences>
-  <preferences profiles="xenFlavour-uefi">
-    <type image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES11" bootprofile="xen" bootkernel="xenk" bootloader="grub2" firmware="uefi">
-      <machine memory="512" domain="domU">
-        <vmdisk id="0" device="/dev/xvda" controller="ide"/>
-        <vmnic interface=""/>
-      </machine>
-    </type>
-    <type image="oem" filesystem="ext3" boot="oemboot/suse-SLES11" bootprofile="xen" bootkernel="xenk" installiso="true" bootloader="grub2" firmware="uefi">
-      <oemconfig>
-        <oem-systemsize>2048</oem-systemsize>
-        <oem-swap>true</oem-swap>
-      </oemconfig>
-      <machine domain="dom0">
-        <vmdisk id="0" controller="ide"/>
-      </machine>
-    </type>
-  </preferences>
-  <preferences profiles="vmxFlavour-uefi">
-    <type image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES11" format="vmdk" bootloader="grub2" firmware="uefi">
-      <machine memory="512" guestOS="suse" HWversion="4">
-        <vmdisk id="0" controller="ide"/>
-        <vmnic driver="e1000" interface="0" mode="bridged"/>
-      </machine>
-    </type>
-    <type image="oem" filesystem="ext3" boot="oemboot/suse-SLES11" installiso="true" bootloader="grub2" firmware="uefi">
-      <oemconfig>
-        <oem-systemsize>2048</oem-systemsize>
-        <oem-swap>true</oem-swap>
-      </oemconfig>
-      <machine memory="512" guestOS="suse" HWversion="4">
-        <vmdisk id="0" controller="ide"/>
-        <vmnic driver="e1000" interface="0" mode="bridged"/>
-      </machine>
-    </type>
-  </preferences>
-  <users group="root">
-    <user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
-  </users>
-  <repository type="rpm-md" alias="SLES11">
-    <source path="http://smt.suse.de/repo/$RCE/SLE11-SDK-SP3-Pool/sle-11-x86_64?credentials=NCCcredentials"/>
-  </repository>
-  <repository type="rpm-md" alias="SLES11-Updates">
-    <source path="http://smt.suse.de/repo/$RCE/SLE11-SDK-SP3-Updates/sle-11-x86_64?credentials=NCCcredentials"/>
-  </repository>
-  <repository type="rpm-md" alias="SLES11-Pool">
-    <source path="http://smt.suse.de/repo/$RCE/SLES11-SP3-Pool/sle-11-x86_64?credentials=NCCcredentials"/>
-  </repository>
-  <repository type="rpm-md" alias="SLES11-PoolUpdates">
-    <source path="http://smt.suse.de/repo/$RCE/SLES11-SP3-Updates/sle-11-x86_64?credentials=NCCcredentials"/>
-  </repository>
-  <packages type="image">
-    <package name="sles-release"/>
-    <package name="sles-release-DVD"/>
-    <package name="aaa_base"/>
-    <package name="bash"/>
-    <package name="coreutils"/>
-    <package name="device-mapper"/>
-    <package name="e2fsprogs"/>
-    <package name="filesystem"/>
-    <package name="glibc"/>
-    <package name="mdadm"/>
-    <package name="rpm"/>
-    <package name="insserv"/>
-    <package name="pam"/>
-    <package name="pam-modules"/>
-    <package name="login"/>
-    <package name="pwdutils"/>
-    <package name="sysconfig"/>
-    <package name="sysvinit"/>
-    <package name="procps"/>
-    <package name="zypper"/>
-    <package name="kbd"/>
-    <package name="mkinitrd"/>
-    <package name="module-init-tools"/>
-    <package name="dhcpcd"/>
-    <package name="initviocons"/>
-    <package name="irqbalance"/>
-    <package name="suse-build-key"/>
-    <package name="syslog-ng"/>
-    <package name="rpcbind"/>
-    <package name="nfs-client"/>
-    <package name="iputils"/>
-    <package name="w3m"/>
-    <package name="ncurses-utils"/>
-    <package name="klogd"/>
-    <package name="elfutils"/>
-    <package name="cracklib-dict-full"/>
-    <package name="openssh"/>
-    <package name="suseRegister"/>
-    <package name="openssl-certs"/>
-    <package name="vim-base"/>
-    <package name="vim"/>
-    <package name="tar"/>
-    <package name="timezone"/>
-    <package name="ifplugd"/>
-    <package name="branding-SLES"/>
-    <package name="release-notes-sles"/>
-    <package name="glib2-branding-SLES"/>
-    <package name="lvm2"/>
-    <package name="syslinux"/>
-  </packages>
-  <packages type="image" profiles="vmxFlavour-uefi,xenFlavour-uefi">
-    <package name="grub2-x86_64-efi" arch="x86_64" bootinclude="true"/>
-    <package name="shim" arch="x86_64" bootinclude="true"/>
-    <package name="bootsplash-branding-SLES" bootinclude="true" bootdelete="true"/>
-    <package name="gfxboot-branding-SLES" bootinclude="true" bootdelete="true"/>
-    <package name="elilo"/>
-  </packages>
-  <packages type="image" profiles="vmxFlavour,xenFlavour">
-    <package name="grub"/>
-    <package name="bootsplash-branding-SLES" bootinclude="true" bootdelete="true"/>
-    <package name="gfxboot-branding-SLES" bootinclude="true" bootdelete="true"/>
-  </packages>
-  <packages type="image" profiles="vmxFlavour-s390">
-    <package name="zipl"/>
-  </packages>
-  <packages type="image" profiles="ec2Flavour">
-    <package name="kernel-ec2" replaces="kernel-xen"/>
-    <package name="kernel-ec2" replaces="kernel-xen-base"/>
-    <package name="kernel-ec2" replaces="kernel-default"/>
-    <package name="kernel-ec2-base" replaces="kernel-default-base"/>
-    <package name="xen-tools-domU" arch="x86_64" replaces=""/>
-    <package name="xen" arch="x86_64" replaces=""/>
-  </packages>
-  <packages type="image" profiles="xenFlavour,xenFlavour-uefi">
-    <package name="kernel-xen" replaces="kernel-ec2"/>
-    <package name="kernel-xen" replaces="kernel-ec2-base"/>
-    <package name="kernel-xen" replaces="kernel-default"/>
-    <package name="kernel-xen-base" replaces="kernel-default-base"/>
-    <package name="xen-tools-domU" replaces=""/>
-    <package name="xen" replaces=""/>
-  </packages>
-  <packages type="image" profiles="vmxFlavour,vmxFlavour-s390,vmxFlavour-uefi">
-    <package name="kernel-default" replaces="kernel-ec2"/>
-    <package name="kernel-default" replaces="kernel-xen"/>
-    <package name="kernel-default-base" replaces="kernel-ec2-base"/>
-    <package name="kernel-default-base" replaces="kernel-xen-base"/>
-    <package name="kernel-default-base" replaces="xen-tools-domU"/>
-    <package name="kernel-default-base" replaces="xen"/>
-  </packages>
-  <packages type="bootstrap">
-    <package name="filesystem"/>
-    <package name="glibc-locale"/>
-    <package name="cracklib-dict-full"/>
-    <package name="openssl-certs"/>
-  </packages>
+    <description type="system">
+        <author>Marcus Schäfer</author>
+        <contact>ms@suse.de</contact>
+        <specification>SUSE Linux Enterprise 11 JeOS</specification>
+    </description>
+    <profiles>
+        <profile name="vmxFlavour" description="VMX with default kernel" import="true"/>
+        <profile name="ec2Flavour" description="VMX with EC2/Xen kernel"/>
+        <profile name="vmxFlavour-uefi" description="VMX with default kernel and UEFI support"/>
+        <profile name="xenFlavour" description="VMX with Xen kernel"/>
+        <profile name="xenFlavour-uefi" description="VMX with Xen kernel and UEFI support"/>
+        <profile name="vmxFlavour-s390" description="VMX for s390 with default kernel"/>
+    </profiles>
+    <preferences>
+        <version>1.11.3</version>
+        <packagemanager>zypper</packagemanager>
+        <bootsplash-theme>SLES</bootsplash-theme>
+        <bootloader-theme>SLES</bootloader-theme>
+        <rpm-excludedocs>true</rpm-excludedocs>
+        <locale>en_US</locale>
+        <keytable>us.map.gz</keytable>
+        <timezone>Europe/Berlin</timezone>
+        <hwclock>utc</hwclock>
+        <type image="iso" boot="isoboot/suse-SLES11" flags="compressed" hybrid="true"/>
+    </preferences>
+    <preferences profiles="ec2Flavour">
+        <type image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES11" bootprofile="ec2" bootkernel="ec2k" bootloader="grub" kernelcmdline="xencons=xvc0 console=xvc0 multipath=off splash=silent showopts"/>
+    </preferences>
+    <preferences profiles="xenFlavour">
+        <type image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES11" bootprofile="xen" bootkernel="xenk">
+            <machine memory="512" domain="domU">
+                <vmdisk id="0" device="/dev/xvda" controller="ide"/>
+                <vmnic interface=""/>
+            </machine>
+        </type>
+        <type image="oem" filesystem="ext3" boot="oemboot/suse-SLES11" bootprofile="xen" bootkernel="xenk" installiso="true">
+            <oemconfig>
+                <oem-systemsize>2048</oem-systemsize>
+                <oem-swap>true</oem-swap>
+            </oemconfig>
+            <machine domain="dom0">
+                <vmdisk id="0" controller="ide"/>
+            </machine>
+        </type>
+    </preferences>
+    <preferences profiles="vmxFlavour,vmxFlavour-s390">
+        <type image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES11" format="vmdk">
+            <machine memory="512" guestOS="suse" HWversion="4">
+                <vmdisk id="0" controller="ide"/>
+                <vmnic driver="e1000" interface="0" mode="bridged"/>
+            </machine>
+        </type>
+        <type image="oem" filesystem="ext3" boot="oemboot/suse-SLES11" installiso="true">
+            <oemconfig>
+                <oem-systemsize>2048</oem-systemsize>
+                <oem-swap>true</oem-swap>
+            </oemconfig>
+            <machine memory="512" guestOS="suse" HWversion="4">
+                <vmdisk id="0" controller="ide"/>
+                <vmnic driver="e1000" interface="0" mode="bridged"/>
+            </machine>
+        </type>
+    </preferences>
+    <preferences profiles="xenFlavour-uefi">
+        <type image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES11" bootprofile="xen" bootkernel="xenk" bootloader="grub2" firmware="uefi">
+            <machine memory="512" domain="domU">
+                <vmdisk id="0" device="/dev/xvda" controller="ide"/>
+                <vmnic interface=""/>
+            </machine>
+        </type>
+        <type image="oem" filesystem="ext3" boot="oemboot/suse-SLES11" bootprofile="xen" bootkernel="xenk" installiso="true" bootloader="grub2" firmware="uefi">
+            <oemconfig>
+                <oem-systemsize>2048</oem-systemsize>
+                <oem-swap>true</oem-swap>
+            </oemconfig>
+            <machine domain="dom0">
+                <vmdisk id="0" controller="ide"/>
+            </machine>
+        </type>
+    </preferences>
+    <preferences profiles="vmxFlavour-uefi">
+        <type image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES11" format="vmdk" bootloader="grub2" firmware="uefi">
+            <machine memory="512" guestOS="suse" HWversion="4">
+                <vmdisk id="0" controller="ide"/>
+                <vmnic driver="e1000" interface="0" mode="bridged"/>
+            </machine>
+        </type>
+        <type image="oem" filesystem="ext3" boot="oemboot/suse-SLES11" installiso="true" bootloader="grub2" firmware="uefi">
+            <oemconfig>
+                <oem-systemsize>2048</oem-systemsize>
+                <oem-swap>true</oem-swap>
+            </oemconfig>
+            <machine memory="512" guestOS="suse" HWversion="4">
+                <vmdisk id="0" controller="ide"/>
+                <vmnic driver="e1000" interface="0" mode="bridged"/>
+            </machine>
+        </type>
+    </preferences>
+    <users group="root">
+        <user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
+    </users>
+    <repository type="rpm-md" alias="SLES11">
+        <source path="http://smt.suse.de/repo/$RCE/SLE11-SDK-SP3-Pool/sle-11-x86_64?credentials=NCCcredentials"/>
+    </repository>
+    <repository type="rpm-md" alias="SLES11-Updates">
+        <source path="http://smt.suse.de/repo/$RCE/SLE11-SDK-SP3-Updates/sle-11-x86_64?credentials=NCCcredentials"/>
+    </repository>
+    <repository type="rpm-md" alias="SLES11-Pool">
+        <source path="http://smt.suse.de/repo/$RCE/SLES11-SP3-Pool/sle-11-x86_64?credentials=NCCcredentials"/>
+    </repository>
+    <repository type="rpm-md" alias="SLES11-PoolUpdates">
+        <source path="http://smt.suse.de/repo/$RCE/SLES11-SP3-Updates/sle-11-x86_64?credentials=NCCcredentials"/>
+    </repository>
+    <packages type="image">
+        <package name="sles-release"/>
+        <package name="sles-release-DVD"/>
+        <package name="aaa_base"/>
+        <package name="bash"/>
+        <package name="coreutils"/>
+        <package name="device-mapper"/>
+        <package name="e2fsprogs"/>
+        <package name="filesystem"/>
+        <package name="glibc"/>
+        <package name="mdadm"/>
+        <package name="rpm"/>
+        <package name="insserv"/>
+        <package name="pam"/>
+        <package name="pam-modules"/>
+        <package name="login"/>
+        <package name="pwdutils"/>
+        <package name="sysconfig"/>
+        <package name="sysvinit"/>
+        <package name="procps"/>
+        <package name="zypper"/>
+        <package name="kbd"/>
+        <package name="mkinitrd"/>
+        <package name="module-init-tools"/>
+        <package name="dhcpcd"/>
+        <package name="initviocons"/>
+        <package name="irqbalance"/>
+        <package name="suse-build-key"/>
+        <package name="syslog-ng"/>
+        <package name="rpcbind"/>
+        <package name="nfs-client"/>
+        <package name="iputils"/>
+        <package name="w3m"/>
+        <package name="ncurses-utils"/>
+        <package name="klogd"/>
+        <package name="elfutils"/>
+        <package name="cracklib-dict-full"/>
+        <package name="openssh"/>
+        <package name="suseRegister"/>
+        <package name="openssl-certs"/>
+        <package name="vim-base"/>
+        <package name="vim"/>
+        <package name="tar"/>
+        <package name="timezone"/>
+        <package name="ifplugd"/>
+        <package name="branding-SLES"/>
+        <package name="release-notes-sles"/>
+        <package name="glib2-branding-SLES"/>
+        <package name="lvm2"/>
+        <package name="syslinux"/>
+    </packages>
+    <packages type="image" profiles="vmxFlavour-uefi,xenFlavour-uefi">
+        <package name="grub2-x86_64-efi" arch="x86_64" bootinclude="true"/>
+        <package name="shim" arch="x86_64" bootinclude="true"/>
+        <package name="bootsplash-branding-SLES" bootinclude="true" bootdelete="true"/>
+        <package name="gfxboot-branding-SLES" bootinclude="true" bootdelete="true"/>
+        <package name="elilo"/>
+    </packages>
+    <packages type="image" profiles="vmxFlavour,xenFlavour">
+        <package name="grub"/>
+        <package name="bootsplash-branding-SLES" bootinclude="true" bootdelete="true"/>
+        <package name="gfxboot-branding-SLES" bootinclude="true" bootdelete="true"/>
+    </packages>
+    <packages type="image" profiles="vmxFlavour-s390">
+        <package name="zipl"/>
+    </packages>
+    <packages type="image" profiles="ec2Flavour">
+        <package name="kernel-ec2" replaces="kernel-xen"/>
+        <package name="kernel-ec2" replaces="kernel-xen-base"/>
+        <package name="kernel-ec2" replaces="kernel-default"/>
+        <package name="kernel-ec2-base" replaces="kernel-default-base"/>
+        <package name="xen-tools-domU" arch="x86_64" replaces=""/>
+        <package name="xen" arch="x86_64" replaces=""/>
+    </packages>
+    <packages type="image" profiles="xenFlavour,xenFlavour-uefi">
+        <package name="kernel-xen" replaces="kernel-ec2"/>
+        <package name="kernel-xen" replaces="kernel-ec2-base"/>
+        <package name="kernel-xen" replaces="kernel-default"/>
+        <package name="kernel-xen-base" replaces="kernel-default-base"/>
+        <package name="xen-tools-domU" replaces=""/>
+        <package name="xen" replaces=""/>
+    </packages>
+    <packages type="image" profiles="vmxFlavour,vmxFlavour-s390,vmxFlavour-uefi">
+        <package name="kernel-default" replaces="kernel-ec2"/>
+        <package name="kernel-default" replaces="kernel-xen"/>
+        <package name="kernel-default-base" replaces="kernel-ec2-base"/>
+        <package name="kernel-default-base" replaces="kernel-xen-base"/>
+        <package name="kernel-default-base" replaces="xen-tools-domU"/>
+        <package name="kernel-default-base" replaces="xen"/>
+    </packages>
+    <packages type="bootstrap">
+        <package name="filesystem"/>
+        <package name="glibc-locale"/>
+        <package name="cracklib-dict-full"/>
+        <package name="openssl-certs"/>
+    </packages>
 </image>

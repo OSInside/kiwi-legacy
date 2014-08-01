@@ -29,7 +29,7 @@ Echo "Calling pre-init stage in system image"
 # 2) check for LOCAL_BOOT
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "yes" ];then
-  exit 0
+    exit 0
 fi
 
 #======================================
@@ -52,30 +52,30 @@ createFramebufferDevices
 # 6) create /etc/ImagePackages
 #--------------------------------------
 if [ -x /bin/rpm ];then
-  Echo "Creating initial image package info file"
-  rpm -qa --last > /etc/ImagePackages
+    Echo "Creating initial image package info file"
+    rpm -qa --last > /etc/ImagePackages
 fi
 
 #======================================
 # 7) create initrd on diskful
 #--------------------------------------
 if [ -z "$UNIONFS_CONFIG" ] && [ -z "$COMBINED_IMAGE" ]; then
-  #======================================
-  # use distro initrd tool
-  #--------------------------------------
-  setupInitrd
+    #======================================
+    # use distro initrd tool
+    #--------------------------------------
+    setupInitrd
 else
-  #======================================
-  # use kiwi initrd from RW partition
-  #--------------------------------------
-  bootLoaderOK=1
+    #======================================
+    # use kiwi initrd from RW partition
+    #--------------------------------------
+    bootLoaderOK=1
 fi
 
 #======================================
 # 8) Install boot loader if ok
 #--------------------------------------
 if [ $bootLoaderOK = 1 ];then
-  installBootLoader
+    installBootLoader
 fi
 
 #======================================

@@ -35,7 +35,7 @@ rhelGFXBoot SLES isolinux
 # Keep UTF-8 locale
 #--------------------------------------
 baseStripLocales \
-  $(for i in $(echo $kiwi_language | tr "," " ");do echo -n "$i.utf8 ";done)
+    $(for i in $(echo $kiwi_language | tr "," " ");do echo -n "$i.utf8 ";done)
 baseStripTranslations kiwi.mo
 
 #======================================

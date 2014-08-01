@@ -174,8 +174,8 @@ documentation can be found here: http://doc.opensuse.org
 
 Authors:
 --------
-    Marcus Schaefer <ms@suse.com>
-    Robert Schweikert <rjschwei@suse.com>
+        Marcus Schaefer <ms@suse.com>
+        Robert Schweikert <rjschwei@suse.com>
 
 %package -n kiwi-requires
 Summary:        KIWI - buildservice package requirements
@@ -225,8 +225,8 @@ the image creation process afterwards. This package allows using the
 
 Authors:
 --------
-  Adrian Schroeter <adrian@suse.com>
-  Stephan Kulow <coolo@suse.com>
+    Adrian Schroeter <adrian@suse.com>
+    Stephan Kulow <coolo@suse.com>
 
 %package -n kiwi-doc
 Summary:        KIWI - Appliance Builder Documentation
@@ -242,8 +242,8 @@ the KIWI image builder.
 
 Authors:
 --------
-    Thomas Schraitle <toms@suse.com>
-    Marcus Schaefer <ms@suse.com>
+        Thomas Schraitle <toms@suse.com>
+        Marcus Schaefer <ms@suse.com>
 
 %package -n kiwi-tools
 Summary:        KIWI - Collection of Boot Helper Tools
@@ -258,7 +258,7 @@ outside of the scope of kiwi appliance building.
 
 Authors:
 --------
-    Marcus Schaefer <ms@suse.com>
+        Marcus Schaefer <ms@suse.com>
 
 %ifarch %ix86 x86_64
 
@@ -289,7 +289,7 @@ needed to serve kiwi built images via PXE.
 
 Authors:
 --------
-    Marcus Schaefer <ms@suse.com>
+        Marcus Schaefer <ms@suse.com>
 %endif
 
 %ifarch %ix86 x86_64
@@ -314,7 +314,7 @@ live ISO images.
 
 Authors:
 --------
-    Marcus Schaefer <ms@suse.com>
+        Marcus Schaefer <ms@suse.com>
 
 %package -n kiwi-desc-isoboot-requires
 Provides:       kiwi-image:iso
@@ -377,7 +377,7 @@ virtual disk images.
 
 Authors:
 --------
-    Marcus Schaefer <ms@suse.com>
+        Marcus Schaefer <ms@suse.com>
 
 %package -n kiwi-desc-vmxboot-requires
 Summary:        KIWI - buildservice package requirements for vmxboot
@@ -429,7 +429,7 @@ kiwi boot (initrd) image for booting PXE images.
 
 Authors:
 --------
-    Marcus Schaefer <ms@suse.com>
+        Marcus Schaefer <ms@suse.com>
 
 %package -n kiwi-desc-netboot-requires
 Provides:       kiwi-image:pxe
@@ -484,7 +484,7 @@ expandable virtual disk images.
 
 Authors:
 --------
-    Marcus Schaefer <ms@suse.com>
+        Marcus Schaefer <ms@suse.com>
 
 %package -n kiwi-desc-oemboot-requires
 Provides:       kiwi-image:oem
@@ -539,7 +539,7 @@ a JeOS based operating system image with kiwi
 
 Authors:
 --------
-    Marcus Schaefer <ms@suse.com>
+        Marcus Schaefer <ms@suse.com>
 %endif
 
 %ifarch %ix86 x86_64 ppc ppc64 ppc64le s390 s390x %arm aarch64
@@ -577,7 +577,7 @@ distributed source media (DVD)
 
 Authors:
 --------
-    Marcus Schaefer <ms@suse.com>
+        Marcus Schaefer <ms@suse.com>
 %endif
 
 %package -n kiwi-test
@@ -596,8 +596,8 @@ used for development testing.
 
 Authors:
 --------
-    Robert Schweikert <rjschwei@suse.com>
-    Marcus Schaefer <ms@suse.com>
+        Robert Schweikert <rjschwei@suse.com>
+        Marcus Schaefer <ms@suse.com>
 
 %prep
 %setup -q -n %name -a2 -a3
@@ -618,26 +618,26 @@ make buildroot=$RPM_BUILD_ROOT CFLAGS="$RPM_OPT_FLAGS"
 #install
 cd $RPM_BUILD_DIR/kiwi
 make buildroot=$RPM_BUILD_ROOT \
-     doc_prefix=$RPM_BUILD_ROOT/%{_defaultdocdir} \
-     man_prefix=$RPM_BUILD_ROOT/%{_mandir} \
-     install
+         doc_prefix=$RPM_BUILD_ROOT/%{_defaultdocdir} \
+         man_prefix=$RPM_BUILD_ROOT/%{_mandir} \
+         install
 touch kiwi.loader
 
 %ifarch %ix86 x86_64
-  install -m 644 pxeboot/pxelinux.0.config \
-    $RPM_BUILD_ROOT/srv/tftpboot/pxelinux.cfg/default.default
+    install -m 644 pxeboot/pxelinux.0.config \
+        $RPM_BUILD_ROOT/srv/tftpboot/pxelinux.cfg/default.default
 %else
-  # no PXE boot setup for non x86 archs
-  rm -rf $RPM_BUILD_ROOT/srv/tftpboot
-  rm -rf $RPM_BUILD_ROOT/etc/permissions.d/kiwi
+    # no PXE boot setup for non x86 archs
+    rm -rf $RPM_BUILD_ROOT/srv/tftpboot
+    rm -rf $RPM_BUILD_ROOT/etc/permissions.d/kiwi
 %endif
 
 mkdir -p $RPM_BUILD_ROOT/var/cache/kiwi
 
 test -f $RPM_BUILD_ROOT/srv/tftpboot/pxelinux.0 && \
-  echo /srv/tftpboot/pxelinux.0 > kiwi.loader
+    echo /srv/tftpboot/pxelinux.0 > kiwi.loader
 test -f $RPM_BUILD_ROOT/srv/tftpboot/mboot.c32 && \
-  echo /srv/tftpboot/mboot.c32 >> kiwi.loader
+    echo /srv/tftpboot/mboot.c32 >> kiwi.loader
 ./.links
 %if 0%{?suse_version} > 1020
 %fdupes $RPM_BUILD_ROOT/srv/tftpboot
@@ -654,13 +654,13 @@ rm -f $RPM_BUILD_ROOT/usr/bin/setctsid
 %endif
 
 for i in isoboot vmxboot netboot oemboot ; do
-  if [ -d  $RPM_BUILD_ROOT/%{_datadir}/kiwi/image/$i ]; then
-    cat > $RPM_BUILD_ROOT/%{_datadir}/kiwi/image/$i/README.requires <<EOF
+    if [ -d  $RPM_BUILD_ROOT/%{_datadir}/kiwi/image/$i ]; then
+        cat > $RPM_BUILD_ROOT/%{_datadir}/kiwi/image/$i/README.requires <<EOF
 This is a meta package to pull in all dependencies required for $i kiwi
 images. This is supposed to be used in Open Build Service in first place
 to track the dependencies.
 EOF
-  fi
+    fi
 done
 cat > $RPM_BUILD_ROOT/%{_datadir}/kiwi/README.requires <<EOF
 This is a meta package to pull in all base dependencies required for kiwi
@@ -673,19 +673,19 @@ EOF
 #============================================================
 # create user and group tftp if they does not exist
 if ! /usr/bin/getent group tftp >/dev/null; then
-  %{_sbindir}/groupadd -r tftp 2>/dev/null || :
+    %{_sbindir}/groupadd -r tftp 2>/dev/null || :
 fi
 if ! /usr/bin/getent passwd tftp >/dev/null; then
-  %{_sbindir}/useradd -c "TFTP account" -d /srv/tftpboot -G tftp -g tftp \
-    -r -s /bin/false tftp 2>/dev/null || :
+    %{_sbindir}/useradd -c "TFTP account" -d /srv/tftpboot -G tftp -g tftp \
+        -r -s /bin/false tftp 2>/dev/null || :
 fi
 
 %post -n kiwi-pxeboot
 #============================================================
 # create /srv/tftpboot/pxelinux.cfg/default only if not exist
 if ( [ ! -e srv/tftpboot/pxelinux.cfg/default  ] ) ; then
-  cp /srv/tftpboot/pxelinux.cfg/default.default \
-    /srv/tftpboot/pxelinux.cfg/default
+    cp /srv/tftpboot/pxelinux.cfg/default.default \
+        /srv/tftpboot/pxelinux.cfg/default
 fi
 %endif
 
@@ -696,7 +696,7 @@ fi
 # Clean up old old template directories if the exists
 oldDists=( 10.1 10.2 10.3 11.0 11.1 11.2 11.3 12.1 SLE10 SLED10 )
 for dist in ${oldDists[@]};do
-  rm -rf /usr/share/kiwi/image/suse-$dist-JeOS
+    rm -rf /usr/share/kiwi/image/suse-$dist-JeOS
 done
 %endif
 

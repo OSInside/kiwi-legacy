@@ -1,109 +1,109 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
-                         "http://www.docbook.org/xml/4.5/docbookx.dtd">
+                                                 "http://www.docbook.org/xml/4.5/docbookx.dtd">
 
 <chapter id="chap.installation">
-  <title>Installation</title>
-  <indexterm>
-    <primary>KIWI</primary>
-    <secondary>Installation</secondary>
-  </indexterm>
+    <title>Installation</title>
+    <indexterm>
+        <primary>KIWI</primary>
+        <secondary>Installation</secondary>
+    </indexterm>
 
-  <sect1 id="sec.installation.rpminstall">
-    <title>Installing using Packages</title>
-    <para>Once you have added the appropriate repositories (more on
-      this below) to your system you can search for the kiwi packages through
-      the YaST interface or using <command>zypper</command> as shown
-      below.</para>
-      
-    <screen><command>zypper</command> se kiwi</screen>
+    <sect1 id="sec.installation.rpminstall">
+        <title>Installing using Packages</title>
+        <para>Once you have added the appropriate repositories (more on
+            this below) to your system you can search for the kiwi packages through
+            the YaST interface or using <command>zypper</command> as shown
+            below.</para>
+            
+        <screen><command>zypper</command> se kiwi</screen>
 
-    <para>The list of packages returned by zypper contains the main package,
-      simply named <filename>kiwi-</filename>, the
-      <filename>-doc</filename> package containing the documentation files,
-      and  the <filename>-desc-</filename> packages containing the boot
-      descriptions for the various image types. Installing this set of
-      packages is sufficient to build your images.</para>
+        <para>The list of packages returned by zypper contains the main package,
+            simply named <filename>kiwi-</filename>, the
+            <filename>-doc</filename> package containing the documentation files,
+            and  the <filename>-desc-</filename> packages containing the boot
+            descriptions for the various image types. Installing this set of
+            packages is sufficient to build your images.</para>
 
-    <para>Adding repositories to your system can be accomplished using the
-      YaST interface or the <command>zypper ar</command> command.</para>
-      
-    <sect2 id="sec.installation.distropckgs">
-      <title>Distribution Provided Packages</title>
-      <para>The simplest and most straight forward way to install KIWI is
-        to use the packages that are part of the SUSE distribution you are
-        running. In openSUSE the kiwi packages are part of the "standard"
-        distribution and in SUSE Linux Enterprise kiwi packages are available
-        in the SDK channel.</para>
-    </sect2>
+        <para>Adding repositories to your system can be accomplished using the
+            YaST interface or the <command>zypper ar</command> command.</para>
+            
+        <sect2 id="sec.installation.distropckgs">
+            <title>Distribution Provided Packages</title>
+            <para>The simplest and most straight forward way to install KIWI is
+                to use the packages that are part of the SUSE distribution you are
+                running. In openSUSE the kiwi packages are part of the "standard"
+                distribution and in SUSE Linux Enterprise kiwi packages are available
+                in the SDK channel.</para>
+        </sect2>
 
-    <sect2 id="sec.installation.studioversion">
-      <title>Packages used by SUSE Studio</title>
-      <para>If you use SUSE Studio to set up your configuration and then export
-        it to build locally on your machine you want to make sure to use the
-        same version of KIWI that SUSE Studio uses to build images. This
-        version of KIWI which most often differs from the version released
-        with a given distribution is available from the openSUSE Build
-        Service. The repository you want to add to your system is
-        <filename>http://download.opensuse.org/repositories/home:/ctso/<!--
-        --><replaceable>DISTRO</replaceable></filename>.</para>
-  
-      <para>Once you have the repository added to your system you can search
-        for the kiwi packages and install them as described above.</para>
-    </sect2>
+        <sect2 id="sec.installation.studioversion">
+            <title>Packages used by SUSE Studio</title>
+            <para>If you use SUSE Studio to set up your configuration and then export
+                it to build locally on your machine you want to make sure to use the
+                same version of KIWI that SUSE Studio uses to build images. This
+                version of KIWI which most often differs from the version released
+                with a given distribution is available from the openSUSE Build
+                Service. The repository you want to add to your system is
+                <filename>http://download.opensuse.org/repositories/home:/ctso/<!--
+                --><replaceable>DISTRO</replaceable></filename>.</para>
+    
+            <para>Once you have the repository added to your system you can search
+                for the kiwi packages and install them as described above.</para>
+        </sect2>
 
-    <sect2 id="sec.installation.develreleases">
-      <title>Packages for Development Releases</title>
-      <para>KIWI is under active development and changes almost on a daily
-        basis. The development code is generally released once a week on
-        Friday. Sometimes the development releases contain new bugs that break
-        existing builds. Therefore, this is not necessarily the best release
-        stream to track if you are looking for critical on time builds of
-        already configured appliances. However, tracking this stream provides
-        a great opportunity for you to help in detecting such bugs and by
-        reporting them on the mailing list you can help the developers. Any
-        regression fixes are generally released as soon as they are completed.
-        Thus, there is no need to wait until the next scheduled release on a
-        Friday. If you add the <filename>http://download.opensuse.org/<!--
-          -->repositories/Virtualization:/Appliances/<!--
-          --><replaceable>DISTRO</replaceable></filename> repository to
-       your system you can track the development release.</para>
-  
-      <para>Once you have the repository added to your system you can search
-        for the kiwi packages and install them as described above.</para>
-    </sect2>
+        <sect2 id="sec.installation.develreleases">
+            <title>Packages for Development Releases</title>
+            <para>KIWI is under active development and changes almost on a daily
+                basis. The development code is generally released once a week on
+                Friday. Sometimes the development releases contain new bugs that break
+                existing builds. Therefore, this is not necessarily the best release
+                stream to track if you are looking for critical on time builds of
+                already configured appliances. However, tracking this stream provides
+                a great opportunity for you to help in detecting such bugs and by
+                reporting them on the mailing list you can help the developers. Any
+                regression fixes are generally released as soon as they are completed.
+                Thus, there is no need to wait until the next scheduled release on a
+                Friday. If you add the <filename>http://download.opensuse.org/<!--
+                    -->repositories/Virtualization:/Appliances/<!--
+                    --><replaceable>DISTRO</replaceable></filename> repository to
+             your system you can track the development release.</para>
+    
+            <para>Once you have the repository added to your system you can search
+                for the kiwi packages and install them as described above.</para>
+        </sect2>
 
-  </sect1>
+    </sect1>
 
-  <sect1 id="sec.installation.fromsource">
-    <title>Installing from Source</title>
-    <para>KIWI is developed and maintained in a git repository on GitHub.
-      You can clone the source code using the following command.</para>
+    <sect1 id="sec.installation.fromsource">
+        <title>Installing from Source</title>
+        <para>KIWI is developed and maintained in a git repository on GitHub.
+            You can clone the source code using the following command.</para>
 
-    <screen><command>git</command> clone <!--
-       -->https://github.com/openSUSE/kiwi.git</screen>
+        <screen><command>git</command> clone <!--
+             -->https://github.com/openSUSE/kiwi.git</screen>
 
-    <para>Before installing from source you want to verify that all the
-      dependencies are satisfied. The best way to accomplish this is to
-      install all packages listed as <emphasis>BuildRequires</emphasis>
-      in the <filename>.spec</filename> file found in the
-      <filename>rpm</filename> directory. Once all dependent packages are
-      installed change your working directory to the
-      <filename>kiwi</filename> directory and build and install from
-      source.</para>
+        <para>Before installing from source you want to verify that all the
+            dependencies are satisfied. The best way to accomplish this is to
+            install all packages listed as <emphasis>BuildRequires</emphasis>
+            in the <filename>.spec</filename> file found in the
+            <filename>rpm</filename> directory. Once all dependent packages are
+            installed change your working directory to the
+            <filename>kiwi</filename> directory and build and install from
+            source.</para>
 
-    <screen><command>make</command>
+        <screen><command>make</command>
 <command>make</command> install</screen>
 
-    <para>The KIWI self tests are executed using:</para>
+        <para>The KIWI self tests are executed using:</para>
 
-    <screen><command>make</command> test</screen>
+        <screen><command>make</command> test</screen>
 
-    <para>If you want to refresh your source with the latest checked in code
-      you can simply pull the latest sources from the GitHub repository
-      using the command shown below.</para>
+        <para>If you want to refresh your source with the latest checked in code
+            you can simply pull the latest sources from the GitHub repository
+            using the command shown below.</para>
 
-    <screen><command>git</command> pull</screen>
+        <screen><command>git</command> pull</screen>
 
-  </sect1>
+    </sect1>
 </chapter>

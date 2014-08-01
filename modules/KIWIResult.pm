@@ -33,454 +33,454 @@ use KIWIQX;
 # Constructor
 #------------------------------------------
 sub new {
-  # ...
-  # Create a new KIWIResult object
-  # ---
-  #==========================================
-  # Object setup
-  #------------------------------------------
-  my $this  = {};
-  my $class = shift;
-  bless $this,$class;
-  #==========================================
-  # Module Parameters
-  #------------------------------------------
-  my $sourcedir = shift;
-  my $destdir   = shift;
-  my $buildnr   = shift;
-  #==========================================
-  # Parameter check
-  #------------------------------------------
-  my $kiwi = KIWILog->instance();
-  if (-d $destdir) {
-    $kiwi -> error ("Destination dir $destdir already exists");
-    $kiwi -> failed();
-    return;
-  }
-  if (! $sourcedir) {
-    $kiwi -> error ("No image source directory specified");
-    $kiwi -> failed();
-    return;
-  }
-  if (! $buildnr) {
-    $kiwi -> error ("No build-id specified");
-    $kiwi -> failed();
-    return;
-  }
-  #==========================================
-  # read in build information file
-  #------------------------------------------
-  my $file = $sourcedir.'/kiwi.buildinfo';
-  if (! -e $file) {
-    $kiwi -> error ("Can't find $file");
-    $kiwi -> failed ();
-    return;
-  }
-  my $buildinfo = Config::IniFiles -> new (
-    -file => $file, -allowedcommentchars => '#'
-  );
-  my $imagebase = $buildinfo->val('main','image.basename');
-  if (! $imagebase) {
-    $kiwi -> error ("Can't find image.basename");
-    $kiwi -> failed ();
-    return;
-  }
-  #==========================================
-  # create temp. dir
-  #------------------------------------------
-  my $tmpdir = KIWIQX::qxx (
-    "mktemp -qdt kiwiresult.XXXXXX"
-  );
-  my $result = $? >> 8;
-  if ($result != 0) {
-    $kiwi -> error  ("Couldn't create tmp dir: $tmpdir: $!");
-    $kiwi -> failed ();
-    return;
-  }
-  chomp $tmpdir;
-  #==========================================
-  # Store object data
-  #------------------------------------------
-  $this->{imagebase} = $imagebase;
-  $this->{tmpdir}    = $tmpdir;
-  $this->{buildinfo} = $buildinfo;
-  $this->{kiwi}      = $kiwi;
-  $this->{sourcedir} = $sourcedir;
-  $this->{destdir}   = $destdir;
-  $this->{buildnr}   = $buildnr;
-  return $this;
+    # ...
+    # Create a new KIWIResult object
+    # ---
+    #==========================================
+    # Object setup
+    #------------------------------------------
+    my $this  = {};
+    my $class = shift;
+    bless $this,$class;
+    #==========================================
+    # Module Parameters
+    #------------------------------------------
+    my $sourcedir = shift;
+    my $destdir   = shift;
+    my $buildnr   = shift;
+    #==========================================
+    # Parameter check
+    #------------------------------------------
+    my $kiwi = KIWILog->instance();
+    if (-d $destdir) {
+        $kiwi -> error ("Destination dir $destdir already exists");
+        $kiwi -> failed();
+        return;
+    }
+    if (! $sourcedir) {
+        $kiwi -> error ("No image source directory specified");
+        $kiwi -> failed();
+        return;
+    }
+    if (! $buildnr) {
+        $kiwi -> error ("No build-id specified");
+        $kiwi -> failed();
+        return;
+    }
+    #==========================================
+    # read in build information file
+    #------------------------------------------
+    my $file = $sourcedir.'/kiwi.buildinfo';
+    if (! -e $file) {
+        $kiwi -> error ("Can't find $file");
+        $kiwi -> failed ();
+        return;
+    }
+    my $buildinfo = Config::IniFiles -> new (
+        -file => $file, -allowedcommentchars => '#'
+    );
+    my $imagebase = $buildinfo->val('main','image.basename');
+    if (! $imagebase) {
+        $kiwi -> error ("Can't find image.basename");
+        $kiwi -> failed ();
+        return;
+    }
+    #==========================================
+    # create temp. dir
+    #------------------------------------------
+    my $tmpdir = KIWIQX::qxx (
+        "mktemp -qdt kiwiresult.XXXXXX"
+    );
+    my $result = $? >> 8;
+    if ($result != 0) {
+        $kiwi -> error  ("Couldn't create tmp dir: $tmpdir: $!");
+        $kiwi -> failed ();
+        return;
+    }
+    chomp $tmpdir;
+    #==========================================
+    # Store object data
+    #------------------------------------------
+    $this->{imagebase} = $imagebase;
+    $this->{tmpdir}    = $tmpdir;
+    $this->{buildinfo} = $buildinfo;
+    $this->{kiwi}      = $kiwi;
+    $this->{sourcedir} = $sourcedir;
+    $this->{destdir}   = $destdir;
+    $this->{buildnr}   = $buildnr;
+    return $this;
 }
 
 #==========================================
 # buildRelease
 #------------------------------------------
 sub buildRelease {
-  # ...
-  # bundle result image files into a tmpdir and skip
-  # intermediate build results as well as the build
-  # metadata. The result files will contain the
-  # given build number
-  # ---
-  my $this = shift;
-  my $buildnr = $this->{buildnr};
-  my $kiwi = $this->{kiwi};
-  my $buildinfo = $this->{buildinfo};
-  my $result;
-  $kiwi -> info ("Bundle build results for release: $buildnr\n");
-  #==========================================
-  # Evaluate bundler method
-  #------------------------------------------
-  my $type = $buildinfo->val('main','image.type');
-  if (! $type) {
-    $kiwi -> info ("--> Calling default bundler\n");
-    $result = $this -> __bundleDefault();
+    # ...
+    # bundle result image files into a tmpdir and skip
+    # intermediate build results as well as the build
+    # metadata. The result files will contain the
+    # given build number
+    # ---
+    my $this = shift;
+    my $buildnr = $this->{buildnr};
+    my $kiwi = $this->{kiwi};
+    my $buildinfo = $this->{buildinfo};
+    my $result;
+    $kiwi -> info ("Bundle build results for release: $buildnr\n");
+    #==========================================
+    # Evaluate bundler method
+    #------------------------------------------
+    my $type = $buildinfo->val('main','image.type');
+    if (! $type) {
+        $kiwi -> info ("--> Calling default bundler\n");
+        $result = $this -> __bundleDefault();
+        $this->DESTROY if ! $result;
+        return $result;
+    }
+    if ($type eq 'product') {
+        $kiwi -> info ("--> Calling product bundler\n");
+        $result = $this -> __bundleProduct();
+    } elsif ($type eq 'docker') {
+        $kiwi -> info ("--> Calling docker bundler\n");
+        $result = $this -> __bundleDocker();
+    } elsif ($type eq 'lxc') {
+        $kiwi -> info ("--> Calling LXC bundler\n");
+        $result = $this -> __bundleLXC();
+    } elsif ($type eq 'iso') {
+        $kiwi -> info ("--> Calling ISO bundler\n");
+        $result = $this -> __bundleISO();
+    } elsif ($type eq 'tbz') {
+        $kiwi -> info ("--> Calling TBZ bundler\n");
+        $result = $this -> __bundleTBZ();
+    } elsif ($type eq 'vmx') {
+        $kiwi -> info ("--> Calling Disk VMX bundler\n");
+        $result = $this -> __bundleDisk();
+    } elsif ($type eq 'oem') {
+        $kiwi -> info ("--> Calling Disk OEM bundler\n");
+        $result = $this -> __bundleDisk();
+    } else {
+        $kiwi -> info ("--> Calling default bundler\n");
+        $result = $this -> __bundleDefault();
+    }
     $this->DESTROY if ! $result;
     return $result;
-  }
-  if ($type eq 'product') {
-    $kiwi -> info ("--> Calling product bundler\n");
-    $result = $this -> __bundleProduct();
-  } elsif ($type eq 'docker') {
-    $kiwi -> info ("--> Calling docker bundler\n");
-    $result = $this -> __bundleDocker();
-  } elsif ($type eq 'lxc') {
-    $kiwi -> info ("--> Calling LXC bundler\n");
-    $result = $this -> __bundleLXC();
-  } elsif ($type eq 'iso') {
-    $kiwi -> info ("--> Calling ISO bundler\n");
-    $result = $this -> __bundleISO();
-  } elsif ($type eq 'tbz') {
-    $kiwi -> info ("--> Calling TBZ bundler\n");
-    $result = $this -> __bundleTBZ();
-  } elsif ($type eq 'vmx') {
-    $kiwi -> info ("--> Calling Disk VMX bundler\n");
-    $result = $this -> __bundleDisk();
-  } elsif ($type eq 'oem') {
-    $kiwi -> info ("--> Calling Disk OEM bundler\n");
-    $result = $this -> __bundleDisk();
-  } else {
-    $kiwi -> info ("--> Calling default bundler\n");
-    $result = $this -> __bundleDefault();
-  }
-  $this->DESTROY if ! $result;
-  return $result;
 }
 
 #==========================================
 # populateRelease
 #------------------------------------------
 sub populateRelease {
-  # ...
-  # Move files from tmpdir back to destdir and
-  # delete level 1 files from the destdir before
-  # ---
-  my $this   = shift;
-  my $kiwi   = $this->{kiwi};
-  my $dest   = $this->{destdir};
-  my $tmpdir = $this->{tmpdir};
-  $kiwi -> info (
-    "Populating build results to: $dest\n"
-  );
-  #==========================================
-  # copy build meta data
-  #------------------------------------------
-  if (! $this -> __bundleMeta()) {
+    # ...
+    # Move files from tmpdir back to destdir and
+    # delete level 1 files from the destdir before
+    # ---
+    my $this   = shift;
+    my $kiwi   = $this->{kiwi};
+    my $dest   = $this->{destdir};
+    my $tmpdir = $this->{tmpdir};
+    $kiwi -> info (
+        "Populating build results to: $dest\n"
+    );
+    #==========================================
+    # copy build meta data
+    #------------------------------------------
+    if (! $this -> __bundleMeta()) {
+        $this->DESTROY;
+        return;
+    }
+    #==========================================
+    # populate results
+    #------------------------------------------
+    my $status = KIWIQX::qxx (
+        "mkdir -p $dest && mv $tmpdir/* $dest/ 2>&1"
+    );
+    my $result = $? >> 8;
+    if ($result != 0) {
+        $kiwi -> error  ("Failed to populate results: $status");
+        $kiwi -> failed ();
+        $this->DESTROY;
+        return;
+    }
+    #==========================================
+    # cleanup
+    #------------------------------------------
     $this->DESTROY;
-    return;
-  }
-  #==========================================
-  # populate results
-  #------------------------------------------
-  my $status = KIWIQX::qxx (
-    "mkdir -p $dest && mv $tmpdir/* $dest/ 2>&1"
-  );
-  my $result = $? >> 8;
-  if ($result != 0) {
-    $kiwi -> error  ("Failed to populate results: $status");
-    $kiwi -> failed ();
-    $this->DESTROY;
-    return;
-  }
-  #==========================================
-  # cleanup
-  #------------------------------------------
-  $this->DESTROY;
-  return $this;
+    return $this;
 }
 
 #==========================================
 # __bundleMeta
 #------------------------------------------
 sub __bundleMeta {
-  my $this   = shift;
-  my $kiwi   = $this->{kiwi};
-  my $source = $this->{sourcedir};
-  my $tmpdir = $this->{tmpdir};
-  my $bnr    = $this->{buildnr};
-  my $base   = $this->{imagebase};
-  my @meta   = (
-    'packages','verified','channel'
-  );
-  my $data;
-  my $code;
-  foreach my $suffix (@meta) {
-    my $meta = "$source/$base.$suffix";
-    if (-e $meta) {
-      $data = KIWIQX::qxx (
-        "cp $meta $tmpdir/$base-$bnr.$suffix 2>&1"
-      );
-      $code = $? >> 8;
-      if ($code != 0) {
-        $kiwi -> error  ("Failed to copy $meta: $data");
-        $kiwi -> failed ();
-        return;
-      }
+    my $this   = shift;
+    my $kiwi   = $this->{kiwi};
+    my $source = $this->{sourcedir};
+    my $tmpdir = $this->{tmpdir};
+    my $bnr    = $this->{buildnr};
+    my $base   = $this->{imagebase};
+    my @meta   = (
+        'packages','verified','channel'
+    );
+    my $data;
+    my $code;
+    foreach my $suffix (@meta) {
+        my $meta = "$source/$base.$suffix";
+        if (-e $meta) {
+            $data = KIWIQX::qxx (
+                "cp $meta $tmpdir/$base-$bnr.$suffix 2>&1"
+            );
+            $code = $? >> 8;
+            if ($code != 0) {
+                $kiwi -> error  ("Failed to copy $meta: $data");
+                $kiwi -> failed ();
+                return;
+            }
+        }
     }
-  }
-  return $this;
+    return $this;
 }
 
 #==========================================
 # __bundleDefault
 #------------------------------------------
 sub __bundleDefault {
-  my $this   = shift;
-  my $kiwi   = $this->{kiwi};
-  my $source = $this->{sourcedir};
-  my $tmpdir = $this->{tmpdir};
-  my $bnr    = $this->{buildnr};
-  my $base   = $this->{imagebase};
-  my @excl   = (
-    '--exclude *.buildinfo',
-    '--exclude *.verified',
-    '--exclude *.packages'
-  );
-  my $opts = '--no-recursion';
-  my $data = KIWIQX::qxx (
-    "cd $source && find . -maxdepth 1 -type f 2>&1"
-  );
-  my $code = $? >> 8;
-  if ($code == 0) {
-    my @flist = split(/\n/,$data);
-    $data = KIWIQX::qxx (
-      "cd $source && tar $opts -czf $tmpdir/$base-$bnr.tgz @excl @flist"
+    my $this   = shift;
+    my $kiwi   = $this->{kiwi};
+    my $source = $this->{sourcedir};
+    my $tmpdir = $this->{tmpdir};
+    my $bnr    = $this->{buildnr};
+    my $base   = $this->{imagebase};
+    my @excl   = (
+        '--exclude *.buildinfo',
+        '--exclude *.verified',
+        '--exclude *.packages'
     );
-    $code = $? >> 8;
-  }
-  if ($code != 0) {
-    $kiwi -> error  ("Failed to archive results: $data");
-    $kiwi -> failed ();
-    return;
-  }
-  return $this;
+    my $opts = '--no-recursion';
+    my $data = KIWIQX::qxx (
+        "cd $source && find . -maxdepth 1 -type f 2>&1"
+    );
+    my $code = $? >> 8;
+    if ($code == 0) {
+        my @flist = split(/\n/,$data);
+        $data = KIWIQX::qxx (
+            "cd $source && tar $opts -czf $tmpdir/$base-$bnr.tgz @excl @flist"
+        );
+        $code = $? >> 8;
+    }
+    if ($code != 0) {
+        $kiwi -> error  ("Failed to archive results: $data");
+        $kiwi -> failed ();
+        return;
+    }
+    return $this;
 }
 
 #==========================================
 # __bundleExtension
 #------------------------------------------
 sub __bundleExtension {
-  my $this   = shift;
-  my $suffix = shift;
-  my $base   = shift;
-  my $kiwi   = $this->{kiwi};
-  my $source = $this->{sourcedir};
-  my $tmpdir = $this->{tmpdir};
-  my $bnr    = $this->{buildnr};
-  my $data;
-  if (! $base) {
-    $base = $this->{imagebase};
-  }
-  if ($suffix =~ /raw/) {
-    # compress this bundle using xz
-    $data = KIWIQX::qxx (
-      "xz -kc $source/$base.$suffix >$tmpdir/$base-$bnr.$suffix.xz 2>&1"
-    );
-  } else {
-    # default bundle handling is a copy
-    $data = KIWIQX::qxx (
-      "cp $source/$base.$suffix $tmpdir/$base-$bnr.$suffix 2>&1"
-    );
-  }
-  my $code = $? >> 8;
-  if ($code != 0) {
-    $kiwi -> error  ("Failed to copy $suffix image: $data");
-    $kiwi -> failed ();
-    return;
-  }
-  if ($suffix =~ /json|vmx|xenconfig/) {
-    # there is metadata whose contents needs a path update
-    my $file = "$tmpdir/$base-$bnr.$suffix";
-    $data = KIWIQX::qxx (
-      "sed -i -e 's/$base/$base-$bnr/' $file 2>&1"
-    );
+    my $this   = shift;
+    my $suffix = shift;
+    my $base   = shift;
+    my $kiwi   = $this->{kiwi};
+    my $source = $this->{sourcedir};
+    my $tmpdir = $this->{tmpdir};
+    my $bnr    = $this->{buildnr};
+    my $data;
+    if (! $base) {
+        $base = $this->{imagebase};
+    }
+    if ($suffix =~ /raw/) {
+        # compress this bundle using xz
+        $data = KIWIQX::qxx (
+            "xz -kc $source/$base.$suffix >$tmpdir/$base-$bnr.$suffix.xz 2>&1"
+        );
+    } else {
+        # default bundle handling is a copy
+        $data = KIWIQX::qxx (
+            "cp $source/$base.$suffix $tmpdir/$base-$bnr.$suffix 2>&1"
+        );
+    }
     my $code = $? >> 8;
     if ($code != 0) {
-      $kiwi -> error  (
-        "Failed to update metadata contents of $file: $data"
-      );
-      $kiwi -> failed ();
-      return;
+        $kiwi -> error  ("Failed to copy $suffix image: $data");
+        $kiwi -> failed ();
+        return;
     }
-  }
-  return $this;
+    if ($suffix =~ /json|vmx|xenconfig/) {
+        # there is metadata whose contents needs a path update
+        my $file = "$tmpdir/$base-$bnr.$suffix";
+        $data = KIWIQX::qxx (
+            "sed -i -e 's/$base/$base-$bnr/' $file 2>&1"
+        );
+        my $code = $? >> 8;
+        if ($code != 0) {
+            $kiwi -> error  (
+                "Failed to update metadata contents of $file: $data"
+            );
+            $kiwi -> failed ();
+            return;
+        }
+    }
+    return $this;
 }
 
 #==========================================
 # __bundleProduct
 #------------------------------------------
 sub __bundleProduct {
-  my $this = shift;
-  if ($this -> __bundleExtension ('iso')) {
-    return $this -> __sign_with_sha256sum();
-  }
-  return;
+    my $this = shift;
+    if ($this -> __bundleExtension ('iso')) {
+        return $this -> __sign_with_sha256sum();
+    }
+    return;
 }
 
 #==========================================
 # __bundleDocker
 #------------------------------------------
 sub __bundleDocker {
-  my $this = shift;
-  return $this -> __bundleExtension ('docker');
+    my $this = shift;
+    return $this -> __bundleExtension ('docker');
 }
 
 #==========================================
 # __bundleLXC
 #------------------------------------------
 sub __bundleLXC {
-  my $this = shift;
-  return $this -> __bundleExtension ('lxc');
+    my $this = shift;
+    return $this -> __bundleExtension ('lxc');
 }
 
 #==========================================
 # __bundleISO
 #------------------------------------------
 sub __bundleISO {
-  my $this = shift;
-  return $this -> __bundleExtension ('iso');
+    my $this = shift;
+    return $this -> __bundleExtension ('iso');
 }
 
 #==========================================
 # __bundleTBZ
 #------------------------------------------
 sub __bundleTBZ {
-  my $this = shift;
-  return $this -> __bundleExtension ('tbz');
+    my $this = shift;
+    return $this -> __bundleExtension ('tbz');
 }
 
 #==========================================
 # __bundleDisk
 #------------------------------------------
 sub __bundleDisk {
-  my $this   = shift;
-  my $kiwi   = $this->{kiwi};
-  my $base   = $this->{imagebase};
-  my $source = $this->{sourcedir};
-  my $tmpd   = $this->{tmpdir};
-  my $bnr    = $this->{buildnr};
-  my $buildinfo = $this->{buildinfo};
-  my $data;
-  my $code;
-  #==========================================
-  # handle install media
-  #------------------------------------------
-  if ($buildinfo->exists('main','install.iso')) {
-    return $this -> __bundleExtension ('install.iso');
-  } elsif ($buildinfo->exists('main','install.stick')) {
-    return $this -> __bundleExtension ('install.raw');
-  } elsif ($buildinfo->exists('main','install.pxe')) {
-    return $this -> __bundleExtension ('install.tgz');
-  }
-  #==========================================
-  # handle formats
-  #------------------------------------------
-  my $format = $buildinfo->val('main','image.format');
-  if (! $format) {
-    return $this -> __bundleExtension ('raw');
-  }
-  if ($format eq 'vagrant') {
-    my @boxes = glob ("$source/$base.*.box");
-    if (! @boxes) {
-      $kiwi -> error  ("No box files found");
-      $kiwi -> failed ();
-      return;
+    my $this   = shift;
+    my $kiwi   = $this->{kiwi};
+    my $base   = $this->{imagebase};
+    my $source = $this->{sourcedir};
+    my $tmpd   = $this->{tmpdir};
+    my $bnr    = $this->{buildnr};
+    my $buildinfo = $this->{buildinfo};
+    my $data;
+    my $code;
+    #==========================================
+    # handle install media
+    #------------------------------------------
+    if ($buildinfo->exists('main','install.iso')) {
+        return $this -> __bundleExtension ('install.iso');
+    } elsif ($buildinfo->exists('main','install.stick')) {
+        return $this -> __bundleExtension ('install.raw');
+    } elsif ($buildinfo->exists('main','install.pxe')) {
+        return $this -> __bundleExtension ('install.tgz');
     }
-    foreach my $box (@boxes) {
-      if ($box =~ /$base\.(.*)\.box/) {
-        my $provider = $1;
-        if (! $this -> __bundleExtension('box',"$base.$provider")) {
-          return;
+    #==========================================
+    # handle formats
+    #------------------------------------------
+    my $format = $buildinfo->val('main','image.format');
+    if (! $format) {
+        return $this -> __bundleExtension ('raw');
+    }
+    if ($format eq 'vagrant') {
+        my @boxes = glob ("$source/$base.*.box");
+        if (! @boxes) {
+            $kiwi -> error  ("No box files found");
+            $kiwi -> failed ();
+            return;
         }
-        if (! $this -> __bundleExtension('json',"$base.$provider")) {
-          return;
+        foreach my $box (@boxes) {
+            if ($box =~ /$base\.(.*)\.box/) {
+                my $provider = $1;
+                if (! $this -> __bundleExtension('box',"$base.$provider")) {
+                    return;
+                }
+                if (! $this -> __bundleExtension('json',"$base.$provider")) {
+                    return;
+                }
+            }
         }
-      }
+        return $this;
+    }
+    if (! $this -> __bundleExtension ($format)) {
+        return;
+    }
+    #==========================================
+    # handle machine configuration
+    #------------------------------------------
+    if (-e "$source/$base.vmx") {
+        return $this -> __bundleExtension ('vmx');
+    }
+    if (-e "$source/$base.xenconfig") {
+        return $this -> __bundleExtension ('xenconfig');
     }
     return $this;
-  }
-  if (! $this -> __bundleExtension ($format)) {
-    return;
-  }
-  #==========================================
-  # handle machine configuration
-  #------------------------------------------
-  if (-e "$source/$base.vmx") {
-    return $this -> __bundleExtension ('vmx');
-  }
-  if (-e "$source/$base.xenconfig") {
-    return $this -> __bundleExtension ('xenconfig');
-  }
-  return $this;
 }
 
 #==========================================
 # __sign_with_sha256sum
 #------------------------------------------
 sub __sign_with_sha256sum {
-  my $this   = shift;
-  my $kiwi   = $this->{kiwi};
-  my $tmpdir = $this->{tmpdir};
-  my $dh;
-  if (! opendir($dh, $tmpdir)) {
-    $kiwi -> error  ("Can't open directory: $tmpdir: $!");
-    $kiwi -> failed ();
-    return;
-  }
-  while (my $entry = readdir ($dh)) {
-    next if $entry eq "." || $entry eq "..";
-    next if ! -f $entry;
-    my $alg = 'sha256';
-    my $sha = Digest::SHA->new($alg);
-    if (! $sha) {
-      $kiwi -> error  ("Unsupported Digest::SHA algorithm: $alg");
-      $kiwi -> failed ();
-      return;
+    my $this   = shift;
+    my $kiwi   = $this->{kiwi};
+    my $tmpdir = $this->{tmpdir};
+    my $dh;
+    if (! opendir($dh, $tmpdir)) {
+        $kiwi -> error  ("Can't open directory: $tmpdir: $!");
+        $kiwi -> failed ();
+        return;
     }
-    $sha -> addfile ($tmpdir."/".$entry);
-    my $digest = $sha -> hexdigest;
-    my $fd = FileHandle -> new();
-    if (! $fd -> open (">$tmpdir/$entry.sha256")) {
-      $kiwi -> error ("Can't open file $tmpdir/$entry.sha256: $!");
-      $kiwi -> failed ();
-      return;
+    while (my $entry = readdir ($dh)) {
+        next if $entry eq "." || $entry eq "..";
+        next if ! -f $entry;
+        my $alg = 'sha256';
+        my $sha = Digest::SHA->new($alg);
+        if (! $sha) {
+            $kiwi -> error  ("Unsupported Digest::SHA algorithm: $alg");
+            $kiwi -> failed ();
+            return;
+        }
+        $sha -> addfile ($tmpdir."/".$entry);
+        my $digest = $sha -> hexdigest;
+        my $fd = FileHandle -> new();
+        if (! $fd -> open (">$tmpdir/$entry.sha256")) {
+            $kiwi -> error ("Can't open file $tmpdir/$entry.sha256: $!");
+            $kiwi -> failed ();
+            return;
+        }
+        print $fd $digest."\n";
+        $fd -> close();
     }
-    print $fd $digest."\n";
-    $fd -> close();
-  }
-  closedir $dh;
-  return $this;
+    closedir $dh;
+    return $this;
 }
 
 #==========================================
 # Destructor
 #------------------------------------------
 sub DESTROY {
-  my $this = shift;
-  my $tmpdir = $this->{tmpdir};
-  if (($tmpdir) && (-d $tmpdir)) {
-    KIWIQX::qxx ("rm -rf $tmpdir");
-  }
-  return $this;
+    my $this = shift;
+    my $tmpdir = $this->{tmpdir};
+    if (($tmpdir) && (-d $tmpdir)) {
+        KIWIQX::qxx ("rm -rf $tmpdir");
+    }
+    return $this;
 }
 
 1;

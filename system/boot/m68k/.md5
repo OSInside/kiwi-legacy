@@ -1,10 +1,10 @@
 #!/bin/bash
 
 for dir in `find -type d`;do
-  if [ -f $dir/config.xml ];then
-    pushd $dir &>/dev/null
-    find -L -type f | grep -v .svn | grep -v .checksum.md5 |\
-      xargs md5sum > .checksum.md5
-    popd &>/dev/null
-  fi
+    if [ -f $dir/config.xml ];then
+        pushd $dir &>/dev/null
+        find -L -type f | grep -v .svn | grep -v .checksum.md5 |\
+            xargs md5sum > .checksum.md5
+        popd &>/dev/null
+    fi
 done

@@ -1,62 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <image schemaversion="5.7" name="suse-xml-validator-test">
-  <description type="system">
-    <author>Robert Schweikert</author>
-    <contact>rschweikert@novell.</contact>
-    <specification>test patternType usage consistency, no default packages section, diff attribute values reuse profiles</specification>
-  </description>
-  <profiles>
-    <profile name="my-first" description="a first test profile"/>
-    <profile name="my-second" description="a second test profile"/>
-  </profiles>
-  <preferences>
-    <type image="vmx" primary="true" filesystem="ext4" boot="vmxboot/suse-11.3" format="vmdk">
-      <machine memory="1024">
-        <vmdisk controller="ide" id="0"/>
-      </machine>
-    </type>
-    <version>1.0.1</version>
-    <packagemanager>zypper</packagemanager>
-    <rpm-check-signatures>false</rpm-check-signatures>
-    <rpm-force>true</rpm-force>
-    <locale>en_US</locale>
-    <keytable>us.map.gz</keytable>
-  </preferences>
-  <users group="users">
-    <user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/home/tux" name="tux"/>
-  </users>
-  <users group="root">
-    <user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
-  </users>
-  <repository type="yast2">
-    <source path="/tmp"/>
-  </repository>
-  <packages type="image" profiles="my-second">
-  </packages>
-  <packages type="image" profiles="my-second" patternType="plusRecommended">
-  </packages>
-  <packages type="image" profiles="my-first">
-    <package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>
-    <package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
-    <package name="kernel-default"/>
-    <package name="ifplugd"/>
-    <package name="vim"/>
-    <namedCollection name="base"/>
-  </packages>
-  <packages type="image" profiles="my-second" patternType="plusRecommended">
-    <package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>
-    <package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
-    <package name="kernel-default"/>
-    <package name="ifplugd"/>
-    <package name="vim"/>
-    <namedCollection name="base"/>
-  </packages>
-  <packages type="image" profiles="my-first,my-second">
-    <package name="yast2"/>
-  </packages>
-  <packages type="bootstrap">
-    <package name="filesystem"/>
-    <package name="glibc-locale"/>
-  </packages>
+    <description type="system">
+        <author>Robert Schweikert</author>
+        <contact>rschweikert@novell.</contact>
+        <specification>test patternType usage consistency, no default packages section, diff attribute values reuse profiles</specification>
+    </description>
+    <profiles>
+        <profile name="my-first" description="a first test profile"/>
+        <profile name="my-second" description="a second test profile"/>
+    </profiles>
+    <preferences>
+        <type image="vmx" primary="true" filesystem="ext4" boot="vmxboot/suse-11.3" format="vmdk">
+            <machine memory="1024">
+                <vmdisk controller="ide" id="0"/>
+            </machine>
+        </type>
+        <version>1.0.1</version>
+        <packagemanager>zypper</packagemanager>
+        <rpm-check-signatures>false</rpm-check-signatures>
+        <rpm-force>true</rpm-force>
+        <locale>en_US</locale>
+        <keytable>us.map.gz</keytable>
+    </preferences>
+    <users group="users">
+        <user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/home/tux" name="tux"/>
+    </users>
+    <users group="root">
+        <user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
+    </users>
+    <repository type="yast2">
+        <source path="/tmp"/>
+    </repository>
+    <packages type="image" profiles="my-second">
+    </packages>
+    <packages type="image" profiles="my-second" patternType="plusRecommended">
+    </packages>
+    <packages type="image" profiles="my-first">
+        <package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>
+        <package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
+        <package name="kernel-default"/>
+        <package name="ifplugd"/>
+        <package name="vim"/>
+        <namedCollection name="base"/>
+    </packages>
+    <packages type="image" profiles="my-second" patternType="plusRecommended">
+        <package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>
+        <package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
+        <package name="kernel-default"/>
+        <package name="ifplugd"/>
+        <package name="vim"/>
+        <namedCollection name="base"/>
+    </packages>
+    <packages type="image" profiles="my-first,my-second">
+        <package name="yast2"/>
+    </packages>
+    <packages type="bootstrap">
+        <package name="filesystem"/>
+        <package name="glibc-locale"/>
+    </packages>
 </image>

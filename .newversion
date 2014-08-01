@@ -3,28 +3,28 @@
 version=$1
 schema=$2
 if [ -z "$version" ] || [ -z "$schema" ];then
-  echo "Need a version and a schema version"
-  exit 1
+    echo "Need a version and a schema version"
+    exit 1
 fi
 if ! echo $version | grep -q -E "^[0-9]+\.[0-9]+\.[0-9]+$";then
-  echo "NOT A VERSION ! ... abort"
-  exit 1
+    echo "NOT A VERSION ! ... abort"
+    exit 1
 fi
 if ! echo $schema | grep -q -E "^[0-9]+\.[0-9]$";then
-  echo "NOT A SCHEMA VERSION ! ... abort"
-  exit 1
+    echo "NOT A SCHEMA VERSION ! ... abort"
+    exit 1
 fi
 
 # code version update
 cat modules/KIWIGlobals.pm | sed \
-  -e s"@\$data{Version}         = \".*\"@\$data\{Version\}         = \"$version\"@" \
+    -e s"@\$data{Version}         = \".*\"@\$data\{Version\}         = \"$version\"@" \
 > modules/KIWIGlobals.pm.new && mv modules/KIWIGlobals.pm.new modules/KIWIGlobals.pm && chmod 644 modules/KIWIGlobals.pm
 
 # spec file version update
 cat rpm/kiwi.spec | sed \
-  -e "0,/Version:       .*/{s/Version:       .*/Version:        $version/}" \
-  -e s"/kiwi-schema = .*/kiwi-schema = $schema/" \
-  -e s"@kiwi (Version .*@kiwi (Version $version)@" \
+    -e "0,/Version:       .*/{s/Version:       .*/Version:        $version/}" \
+    -e s"/kiwi-schema = .*/kiwi-schema = $schema/" \
+    -e s"@kiwi (Version .*@kiwi (Version $version)@" \
 > rpm/kiwi.spec.new && mv rpm/kiwi.spec.new rpm/kiwi.spec
 
 echo "update to version: ${version}... done"

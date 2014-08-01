@@ -5,14 +5,14 @@ use autotest;
 
 # wait for qemu to start
 while ( !getcurrentscreenshot() ) {
-  sleep 1;
+    sleep 1;
 }
 
 $username = "root";
 $password = "linux";
 
 autotest::loadtestdir(
-  "$scriptdir/distri/$ENV{DISTRI}/test.d"
+    "$scriptdir/distri/$ENV{DISTRI}/test.d"
 );
 
 1;

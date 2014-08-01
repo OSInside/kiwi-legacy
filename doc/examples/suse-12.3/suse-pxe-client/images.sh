@@ -6,13 +6,13 @@ echo "Configure image: [$kiwi_iname]..."
 # remove unneeded packages
 #------------------------------------------
 for i in \
-  info smart python-xml perl-gettext perl-Bootloader openslp \
-  rpm-python suse-build-key python perl xscreensaver \
-  yast2-hardware-detection yast2-xml samba-client \
-  yast2-pkg-bindings yast2 yast2-core docbook_4 docbook_3 \
-  docbook-xsl-stylesheets docbook-dsssl-stylesheets avahi
+    info smart python-xml perl-gettext perl-Bootloader openslp \
+    rpm-python suse-build-key python perl xscreensaver \
+    yast2-hardware-detection yast2-xml samba-client \
+    yast2-pkg-bindings yast2 yast2-core docbook_4 docbook_3 \
+    docbook-xsl-stylesheets docbook-dsssl-stylesheets avahi
 do
-  rpm -e $i --nodeps
+    rpm -e $i --nodeps
 done
 
 #==========================================
