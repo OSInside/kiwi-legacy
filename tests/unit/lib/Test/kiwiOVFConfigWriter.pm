@@ -206,7 +206,7 @@ sub test_getConfigFileName {
     my $state = $kiwi -> getState();
     $this -> assert_str_equals('No state set', $state);
     # Test this condition last to get potential error messages
-    $this -> assert_str_equals('ovfconfig-test.x86_64-1.0.0.ovf', $cName);
+    $this -> assert_matches(qr/ovfconfig-test.*-1.0.0.ovf/sxm, $cName);
     return;
 }
 
@@ -225,9 +225,8 @@ sub test_noImagePresent {
     my $writer = KIWIOVFConfigWriter -> new($xml, '/tmp');
     my $res = $writer -> writeConfigFile();
     my $msg = $kiwi -> getMessage();
-    my $expected = 'Could not find expected image '
-        . "'/tmp/ovfconfig-test.x86_64-1.0.0.vmdk'";
-    $this -> assert_str_equals($expected, $msg);
+    my $expected = 'Could.not.find.expected.image';
+    $this -> assert_matches(qr/$expected/sxm, $msg);
     my $msgT = $kiwi -> getMessageType();
     $this -> assert_str_equals('error', $msgT);
     my $state = $kiwi -> getState();
@@ -293,6 +292,11 @@ sub test_powerWriteNoDVD {
     # ...
     # Test the creation of the config file for Powe
     # ---
+    if ((KIWIQX::qxx ("uname -m")) ne 'x86_64') {
+        print "\t\tInfo: x86_64 arch only, skipping ";
+        print "test_powerWriteNoDVD\n";
+        return;
+    }
     my $this = shift;
     my $kiwi = $this -> {kiwi};
     my $confDir = $this -> {dataDir} . '/powerOVFConfig';
@@ -420,6 +424,11 @@ sub test_vmwareWriteDVDide {
     # ...
     # Test the creation of the config file for VMWare with IDE DVD
     # ---
+    if ((KIWIQX::qxx ("uname -m")) ne 'x86_64') {
+        print "\t\tInfo: x86_64 arch only, skipping ";
+        print "test_vmwareWriteDVDide\n";
+        return;
+    }
     my $this = shift;
     my $kiwi = $this -> {kiwi};
     my $confDir = $this -> {dataDir} . '/dvdIdeConfig';
@@ -465,6 +474,11 @@ sub test_vmwareWriteDVDscsi {
     # ...
     # Test the creation of the config file for VMWare with SCSI DVD
     # ---
+    if ((KIWIQX::qxx ("uname -m")) ne 'x86_64') {
+        print "\t\tInfo: x86_64 arch only, skipping ";
+        print "test_vmwareWriteDVDscsi\n";
+        return;
+    }
     my $this = shift;
     my $kiwi = $this -> {kiwi};
     my $confDir = $this -> {dataDir} . '/dvdScsiConfig';
@@ -510,6 +524,11 @@ sub test_vmwareWriteGenericGuestOS {
     # ...
     # Test the creation of the config file for VMWare with unknown guest OS
     # ---
+    if ((KIWIQX::qxx ("uname -m")) ne 'x86_64') {
+        print "\t\tInfo: x86_64 arch only, skipping ";
+        print "test_vmwareWriteGenericGuestOS\n";
+        return;
+    }
     my $this = shift;
     my $kiwi = $this -> {kiwi};
     my $confDir = $this -> {dataDir} . '/genericGuestOSConfig';
@@ -556,6 +575,11 @@ sub test_vmwareWriteHWver8 {
     # ...
     # Test the creation of the config file for VMWare with HW version 8
     # ---
+    if ((KIWIQX::qxx ("uname -m")) ne 'x86_64') {
+        print "\t\tInfo: x86_64 arch only, skipping ";
+        print "test_vmwareWriteHWver8\n";
+        return;
+    }
     my $this = shift;
     my $kiwi = $this -> {kiwi};
     my $confDir = $this -> {dataDir} . '/hwEightConfig';
@@ -601,6 +625,11 @@ sub test_vmwareWriteIdeCntrl {
     # ...
     # Test the creation of the config file for VMWare with HW version 8
     # ---
+    if ((KIWIQX::qxx ("uname -m")) ne 'x86_64') {
+        print "\t\tInfo: x86_64 arch only, skipping ";
+        print "test_vmwareWriteIdeCntrl\n";
+        return;
+    }
     my $this = shift;
     my $kiwi = $this -> {kiwi};
     my $confDir = $this -> {dataDir} . '/ideCntrlConfig';
@@ -646,6 +675,11 @@ sub test_vmwareWriteKnownGuestOS {
     # ...
     # Test the creation of the config file for VMWare with known guest OS
     # ---
+    if ((KIWIQX::qxx ("uname -m")) ne 'x86_64') {
+        print "\t\tInfo: x86_64 arch only, skipping ";
+        print "test_vmwareWriteKnownGuestOS\n";
+        return;
+    }
     my $this = shift;
     my $kiwi = $this -> {kiwi};
     my @knownDists = qw (rhel rhel-64 sles sles-64 suse suse-64);
@@ -699,6 +733,11 @@ sub test_vmwareWriteMaxCPU {
     # ...
     # Test the creation of the config file for VMWare with max CPU count set
     # ---
+    if ((KIWIQX::qxx ("uname -m")) ne 'x86_64') {
+        print "\t\tInfo: x86_64 arch only, skipping ";
+        print "test_vmwareWriteMaxCPU\n";
+        return;
+    }
     my $this = shift;
     my $kiwi = $this -> {kiwi};
     my $confDir = $this -> {dataDir} . '/maxCPUOVFConfig';
@@ -744,6 +783,11 @@ sub test_vmwareWriteMinCPU {
     # ...
     # Test the creation of the config file for VMWare with min CPU count set
     # ---
+    if ((KIWIQX::qxx ("uname -m")) ne 'x86_64') {
+        print "\t\tInfo: x86_64 arch only, skipping ";
+        print "test_vmwareWriteMinCPU\n";
+        return;
+    }
     my $this = shift;
     my $kiwi = $this -> {kiwi};
     my $confDir = $this -> {dataDir} . '/minCPUOVFConfig';
@@ -790,6 +834,11 @@ sub test_vmwareWriteMinGTMaxCPU {
     # Test the creation of the config file for VMWare with min memory set
     # larger than max memory
     # ---
+    if ((KIWIQX::qxx ("uname -m")) ne 'x86_64') {
+        print "\t\tInfo: x86_64 arch only, skipping ";
+        print "test_vmwareWriteMinGTMaxCPU\n";
+        return;
+    }
     my $this = shift;
     my $kiwi = $this -> {kiwi};
     my $confDir = $this -> {dataDir} . '/minGTMaxCPUOVFConfig';
@@ -825,6 +874,11 @@ sub test_vmwareWriteMinMaxCPU {
     # Test the creation of the config file for VMWare with max and min CPU
     # count set
     # ---
+    if ((KIWIQX::qxx ("uname -m")) ne 'x86_64') {
+        print "\t\tInfo: x86_64 arch only, skipping ";
+        print "test_vmwareWriteMinMaxCPU\n";
+        return;
+    }
     my $this = shift;
     my $kiwi = $this -> {kiwi};
     my $confDir = $this -> {dataDir} . '/minMaxCPUOVFConfig';
@@ -870,6 +924,11 @@ sub test_vmwareWriteMaxMemory {
     # ...
     # Test the creation of the config file for VMWare with max memory set
     # ---
+    if ((KIWIQX::qxx ("uname -m")) ne 'x86_64') {
+        print "\t\tInfo: x86_64 arch only, skipping ";
+        print "test_vmwareWriteMaxMemory\n";
+        return;
+    }
     my $this = shift;
     my $kiwi = $this -> {kiwi};
     my $confDir = $this -> {dataDir} . '/maxMemoryOVFConfig';
@@ -915,6 +974,11 @@ sub test_vmwareWriteMinMemory {
     # ...
     # Test the creation of the config file for VMWare with min memory set
     # ---
+    if ((KIWIQX::qxx ("uname -m")) ne 'x86_64') {
+        print "\t\tInfo: x86_64 arch only, skipping ";
+        print "test_vmwareWriteMinMemory\n";
+        return;
+    }
     my $this = shift;
     my $kiwi = $this -> {kiwi};
     my $confDir = $this -> {dataDir} . '/minMemoryOVFConfig';
@@ -995,6 +1059,11 @@ sub test_vmwareWriteMinMaxMemory {
     # ...
     # Test the creation of the config file for VMWare with minMax memory set
     # ---
+    if ((KIWIQX::qxx ("uname -m")) ne 'x86_64') {
+        print "\t\tInfo: x86_64 arch only, skipping ";
+        print "test_vmwareWriteMinMaxMemory\n";
+        return;
+    }
     my $this = shift;
     my $kiwi = $this -> {kiwi};
     my $confDir = $this -> {dataDir} . '/minMaxMemoryOVFConfig';
@@ -1040,6 +1109,11 @@ sub test_vmwareWriteMultiNIC {
     # ...
     # Test the creation of the config file for VMWare with multiple NICS
     # ---
+    if ((KIWIQX::qxx ("uname -m")) ne 'x86_64') {
+        print "\t\tInfo: x86_64 arch only, skipping ";
+        print "test_vmwareWriteMultiNIC\n";
+        return;
+    }
     my $this = shift;
     my $kiwi = $this -> {kiwi};
     my $confDir = $this -> {dataDir} . '/multiNICOVFConfig';
@@ -1085,6 +1159,11 @@ sub test_vmwareWriteNoDiskCrtl {
     # ...
     # Test the creation of the config file when no disk controller is specified
     # ---
+    if ((KIWIQX::qxx ("uname -m")) ne 'x86_64') {
+        print "\t\tInfo: x86_64 arch only, skipping ";
+        print "test_vmwareWriteNoDiskCrtl\n";
+        return;
+    }
     my $this = shift;
     my $kiwi = $this -> {kiwi};
     my $confDir = $this -> {dataDir} . '/noDiskCrtlSpec';
@@ -1137,6 +1216,11 @@ sub test_vmwareWriteNoDVD {
     # ...
     # Test the creation of the config file for VMWare with no DVD device
     # ---
+    if ((KIWIQX::qxx ("uname -m")) ne 'x86_64') {
+        print "\t\tInfo: x86_64 arch only, skipping ";
+        print "test_vmwareWriteNoDVD\n";
+        return;
+    }
     my $this = shift;
     my $kiwi = $this -> {kiwi};
     my $confDir = $this -> {dataDir} . '/baseOVFConfig';
@@ -1182,6 +1266,11 @@ sub test_vmwareWriteNoCPUspec {
     # ...
     # Test the creation of the config file when no CPU is specified
     # ---
+    if ((KIWIQX::qxx ("uname -m")) ne 'x86_64') {
+        print "\t\tInfo: x86_64 arch only, skipping ";
+        print "test_vmwareWriteNoCPUspec\n";
+        return;
+    }
     my $this = shift;
     my $kiwi = $this -> {kiwi};
     my $confDir = $this -> {dataDir} . '/noCPUspec';
@@ -1234,6 +1323,11 @@ sub test_vmwareWriteNoDiskCntrl {
     # ...
     # Test the creation of the config file when no Memory is specified
     # ---
+    if ((KIWIQX::qxx ("uname -m")) ne 'x86_64') {
+        print "\t\tInfo: x86_64 arch only, skipping ";
+        print "test_vmwareWriteNoDiskCntrl\n";
+        return;
+    }
     my $this = shift;
     my $kiwi = $this -> {kiwi};
     my $confDir = $this -> {dataDir} . '/noDiskCntrl';
@@ -1286,6 +1380,11 @@ sub test_vmwareWriteNoMemoryspec {
     # ...
     # Test the creation of the config file when no Memory is specified
     # ---
+    if ((KIWIQX::qxx ("uname -m")) ne 'x86_64') {
+        print "\t\tInfo: x86_64 arch only, skipping ";
+        print "test_vmwareWriteNoMemoryspec\n";
+        return;
+    }
     my $this = shift;
     my $kiwi = $this -> {kiwi};
     my $confDir = $this -> {dataDir} . '/noMemorySpec';
@@ -1338,6 +1437,11 @@ sub test_writeNoOvfType {
     # ...
     # Test the creation of the config file for the "default" ovf type
     # ---
+    if ((KIWIQX::qxx ("uname -m")) ne 'x86_64') {
+        print "\t\tInfo: x86_64 arch only, skipping ";
+        print "test_writeNoOvfType\n";
+        return;
+    }
     my $this = shift;
     my $kiwi = $this -> {kiwi};
     my $confDir = $this -> {dataDir} . '/noOVFTypeConfig';
@@ -1388,6 +1492,11 @@ sub test_xenWriteNoDVD {
     # ...
     # Test the creation of the config file for XEN
     # ---
+    if ((KIWIQX::qxx ("uname -m")) ne 'x86_64') {
+        print "\t\tInfo: x86_64 arch only, skipping ";
+        print "test_xenWriteNoDVD\n";
+        return;
+    }
     my $this = shift;
     my $kiwi = $this -> {kiwi};
     my $confDir = $this -> {dataDir} . '/xenOVFConfig';
@@ -1433,6 +1542,11 @@ sub test_zvmWriteNoDVD {
     # ...
     # Test the creation of the config file for zvm
     # ---
+    if ((KIWIQX::qxx ("uname -m")) ne 'x86_64') {
+        print "\t\tInfo: x86_64 arch only, skipping ";
+        print "test_zvmWriteNoDVD\n";
+        return;
+    }
     my $this = shift;
     my $kiwi = $this -> {kiwi};
     my $confDir = $this -> {dataDir} . '/zvmOVFConfig';
