@@ -111,7 +111,7 @@ sub writeConfigFile {
         return;
     }
     $kiwi -> info("Write OVF configuration file\n");
-    $kiwi -> info ("--> $loc/$fileName");
+    $kiwi -> info ("--> $loc/$fileName\n");
     # Start out with the XML header
     my $config = $this -> __generateXMLHeader();
     #==========================================
@@ -131,7 +131,6 @@ sub writeConfigFile {
     my $checksum = $sha1->hexdigest();
     $status = close $INPUT;
     if (! $status) {
-        $kiwi -> failed();
         my $msg = "Could not close opened file: $loc/$imageName";
         $kiwi -> error($msg);
         $kiwi -> failed();
@@ -340,7 +339,6 @@ sub writeConfigFile {
         . '</ovf:Envelope>';
     $status = open (my $CONF, '>', "$loc/$fileName");
     if (! $status) {
-        $kiwi -> failed();
         my $msg = 'Could not write OVF configuration file '
             . "$loc/$fileName";
         $kiwi -> error($msg);
@@ -351,14 +349,11 @@ sub writeConfigFile {
     print $CONF $config;
     $status = close $CONF;
     if (! $status) {
-        $kiwi -> oops();
         my $msg = 'Unable to close configuration file'
             . "$loc/$fileName";
         $kiwi -> warning($msg);
         $kiwi -> skipped();
     }
-    $kiwi -> done();
-
     return 1;
 }
 
@@ -417,7 +412,7 @@ sub __generateCPUCfgSection {
         }
     }
     if (! $numCPU ) {
-        my $msg = 'No nominal CPU count set, using 1';
+        my $msg = '--> No nominal CPU count set, using 1';
         $kiwi -> warning($msg);
         $kiwi -> notset();
         $numCPU = 1;
@@ -516,7 +511,7 @@ sub __generateDiskCtrlCfgSection {
         $ovfType = 'vmware';
     }
     if (! $diskType) {
-        my $msg = 'No disk disktype set, using "scsi"';
+        my $msg = '--> No disk disktype set, using "scsi"';
         $kiwi -> warning($msg);
         $kiwi -> notset();
         $diskType = 'scsi';
@@ -529,7 +524,7 @@ sub __generateDiskCtrlCfgSection {
     }
     my $controller = $vmConfig -> getSystemDiskController();
     if (! $controller) {
-        my $msg = 'No disk controller set, using "lsilogic"';
+        my $msg = '--> No disk controller set, using "lsilogic"';
         $kiwi -> warning($msg);
         $kiwi -> notset();
         $controller = 'lsilogic';
@@ -674,7 +669,7 @@ sub __generateMemoryCfgSection {
         }
     }
     if (! $memory ) {
-        my $msg = "No memory value set, using '$GIG MB'";
+        my $msg = "--> No memory value set, using '$GIG MB'";
         $kiwi -> warning($msg);
         $kiwi -> notset();
         $memory = $GIG;
@@ -730,14 +725,14 @@ sub __generateNetworkCfgSection {
         my $mac = $vmConfig -> getNICMAC($id);
         my $mode = $vmConfig -> getNICMode($id);
         if (! $mode) {
-            my $msg = 'No network mode set, using "none"';
+            my $msg = '--> No network mode set, using "none"';
             $kiwi -> info($msg);
             $kiwi -> notset();
             $mode = 'none';
         }
         my $driver = $vmConfig -> getNICDriver($id);
         if (! $driver) {
-            my $msg = 'No network driver set, using "vmxnet3"';
+            my $msg = '--> No network driver set, using "vmxnet3"';
             $kiwi -> info($msg);
             $kiwi -> notset();
             $driver = 'vmxnet3';
@@ -822,7 +817,7 @@ sub __generateNetworkDeclaration {
     for my $id (@nicIDs) {
         my $mode = $vmConfig -> getNICMode($id);
         if (! $mode) {
-            my $msg = 'No network mode set, using "none"';
+            my $msg = '--> No network mode set, using "none"';
             $kiwi -> info($msg);
             $kiwi -> notset();
             $mode = 'none';
@@ -891,7 +886,7 @@ sub __getHWVersion {
     my $kiwi = $this->{kiwi};
     my $hwVersion = $vmdata -> getHardwareVersion();
     if (! $hwVersion ) {
-        my $msg = "No HW version set using default: '$default'";
+        my $msg = "--> No HW version set using default: '$default'";
         $kiwi -> info($msg);
         $kiwi -> notset();
         return $default;
@@ -990,7 +985,7 @@ sub __setOVFType {
     my $kiwi = $this -> {kiwi};
     my $ovfType = $vmConfig -> getOVFType();
     if (! $ovfType) {
-        my $msg = 'No OVF type specified using fallback "vmware".';
+        my $msg = '--> No OVF type specified using fallback "vmware".';
         $kiwi -> warning($msg);
         $kiwi -> notset();
         $ovfType = 'vmware';

@@ -106,7 +106,7 @@ sub new {
     # get format
     #------------------------------------------
     my $xmlformat = $type -> getFormat();
-    if ($xmlformat) {
+    if ((! $format) && ($xmlformat)) {
         $format = $xmlformat;
     }
     #==========================================
@@ -559,7 +559,7 @@ sub createVagrantBox {
             $this->{format} = 'ovf';
             my $ovf = $this -> createOVFConfiguration();
             $this->{format} = 'vagrant';
-            if (($ovf) || (! -e $ovf)) {
+            if ((! $ovf) || (! -e $ovf)) {
                 return;
             }
         }
@@ -655,7 +655,6 @@ sub createVagrantBox {
             $mf_basename =~ s/vmdk$/mf/;
             KIWIQX::qxx ("cd $dest && mv $img_basename box-disk1.vmdk");
             KIWIQX::qxx ("cd $dest && mv $ovf_basename box.ovf");
-            KIWIQX::qxx ("cd $dest && rm $mf_basename");
             push @components, 'box.ovf';
             push @components, 'box-disk1.vmdk';
         } else {
@@ -1025,7 +1024,7 @@ sub createOVFConfiguration {
     #==========================================
     # setup config file name from image name
     #------------------------------------------
-    $kiwi -> info ("Creating image OVF configuration file...");
+    $kiwi -> info ("Creating image OVF configuration file\n");
     my $image = $base;
     if ($base =~ /(.*)\.(.*?)$/) {
         $image = $1;
@@ -1041,8 +1040,9 @@ sub createOVFConfiguration {
     my $locator = KIWILocator -> instance();
     my $ovftool = $locator -> getExecPath ('ovftool');
     if (($format eq 'ova') && (! $ovftool)) {
-        $kiwi -> skipped ();
-        $kiwi -> warning ('ovftool not found, will create only ova tarball');
+        $kiwi -> warning (
+            '--> ovftool not found, will create only ova tarball'
+        );
         $kiwi -> skipped ();
     }
     my $writer = KIWIOVFConfigWriter -> new($xml, $ovfdir);
@@ -1101,7 +1101,6 @@ sub createOVFConfiguration {
         }
         my $result = $? >> 8;
         if ($result != 0) {
-            $kiwi -> failed ();
             $kiwi -> error  ("Couldn't create $format image: $status");
             $kiwi -> failed ();
             return;
@@ -1117,11 +1116,12 @@ sub createOVFConfiguration {
             );
             $result = $? >> 8;
             if ($result == 0) {
-                $status = KIWIQX::qxx ("mv $ovfdir/$extract $ovabasis.vmdk 2>&1");
+                $status = KIWIQX::qxx (
+                    "mv $ovfdir/$extract $ovabasis.vmdk 2>&1"
+                );
                 $result = $? >> 8;
             }
             if ($result != 0) {
-                $kiwi -> failed ();
                 $kiwi -> error  ("Couldn't unpack vmdk file: $status");
                 $kiwi -> failed ();
                 return;
@@ -1136,14 +1136,12 @@ sub createOVFConfiguration {
             );
             $result = $? >> 8;
             if ($result != 0) {
-                $kiwi -> failed ();
                 $kiwi -> error  ("Couldn't unpack ovf and mf file: $status");
                 $kiwi -> failed ();
                 return;
             }
         }
     }
-    $kiwi -> done();
     return $ovf;
 }
 

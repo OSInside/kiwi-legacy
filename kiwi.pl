@@ -62,7 +62,6 @@ use KIWIXMLInfo;
 use KIWIXMLRepositoryData;
 use KIWIXMLValidator;
 
-
 #============================================
 # UTF-8 for output to stdout
 #--------------------------------------------
