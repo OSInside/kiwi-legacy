@@ -13,5 +13,11 @@
 # possible jeos-name: see the result of 'kiwi -l'
 #
 jeos=$1
-shift
-kiwi --build $jeos --type oem --logfile terminal $@
+arch=$2
+if [ -z "$arch" ];then
+    arch=x86_64
+fi
+
+/home/jenkins/kiwi/kiwi/kiwi \
+    --build /home/jenkins/kiwi/kiwi/template/$arch/$jeos \
+    --type oem --logfile terminal $@
