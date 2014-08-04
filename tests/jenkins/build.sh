@@ -14,7 +14,7 @@
 #
 jeos=$1
 shift
-arch=$2
+arch=$1
 shift
 
 /home/jenkins/kiwi/kiwi/kiwi \
