@@ -781,8 +781,7 @@ function activeConsoles {
 # consoleInit
 #--------------------------------------
 function consoleInit {
-    read consoledev rest < /sys/class/tty/console/active
-    consoledev=${consoledev:-tty0}
+    consoledev=console
     if [ -x /lib/udev/console_init ] && [ -e "/dev/$consoledev" ];then
         /lib/udev/console_init "/dev/$consoledev"
     fi
