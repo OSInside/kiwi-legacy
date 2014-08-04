@@ -60,13 +60,12 @@ sub new {
     # ---
     my $class = shift;
     my $this  = $class->SUPER::new(@_);
-
     if (! $this) {
         return;
     }
     my $imgName = KIWIGlobals
-                -> instance()
-                -> generateBuildImageName($this->{xml});
+        -> instance()
+        -> generateBuildImageName($this->{xml});
     $this->{name} = $imgName . '.ovf';
     return $this;
 }
@@ -93,20 +92,21 @@ sub writeConfigFile {
     }
     $this -> __setOVFType($vmConfig);
     my $ovfType = $this -> {ovfType};
-    my $vsize = $xml -> getImageType() -> getSize();
-    if (! $vsize) {
-        my $msg = 'An image size must be specified in the configuration.';
-        $kiwi -> error($msg);
-        $kiwi -> failed();
-        return;
-    }
     my $baseName = KIWIGlobals
-                -> instance()
-                -> generateBuildImageName($this->{xml});
+        -> instance()
+        -> generateBuildImageName($this->{xml});
     my $imageName =  $baseName . '.vmdk';
     if (! -f "$loc/$imageName") {
         my $msg = "Could not find expected image '$loc/$imageName'";
         $kiwi -> error($msg);
+        $kiwi -> failed();
+        return;
+    }
+    my $vsize = -s "$loc/$imageName";
+    if (! $vsize) {
+        $kiwi -> error(
+            "Can't obtain embedded OVF image size: $!"
+        );
         $kiwi -> failed();
         return;
     }
@@ -996,7 +996,6 @@ sub __setOVFType {
         $ovfType = 'vmware';
     }
     $this -> {ovfType} = $ovfType;
-
     return 1;
 }
 

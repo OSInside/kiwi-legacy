@@ -27,14 +27,12 @@ use File::Basename;
 use JSON;
 
 #==========================================
-# KWIW Modules
+# KIWI Modules
 #------------------------------------------
 use KIWIBoot;
 use KIWIGlobals;
 use KIWILocator;
 use KIWILog;
-# Use the ovf config writer directly, needs better integration to use the
-# factory
 use KIWIOVFConfigWriter;
 use KIWIQX;
 
@@ -561,7 +559,7 @@ sub createVagrantBox {
             $this->{format} = 'ovf';
             my $ovf = $this -> createOVFConfiguration();
             $this->{format} = 'vagrant';
-            if (! -e $ovf) {
+            if (($ovf) || (! -e $ovf)) {
                 return;
             }
         }
