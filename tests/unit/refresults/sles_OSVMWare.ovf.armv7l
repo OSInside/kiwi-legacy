@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- KIWI generated ovf file --> 
+<ovf:Envelope xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1" xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData" xmlns:vmw="http://www.vmware.com/schema/ovf" xmlns:vssd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:vcloud="http://www.vmware.com/vcloud/v1.5" xsi:schemaLocation="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2.22.0/CIM_VirtualSystemSettingData.xsd http://www.vmware.com/schema/ovf http://schemas.dmtf.org/ovf/envelope/1 http://schemas.dmtf.org/ovf/envelope/1/dsp8023_1.1.0.xsd http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2.22.0/CIM_ResourceAllocationSettingData.xsd http://www.vmware.com/vcloud/v1.5 ">
+<ovf:References>
+	<ovf:File ovf:href="ovfconfig-test.armv7l-1.0.0.vmdk" ovf:id="file-1-2" ovf:size="2097152"/>
+</ovf:References>
+<ovf:DiskSection>
+	<ovf:Info>Virtual disk information</ovf:Info>
+	<ovf:Disk ovf:capacity="10240" ovf:capacityAllocationUnits="byte * 2^20" ovf:diskId="vmdisk-1-2" ovf:fileRef="file-1-2"/>
+</ovf:DiskSection>
+<ovf:NetworkSection>
+	<ovf:Info>The list of logical networks</ovf:Info>
+	<Network ovf:name="none">
+		<Description>The none network</Description>
+	</Network>
+</ovf:NetworkSection>
+<ovf:VirtualSystem ovf:id="vm-1-2">
+	<Info>A virtual machine</Info>
+	<Name>ovfconfig-test.armv7l-1.0.0</Name>
+	<OperatingSystemSection ovf:id="84" vmw:osType="SLES">
+		<Info>Image cretaed by KIWI</Info>
+	</OperatingSystemSection>
+	<ovf:VirtualHardwareSection ovf:transport="">
+		<Info>Virtual hardware requirements</Info>
+		<ovf:System>
+			<vssd:ElementName>Virtual Hardware Family</vssd:ElementName>
+			<vssd:InstanceID>0</vssd:InstanceID>
+			<vssd:VirtualSystemIdentifier>ovfconfig-test.armv7l-1.0.0</vssd:VirtualSystemIdentifier>
+			<vssd:VirtualSystemType>vmx-9</vssd:VirtualSystemType>
+		</ovf:System>
+		<ovf:Item>
+			<rasd:AllocationUnits>hertz * 10^6</rasd:AllocationUnits>
+			<rasd:Description>Number of Virtual CPUs</rasd:Description>
+			<rasd:ElementName>CPU definition</rasd:ElementName>
+			<rasd:InstanceID>1</rasd:InstanceID>
+			<rasd:Reservation>0</rasd:Reservation>
+			<rasd:ResourceType>3</rasd:ResourceType>
+			<rasd:VirtualQuantity>1</rasd:InstanceID>
+			<rasd:Weight>1000</rasd:Weight>
+			<vmw:CoresPerSocket ovf:required="false">1</vmw:CoresPerSocket>
+			<rasd:Weight>1000</rasd:Weight>
+		</ovf:Item>
+		<ovf:Item>
+			<rasd:AllocationUnits>byte * 2^20</rasd:AllocationUnits>
+			<rasd:Description>Memory Size</rasd:Description>
+			<rasd:ElementName>1024MB of memory</rasd:ElementName>
+			<rasd:InstanceID>2</rasd:InstanceID>
+			<rasd:Reservation>0</rasd:Reservation>
+			<rasd:ResourceType>4</rasd:ResourceType>
+			<rasd:VirtualQuantity>1024</rasd:VirtualQuantity>
+			<rasd:Weight>10240</rasd:Weight>
+		</Item>
+		<ovf:Item>
+			<rasd:Description>SCSI Controller</rasd:Description>
+			<rasd:ElementName>scsi Controller</rasd:ElementName>
+			<rasd:InstanceID>3</rasd:InstanceID>
+			<rasd:ResourceSubType>lsilogic</rasd:ResourceSubType>
+			<rasd:ResourceType>6</rasd:ResourceType>
+			<vmw:Config ovf:required="false" vmw:key="slotInfo.pciSlotNumber" vmw:value="16"/>
+		</ovf:Item>
+		<ovf:Item>
+			<rasd:AddressOnParent>0</rasd:AddressOnParent>
+			<rasd:Description>Hard disk</rasd:Description>
+			<rasd:ElementName>Hard disk1</rasd:ElementName>
+			<rasd:HostResource>ovf:/disk/1</rasd:HostResource>
+			<rasd:InstanceID>4</rasd:InstanceID>
+			<rasd:Parent>3</rasd:Parent>
+			<rasd:ResourceType>17</rasd:ResourceType>
+			<vmw:Config ovf:required="false" vmw:key="backing.writeThrough" vmw:value="false"/>
+		</ovf:Item>
+		<ovf:Item>
+			<rasd:AddressOnParent>1</rasd:AddressOnParent>
+			<rasd:Description>vmxnet3 ethernet on -none-</rasd:Description>
+			<rasd:ElementName>Network adapter 1</rasd:ElementName>
+			<rasd:InstanceID>5</rasd:InstanceID>
+			<rasd:ResourceSubType>vmxnet3</rasd:ResourceSubType>
+			<rasd:ResourceType>10</rasd:ResourceType>
+			<rasd:AutomaticAllocation>true</rasd:AutomaticAllocation>
+			<rasd:Connection vcloud:ipAddressingMode="NONE" vcloud:primaryNetworkConnection="true">none</rasd:Connection>
+			<vmw:Config ovf:required="false" vmw:key="wakeOnLanEnabled" vmw:value="true"/>
+			<vmw:Config ovf:required="false" vmw:key="slotInfo.pciSlotNumber" vmw:value="160"/>
+		</ovf:Item>
+		<vmw:Config ovf:required="false" vmw:key="cpuHotAddEnabled" vmw:value="false"/>
+		<vmw:Config ovf:required="false" vmw:key="cpuHotRemoveEnabled" vmw:value="false"/>
+		<vmw:Config ovf:required="false" vmw:key="firmware" vmw:value="bios"/>
+		<vmw:Config ovf:required="false" vmw:key="virtualICH7MPresent" vmw:value="false"/>
+		<vmw:Config ovf:required="false" vmw:key="virtualSMCPresent" vmw:value="false"/>
+		<vmw:Config ovf:required="false" vmw:key="memoryHotAddEnabled" vmw:value="false"/>
+		<vmw:Config ovf:required="false" vmw:key="nestedHVEnabled" vmw:value="false"/>
+		<vmw:Config ovf:required="false" vmw:key="powerOpInfo.powerOffType" vmw:value="soft"/>
+		<vmw:Config ovf:required="false" vmw:key="powerOpInfo.resetType" vmw:value="soft"/>
+		<vmw:Config ovf:required="false" vmw:key="powerOpInfo.standbyAction" vmw:value="checkpoint"/>
+		<vmw:Config ovf:required="false" vmw:key="powerOpInfo.suspendType" vmw:value="hard"/>
+		<vmw:Config ovf:required="false" vmw:key="tools.afterPowerOn" vmw:value="true"/>
+		<vmw:Config ovf:required="false" vmw:key="tools.afterResume" vmw:value="true"/>
+		<vmw:Config ovf:required="false" vmw:key="tools.beforeGuestShutdown" vmw:value="true"/>
+		<vmw:Config ovf:required="false" vmw:key="tools.beforeGuestStandby" vmw:value="true"/>
+		<vmw:Config ovf:required="false" vmw:key="tools.syncTimeWithHost" vmw:value="false"/>
+		<vmw:Config ovf:required="false" vmw:key="tools.toolsUpgradePolicy" vmw:value="manual"/>
+	</ovf:VirtualHardwareSection>
+	<vcloud:GuestCustomizationSection ovf:required="false">
+		<ovf:Info>Specifies Guest OS Customization Settings</ovf:Info>
+		<vcloud:Enabled>true</vcloud:Enabled>
+		<vcloud:ChangeSid>false</vcloud:ChangeSid>
+		<vcloud:VirtualMachineId>100000000</vcloud:VirtualMachineId>
+		<vcloud:JoinDomainEnabled>false</vcloud:JoinDomainEnabled>
+		<vcloud:UseOrgSettings>false</vcloud:UseOrgSettings>
+		<vcloud:AdminPasswordEnabled>true</vcloud:AdminPasswordEnabled>
+		<vcloud:AdminPasswordAuto>true</vcloud:AdminPasswordAuto>
+		<vcloud:ResetPasswordRequired>true</vcloud:ResetPasswordRequired>
+		<vcloud:ComputerName>KIWI Machine</vcloud:ComputerName>
+	</vcloud:GuestCustomizationSection>
+</ovf:VirtualSystem>
+</ovf:Envelope>
