@@ -7783,11 +7783,11 @@ function setupUnionFS {
         luksOpen $roDevice luksReadOnly
         roDeviceLuks=$luksDeviceOpened
     fi
-    if [ ! "$rwDeviceLuks" = "$rwDevice" ];then
+    if [ ! -z "$rwDeviceLuks" ] && [ ! "$rwDeviceLuks" = "$rwDevice" ];then
         rwDevice=$rwDeviceLuks
         export haveLuks="yes"
     fi
-    if [ ! "$roDeviceLuks" = "$roDevice" ];then
+    if [ ! -z "$roDeviceLuks" ] && [ ! "$roDeviceLuks" = "$roDevice" ];then
         roDevice=$roDeviceLuks
         export haveLuks="yes"
     fi
