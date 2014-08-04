@@ -868,17 +868,22 @@ function installBootLoader {
             "*** boot loader install for $arch-$loader not implemented ***" \
         "reboot"
     esac
-    if [ ! $? = 0 ];then
-        if lookup dialog &>/dev/null;then
-            Dialog \
-                --backtitle \"$TEXT_BOOT_SETUP_FAILED\" \
-                --msgbox "\"$TEXT_BOOT_SETUP_FAILED_INFO\"" 10 70
-        else
-            systemException \
-                "$TEXT_BOOT_SETUP_FAILED\n\n$TEXT_BOOT_SETUP_FAILED_INFO" \
-            "waitkey"
-        fi
-    fi
+    #
+    # Warning message is disabled because sometimes the message
+    # can't be displayed on the console which leads to a stopped
+    # system but the user has no clue why
+    #
+    #if [ ! $? = 0 ];then
+    #    if lookup dialog &>/dev/null;then
+    #        Dialog \
+    #            --backtitle \"$TEXT_BOOT_SETUP_FAILED\" \
+    #            --msgbox "\"$TEXT_BOOT_SETUP_FAILED_INFO\"" 10 70
+    #    else
+    #        systemException \
+    #            "$TEXT_BOOT_SETUP_FAILED\n\n$TEXT_BOOT_SETUP_FAILED_INFO" \
+    #        "waitkey"
+    #    fi
+    #fi
     case $arch in
         i*386|x86_64)
             masterBootID=$(printf 0x%04x%04x $RANDOM $RANDOM)
@@ -1448,17 +1453,21 @@ function setupInitrd {
     #======================================
     # Display a warning on failure
     #--------------------------------------
-    if [ $bootLoaderOK = 0 ];then
-        if lookup dialog &>/dev/null;then
-            Dialog \
-                --backtitle \"$TEXT_BOOT_SETUP_FAILED\" \
-                --msgbox "\"$TEXT_BOOT_SETUP_FAILED_INFO\"" 10 70
-        else
-            systemException \
-                "$TEXT_BOOT_SETUP_FAILED\n\n$TEXT_BOOT_SETUP_FAILED_INFO" \
-            "waitkey"
-        fi
-    fi
+    # Warning message is disabled because sometimes the message
+    # can't be displayed on the console which leads to a stopped
+    # system but the user has no clue why
+    #
+    #if [ $bootLoaderOK = 0 ];then
+    #    if lookup dialog &>/dev/null;then
+    #        Dialog \
+    #            --backtitle \"$TEXT_BOOT_SETUP_FAILED\" \
+    #            --msgbox "\"$TEXT_BOOT_SETUP_FAILED_INFO\"" 10 70
+    #    else
+    #        systemException \
+    #            "$TEXT_BOOT_SETUP_FAILED\n\n$TEXT_BOOT_SETUP_FAILED_INFO" \
+    #        "waitkey"
+    #    fi
+    #fi
 }
 #======================================
 # setupDefaultTheme
