@@ -265,35 +265,11 @@ sub test_noMachineConfig {
 }
 
 #==========================================
-# test_noSizeSet
-#------------------------------------------
-sub test_noSizeSet {
-    # ...
-    # Test an attempt to create a configuration when there is no <size> set
-    # ---
-    my $this = shift;
-    my $kiwi = $this -> {kiwi};
-    my $confDir = $this -> {dataDir} . '/noSizeConfig';
-    my $xml = $this -> __getXMLObj($confDir);
-    my $writer = KIWIOVFConfigWriter -> new($xml, '/tmp');
-    my $res = $writer -> writeConfigFile();
-    my $msg = $kiwi -> getMessage();
-    my $expected = 'An image size must be specified in the configuration.';
-    $this -> assert_str_equals($expected, $msg);
-    my $msgT = $kiwi -> getMessageType();
-    $this -> assert_str_equals('error', $msgT);
-    my $state = $kiwi -> getState();
-    $this -> assert_str_equals('failed', $state);
-    $this -> assert_null($res);
-    return;
-}
-
-#==========================================
 # test_powerWriteNoDVD
 #------------------------------------------
 sub test_powerWriteNoDVD {
     # ...
-    # Test the creation of the config file for Powe
+    # Test the creation of the config file for Power
     # ---
     my $this = shift;
     my $kiwi = $this -> {kiwi};
@@ -306,7 +282,7 @@ sub test_powerWriteNoDVD {
     my $vmdkName = $cfgName;
     $vmdkName =~ s/\.ovf/\.vmdk/msx;
     # Create a fake vmdk
-    system "dd if=/dev/urandom of=$cfgTgtDir/$vmdkName bs=1M count=2  2>&1";
+    system "dd if=/dev/urandom of=$cfgTgtDir/$vmdkName bs=1k count=10  2>&1";
     my $res = $writer -> writeConfigFile();
     my $msg = $kiwi -> getMessage();
     my $cfgFile = "$cfgTgtDir/$cfgName";
@@ -434,7 +410,7 @@ sub test_vmwareWriteDVDide {
     my $vmdkName = $cfgName;
     $vmdkName =~ s/\.ovf/\.vmdk/msx;
     # Create a fake vmdk
-    system "dd if=/dev/urandom of=$cfgTgtDir/$vmdkName bs=1M count=2  2>&1";
+    system "dd if=/dev/urandom of=$cfgTgtDir/$vmdkName bs=1k count=10  2>&1";
     my $res = $writer -> writeConfigFile();
     my $msg = $kiwi -> getMessage();
     my $cfgFile = "$cfgTgtDir/$cfgName";
@@ -480,7 +456,7 @@ sub test_vmwareWriteDVDscsi {
     my $vmdkName = $cfgName;
     $vmdkName =~ s/\.ovf/\.vmdk/msx;
     # Create a fake vmdk
-    system "dd if=/dev/urandom of=$cfgTgtDir/$vmdkName bs=1M count=2  2>&1";
+    system "dd if=/dev/urandom of=$cfgTgtDir/$vmdkName bs=1k count=10  2>&1";
     my $res = $writer -> writeConfigFile();
     my $msg = $kiwi -> getMessage();
     my $cfgFile = "$cfgTgtDir/$cfgName";
@@ -528,7 +504,7 @@ sub test_vmwareWriteGenericGuestOS {
     my $vmdkName = $cfgName;
     $vmdkName =~ s/\.ovf/\.vmdk/msx;
     # Create a fake vmdk
-    system "dd if=/dev/urandom of=$cfgTgtDir/$vmdkName bs=1M count=2  2>&1";
+    system "dd if=/dev/urandom of=$cfgTgtDir/$vmdkName bs=1k count=10 2>&1";
     my $res = $writer -> writeConfigFile();
     my $msg = $kiwi -> getMessage();
     my $cfgFile = "$cfgTgtDir/$cfgName";
@@ -577,7 +553,7 @@ sub test_vmwareWriteHWver8 {
     my $vmdkName = $cfgName;
     $vmdkName =~ s/\.ovf/\.vmdk/msx;
     # Create a fake vmdk
-    system "dd if=/dev/urandom of=$cfgTgtDir/$vmdkName bs=1M count=2  2>&1";
+    system "dd if=/dev/urandom of=$cfgTgtDir/$vmdkName bs=1k count=10 2>&1";
     my $res = $writer -> writeConfigFile();
     my $msg = $kiwi -> getMessage();
     my $cfgFile = "$cfgTgtDir/$cfgName";
@@ -625,7 +601,7 @@ sub test_vmwareWriteIdeCntrl {
     my $vmdkName = $cfgName;
     $vmdkName =~ s/\.ovf/\.vmdk/msx;
     # Create a fake vmdk
-    system "dd if=/dev/urandom of=$cfgTgtDir/$vmdkName bs=1M count=2  2>&1";
+    system "dd if=/dev/urandom of=$cfgTgtDir/$vmdkName bs=1k count=10 2>&1";
     my $res = $writer -> writeConfigFile();
     my $msg = $kiwi -> getMessage();
     my $cfgFile = "$cfgTgtDir/$cfgName";
@@ -679,7 +655,7 @@ sub test_vmwareWriteKnownGuestOS {
         $vmdkName =~ s/\.ovf/\.vmdk/msx;
         # Create a fake vmdk
         my $cmd = 'dd if=/dev/urandom '
-            . "of=$cfgTgtDir/$vmdkName bs=1M count=2  2>&1";
+            . "of=$cfgTgtDir/$vmdkName bs=1k count=10 2>&1";
         system $cmd;
         my $res = $writer -> writeConfigFile();
         my $msg = $kiwi -> getMessage();
@@ -730,7 +706,7 @@ sub test_vmwareWriteMaxCPU {
     my $vmdkName = $cfgName;
     $vmdkName =~ s/\.ovf/\.vmdk/msx;
     # Create a fake vmdk
-    system "dd if=/dev/urandom of=$cfgTgtDir/$vmdkName bs=1M count=2  2>&1";
+    system "dd if=/dev/urandom of=$cfgTgtDir/$vmdkName bs=1k count=10 2>&1";
     my $res = $writer -> writeConfigFile();
     my $msg = $kiwi -> getMessage();
     my $cfgFile = "$cfgTgtDir/$cfgName";
@@ -776,7 +752,7 @@ sub test_vmwareWriteMinCPU {
     my $vmdkName = $cfgName;
     $vmdkName =~ s/\.ovf/\.vmdk/msx;
     # Create a fake vmdk
-    system "dd if=/dev/urandom of=$cfgTgtDir/$vmdkName bs=1M count=2  2>&1";
+    system "dd if=/dev/urandom of=$cfgTgtDir/$vmdkName bs=1k count=10 2>&1";
     my $res = $writer -> writeConfigFile();
     my $msg = $kiwi -> getMessage();
     my $cfgFile = "$cfgTgtDir/$cfgName";
@@ -823,7 +799,7 @@ sub test_vmwareWriteMinGTMaxCPU {
     my $vmdkName = $cfgName;
     $vmdkName =~ s/\.ovf/\.vmdk/msx;
     # Create a fake vmdk
-    system "dd if=/dev/urandom of=$cfgTgtDir/$vmdkName bs=1M count=2  2>&1";
+    system "dd if=/dev/urandom of=$cfgTgtDir/$vmdkName bs=1k count=10 2>&1";
     my $res = $writer -> writeConfigFile();
     my $errMsg = $kiwi -> getErrorMessage();
     my $errExpect = 'Minimum CPU count specified larger than maximum';
@@ -858,7 +834,7 @@ sub test_vmwareWriteMinMaxCPU {
     my $vmdkName = $cfgName;
     $vmdkName =~ s/\.ovf/\.vmdk/msx;
     # Create a fake vmdk
-    system "dd if=/dev/urandom of=$cfgTgtDir/$vmdkName bs=1M count=2  2>&1";
+    system "dd if=/dev/urandom of=$cfgTgtDir/$vmdkName bs=1k count=10 2>&1";
     my $res = $writer -> writeConfigFile();
     my $msg = $kiwi -> getMessage();
     my $cfgFile = "$cfgTgtDir/$cfgName";
@@ -906,7 +882,7 @@ sub test_vmwareWriteMaxMemory {
     my $vmdkName = $cfgName;
     $vmdkName =~ s/\.ovf/\.vmdk/msx;
     # Create a fake vmdk
-    system "dd if=/dev/urandom of=$cfgTgtDir/$vmdkName bs=1M count=2  2>&1";
+    system "dd if=/dev/urandom of=$cfgTgtDir/$vmdkName bs=1k count=10 2>&1";
     my $res = $writer -> writeConfigFile();
     my $msg = $kiwi -> getMessage();
     my $cfgFile = "$cfgTgtDir/$cfgName";
@@ -954,7 +930,7 @@ sub test_vmwareWriteMinMemory {
     my $vmdkName = $cfgName;
     $vmdkName =~ s/\.ovf/\.vmdk/msx;
     # Create a fake vmdk
-    system "dd if=/dev/urandom of=$cfgTgtDir/$vmdkName bs=1M count=2  2>&1";
+    system "dd if=/dev/urandom of=$cfgTgtDir/$vmdkName bs=1k count=10 2>&1";
     my $res = $writer -> writeConfigFile();
     my $msg = $kiwi -> getMessage();
     my $cfgFile = "$cfgTgtDir/$cfgName";
@@ -1003,7 +979,7 @@ sub test_vmwareWriteMinGTMaxMemory {
     my $vmdkName = $cfgName;
     $vmdkName =~ s/\.ovf/\.vmdk/msx;
     # Create a fake vmdk
-    system "dd if=/dev/urandom of=$cfgTgtDir/$vmdkName bs=1M count=2  2>&1";
+    system "dd if=/dev/urandom of=$cfgTgtDir/$vmdkName bs=1k count=10 2>&1";
     my $res = $writer -> writeConfigFile();
     my $errMsg = $kiwi -> getErrorMessage();
     my $errExpect = 'Minimum memory specified larger than maximum';
@@ -1037,7 +1013,7 @@ sub test_vmwareWriteMinMaxMemory {
     my $vmdkName = $cfgName;
     $vmdkName =~ s/\.ovf/\.vmdk/msx;
     # Create a fake vmdk
-    system "dd if=/dev/urandom of=$cfgTgtDir/$vmdkName bs=1M count=2  2>&1";
+    system "dd if=/dev/urandom of=$cfgTgtDir/$vmdkName bs=1k count=10 2>&1";
     my $res = $writer -> writeConfigFile();
     my $msg = $kiwi -> getMessage();
     my $cfgFile = "$cfgTgtDir/$cfgName";
@@ -1085,7 +1061,7 @@ sub test_vmwareWriteMultiNIC {
     my $vmdkName = $cfgName;
     $vmdkName =~ s/\.ovf/\.vmdk/msx;
     # Create a fake vmdk
-    system "dd if=/dev/urandom of=$cfgTgtDir/$vmdkName bs=1M count=2  2>&1";
+    system "dd if=/dev/urandom of=$cfgTgtDir/$vmdkName bs=1k count=10 2>&1";
     my $res = $writer -> writeConfigFile();
     my $msg = $kiwi -> getMessage();
     my $cfgFile = "$cfgTgtDir/$cfgName";
@@ -1133,7 +1109,7 @@ sub test_vmwareWriteNoDiskCrtl {
     my $vmdkName = $cfgName;
     $vmdkName =~ s/\.ovf/\.vmdk/msx;
     # Create a fake vmdk
-    system "dd if=/dev/urandom of=$cfgTgtDir/$vmdkName bs=1M count=2  2>&1";
+    system "dd if=/dev/urandom of=$cfgTgtDir/$vmdkName bs=1k count=10 2>&1";
     my $res = $writer -> writeConfigFile();
     my $warnMsg = $kiwi -> getWarningMessage();
     my $warnExpect = 'No disk controller set, using "lsilogic"';
@@ -1188,7 +1164,7 @@ sub test_vmwareWriteNoDVD {
     my $vmdkName = $cfgName;
     $vmdkName =~ s/\.ovf/\.vmdk/msx;
     # Create a fake vmdk
-    system "dd if=/dev/urandom of=$cfgTgtDir/$vmdkName bs=1M count=2  2>&1";
+    system "dd if=/dev/urandom of=$cfgTgtDir/$vmdkName bs=1k count=10 2>&1";
     my $res = $writer -> writeConfigFile();
     my $msg = $kiwi -> getMessage();
     my $cfgFile = "$cfgTgtDir/$cfgName";
@@ -1234,7 +1210,7 @@ sub test_vmwareWriteNoCPUspec {
     my $vmdkName = $cfgName;
     $vmdkName =~ s/\.ovf/\.vmdk/msx;
     # Create a fake vmdk
-    system "dd if=/dev/urandom of=$cfgTgtDir/$vmdkName bs=1M count=2  2>&1";
+    system "dd if=/dev/urandom of=$cfgTgtDir/$vmdkName bs=1k count=10 2>&1";
     my $res = $writer -> writeConfigFile();
     my $warnMsg = $kiwi -> getWarningMessage();
     my $warnExpect = 'No nominal CPU count set, using 1';
@@ -1287,7 +1263,7 @@ sub test_vmwareWriteNoDiskCntrl {
     my $vmdkName = $cfgName;
     $vmdkName =~ s/\.ovf/\.vmdk/msx;
     # Create a fake vmdk
-    system "dd if=/dev/urandom of=$cfgTgtDir/$vmdkName bs=1M count=2  2>&1";
+    system "dd if=/dev/urandom of=$cfgTgtDir/$vmdkName bs=1k count=10 2>&1";
     my $res = $writer -> writeConfigFile();
     my $warnMsg = $kiwi -> getWarningMessage();
     my $warnExpect = 'No disk disktype set, using "scsi"';
@@ -1342,7 +1318,7 @@ sub test_vmwareWriteNoMemoryspec {
     my $vmdkName = $cfgName;
     $vmdkName =~ s/\.ovf/\.vmdk/msx;
     # Create a fake vmdk
-    system "dd if=/dev/urandom of=$cfgTgtDir/$vmdkName bs=1M count=2  2>&1";
+    system "dd if=/dev/urandom of=$cfgTgtDir/$vmdkName bs=1k count=10 2>&1";
     my $res = $writer -> writeConfigFile();
     my $warnMsg = $kiwi -> getWarningMessage();
     my $warnExpect = "No memory value set, using '1024 MB'";
@@ -1397,7 +1373,7 @@ sub test_writeNoOvfType {
     my $vmdkName = $cfgName;
     $vmdkName =~ s/\.ovf/\.vmdk/msx;
     # Create a fake vmdk
-    system "dd if=/dev/urandom of=$cfgTgtDir/$vmdkName bs=1M count=2  2>&1";
+    system "dd if=/dev/urandom of=$cfgTgtDir/$vmdkName bs=1k count=10 2>&1";
     my $res = $writer -> writeConfigFile();
     my $warnMsg = $kiwi -> getWarningMessage();
     my $warnExpect = 'No OVF type specified using fallback "vmware".';
@@ -1448,7 +1424,7 @@ sub test_xenWriteNoDVD {
     my $vmdkName = $cfgName;
     $vmdkName =~ s/\.ovf/\.vmdk/msx;
     # Create a fake vmdk
-    system "dd if=/dev/urandom of=$cfgTgtDir/$vmdkName bs=1M count=2  2>&1";
+    system "dd if=/dev/urandom of=$cfgTgtDir/$vmdkName bs=1k count=10 2>&1";
     my $res = $writer -> writeConfigFile();
     my $msg = $kiwi -> getMessage();
     my $cfgFile = "$cfgTgtDir/$cfgName";
@@ -1494,7 +1470,7 @@ sub test_zvmWriteNoDVD {
     my $vmdkName = $cfgName;
     $vmdkName =~ s/\.ovf/\.vmdk/msx;
     # Create a fake vmdk
-    system "dd if=/dev/urandom of=$cfgTgtDir/$vmdkName bs=1M count=2  2>&1";
+    system "dd if=/dev/urandom of=$cfgTgtDir/$vmdkName bs=1k count=10 2>&1";
     my $res = $writer -> writeConfigFile();
     my $msg = $kiwi -> getMessage();
     my $cfgFile = "$cfgTgtDir/$cfgName";
