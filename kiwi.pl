@@ -333,29 +333,29 @@ sub main {
         my $destination = $cmdL->getOperationMode("analyse");
         $destination = "/tmp/".$destination;
         my $system = KIWIAnalyseSystem -> new (
-                        $destination,$cmdL
-                );
+            $destination,$cmdL
+        );
         if (! $system) {
-            return;
+            kiwiExit (1);
         }
         if (! $system -> createCustomDataSyncReference()) {
-            return;
+            kiwiExit (1);
         }
         if (! $system -> syncCustomData()) {
-            return;
+            kiwiExit (1);
         }
         $kiwi -> info ("Creating base description files\n");
         my $software = KIWIAnalyseSoftware -> new (
             $system,$cmdL
         );
         if (! $software) {
-            return;
+            kiwiExit (1);
         }
         my $template = KIWIAnalyseTemplate -> new (
             $destination,$cmdL,$system,$software
         );
         if (! $template) {
-            return;
+            kiwiExit (1);
         }
         $template -> writeKIWIXMLConfiguration();
         $template -> writeKIWIScripts();
@@ -364,12 +364,13 @@ sub main {
             $destination,$cmdL,$system,$software
         );
         if (! $report) {
-            return;
+            kiwiExit (1);
         }
         $report -> createReport();
         if (! $system -> commitTransaction()) {
-            return;
+            kiwiExit (1);
         }
+        kiwiExit (0);
     }
 
     #==========================================
