@@ -14,7 +14,7 @@
         <profile name="vmxFlavour" description="VMX with default kernel" import="true"/>
     </profiles>
     <preferences>
-        <type image="iso" primary="true" boot="isoboot/suse-13.2" flags="overlay" hybrid="true" firmware="efi"/>
+        <type image="iso" primary="true" boot="isoboot/suse-13.2" flags="overlay" hybrid="true" firmware="efi" kernelcmdline="splash"/>
         <version>1.13.2</version>
         <packagemanager>zypper</packagemanager>
         <locale>en_US</locale>
@@ -26,16 +26,16 @@
         <bootloader-theme>openSUSE</bootloader-theme>
     </preferences>
     <preferences profiles="ec2Flavour">
-        <type image="vmx" filesystem="ext3" boot="vmxboot/suse-13.2" bootprofile="ec2" bootkernel="ec2k" bootloader="grub" kernelcmdline="xencons=xvc0 console=xvc0 multipath=off splash=silent showopts"/>
+        <type image="vmx" filesystem="ext3" boot="vmxboot/suse-13.2" bootprofile="ec2" bootkernel="ec2k" bootloader="grub" kernelcmdline="xencons=xvc0 console=xvc0 multipath=off splash"/>
     </preferences>
     <preferences profiles="xenFlavour">
-        <type image="vmx" filesystem="ext3" boot="vmxboot/suse-13.2" bootprofile="xen" bootkernel="xenk" bootloader="grub2">
+        <type image="vmx" filesystem="ext3" boot="vmxboot/suse-13.2" bootprofile="xen" bootkernel="xenk" bootloader="grub2" kernelcmdline="splash">
             <machine memory="512" domain="domU">
                 <vmdisk id="0" device="/dev/xvda" controller="ide"/>
                 <vmnic interface=""/>
             </machine>
         </type>
-        <type image="oem" filesystem="ext3" boot="oemboot/suse-13.2" bootprofile="xen" bootkernel="xenk" installiso="true" bootloader="grub2">
+        <type image="oem" filesystem="ext3" boot="oemboot/suse-13.2" bootprofile="xen" bootkernel="xenk" installiso="true" bootloader="grub2" kernelcmdline="splash">
             <oemconfig>
                 <oem-systemsize>2048</oem-systemsize>
                 <oem-swap>true</oem-swap>
@@ -46,13 +46,13 @@
         </type>
     </preferences>
     <preferences profiles="vmxFlavour">
-        <type image="vmx" filesystem="ext3" boot="vmxboot/suse-13.2" format="vmdk" bootloader="grub2">
+        <type image="vmx" filesystem="ext3" boot="vmxboot/suse-13.2" format="vmdk" bootloader="grub2" kernelcmdline="splash">
             <machine memory="512" guestOS="suse" HWversion="4">
                 <vmdisk id="0" controller="ide"/>
                 <vmnic driver="e1000" interface="0" mode="bridged"/>
             </machine>
         </type>
-        <type image="oem" filesystem="ext3" boot="oemboot/suse-13.2" installiso="true" bootloader="grub2">
+        <type image="oem" filesystem="ext3" boot="oemboot/suse-13.2" installiso="true" bootloader="grub2" kernelcmdline="splash">
             <oemconfig>
                 <oem-systemsize>2048</oem-systemsize>
                 <oem-swap>true</oem-swap>
