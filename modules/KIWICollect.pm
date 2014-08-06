@@ -1184,13 +1184,15 @@ sub setupPackageFiles {
                         $this->logMsg('E', $msg);
                     } else {
                         my $lnkTarget =
-                            $packOptions->{$requestedArch}->{'newpath'};
-                        $this->addToTrackFile($packName, $packPointer, $medium, $lnkTarget);
+                            $packOptions->{$requestedArch}->{'newpath'}
+                            . "/$packOptions->{$requestedArch}->{'newfile'}";
+                        $this->addToTrackFile(
+                            $packName, $packPointer, $medium, $lnkTarget
+                        );
                         if ($this->{m_debug} >= 4) {
                             my $msg =
                                 "    linked file $packPointer->{'localfile'}"
-                                . " to $lnkTarget/"
-                                . "$packOptions->{$requestedArch}->{'newfile'}";
+                                . " to $lnkTarget";
                             $this->logMsg('I', $msg);
                         }
                         if ($this->{m_debug} >= 2) {
