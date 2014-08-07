@@ -588,7 +588,6 @@ if [ ! -z "$KIWI_RECOVERY" ];then
     # 16.9) import oem config file
     #--------------------------------------
     importFile < $OEM_PARTITION_CONFIG
-    IFS=$IFS_ORIG
     #======================================
     # 16.10) write oem-trigger
     #--------------------------------------

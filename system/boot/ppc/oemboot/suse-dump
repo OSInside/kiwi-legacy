@@ -91,8 +91,7 @@ function OEMFindPartitions {
         local partid=$(partitionID /dev/$disk $(nd $device))
         local labels=""
         local deviceOK=0
-        IFS=","
-        for i in $rids;do
+        for i in $(echo $rids | tr , ' ');do
             req_psize=$(echo $i | cut -f1 -d:)
             req_label=$(echo $i | cut -f2 -d:)
             req_partid=$(echo $i | cut -f3 -d:)
@@ -105,7 +104,6 @@ function OEMFindPartitions {
                 deviceOK=1 ; break
             fi
         done
-        IFS=$IFS_ORIG
         if [ $deviceOK -eq 0 ];then
             Echo "Partition $device with $ID $partid and size $mbsize skipped"
             Echo "Partition ID mismatch and/or size too small"
@@ -201,7 +199,6 @@ function OEMInstall {
     #======================================
     # Search and ask for the install disk
     #--------------------------------------
-    IFS=$IFS_ORIG
     Echo "Searching harddrive for $OEMInstallType installation"
     hwinfo=/usr/sbin/hwinfo
     deviceDisks=$($hwinfo --disk | \
@@ -417,11 +414,9 @@ function OEMInstall {
             partitions=$OEMPartitions
             if [ ! -z "$partitions" ];then
                 count=0
-                IFS=","
-                for i in $partitions;do
+                for i in $(echo $partitions | tr , ' ');do
                     count=$((count + 1))
                 done
-                IFS=$IFS_ORIG
             fi
             if [ -z "$partitions" ] || [ $count -lt $reqpart ];then
                 #======================================
@@ -440,8 +435,7 @@ function OEMInstall {
                 echo "kiwi requires $reqpart partition(s) as listed" >> $info
                 echo "below without any filesystem inside !"         >> $info
                 echo >> $info
-                IFS=","
-                for i in $req_part_info;do
+                for i in $(echo $req_part_info | tr , ' ');do
                     psize=$(echo $i | cut -f1 -d:)
                     partname=$(echo $i | cut -f2 -d:)
                     partid=$(echo $i | cut -f3 -d:)
@@ -451,7 +445,6 @@ function OEMInstall {
                         echo "  Partition MBR Type: 0x$partid" >> $info
                     fi
                 done
-                IFS=$IFS_ORIG
                 cat $info
                 systemException \
                     "Use parted to setup the partition table" \
@@ -511,8 +504,7 @@ function OEMInstall {
                 TEXT_SELECT=$(
                     getText "$selectedMSG" $selectedText)
                 count=0
-                IFS=","
-                for i in $partitions;do
+                for i in $(echo $partitions | tr , ' ');do
                     plabel=$(echo $i | cut -f4- -d:)
                     if [[ $plabel =~ $selectedText ]];then
                         psize=$(echo $i | cut -f2 -d:)
@@ -525,7 +517,6 @@ function OEMInstall {
                         count=$((count + 1))
                     fi
                 done
-                IFS=$IFS_ORIG
                 if [ $count -eq 1 ];then
                     selectedPart=$pname
                 else
@@ -539,8 +530,7 @@ function OEMInstall {
                     fi
                 fi
                 count=0
-                IFS=","
-                for i in $partitions;do
+                for i in $(echo $partitions | tr , ' ');do
                     pname=$(echo $i | cut -f1 -d:)
                     if [ ! $pname = $selectedPart ];then
                         if [ $count -eq 0 ];then
@@ -551,7 +541,6 @@ function OEMInstall {
                         count=$((count + 1))
                     fi
                 done
-                IFS=$IFS_ORIG
                 partitions=$partitions_next
                 if [ $selectedText = "BOOT" ];then
                     bID=$(nd $selectedPart)

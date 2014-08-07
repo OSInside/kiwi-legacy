@@ -115,16 +115,15 @@ fi
 #======================================
 # 9) Download RW part of the CD image
 #--------------------------------------
-IFS="," ; for i in $IMAGE;do
+for i in $(echo $IMAGE | tr , ' ');do
     field=0
-    IFS=";" ; for n in $i;do
+    for n in $(echo $i | tr ';' ' ');do
     case $field in
         0) imageDevice=$n ; field=1 ;;
         1) imageName=$n   ; field=2 ;;
         2) imageVersion=$n
     esac
     done
-    IFS=$IFS_ORIG
     imageReadOnly="$imageName"
     imageReadOnly=$(echo $imageReadOnly | sed -e "s@\.${ARCH}\$@@")
     imageReadOnly="$imageReadOnly-read-only.$ARCH-$imageVersion"

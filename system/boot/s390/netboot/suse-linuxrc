@@ -326,7 +326,7 @@ if [ $LOCAL_BOOT = "no" ] && [ $haveDisk = "1" ];then
     IMAGE_FIRST=$(echo $IMAGE | cut -f1 -d,)
     for i in $IMAGE_FIRST;do
         field=0
-        IFS=";" ; for n in $i;do
+        for n in $(echo $i | tr ';' ' ');do
             case $field in
                 0) imageDevice=$n ; field=1 ;;
                 1) imageName=$n   ; field=2 ;;
@@ -402,14 +402,13 @@ then
         # Raid1 table
         #--------------------------------------
         field=0
-        IFS=";" ; for n in $RAID;do
+        for n in $(echo $RAID | tr ';' ' ');do
             case $field in
                 0) raidLevel=$n     ; field=1 ;;
                 1) raidDiskFirst=$n ; field=2 ;;
                 2) raidDiskSecond=$n; field=3
             esac
         done
-        IFS=$IFS_ORIG
         #======================================
         # wait for raid disks to appear
         #--------------------------------------
@@ -492,11 +491,11 @@ then
     # 15.1) Download network client image
     #--------------------------------------
     count=0
-    IFS="," ; for i in $IMAGE;do
+    for i in $(echo $IMAGE | tr , ' ');do
         imageZipped="uncompressed"
         count=$(($count + 1))
         field=0
-        IFS=";" ; for n in $i;do
+        for n in $(echo $i | tr ';' ' ');do
         case $field in
             0) imageDevice=$n ; field=1 ;;
             1) imageName=$n   ; field=2 ;;
@@ -518,7 +517,6 @@ then
             continue
         fi
         imagePath="image/$imageName-$imageVersion"
-        IFS=$IFS_ORIG
         while true;do
             # /.../
             # get image md5sum to be able to check for the size
@@ -644,9 +642,9 @@ else
     # 15.3) Check for NFS root
     #--------------------------------------
     if [ ! -z "$NFSROOT" ];then
-        IFS="," ; for i in $NFSROOT;do
+        for i in $(echo $NFSROOT | tr , ' ');do
             field=0
-            IFS=";" ; for n in $i;do
+            for n in $(echo $i | tr ';' ' ');do
             case $field in
                 0) nfsRootServer=$n ; field=1 ;;
                 1) nfsRootDevice=$n ; field=2
@@ -685,9 +683,9 @@ else
         if ! modprobe nbd;then
             systemException "Failed to load network blk device module" "reboot"
         fi
-        IFS="," ; for i in $NBDROOT;do
+        for i in $(echo $NBDROOT | tr , ' ');do
             field=0
-            IFS=";" ; for n in $i;do
+            for n in $(echo $i | tr ';' ' ');do
             case $field in
                 0) nbdServer=$n     ; field=1 ;;
                 1) nbdName=$n       ; field=2 ;;
@@ -913,10 +911,10 @@ if [ $LOCAL_BOOT = "no" ] || [ ! -z "$RELOAD_CONFIG" ];then
     #=======================================
     # 20.4) Get files from CONF, VENDOR_CONF
     #---------------------------------------
-    IFS="," ; for i in $ALL_CCONF;do
+    for i in $(echo $ALL_CCONF | tr , ' ');do
         unset configHash
         field=0
-        IFS=";"; for n in $i;do
+        for n in $(echo $i | tr ';' ' ');do
         case $field in
             0) configSource=$n ; field=1 ;;
             1) configDest=$n   ; field=2 ;;
@@ -932,7 +930,7 @@ if [ $LOCAL_BOOT = "no" ] || [ ! -z "$RELOAD_CONFIG" ];then
         cfgmsg_why='(forced)'
         if [ -z "$RELOAD_CONFIG" ];then
             cfgmsg_why='(missing)'
-            IFS=","; for j in $ALL_CBK_CONF;do
+            for j in $(echo $ALL_CBK_CONF | tr , ' ');do
                 BKconfigDest=`echo "$j" | cut -d ';' -f 2`
                 BKconfigHash=`echo "$j" | cut -d ';' -f 5`
                 if [ "$BKconfigDest" = "$configDest" ];then
@@ -964,10 +962,10 @@ if [ $LOCAL_BOOT = "no" ] || [ ! -z "$RELOAD_CONFIG" ];then
     #=======================================
     # 20.5) check config files to be deleted
     #---------------------------------------
-    IFS="," ; for i in $ALL_CBK_CONF;do
+    for i in $(echo $ALL_CBK_CONF | tr , ' ');do
         BKconfigDest=`echo "$i" | cut -d ';' -f 2`
         deletethis=1
-        IFS=","; for j in $ALL_CCONF;do
+        for j in $(echo $ALL_CCONF | tr , ' ');do
             configDest=`echo "$j" | cut -d ';' -f 2`
             if [ "$BKconfigDest" = "$configDest" ];then
                 deletethis=0
@@ -979,7 +977,6 @@ if [ $LOCAL_BOOT = "no" ] || [ ! -z "$RELOAD_CONFIG" ];then
             rm /mnt/$BKconfigDest
         fi
     done
-    IFS=$IFS_ORIG
     #=======================================
     # 20.6) Check for KIWI_INITRD
     #---------------------------------------

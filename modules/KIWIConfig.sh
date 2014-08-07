@@ -634,11 +634,10 @@ function baseSetupInPlaceSVNRepository {
     svnadmin create $repo
     chmod 700 $repo
     svn mkdir -m created file:///$repo/trunk
-    local ifss=$IFS
     local subp=""
     for dir in $paths;do
         subp=""
-        IFS="/"; for n in $dir;do
+        for n in $(echo $dir | tr '/' ' ');do
             if [ -z $n ];then
                 continue
             fi
@@ -646,7 +645,6 @@ function baseSetupInPlaceSVNRepository {
             svn mkdir -m created file:///$repo/trunk/$subp
         done
     done
-    IFS=$ifss
     for dir in $paths;do
         chmod 700 $dir/.svn
         svn add $dir/*
@@ -1385,15 +1383,11 @@ function suseStripFirmware {
     # strip out all firmware files which are not referenced
     # by a kernel module
     # ----
-    local ifs=$IFS
     local base=/lib/modules
     local name
     local bmdir
-    local IFS="
-    "
     mkdir -p /lib/firmware-required
-    for i in $(find $base -name "*.ko" | xargs modinfo | grep ^firmware);do
-        IFS=$ifs
+    find $base -name "*.ko" | xargs modinfo | grep ^firmware | while read i;do
         name=$(echo $(echo $i | cut -f2 -d:))
         if [ -z "$name" ];then
             continue
@@ -1477,7 +1471,6 @@ function suseStripKernel {
     # the vmlinux.gz and vmlinuz files which are required
     # for the kernel extraction in case of kiwi boot images
     # ----
-    local ifss=$IFS
     local arch=$(uname -m)
     local kversion
     local i
@@ -1486,10 +1479,7 @@ function suseStripKernel {
     local stripdir
     local kdata
     for kversion in /lib/modules/*;do
-        IFS="
-        "
         if [ ! -d "$kversion" ];then
-            IFS=$ifss
             continue
         fi
         if [ -x /bin/rpm ];then
@@ -1503,17 +1493,14 @@ function suseStripKernel {
             #------------------------------------------
             if [ ! $? = 0 ];then
                 # not in a package...
-                IFS=$ifss
                 continue
             fi
             if echo $p | grep -q "\-kmp\-";then  
                 # a kernel module package...
-                IFS=$ifss
                 continue
             fi
             if echo $p | grep -q "\-source\-";then
                 # a kernel source package...
-                IFS=$ifss
                 continue
             fi
             VERSION=$(/usr/bin/basename $kversion)
@@ -1525,7 +1512,6 @@ function suseStripKernel {
             if [ ! -f /boot/System.map-$VERSION ];then
                 # no system map for kernel
                 echo "no system map for kernel: $p found... skip it"
-                IFS=$ifss
                 continue
             fi
             /sbin/depmod -F /boot/System.map-$VERSION $VERSION
@@ -1548,8 +1534,7 @@ function suseStripKernel {
             # strip the modules but take care for deps
             #------------------------------------------
             stripdir=/tmp/stripped_modules
-            IFS=,
-            for mod in $kiwi_drivers; do
+            for mod in $(echo $kiwi_drivers | tr , ' '); do
                 local path=`/usr/bin/dirname $mod`
                 local base=`/usr/bin/basename $mod`
                 for d in kernel;do
@@ -1576,7 +1561,6 @@ function suseStripKernel {
                     fi
                 done
             done
-            IFS=$ifss
             for mod in `find $stripdir -name "*.ko"`;do
                 d=`/usr/bin/basename $mod`
                 i=`/sbin/modprobe \

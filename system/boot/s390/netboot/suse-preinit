@@ -97,7 +97,7 @@ fi
 # 10) check for valid mount points
 #--------------------------------------
 if [ ! -z "$imageDiskDevice" ] && [ "$systemIntegrity" = "clean" ];then
-    IFS=":" ; for i in $PART_MOUNT;do
+    for i in $(echo $PART_MOUNT | tr ':' ' ');do
     if [ ! -z "$i" ] && [ ! -e "$i" ] && [ ! "$i" = "x" ];then
         mkdir -p $i
     fi
@@ -109,10 +109,10 @@ fi
 #--------------------------------------
 if [ ! -z "$imageDiskDevice" ] && [ "$systemIntegrity" = "clean" ];then
     count=0
-    IFS="," ; for i in $IMAGE;do
+    for i in $(echo $IMAGE | tr , ' ');do
         count=$(($count + 1))
         field=0
-        IFS=";" ; for n in $i;do
+        for n in $(echo $i | tr ';' ' ');do
         case $field in
             0) field=1 ;;
             1) imageName=$n   ; field=2 ;;

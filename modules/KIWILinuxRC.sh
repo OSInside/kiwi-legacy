@@ -28,6 +28,7 @@ export HYBRID_PERSISTENT_DIR=/read-write
 export UTIMER_INFO=/dev/utimer
 export bootLoaderOK=0
 export enablePlymouth=1
+export IFS_ORIG=$IFS
 
 #======================================
 # lookup
@@ -110,6 +111,7 @@ function hideSplash {
     # can control a custom behavior using the handleSplash
     # hook called at the end of this function
     # ----
+    local IFS=$IFS_ORIG
     local console_count=$(activeConsoles)
     if [ $console_count -eq 1 ];then
         test -e /proc/splash && echo verbose > /proc/splash
@@ -126,6 +128,7 @@ function hideSplash {
 # Dialog
 #--------------------------------------
 function Dialog {
+    local IFS=$IFS_ORIG
     local code=1
     export DIALOG_CANCEL=1
     hideSplash
@@ -154,6 +157,7 @@ function Debug {
     # /.../
     # print message if variable DEBUG is set to 1
     # -----
+    local IFS=$IFS_ORIG
     if test "$DEBUG" = 1;then
         echo "+++++> $1"
     fi
@@ -165,6 +169,7 @@ function Echo {
     # /.../
     # print a message to the controling terminal
     # ----
+    local IFS=$IFS_ORIG
     if [ $ELOG_STOPPED = 0 ];then
         set +x
     fi
@@ -205,6 +210,7 @@ function WaitKey {
     # /.../
     # if DEBUG is set wait for ENTER to continue
     # ----
+    local IFS=$IFS_ORIG
     if test "$DEBUG" = 1;then
         Echo -n "Press ENTER to continue..."
         read
@@ -219,6 +225,7 @@ function importFile {
     # will export each entry of the file as variable into
     # the current shell environment
     # ----
+    local IFS=$IFS_ORIG
     local prefix=$1
     # create clean input, no empty lines and comments
     cat - | grep -v '^$' | grep -v '^[ \t]*#' > /tmp/srcme
@@ -248,7 +255,7 @@ function unsetFile {
     # unset variables specified within the given file.
     # the file must be in the config.<MAC> style format
     # ----
-    IFS="
+    local IFS="
     "
     local prefix=$1 #change name of key with a prefix
     while read line;do
@@ -260,7 +267,6 @@ function unsetFile {
         Debug "unset $prefix$key"
         eval unset "$prefix$key"
     done
-    IFS=$IFS_ORIG
 }
 #======================================
 # condenseConfigData
@@ -271,7 +277,7 @@ function condenseConfigData {
     # are present on the CONF line,
     # only last one will be kept (this preserves compatibility)
     # ----
-    IFS=","
+    local IFS=","
     local conf=( $1 )
     local cconf
     local sep=''
@@ -290,7 +296,6 @@ function condenseConfigData {
             sep=$IFS
         fi
     done
-    IFS=$IFS_ORIG
     echo "$cconf"
 }
 #======================================
@@ -302,6 +307,7 @@ function systemException {
     # by an action. Possible actions are reboot, wait, shutdown,
     # and opening a shell
     # ----
+    local IFS=$IFS_ORIG
     set +x
     local what=$2
     local nuldev=/dev/null
@@ -359,6 +365,7 @@ function systemException {
 # copyDevices
 #--------------------------------------
 function copyDeviceNodes {
+    local IFS=$IFS_ORIG
     local search=$1
     local prefix=$2
     local dtype
@@ -398,6 +405,7 @@ function copyDeviceNodes {
 # createInitialDevices
 #--------------------------------------
 function createInitialDevices {
+    local IFS=$IFS_ORIG
     local prefix=$1
     #======================================
     # create master dev dir
@@ -452,6 +460,7 @@ function createInitialDevices {
 # mount_rpc_pipefs
 #--------------------------------------
 function mount_rpc_pipefs {
+    local IFS=$IFS_ORIG
     # See if the file system is there yet
     if [ ! -e /var/lib/nfs/rpc_pipefs ];then
         return 0
@@ -466,6 +475,7 @@ function mount_rpc_pipefs {
 # umount_rpc_pipefs
 #--------------------------------------
 function umount_rpc_pipefs {
+    local IFS=$IFS_ORIG
     # See if the file system is there
     case `stat -c "%t" -f /var/lib/nfs/rpc_pipefs 2>/dev/null` in
     *67596969*)
@@ -476,6 +486,7 @@ function umount_rpc_pipefs {
 # setupNFSServices
 #--------------------------------------
 function setupNFSServices {
+    local IFS=$IFS_ORIG
     mount_rpc_pipefs
     if [ -x /sbin/rpcbind ];then
         startproc /sbin/rpcbind
@@ -491,6 +502,7 @@ function setupNFSServices {
 # mountSystemFilesystems
 #--------------------------------------
 function mountSystemFilesystems {
+    local IFS=$IFS_ORIG
     if [ ! -e /proc/cmdline ];then
         mount -t proc  proc   /proc
     fi
@@ -505,6 +517,7 @@ function mountSystemFilesystems {
 # umountSystemFilesystems
 #--------------------------------------
 function umountSystemFilesystems {
+    local IFS=$IFS_ORIG
     umount_rpc_pipefs
     umount /dev/pts &>/dev/null
     umount /sys     &>/dev/null
@@ -514,6 +527,7 @@ function umountSystemFilesystems {
 # createFramebufferDevices
 #--------------------------------------
 function createFramebufferDevices {
+    local IFS=$IFS_ORIG
     if [ -f /proc/fb ]; then
         while read fbnum fbtype; do
             if [ $(($fbnum < 32)) ] ; then
@@ -529,6 +543,7 @@ function createFramebufferDevices {
 # errorLogStop
 #--------------------------------------
 function errorLogStop {
+    local IFS=$IFS_ORIG
     set +x
     export ELOG_STOPPED=1
     exec < $ELOG_EXCEPTION &> $ELOG_EXCEPTION
@@ -537,6 +552,7 @@ function errorLogStop {
 # errorLogContinue
 #--------------------------------------
 function errorLogContinue {
+    local IFS=$IFS_ORIG
     exec 2>>$ELOG_FILE
     exec < $ELOG_EXCEPTION > $ELOG_EXCEPTION
     export ELOG_STOPPED=0
@@ -550,6 +566,7 @@ function errorLogStart {
     # Log all errors and the debug information to the
     # file set in ELOG_FILE.
     # ----
+    local IFS=$IFS_ORIG
     local umountProc=0
     if [ ! -f $ELOG_FILE ];then
         #======================================
@@ -611,6 +628,7 @@ function errorLogStart {
 # udevPending
 #--------------------------------------
 function udevPending {
+    local IFS=$IFS_ORIG
     local umountProc=0
     if [ ! -e /proc/cmdline ];then
         mount -t proc proc /proc
@@ -633,6 +651,7 @@ function udevPending {
 # udevTrigger
 #--------------------------------------
 function udevTrigger {
+    local IFS=$IFS_ORIG
     local udevadmExec=$(lookup udevadm 2>/dev/null)
     if [ -x $udevadmExec ];then
         $udevadmExec trigger
@@ -647,6 +666,7 @@ function udevSystemStart {
     # /.../
     # start udev daemon
     # ----
+    local IFS=$IFS_ORIG
     local udev_bin=/usr/lib/systemd/systemd-udevd
     if [ ! -x $udev_bin ];then
         udev_bin=/sbin/udevd
@@ -669,6 +689,7 @@ function udevSystemStop {
     # /.../
     # stop udev while in pre-init phase.
     # ----
+    local IFS=$IFS_ORIG
     if kill -0 $UDEVD_PID &>/dev/null;then
         udevPending
         kill $UDEVD_PID
@@ -681,6 +702,7 @@ function udevStart {
     # /.../
     # start the udev daemon.
     # ----
+    local IFS=$IFS_ORIG
     #======================================
     # Check time according to build day
     #--------------------------------------
@@ -753,6 +775,7 @@ function moduleLoadBeforeUdev {
 # loadAGPModules
 #--------------------------------------
 function loadAGPModules {
+    local IFS=$IFS_ORIG
     local krunning=$(uname -r)
     for i in /lib/modules/$krunning/kernel/drivers/char/agp/*; do
         test -e $i || continue
@@ -763,6 +786,7 @@ function loadAGPModules {
 # udevKill
 #--------------------------------------
 function udevKill {
+    local IFS=$IFS_ORIG
     . /iprocs
     if kill -0 $UDEVD_PID &>/dev/null;then
         udevPending
@@ -773,6 +797,7 @@ function udevKill {
 # activeConsoles
 #--------------------------------------
 function activeConsoles {
+    local IFS=$IFS_ORIG
     for i in $(cat /sys/class/tty/console/active 2>/dev/null);do
         echo $i
     done | wc -l
@@ -781,6 +806,7 @@ function activeConsoles {
 # consoleInit
 #--------------------------------------
 function consoleInit {
+    local IFS=$IFS_ORIG
     consoledev=console
     if [ -x /lib/udev/console_init ] && [ -e "/dev/$consoledev" ];then
         /lib/udev/console_init "/dev/$consoledev"
@@ -790,6 +816,7 @@ function consoleInit {
 # startPlymouth
 #--------------------------------------
 function startPlymouth {
+    local IFS=$IFS_ORIG
     local consoledev
     if lookup plymouthd &>/dev/null;then
         # first trigger graphics subsystem
@@ -814,6 +841,7 @@ function startDropBear {
     # /.../
     # start dropbear ssh server if installed
     # ---
+    local IFS=$IFS_ORIG
     local auth_keys="/root/.ssh/authorized_keys"
     if [ -z "$kiwidebug" ];then
         return
@@ -846,7 +874,8 @@ function installBootLoader {
     # The selection of the bootloader happens according to
     # the architecture of the system
     # ----
-    local arch=`uname -m`
+    local IFS=$IFS_ORIG
+    local arch=$(uname -m)
     case $arch-$loader in
         i*86-grub)       installBootLoaderGrub ;;
         x86_64-grub)     installBootLoaderGrub ;;
@@ -907,7 +936,8 @@ function installBootLoaderRecovery {
     # the recovery partition. The selection of the bootloader
     # happens according to the architecture of the system
     # ----
-    local arch=`uname -m`
+    local IFS=$IFS_ORIG
+    local arch=$(uname -m)
     case $arch-$loader in
         i*86-grub)       installBootLoaderGrubRecovery ;;
         x86_64-grub)     installBootLoaderGrubRecovery ;;
@@ -935,6 +965,7 @@ function installBootLoaderUBoot {
     # way because each arm board behaves differently.
     # Thus we are only calling a hook script here
     # ----
+    local IFS=$IFS_ORIG
     if [ "$kiwi_bootloader" = "berryboot" ];then
         runHook installBerryBoot "$@"
     else
@@ -945,6 +976,7 @@ function installBootLoaderUBoot {
 # installBootLoaderS390
 #--------------------------------------
 function installBootLoaderS390 {
+    local IFS=$IFS_ORIG
     if [ -x /sbin/zipl ];then
         Echo "Installing boot loader..."
         zipl -c /etc/zipl.conf 1>&2
@@ -963,6 +995,7 @@ function installBootLoaderS390 {
 # installBootLoaderSyslinux
 #--------------------------------------
 function installBootLoaderSyslinux {
+    local IFS=$IFS_ORIG
     local syslmbr=/usr/share/syslinux/mbr.bin
     if [ -e $syslmbr ];then
         Echo "Installing boot loader..."
@@ -993,6 +1026,7 @@ function installBootLoaderGrub {
     # install the grub according to the contents of
     # /etc/grub.conf and /boot/grub/menu.lst
     # ----
+    local IFS=$IFS_ORIG
     if lookup grub &>/dev/null;then
         Echo "Installing boot loader..."
         grub --batch --no-floppy < /etc/grub.conf 1>&2
@@ -1020,6 +1054,7 @@ function installBootLoaderGrub2 {
     # configure and install grub2 according to the
     # contents of /boot/grub2/grub.cfg
     # ----
+    local IFS=$IFS_ORIG
     local confTool=grub2-mkconfig
     local instTool=grub2-install
     local confFile_grub_bios=/boot/grub2/grub.cfg
@@ -1163,6 +1198,7 @@ function installBootLoaderYaboot {
     # /.../
     # install the lilo/yaboot bootloader
     # ----
+    local IFS=$IFS_ORIG
     if [ -x /sbin/lilo ];then
         Echo "Installing boot loader..."
         /sbin/lilo 1>&2
@@ -1181,6 +1217,7 @@ function installBootLoaderYaboot {
 # installBootLoaderS390Recovery
 #--------------------------------------
 function installBootLoaderS390Recovery {
+    local IFS=$IFS_ORIG
     Echo "*** zipl: recovery boot not implemented ***"
     return 1
 }
@@ -1188,6 +1225,7 @@ function installBootLoaderS390Recovery {
 # installBootLoaderSyslinuxRecovery
 #--------------------------------------
 function installBootLoaderSyslinuxRecovery {
+    local IFS=$IFS_ORIG
     local syslmbr=/usr/share/syslinux/mbr.bin
     if [ -e $syslmbr ];then
         if [ $loader = "syslinux" ];then
@@ -1217,6 +1255,7 @@ function installBootLoaderGrubRecovery {
     # By design the recovery partition is always the
     # last primary partition of the disk
     # ----
+    local IFS=$IFS_ORIG
     local input=/grub.input
     local gdevreco=$((recoid - 1))
     echo "device (hd0) $imageDiskDevice" > $input
@@ -1245,6 +1284,7 @@ function installBootLoaderGrub2Recovery {
     # By design the recovery partition is always the
     # last primary partition of the disk
     # ----
+    local IFS=$IFS_ORIG
     local confTool=grub2-mkconfig
     local confFile_grub_bios=/boot/grub2/grub.cfg
     local confFile_grub_efi=/boot/grub2-efi/grub.cfg
@@ -1314,6 +1354,7 @@ function updateModuleDependencies {
     # /.../
     # update the kernel module dependencies list
     # ---
+    local IFS=$IFS_ORIG
     local depmodExec=$(lookup depmod 2>/dev/null)
     if [ ! -x "$depmodExec" ];then
         Echo "Could not find depmod executable"
@@ -1334,6 +1375,7 @@ function setupInitrd {
     # /.../
     # call mkinitrd to create the distro initrd
     # ----
+    local IFS=$IFS_ORIG
     bootLoaderOK=1
     local umountProc=0
     local umountSys=0
@@ -1472,6 +1514,7 @@ function setupInitrd {
 # setupDefaultTheme
 #--------------------------------------
 function setupDefaultTheme {
+    local IFS=$IFS_ORIG
     if lookup plymouthd &>/dev/null;then
         plymouth-set-default-theme $kiwi_splash_theme &>/dev/null
     fi
@@ -1485,6 +1528,7 @@ function setupBootLoader {
     # The selection of the bootloader happens according to
     # the architecture of the system
     # ----
+    local IFS=$IFS_ORIG
     local arch=`uname -m`
     local para=""
     while [ $# -gt 0 ];do
@@ -1519,6 +1563,7 @@ function setupBootLoader {
 # setupBootThemes
 #--------------------------------------
 function setupBootThemes {
+    local IFS=$IFS_ORIG
     local destprefix=$1
     local srcprefix=$2
     if [ -z "$srcprefix" ];then
@@ -1585,7 +1630,8 @@ function setupBootLoaderRecovery {
     # for the recovery partition. The selection of the bootloader
     # happens according to the architecture of the system
     # ----
-    local arch=`uname -m`
+    local IFS=$IFS_ORIG
+    local arch=$(uname -m)
     local para=""
     while [ $# -gt 0 ];do
         # quote simple quotation marks
@@ -1615,6 +1661,7 @@ function setupBootLoaderRecovery {
 # setupBootLoaderS390Recovery
 #--------------------------------------
 function setupBootLoaderS390Recovery {
+    local IFS=$IFS_ORIG
     systemException \
         "*** zipl: recovery boot not implemented ***" \
     "reboot"
@@ -1626,6 +1673,7 @@ function setupBootLoaderSyslinuxRecovery {
     # /.../
     # create syslinux configuration for the recovery boot system
     # ----
+    local IFS=$IFS_ORIG
     local mountPrefix=$1  # mount path of the image
     local destsPrefix=$2  # base dir for the config files
     local gnum=$3         # boot partition ID
@@ -1737,6 +1785,7 @@ function setupBootLoaderGrubRecovery {
     # /.../
     # create menu.lst file for the recovery boot system
     # ----
+    local IFS=$IFS_ORIG
     local mountPrefix=$1  # mount path of the image
     local destsPrefix=$2  # base dir for the config files
     local gfix=$3         # grub title
@@ -1854,6 +1903,7 @@ function setupBootLoaderGrub2Recovery {
     # /.../
     # create grub.cfg file for the recovery boot system
     # ----
+    local IFS=$IFS_ORIG
     local mountPrefix=$1  # mount path of the image
     local destsPrefix=$2  # base dir for the config files
     local gfix=$3         # grub title
@@ -1992,6 +2042,7 @@ function setupBootLoaderUBoot {
     # differently. Thus we are only calling a hook
     # script here
     # ----
+    local IFS=$IFS_ORIG
     if [ "$kiwi_bootloader" = "berryboot" ];then
         runHook setupBerryBoot "$@"
     else
@@ -2006,6 +2057,7 @@ function setupBootLoaderS390 {
     # create /etc/zipl.conf used for the
     # zipl bootloader
     # ----
+    local IFS=$IFS_ORIG
     local mountPrefix=$1  # mount path of the image
     local destsPrefix=$2  # base dir for the config files
     local znum=$3         # boot partition ID
@@ -2191,6 +2243,7 @@ function setupBootLoaderSyslinux {
     # create syslinux.cfg used for the
     # syslinux bootloader
     # ----
+    local IFS=$IFS_ORIG
     local mountPrefix=$1  # mount path of the image
     local destsPrefix=$2  # base dir for the config files
     local gnum=$3         # boot partition ID
@@ -2401,6 +2454,7 @@ function setupBootLoaderGrub {
     # create grub.conf and menu.lst file used for
     # installing the bootloader
     # ----
+    local IFS=$IFS_ORIG
     local mountPrefix=$1  # mount path of the image
     local destsPrefix=$2  # base dir for the config files
     local gnum=$3         # grub boot partition ID
@@ -2657,6 +2711,7 @@ function setupBootLoaderGrub2 {
     # /.../
     # create/update default grub2 configuration
     # ----
+    local IFS=$IFS_ORIG
     #======================================
     # function paramters
     #--------------------------------------
@@ -2858,6 +2913,7 @@ function setupBootLoaderYaboot {
     # this file is converted to yaboot.conf therefore lilo.conf
     # has some restrictions
     # ----
+    local IFS=$IFS_ORIG
     local mountPrefix=$1  # mount path of the image
     local destsPrefix=$2  # base dir for the config files
     local lnum=$3         # lilo boot partition ID
@@ -3064,6 +3120,7 @@ function setupDefaultPXENetwork {
     # create the /sysconfig/network file according to the PXE
     # boot interface.
     # ----
+    local IFS=$IFS_ORIG
     if [ -z "$PXE_IFACE" ];then
         return
     fi
@@ -3082,6 +3139,7 @@ function setupDefaultFstab {
     # /.../
     # create a new /etc/fstab file with the default entries
     # ----
+    local IFS=$IFS_ORIG
     local prefix=$1
     local nfstab=$prefix/etc/fstab
     mkdir -p $prefix/etc
@@ -3100,7 +3158,7 @@ function updateRootDeviceFstab {
     # /.../
     # add one line to the fstab file for the root device
     # ----
-    IFS=$IFS_ORIG
+    local IFS=$IFS_ORIG
     local prefix=$1
     local rdev=$2
     local nfstab=$prefix/etc/fstab
@@ -3167,6 +3225,7 @@ function updateSwapDeviceFstab {
     # /.../
     # add one line to the fstab file for the swap device
     # ----
+    local IFS=$IFS_ORIG
     local prefix=$1
     local sdev=$2
     local diskByID=`getDiskID $sdev`
@@ -3180,6 +3239,7 @@ function updateBootDeviceFstab {
     # /.../
     # add temporary bind mounted boot entry to fstab
     # ----
+    local IFS=$IFS_ORIG
     local prefix=$1
     local sdev=$2
     local nfstab=$prefix/etc/fstab
@@ -3224,6 +3284,7 @@ function updateOtherDeviceFstab {
     # add one line to the fstab file for each partition
     # which has a mount point defined.
     # ----
+    local IFS=$IFS_ORIG
     local prefix=$1
     local sysroot=$2
     local nfstab=$prefix/etc/fstab
@@ -3277,6 +3338,7 @@ function setupKernelModules {
     # kernel modules to become integrated into the initrd
     # if created by the distro mkinitrd tool
     # ----
+    local IFS=$IFS_ORIG
     local destprefix=$1
     local srcprefix=$2
     if [ -z "$srcprefix" ];then
@@ -3348,6 +3410,7 @@ function getKernelBootParameters {
     # check contents of bootloader configuration
     # and extract cmdline parameters
     # ----
+    local IFS=$IFS_ORIG
     local prefix=$1
     local params
     local files="
@@ -3383,7 +3446,7 @@ function kernelCheck {
     # image kernel. This is done by either using kexec
     # or a real reboot is triggered
     # ----
-    local IFS
+    local IFS=$IFS_ORIG
     local kactive=`uname -r`
     local kreboot=1
     local prefix=$1
@@ -3478,6 +3541,7 @@ function probeFileSystem {
     # filesystem header data to detect the type of the
     # filesystem
     # ----
+    local IFS=$IFS_ORIG
     FSTYPE=unknown
     FSTYPE=$(blkid $1 -s TYPE -o value)
     case $FSTYPE in
@@ -3522,6 +3586,7 @@ function getSystemIntegrity {
     # the information from the image assigned to this partition
     # is returned
     # ----
+    local IFS=$IFS_ORIG
     if [ -z "$SYSTEM_INTEGRITY" ];then
         echo "clean"
     else
@@ -3536,12 +3601,14 @@ function getSystemMD5Status {
     # return the md5 status of the given image number.
     # the function works similar to getSystemIntegrity
     # ----
+    local IFS=$IFS_ORIG
     echo $SYSTEM_MD5STATUS | cut -f$1 -d:
 }
 #======================================
 # waitForIdleEventQueue
 #--------------------------------------
 function waitForIdleEventQueue {
+    local IFS=$IFS_ORIG
     local devs=0
     local p_devs=1
     local timeout=5
@@ -3562,6 +3629,7 @@ function waitForIdleEventQueue {
 # probeUSB
 #--------------------------------------
 function probeUSB {
+    local IFS=$IFS_ORIG
     local module=""
     local stdevs=""
     local hwicmd="/usr/sbin/hwinfo"
@@ -3624,6 +3692,7 @@ function probeUSB {
 # probeDevices
 #--------------------------------------
 function probeDevices {
+    local IFS=$IFS_ORIG
     local skipUSB=$1
     udevPending
     if [ $HAVE_MODULES_ORDER = 0 ];then
@@ -3712,6 +3781,7 @@ function probeDevices {
 # USBStickDevice
 #--------------------------------------
 function USBStickDevice {
+    local IFS=$IFS_ORIG
     stickFound=0
     local mode=$1
     #======================================
@@ -3820,6 +3890,7 @@ function CDMountOption {
     # mount option required to mount the device in full
     # speed mode
     # ----
+    local IFS=$IFS_ORIG
     local id=$(blkid -o value -s TYPE $1)
     if [ "$id" = "iso9660" ];then
         echo "-t iso9660"
@@ -3837,6 +3908,7 @@ function searchImageISODevice {
     # iso header. This function is called to identify the
     # live media and/or install media
     # ----
+    local IFS=$IFS_ORIG
     local mbrVID
     local mbrIID
     local count=0
@@ -3938,6 +4010,7 @@ function runMediaCheck {
     # /.../
     # run checkmedia program on the specified device
     # ----
+    local IFS=$IFS_ORIG
     local device_iso=$biosBootDevice
     local device_sdx=$(dn $biosBootDevice)
     if [ -e "$device_sdx" ];then
@@ -3959,6 +4032,7 @@ function setupHybridPersistent {
     # create a write partition for hybrid images if requested
     # and store the device name in HYBRID_RW
     # ----
+    local IFS=$IFS_ORIG
     if [ ! "$kiwi_hybridpersistent" = "true" ];then
         return
     fi
@@ -3997,12 +4071,14 @@ function CDUmount {
     # /.../
     # umount the CD device
     # ----
+    local IFS=$IFS_ORIG
     umount $biosBootDevice
 }
 #======================================
 # CDEject
 #--------------------------------------
 function CDEject {
+    local IFS=$IFS_ORIG
     eject $biosBootDevice
 }
 #======================================
@@ -4014,7 +4090,7 @@ function searchOFBootDevice {
     # this is required for the ppc boot architecture
     # as we don't have a BIOS and a MBR here
     # ----
-    IFS=$IFS_ORIG
+    local IFS=$IFS_ORIG
     local ofdev=`cat /proc/device-tree/chosen/bootpath|cut -f1 -d:`
     local h=/usr/sbin/ofpathname
     local ddevs=`$h -l $ofdev`
@@ -4040,6 +4116,7 @@ function searchBusIDBootDevice {
     # device is set online and the biosBootDevice variable
     # is set to this device for further processing
     # ----
+    local IFS=$IFS_ORIG
     local deviceID=0
     local dpath=/dev/disk/by-path
     local ipl_type=$(cat /sys/firmware/ipl/ipl_type)
@@ -4120,6 +4197,7 @@ function lookupDiskDevices {
     # /.../
     # use hwinfo to search for disk device nodes
     # ----
+    local IFS=$IFS_ORIG
     local h=/usr/sbin/hwinfo
     local c="Device File:|BIOS id"
     udevPending
@@ -4133,6 +4211,7 @@ function lookupBiosBootDevice {
     # /.../
     # check for devices which have 0x80 bios flag assigned
     # ----
+    local IFS=$IFS_ORIG
     local curd
     local pred
     for curd in $diskDevices;do
@@ -4155,7 +4234,7 @@ function searchBIOSBootDevice {
     # If we got a root device set via cmdline this value
     # takes precedence over everything else though
     # ----
-    IFS=$IFS_ORIG
+    local IFS=$IFS_ORIG
     local file=/boot/mbrid
     local ifix
     local match_count
@@ -4261,6 +4340,7 @@ function searchVolumeGroup {
     # /dev/$kiwi_lvmgroup/LVRoot and/or /dev/$kiwi_lvmgroup/LVComp
     # return zero on success
     # ----
+    local IFS=$IFS_ORIG
     local vg_count=0
     local vg_found
     if [ ! "$kiwi_lvm" = "true" ];then
@@ -4300,6 +4380,7 @@ function deactivateVolumeGroup {
     # we may require a moment before 'vgchange -a n'
     # return zero on success
     # ----
+    local IFS=$IFS_ORIG
     if [ ! "$kiwi_lvm" = "true" ];then
         return 1
     fi
@@ -4315,6 +4396,7 @@ function activateVolumeGroup {
     # /.../
     # activate volume group if LVM is present
     # ----
+    local IFS=$IFS_ORIG
     if [ ! "$kiwi_lvm" = "true" ];then
         return 1
     fi
@@ -4327,6 +4409,7 @@ function activateVolumeGroup {
 # activateMDRaid
 #--------------------------------------
 function activateMDRaid {
+    local IFS=$IFS_ORIG
     if [ ! -z "$kiwi_RaidDev" ];then
         udevPending
         Echo "Activating $kiwi_RaidDev mdraid array..."
@@ -4338,6 +4421,7 @@ function activateMDRaid {
 # resizeMDRaid
 #--------------------------------------
 function resizeMDRaid {
+    local IFS=$IFS_ORIG
     if [ ! -z "$kiwi_RaidDev" ];then
         udevPending
         Echo "Resizing $kiwi_RaidDev mdraid array..."
@@ -4348,6 +4432,7 @@ function resizeMDRaid {
 # resizeLVMPVs
 #--------------------------------------
 function resizeLVMPVs {
+    local IFS=$IFS_ORIG
     local extendID=$1
     local device=$(ddn $imageDiskDevice $extendID)
     if [ ! -z "$kiwi_RaidDev" ];then
@@ -4363,6 +4448,7 @@ function resizeLVMPVs {
 # deactivateMDRaid
 #--------------------------------------
 function deactivateMDRaid {
+    local IFS=$IFS_ORIG
     if [ ! -z "$kiwi_RaidDev" ] && [ -e $kiwi_RaidDev ];then
         udevPending
         Echo "Deactivating $kiwi_RaidDev mdraid array..."
@@ -4373,6 +4459,7 @@ function deactivateMDRaid {
 # zeroMDRaidSuperBlock
 #--------------------------------------
 function zeroMDRaidSuperBlock {
+    local IFS=$IFS_ORIG
     if [ ! -z "$kiwi_RaidDev" ] && [ -e $kiwi_RaidDev ];then
         local diskDevice=$1
         for i in /dev/md*;do
@@ -4388,6 +4475,7 @@ function searchSwapSpace {
     # /.../
     # search for a type=82 swap partition
     # ----
+    local IFS=$IFS_ORIG
     if [ ! -z $kiwinoswapsearch ];then
         return
     fi
@@ -4408,6 +4496,7 @@ function searchSwapSpace {
 # updateMTAB
 #--------------------------------------
 function updateMTAB {
+    local IFS=$IFS_ORIG
     local prefix=$1
     local umount=0
     if [ ! -e /proc/mounts ];then
@@ -4427,6 +4516,7 @@ function updateMTAB {
 # getNicNames
 #--------------------------------------
 function getNicNames {
+    local IFS=$IFS_ORIG
     for nic in $(ip -4 -o link | cut -f2 -d:);do
         if [ ! $nic = 'lo' ];then
             echo $nic
@@ -4437,6 +4527,7 @@ function getNicNames {
 # getHWAddress
 #--------------------------------------
 function getHWAddress {
+    local IFS=$IFS_ORIG
     local iface=$1
     ip addr show dev $iface |\
         grep 'link\/ether ' | cut -f6 -d ' '
@@ -4445,6 +4536,7 @@ function getHWAddress {
 # setupNic
 #--------------------------------------
 function setupNic {
+    local IFS=$IFS_ORIG
     local iface=$1
     local address=$2
     local netmask=$3
@@ -4493,7 +4585,7 @@ function loadNetworkCard {
     # /.../
     # load network module found by probeNetworkCard()
     # ----
-    local IFS
+    local IFS=$IFS_ORIG
     local loaded=0
     probeNetworkCard
     IFS=":" ; for i in $networkModule;do
@@ -4513,6 +4605,7 @@ function loadNetworkCardS390 {
     # search and include parameters from a parm file
     # provided on the specified dasd id
     # ----
+    local IFS=$IFS_ORIG
     local host=$1
     local skip="/etc/deactivate_s390_network_config_from_dasd"
     local hostdev=/dev/disk/by-path/ccw-${host}
@@ -4580,6 +4673,7 @@ function dhclientImportInfo {
     # Import and export the information form the
     # dhclient.lease file into the enviroment.
     # ----
+    local IFS=$IFS_ORIG
     if [ ! -n $1 ]; then
         Echo "NULL argument passed to dhclientImportInfo"
         return
@@ -4617,6 +4711,7 @@ function setupNetworkWicked {
     # /.../
     # assign DHCP IP address by using the wicked tool
     # ----
+    local IFS=$IFS_ORIG
     local nic_config
     local dhcp_info
     local wicked_dhcp4=/usr/lib/wicked/bin/wickedd-dhcp4
@@ -4695,6 +4790,7 @@ function setupNetworkDHCPCD {
     # /.../
     # assign DHCP IP address by using the dhcpcd tool
     # ----
+    local IFS=$IFS_ORIG
     if [ $DHCPCD_HAVE_PERSIST -eq 0 ];then
         # /.../
         # older version of dhcpd which doesn't have the
@@ -4812,6 +4908,7 @@ function setupNetworkDHCLIENT {
     # /.../
     # assign DHCP IP address by using the dhclient tool
     # ----
+    local IFS=$IFS_ORIG
     local dhclient_opts=" -4 -1 -q -timeout 20"
     mkdir -p /var/lib/dhclient
     mkdir -p /var/run
@@ -4896,10 +4993,10 @@ function setupNetwork {
     # and the nameserver information is written to
     # /etc/resolv.conf
     # ----
+    local IFS=$IFS_ORIG
     #======================================
     # local variable setup
     #--------------------------------------
-    local IFS
     local MAC=0
     local DEV=0
     local mac_list=0
@@ -5002,6 +5099,7 @@ function releaseNetwork {
     # release network setup by dhcpcd and free the lease
     # Do that only for _non_ network root devices
     # ----
+    local IFS=$IFS_ORIG
     if [ -z "$NFSROOT" ] && [ -z "$NBDROOT" ] && [ -z "$AOEROOT" ];then
         if lookup dhcpcd &>/dev/null; then
             #======================================
@@ -5051,6 +5149,7 @@ function setupNetworkInterfaceS390 {
     # needs includeKernelParametersLowerCase to be run
     # because parm file parameters are case insensitive
     # ----
+    local IFS=$IFS_ORIG
     case "$instnetdev" in
         "osa"|"hsi")
             local qeth_cmd="/sbin/qeth_configure"
@@ -5109,6 +5208,7 @@ function convertCIDRToNetmask {
     # /.../
     # convert the CIDR part to a useable netmask
     # ----
+    local IFS=$IFS_ORIG
     local cidr=$1
     local count=0
     for count in `seq 1 4`;do
@@ -5137,6 +5237,7 @@ function setupNetworkStatic {
     # configure static network either bring it up manually
     # or save the configuration depending on 'up' parameter
     # ----
+    local IFS=$IFS_ORIG
     local up=$1
     if [[ $hostip =~ / ]];then
         #======================================
@@ -5189,6 +5290,7 @@ function setupDefaultGateway {
     # setup default gateway. either set the route or save
     # the configuration depending on 'up' parameter
     # ----
+    local IFS=$IFS_ORIG
     local up=$1
     if [ "$up" == "1" ];then
         #======================================
@@ -5209,7 +5311,7 @@ function setupDNS {
     # /.../
     # setup DNS. write data to resolv.conf
     # ----
-    local IFS
+    local IFS=$IFS_ORIG
     local file="/etc/resolv.conf"
     if [ -n "$domain" ];then
         export DOMAIN=$domain
@@ -5237,6 +5339,7 @@ function fetchImageMD5 {
     # or from a local cache directory if specified by
     # KIWI_LOCAL_CACHE_DIR.
     # ----
+    local IFS=$IFS_ORIG
     local imageMD5s="image/$1-$2.md5"
     local imageServer=$3
     local imageBlkSize=$4
@@ -5297,7 +5400,7 @@ function updateNeeded {
     #======================================
     # Local variables
     #--------------------------------------
-    local IFS
+    local IFS=$IFS_ORIG
     local count=0
     local sum2
     local installed
@@ -5397,6 +5500,7 @@ function cleanSweep {
     # /.../
     # zero out a the given disk device
     # ----
+    local IFS=$IFS_ORIG
     local diskDevice=$1
     dd if=/dev/zero of=$diskDevice bs=32M >/dev/null
 }
@@ -5404,7 +5508,7 @@ function cleanSweep {
 # fdasdGetPartitionID
 #--------------------------------------
 function fdasdGetPartitionID {
-    IFS=$IFS_ORIG
+    local IFS=$IFS_ORIG
     local device=$1
     local partid=$2
     local count=1
@@ -5437,6 +5541,7 @@ function partedGetPartitionID {
     # map ID's if GPT table according to kiwi set partition
     # names
     # ----
+    local IFS=$IFS_ORIG
     local parted=$(parted -m -s $1 print | grep -v Warning:)
     local diskhd=$(echo $parted | head -n 3 | tail -n 2 | head -n 1)
     local plabel=$(echo $diskhd | cut -f6 -d:)
@@ -5478,6 +5583,7 @@ function partedGetPartitionID {
 # partitionID
 #--------------------------------------
 function partitionID {
+    local IFS=$IFS_ORIG
     local diskDevice=$1
     local diskNumber=$2
     if [ $PARTITIONER = "fdasd" ];then
@@ -5490,6 +5596,7 @@ function partitionID {
 # partitionSize
 #--------------------------------------
 function partitionSize {
+    local IFS=$IFS_ORIG
     local diskDevice=$1
     local psizeBytes
     local psizeKBytes
@@ -5509,6 +5616,7 @@ function kernelList {
     # links to the initrd and kernel files. The function will
     # save the valid linknames in the variable KERNEL_LIST
     # ----
+    local IFS=$IFS_ORIG
     local prefix=$1
     local kcount=1
     local kname=""
@@ -5603,6 +5711,7 @@ function validateSize {
     # check if the image fits into the requested partition.
     # An information about the sizes is printed out
     # ----
+    local IFS=$IFS_ORIG
     haveBytes=$(partitionSize $imageDevice)
     haveBytes=$((haveBytes * 1024))
     haveMByte=$((haveBytes / 1048576))
@@ -5625,6 +5734,7 @@ function validateBlockSize {
     # to the size of the image. The block size itself is also
     # limited to 65464 bytes
     # ----
+    local IFS=$IFS_ORIG
     local blkTest
     local nBlk
     if [ -z "$zblocks" ] && [ -z "$blocks" ];then
@@ -5661,6 +5771,7 @@ function loadOK {
     # there is no useful return code to check so we have to
     # check the output of the command
     # ----
+    local IFS=$IFS_ORIG
     for i in "File not found" "aborting" "no option named" "unknown host" ; do
         if echo "$1" | grep -q  "$i" ; then
             return 1
@@ -5676,7 +5787,7 @@ function includeKernelParameters {
     # include the parameters from /proc/cmdline into
     # the current shell environment
     # ----
-    IFS=$IFS_ORIG
+    local IFS=$IFS_ORIG
     local file=$1
     local translate=$2
     if [ -z "$file" ];then
@@ -5740,10 +5851,9 @@ function includeKernelParametersLowerCase {
 # umountSystem
 #--------------------------------------
 function umountSystem {
+    local IFS=$IFS_ORIG
     local retval=0
-    local OLDIFS=$IFS
     local mountList="/mnt /read-only /read-write"
-    IFS=$IFS_ORIG
     #======================================
     # umount boot device
     #--------------------------------------
@@ -5770,13 +5880,13 @@ function umountSystem {
     for dir in "/read-only" "/read-write" "/xino";do
         test -d $dir && rmdir $dir 1>&2
     done
-    IFS=$OLDIFS
     return $retval
 }
 #======================================
 # isFSTypeReadOnly
 #--------------------------------------
 function isFSTypeReadOnly {
+    local IFS=$IFS_ORIG
     if [ "$FSTYPE" = "squashfs" ];then
         export unionFST=overlay
         return 0
@@ -5791,6 +5901,7 @@ function isFSTypeReadOnly {
 # kiwiMount
 #--------------------------------------
 function kiwiMount {
+    local IFS=$IFS_ORIG
     local src=$1
     local dst=$2
     local opt=$3
@@ -5864,6 +5975,7 @@ function setupReadWrite {
     # check/create read-write filesystem used for
     # overlay data
     # ----
+    local IFS=$IFS_ORIG
     local rwDir=/read-write
     local rwDevice=`echo $UNIONFS_CONFIG | cut -d , -f 1`
     mkdir -p $rwDir
@@ -5911,6 +6023,7 @@ function setupReadWrite {
 # mountSystemSeedBtrFS
 #--------------------------------------
 function mountSystemSeedBtrFS {
+    local IFS=$IFS_ORIG
     local loopf=$1
     local rwDevice=`echo $UNIONFS_CONFIG | cut -d , -f 1`
     local roDevice=`echo $UNIONFS_CONFIG | cut -d , -f 2`
@@ -5966,6 +6079,7 @@ function mountSystemSeedBtrFS {
 # mountSystemUnionFS
 #--------------------------------------
 function mountSystemUnionFS {
+    local IFS=$IFS_ORIG
     local loopf=$1
     local roDir=/read-only
     local rwDir=/read-write
@@ -6052,6 +6166,7 @@ function mountSystemUnionFS {
 # mountSystemClicFS
 #--------------------------------------
 function mountSystemClicFS {
+    local IFS=$IFS_ORIG
     local loopf=$1
     local roDir=/read-only
     local rwDevice=`echo $UNIONFS_CONFIG | cut -d , -f 1`
@@ -6192,6 +6307,7 @@ function mountSystemClicFS {
 # mountSystemCombined
 #--------------------------------------
 function mountSystemCombined {
+    local IFS=$IFS_ORIG
     local mountDevice=$1
     local loopf=$2
     local roDevice=$mountDevice
@@ -6332,6 +6448,7 @@ function mountSystemCombined {
 # mountSystemStandard
 #--------------------------------------
 function mountSystemStandard {
+    local IFS=$IFS_ORIG
     local mountDevice=$1
     local variable
     local volume
@@ -6374,9 +6491,8 @@ function mountSystemStandard {
 # mountSystem
 #--------------------------------------
 function mountSystem {
+    local IFS=$IFS_ORIG
     local retval=0
-    local OLDIFS=$IFS
-    IFS=$IFS_ORIG
     #======================================
     # set primary mount device
     #--------------------------------------
@@ -6436,13 +6552,13 @@ function mountSystem {
     # reset mount counter
     #--------------------------------------
     resetMountCounter
-    IFS=$OLDIFS
     return $retval
 }
 #======================================
 # cleanDirectory
 #--------------------------------------
 function cleanDirectory {
+    local IFS=$IFS_ORIG
     local directory=$1
     shift 1
     local save=$@
@@ -6458,6 +6574,7 @@ function cleanDirectory {
 # searchGroupConfig
 #--------------------------------------
 function searchGroupConfig {
+    local IFS=$IFS_ORIG
     local localhwaddr=$DHCPCHADDR
     local GROUPCONFIG=/etc/config.group
     local list_var
@@ -6502,6 +6619,7 @@ function searchGroupHardwareAddress {
     # hardware address within the defined "mac_list".
     # If the hardware address is found, load the config file.
     # ----
+    local IFS=$IFS_ORIG
     local localhwaddr=$DHCPCHADDR
     local local_group=$1
     local mac_list=$2
@@ -6523,6 +6641,7 @@ function searchGroupHardwareAddress {
 # searchAlternativeConfig
 #--------------------------------------
 function searchAlternativeConfig {
+    local IFS=$IFS_ORIG
     # Check config.IP in Hex (pxelinux style)
     localip=$IPADDR
     hexip1=`echo $localip | cut -f1 -d'.'`
@@ -6550,6 +6669,7 @@ function searchAlternativeConfig {
 # searchHardwareMapConfig
 #--------------------------------------
 function searchHardwareMapConfig {
+    local IFS=$IFS_ORIG
     local list_var
     local mac_list
     #======================================
@@ -6579,6 +6699,7 @@ function searchHardwareMapConfig {
 # searchHardwareMapHardwareAddress
 #--------------------------------------
 function searchHardwareMapHardwareAddress {
+    local IFS=$IFS_ORIG
     local HARDWARE_CONFIG=/etc/config.hardware
     local localhwaddr=$DHCPCHADDR
     local hardware_group=$1
@@ -6604,6 +6725,7 @@ function searchHardwareMapHardwareAddress {
 # runHook
 #--------------------------------------
 function runHook {
+    local IFS=$IFS_ORIG
     #======================================
     # Check for execution permission
     #--------------------------------------
@@ -6644,6 +6766,7 @@ function runHook {
 # getNextPartition
 #--------------------------------------
 function getNextPartition {
+    local IFS=$IFS_ORIG
     part=$1
     nextPart=`echo $part | sed -e "s/\(.*\)[0-9]/\1/"`
     nextPartNum=`echo $part | sed -e "s/.*\([0-9]\)/\1/"`
@@ -6658,6 +6781,7 @@ function startShell {
     # /.../
     # start a debugging shell on ELOG_BOOTSHELL
     # ----
+    local IFS=$IFS_ORIG
     if [ ! -z $kiwidebug ];then
         if [ ! -e $ELOG_BOOTSHELL ];then
             Echo "No terminal $ELOG_BOOTSHELL available for debug shell"
@@ -6676,6 +6800,7 @@ function killShell {
     # /.../
     # kill debugging shell on ELOG_BOOTSHELL
     # ----
+    local IFS=$IFS_ORIG
     local umountProc=0
     if [ ! -e /proc/mounts ];then
         mount -t proc proc /proc
@@ -6700,6 +6825,7 @@ function waitForStorageDevice {
     # storage device could be obtained or the check
     # counter equals 4
     # ----
+    local IFS=$IFS_ORIG
     local device=$1
     local check=0
     udevPending
@@ -6726,6 +6852,7 @@ function waitForBlockDevice {
     # exists. If not the function will wait until the
     # device appears or the check counter equals 4
     # ----
+    local IFS=$IFS_ORIG
     local device=$1
     local check=0
     udevPending
@@ -6748,6 +6875,7 @@ function atftpProgress {
     # seek back and forth which makes it hard to use pipes for
     # progress indication. Therefore we watch the trace output
     # ----
+    local IFS=$IFS_ORIG
     local imgsize=$1    # image size in MB
     local prefix=$2     # line prefix text
     local file=$3       # file with progress data
@@ -6802,6 +6930,7 @@ function encodeURL {
     # encode special characters in URL's to correctly
     # serve as input for fetchFile and putFile
     # ----
+    local IFS=$IFS_ORIG
     local STR
     local CH
     STR="$@"
@@ -6819,6 +6948,7 @@ function fetchFile {
     # tftp,ftp, http, https. fetchFile is used in the netboot linuxrc
     # and uses curl and atftp to download files from the network
     # ----
+    local IFS=$IFS_ORIG
     local path=$1
     local dest=$2
     local izip=$3
@@ -7101,6 +7231,7 @@ function putFile {
     # the generic putFile function is used to upload boot data on
     # a server. Supported protocols are tftp, ftp, http, https
     # ----
+    local IFS=$IFS_ORIG
     local path=$1
     local dest=$2
     local host=$3
@@ -7161,6 +7292,7 @@ function importBranding {
     # include possible custom boot loader and bootsplash files
     # to the system to allow to use them persistently
     # ----
+    local IFS=$IFS_ORIG
     if [ -f /image/loader/message ];then
         if ! canWrite /mnt/boot;then
             Echo "Can't write to boot, import of boot message skipped"
@@ -7195,6 +7327,7 @@ function validateRootTree {
     # check whether that mount is a valid system tree or not. Therefore
     # some sanity checks are made here
     # ----
+    local IFS=$IFS_ORIG
     if [ ! -x /mnt/sbin/init -a ! -L /mnt/sbin/init ];then
         systemException "/sbin/init no such file or not executable" "reboot"
     fi
@@ -7208,6 +7341,7 @@ function getDiskID {
     # this function is able to turn a given standard device
     # name into the udev ID based representation
     # ----
+    local IFS=$IFS_ORIG
     local device=$1
     local swap=$2
     local prefix=by-id
@@ -7266,6 +7400,7 @@ function getDiskDevice {
     # this function is able to turn the given udev disk
     # ID label into the /dev/ device name
     # ----
+    local IFS=$IFS_ORIG
     local device=$(readlink $1)
     if [ -z "$device" ];then
         echo $1
@@ -7283,6 +7418,7 @@ function getDiskModels {
     # this function returns the disk identifier as
     # registered in the sysfs layer
     # ----
+    local IFS=$IFS_ORIG
     local models=`cat /sys/block/*/device/model 2>/dev/null`
     if [ ! -z "$models" ];then
         echo $models; return
@@ -7298,6 +7434,7 @@ function setupInittab {
     # information. If textmode is set to 1 we will boot into
     # runlevel 3
     # ----
+    local IFS=$IFS_ORIG
     local prefix=$1
     if cat /proc/cmdline | grep -qi "textmode=1";then
         sed -i -e s"@id:.*:initdefault:@id:3:initdefault:@" $prefix/etc/inittab
@@ -7311,6 +7448,7 @@ function setupConfigFiles {
     # all files created below /config inside the initrd are
     # now copied into the system image
     # ----
+    local IFS=$IFS_ORIG
     local file
     local dir
     cd /config
@@ -7338,6 +7476,7 @@ function activateImage {
     # already runs in the new tree and finaly switch the
     # new tree to be the new root (/) 
     # ----
+    local IFS=$IFS_ORIG
     #======================================
     # setup image name
     #--------------------------------------
@@ -7441,6 +7580,7 @@ function cleanImage {
     # real init is called. this function runs already
     # inside the system root directory via chroot
     # ----
+    local IFS=$IFS_ORIG
     local bootdir=boot_bind
     #======================================
     # setup logging in this mode
@@ -7538,6 +7678,7 @@ function bootImage {
     # call the system image init process and therefore
     # boot into the operating system
     # ----
+    local IFS=$IFS_ORIG
     local reboot=no
     local option=${kernel_cmdline[@]}
     #======================================
@@ -7555,7 +7696,6 @@ function bootImage {
     #--------------------------------------
     option=$(echo $@ | sed -e s@4@5@)
     echo && Echo "Booting System: $option"
-    export IFS=$IFS_ORIG
     #======================================
     # check for reboot request
     #--------------------------------------
@@ -7777,6 +7917,7 @@ function setupUnionFS {
     # following style: rwDevice,roDevice,unionType. The
     # devices are stores by disk ID if possible
     # ----
+    local IFS=$IFS_ORIG
     local rwDevice=`getDiskID $1`
     local roDevice=`getDiskID $2`
     local unionFST=$3
@@ -7813,6 +7954,7 @@ function canWrite {
     # for write permissions in /mnt.
     # returns zero on success.
     # ---
+    local IFS=$IFS_ORIG
     local dest=$1
     if [ -z "$dest" ];then
         dest=/mnt
@@ -7834,6 +7976,7 @@ function xenServer {
     # check if the given kernel is a xen kernel and if so
     # check if a dom0 or a domU setup was requested
     # ----
+    local IFS=$IFS_ORIG
     local kname=$1
     local mountPrefix=$2
     local sysmap="$mountPrefix/boot/System.map-$kname"
@@ -7869,6 +8012,7 @@ function makeLabel {
     # underscores. current bootloaders show the
     # underscore sign as as space in the boot menu
     # ---
+    local IFS=$IFS_ORIG
     if \
         [ ! $loader = "syslinux" ] && \
         [ ! $loader = "extlinux" ] && \
@@ -7887,6 +8031,7 @@ function waitForX {
     # wait for the X-Server with PID $xserver_pid to
     # become read for client calls
     # ----
+    local IFS=$IFS_ORIG
     local xserver_pid=$1
     local testx=/usr/sbin/testX
     local err=1
@@ -7920,6 +8065,7 @@ function startX {
     # /.../
     # start X-Server and wait for it to become ready
     # ----
+    local IFS=$IFS_ORIG
     export DISPLAY=:0
     local XServer=/usr/bin/Xorg
     if [ -x /usr/X11R6/bin/Xorg ];then
@@ -7937,6 +8083,7 @@ function startX {
 # stoppX
 #--------------------------------------
 function stoppX {
+    local IFS=$IFS_ORIG
     if [ -z "$XServerPID" ];then
         return
     fi
@@ -7956,6 +8103,7 @@ function luksOpen {
     # if yes open the device and return the new
     # /dev/mapper/ device name
     # ----
+    local IFS=$IFS_ORIG
     local ldev=$1
     local name=$2
     local retry=1
@@ -8031,6 +8179,7 @@ function luksResize {
     # check if luksDeviceOpened is defined and
     # run cryptsetup resize on the mapper name
     # ----
+    local IFS=$IFS_ORIG
     if [ ! -z "$luksDeviceOpened" ] && [ -e $luksDeviceOpened ];then
         cryptsetup resize $luksDeviceOpened
         udevPending
@@ -8043,6 +8192,7 @@ function luksClose {
     # /.../
     # close all open LUKS mappings
     # ----
+    local IFS=$IFS_ORIG
     local name=$1
     #======================================
     # close specified name if set
@@ -8067,6 +8217,7 @@ function importText {
     # /.../
     # read in all texts from the catalog
     # ----
+    local IFS=$IFS_ORIG
     export TEXT_TIMEOUT=$(
         getText "Boot continues in 10 sec...")
     export TEXT_OK=$(
@@ -8114,6 +8265,7 @@ function selectLanguage {
     # select language if not yet done. The value is
     # used for all dialog windows with i18n support
     # ----
+    local IFS=$IFS_ORIG
     local title="\"Select Language\""
     local list="en_US \"[ English ]\" on"
     local list_orig=$list
@@ -8184,6 +8336,7 @@ function getText {
     # /.../
     # return translated text
     # ----
+    local IFS=$IFS_ORIG
     local text=$(gettext kiwi "$1")
     if [ ! -z "$2" ];then
         text=$(echo $text | sed -e s"@%1@$2@")
@@ -8202,6 +8355,7 @@ function displayEULA {
     # selected language file(s). The files are searched
     # by the names in kiwi_showlicense
     # ----
+    local IFS=$IFS_ORIG
     local code=$(echo $DIALOG_LANG | cut -f1 -d_)
     if [ -z "$kiwi_showlicense" ];then
         Echo "No license name(s) configured"
@@ -8270,6 +8424,7 @@ function ddn {
     #    the /dev/mapper/<name>_partN schema is checked optionally
     #    if it does not exist the default device node specs applies
     # ----
+    local IFS=$IFS_ORIG
     if echo $1 | grep -q "^\/dev\/disk\/" ; then
         if [ -e $1"_part"$2 ]; then
             echo $1"_part"$2
@@ -8305,6 +8460,7 @@ function dn {
     # the last number. Exceptions:
     # loop devices
     # ----
+    local IFS=$IFS_ORIG
     local part=$(getDiskDevice $1)
     if [[ $part =~ dev/loop[0-9] ]];then
         echo $part
@@ -8327,6 +8483,7 @@ function nd {
     # print the number of the disk device according to the
     # device node name. 
     # ----
+    local IFS=$IFS_ORIG
     local part=$(getDiskDevice $1)
     local part_new=$(echo $part | sed -e 's@\(^.*\)p\([0-9].*$\)@\2@')
     if [ $part = $part_new ];then
@@ -8344,6 +8501,7 @@ function runInteractive {
     # tty first. The output of the dialog call is stored in
     # a file and printed as result to this function
     # ----
+    local IFS=$IFS_ORIG
     hideSplash
     local r=/tmp/rid
     local code
@@ -8369,6 +8527,7 @@ function createCustomHybridPersistent {
     # import the write space for the hybrid according to
     # the information given by kiwi_cowdevice and kiwi_cowsystem
     # ----
+    local IFS=$IFS_ORIG
     #======================================
     # check for custom cow location
     #--------------------------------------
@@ -8426,6 +8585,7 @@ function createHybridPersistent {
     # by the clicfs live mount. A new partition with a filesystem
     # inside labeled as 'hybrid' is created for this purpose
     # ----
+    local IFS=$IFS_ORIG
     local device=$1
     local input=/part.input
     local pID
@@ -8489,6 +8649,7 @@ function createHybridPersistent {
 # callPartitioner
 #--------------------------------------
 function callPartitioner {
+    local IFS=$IFS_ORIG
     local input=$1
     if [ $PARTITIONER = "fdasd" ];then
         Echo "Partition the disk according to real geometry [ fdasd ]"
@@ -8515,6 +8676,7 @@ function callPartitioner {
 # createPartitionerInput
 #--------------------------------------
 function createPartitionerInput {
+    local IFS=$IFS_ORIG
     if echo $imageDiskDevice | grep -q 'dev\/dasd';then
         PARTITIONER=fdasd
     fi
@@ -8532,6 +8694,7 @@ function createPartitionerInput {
 # createFDasdInput
 #--------------------------------------
 function createFDasdInput {
+    local IFS=$IFS_ORIG
     local input=/part.input
     local ignore_once=0
     local ignore=0
@@ -8576,9 +8739,10 @@ function partedInit {
     # as well as the number of cylinders and the
     # cyliner size in kB for this disk
     # ----
+    local IFS=$IFS_ORIG
     local devname=$1
     local device=$(getDiskDevice $devname)
-    local IFS=""
+    IFS=""
     local parted=$(parted -m -s $device unit cyl print | grep -v Warning:)
     local header=$(echo $parted | head -n 3 | tail -n 1)
     local ccount=$(echo $parted | grep ^$device | cut -f 2 -d: | tr -d cyl)
@@ -8601,6 +8765,7 @@ function partedWrite {
     # call parted with current command queue.
     # This will immediately change the partition table
     # ----
+    local IFS=$IFS_ORIG
     local device=$1
     local cmds=$2
     local opts
@@ -8628,7 +8793,7 @@ function partedSectorInit {
     # /.../
     # return aligned start/end sectors of current table.
     # ----
-    IFS=$IFS_ORIG
+    local IFS=$IFS_ORIG
     local disk=$1
     local s_start
     local s_stopp
@@ -8667,8 +8832,9 @@ function partedEndCylinder {
     # return end cylinder of given partition, next
     # partition must start at return value plus 1
     # ----
+    local IFS=$IFS_ORIG
     local part=$(($1 + 3))
-    local IFS=""
+    IFS=""
     local header=$(echo $partedOutput | head -n $part | tail -n 1)
     local ccount=$(echo $header | cut -f3 -d: | tr -d cyl)
     echo $ccount
@@ -8680,6 +8846,7 @@ function partedMBToCylinder {
     # /.../
     # convert size given in MB to cylinder count
     # ----
+    local IFS=$IFS_ORIG
     local sizeBytes=$(($1 * 1048576))
     local cylreq=$(echo "scale=0; $sizeBytes / ($partedCylKSize * 1000)" | bc)
     echo $cylreq
@@ -8695,6 +8862,7 @@ function createPartedInput {
     # last partedInit() call the command queue is processed
     # and the partedInit() will be called afterwards
     # ----
+    local IFS=$IFS_ORIG
     local disk=$1
     shift
     local index=0
@@ -8811,6 +8979,7 @@ function createPartedInput {
 # normalizeRepartInput
 #--------------------------------------
 function normalizeRepartInput {
+    local IFS=$IFS_ORIG
     local pcmds_fix
     local index=0
     local index_fix=0
@@ -8883,6 +9052,7 @@ function reloadKernel {
     # and shows them in a dialog window. The selected kernel
     # and initrd is loaded via kexec.
     # ----
+    local IFS=$IFS_ORIG
     #======================================
     # check proc/cmdline
     #--------------------------------------
@@ -8936,6 +9106,7 @@ function reloadKernel {
 # resizeFilesystem
 #--------------------------------------
 function resizeFilesystem {
+    local IFS=$IFS_ORIG
     local deviceResize=$1
     local callme=$2
     local ramdisk=0
@@ -9013,6 +9184,7 @@ function resizeFilesystem {
 # resetMountCounter
 #--------------------------------------
 function resetMountCounter {
+    local IFS=$IFS_ORIG
     local curtype=$FSTYPE
     local command
     for device in \
@@ -9041,6 +9213,7 @@ function resetMountCounter {
 # createFilesystem
 #--------------------------------------
 function createFilesystem {
+    local IFS=$IFS_ORIG
     local deviceCreate=$1
     local blocks=$2
     if [ "$FSTYPE" = "reiserfs" ];then
@@ -9079,6 +9252,7 @@ function restoreLVMPhysicalVolumes {
     # created from vgcfgbackup. It's important to create them
     # with the same uuid's compared to the restore file
     # ----
+    local IFS=$IFS_ORIG
     local restorefile=$1
     cat $restorefile | grep -A2 -E 'pv[0-9] {' | while read line;do
         if [ -z "$uuid" ];then
@@ -9105,6 +9279,7 @@ function pxeCheckServer {
     # If it exists its contents will be used as
     # server address stored in the SERVER variabe
     # ----
+    local IFS=$IFS_ORIG
     if [ ! -z $kiwiserver ];then
         Echo "Found server in kernel cmdline"
         SERVER=$kiwiserver
@@ -9130,6 +9305,7 @@ function pxeSetupDownloadServer {
     # 3) try address of DHCP server if no servertype or tftp is used
     # 4) fail if no location was found
     # ----
+    local IFS=$IFS_ORIG
     pxeCheckServer
     if [ -z "$SERVER" ];then
         if [ ! -z "$ip" ];then
@@ -9171,6 +9347,7 @@ function pxeSetupSystemAliasName {
     # ask for ever for this name otherwhise the number sets
     # a timeout how long to wait for input of this data
     # ----
+    local IFS=$IFS_ORIG
     if test $NAME -ne 0;then
         if test $NAME -eq -1;then
             Echo -n "Enter Alias Name for this system: " && \
@@ -9191,6 +9368,7 @@ function pxeSetupSystemHWInfoFile {
     # NOTE: it's required to have the dhcp info file sourced
     # before this function is called
     # ----
+    local IFS=$IFS_ORIG
     hwinfo --all --log=hwinfo.$DHCPCHADDR >/dev/null
 }
 #======================================
@@ -9203,6 +9381,7 @@ function pxeSetupSystemHWTypeFile {
     # file suffixed by the hardware address of the
     # network card.
     # ----
+    local IFS=$IFS_ORIG
     echo "NCNAME=$SYSALIAS"   >> hwtype.$DHCPCHADDR
     echo "CRNAME=$SYSALIAS"   >> hwtype.$DHCPCHADDR
     echo "IPADDR=$IPADDR"     >> hwtype.$DHCPCHADDR
@@ -9212,6 +9391,7 @@ function pxeSetupSystemHWTypeFile {
 # pxeSizeToMB
 #--------------------------------------
 function pxeSizeToMB {
+    local IFS=$IFS_ORIG
     local size=$1
     if [ "$size" = "x" ];then
         echo . ; return
@@ -9229,6 +9409,7 @@ function pxeSizeToMB {
 # pxePartitionInput
 #--------------------------------------
 function pxePartitionInput {
+    local IFS=$IFS_ORIG
     if [ $PARTITIONER = "fdasd" ];then
         pxePartitionInputFDASD
     else
@@ -9239,6 +9420,7 @@ function pxePartitionInput {
 # pxeRaidPartitionInput
 #--------------------------------------
 function pxeRaidPartitionInput {
+    local IFS=$IFS_ORIG
     if [ $PARTITIONER = "fdasd" ];then
         pxeRaidPartitionInputFDASD
     else
@@ -9249,6 +9431,7 @@ function pxeRaidPartitionInput {
 # pxePartitionInputFDASD
 #--------------------------------------
 function pxePartitionInputFDASD {
+    local IFS=$IFS_ORIG
     local field=0
     local count=0
     local IFS=","
@@ -9289,11 +9472,11 @@ function pxeRaidPartitionInputFDASD {
 # pxePartitionInputGeneric
 #--------------------------------------
 function pxePartitionInputGeneric {
+    local IFS=","
     local field=0
     local count=0
     local pname
-    local IFS=","
-    for i in $PART;do
+       for i in $PART;do
         field=0
         count=$((count + 1))
         IFS=";" ; for n in $i;do
@@ -9357,9 +9540,9 @@ function pxeRaidPartitionInputGeneric {
 # pxeRaidCreate
 #--------------------------------------
 function pxeRaidCreate {
+    local IFS=","
     local count=0
     local mdcount=0
-    local IFS=","
     local raidFirst
     local raidSecond
     local conf=/mdadm.conf
@@ -9391,11 +9574,11 @@ function pxeRaidCreate {
 # pxeRaidAssemble
 #--------------------------------------
 function pxeRaidAssemble {
+    local IFS=";"
     local count=0
     local mdcount=0
     local field=0
     local devices
-    local IFS=";"
     local raidFirst
     local raidSecond
     local conf=/mdadm.conf
@@ -9441,9 +9624,9 @@ function pxeRaidZeroSuperBlock {
     # layout is different compared to the former raid layout
     # the superblock is not valid anymore
     # ----
+    local IFS=","
     local count=1
     local device
-    local IFS=","
     for i in $PART;do
         device=$(ddn $imageDiskDevice $count)
         if ! waitForStorageDevice $device;then
@@ -9457,8 +9640,8 @@ function pxeRaidZeroSuperBlock {
 # pxeRaidStop
 #--------------------------------------
 function pxeRaidStop {
-    local count=0
     local IFS=","
+    local count=0
     for i in $PART;do
         mdadm --stop /dev/md$count
         count=$((count + 1))
@@ -9468,10 +9651,10 @@ function pxeRaidStop {
 # pxeSwapDevice
 #--------------------------------------
 function pxeSwapDevice {
+    local IFS=","
     local field=0
     local count=0
     local device
-    local IFS=","
     for i in $PART;do
         field=0
         count=$((count + 1))
@@ -9494,11 +9677,11 @@ function pxeSwapDevice {
 # pxeRaidSwapDevice
 #--------------------------------------
 function pxeRaidSwapDevice {
+    local IFS=","
     local field=0
     local count=0
     local mdcount=0
     local device
-    local IFS=","
     for i in $PART;do
         field=0
         count=$((count + 1))
@@ -9522,6 +9705,7 @@ function pxeRaidSwapDevice {
 # pxeRaidPartCheck
 #--------------------------------------
 function pxeRaidPartCheck {
+    local IFS=";"
     local count=0
     local field=0
     local n
@@ -9529,7 +9713,6 @@ function pxeRaidPartCheck {
     local raidDiskFirst
     local raidDiskSecond
     local device
-    local IFS=";"
     local partSize
     local partID
     local partMount
@@ -9600,9 +9783,9 @@ function pxePartitionSetupCheck {
     # checks if it's possible to setup those partitions
     # with respect to the available disk size
     # ----
+    local IFS=","
     local field=0
     local count=0
-    local IFS=","
     local reqsizeMB=0
     if [ -z "$DISK" ];then
         # no disk device available, might be a ram only
@@ -9648,6 +9831,7 @@ function pxePartCheck {
     # or if it only increases the partitions so that no
     # data loss is expected.
     # ----
+    local IFS=$IFS_ORIG
     local count=0
     local field=0
     local n
@@ -9656,7 +9840,6 @@ function pxePartCheck {
     local partMount
     local device
     local size
-    local IFS
     local maxDiffPlus=10240  # max 10MB bigger
     local maxDiffMinus=10240 # max 10MB smaller
     IFS=","
@@ -9694,10 +9877,10 @@ function pxePartCheck {
 # pxeBootDevice
 #--------------------------------------
 function pxeBootDevice {
+    local IFS=","
     local field=0
     local count=0
     local device
-    local IFS=","
     for i in $PART;do
         field=0
         count=$((count + 1))
@@ -9720,6 +9903,7 @@ function pxeBootDevice {
 # startUtimer
 #--------------------------------------
 function startUtimer {
+    local IFS=$IFS_ORIG
     local utimer=/usr/bin/utimer
     if [ ! -x $utimer ];then
         utimer=/utimer
@@ -9743,6 +9927,7 @@ function setupBootPartitionPXE {
     #======================================
     # Variable setup
     #--------------------------------------
+    local IFS=$IFS_ORIG
     local fs_type
     local FSTYPE_SAVE=$FSTYPE
     local mpoint=boot_bind
@@ -9863,6 +10048,7 @@ function setupBootPartition {
     #======================================
     # Variable setup
     #--------------------------------------
+    local IFS=$IFS_ORIG
     local label=undef
     local mpoint=boot_bind
     local haveBootPartition=0
@@ -9936,6 +10122,7 @@ function setupBootPartition {
 # isVirtioDevice
 #--------------------------------------
 function isVirtioDevice {
+    local IFS=$IFS_ORIG
     if [ $haveDASD -eq 0 ] && [ $haveZFCP -eq 0 ];then
         return 0
     fi
@@ -9945,6 +10132,7 @@ function isVirtioDevice {
 # isDASDDevice
 #--------------------------------------
 function isDASDDevice {
+    local IFS=$IFS_ORIG
     if [ $haveDASD -eq 1 ];then
         return 0
     fi
@@ -9954,6 +10142,7 @@ function isDASDDevice {
 # isZFCPDevice
 #--------------------------------------
 function isZFCPDevice {
+    local IFS=$IFS_ORIG
     if [ $haveZFCP -eq 1 ];then
         return 0
     fi
@@ -9967,6 +10156,7 @@ function runPreinitServices {
     # run the .sh scripts in /etc/init.d/kiwi while
     # inside the preinit stage of the kiwi boot process
     # ----
+    local IFS=$IFS_ORIG
     local service=/etc/init.d/kiwi/$1
     if [ ! -d $service ];then
         Echo "kiwi service $service not found... skipped"
@@ -9983,6 +10173,7 @@ function setupTTY {
     # /.../
     # create tty device nodes in case we don't have devtmpfs
     # ----
+    local IFS=$IFS_ORIG
     local tty_driver
     local major
     local minor
@@ -10021,6 +10212,7 @@ function setupConsole {
     # setup the xvc and/or hvc console if the device is present
     # also remove the ttyS0 console if no ttyS0 device exists
     # ----
+    local IFS=$IFS_ORIG
     local itab=/etc/inittab
     local stty=/etc/securetty
     local init=/bin/systemd
@@ -10069,6 +10261,7 @@ function cleanPartitionTable {
     # remove partition table and create a new msdos
     # table label if parted is in use
     # ----
+    local IFS=$IFS_ORIG
     dd if=/dev/zero of=$imageDiskDevice bs=512 count=1 >/dev/null
     if [ $PARTITIONER = "parted" ];then
         parted -s $imageDiskDevice mklabel msdos
@@ -10083,6 +10276,7 @@ function updatePartitionTable {
     # for fixing the table when e.g the print command is called.
     # We tell parted to fix the table
     # ----
+    local IFS=$IFS_ORIG
     local device=$(getDiskDevice $1)
     local diskhd
     local plabel
@@ -10167,6 +10361,7 @@ function resetBootBind {
     # symbolic link to make the suse kernel update process
     # to work correctly
     # ----
+    local IFS=$IFS_ORIG
     local bprefix=$1
     local bootdir=$bprefix/boot_bind
     if [ ! -e /proc/mounts ];then
@@ -10229,6 +10424,7 @@ function setupKernelLinks {
     # check kernel names and links to kernel and initrd
     # according to the different boot-up situations
     # ----
+    local IFS=$IFS_ORIG
     #======================================
     # mount boot partition if required
     #--------------------------------------
@@ -10315,6 +10511,7 @@ function createOriginSnapshot {
     # time of the image. This origin snapshot requires
     # the use of the btrfs filesystem
     # ----
+    local IFS=$IFS_ORIG
     if [ ! "$FSTYPE" = "btrfs" ];then
         return
     fi
@@ -10331,6 +10528,7 @@ function createOriginSnapshot {
 # activateBootPartition
 #--------------------------------------
 function activateBootPartition {
+    local IFS=$IFS_ORIG
     local device=$imageBootDevice
     if [ ! -e $device ];then
         device=$imageRootDevice
@@ -10347,6 +10545,7 @@ function activateBootPartition {
 # refreshProtectiveMBR
 #--------------------------------------
 function updateProtectiveMBR {
+    local IFS=$IFS_ORIG
     local device=$1
     local input=/part.input
     if ! lookup gdisk &>/dev/null;then
@@ -10370,6 +10569,7 @@ function updateProtectiveMBR {
 # FBOK
 #--------------------------------------
 function FBOK {
+    local IFS=$IFS_ORIG
     if [ ! -e /dev/fb0 ];then
         # no framebuffer device found
         return 1
@@ -10393,10 +10593,7 @@ function FBOK {
 # initialize
 #--------------------------------------
 function initialize {
-    #======================================
-    # Export IFS default value
-    #--------------------------------------
-    export IFS_ORIG=$IFS
+    local IFS=$IFS_ORIG
     #======================================
     # Exports boot image .profile
     #--------------------------------------
