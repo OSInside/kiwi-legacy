@@ -527,8 +527,10 @@ sub __createSolver {
         $solvRecommends = 0;
     }
     if ($KIWISatSolver::libsolv) {
-        # TODO: set_dont_install_recommended does not exist in libsolv
         $solver = $pool->Solver();
+        if (! $solvRecommends) {
+            $solver->set_flag($solv::Solver::SOLVER_FLAG_IGNORE_RECOMMENDED,1);
+        }
     } elsif ($KIWISatSolver::libsatsolver) {
         $solver = satsolver::Solver->new($pool);
         if (! $solvRecommends) {

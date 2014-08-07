@@ -140,6 +140,13 @@ sub new {
     my $manager = $xml -> getPreferences() -> getPackageManager();
     push @items_install, $manager;
     #==========================================
+    # Get pattern type
+    #------------------------------------------
+    my $ptype = $xml -> getInstallOption();
+    if (! $ptype) {
+        $ptype = 'onlyRequired';
+    }
+    #==========================================
     # Store package names to be deleted later
     #------------------------------------------
     my $deletePacks = $xml -> getPackagesToDelete();
@@ -243,7 +250,7 @@ sub __solve {
     my @solp;
     my $solf;
     my $psolve = KIWISatSolver -> new (
-        $items,$urllist,"solve-patterns"
+        $items,$urllist,"solve-patterns",undef,undef,$this->{ptype}
     );
     if (! defined $psolve) {
         $kiwi -> error ("SaT solver setup failed\n");
@@ -280,7 +287,7 @@ sub __lookupPatterns {
     my $urllist = $this->{urllist};
     my $kiwi    = $this->{kiwi};
     my $psolve = KIWISatSolver -> new (
-        $items,$urllist,"solve-patterns",undef,'quiet'
+        $items,$urllist,"solve-patterns",undef,'quiet',$this->{ptype}
     );
     if (! defined $psolve) {
         $kiwi -> error ("SaT solver setup failed\n");
