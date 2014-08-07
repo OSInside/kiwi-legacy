@@ -3474,6 +3474,12 @@ sub setupBootLoaderStages {
         my $grub_ofw   = 'grub2';
         my $grub_share = 'grub2';
         my $lib        = 'lib';
+        if ($firmware eq 'ec2') {
+            $grubpc = 'x86_64-xen';
+            if ($arch ne 'x86_64') {
+                $grubpc = 'i386-xen';
+            }
+        }
         if ($arch ne 'x86_64') {
             $efipc = 'i386-efi';
         }
@@ -3536,16 +3542,18 @@ sub setupBootLoaderStages {
         #------------------------------------------
         my @core_modules = (
             'ext2','iso9660','linux','echo','configfile',
-            'boot','search_label','search_fs_file','search',
+            'search_label','search_fs_file','search',
             'search_fs_uuid','ls','normal','gzio',
             'png','fat','gettext','font','minicmd',
             'gfxterm','gfxmenu','video','video_fb'
         );
         my @bios_core_modules = (
-            'biosdisk','part_msdos','part_gpt','vga','vbe',
-            'chain','multiboot'
-
+            'part_msdos','part_gpt'
         );
+        if ($firmware ne 'ec2') {
+            push @core_modules, 'boot';
+            push @bios_core_modules, qw /biosdisk vga vbe chain multiboot/;
+        }
         my @efi_core_modules = (
             'part_gpt','efi_gop','efi_uga'
         );
@@ -5462,21 +5470,6 @@ sub installBootLoader {
             $kiwi -> error  ("Mandatory grub2 modules not found");
             $kiwi -> failed ();
             return;
-        }
-        if ($firmware eq 'ec2') {
-            $status = KIWIQX::qxx (
-                "cd /mnt/boot/grub2/; ln -s $grubarch xen-x86_64 2>&1"
-            );
-            $result = $? >> 8;
-            if ($result != 0) {
-                my $msg = "Could not create symlink xen-x86_64 -> $grubarch "
-                    . 'for EV2 grub2 setup';
-                $kiwi -> failed ();
-                $kiwi -> error ($msg);
-                $kiwi -> failed ();
-                $this -> cleanStack ();
-                return;
-            }
         }
         #==========================================
         # Copy grub2 core modules to tmpdir
