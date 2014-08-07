@@ -323,7 +323,11 @@ Requires:       genisoimage
 Requires:       kiwi-desc-isoboot = %{version}
 Requires:       %(echo `bash %{S:4} %{S:0} isoboot %{myarch} %{mysystems}`)
 %ifarch ppc ppc64 ppc64le
+%if 0%{?suse_version} >= 1315
+Requires:       grub2-powerpc-ieee1275
+%else
 Requires:       yaboot
+%endif
 %endif
 %ifarch s390 s390x
 Requires:       zipl
@@ -387,7 +391,11 @@ Requires:       genisoimage
 Requires:       kiwi-desc-vmxboot = %{version}
 Requires:       %(echo `bash %{S:4} %{S:0} vmxboot %{myarch} %{mysystems}`)
 %ifarch ppc ppc64 ppc64le
+%if 0%{?suse_version} >= 1315
+Requires:       grub2-powerpc-ieee1275
+%else
 Requires:       yaboot
+%endif
 %endif
 %ifarch s390 s390x
 Requires:       zipl
@@ -493,8 +501,13 @@ Provides:       kiwi-boot:tbz
 Requires:       genisoimage
 Requires:       kiwi-desc-oemboot = %{version}
 Requires:       %(echo `bash %{S:4} %{S:0} oemboot %{myarch} %{mysystems}`)
+
 %ifarch ppc ppc64 ppc64le
+%if 0%{?suse_version} >= 1315
+Requires:       grub2-powerpc-ieee1275
+%else
 Requires:       yaboot
+%endif
 %endif
 %ifarch s390 s390x
 Requires:       zipl
