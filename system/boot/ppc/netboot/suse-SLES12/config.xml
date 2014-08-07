@@ -15,10 +15,9 @@
     <profiles>
         <profile name="default" description="Booting default profile"/>
         <profile name="std" description="KERNEL: Default"/>
-        <profile name="ppc64" description="KERNEL: PPC64 kernel"/>
         <profile name="custom" description="KERNEL: specified by bootinclude in system XML"/>
     </profiles>
-    <drivers profiles="default,ppc64">
+    <drivers profiles="default">
         <file name="crypto/*"/>
         <file name="drivers/acpi/dock.ko"/>
         <file name="drivers/ata/*"/>
@@ -81,12 +80,8 @@
     <packages type="image" profiles="std">
         <package name="kernel-default"/>
     </packages>
-    <packages type="image" profiles="ppc64">
-        <package name="kernel-ppc64"/>
-        <package name="kernel-ppc64-base"/>
-    </packages>
     <packages type="image" profiles="custom"><!-- empty custom section to allow bootincluding custom kernel --></packages>
-    <packages type="image" profiles="default,ppc64">
+    <packages type="image" profiles="default">
         <package name="adaptec-firmware"/>
         <package name="atftp"/>
         <package name="bc"/>
@@ -141,7 +136,7 @@
         <package name="psmisc"/>
         <package name="sysvinit-tools"/>
     </packages>
-    <packages type="delete" profiles="default,ppc64">
+    <packages type="delete" profiles="default">
         <package name="cracklib-dict-full"/>
         <package name="diffutils"/>
         <package name="fillup"/>

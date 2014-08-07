@@ -14,7 +14,6 @@
     </preferences>
     <profiles>
         <profile name="default" description="Booting default setup"/>
-        <profile name="ppc64" description="KERNEL: ppc64 kernel"/>
         <profile name="custom" description="KERNEL: specified by bootinclude in system XML"/>
         <profile name="std" description="KERNEL: Default"/>
     </profiles>
@@ -83,10 +82,6 @@
     </repository>
     <packages type="image" profiles="std">
         <package name="kernel-default"/>
-    </packages>
-    <packages type="image" profiles="ppc64">
-        <package name="kernel-ppc64"/>
-        <package name="kernel-ppc64-base"/>
     </packages>
     <packages type="image" profiles="custom"><!-- empty custom section to allow bootincluding custom kernel --></packages>
     <packages type="bootstrap">
