@@ -129,7 +129,11 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 # redefine for the SLES case if no sles_version exists
 # SLE12: NOTE: potential problems ahead with the first SP of SLES12
 %if %suse_version == 1315
+%ifarch x86_64
 %define mysystems suse-SLES12 suse-SLED12
+%else
+%define mysystems suse-SLES12
+%endif
 %endif
 # redefine for the SLE11 case if no sles_version exists
 # SLE11: NOTE: this works only because openSUSE 11.1 is out of scope
@@ -139,7 +143,11 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 %endif
 # SLES with sles_version macro
 %if 0%{?sles_version}
+%ifarch %ix86 x86_64
 %define mysystems suse-SLES%{sles_version} suse-SLED%{sles_version}
+%else
+%define mysystems suse-SLES%{sles_version}
+%endif
 %endif
 # RHEL
 %if 0%{?rhel_version}
