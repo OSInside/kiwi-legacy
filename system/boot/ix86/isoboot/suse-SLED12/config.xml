@@ -173,6 +173,6 @@
         <package name="sysconfig"/>
         <package name="syslinux"/>
         <package name="python"/>
-        <package name="dracut"/>
+        <package name="python-base"/>
     </packages>
 </image>

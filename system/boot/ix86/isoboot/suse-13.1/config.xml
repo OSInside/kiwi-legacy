@@ -181,5 +181,7 @@
         <package name="pwdutils"/>
         <package name="sysconfig"/>
         <package name="syslinux"/>
+        <package name="python"/>
+        <package name="python-base"/>
     </packages>
 </image>

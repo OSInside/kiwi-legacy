@@ -157,6 +157,6 @@
         <package name="perl-Bootloader"/>
         <package name="permissions"/>
         <package name="python"/>
-        <package name="dracut"/>
+        <package name="python-base"/>
     </packages>
 </image>

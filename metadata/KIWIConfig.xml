@@ -3,6 +3,12 @@
     remove all files listed here
     -->
     <strip type="delete">
+        <file name="usr/share/bash-completion"/>
+        <file name="usr/share/zsh"/>
+        <file name="usr/share/sgml"/>
+        <file name="usr/share/emacs"/>
+        <file name="usr/share/zoneinfo"/>
+        <file name="usr/share/bash/helpfiles"/>
         <file name="/usr/share/info"/>
         <file name="/usr/share/splashy"/>
         <file name="/lib/i686/nosegneg"/>
