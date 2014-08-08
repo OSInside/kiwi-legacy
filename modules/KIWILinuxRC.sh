@@ -807,9 +807,12 @@ function activeConsoles {
 #--------------------------------------
 function consoleInit {
     local IFS=$IFS_ORIG
-    consoledev=console
-    if [ -x /lib/udev/console_init ] && [ -e "/dev/$consoledev" ];then
-        /lib/udev/console_init "/dev/$consoledev"
+    local udev_console=/lib/udev/console_init
+    local systemd_console=/usr/lib/systemd/systemd-vconsole-setup
+    if [ -x $udev_console ];then
+        $udev_console /dev/console
+    elif [ -x $systemd_console ];then
+        $systemd_console
     fi
 }
 #======================================
