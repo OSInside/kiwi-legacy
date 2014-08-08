@@ -82,12 +82,14 @@
         <package name="kernel-default" arch="i586"/>
     </packages>
     <packages type="image" profiles="xenk">
+        <package name="grub2-x86_64-xen"/>
 <!-- xen kernel only supported on x86_64 -->
         <package name="kernel-xen" arch="x86_64"/>
 <!-- xen dom0 support only on x86_64 -->
         <package name="xen" arch="x86_64"/>
     </packages>
     <packages type="image" profiles="ec2k">
+        <package name="grub2-x86_64-xen"/>
         <package name="kernel-ec2"/>
     </packages>
     <packages type="image" profiles="custom"><!-- empty custom section to allow bootincluding custom kernel --></packages>
