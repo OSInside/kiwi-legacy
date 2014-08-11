@@ -934,7 +934,7 @@ sub createVMwareConfiguration {
     my @nicIds = @{$vmdata -> getNICIDs()};
     for my $id (@nicIds) {
         my $iFace = $vmdata -> getNICInterface($id);
-        my $nic = "ethernet" . $iFace;
+        my $nic = "ethernet" . $id;
         print $VMWFD $nic . '.present = "true"' . "\n";
         my $mac = $vmdata -> getNICMAC($id);
         if ($mac) {
