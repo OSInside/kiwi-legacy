@@ -1658,12 +1658,14 @@ function suseSetupProduct {
     # /.../
     # This function will create the /etc/products.d/baseproduct
     # link pointing to the product referenced by either
-    # the /etc/SuSE-brand file or the latest .prod file
+    # the /etc/SuSE-brand or /etc/os-release file or the latest .prod file
     # available in /etc/products.d
     # ----
     local prod=undef
     if [ -f /etc/SuSE-brand ];then
         prod=$(head /etc/SuSE-brand -n 1)
+    elif [ -f /etc/os-release ];then
+        prod=$(grep "^NAME" /etc/os-release | cut -d '=' -f 2 | cut -d '"' -f 2)
     fi
     if [ -d /etc/products.d ];then
         pushd /etc/products.d
