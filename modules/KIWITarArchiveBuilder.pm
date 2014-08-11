@@ -121,7 +121,7 @@ sub __createTarArchive {
     $imgFlName .= '.tbz';
     my $tar = $locator -> getExecPath('tar');
     my $cmd = "cd $origin && "
-        . "$tar -cjf $tarDestDir/$imgFlName --exclude=image . 2>&1";
+        . "$tar -cjf $tarDestDir/$imgFlName --exclude=./image . 2>&1";
     my $data = KIWIQX::qxx ($cmd);
     my $code = $? >> 8;
     if ($code != 0) {
