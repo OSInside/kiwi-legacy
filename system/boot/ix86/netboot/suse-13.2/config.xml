@@ -226,6 +226,7 @@
         <package name="iproute2"/>
         <package name="psmisc"/>
         <package name="sysvinit-tools"/>
+        <package name="e2fsprogs"/>
     </packages>
     <packages type="delete" profiles="default,diskless,xen">
         <package name="cracklib-dict-full"/>
