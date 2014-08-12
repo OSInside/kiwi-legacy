@@ -1449,7 +1449,7 @@ sub __applyAdditionalXMLOverrides {
                 -> new (\%pckgData);
             push @delPacks, $pckgObj;
         }
-        $xml -> addPackagesToDelete (\@addPacks);
+        $xml -> addPackagesToDelete (\@delPacks);
     }
     return $xml;
 }
