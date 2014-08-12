@@ -74,7 +74,7 @@ sub new {
         $kiwi -> info ("Using already existing destination dir");
         $kiwi -> done();
     } else {
-        $data = KIWIQX::qxx ("mkdir $destdir 2>&1");
+        $data = KIWIQX::qxx ("mkdir -p $destdir 2>&1");
         $code = $? >> 8;
         if ($code != 0) {
             $kiwi -> error  ("Couldn't create destination dir: $data");

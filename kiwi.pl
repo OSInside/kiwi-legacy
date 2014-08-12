@@ -331,7 +331,7 @@ sub main {
     if ($cmdL->getOperationMode("analyse")) {
         $kiwi -> info ("Starting system analysis\n");
         my $destination = $cmdL->getOperationMode("analyse");
-        $destination = "/tmp/".$destination;
+        $destination = "/var/cache/kiwi/describe/".$destination;
         my $system = KIWIAnalyseSystem -> new (
             $destination,$cmdL
         );

@@ -35,7 +35,7 @@ function checkEnv {
 }
 
 function fileName {
-    # global location for runtime and result files
+    # global location for runtime and temporary result files
     echo -n /tmp/$1
 }
 
@@ -51,7 +51,7 @@ function custom_filter {
 
 function filter_items {
     # files and directories matching here are filtered out
-    echo -n "^/(\$|$(custom_filter)tmp|dev|proc|sys|run|lost\+found|var\/run)"
+    echo -n "^/(\$|$(custom_filter)tmp|dev|proc|sys|run|lost\+found|var\/run|var\/cache)"
 }
 
 function filter_filesystem {
