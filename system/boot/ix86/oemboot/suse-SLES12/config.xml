@@ -103,6 +103,9 @@
     <packages type="image" profiles="ec2k">
         <package name="kernel-ec2"/>
     </packages>
+    <packages type="image" profiles="xen,ec2">
+        <package name="grub2-x86_64-xen" arch="x86_64"/>
+    </packages>
     <packages type="image" profiles="custom"><!-- empty custom section to allow bootincluding custom kernel --></packages>
     <packages type="bootstrap">
         <package name="gptfdisk"/>
