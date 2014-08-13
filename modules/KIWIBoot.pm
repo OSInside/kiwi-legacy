@@ -3469,6 +3469,7 @@ sub setupBootLoaderStages {
     my $type     = shift;
     my $uuid     = shift;
     my $kiwi     = $this->{kiwi};
+    my $typeinfo = $this->{type};
     my $tmpdir   = $this->{tmpdir};
     my $initrd   = $this->{initrd};
     my $zipped   = $this->{zipped};
@@ -3562,7 +3563,7 @@ sub setupBootLoaderStages {
         # Module lists for self created grub images
         #------------------------------------------
         my @core_modules = (
-            'lvm','btrfs','ext2','iso9660','linux','echo','configfile',
+            'ext2','iso9660','linux','echo','configfile',
             'search_label','search_fs_file','search',
             'search_fs_uuid','ls','normal','gzio',
             'png','fat','gettext','font','minicmd',
@@ -3571,6 +3572,15 @@ sub setupBootLoaderStages {
         my @bios_core_modules = (
             'part_msdos','part_gpt'
         );
+        if ($typeinfo->{filesystem} eq 'xfs') {
+            push @core_modules, 'xfs';
+        }
+        if ($typeinfo->{filesystem} eq 'btrfs') {
+            push @core_modules, 'btrfs';
+        }
+        if ($typeinfo->{lvm}) {
+            push @core_modules, 'lvm';
+        }
         if ($firmware ne 'ec2') {
             push @core_modules, 'boot';
             push @bios_core_modules, qw /biosdisk vga vbe chain multiboot/;
@@ -3893,7 +3903,7 @@ sub setupBootLoaderStages {
         # Create core grub2 boot images
         #------------------------------------------
         if ($stagesBIOS) {
-            $kiwi -> info ("Creating grub2 bios core boot image");
+            $kiwi -> info ("Creating grub2 core boot image");
             if (! $grub2_bios_mkimage) {
                 $kiwi -> failed ();
                 $kiwi -> error  ("Can't find grub2 mkimage tool");
