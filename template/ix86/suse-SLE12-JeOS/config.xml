@@ -24,7 +24,7 @@
         <rpm-excludedocs>true</rpm-excludedocs>
     </preferences>
     <preferences profiles="ec2Flavour">
-        <type image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES12" bootprofile="ec2" bootkernel="ec2k" bootloader="grub" kernelcmdline="xencons=xvc0 console=xvc0 multipath=off splash"/>
+        <type image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES12" bootprofile="ec2" bootkernel="ec2k" bootloader="grub2" kernelcmdline="xencons=xvc0 console=xvc0 multipath=off splash" firmware="ec2"/>
     </preferences>
     <preferences profiles="xenFlavour">
         <type image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES12" bootprofile="xen" bootkernel="xenk" bootloader="grub2" kernelcmdline="splash">
@@ -44,7 +44,8 @@
         </type>
     </preferences>
     <preferences profiles="vmxFlavour">
-        <type image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES12" format="vmdk" bootloader="grub2" firmware="efi" kernelcmdline="splash">
+        <type image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES12" format="vmdk" bootloader="grub2" firmware="efi" kernelcmdline="splash" bootpartition="false">
+            <systemdisk name="systemVG"/>
             <machine memory="512" guestOS="suse" HWversion="4">
                 <vmdisk id="0" controller="ide"/>
                 <vmnic driver="e1000" interface="0" mode="bridged"/>
