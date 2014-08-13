@@ -1645,6 +1645,10 @@ div {
         attribute firmware {
             "bios" | "ec2" | "efi" | "uefi" | "vboot" | "ofw"
         }
+    k.type.bootpartition.attribute =
+        ## specify if an extra boot partition should be used or not.
+        ## This will overwrite kiwi's default layout
+        attribute bootpartition { xsd:boolean }
     k.type.bootfilesystem.attribute =
         ## if an extra boot partition is required this attribute
         ## specify which filesystem should be used for it. The
@@ -1778,6 +1782,7 @@ div {
         k.type.firmware.attribute? &
         k.type.bootkernel.attribute? &
         k.type.bootloader.attribute? &
+        k.type.bootpartition.attribute? &
         k.type.bootpartsize.attribute? &
         k.type.bootprofile.attribute? &
         k.type.boottimeout.attribute? &

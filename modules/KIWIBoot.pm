@@ -258,6 +258,7 @@ sub new {
         }
         $type{bootfilesystem}         = $xmltype -> getBootImageFileSystem();
         $type{bootloader}             = $xmltype -> getBootLoader();
+        $type{bootpartition}          = $xmltype -> getBootPartition();
         $type{bootpartsize}           = $xmltype -> getBootPartitionSize();
         $type{boottimeout}            = $xmltype -> getBootTimeout();
         $type{cmdline}                = $xmltype -> getKernelCmdOpts();
@@ -2016,6 +2017,7 @@ sub setupBootDisk {
         $this -> __updateDiskSize ($this->{jumpsize});
         $needJumpP = 1;
     }
+    $this->{needJumpP} = $needJumpP;
     #==========================================
     # Do we need a boot partition
     #------------------------------------------
@@ -2036,8 +2038,20 @@ sub setupBootDisk {
         $this->{prepsize} = 8;
         $this -> __updateDiskSize ($this->{prepsize});
     }
+    if ($type->{bootpartition}) {
+        if ($type->{bootpartition} eq 'true') {
+            $needBootP = 1;
+        } else {
+            $needBootP = 0;
+        }
+    }
     $this->{needBootP} = $needBootP;
-    $this->{needJumpP} = $needJumpP;
+    #==========================================
+    # Do we need a PrepP partition
+    #------------------------------------------
+    if ($firmware eq "ofw") {
+        $needPrepP = 1;
+    }
     #==========================================
     # Do we need a read-only root partition
     #------------------------------------------
@@ -2110,6 +2124,13 @@ sub setupBootDisk {
             $this->{bootlabel} = $oemtitle;
             $bootfix = "OEM";
         }
+    }
+    #==========================================
+    # increase disk size for PrepP partition
+    #------------------------------------------
+    if ($needPrepP) {
+        $this->{prepsize} = 8;
+        $this -> __updateDiskSize ($this->{prepsize});
     }
     #==========================================
     # increase disk size for in-place recovery
@@ -3541,7 +3562,7 @@ sub setupBootLoaderStages {
         # Module lists for self created grub images
         #------------------------------------------
         my @core_modules = (
-            'ext2','iso9660','linux','echo','configfile',
+            'lvm','btrfs','ext2','iso9660','linux','echo','configfile',
             'search_label','search_fs_file','search',
             'search_fs_uuid','ls','normal','gzio',
             'png','fat','gettext','font','minicmd',

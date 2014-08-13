@@ -3869,6 +3869,7 @@ sub __genTypeHash {
         'bootfilesystem',
         'bootkernel',
         'bootloader',
+        'bootpartition',
         'bootpartsize',
         'bootprofile',
         'boottimeout',

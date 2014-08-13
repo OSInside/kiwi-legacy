@@ -2191,6 +2191,13 @@ the standard x86 bios firmware setup is used</a:documentation>
         </choice>
       </attribute>
     </define>
+    <define name="k.type.bootpartition.attribute">
+      <attribute name="bootpartition">
+        <a:documentation>specify if an extra boot partition should be used or not.
+This will overwrite kiwi's default layout</a:documentation>
+        <data type="boolean"/>
+      </attribute>
+    </define>
     <define name="k.type.bootfilesystem.attribute">
       <attribute name="bootfilesystem">
         <a:documentation>if an extra boot partition is required this attribute
@@ -2439,6 +2446,9 @@ into the master block. There is space for 32 characters.</a:documentation>
         </optional>
         <optional>
           <ref name="k.type.bootloader.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.type.bootpartition.attribute"/>
         </optional>
         <optional>
           <ref name="k.type.bootpartsize.attribute"/>

@@ -1803,6 +1803,7 @@ sub test_getXMLElement{
         . 'bootkernel="xenk" '
         . 'bootloader="grub2" '
         . 'bootpartsize="512" '
+        . 'bootpartition="true" '
         . 'bootprofile="std" '
         . 'boottimeout="5" '
         . 'checkprebuilt="true" '
@@ -2169,6 +2170,95 @@ sub test_setBootPartitionSizeNoArg {
     $state = $kiwi -> getState();
     $this -> assert_str_equals('No state set', $state);
     $this -> assert_equals($BOOTPAT_SIZE, $size);
+    return;
+}
+
+#==========================================
+# test_setBootPartition
+#------------------------------------------
+sub test_setBootPartition {
+    # ...
+    # Test the setBootPartition method
+    # ---
+    my $this = shift;
+    my $kiwi = $this -> {kiwi};
+    my $typeDataObj = $this -> __getTypeObj();
+    $typeDataObj = $typeDataObj -> setBootPartition('false');
+    my $msg = $kiwi -> getMessage();
+    $this -> assert_str_equals('No messages set', $msg);
+    my $msgT = $kiwi -> getMessageType();
+    $this -> assert_str_equals('none', $msgT);
+    my $state = $kiwi -> getState();
+    $this -> assert_str_equals('No state set', $state);
+    $this -> assert_not_null($typeDataObj);
+    my $comp = $typeDataObj -> getBootPartition();
+    $msg = $kiwi -> getMessage();
+    $this -> assert_str_equals('No messages set', $msg);
+    $msgT = $kiwi -> getMessageType();
+    $this -> assert_str_equals('none', $msgT);
+    $state = $kiwi -> getState();
+    $this -> assert_str_equals('No state set', $state);
+    $this -> assert_str_equals('false', $comp);
+    return;
+}
+
+#==========================================
+# test_setBootPartitionNoArg
+#------------------------------------------
+sub test_setBootPartitionNoArg {
+    # ...
+    # Test the setBootPartition method with no argument
+    # ---
+    my $this = shift;
+    my $kiwi = $this -> {kiwi};
+    my $typeDataObj = $this -> __getTypeObj();
+    my $res = $typeDataObj -> setBootPartition();
+    my $msg = $kiwi -> getMessage();
+    $this -> assert_str_equals('No messages set', $msg);
+    my $msgT = $kiwi -> getMessageType();
+    $this -> assert_str_equals('none', $msgT);
+    my $state = $kiwi -> getState();
+    $this -> assert_str_equals('No state set', $state);
+    $this -> assert_not_null($typeDataObj);
+    my $comp = $typeDataObj -> getBootPartition();
+    $msg = $kiwi -> getMessage();
+    $this -> assert_str_equals('No messages set', $msg);
+    $msgT = $kiwi -> getMessageType();
+    $this -> assert_str_equals('none', $msgT);
+    $state = $kiwi -> getState();
+    $this -> assert_str_equals('No state set', $state);
+    $this -> assert_str_equals('false', $comp);
+    return;
+}
+
+#==========================================
+# test_setBootPartitionUnknownArg
+#------------------------------------------
+sub test_setBootPartitionUnknownArg {
+    # ...
+    # Test the setBootPartition method with an unrecognized argument
+    # ---
+    my $this = shift;
+    my $kiwi = $this -> {kiwi};
+    my $typeDataObj = $this -> __getTypeObj();
+    my $res = $typeDataObj -> setBootPartition('5');
+    my $msg = $kiwi -> getMessage();
+    my $expected = 'KIWIXMLTypeData:setBootPartition: unrecognized argument '
+        . 'expecting "true" or "false".';
+    $this -> assert_str_equals($expected, $msg);
+    my $msgT = $kiwi -> getMessageType();
+    $this -> assert_str_equals('error', $msgT);
+    my $state = $kiwi -> getState();
+    $this -> assert_str_equals('failed', $state);
+    $this -> assert_null($res);
+    my $comp = $typeDataObj -> getBootPartition();
+    $msg = $kiwi -> getMessage();
+    $this -> assert_str_equals('No messages set', $msg);
+    $msgT = $kiwi -> getMessageType();
+    $this -> assert_str_equals('none', $msgT);
+    $state = $kiwi -> getState();
+    $this -> assert_str_equals('No state set', $state);
+    $this -> assert_str_equals('true', $comp);
     return;
 }
 
@@ -5008,6 +5098,7 @@ sub __getTypeObj {
                 bootfilesystem         => 'fat32',
                 bootkernel             => 'xenk',
                 bootloader             => 'grub2',
+                bootpartition          => 'true',
                 bootpartsize           => '512',
                 bootprofile            => 'std',
                 boottimeout            => '5',

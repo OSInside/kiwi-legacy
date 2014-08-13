@@ -58,6 +58,7 @@ sub new {
     #     bootfilesystem         = ''
     #     bootkernel             = ''
     #     bootloader             = ''
+    #     bootpartition          = ''
     #     bootpartsize           = ''
     #     bootprofile            = ''
     #     boottimeout            = ''
@@ -117,10 +118,11 @@ sub new {
     # is not in this class the child relationship is enforced at the
     # XML level.
     my %keywords = map { ($_ => 1) } qw(
-            boot
+        boot
         bootfilesystem
         bootkernel
         bootloader
+        bootpartition
         bootpartsize
         bootprofile
         boottimeout
@@ -162,7 +164,8 @@ sub new {
     );
     $this->{supportedKeywords} = \%keywords;
     my %boolKW = map { ($_ => 1) } qw(
-            checkprebuilt
+        checkprebuilt
+        bootpartition
         compressed
         fsnocheck
         hybrid
@@ -301,6 +304,17 @@ sub getBootPartitionSize {
         $size = int $this->{bootpartsize};
     }
     return $size;
+}
+
+#==========================================
+# getBootPartition
+#------------------------------------------
+sub getBootPartition {
+    # ...
+    # Return the configuration for the setup of a bootpartition
+    # ---
+    my $this = shift;
+    return $this->{bootpartition};
 }
 
 #==========================================
@@ -854,6 +868,10 @@ sub getXMLElement {
     if ($bPartSize) {
         $element -> setAttribute('bootpartsize', $bPartSize);
     }
+    my $bPart = $this -> getBootPartition();
+    if ($bPart) {
+        $element -> setAttribute('bootpartition', $bPart);
+    }
     my $bProf = $this -> getBootProfile();
     if ($bProf) {
         $element -> setAttribute('bootprofile', $bProf);
@@ -1105,6 +1123,23 @@ sub setBootPartitionSize {
     }
     $this->{bootpartsize} = $size;
     return $this;
+}
+
+#==========================================
+# setBootPartition
+#------------------------------------------
+sub setBootPartition {
+    # ...
+    # Set the configuration for the use of a bootpartition
+    # ---
+    my $this = shift;
+    my $bootpart = shift;
+    my %settings = (
+        attr   => 'bootpartition',
+        value  => $bootpart,
+        caller => 'setBootPartition'
+    );
+    return $this -> p_setBooleanValue(\%settings);
 }
 
 #==========================================
