@@ -398,10 +398,12 @@ sub printLog {
     #==========================================
     # Setup channel location due to loglevel
     #------------------------------------------
-    if ($lglevel == 3) {
-        $this->{channel} = *STDERR;
-    } else {
-        $this->{channel} = *STDOUT;
+    if ((! $this->{fileLog}) || ($this->{fileLog} == 2)) {
+        if ($lglevel == 3) {
+            $this->{channel} = *STDERR;
+        } else {
+            $this->{channel} = *STDOUT;
+        }
     }
     #==========================================
     # check log status 
