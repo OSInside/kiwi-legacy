@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- KIWI generated ovf file --> 
-<ovf:Envelope xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1" xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData" xmlns:vmw="http://www.vmware.com/schema/ovf" xmlns:vssd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"  xsi:schemaLocation="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2.22.0/CIM_VirtualSystemSettingData.xsd http://www.vmware.com/schema/ovf http://schemas.dmtf.org/ovf/envelope/1 http://schemas.dmtf.org/ovf/envelope/1/dsp8023_1.1.0.xsd http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2.22.0/CIM_ResourceAllocationSettingData.xsd">
+<ovf:Envelope xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1" xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData" xmlns:vmw="http://www.vmware.com/schema/ovf" xmlns:vssd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"  xsi:schemaLocation="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2.22.0/CIM_VirtualSystemSettingData.xsd http://www.vmware.com/schema/ovf http://www.vmware.com/schema/ovf http://schemas.dmtf.org/ovf/envelope/1 http://schemas.dmtf.org/ovf/envelope/1/dsp8023_1.1.0.xsd http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2.22.0/CIM_ResourceAllocationSettingData.xsd">
 <ovf:References>
 	<ovf:File ovf:href="ovfconfig-test.ppc-1.0.0.vmdk" ovf:id="file-1-2" ovf:size="10240"/>
 </ovf:References>
@@ -10,18 +10,18 @@
 </ovf:DiskSection>
 <ovf:NetworkSection>
 	<ovf:Info>The list of logical networks</ovf:Info>
-	<Network ovf:name="bridged">
-		<Description>The bridged network</Description>
-	</Network>
+	<ovf:Network ovf:name="bridged">
+		<ovf:Description>The bridged network</ovf:Description>
+	</ovf:Network>
 </ovf:NetworkSection>
 <ovf:VirtualSystem ovf:id="vm-1-2">
-	<Info>A virtual machine</Info>
-	<Name>ovfconfig-test.ppc-1.0.0</Name>
-	<OperatingSystemSection ovf:id="83" vmw:osType="SUSE 64-Bit">
-		<Info>Image cretaed by KIWI</Info>
-	</OperatingSystemSection>
+	<ovf:Info>A virtual machine</ovf:Info>
+	<ovf:Name>ovfconfig-test.ppc-1.0.0</ovf:Name>
+	<ovf:OperatingSystemSection ovf:id="83" vmw:osType="SUSE 64-Bit">
+		<ovf:Info>Image cretaed by KIWI</ovf:Info>
+	</ovf:OperatingSystemSection>
 	<ovf:VirtualHardwareSection ovf:transport="">
-		<Info>Virtual hardware requirements</Info>
+		<ovf:Info>Virtual hardware requirements</ovf:Info>
 		<ovf:System>
 			<vssd:ElementName>Virtual Hardware Family</vssd:ElementName>
 			<vssd:InstanceID>0</vssd:InstanceID>
@@ -35,7 +35,7 @@
 			<rasd:InstanceID>1</rasd:InstanceID>
 			<rasd:Reservation>0</rasd:Reservation>
 			<rasd:ResourceType>3</rasd:ResourceType>
-			<rasd:VirtualQuantity>1</rasd:InstanceID>
+			<rasd:VirtualQuantity>1</rasd:VirtualQuantity>
 			<rasd:Weight>1000</rasd:Weight>
 			<vmw:CoresPerSocket ovf:required="false">1</vmw:CoresPerSocket>
 			<rasd:Weight>1000</rasd:Weight>
@@ -49,7 +49,7 @@
 			<rasd:ResourceType>4</rasd:ResourceType>
 			<rasd:VirtualQuantity>1024</rasd:VirtualQuantity>
 			<rasd:Weight>10240</rasd:Weight>
-		</Item>
+		</ovf:Item>
 		<ovf:Item>
 			<rasd:Description>SCSI Controller</rasd:Description>
 			<rasd:ElementName>scsi Controller</rasd:ElementName>
