@@ -765,6 +765,7 @@ sub createYumConfig {
     KIWIQX::qxx ("echo 'obsoletes=1' >> $config");
     KIWIQX::qxx ("echo 'plugins=1' >> $config");
     KIWIQX::qxx ("echo 'metadata_expire=1800' >> $config");
+    KIWIQX::qxx ("echo 'group_command=compat' >> $config");
     return $config;
 }
 
