@@ -8957,6 +8957,13 @@ function createPartedInput {
                         # extension.
                         #
                         cmdq="$cmdq set $partid type 0x$ptypex"
+                    elif [[ $kiwi_iname =~ boot-rhel ]];then
+                        # /.../
+                        # parted on RHEL is not able to set swap flag. I don't
+                        # have a good solution for this thus we skip the flag
+                        # setup in this case
+                        #
+                        flagok=0
                     else
                         cmdq="$cmdq set $partid swap on"
                     fi
