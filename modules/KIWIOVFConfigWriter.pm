@@ -175,15 +175,15 @@ sub writeConfigFile {
         return;
     }
     $config .= '<ovf:VirtualSystem ovf:id="' . $sysID . '">' . "\n"
-        . "\t" . '<Info>A virtual machine</Info>' . "\n"
-        . "\t" . '<Name>' . $baseName . '</Name>' . "\n"
-        . "\t" . '<OperatingSystemSection '
+        . "\t" . '<ovf:Info>A virtual machine</ovf:Info>' . "\n"
+        . "\t" . '<ovf:Name>' . $baseName . '</ovf:Name>' . "\n"
+        . "\t" . '<ovf:OperatingSystemSection '
         . 'ovf:id="' . $sysData->{osid} . '" '
         . 'vmw:osType="' . $sysData->{ostype} . '">' . "\n"
-        . "\t\t" . '<Info>Image cretaed by KIWI</Info>' . "\n"
-        . "\t" . '</OperatingSystemSection>' . "\n"
+        . "\t\t" . '<ovf:Info>Image cretaed by KIWI</ovf:Info>' . "\n"
+        . "\t" . '</ovf:OperatingSystemSection>' . "\n"
         . "\t" . '<ovf:VirtualHardwareSection ovf:transport="">' . "\n"
-        . "\t\t" . '<Info>Virtual hardware requirements</Info>' . "\n"
+        . "\t\t" . '<ovf:Info>Virtual hardware requirements</ovf:Info>' . "\n"
         . "\t\t" . '<ovf:System>' . "\n"
         . "\t\t\t" . '<vssd:ElementName>Virtual Hardware Family'
         . '</vssd:ElementName>' . "\n"
@@ -437,7 +437,7 @@ sub __generateCPUCfgSection {
         . "\t\t\t"
         . '<rasd:ResourceType>3</rasd:ResourceType>' . "\n"
         . "\t\t\t"
-        . '<rasd:VirtualQuantity>' . $numCPU . '</rasd:InstanceID>' . "\n"
+        . '<rasd:VirtualQuantity>' . $numCPU . '</rasd:VirtualQuantity>' . "\n"
         . "\t\t\t"
         . '<rasd:Weight>1000</rasd:Weight>' . "\n"
         . "\t\t\t"
@@ -625,7 +625,7 @@ sub __generateDVDCfgSection {
         . '<rasd:Parent>' . $dvdContID . '</rasd:Parent>' . "\n"
         . "\t\t\t"
         . '<rasd:ResourceType>15</rasd:ResourceType>' . "\n"
-        . "\t\t" . '</Item>' . "\n";
+        . "\t\t" . '</ovf:Item>' . "\n";
     $instID += 1;
 
     return $config, $instID
@@ -698,7 +698,7 @@ sub __generateMemoryCfgSection {
         . '<rasd:VirtualQuantity>' . $memory . '</rasd:VirtualQuantity>' . "\n"
         . "\t\t\t"
         . '<rasd:Weight>' . $memory * $TEN . '</rasd:Weight>' . "\n"
-        . "\t\t" . '</Item>' . "\n";
+        . "\t\t" . '</ovf:Item>' . "\n";
 
     return $config;
 }
@@ -823,10 +823,10 @@ sub __generateNetworkDeclaration {
             $mode = 'none';
         }
         if (! $modes{$mode}) {
-            $config .= "\t" . '<Network ovf:name="' . $mode . '">' . "\n"
-                . "\t\t" . '<Description>The ' . $mode . ' network'
-                . '</Description>' . "\n"
-                . "\t" . '</Network>' . "\n";
+            $config .= "\t" . '<ovf:Network ovf:name="' . $mode . '">' . "\n"
+                . "\t\t" . '<ovf:Description>The ' . $mode . ' network'
+                . '</ovf:Description>' . "\n"
+                . "\t" . '</ovf:Network>' . "\n";
             $modes{$mode} = 1;
         }
     }
@@ -861,12 +861,15 @@ sub __generateXMLHeader {
         . 'http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData '
         . 'http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2.22.0/CIM_VirtualSystemSettingData.xsd '
         . 'http://www.vmware.com/schema/ovf '
+        # Needs to be in pairs, thus repeated entry
+        . 'http://www.vmware.com/schema/ovf '
         . 'http://schemas.dmtf.org/ovf/envelope/1 '
         . 'http://schemas.dmtf.org/ovf/envelope/1/dsp8023_1.1.0.xsd '
         . 'http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData '
         . 'http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2.22.0/CIM_ResourceAllocationSettingData.xsd';
     if ($ovfType eq 'vmware') {
         $config .= ' http://www.vmware.com/vcloud/v1.5 '
+            . 'http://www.vmware.com/vcloud/v1.5 ';
     }
     $config .= '">' . "\n";
 
