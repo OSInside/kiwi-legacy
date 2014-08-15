@@ -2079,6 +2079,8 @@ sub createImageLiveCD {
         } else {
             print $IFD "gfxboot bootlogo"."\n";
         }
+    } else {
+        print $IFD "ui menu.c32"."\n";
     }
     print $IFD "prompt   1"."\n";
     print $IFD "timeout  $bootTimeout"."\n";

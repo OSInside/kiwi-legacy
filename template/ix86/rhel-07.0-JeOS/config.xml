@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<image schemaversion="6.1" name="LimeJeOS-RHEL-07.0">
+    <description type="system">
+        <author>Marcus Schäfer</author>
+        <contact>ms@suse.com</contact>
+        <specification>RHEL Enterprise 7 JeOS</specification>
+    </description>
+    <profiles>
+        <profile name="RedHat" description="Build for RHEL" import="true"/>
+        <profile name="CentOS" description="Build for CentOS"/>
+    </profiles>
+    <strip type="delete">
+        <file name="/usr/lib*/python*"/>
+        <file name="/usr/lib*/gconv"/>
+        <file name="/usr/share/zoneinfo"/>
+        <file name="/usr/share/i18n"/>
+        <file name="/lib/i686/nosegneg"/>
+        <file name="/lib/kbd"/>
+    </strip>
+    <preferences>
+        <version>1.2.0</version>
+        <packagemanager>yum</packagemanager>
+        <bootsplash-theme>upstream</bootsplash-theme>
+        <bootloader-theme>upstream</bootloader-theme>
+        <locale>en_US</locale>
+        <keytable>us.map.gz</keytable>
+        <timezone>UTC</timezone>
+        <hwclock>utc</hwclock>
+        <rpm-check-signatures>false</rpm-check-signatures>
+        <type image="iso" primary="true" boot="isoboot/rhel-07.0" flags="compressed" firmware="bios"/>
+        <type image="vmx" boot="vmxboot/rhel-07.0" filesystem="ext3" format="vmdk" kernelcmdline="rhgb" bootloader="grub2">
+            <machine memory="1024" guestOS="rhel7">
+                <vmdisk id="0" controller="ide"/>
+                <vmnic driver="e1000" interface="0" mode="bridged"/>
+            </machine>
+            <systemdisk name="systemVG">
+                <volume name="home" freespace="500M"/>
+            </systemdisk>
+        </type>
+        <type image="oem" boot="oemboot/rhel-07.0" filesystem="ext3" installiso="true" bootloader="grub2">
+            <oemconfig>
+                <oem-systemsize>2048</oem-systemsize>
+                <oem-swap>true</oem-swap>
+                <oem-swapsize>200</oem-swapsize>
+            </oemconfig>
+        </type>
+    </preferences>
+    <users group="root">
+        <user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
+    </users>
+    <repository type="rpm-md" profiles="RedHat">
+<!-- Use the set-repo option to replace this first repo if needed -->
+        <source path="iso:///image/CDs/RHEL-7.0-x86_64-DVD.iso"/>
+    </repository>
+<!-- Don't remove the following repos, they contain tools needed by kiwi -->
+    <repository type="rpm-md" priority="1" profiles="RedHat">
+        <source path="obs://Virtualization:/Appliances/RHEL_7"/>
+    </repository>
+    <repository type="rpm-md" priority="1" profiles="CentOS">
+        <source path="obs://Virtualization:/Appliances/CentOS_7"/>
+    </repository>
+    <packages type="image">
+        <package name="grub2"/>
+        <package name="kernel"/>
+        <namedCollection name="Minimal Install"/>
+        <namedCollection name="Console Internet Tools"/>
+<!--        <package name="gfxboot-branding-upstream" bootinclude="true" bootdelete="true"/>-->
+        <package name="yum-plugin-priorities" bootinclude="true"/>
+    </packages>
+    <packages type="image" profiles="RedHat">
+        <package name="redhat-logos" bootinclude="true" bootdelete="true"/>
+    </packages>
+    <packages type="bootstrap">
+        <package name="filesystem"/>
+        <package name="basesystem"/>
+    </packages>
+</image>
