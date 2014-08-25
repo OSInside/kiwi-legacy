@@ -149,6 +149,7 @@
         <package name="module-init-tools"/>
         <package name="which"/>
         <package name="udev"/>
+        <package name="e2fsprogs"/>
     </packages>
     <packages type="delete">
         <package name="cracklib-dict-full"/>

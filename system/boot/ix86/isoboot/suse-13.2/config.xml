@@ -147,6 +147,7 @@
         <package name="which"/>
         <package name="udev"/>
         <package name="sysvinit-tools"/>
+        <package name="e2fsprogs"/>
     </packages>
     <packages type="delete">
         <package name="cracklib-dict-full"/>
