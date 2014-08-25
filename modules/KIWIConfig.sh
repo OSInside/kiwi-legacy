@@ -54,7 +54,7 @@ function baseSystemdServiceInstalled {
         fi
     done
     if [ -x "/etc/init.d/${service}" ];then
-        echo "/etc/init.d/${service}"
+        echo "${service}"
     fi
 }
 
