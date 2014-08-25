@@ -29,6 +29,12 @@ License:        GPL-2.0
 Group:          System/Management
 Version:        5.06.153
 Provides:       kiwi-schema = 6.1
+Provides:       kiwi-image:lxc
+Provides:       kiwi-image:tbz
+Provides:       kiwi:%{_mandir}/man1/kiwi.1.gz
+Provides:       kiwi:%{_mandir}/man1/KIWI::images.sh.1.gz
+Provides:       kiwi:%{_mandir}/man1/KIWI::config.sh.1.gz
+Provides:       kiwi:%{_mandir}/man1/KIWI::kiwirc.1.gz
 Release:        0
 # requirements to build packages
 BuildRequires:  diffutils
@@ -57,8 +63,6 @@ BuildRequires:  fdupes
 %ifarch %ix86 x86_64
 BuildRequires:  syslinux
 %endif
-Provides:       kiwi-image:lxc
-Provides:       kiwi-image:tbz
 %if 0%{?suse_version} > 1140
 BuildRequires:  btrfsprogs
 BuildRequires:  cdrkit-cdrtools-compat
@@ -238,6 +242,10 @@ Authors:
 
 %package -n kiwi-doc
 Summary:        KIWI - Appliance Builder Documentation
+Obsoletes:      kiwi-doc:%{_mandir}/man1/kiwi.1.gz
+Obsoletes:      kiwi-doc:%{_mandir}/man1/KIWI::images.sh.1.gz
+Obsoletes:      kiwi-doc:%{_mandir}/man1/KIWI::config.sh.1.gz
+Obsoletes:      kiwi-doc:%{_mandir}/man1/KIWI::kiwirc.1.gz
 License:        LGPL-2.0+
 Group:          Documentation/Howto
 %if 0%{?suse_version} > 1120
