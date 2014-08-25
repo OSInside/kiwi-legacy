@@ -312,6 +312,7 @@ Requires:       syslinux
 Requires:       dosfstools
 %if 0%{?suse_version}
 Requires:       genisoimage
+Requires:       cdrkit-cdrtools-compat
 %endif
 License:        GPL-2.0+
 Group:          System/Management
@@ -327,7 +328,10 @@ Authors:
 %package -n kiwi-desc-isoboot-requires
 Provides:       kiwi-image:iso
 Provides:       kiwi-boot:isoboot
+%if 0%{?suse_version}
 Requires:       genisoimage
+Requires:       cdrkit-cdrtools-compat
+%endif
 Requires:       kiwi-desc-isoboot = %{version}
 Requires:       %(echo `bash %{S:4} %{S:0} isoboot %{myarch} %{mysystems}`)
 %ifarch ppc ppc64 ppc64le
@@ -395,7 +399,10 @@ Authors:
 Summary:        KIWI - buildservice package requirements for vmxboot
 Provides:       kiwi-image:vmx
 Provides:       kiwi-boot:vmxboot
+%if 0%{?suse_version}
 Requires:       genisoimage
+Requires:       cdrkit-cdrtools-compat
+%endif
 Requires:       kiwi-desc-vmxboot = %{version}
 Requires:       %(echo `bash %{S:4} %{S:0} vmxboot %{myarch} %{mysystems}`)
 %ifarch ppc ppc64 ppc64le
@@ -474,6 +481,7 @@ Requires:       kiwi = %{version}
 Requires:       parted
 %if 0%{?suse_version}
 Requires:       genisoimage
+Requires:       cdrkit-cdrtools-compat
 Requires:       multipath-tools
 %endif
 %if 0%{?rhel_version} || 0%{?fedora} || 0%{?centos}
@@ -506,10 +514,12 @@ Authors:
 Provides:       kiwi-image:oem
 Provides:       kiwi-boot:oemboot
 Provides:       kiwi-boot:tbz
+%if 0%{?suse_version}
 Requires:       genisoimage
+Requires:       cdrkit-cdrtools-compat
+%endif
 Requires:       kiwi-desc-oemboot = %{version}
 Requires:       %(echo `bash %{S:4} %{S:0} oemboot %{myarch} %{mysystems}`)
-
 %ifarch ppc ppc64 ppc64le
 %if 0%{?suse_version} >= 1315
 Requires:       grub2-powerpc-ieee1275
