@@ -6265,7 +6265,7 @@ sub test_getVMachineConfigVMW {
     $this -> assert_str_equals('2', $dvdID);
     $this -> assert_str_equals('ide', $dvdCnt);
     $this -> assert_str_equals('1', $diskID);
-    $this -> assert_str_equals('ide', $diskCnt);
+    $this -> assert_str_equals('lsilogic', $diskCnt);
     $this -> assert_str_equals('sles', $guest);
     $this -> assert_str_equals('7', $hwver);
     $this -> assert_str_equals('1024', $mem);
