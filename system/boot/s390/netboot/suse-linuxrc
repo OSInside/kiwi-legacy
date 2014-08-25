@@ -659,9 +659,9 @@ else
         fi
         setupNFSServices
         Echo "Mounting NFS root system: $nfsRootServer:$nfsRootDevice..."
-        imageRootDevice="-o vers=3,rw $nfsRootServer:$nfsRootDevice"
+        imageRootDevice="-o vers=3,rw,nolock $nfsRootServer:$nfsRootDevice"
         if [ ! -z "$COMBINED_IMAGE" ] || [ ! -z "$UNIONFS_CONFIG" ];then
-            imageRootDevice="-o vers=3,ro $nfsRootServer:$nfsRootDevice"
+            imageRootDevice="-o vers=3,ro,nolock $nfsRootServer:$nfsRootDevice"
         fi
         imageRootName="NFSRoot-System"
         systemIntegrity="clean"
