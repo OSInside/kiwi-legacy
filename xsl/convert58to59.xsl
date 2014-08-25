@@ -33,16 +33,16 @@
     </xsl:choose>
 </xsl:template>
 
-<!-- rename controller="scsi" to controller="ide" in vmdisk -->
+<!-- rename controller="scsi" to controller="lsilogic" in vmdisk -->
 <para xmlns="http://docbook.org/ns/docbook">
-    rename controller="scsi" to controller="ide" in vmdisk
+    rename controller="scsi" to controller="lsilogic" in vmdisk
 </para>
 <xsl:template match="vmdisk" mode="conv58to59">
     <vmdisk>
         <xsl:copy-of select="@*[not(local-name(.) = 'controller')]"/>
         <xsl:choose>
             <xsl:when test="@controller='scsi'">
-                <xsl:variable name="controllername" select='"ide"'/>
+                <xsl:variable name="controllername" select='"lsilogic"'/>
                 <xsl:attribute name="controller">
                     <xsl:value-of select="$controllername"/>
                 </xsl:attribute>
