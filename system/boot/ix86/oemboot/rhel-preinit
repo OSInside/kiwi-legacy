@@ -116,37 +116,27 @@ if [ "$LOCAL_BOOT" = "no" ] && [ ! -z "$OEM_RECOVERY" ];then
 fi
 
 #======================================
-# 9) create /etc/ImagePackages
-#--------------------------------------
-if [ "$LOCAL_BOOT" = "no" ];then
-    if [ -x /bin/rpm ];then
-        Echo "Creating initial image package info file"
-        rpm -qa --last > /etc/ImagePackages
-    fi
-fi
-
-#======================================
-# 10) setup console
+# 9) setup console
 #--------------------------------------
 setupConsole
 
 #======================================
-# 11) create origin snapshot if possible
+# 10) create origin snapshot if possible
 #--------------------------------------
 createOriginSnapshot
 
 #======================================
-# 12) update auth config 
+# 11) update auth config 
 #--------------------------------------
 authconfig --updateall
 
 #======================================
-# 13) Run user script
+# 12) Run user script
 #--------------------------------------
 runHook preCallInit
 
 #======================================
-# 14) kill udev
+# 13) kill udev
 #--------------------------------------
 udevSystemStop
 umountSystemFilesystems

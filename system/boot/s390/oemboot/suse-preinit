@@ -129,22 +129,12 @@ if [ "$LOCAL_BOOT" = "no" ] && [ ! -z "$OEM_RECOVERY" ];then
 fi
 
 #======================================
-# 10) create /etc/ImagePackages
-#--------------------------------------
-if [ "$LOCAL_BOOT" = "no" ];then
-    if [ -x /bin/rpm ];then
-        Echo "Creating initial image package info file"
-        rpm -qa --last > /etc/ImagePackages
-    fi
-fi
-
-#======================================
-# 11) setup console
+# 10) setup console
 #--------------------------------------
 setupConsole
 
 #======================================
-# 11.1) load network module
+# 11) load network module
 #--------------------------------------
 if loadNetworkCardS390 "0.0.0191";then
     #======================================

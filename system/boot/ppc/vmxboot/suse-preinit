@@ -49,15 +49,7 @@ updateMTAB
 createFramebufferDevices
 
 #======================================
-# 6) create /etc/ImagePackages
-#--------------------------------------
-if [ -x /bin/rpm ];then
-    Echo "Creating initial image package info file"
-    rpm -qa --last > /etc/ImagePackages
-fi
-
-#======================================
-# 7) create initrd on diskful
+# 6) create initrd on diskful
 #--------------------------------------
 if [ -z "$UNIONFS_CONFIG" ] && [ -z "$COMBINED_IMAGE" ]; then
     #======================================
@@ -72,29 +64,29 @@ else
 fi
 
 #======================================
-# 8) Install boot loader if ok
+# 7) Install boot loader if ok
 #--------------------------------------
 if [ $bootLoaderOK = 1 ];then
     installBootLoader
 fi
 
 #======================================
-# 9) setup console
+# 8) setup console
 #--------------------------------------
 setupConsole
 
 #======================================
-# 10) create origin snapshot if possible
+# 9) create origin snapshot if possible
 #--------------------------------------
 createOriginSnapshot
 
 #======================================
-# 11) Run user script
+# 10) Run user script
 #--------------------------------------
 runHook preCallInit
 
 #======================================
-# 12) kill udev
+# 11) kill udev
 #--------------------------------------
 udevSystemStop
 umountSystemFilesystems

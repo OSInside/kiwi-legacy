@@ -62,15 +62,7 @@ if isZFCPDevice;then
 fi
 
 #======================================
-# 7) create /etc/ImagePackages
-#--------------------------------------
-if [ -x /bin/rpm ];then
-    Echo "Creating initial image package info file"
-    rpm -qa --last > /etc/ImagePackages
-fi
-
-#======================================
-# 8) create initrd on diskful
+# 7) create initrd on diskful
 #--------------------------------------
 if [ -z "$UNIONFS_CONFIG" ] && [ -z "$COMBINED_IMAGE" ]; then
     #======================================
@@ -85,19 +77,19 @@ else
 fi
 
 #======================================
-# 9) Install boot loader if ok
+# 8) Install boot loader if ok
 #--------------------------------------
 if [ $bootLoaderOK = 1 ];then
     installBootLoader
 fi
 
 #======================================
-# 10) setup console
+# 9) setup console
 #--------------------------------------
 setupConsole
 
 #======================================
-# 10.1) load network module
+# 10) load network module
 #--------------------------------------
 if loadNetworkCardS390 "0.0.0191";then
     #======================================
