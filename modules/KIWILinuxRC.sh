@@ -455,6 +455,10 @@ function createInitialDevices {
     ln -s fd/0 $prefix/stdin
     ln -s fd/1 $prefix/stdout
     ln -s fd/2 $prefix/stderr
+    #======================================
+    # create directories in /run
+    #--------------------------------------
+    mkdir -p -m 0755 /run/lock
 }
 #======================================
 # mount_rpc_pipefs
