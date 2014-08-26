@@ -1879,8 +1879,7 @@ sub __validateXML {
     };
     if ($@) {
         my $evaldata=$@;
-        $kiwi -> error  ("Schema validation failed:\n");
-        $kiwi -> error  ($evaldata);
+        $kiwi -> error  ("Schema validation failed");
         $kiwi -> failed ();
         my $configStr = $systemXML -> parse_file( $controlFile ) -> toString();
         my $upgradedStr = $systemTree -> toString();
@@ -1906,9 +1905,10 @@ sub __validateXML {
         my $locator = KIWILocator -> instance();
         my $jingExec = $locator -> getExecPath('jing');
         if ($jingExec) {
-            KIWIQX::qxx (
-				"$jingExec $this->{schema} $upgradedContolFile 2>/dev/null"
-			);
+            $evaldata = KIWIQX::qxx (
+                "$jingExec $this->{schema} $upgradedContolFile 2>/dev/null"
+            );
+            $kiwi -> error ("$evaldata\n");
             return;
         } else {
             $kiwi -> error ("$evaldata\n");
