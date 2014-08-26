@@ -4252,7 +4252,6 @@ function searchBIOSBootDevice {
     #--------------------------------------
     if [ ! -z "$root" ];then
         export biosBootDevice=$(dn $root)
-        export LOCAL_BOOT=yes
         if [ ! -e /config.partids ];then
             echo "kiwi_RootPart=1" > /config.partids
         fi
