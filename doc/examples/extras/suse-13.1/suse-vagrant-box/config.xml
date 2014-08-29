@@ -37,6 +37,7 @@
         <product name="openSUSE"/>
         <package name="plymouth-branding-openSUSE" bootinclude="true"/>
         <package name="grub2-branding-openSUSE" bootinclude="true"/>
+        <package name="virtualbox-guest-tools"/>
         <package name="ifplugd"/>
         <package name="iputils"/>
         <package name="vim"/>
