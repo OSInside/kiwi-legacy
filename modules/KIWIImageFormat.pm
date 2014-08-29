@@ -530,6 +530,8 @@ sub createVagrantBox {
         $kiwi -> failed ();
         return;
     }
+    my $img_basename = basename $img;
+    my $img_dirname  = dirname $img;
     foreach my $vgc (@{$vgclist}) {
         my $box = $this->{image};
         my $provider = $vgc -> getProvider();
@@ -554,7 +556,8 @@ sub createVagrantBox {
         # create OVF file for virtualbox provider
         #------------------------------------------
         if ($provider eq 'virtualbox') {
-            $this->{image}  = $img;
+            KIWIQX::qxx ("cd $dest && mv $img_basename box-disk1.vmdk");
+            $this->{image}  = $img_dirname."/box-disk1.vmdk";
             $this->{ovfdir} = $dest;
             $this->{format} = 'ovf';
             my $ovf = $this -> createOVFConfiguration();
@@ -647,13 +650,11 @@ sub createVagrantBox {
         #------------------------------------------
         $kiwi -> info ("--> Creating box archive");
         my @components = ();
-        my $img_basename = basename $img;
         if ($provider eq 'virtualbox') {
             my $ovf_basename = $img_basename;
             my $mf_basename = $img_basename;
             $ovf_basename =~ s/vmdk$/ovf/;
             $mf_basename =~ s/vmdk$/mf/;
-            KIWIQX::qxx ("cd $dest && mv $img_basename box-disk1.vmdk");
             KIWIQX::qxx ("cd $dest && mv $ovf_basename box.ovf");
             push @components, 'box.ovf';
             push @components, 'box-disk1.vmdk';
