@@ -153,12 +153,15 @@ sub writeConfigFile {
     # storage description
     #------------------------------------------
     my $diskID = 'vmdisk-' . $refID;
+    my $format = "http://www.vmware.com/interfaces/specifications/vmdk.html"
+        . "#streamOptimized";
     $config .= '<ovf:DiskSection>' . "\n"
         . "\t" . '<ovf:Info>Virtual disk information</ovf:Info>' . "\n"
         . "\t" . '<ovf:Disk '
         . 'ovf:capacity="' . $vsize . '" '
         . 'ovf:capacityAllocationUnits="byte * 2^20" '
         . 'ovf:diskId="' . $diskID . '" '
+        . 'ovf:format="' . $format . '" '
         . 'ovf:fileRef="' . $fileRef . '"/>' . "\n"
         . '</ovf:DiskSection>' . "\n";
     #==========================================
