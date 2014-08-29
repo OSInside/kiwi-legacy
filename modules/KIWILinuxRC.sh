@@ -899,6 +899,8 @@ function installBootLoader {
         x86_64-extlinux) installBootLoaderSyslinux ;;
         s390-zipl)       installBootLoaderS390 ;;
         s390x-zipl)      installBootLoaderS390 ;;
+        aarch64-uboot)   installBootLoaderUBoot ;;
+        aarch64-grub2)   installBootLoaderGrub2 ;;
         *)
         systemException \
             "*** boot loader install for $arch-$loader not implemented ***" \
@@ -1560,6 +1562,8 @@ function setupBootLoader {
         s390x-zipl)      eval setupBootLoaderS390 $para ;;
         ppc*)            eval setupBootLoaderYaboot $para ;;
         arm*)            eval setupBootLoaderUBoot $para ;;
+        aarch64-uboot)   eval setupBootLoaderUBoot $para ;;
+        aarch64-grub2)   eval setupBootLoaderGrub2 $para ;;
         *)
         systemException \
             "*** boot loader setup for $arch-$loader not implemented ***" \
