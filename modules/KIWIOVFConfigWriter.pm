@@ -167,7 +167,10 @@ sub writeConfigFile {
     #==========================================
     # network description
     #------------------------------------------
-    $config .= $this -> __generateNetworkDeclaration($vmConfig);
+    my $netData = $this -> __generateNetworkDeclaration($vmConfig);
+    if ($netData) {
+        $config .= $netData;
+    }
     #==========================================
     # virtual system description
     #------------------------------------------
@@ -237,7 +240,9 @@ sub writeConfigFile {
     my ($netCfg, $upInstID) =
         $this -> __generateNetworkCfgSection($vmConfig, $instID);
     $instID = $upInstID;
-    $config .= $netCfg;
+    if ($netCfg) {
+        $config .= $netCfg;
+    }
     # Configuration we received from VMWare, not certain if this applies to
     # other environments, being cautious
     if ($ovfType eq 'vmware') {
