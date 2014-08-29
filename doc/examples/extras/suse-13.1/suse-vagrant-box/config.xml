@@ -12,6 +12,10 @@
         <type image="vmx" filesystem="ext3" boot="vmxboot/suse-13.1" format="vagrant" bootloader="grub2" kernelcmdline="nomodeset">
             <vagrantconfig provider="libvirt" virtualsize="16"/>
             <vagrantconfig provider="virtualbox" virtualsize="16"/>
+            <machine memory="512" guestOS="suse" HWversion="9" ovftype="vmware">
+                <vmdisk id="0" controller="lsilogic"/>
+            </machine>
+            <size unit="G">10</size>
         </type>
         <version>1.13.1</version>
         <packagemanager>zypper</packagemanager>
@@ -53,6 +57,17 @@
         <package name="sudo"/>
         <package name="rsync"/>
         <package name="kernel-default"/>
+        <package name="virtualbox-guest-kmp-default"/>
+        <package name="kiwi"/>
+        <package name="kiwi-tools"/>
+        <package name="kiwi-desc-isoboot"/>
+        <package name="kiwi-desc-netboot"/>
+        <package name="kiwi-desc-oemboot"/>
+        <package name="kiwi-desc-vmxboot"/>
+        <package name="kiwi-templates"/>
+        <package name="btrfsprogs"/>
+        <package name="genisoimage"/>
+        <package name="squashfs"/>
     </packages>
     <packages type="bootstrap">
         <package name="udev"/>
