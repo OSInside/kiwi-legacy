@@ -459,6 +459,7 @@ function createInitialDevices {
     # create directories in /run
     #--------------------------------------
     mkdir -p -m 0755 /run/lock
+    mkdir -p -m 0755 /run/log
 }
 #======================================
 # mount_rpc_pipefs
