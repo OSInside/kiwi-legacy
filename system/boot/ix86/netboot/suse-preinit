@@ -78,17 +78,7 @@ if [ "$bootLoaderOK" = 1 ] && [ -z "$DO_NOT_INSTALL_BOOTLOADER" ]; then
 fi
 
 #======================================
-# 8) create /etc/ImagePackages
-#--------------------------------------
-if [ "$systemIntegrity" = "clean" ];then
-    if [ -x /bin/rpm ];then
-        Echo "Creating initial image package info file"
-        rpm -qa --last > /etc/ImagePackages
-    fi
-fi
-
-#======================================
-# 9) check for valid mount points
+# 8) check for valid mount points
 #--------------------------------------
 if [ ! -z "$imageDiskDevice" ] && [ "$systemIntegrity" = "clean" ];then
     for i in $(echo $PART_MOUNT | tr ':' ' ');do
@@ -99,7 +89,7 @@ if [ ! -z "$imageDiskDevice" ] && [ "$systemIntegrity" = "clean" ];then
 fi
 
 #======================================
-# 10) Update /etc/ImageVersion files
+# 9) Update /etc/ImageVersion files
 #--------------------------------------
 if [ ! -z "$imageDiskDevice" ] && [ "$systemIntegrity" = "clean" ];then
     count=0
@@ -123,29 +113,29 @@ if [ ! -z "$imageDiskDevice" ] && [ "$systemIntegrity" = "clean" ];then
 fi
 
 #======================================
-# 11) setup console
+# 10) setup console
 #--------------------------------------
 if [ "$systemIntegrity" = "clean" ];then
     setupConsole
 fi
 
 #======================================
-# 12) kernelCheck
+# 11) kernelCheck
 #--------------------------------------
 kernelCheck
 
 #======================================
-# 13) create origin snapshot if possible
+# 12) create origin snapshot if possible
 #--------------------------------------
 createOriginSnapshot
 
 #======================================
-# 14) Run user script
+# 13) Run user script
 #--------------------------------------
 runHook preCallInit
 
 #======================================
-# 15) kill udev
+# 14) kill udev
 #--------------------------------------
 udevSystemStop
 umountSystemFilesystems

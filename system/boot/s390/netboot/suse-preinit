@@ -84,17 +84,7 @@ if [ "$bootLoaderOK" = 1 ] && [ -z "$DO_NOT_INSTALL_BOOTLOADER" ]; then
 fi
 
 #======================================
-# 9) create /etc/ImagePackages
-#--------------------------------------
-if [ "$systemIntegrity" = "clean" ];then
-    if [ -x /bin/rpm ];then
-        Echo "Creating initial image package info file"
-        rpm -qa --last > /etc/ImagePackages
-    fi
-fi
-
-#======================================
-# 10) check for valid mount points
+# 9) check for valid mount points
 #--------------------------------------
 if [ ! -z "$imageDiskDevice" ] && [ "$systemIntegrity" = "clean" ];then
     for i in $(echo $PART_MOUNT | tr ':' ' ');do
@@ -105,7 +95,7 @@ if [ ! -z "$imageDiskDevice" ] && [ "$systemIntegrity" = "clean" ];then
 fi
 
 #======================================
-# 11) Update /etc/ImageVersion files
+# 10) Update /etc/ImageVersion files
 #--------------------------------------
 if [ ! -z "$imageDiskDevice" ] && [ "$systemIntegrity" = "clean" ];then
     count=0
@@ -129,14 +119,14 @@ if [ ! -z "$imageDiskDevice" ] && [ "$systemIntegrity" = "clean" ];then
 fi
 
 #======================================
-# 12) setup console
+# 11) setup console
 #--------------------------------------
 if [ "$systemIntegrity" = "clean" ];then
     setupConsole
 fi
 
 #======================================
-# 13) setup static network
+# 12) setup static network
 #--------------------------------------
 if [ "$systemIntegrity" = "clean" ];then
     setupNetworkInterfaceS390
@@ -145,22 +135,22 @@ if [ "$systemIntegrity" = "clean" ];then
 fi
 
 #======================================
-# 14) kernelCheck
+# 13) kernelCheck
 #--------------------------------------
 kernelCheck
 
 #======================================
-# 15) create origin snapshot if possible
+# 14) create origin snapshot if possible
 #--------------------------------------
 createOriginSnapshot
 
 #======================================
-# 16) Run user script
+# 15) Run user script
 #--------------------------------------
 runHook preCallInit
 
 #======================================
-# 17) kill udev
+# 16) kill udev
 #--------------------------------------
 udevSystemStop
 umountSystemFilesystems
