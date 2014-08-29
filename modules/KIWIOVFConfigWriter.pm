@@ -225,8 +225,9 @@ sub writeConfigFile {
     $instID += 1;
     # Connect the system disk to the controller
     my $pAddress = 0;
-    my $diskCfg =
-        $this -> __generateDiskCfgSection($vmConfig, $instID, $controllerID);
+    my $diskCfg = $this -> __generateDiskCfgSection(
+        $vmConfig, $instID, $controllerID, $diskID
+    );
     $config .= $diskCfg;
     $instID += 1;
     # DVD
@@ -469,9 +470,11 @@ sub __generateDiskCfgSection {
     my $vmConfig     = shift;
     my $instID       = shift;
     my $controllerID = shift;
-    my $ovfType = $this -> {ovfType};
+    my $diskID       = shift;
+    my $ovfType  = $this -> {ovfType};
     my $pAddress = 0;
-    my $diskID = $pAddress + 1;
+    my $disk_nr  = $pAddress + 1;
+
     my $config = "\t\t" . '<ovf:Item>' . "\n"
         . "\t\t\t"
         . '<rasd:AddressOnParent>' . $pAddress
@@ -479,7 +482,7 @@ sub __generateDiskCfgSection {
         . "\t\t\t"
         . '<rasd:Description>Hard disk</rasd:Description>' . "\n"
         . "\t\t\t"
-        . '<rasd:ElementName>Hard disk' . $diskID
+        . '<rasd:ElementName>Hard disk' . $disk_nr
         . '</rasd:ElementName>' . "\n"
         . "\t\t\t"
         . '<rasd:HostResource>ovf:/disk/' . $diskID

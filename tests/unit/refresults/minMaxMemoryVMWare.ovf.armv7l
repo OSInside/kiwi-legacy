@@ -63,7 +63,7 @@
 			<rasd:AddressOnParent>0</rasd:AddressOnParent>
 			<rasd:Description>Hard disk</rasd:Description>
 			<rasd:ElementName>Hard disk1</rasd:ElementName>
-			<rasd:HostResource>ovf:/disk/1</rasd:HostResource>
+			<rasd:HostResource>ovf:/disk/vmdisk-1-2</rasd:HostResource>
 			<rasd:InstanceID>4</rasd:InstanceID>
 			<rasd:Parent>3</rasd:Parent>
 			<rasd:ResourceType>17</rasd:ResourceType>
