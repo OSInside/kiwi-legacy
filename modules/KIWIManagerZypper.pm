@@ -365,11 +365,11 @@ sub setupInstallationSource {
         my $sed;
         if (! $chroot) {
             if (! $repo_exists) {
-                $kiwi -> info ("Adding bootstrap zypper service: $alias");
+                $kiwi -> info ("Adding bootstrap zypper service: $alias\n");
                 $data = KIWIQX::qxx ("@zypper --root \"$root\" $sadd 2>&1");
                 $code = $? >> 8;
             } else {
-                $kiwi -> info ("Updating bootstrap zypper service: $alias");
+                $kiwi -> info ("Updating bootstrap zypper service: $alias\n");
                 $data = KIWIQX::qxx (
                     "grep -q '^baseurl=file:/base-system' $repo"
                 );
@@ -791,7 +791,7 @@ sub setupRootSystem {
         if ($this -> setupInstallPackages()) {
             push (@packs,$manager);
         }
-        $kiwi -> info ("Initializing image system on: $root");
+        $kiwi -> info ("Initializing image system on: $root\n");
         #==========================================
         # check input list for pattern names
         #------------------------------------------

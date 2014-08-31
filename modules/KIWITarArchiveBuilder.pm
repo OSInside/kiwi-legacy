@@ -113,7 +113,7 @@ sub __createTarArchive {
     my $kiwi = $this->{kiwi};
     my $locator = $this->{locator};
     my $xml  = $this->{xml};
-    $kiwi -> info('Creating tar archive...');
+    $kiwi -> info("Creating tar archive...\n");
     my $tarDestDir = $this -> getBaseBuildDirectory();
     my $origin = $cmdL -> getConfigDir();
     my $globals = KIWIGlobals -> instance();

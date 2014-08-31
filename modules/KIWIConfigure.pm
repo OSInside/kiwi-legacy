@@ -797,11 +797,11 @@ sub setupUsers {
         my $data = KIWIQX::qxx ("chroot $root $grep -q ^$uName: /etc/passwd 2>&1");
         my $code = $? >> 8;
         if ($code != 0) {
-            $kiwi -> info ("Adding user: $uName [$group]");
+            $kiwi -> info ("Adding user: $uName [$group]\n");
             $data = KIWIQX::qxx ( "chroot $root $adduser $uName 2>&1" );
             $code = $? >> 8;
         } else {
-            $kiwi -> info ("Modifying user: $uName [$group]");
+            $kiwi -> info ("Modifying user: $uName [$group]\n");
             $data = KIWIQX::qxx ( "chroot $root $moduser $uName 2>&1" );
             $code = $? >> 8;
         }
@@ -813,7 +813,7 @@ sub setupUsers {
         }
         $kiwi -> done ();
         if ((defined $uHome) && (-d "$root/$uHome")) {
-            my $iMsg = "Setting owner/group permissions $uName [$group]";
+            my $iMsg = "Setting owner/group permissions $uName [$group]\n";
             $kiwi -> info($iMsg);
             $data = KIWIQX::qxx("chroot $root $chown -R $uName:$group $uHome 2>&1");
             $code = $? >> 8;

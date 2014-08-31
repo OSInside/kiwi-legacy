@@ -494,7 +494,7 @@ sub createBootStructure {
         $initrd = KIWIGlobals -> instance() -> setupSplash($initrd);
         $zipped = 1;
     }
-    $kiwi -> info ("Creating initial boot structure");
+    $kiwi -> info ("Creating initial boot structure\n");
     $status = KIWIQX::qxx ( "mkdir -p $tmpdir/boot 2>&1" );
     $result = $? >> 8;
     if ($result != 0) {
@@ -2673,7 +2673,7 @@ sub setupBootDisk {
         #==========================================
         # Copy root tree to disk
         #------------------------------------------
-        $kiwi -> info ("Copying system image tree on disk");
+        $kiwi -> info ("Copying system image tree on disk\n");
         my $btrfs_sub_vol = '';
         my $rsync_cmd = 'rsync -aHXA --one-file-system ';
         if (-e $loopdir.'/@') {
@@ -3656,7 +3656,7 @@ sub setupBootLoaderStages {
         #==========================================
         # Get Grub2 stage and theming files
         #------------------------------------------
-        $kiwi -> info ("Importing grub2 stage and theming files");
+        $kiwi -> info ("Importing grub2 stage and theming files\n");
         my $figure= "'usr/share/$grub_share/themes/*'";
         my $s_efi = $stages{efi}{initrd};
         my $s_bio = $stages{bios}{initrd};
@@ -3771,7 +3771,7 @@ sub setupBootLoaderStages {
         # Create core efi boot image, standard EFI
         #------------------------------------------
         if ($firmware eq "efi") {
-            $kiwi -> info ("Creating grub2 efi boot image");
+            $kiwi -> info ("Creating grub2 efi boot image\n");
             if (! $grub2_uefi_mkimage) {
                 $kiwi -> failed ();
                 $kiwi -> error  ("Can't find grub2 mkimage tool");
@@ -3903,7 +3903,7 @@ sub setupBootLoaderStages {
         # Create core grub2 boot images
         #------------------------------------------
         if ($stagesBIOS) {
-            $kiwi -> info ("Creating grub2 core boot image");
+            $kiwi -> info ("Creating grub2 core boot image\n");
             if (! $grub2_bios_mkimage) {
                 $kiwi -> failed ();
                 $kiwi -> error  ("Can't find grub2 mkimage tool");
@@ -4228,7 +4228,7 @@ sub setupBootLoaderConfiguration {
     #------------------------------------------
     if ($cmdline) {
         $kiwi -> loginfo (
-            "Additional commandline options: \"$cmdline\""
+            "Additional commandline options: \"$cmdline\"\n"
         );
     }
     #==========================================
@@ -4245,7 +4245,7 @@ sub setupBootLoaderConfiguration {
     # Create MBR id file for boot device check
     #------------------------------------------
     if ($firmware ne "ofw") {
-        $kiwi -> info ("Saving disk label boot/mbrid: $this->{mbrid}...");
+        $kiwi -> info ("Saving disk label boot/mbrid: $this->{mbrid}...\n");
         KIWIQX::qxx ("mkdir -p $tmpdir/boot");
         my $FD;
         if (! open ($FD,'>',"$tmpdir/boot/mbrid")) {
@@ -4322,7 +4322,7 @@ sub setupBootLoaderConfiguration {
         #==========================================
         # Create grub.cfg file
         #------------------------------------------
-        $kiwi -> info ("Creating grub2 configuration file...");
+        $kiwi -> info ("Creating grub2 configuration file...\n");
         foreach my $config (@config) {
             KIWIQX::qxx ("mkdir -p $tmpdir/boot/$config");
             my $FD = FileHandle -> new();
@@ -4612,7 +4612,7 @@ sub setupBootLoaderConfiguration {
         #==========================================
         # Create menu.lst file
         #------------------------------------------
-        $kiwi -> info ("Creating grub menu list file...");
+        $kiwi -> info ("Creating grub menu list file...\n");
         KIWIQX::qxx ("mkdir -p $tmpdir/boot/grub");
         my $FD = FileHandle -> new();
         if (! $FD -> open (">$tmpdir/boot/grub/menu.lst")) {
@@ -5174,7 +5174,7 @@ sub setupBootLoaderConfiguration {
         #==========================================
         # Create uboot image file from initrd
         #------------------------------------------
-        $kiwi -> info ("Creating uBoot initrd image...");
+        $kiwi -> info ("Creating uBoot initrd image...\n");
         $cmdline =~ s/\n//g;
         my $mkopts = "-A arm -O linux -T ramdisk -C none -a 0x0 -e 0x0";
         my $inputf = "$tmpdir/boot/initrd.vmx";
@@ -5461,7 +5461,7 @@ sub installBootLoader {
         #==========================================
         # Create device map for the disk
         #------------------------------------------
-        $kiwi -> info ("Creating grub2 device map");
+        $kiwi -> info ("Creating grub2 device map\n");
         my $dmfile = "$tmpdir/boot/grub2/device.map";
         my $dmfd = FileHandle -> new();
         if (! $dmfd -> open(">$dmfile")) {
@@ -5620,7 +5620,7 @@ sub installBootLoader {
     # Grub
     #------------------------------------------
     if ($loader eq "grub") {
-        $kiwi -> info ("Installing grub on device: $diskname");
+        $kiwi -> info ("Installing grub on device: $diskname\n");
         #==========================================
         # re-init bootid, legacy grub starts at 0
         #------------------------------------------
@@ -5810,11 +5810,11 @@ sub installBootLoader {
         # Install sys/extlinux on boot device
         #------------------------------------------
         if ($loader eq "syslinux") {
-            $kiwi -> info ("Installing syslinux on device: $bootdev");
+            $kiwi -> info ("Installing syslinux on device: $bootdev\n");
             $status = KIWIQX::qxx ("syslinux $bootdev 2>&1");
             $result = $? >> 8;
         } else {
-            $kiwi -> info ("Installing extlinux on device: $bootdev");
+            $kiwi -> info ("Installing extlinux on device: $bootdev\n");
             if (KIWIGlobals -> instance() -> mount ($bootdev, '/mnt')) {
                 $status = KIWIQX::qxx (
                     "extlinux --install /mnt/boot/syslinux 2>&1"
@@ -5854,7 +5854,7 @@ sub installBootLoader {
     # Zipl
     #------------------------------------------
     if ($loader eq "zipl") {
-        $kiwi -> info ("Installing zipl on device: $diskname");
+        $kiwi -> info ("Installing zipl on device: $diskname\n");
         my $offset;
         my $haveRealDevice = 1;
         if (! -b $diskname) {
@@ -7046,10 +7046,10 @@ sub setupFilesystem {
             my $fstool = 'mkdosfs';
             my $fsopts = '';
             if ($fstype eq 'fat16') {
-                $kiwi -> info ("Creating DOS [Fat16] filesystem");
+                $kiwi -> info ("Creating DOS [Fat16] filesystem\n");
                 $fsopts.= " -F16 -I";
             } else {
-                $kiwi -> info ("Creating DOS [Fat32] filesystem");
+                $kiwi -> info ("Creating DOS [Fat32] filesystem\n");
                 $fsopts.= " -F32 -I";
             }
             if ($bootp) {

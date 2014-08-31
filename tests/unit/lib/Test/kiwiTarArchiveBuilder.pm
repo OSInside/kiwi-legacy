@@ -267,7 +267,7 @@ sub test_createTarArchive {
     # Test the method
     my $res = $builder -> __createTarArchive();
     my $msg = $kiwi -> getMessage();
-    my $expected = 'Creating tar archive...';
+    my $expected = "Creating tar archive...\n";
     $this -> assert_str_equals($expected, $msg);
     my $msgT = $kiwi -> getMessageType();
     $this -> assert_str_equals('info', $msgT);

@@ -177,7 +177,7 @@ sub executeUserImagesScript {
     my $imageTree = $this->{imageTree};
     my $kiwi      = $this->{kiwi};
     if (-x "$imageTree/image/images.sh") {
-        $kiwi -> info ('Calling image script: images.sh');
+        $kiwi -> info ("Calling image script: images.sh\n");
         my ($code,$data) = KIWIGlobals -> instance() -> callContained (
             $imageTree,"/image/images.sh"
         );
@@ -241,7 +241,7 @@ sub stripImage {
     my $this = shift;
     my $kiwi = $this->{kiwi};
     my $imageTree = $this->{imageTree};
-    $kiwi -> info ("Stripping shared objects/executables...");
+    $kiwi -> info ("Stripping shared objects/executables...\n");
     my $list = KIWIQX::qxx ("find $imageTree -type f -perm -755");
     my @list = split(/\n/,$list);
     foreach my $file (@list) {
@@ -363,7 +363,7 @@ sub createImageClicFS {
             $kiwi -> failed ();
             return;
         }  
-        $kiwi -> info ("clicfs: blocks count=$blocks free=$data");
+        $kiwi -> info ("clicfs: blocks count=$blocks free=$data\n");
         $blocks = $blocks - $data;  
         $data = KIWIQX::qxx (
             "resize2fs $this->{imageDest}/fsdata.ext4 $blocks 2>&1"
@@ -379,7 +379,7 @@ sub createImageClicFS {
     # Create clicfs filesystem from ext3
     #------------------------------------------
     $kiwi -> info (
-        "Creating clicfs container: $this->{imageDest}/$name.clicfs"
+        "Creating clicfs container: $this->{imageDest}/$name.clicfs\n"
     );
     my $clicfs = "mkclicfs";
     if (defined $ENV{MKCLICFS_COMPRESSION}) {
@@ -720,7 +720,7 @@ sub createImageCPIO {
     #==========================================
     # PRE Create filesystem on extend
     #------------------------------------------
-    $kiwi -> info ("Creating cpio archive...");
+    $kiwi -> info ("Creating cpio archive...\n");
     my $pwd  = KIWIQX::qxx ("pwd"); chomp $pwd;
     my @cpio = ("--create", "--format=newc", "--quiet");
     my $dest = $this->{imageDest}."/".$name.".".$suf;
@@ -1254,7 +1254,7 @@ sub createImageLiveCD {
         $imageTreeReadOnly.= "-read-only/";
         $this->{imageTreeReadOnly} = $imageTreeReadOnly;
         if (! -d $imageTreeReadOnly) {
-            $kiwi -> info ("Creating read only image part");
+            $kiwi -> info ("Creating read only image part\n");
             if (! mkdir $imageTreeReadOnly) {
                 $error = $!;
                 $kiwi -> failed ();
@@ -1441,7 +1441,7 @@ sub createImageLiveCD {
     if ((defined $imageTreeReadOnly) && (! -d $imageTreeReadOnly) &&
         (! defined $gzip)
     ) {
-        $kiwi -> info ("Creating read only reference...");
+        $kiwi -> info ("Creating read only reference...\n");
         if (! mkdir $imageTreeReadOnly) {
             $error = $!;
             $kiwi -> failed ();
@@ -1502,7 +1502,7 @@ sub createImageLiveCD {
     # Prepare for CD ISO image
     #------------------------------------------
     my $CD = $idest."/CD";
-    $kiwi -> info ("Creating CD filesystem structure");
+    $kiwi -> info ("Creating CD filesystem structure\n");
     KIWIQX::qxx ("mkdir -p $CD/boot");
     push @{$this->{tmpdirs}},$CD;
     $kiwi -> done ();
@@ -1510,7 +1510,7 @@ sub createImageLiveCD {
     # Check for optional config-cdroot archive
     #------------------------------------------
     if (-f $this->{imageDest}."/".$cdrootData) {
-        $kiwi -> info ("Integrating CD root information...");
+        $kiwi -> info ("Integrating CD root information...\n");
         my $data= KIWIQX::qxx (
             "tar -C $CD -xvf $this->{imageDest}/$cdrootData"
         );
@@ -1528,7 +1528,7 @@ sub createImageLiveCD {
     # Check for optional config-cdroot.sh
     #------------------------------------------
     if (-x $this->{imageDest}."/".$cdrootScript) {
-        $kiwi -> info ("Calling CD root setup script...");
+        $kiwi -> info ("Calling CD root setup script...\n");
         my $pwd = KIWIQX::qxx ("pwd"); chomp $pwd;
         my $cdrootEnv = $imageTree."/.profile";
         if ($cdrootEnv !~ /^\//) {
@@ -1561,7 +1561,7 @@ sub createImageLiveCD {
     #==========================================
     # Installing system image file(s)
     #------------------------------------------
-    $kiwi -> info ("Moving CD image data into boot structure");
+    $kiwi -> info ("Moving CD image data into boot structure\n");
     if (! defined $gzip) {
         # /.../
         # don't symlink these file because in this old live iso
@@ -1587,7 +1587,7 @@ sub createImageLiveCD {
     #==========================================
     # copy boot kernel and initrd
     #------------------------------------------
-    $kiwi -> info ("Copying boot image and kernel [$isoarch]");
+    $kiwi -> info ("Copying boot image and kernel [$isoarch]\n");
     my $destination = "$CD/boot/$isoarch/loader";
     KIWIQX::qxx ("mkdir -p $destination");
     $data = KIWIQX::qxx ("cp $pinitrd $destination/initrd 2>&1");
@@ -1610,7 +1610,7 @@ sub createImageLiveCD {
     #==========================================
     # check for graphics boot files
     #------------------------------------------
-    $kiwi -> info ("Extracting initrd for boot graphics data lookup");
+    $kiwi -> info ("Extracting initrd for boot graphics data lookup\n");
     my $tmpdir = KIWIQX::qxx ("mktemp -q -d $idest/boot-iso.XXXXXX");
     $code = $? >> 8;
     if ($code != 0) {
@@ -1636,7 +1636,7 @@ sub createImageLiveCD {
     #==========================================
     # Include MBR ID to initrd
     #------------------------------------------
-    $kiwi -> info ("Saving hybrid disk label in initrd: $this->{mbrid}...");
+    $kiwi -> info ("Saving hybrid disk label in initrd: $this->{mbrid}...\n");
     KIWIQX::qxx ("mkdir -p $tmpdir/boot/grub");
     my $MBRFD = FileHandle -> new();
     if (! $MBRFD -> open (">$tmpdir/boot/mbrid")) {
@@ -1797,7 +1797,7 @@ sub createImageLiveCD {
         # create / use efi boot image
         #------------------------------------------
         if ($firmware eq "efi") {
-            $kiwi -> info ("Creating grub2 efi boot image");
+            $kiwi -> info ("Creating grub2 efi boot image\n");
             my $locator = KIWILocator -> instance();
             my $grub2_mkimage = $locator -> getExecPath ("grub2-efi-mkimage");
             if (! $grub2_mkimage) {
@@ -1824,7 +1824,7 @@ sub createImageLiveCD {
             }
             $kiwi -> done();
         } else {
-            $kiwi -> info ("Importing grub2 shim/signed efi modules");
+            $kiwi -> info ("Importing grub2 shim/signed efi modules\n");
             my $lib = 'lib';
             if ( -d "$tmpdir/usr/lib64" ) {
                 $lib = 'lib64';
@@ -1879,7 +1879,7 @@ sub createImageLiveCD {
         #==========================================
         # create grub configuration
         #------------------------------------------
-        $kiwi -> info ("Creating grub2 configuration file...");
+        $kiwi -> info ("Creating grub2 configuration file...\n");
         my $FD = FileHandle -> new();
         if (! $FD -> open(">$CD/boot/grub2-efi/grub.cfg")) {
             $kiwi -> failed ();
@@ -2028,7 +2028,7 @@ sub createImageLiveCD {
     #==========================================
     # copy base graphics boot CD files
     #------------------------------------------
-    $kiwi -> info ("Setting up isolinux boot CD [$isoarch]");
+    $kiwi -> info ("Setting up isolinux boot CD [$isoarch]\n");
     my $gfx = $tmpdir."/image/loader";
     $data = KIWIQX::qxx ("cp -a $gfx/* $destination");
     $code = $? >> 8;
@@ -2047,7 +2047,7 @@ sub createImageLiveCD {
     #==========================================
     # setup isolinux.cfg file
     #------------------------------------------
-    $kiwi -> info ("Creating isolinux configuration...");
+    $kiwi -> info ("Creating isolinux configuration...\n");
     my $vga = $xmltype -> getVGA();
     my $syslinux_new_format = 0;
     my $bootTimeout = 200;
@@ -2485,7 +2485,7 @@ sub createImageSplit {
     #==========================================
     # Create clone of prepared tree
     #------------------------------------------
-    $kiwi -> info ("Creating root tree clone for split operations");
+    $kiwi -> info ("Creating root tree clone for split operations\n");
     $treebase = basename $imageTree;
     if (-d $this->{imageDest}."/".$treebase) {
         KIWIQX::qxx ("rm -rf $this->{imageDest}/$treebase");
@@ -2800,7 +2800,7 @@ sub createImageSplit {
         # Create RW logical extend
         #------------------------------------------
         if (defined $this->{imageTreeRW}) {
-            $kiwi -> info ("Image RW part requires $mbytesrw MB of disk space");
+            $kiwi -> info ("Image RW part requires $mbytesrw MB of disk space\n");
             if (! $this -> buildLogicalExtend ($namerw,$mbytesrw."M")) {
                 KIWIQX::qxx ("rm -rf $imageTreeRW");
                 KIWIQX::qxx ("rm -rf $imageTree");
@@ -2857,7 +2857,7 @@ sub createImageSplit {
     #==========================================
     # Create RO logical extend
     #------------------------------------------
-    $kiwi -> info ("Image RO part requires $mbytesro MB of disk space");
+    $kiwi -> info ("Image RO part requires $mbytesro MB of disk space\n");
     if (! $this -> buildLogicalExtend ($namero,$mbytesro."M")) {
         KIWIQX::qxx ("rm -rf $imageTreeRW");
         KIWIQX::qxx ("rm -rf $imageTree");
@@ -2958,7 +2958,7 @@ sub createImageSplit {
         #==========================================
         # Checking file system
         #------------------------------------------
-        $kiwi -> info ("Checking file system: $type...");
+        $kiwi -> info ("Checking file system: $type...\n");
         SWITCH: for ($type) {
             /ext2/       && do {
                 KIWIQX::qxx (
@@ -3240,7 +3240,7 @@ sub writeImageConfig {
     # create .config for types which needs it
     #------------------------------------------
     if (defined $device) {
-        $kiwi -> info ("Creating boot configuration...");
+        $kiwi -> info ("Creating boot configuration...\n");
         my $FD = FileHandle -> new();
         if (! $FD -> open (">$this->{imageDest}/$configName")) {
             $kiwi -> failed ();
@@ -3478,9 +3478,9 @@ sub postImage {
     }
     my $para = $imagetype.":".$filesystem;
     if ($filesystem) {
-        $kiwi -> info ("Checking file system: $filesystem...");
+        $kiwi -> info ("Checking file system: $filesystem...\n");
     } else {
-        $kiwi -> info ("Checking file system: $imagetype...");
+        $kiwi -> info ("Checking file system: $imagetype...\n");
     }
     SWITCH: for ($para) {
         #==========================================
@@ -3788,7 +3788,7 @@ sub installLogicalExtend {
     # copy physical to logical
     #------------------------------------------
     my $name = basename ($source);
-    $kiwi -> info ("Copying physical to logical [$name]...");
+    $kiwi -> info ("Copying physical to logical [$name]...\n");
     my $free = KIWIQX::qxx ("df -h $extend 2>&1");
     $kiwi -> loginfo ("getSize: mount: $free\n");
     my $data = KIWIQX::qxx (
@@ -3812,7 +3812,7 @@ sub installLogicalExtend {
             -> instance()
             -> generateBuildImageName($this->{xml});
         my $dest = $this->{imageDest}."/".$name;
-        $kiwi -> info ("Dumping filesystem image from $device...");
+        $kiwi -> info ("Dumping filesystem image from $device...\n");
         my $locator = KIWILocator -> instance();
         my $qemu_img = $locator -> getExecPath ("qemu-img");
         if (! $qemu_img) {
@@ -4028,7 +4028,7 @@ sub extractSplash {
     #==========================================
     # move out all splash files
     #------------------------------------------
-    $kiwi -> info ("Extracting kernel splash files...");
+    $kiwi -> info ("Extracting kernel splash files...\n");
     mkdir $newspl;
     my $status = KIWIQX::qxx ("mv $imageTree/image/loader/*.spl $newspl 2>&1");
     my $result = $? >> 8;
@@ -4236,7 +4236,7 @@ sub setupEXT2 {
     my $fsnocheck = $xmltype -> getFSNoCheck();
     if (($fsnocheck) && ($fsnocheck eq 'true')) {
         if ($tuneopts) {
-            $kiwi -> info ('Overwrite ext tune options to nocheck per XML');
+            $kiwi -> info ("Overwrite ext tune options to nocheck per XML\n");
         }
         $tuneopts = " -c 0 -i 0";
     }
@@ -4544,7 +4544,7 @@ sub buildMD5Sum {
     #==========================================
     # Create image md5sum
     #------------------------------------------
-    $kiwi -> info ("Creating image MD5 sum...");
+    $kiwi -> info ("Creating image MD5 sum...\n");
     my $size = int KIWIGlobals -> instance() -> isize ($image);
     my $primes = KIWIQX::qxx ("factor $size");
     $primes =~ s/^.*: //;
@@ -4596,7 +4596,7 @@ sub restoreSplitExtend {
     if ((! defined $imageTreeReadOnly) || ( ! -d $imageTreeReadOnly)) {
         return $imageTreeReadOnly;
     }
-    $kiwi -> info ("Restoring physical extend...");
+    $kiwi -> info ("Restoring physical extend...\n");
     my @rodirs = qw (bin boot lib lib64 opt sbin usr);
     foreach my $dir (@rodirs) {
         if (! -d "$imageTreeReadOnly/$dir") {
@@ -4631,7 +4631,7 @@ sub compressImage {
     #==========================================
     # Compress image using gzip
     #------------------------------------------
-    $kiwi -> info ("Compressing image...");
+    $kiwi -> info ("Compressing image...\n");
     my $suf = $this->{gdata}->{IrdZipperSuffix};
     my $zip = $this->{gdata}->{IrdZipperCommand};
     my $data = KIWIQX::qxx (
@@ -4668,7 +4668,7 @@ sub updateMD5File {
     # Update md5file adding zblocks/zblocksize
     #------------------------------------------
     if (defined $this->{md5file}) {
-        $kiwi -> info ("Updating md5 file...");
+        $kiwi -> info ("Updating md5 file...\n");
         my $FD;
         if (! open ($FD, '<', $this->{md5file})) {
             $kiwi -> failed ();
