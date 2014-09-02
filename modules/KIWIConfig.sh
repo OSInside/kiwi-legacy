@@ -324,12 +324,19 @@ function baseSetupOEMPartition {
 #--------------------------------------
 function baseSetupUserPermissions {
     while read line;do
-        dir=`echo $line | cut -f6 -d:`
-        uid=`echo $line | cut -f3 -d:`
-        usern=`echo $line | cut -f1 -d:`
-        group=`echo $line | cut -f4 -d:`
-        if [ -d "$dir" ] && [ $uid -gt 200 ] && [ $usern != "nobody" ];then
-            group=`cat /etc/group | grep "$group" | cut -f1 -d:`
+        dir=$(echo $line | cut -f6 -d:)
+        uid=$(echo $line | cut -f3 -d:)
+        usern=$(echo $line | cut -f1 -d:)
+        group=$(echo $line | cut -f4 -d:)
+        shell=$(echo $line | cut -f7 -d:)
+        if [ ! -d "$dir" ];then
+            continue
+        fi
+        if [ $uid -lt 1000 ];then
+            continue
+        fi
+        if [[ ! $shell =~ nologin|true|false ]];then
+            group=$(cat /etc/group | grep "$group" | cut -f1 -d:)
             chown -c -R $usern:$group $dir/*
         fi
     done < /etc/passwd
