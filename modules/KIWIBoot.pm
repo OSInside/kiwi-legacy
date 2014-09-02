@@ -561,9 +561,13 @@ sub setupInstallCD {
     my $appid     = $this->{mbrid};
     my $type      = $this->{type};
     my $bootloader= "syslinux";
-    my $efi_arch  = 'x86_64';
-    if ($arch ne 'x86_64') {
+    my $efi_arch;
+    if ($arch eq 'x86_64') {
+        $efi_arch  = 'x86_64';
+    } elsif ($arch =~ /i.86/) {
         $efi_arch = 'i386';
+    } elsif (($arch eq 'aarch64') || ($arch eq 'arm64')) {
+        $efi_arch = 'arm64';
     }
     my $status;
     my $result;
@@ -975,6 +979,9 @@ sub setupInstallStick {
     my $bootloader;
     if ($arch =~ /ppc|ppc64|ppc64le/) {
         $bootloader = "yaboot";
+        if ($firmware eq "ofw") {
+            $bootloader = "grub2";
+        }
     } elsif ($arch =~ /arm/) {
         $bootloader = "uboot";
     } elsif (($firmware eq "efi") || ($firmware eq "uefi")) {
@@ -3482,9 +3489,9 @@ sub setupBootLoaderStages {
     # Grub2
     #------------------------------------------
     if ($loader eq "grub2") {
-        my $efipc      = 'x86_64-efi';
-        my $grubpc     = 'i386-pc';
-        my $grubofw    = 'powerpc-ieee1275';
+        my $efipc;
+        my $grubpc;
+        my $grubofw;
         my $bootbios   = "$tmpdir/boot/grub2/bootpart.cfg";
         my $bootofw    = "$tmpdir/boot/grub2/bootpart.cfg";
         my $bootefi    = "$tmpdir/boot/grub2-efi/bootpart.cfg";
@@ -3496,14 +3503,32 @@ sub setupBootLoaderStages {
         my $grub_ofw   = 'grub2';
         my $grub_share = 'grub2';
         my $lib        = 'lib';
-        if ($firmware eq 'ec2') {
-            $grubpc = 'x86_64-xen';
-            if ($arch ne 'x86_64') {
+        if ($arch eq 'x86_64') {
+            $efipc = 'x86_64-efi';
+            $grubpc = 'i386-pc';
+            if ($firmware eq 'ec2') {
+                $grubpc = 'x86_64-xen';
+            }
+        } elsif ($arch =~ /i.86/) {
+            $efipc = 'i386-efi';
+            $grubpc = 'i386-pc';
+            if ($firmware eq 'ec2') {
                 $grubpc = 'i386-xen';
             }
-        }
-        if ($arch ne 'x86_64') {
-            $efipc = 'i386-efi';
+        } elsif (($arch eq 'aarch64') || ($arch eq 'arm64')) {
+            $efipc = 'arm64-efi';
+            $grubpc = 'arm64-efi';
+        } elsif ($arch =~ /ppc|ppc64|ppc64le/) {
+            if ($firmware eq 'ofw') {
+                $grubofw = 'powerpc-ieee1275';
+            }
+        } else {
+            $kiwi -> failed ();
+            $kiwi -> error  (
+                "grub2: Unsupported architecture/firmware: $arch/$firmware"
+            );
+            $kiwi -> failed ();
+            return;
         }
         if ($zipped) {
             $test = $unzip;
@@ -3583,10 +3608,13 @@ sub setupBootLoaderStages {
         }
         if ($firmware ne 'ec2') {
             push @core_modules, 'boot';
-            push @bios_core_modules, qw /biosdisk vga vbe chain multiboot/;
+            push @bios_core_modules, qw /chain/;
+            if ($arch =~ /i.86|x86_64/) {
+                push @bios_core_modules, qw /biosdisk vga vbe multiboot/;
+            }
         }
         my @efi_core_modules = (
-            'part_gpt','efi_gop','efi_uga'
+            'part_gpt','efi_gop'
         );
         my @ofw_core_modules = (
             'ofnet','part_gpt','part_msdos'
@@ -3605,6 +3633,9 @@ sub setupBootLoaderStages {
         }
         if ($firmware eq "ofw") {
             @bootdir = ("$tmpdir/boot/grub2/$grubofw");
+        }
+        if ($arch =~ /i.86|x86_64/) {
+            push @efi_core_modules,'efi_uga';
         }
         $status = KIWIQX::qxx ("mkdir -p @bootdir 2>&1");
         $result = $? >> 8;
@@ -3779,11 +3810,17 @@ sub setupBootLoaderStages {
                 return;
             }
             my @modules = @efi_core_modules;
-            my $fo      = 'x86_64-efi';
-            my $fo_bin  = 'bootx64.efi';
-            if ($arch ne 'x86_64') {
+            my $fo;
+            my $fo_bin;
+            if ($arch eq 'x86_64') {
+                $fo      = 'x86_64-efi';
+                $fo_bin  = 'bootx64.efi';
+            } elsif ($arch =~ /i.86/) {
                 $fo     = 'i386-efi';
                 $fo_bin = 'bootx32.efi';
+            } elsif (($arch eq 'aarch64') || ($arch eq 'arm64')) {
+                $fo     = 'arm64-efi';
+                $fo_bin = 'bootaa64.efi';
             }
             my $core= "$tmpdir/EFI/BOOT/$fo_bin";
             my $core_opts;
@@ -3810,9 +3847,13 @@ sub setupBootLoaderStages {
             my $s_shim_ms   = $stages{efi}{shim_ms};
             my $s_shim_suse = $stages{efi}{shim_suse};
             my $s_signed    = $stages{efi}{signed};
-            my $fo_bin      = 'bootx64.efi';
-            if ($arch ne 'x86_64') {
+            my $fo_bin;
+            if ($arch eq 'x86_64') {
+                $fo_bin = 'bootx64.efi';
+            } elsif ($arch =~ /i.86/) {
                 $fo_bin = 'bootx32.efi';
+            } elsif (($arch eq 'aarch64') || ($arch eq 'arm64')) {
+                $fo_bin = 'bootaa64.efi';
             }
             $result = 0;
             if ($zipped) {
@@ -4397,8 +4438,10 @@ sub setupBootLoaderConfiguration {
                     print $FD "\t"."set root='hd0,1'"."\n";
                     if ($arch eq 'x86_64') {
                         print $FD "\t".'chainloader /EFI/BOOT/bootx64.efi'."\n";
-                    } else {
+                    } elsif ($arch =~ /i.86/) {
                         print $FD "\t".'chainloader /EFI/BOOT/bootx32.efi'."\n";
+                    } elsif (($arch eq 'aarch64') || ($arch eq 'arm64')) {
+                        print $FD "\t".'chainloader /EFI/BOOT/bootaa64.efi'."\n";
                     }
                 } else {
                     print $FD "\t"."set root='hd0'"."\n";
@@ -5527,7 +5570,7 @@ sub installBootLoader {
         my $loaderTarget;
         my $targetMessage;
         if (-e "$stages/core.img") {
-            # architectures: ix86 and x86_64
+            # architectures: ix86, x86_64 and arm
             if ($chainload) {
                 $loaderTarget = readlink ($bootdev);
                 $loaderTarget =~ s/\.\./\/dev/;
