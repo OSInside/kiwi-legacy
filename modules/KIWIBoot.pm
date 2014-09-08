@@ -4232,17 +4232,17 @@ sub setupBootLoaderConfiguration {
     }
     if ($firmware eq 'ec2hvm') {
         # /.../
-	# Similar to the firmware type 'ec2', EC2 needs in case of HVM
-	# (hardware-assisted virtual machine) instances the root device to be
-	# set to /dev/hda1.
-	#
-	# Reason:
-	# During the first boot, kiwi tries to detect the root device via
-	# "hwinfo --storage", takes the first entry and creates an initrd and
-	# bootlaoder configuration based on this assumption. The problem is,
-	# that the first entry refers to /dev/sda1 (the second is /dev/hda1).
-	# During the second reboot, /dev/sda will be removed from the system
-	# and therefore such an instance won't come up.
+        # Similar to the firmware type 'ec2', EC2 needs in case of HVM
+        # (hardware-assisted virtual machine) instances the root device to be
+        # set to /dev/hda1.
+        #
+        # Reason:
+        # During the first boot, kiwi tries to detect the root device via
+        # "hwinfo --storage", takes the first entry and creates an initrd and
+        # bootlaoder configuration based on this assumption. The problem is,
+        # that the first entry refers to /dev/sda1 (the second is /dev/hda1).
+        # During the second reboot, /dev/sda will be removed from the system
+        # and therefore such an instance won't come up.
         # ----
         $cmdline .= " root=/dev/hda1";
     }
