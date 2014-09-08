@@ -123,14 +123,6 @@ sub setFlag {
     } else {
         print $FD "   $flag\n";
     }
-    #==========================================
-    # save a newline for default log file
-    #------------------------------------------
-    if ($rootEFD) {
-        print $rootEFD "\n";
-    } else {
-        $this -> saveInCache ("\n");
-    }
     return;
 }
 
@@ -439,8 +431,14 @@ sub printLog {
     # send message cache if needed
     #------------------------------------------
     if ((($this->{fileLog}) || ($this->{errorOk})) && (@mcache) && ($rootEFD)) {
+        my $line = "\n";
         foreach my $message (@mcache) {
+            my $last_line_ending = chop $line;
+            if ($last_line_ending ne "\n") {
+                print $rootEFD "\n";
+            }
             print $rootEFD $message;
+            $line = $message;
         }
         undef $this->{mcache};
     }
@@ -459,7 +457,7 @@ sub printLog {
     #------------------------------------------
     if (($this->{errorOk}) && ($rootEFD)) {
         if ($needCR) {
-            print $prev_channel "\n";
+            print $rootEFD "\n";
         }
         print $rootEFD $result;
     }
@@ -467,7 +465,7 @@ sub printLog {
     # print message to log channel (stdin,file)
     #------------------------------------------
     if (($FD) && ((! defined $flag) || ($this->{fileLog}))) {
-        if ($needCR) {
+        if (($needCR) && ($this->{fileLog})) {
             print $prev_channel "\n";
         }
         print $FD $result;
