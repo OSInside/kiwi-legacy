@@ -26,6 +26,7 @@
     locations except for the ones listed here
     -->
     <strip type="tools">
+        <file name="lvmetad"/>
         <file name="loadkeys"/>
         <file name="klogconsole"/>
         <file name="multipath"/>
