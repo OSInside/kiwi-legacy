@@ -632,7 +632,7 @@ sub main {
         #------------------------------------------
         $kiwi -> done ();
         $kiwi -> info ("Calling isotovideo, this can take some time...\n");
-        $kiwi -> info ("watch the screen session by: 'screen -r'");
+        $kiwi -> info ("watch the screen session by: 'screen -r'\n");
         KIWIQX::qxx ("chmod u+x $out/run.sh");
         KIWIQX::qxx ("screen -L -D -m -c $out/run.ctrl $out/run.sh");
         $code = $? >> 8;

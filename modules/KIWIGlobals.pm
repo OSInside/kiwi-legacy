@@ -1653,7 +1653,7 @@ sub buildMD5Sum {
     my $file = shift;
     my $outf = shift;
     my $kiwi = $this->{kiwi};
-    $kiwi -> info ("Creating image MD5 sum...");
+    $kiwi -> info ("Creating image MD5 sum...\n");
     my $size = KIWIGlobals -> instance() -> isize ($file);
     my $primes = KIWIQX::qxx ("factor $size"); $primes =~ s/^.*: //;
     my $blocksize = 1;

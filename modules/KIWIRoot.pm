@@ -479,7 +479,7 @@ sub init {
     #==================================
     # Copy/touch some defaults files
     #----------------------------------
-    $kiwi -> info ("Creating default template files for new root system");
+    $kiwi -> info ("Creating default template files for new root system\n");
     if (! defined $this->{cacheRoot}) {
         KIWIQX::qxx ("mkdir -p $root/dev");
         KIWIQX::qxx ("chown root:root $root/dev");
@@ -1053,7 +1053,7 @@ sub setup {
     # copy user defined files to image tree
     #----------------------------------------
     if ((-d "$imageDesc/root") && (bsd_glob($imageDesc.'/root/*'))) {
-        $kiwi -> info ("Copying user defined files to image tree");
+        $kiwi -> info ("Copying user defined files to image tree\n");
         #========================================
         # copy user defined files to tmproot
         #----------------------------------------
@@ -1098,7 +1098,7 @@ sub setup {
     #========================================
     # create .profile from <image> tags
     #----------------------------------------
-    $kiwi -> info ("Create .profile environment");
+    $kiwi -> info ("Create .profile environment\n");
     my $profile = KIWIProfileFile -> new();
     if (! $profile) {
         return;
@@ -1131,7 +1131,7 @@ sub setup {
     # check for linuxrc
     #----------------------------------------
     if (-f "$root/linuxrc") {
-        $kiwi -> info ("Setting up linuxrc...");
+        $kiwi -> info ("Setting up linuxrc...\n");
         unlink ("$root/init");
         my $data = KIWIQX::qxx ("ln $root/linuxrc $root/init 2>&1");
         my $code = $? >> 8;
@@ -1147,7 +1147,7 @@ sub setup {
     # call setup scripts
     #----------------------------------------
     if (-d "$imageDesc/config") {
-        $kiwi -> info ("Preparing package setup scripts");
+        $kiwi -> info ("Preparing package setup scripts\n");
         KIWIQX::qxx (" mkdir -p $root/image/config ");
         KIWIQX::qxx (" cp $imageDesc/config/* $root/image/config 2>&1 ");
         if (! opendir ($FD,"$root/image/config")) {
@@ -1163,7 +1163,7 @@ sub setup {
                 if ($manager -> setupPackageInfo ( $script )) {
                     next;
                 }
-                $kiwi -> info ("Calling package setup script: $script");
+                $kiwi -> info ("Calling package setup script: $script\n");
                 KIWIQX::qxx (" chmod u+x $root/image/config/$script");
                 my $data = KIWIQX::qxx (
                     "chroot $root /image/config/$script 2>&1"
@@ -1257,7 +1257,7 @@ sub setup {
     # call config.sh image script
     #----------------------------------------
     if ((! $initCache) && (-e "$imageDesc/config.sh")) {
-        $kiwi -> info ("Calling image script: config.sh");
+        $kiwi -> info ("Calling image script: config.sh\n");
         KIWIQX::qxx (" cp $imageDesc/config.sh $root/tmp ");
         KIWIQX::qxx (" chmod u+x $root/tmp/config.sh ");
         my ($code,$data) = KIWIGlobals -> instance() -> callContained (
@@ -1297,7 +1297,7 @@ sub setup {
     #----------------------------------------
     my $id = $xml -> getImageID();
     if ($id) {
-        $kiwi -> info ("Creating image ID file: $id");
+        $kiwi -> info ("Creating image ID file: $id\n");
         if ( ! open ($FD, '>', "$root/etc/ImageID")) {
             $kiwi -> failed ();
             $kiwi -> error ("Failed to create ID file: $!");
@@ -1319,7 +1319,7 @@ sub setup {
             );
             my $code = $? >> 8;
             if ($code == 0) {
-                $kiwi -> info ("Cleanup temporary copy of resolv.conf");
+                $kiwi -> info ("Cleanup temporary copy of resolv.conf\n");
                 KIWIQX::qxx ("rm -f $root/etc/resolv.conf");
                 $kiwi -> done ();
             }
@@ -1331,7 +1331,7 @@ sub setup {
     if (! -e "$imageDesc/root/etc/hosts") {
         # restore only if overlay tree doesn't contain a hosts
         if (-f "$root/etc/hosts.rpmnew") {
-            $kiwi -> info ("Cleanup temporary copy of hosts");
+            $kiwi -> info ("Cleanup temporary copy of hosts\n");
             KIWIQX::qxx ("mv $root/etc/hosts.rpmnew $root/etc/hosts");
             $kiwi -> done ();
         }
@@ -1347,7 +1347,7 @@ sub setup {
             );
             my $code = $? >> 8;
             if ($code == 0) {
-                $kiwi -> info ("Cleanup temporary copy of sysconfig/proxy");
+                $kiwi -> info ("Cleanup temporary copy of sysconfig/proxy\n");
                 my $template = "$root/var/adm/fillup-templates/sysconfig.proxy";
                 if (! -f $template) {
                     KIWIQX::qxx ("rm -f $root/etc/sysconfig/proxy");
@@ -1391,7 +1391,7 @@ sub importHostPackageKeys {
     #==========================================
     # check build key and gpg
     #------------------------------------------
-    $kiwi -> info ("Importing build keys...");
+    $kiwi -> info ("Importing build keys...\n");
     my $gnupg       = '/usr/lib/rpm/gnupg';
     my $dumsigsExec = "$gnupg/dumpsigs";
     my $keydir      = "$gnupg/keys";
@@ -1439,7 +1439,7 @@ sub importHostPackageKeys {
     }
     if (@rpm_keys <= 2) {
         $kiwi -> skipped ();
-        $kiwi -> info ("No keys found for import");
+        $kiwi -> info ("No keys found for import\n");
         $kiwi -> skipped ();
         KIWIQX::qxx ("rm -rf $sigs");
         return $this;
@@ -1591,7 +1591,7 @@ sub setupMount {
     } else {
         @mountList = ();
     }
-    $kiwi -> info ("Mounting required file systems");
+    $kiwi -> info ("Mounting required file systems\n");
     if (-d $prefix) {
         $kiwi -> failed ();
         $kiwi -> error ("Entity $prefix already exist");
@@ -1658,7 +1658,7 @@ sub setupMount {
             KIWIQX::qxx ("rm -f $path/bob 2>&1");
             $kiwi -> warning ("--> Status: read-write mounted");
         } else {
-            $kiwi -> info ("--> Status: read-only mounted");
+            $kiwi -> info ("--> Status: read-only mounted\n");
         }
         $data = KIWIQX::qxx ("mount -n -o bind \"$path\" \"$mount\" 2>&1");
         $code = $? >> 8;

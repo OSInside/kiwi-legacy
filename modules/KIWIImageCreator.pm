@@ -927,7 +927,7 @@ sub createImage {
     # Create package content and verification
     #------------------------------------------
     if (-f "$tree/var/lib/rpm/Packages") {
-        $kiwi -> info ("Creating unpacked image tree meta data");
+        $kiwi -> info ("Creating unpacked image tree meta data\n");
         my $idest = $cmdL -> getImageIntermediateTargetDir();
         my $query = '%{NAME}|%{EPOCH}|%{VERSION}|'
             . '%{RELEASE}|%{ARCH}|%{DISTURL}\n';
@@ -1084,7 +1084,7 @@ sub createImage {
         my $basesubd = basename $buildResultDir;
         my $tarfile  = $imgName."-".$basesubd.".tgz";
         if ($cmdL -> getArchiveImage()) {
-            $kiwi -> info ("Archiving image build result...");
+            $kiwi -> info ("Archiving image build result...\n");
             my $status = KIWIQX::qxx (
                 "cd $basedest && tar -czSf $tarfile $basesubd 2>&1"
             );
@@ -2315,7 +2315,7 @@ sub __updateProfileEnvironment {
     my $dest  = shift;
     my $kiwi  = $this->{kiwi};
     my $image = $this->{image};
-    $kiwi -> info ("Updating .profile environment");
+    $kiwi -> info ("Updating .profile environment\n");
     my $tree = $image -> getImageTree();
     my $configure = KIWIConfigure -> new(
         $xml,$tree,$tree."/image",$dest
