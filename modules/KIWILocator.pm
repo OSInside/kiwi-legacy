@@ -83,6 +83,10 @@ sub createTmpDirectory {
             }
             if (mkdir $root) {
                 $rootError = 0;
+            } else {
+                $kiwi -> failed();
+                $kiwi -> error ("Couldn't mkdir '$root': $!");
+                $kiwi -> failed();
             }
         }
     } else {
