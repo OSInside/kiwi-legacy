@@ -81,8 +81,8 @@ sub doNorm {
     # Reset cursor position to standard value
     # ---
     my $this = shift;
-    my $FD   = $this->{channel};
-    print $FD "\033[m\017";
+    print STDOUT "\033[m\017";
+    print STDERR "\033[m\017";
     return;
 }
 
