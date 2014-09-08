@@ -14,113 +14,160 @@ my $result = GetOptions(
 
 # The known Perl modules
 my @kiwiModules = qw (
-	KIWIResult.pm
+	KIWIAnalyseReport.pm
+	KIWIAnalyseSoftware.pm
+	KIWIAnalyseSystem.pm
+	KIWIAnalyseTemplate.pm
 	KIWIArchList.pm
 	KIWIArch.pm
 	KIWIBasePlugin.pm
-	KIWIFinishEFIPlugin.pm
-	KIWIPromoDVDPlugin.pm
 	KIWIBoot.pm
 	KIWICache.pm
 	KIWICollect.pm
+	kiwiCommandLine.pm
 	KIWICommandLine.pm
 	KIWIConfigure.pm
-	KIWIConfigWriter.pm
+	kiwiConfigWriterFactory.pm
 	KIWIConfigWriterFactory.pm
+	KIWIConfigWriter.pm
+	kiwiContainerBuilder.pm
 	KIWIContainerBuilder.pm
+	kiwiContainerConfigWriter.pm
 	KIWIContainerConfigWriter.pm
 	KIWIContentPlugin.pm
 	KIWIDescrPlugin.pm
 	KIWIEulaPlugin.pm
+	kiwiFilesystemOptions.pm
 	KIWIFilesystemOptions.pm
+	KIWIFinishEFIPlugin.pm
 	KIWIGlobals.pm
+	kiwiImageBuilderBase.pm
 	KIWIImageBuilderBase.pm
+	kiwiImageBuildFactory.pm
 	KIWIImageBuildFactory.pm
+	kiwiImageCreator.pm
 	KIWIImageCreator.pm
 	KIWIImageFormat.pm
+	kiwiImage.pm
 	KIWIImage.pm
 	KIWIIsoLinux.pm
 	KIWILicensePlugin.pm
 	KIWILiveTreePlugin.pm
+	kiwiLocator.pm
 	KIWILocator.pm
 	KIWILog.pm
-	KIWIManager.pm
 	KIWIManagerApt.pm
+	KIWIManagerEnsconce.pm
+	KIWIManager.pm
 	KIWIManagerSmart.pm
 	KIWIManagerYum.pm
 	KIWIManagerZypper.pm
-	KIWIManagerEnsconce.pm
-	KIWIAnalyseSystem.pm
-	KIWIAnalyseSoftware.pm
-	KIWIAnalyseReport.pm
-	KIWIAnalyseTemplate.pm
 	KIWIMiniIsoPlugin.pm
 	KIWIOverlay.pm
+	kiwiOVFConfigWriter.pm
 	KIWIOVFConfigWriter.pm
 	KIWIPatternsPlugin.pm
+	kiwi.pl
 	KIWIProductData.pm
+	kiwiProfileFile.pm
 	KIWIProfileFile.pm
+	KIWIPromoDVDPlugin.pm
 	KIWIQX.pm
 	KIWIRepoMetaHandler.pm
+	KIWIResult.pm
 	KIWIRoot.pm
+	kiwiRuntimeChecker.pm
 	KIWIRuntimeChecker.pm
 	KIWISatSolver.pm
-	KIWISharedMem.pm
-	KIWISocket.pm
+	kiwiTarArchiveBuilder.pm
 	KIWITarArchiveBuilder.pm
 	KIWITrace.pm
 	KIWIURL.pm
 	KIWIUtil.pm
-	KIWIXML.pm
 	KIWIXMLDataBase.pm
+	kiwiXMLDefStripData.pm
 	KIWIXMLDefStripData.pm
+	kiwiXMLDescriptionData.pm
 	KIWIXMLDescriptionData.pm
+	kiwiXMLDriverData.pm
 	KIWIXMLDriverData.pm
+	kiwiXMLEC2ConfigData.pm
 	KIWIXMLEC2ConfigData.pm
+	kiwiXMLExceptData.pm
 	KIWIXMLExceptData.pm
+	kiwiXMLFileData.pm
 	KIWIXMLFileData.pm
+	kiwiXMLInfo.pm
 	KIWIXMLInfo.pm
+	kiwiXMLInstRepositoryData.pm
 	KIWIXMLInstRepositoryData.pm
+	kiwiXMLOEMConfigData.pm
 	KIWIXMLOEMConfigData.pm
-	KIWIXMLVagrantConfigData.pm
-	KIWIXMLPXEDeployConfigData.pm
-	KIWIXMLPXEDeployData.pm
+	kiwiXMLPackageArchiveData.pm
 	KIWIXMLPackageArchiveData.pm
+	kiwiXMLPackageCollectData.pm
 	KIWIXMLPackageCollectData.pm
+	kiwiXMLPackageData.pm
 	KIWIXMLPackageData.pm
+	kiwiXMLPackageIgnoreData.pm
 	KIWIXMLPackageIgnoreData.pm
+	kiwiXMLPackageProductData.pm
 	KIWIXMLPackageProductData.pm
+	kiwiXML.pm
+	KIWIXML.pm
+	kiwiXMLPreferenceData.pm
 	KIWIXMLPreferenceData.pm
+	kiwiXMLProductArchitectureData.pm
 	KIWIXMLProductArchitectureData.pm
+	kiwiXMLProductMetaChrootData.pm
 	KIWIXMLProductMetaChrootData.pm
+	kiwiXMLProductMetaFileData.pm
 	KIWIXMLProductMetaFileData.pm
+	kiwiXMLProductOptionsData.pm
 	KIWIXMLProductOptionsData.pm
+	kiwiXMLProductPackageData.pm
 	KIWIXMLProductPackageData.pm
+	kiwiXMLProfileData.pm
 	KIWIXMLProfileData.pm
+	kiwiXMLPXEDeployConfigData.pm
+	KIWIXMLPXEDeployConfigData.pm
+	kiwiXMLPXEDeployData.pm
+	KIWIXMLPXEDeployData.pm
 	KIWIXMLRepositoryBaseData.pm
+	kiwiXMLRepositoryData.pm
 	KIWIXMLRepositoryData.pm
+	kiwiXMLSplitData.pm
 	KIWIXMLSplitData.pm
+	kiwiXMLStripData.pm
 	KIWIXMLStripData.pm
+	kiwiXMLSystemdiskData.pm
 	KIWIXMLSystemdiskData.pm
+	kiwiXMLTypeData.pm
 	KIWIXMLTypeData.pm
+	kiwiXMLUserData.pm
 	KIWIXMLUserData.pm
-	KIWIXMLVMachineData.pm
+	kiwiXMLVagrantConfigData.pm
+	KIWIXMLVagrantConfigData.pm
+	kiwiXMLValidator.pm
 	KIWIXMLValidator.pm
+	kiwiXMLVMachineData.pm
+	KIWIXMLVMachineData.pm
 	KTCommandLine.t
 	KTConfigWriterFactory.t
 	KTContainerBuilder.t
 	KTContainerConfigWriter.t
 	KTFilesystemOptions.t
-	KTImage.t
 	KTImageBuilderBase.t
 	KTImageBuildFactory.t
 	KTImageCreator.t
+	KTImage.t
 	KTLocator.t
+	ktLog.pm
 	KTOVFVConfigWriter.t
 	KTProfileFile.t
 	KTRuntimeChecker.t
 	KTTarArchiveBuilder.t
-	KTXML.t
+	ktTestCase.pm
 	KTXMLDefStripData.t
 	KTXMLDescriptionData.t
 	KTXMLDriverData.t
@@ -130,8 +177,6 @@ my @kiwiModules = qw (
 	KTXMLInfo.t
 	KTXMLInstRepositoryData.t
 	KTXMLOEMConfigData.t
-	KTXMLPXEDeployConfigData.t
-	KTXMLPXEDeployData.t
 	KTXMLPackageArchiveData.t
 	KTXMLPackageCollectData.t
 	KTXMLPackageData.t
@@ -144,65 +189,18 @@ my @kiwiModules = qw (
 	KTXMLProductOptionsData.t
 	KTXMLProductPackageData.t
 	KTXMLProfileData.t
+	KTXMLPXEDeployConfigData.t
+	KTXMLPXEDeployData.t
 	KTXMLRepositoryData.t
 	KTXMLSplitData.t
 	KTXMLStripData.t
 	KTXMLSystemdiskData.t
+	KTXML.t
 	KTXMLTypeData.t
 	KTXMLUserData.t
-	KTXMLVMachineData.t
-	KTXMLValidator.t
 	KTXMLVagrantConfigData.t
-	ktLog.pm
-	ktTestCase.pm
-	kiwiCommandLine.pm
-	kiwiConfigWriterFactory.pm
-	kiwiContainerBuilder.pm
-	kiwiContainerConfigWriter.pm
-	kiwiFilesystemOptions.pm
-	kiwiLocator.pm
-	kiwiImage.pm
-	kiwiImageBuilderBase.pm
-	kiwiImageBuildFactory.pm
-	kiwiImageCreator.pm
-	kiwiOVFConfigWriter.pm
-	kiwiProfileFile.pm
-	kiwiRuntimeChecker.pm
-	kiwiTarArchiveBuilder.pm
-	kiwiXML.pm
-	kiwiXMLDefStripData.pm
-	kiwiXMLDescriptionData.pm
-	kiwiXMLDriverData.pm
-	kiwiXMLEC2ConfigData.pm
-	kiwiXMLExceptData.pm
-	kiwiXMLFileData.pm
-	kiwiXMLInfo.pm
-	kiwiXMLInstRepositoryData.pm
-	kiwiXMLOEMConfigData.pm
-	kiwiXMLVagrantConfigData.pm
-	kiwiXMLPXEDeployConfigData.pm
-	kiwiXMLPXEDeployData.pm
-	kiwiXMLPackageArchiveData.pm
-	kiwiXMLPackageCollectData.pm
-	kiwiXMLPackageData.pm
-	kiwiXMLPackageIgnoreData.pm
-	kiwiXMLPackageProductData.pm
-	kiwiXMLPreferenceData.pm
-	kiwiXMLProductArchitectureData.pm
-	kiwiXMLProductMetaChrootData.pm
-	kiwiXMLProductMetaFileData.pm
-	kiwiXMLProductOptionsData.pm
-	kiwiXMLProductPackageData.pm
-	kiwiXMLProfileData.pm
-	kiwiXMLRepositoryData.pm
-	kiwiXMLSplitData.pm
-	kiwiXMLStripData.pm
-	kiwiXMLSystemdiskData.pm
-	kiwiXMLTypeData.pm
-	kiwiXMLUserData.pm
-	kiwiXMLVMachineData.pm
-	kiwiXMLValidator.pm
-	kiwi.pl
+	KTXMLValidator.t
+	KTXMLVMachineData.t
 );
 
 # List of modules not clean to level 1 (brutal) of perlcritic
@@ -258,8 +256,6 @@ my @notClean1 = qw (
 	KIWIRoot.pm
 	KIWIRuntimeChecker.pm
 	KIWISatSolver.pm
-	KIWISharedMem.pm
-	KIWISocket.pm
 	KIWITarArchiveBuilder.pm
 	KIWITrace.pm
 	KIWIURL.pm
@@ -445,8 +441,6 @@ my @notClean2 = qw (
 	KIWIRoot.pm
 	KIWIRuntimeChecker.pm
 	KIWISatSolver.pm
-	KIWISharedMem.pm
-	KIWISocket.pm
 	KIWITarArchiveBuilder.pm
 	KIWITrace.pm
 	KIWIURL.pm
@@ -501,6 +495,7 @@ my @notClean3 = qw (
 	KIWIAnalyseTemplate.pm
 	KIWIMiniIsoPlugin.pm
 	KIWIOverlay.pm
+    KIWIOVFConfigWriter.pm
 	KIWIPatternsPlugin.pm
 	KIWIProductData.pm
 	KIWIQX.pm
@@ -508,8 +503,6 @@ my @notClean3 = qw (
 	KIWIRoot.pm
 	KIWIRuntimeChecker.pm
 	KIWISatSolver.pm
-	KIWISharedMem.pm
-	KIWISocket.pm
 	KIWITrace.pm
 	KIWIURL.pm
 	KIWIUtil.pm
