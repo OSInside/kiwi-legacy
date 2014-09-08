@@ -564,6 +564,7 @@ sub createVagrantBox {
             if ((! $ovf) || (! -e $ovf)) {
                 return;
             }
+            $this->{image} = $box;
         }
         $kiwi -> info ("--> Creating box metadata files");
         #==========================================
