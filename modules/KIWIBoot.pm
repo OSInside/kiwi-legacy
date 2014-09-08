@@ -4244,7 +4244,7 @@ sub setupBootLoaderConfiguration {
 	# During the second reboot, /dev/sda will be removed from the system
 	# and therefore such an instance won't come up.
         # ----
-        $cmdline .= " root=/dev/sda1";
+        $cmdline .= " root=/dev/hda1";
     }
     if ($topic =~ /^KIWI (CD|USB) Boot/) {
         # /.../
