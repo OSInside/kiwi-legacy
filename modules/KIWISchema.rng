@@ -2184,6 +2184,7 @@ the standard x86 bios firmware setup is used</a:documentation>
         <choice>
           <value>bios</value>
           <value>ec2</value>
+          <value>ec2hvm</value>
           <value>efi</value>
           <value>uefi</value>
           <value>vboot</value>
