@@ -441,8 +441,10 @@ function createInitialDevices {
     #--------------------------------------
     mkdir -p -m 0755 /run
     mkdir -p -m 0755 /var/run
-    mount -t tmpfs -o mode=0755,nodev,nosuid tmpfs /run
-    mount --bind /run /var/run
+    if [[ ! $kiwi_iname =~ SLE.11 ]];then
+        mount -t tmpfs -o mode=0755,nodev,nosuid tmpfs /run
+        mount --bind /run /var/run
+    fi
     #======================================
     # mount devpts tmpfs
     #--------------------------------------
@@ -7550,8 +7552,10 @@ function activateImage {
     mkdir -p /mnt/dev
     mkdir -p /mnt/var/run
     mount --move /dev /mnt/dev
-    mount --move /run /mnt/run
-    mount --move /var/run /mnt/var/run
+    if [[ ! $kiwi_iname =~ SLE.11 ]];then
+        mount --move /run /mnt/run
+        mount --move /var/run /mnt/var/run
+    fi
     udevKill
     #======================================
     # run preinit stage
