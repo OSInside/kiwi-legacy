@@ -101,11 +101,7 @@ sub setFlag {
     # no flag in file logging mode
     #------------------------------------------
     if ($this->{fileLog}) {
-        #
-        # Don't set status flags to the log file, instead
-        # complete the line with a newline
-        #
-        print $FD "\n";
+        # Don't set status flags in logging mode
         return;
     }
     #==========================================
@@ -391,6 +387,8 @@ sub printLog {
     my $rootEFD = $this->{rootefd};
     my $date    = $this -> getPrefix ( $lglevel );
     my $trace   = KIWITrace -> instance();
+    my $prev    = $this->{last_line};
+    my $prev_channel = $this->{last_channel};
     #==========================================
     # no logdata -> return
     #------------------------------------------
@@ -447,15 +445,31 @@ sub printLog {
         undef $this->{mcache};
     }
     #==========================================
+    # check if last log line ended with a CR
+    #------------------------------------------
+    my $needCR = 0;
+    if ($prev) {
+        my $last_line_ending = chop $prev;
+        if ($last_line_ending ne "\n") {
+            $needCR = 1;
+        }
+    }
+    #==========================================
     # print message to root file
     #------------------------------------------
     if (($this->{errorOk}) && ($rootEFD)) {
+        if ($needCR) {
+            print $prev_channel "\n";
+        }
         print $rootEFD $result;
     }
     #==========================================
     # print message to log channel (stdin,file)
     #------------------------------------------
     if (($FD) && ((! defined $flag) || ($this->{fileLog}))) {
+        if ($needCR) {
+            print $prev_channel "\n";
+        }
         print $FD $result;
     }
     #==========================================
@@ -536,6 +550,8 @@ sub saveInCache {
     my $this    = shift;
     my $logdata = shift;
     my @mcache;
+    $this->{last_line} = $logdata;
+    $this->{last_channel} = $this->{channel};
     if (defined $this->{mcache}) {
         @mcache = @{$this->{mcache}};
     }
