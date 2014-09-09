@@ -77,7 +77,7 @@ Requires:       coreutils
 Requires:       kiwi-tools >= %{version}
 Requires:       libxslt
 Requires:       perl-Class-Singleton
-Requires:       perl-Config-IniFiles
+Requires:       perl-Config-IniFiles >= 2.49
 Requires:       perl-Digest-SHA1
 Requires:       perl-File-Slurp
 Requires:       perl-JSON
