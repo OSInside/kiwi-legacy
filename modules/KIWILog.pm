@@ -93,10 +93,9 @@ sub setFlag {
     # ...
     # set status flag
     # ---
-    my $this    = shift;
-    my $flag    = shift;
-    my $rootEFD = $this->{rootefd};
-    my $FD      = $this->{channel};
+    my $this = shift;
+    my $flag = shift;
+    my $FD   = $this->{channel};
     #==========================================
     # no flag in file logging mode
     #------------------------------------------
