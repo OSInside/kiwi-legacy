@@ -371,7 +371,7 @@ sub ppc64_default {
     my $volid = $this -> createVolumeID();
 
     $para.= " -chrp-boot";
-    $para.= " -hfs-bless $src/$boot/grub2-ieee1275"; # CHECK: maybe $src is not necessary
+    $para.= " -hfs-bless $src/$boot/grub2-ieee1275";
     $para.= " -hfs-volid '$volid'";
     $para.= " -l";
     $para.= " --macbin";
@@ -459,7 +459,7 @@ sub callBootMethods {
     foreach my $boot (@catalog) {
         if ($boot =~ /(.*)_.*/) {
             my $arch = $1;
-            KIWIQX::qxx ("mkdir -p $ldir/".$base{$arch}{boot}."/loader");
+            KIWIQX::qxx ("mkdir -p $ldir/".$base{$arch}{boot});
             no strict 'refs'; ## no critic
             &{$boot}($this,$arch);
             use strict 'refs';
@@ -855,7 +855,7 @@ sub createISO {
             $firmware = $xmlFirmWare;
         }
         $hybrid = $type -> getHybrid();
-        }
+    }
     #==========================================
     # check for pre bootloader install
     #------------------------------------------
