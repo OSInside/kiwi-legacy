@@ -17,7 +17,8 @@
 <ovf:VirtualSystem ovf:id="vm-1-2">
 	<ovf:Info>A virtual machine</ovf:Info>
 	<ovf:Name>ovfconfig-test.armv7l-1.0.0</ovf:Name>
-	<ovf:OperatingSystemSection ovf:id="36" vmw:osType="LINUX">
+	<ovf:OperatingSystemSection ovf:id="36">
+		<vmw:osType>LINUX</vmw:osType>
 		<ovf:Info>Image cretaed by KIWI</ovf:Info>
 	</ovf:OperatingSystemSection>
 	<ovf:VirtualHardwareSection ovf:transport="">
