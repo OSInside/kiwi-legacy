@@ -579,6 +579,54 @@ sub test_vmwareWriteHWver8 {
 }
 
 #==========================================
+# test_virtualboxGuestOS
+#------------------------------------------
+sub test_virtualboxGuestOS {
+    # ...
+    # Test the creation of the config file for VirtualBox with
+    # guestOS set to openSUSE_64
+    # ---
+    my $this = shift;
+    my $kiwi = $this -> {kiwi};
+    my $confDir = $this -> {dataDir} . '/virtualboxGuestOSConfig';
+    my $xml = $this -> __getXMLObj($confDir);
+    my $cfgTgtDir = $this -> createTestTmpDir();
+    my $writer = KIWIOVFConfigWriter -> new($xml, $cfgTgtDir);
+    $writer -> setPredictableID();
+    my $cfgName = $writer -> getConfigFileName();
+    my $vmdkName = $cfgName;
+    $vmdkName =~ s/\.ovf/\.vmdk/msx;
+    # Create a fake vmdk
+    system "dd if=/dev/urandom of=$cfgTgtDir/$vmdkName bs=1k count=10 2>&1";
+    my $res = $writer -> writeConfigFile();
+    my $msg = $kiwi -> getMessage();
+    my $cfgFile = "$cfgTgtDir/$cfgName";
+    my $expected = "Write OVF configuration file\n--> $cfgFile\n";
+    $this -> assert_str_equals($expected, $msg);
+    my $msgT = $kiwi -> getMessageType();
+    $this -> assert_str_equals('info', $msgT);
+    my $state = $kiwi -> getState();
+    $this -> assert_not_null($res);
+    $this -> assert_file_exists($cfgFile);
+    my $arch = $xml -> getArch();
+    my $refFile = $this -> getRefResultsDir()
+        . '/virtualboxGuestOSConfig.ovf'
+        . ".$arch";
+    $res = $this -> compareFiles($refFile, $cfgFile);
+    if ($res) {
+        $this -> removeTestTmpDir();
+    } else {
+        my $saveDir = $this -> createResultSaveDir();
+        system "cp $cfgFile $saveDir";
+        my $tMsg = 'test_virtualboxGuestOS file comparison failed, '
+            . "result saved in $saveDir/$cfgName";
+        $this -> assert(0, $msg);
+        $this -> removeTestTmpDir();
+    }
+    return;
+}
+
+#==========================================
 # test_vmwareWriteIdeCntrl
 #------------------------------------------
 sub test_vmwareWriteIdeCntrl {
