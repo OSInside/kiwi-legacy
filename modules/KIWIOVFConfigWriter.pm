@@ -180,12 +180,24 @@ sub writeConfigFile {
     if (! $sysData) {
         return;
     }
+    my $osType = $sysData->{ostype};
+    my $osSection = 'vmw:osType';
+    my $osAttributes = "";
+    if ($osType =~ /vmw:(.*)/) {
+        $osType = $1;
+        $osSection = 'vmw:osType';
+    } elsif ($osType =~ /vbox:(.*)/) {
+        $osType = $1;
+        $osSection = 'vbox:OSType';
+        $osAttributes = ' ovf:required="false"'
+    }
     $config .= '<ovf:VirtualSystem ovf:id="' . $sysID . '">' . "\n"
         . "\t" . '<ovf:Info>A virtual machine</ovf:Info>' . "\n"
         . "\t" . '<ovf:Name>' . $baseName . '</ovf:Name>' . "\n"
-        . "\t" . '<ovf:OperatingSystemSection '
-        . 'ovf:id="' . $sysData->{osid} . '" '
-        . 'vmw:osType="' . $sysData->{ostype} . '">' . "\n"
+        . "\t" . '<ovf:OperatingSystemSection ovf:id="'
+        . $sysData->{osid}.'">'."\n"
+        . "\t\t". '<'.$osSection.$osAttributes.'>'.$osType
+        . '</'.$osSection.'>' . "\n"
         . "\t\t" . '<ovf:Info>Image cretaed by KIWI</ovf:Info>' . "\n"
         . "\t" . '</ovf:OperatingSystemSection>' . "\n"
         . "\t" . '<ovf:VirtualHardwareSection ovf:transport="">' . "\n"
@@ -921,22 +933,26 @@ sub __getSystemData {
     my $kiwi = $this->{kiwi};
     my %sysSettings;
     my %osTypDescrpt = (
-        'unknown' => 'LINUX',
-        'rhel'    => 'RedHat Enterprise Linux',
-        'rhel-64' => 'RedHat Enterprise Linux 64-Bit',
-        'sles'    => 'SLES',
-        'sles-64' => 'SLES 64-Bit',
-        'suse'    => 'SUSE',
-        'suse-64' => 'SUSE 64-Bit',
+        'unknown'     => 'LINUX',
+        'rhel'        => 'vmw:RedHat Enterprise Linux',
+        'rhel-64'     => 'vmw:RedHat Enterprise Linux 64-Bit',
+        'sles'        => 'vmw:SLES',
+        'sles-64'     => 'vmw:SLES 64-Bit',
+        'suse'        => 'vmw:SUSE',
+        'suse-64'     => 'vmw:SUSE 64-Bit',
+        'openSUSE'    => 'vbox:openSUSE',
+        'openSUSE_64' => 'vbox:openSUSE_64'
     );
     my %osIDDescrpt = (
-        'unknown' => '36',
-        'rhel'    => '79',
-        'rhel-64' => '80',
-        'sles'    => '84',
-        'sles-64' => '85',
-        'suse'    => '82',
-        'suse-64' => '83',
+        'unknown'     => '36',
+        'rhel'        => '79',
+        'rhel-64'     => '80',
+        'sles'        => '84',
+        'sles-64'     => '85',
+        'suse'        => '82',
+        'suse-64'     => '83',
+        'openSUSE'    => '82',
+        'openSUSE_64' => '83'
     );
     my %ovfTypeID = (
         'powervm' => 'IBM:POWER:AIXLINUX',
