@@ -533,7 +533,7 @@ sub __updateXMLSystemDisk {
         }
         my $type = $xml -> getImageType();
         if ($type) {
-            if ($type -> useLVM()) {
+            if (KIWIGlobals -> instance() -> useLVM($xml)) {
                 $this -> addEntry('kiwi_lvm','true');
             }
         }
