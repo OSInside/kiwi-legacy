@@ -78,7 +78,6 @@ sub new {
     my $zipped    = 0;
     my $firmware  = "bios";
     my $vga       = "0x314";
-    my $vgroup    = "kiwiVG";
     my $haveTree  = 0;
     my $haveSplit = 0;
     my $vmmbyte;
@@ -219,7 +218,6 @@ sub new {
     $this->{cleanupStack} = [];
     $this->{tmpdir}   = $tmpdir;
     $this->{loopdir}  = $loopdir;
-    $this->{lvmgroup} = $vgroup;
     $this->{tmpdirs}  = [ $tmpdir, $loopdir ];
     $this->{haveTree} = $haveTree;
     $this->{kiwi}     = $kiwi;
@@ -249,6 +247,12 @@ sub new {
         }
     }
     #==========================================
+    # store systemdisk information
+    #------------------------------------------
+    if (defined $xml) {
+        $this->{sysdisk} = $xml -> getSystemDiskConfig();
+    }
+    #==========================================
     # store type information
     #------------------------------------------
     if ($xml) {
@@ -256,6 +260,7 @@ sub new {
         if (! $xmltype) {
             return;
         }
+        $type{lvmgroup}               = "kiwiVG";
         $type{bootfilesystem}         = $xmltype -> getBootImageFileSystem();
         $type{bootloader}             = $xmltype -> getBootLoader();
         $type{bootpartition}          = $xmltype -> getBootPartition();
@@ -285,12 +290,13 @@ sub new {
                 $type{filesystem} = "$fsrw,$fsro";
             }
         }
-    }
-    #==========================================
-    # store systemdisk information
-    #------------------------------------------
-    if (defined $xml) {
-        $this->{sysdisk} = $xml -> getSystemDiskConfig();
+        if ($this->{sysdisk}) {
+            $type{lvmgroup} = $this->{sysdisk} -> getVGName();
+            if (($this->{sysdisk}->getLVMVolumeManagement()) == 1) {
+                # LVM volume management is preferred
+                $type{lvm} = 1;
+            }
+        }
     }
     #==========================================
     # find Xen domain configuration
@@ -550,7 +556,6 @@ sub setupInstallCD {
     my $oldird    = $this->{initrd};
     my $zipped    = $this->{zipped};
     my $isxen     = $this->{isxen};
-    my $lvm       = $this->{lvm};
     my $xml       = $this->{xml};
     my $firmware  = $this->{firmware};
     my $global    = KIWIGlobals -> instance();
@@ -963,7 +968,6 @@ sub setupInstallStick {
     my $loopdir   = $this->{loopdir};
     my $zipped    = $this->{zipped};
     my $isxen     = $this->{isxen};
-    my $lvm       = $this->{lvm};
     my $xml       = $this->{xml};
     my $cmdL      = $this->{cmdL};
     my $firmware  = $this->{firmware};
@@ -1158,11 +1162,7 @@ sub setupInstallStick {
     if ($bootloader eq 'syslinux') {
         $bootfs = 'fat32';
     } elsif ($bootloader eq 'yaboot') {
-        if ($lvm) {
-            $bootfs = 'fat16';
-        } else {
-            $bootfs = 'fat32';
-        }
+        $bootfs = 'fat16';
     } elsif (($firmware eq "efi") || ($firmware eq "uefi")) {
         $bootfs = 'fat16';
     } elsif ( $firmware eq "ofw" ) {
@@ -1466,8 +1466,6 @@ sub setupInstallPXE {
     my $xml       = $this->{xml};
     my $zipped    = $this->{zipped};
     my $arch      = $this->{arch};
-    my $vgroup    = $this->{lvmgroup};
-    my $lvm       = $this->{lvm};
     my $imgtype   = $this->{imgtype};
     my $type      = $this->{type};
     my $global    = KIWIGlobals -> instance();
@@ -1659,7 +1657,6 @@ sub setupBootDisk {
     my $loopdir   = $this->{loopdir};
     my $zipped    = $this->{zipped};
     my $isxen     = $this->{isxen};
-    my $lvm       = $this->{lvm};
     my $profile   = $this->{profile};
     my $xendomain = $this->{xendomain};
     my $xml       = $this->{xml};
@@ -1681,7 +1678,6 @@ sub setupBootDisk {
     my $needPrepP = 0;
     my $needRoP   = 0;
     my $rawRW     = 0;
-    my $md        = 0;
     my $bootloader;
     if ($arch =~ /ppc|ppc64|ppc64le/) {
         $bootloader = "yaboot";
@@ -1711,7 +1707,6 @@ sub setupBootDisk {
     my $status;
     my $destdir;
     my %lvmparts;
-    my $vgroupName;
     #==========================================
     # check if we can operate on this root
     #------------------------------------------
@@ -1743,13 +1738,6 @@ sub setupBootDisk {
         $type->{installpxe} = 'false';
     }
     #==========================================
-    # Check for software raid...
-    #------------------------------------------
-    if ($type->{mdraid}) {
-        $md = $type->{mdraid};
-        $this->{md} = $md;
-    }
-    #==========================================
     # check for LUKS extension
     #------------------------------------------
     if ($type->{luks}) {
@@ -1758,35 +1746,12 @@ sub setupBootDisk {
     #==========================================
     # Check subsystem combination
     #------------------------------------------
-    if (($md) && ($haveluks)) {
+    if (($type->{mdraid}) && ($haveluks)) {
         $kiwi -> error (
             "LUKS encryption on Software RAID not yet supported"
         );
         $kiwi -> failed ();
         return;
-    }
-    #==========================================
-    # Check if LVM is requested...
-    #------------------------------------------
-    if ((($systemDisk) && ($type->{lvm})) || ($lvm)) {
-        #==========================================
-        # set volume group name and flag variable
-        #------------------------------------------
-        $lvm = 1;
-        $this->{lvm}= $lvm;
-        if ($systemDisk) {
-            $vgroupName = $systemDisk -> getVGName();
-        }
-        if ($vgroupName) {
-            $this->{lvmgroup} = $vgroupName;
-        }
-    }
-    #==========================================
-    # Check if volume management is done by fs
-    #------------------------------------------
-    if ($type->{filesystem} =~ /zfs|btrfs/) {
-        undef $lvm;
-        undef $this->{lvm};
     }
     #==========================================
     # Check if ZFS setup can be done...
@@ -1807,7 +1772,7 @@ sub setupBootDisk {
             %lvmparts = %{$volumes};
         }
     }
-    if (($lvm) && (%lvmparts)) {
+    if (($type->{lvm}) && (%lvmparts)) {
         if ( ! -d $system ) {
             $kiwi -> error (
                 "LVM volumes setup requires root tree but got image file"
@@ -1826,7 +1791,7 @@ sub setupBootDisk {
     #==========================================
     # Calculate volume size requirements...
     #------------------------------------------
-    if (($lvm) || ($type->{filesystem} =~ /zfs|btrfs/)) {
+    if (($type->{lvm}) || ($type->{filesystem} =~ /zfs|btrfs/)) {
         #==========================================
         # check and set volumes setup
         #------------------------------------------
@@ -2028,9 +1993,9 @@ sub setupBootDisk {
     #==========================================
     # Do we need a boot partition
     #------------------------------------------
-    if ($md) {
+    if ($type->{mdraid}) {
         $needBootP = 1;
-    } elsif ($lvm) {
+    } elsif ($type->{lvm}) {
         $needBootP = 1;
     } elsif ($syszip) {
         $needBootP = 1;
@@ -2071,10 +2036,10 @@ sub setupBootDisk {
     # check root partition type
     #------------------------------------------
     my $rootid = '83';
-    if ($lvm) {
+    if ($type->{lvm}) {
         $rootid = '8e';
     }
-    if ($md) {
+    if ($type->{mdraid}) {
         $rootid = 'fd';
     }
     #==========================================
@@ -2088,7 +2053,7 @@ sub setupBootDisk {
         } elsif ($bootloader eq 'syslinux') {
             $bootfs = 'fat32';
         } elsif ($bootloader eq 'yaboot') {
-            if ($lvm) {
+            if ($type->{lvm}) {
                 $bootfs = 'fat16';
             } else {
                 $bootfs = 'fat32';
@@ -2327,7 +2292,7 @@ sub setupBootDisk {
                 $active = $pnr;
             }
         }
-        if (! $lvm) {
+        if (! $type->{lvm}) {
             if ($needRoP) {
                 $pnr++;
                 push @commands,"n","p:lxroot",$pnr,".","+".$syszip."M";
@@ -2402,8 +2367,8 @@ sub setupBootDisk {
         #==========================================
         # setup md device if requested
         #------------------------------------------
-        if ($md) {
-            %deviceMap = $this -> setMD (\%deviceMap,$md);
+        if ($type->{mdraid}) {
+            %deviceMap = $this -> setMD (\%deviceMap,$type->{mdraid});
             if (! %deviceMap) {
                 $this -> cleanStack ();
                 return;
@@ -2432,7 +2397,7 @@ sub setupBootDisk {
         #==========================================
         # setup volume group if requested
         #------------------------------------------
-        if ($lvm) {
+        if ($type->{lvm}) {
             %deviceMap = $this -> setVolumeGroup (
                 \%deviceMap,$this->{loop},$syszip,$haveSplit,\%lvmparts
             );
@@ -2601,8 +2566,8 @@ sub setupBootDisk {
         #==========================================
         # Create LVM volumes filesystems
         #------------------------------------------
-        if (($lvm) && (%lvmparts)) {
-            my $VGroup = $this->{lvmgroup};
+        if (($type->{lvm}) && (%lvmparts)) {
+            my $VGroup = $type->{lvmgroup};
             my @paths  = ();
             my %phash  = ();
             my %lhash  = ();
@@ -2661,20 +2626,22 @@ sub setupBootDisk {
         #==========================================
         # Setup filesystem specific environment
         #------------------------------------------
-        if ($FSTypeRW eq 'btrfs') {
-            if (! KIWIGlobals
-                -> instance()
-                -> setupBTRFSSubVolumes ($loopdir,\%lvmparts)) {
-                $this -> cleanStack ();
-                return;
+        if (! $type->{lvm}) {
+            if ($FSTypeRW eq 'btrfs') {
+                if (! KIWIGlobals
+                    -> instance()
+                    -> setupBTRFSSubVolumes ($loopdir,\%lvmparts)) {
+                    $this -> cleanStack ();
+                    return;
+                }
             }
-        }
-        if ($FSTypeRW eq 'zfs') {
-            if (! KIWIGlobals
-                -> instance()
-                -> setupZFSPoolVolumes ($loopdir,\%lvmparts)) {
-                $this -> cleanStack ();
-                return;
+            if ($FSTypeRW eq 'zfs') {
+                if (! KIWIGlobals
+                    -> instance()
+                    -> setupZFSPoolVolumes ($loopdir,\%lvmparts)) {
+                    $this -> cleanStack ();
+                    return;
+                }
             }
         }
         #==========================================
@@ -3253,6 +3220,7 @@ sub setupPartIDs {
     my $this = shift;
     my $file = shift;
     my $kiwi = $this->{kiwi};
+    my $type = $this->{type};
     if ($this->{partids}) {
         my %currentIDs;
         my $ID_FD = FileHandle -> new();
@@ -3282,13 +3250,13 @@ sub setupPartIDs {
             }
         }
         my $entry;
-        if ($this->{md}) {
+        if ($type->{mdraid}) {
             $entry = "kiwi_RaidPart=\"$this->{partids}{root}\"\n";
             if (! $currentIDs{$entry}) { print $ID_FD $entry }
             $entry = "kiwi_RaidDev=/dev/md0\n";
             if (! $currentIDs{$entry}) { print $ID_FD $entry }
         }
-        if ($this->{lvm}) {
+        if ($type->{lvm}) {
             if ($this->{partids}{root_lv}) {
                 $entry = "kiwi_RootPartVol=\"$this->{partids}{root_lv}\"\n";
                 if (! $currentIDs{$entry}) { print $ID_FD $entry }
@@ -4179,8 +4147,6 @@ sub setupBootLoaderConfiguration {
     my $imgtype  = $this->{imgtype};
     my $label    = $this->{bootlabel};
     my $vga      = $this->{vga};
-    my $lvm      = $this->{lvm};
-    my $vgroup   = $this->{lvmgroup};
     my $xml      = $this->{xml};
     my $firmware = $this->{firmware};
     my $failsafe = 1;
@@ -5475,7 +5441,6 @@ sub installBootLoader {
     my $kiwi     = $this->{kiwi};
     my $tmpdir   = $this->{tmpdir};
     my $chainload= $this->{chainload};
-    my $lvm      = $this->{lvm};
     my $cmdL     = $this->{cmdL};
     my $xml      = $this->{xml};
     my $firmware = $this->{firmware};
@@ -6801,7 +6766,8 @@ sub setVolumeGroup {
     my $system    = $this->{system};
     my %deviceMap = %{$map};
     my %lvmparts  = %{$parts};
-    my $VGroup    = $this->{lvmgroup};
+    my $type      = $this->{type};
+    my $VGroup    = $type->{lvmgroup};
     my $fsopts    = $cmdL -> getFilesystemOptions();
     my $inoderatio= $fsopts -> getInodeRatio();
     my $align     = $cmdL -> getDiskAlignment();
@@ -6812,7 +6778,9 @@ sub setVolumeGroup {
     $kiwi -> info ("--> Creating volume group\n");
     $status = KIWIQX::qxx ("vgremove --force $VGroup 2>&1");
     $status = KIWIQX::qxx ("test -d /dev/$VGroup && rm -rf /dev/$VGroup 2>&1");
-    $status = KIWIQX::qxx ("pvcreate --dataalignment $align $deviceMap{root} 2>&1");
+    $status = KIWIQX::qxx (
+        "pvcreate --dataalignment $align $deviceMap{root} 2>&1"
+    );
     $result = $? >> 8;
     if ($result != 0) {
         $kiwi -> error  ("Failed creating physical extends: $status");
@@ -6920,9 +6888,9 @@ sub setVolumeGroup {
 #------------------------------------------
 sub deleteVolumeGroup {
     my $this   = shift;
-    my $lvm    = $this->{lvm};
-    my $VGroup = $this->{lvmgroup};
-    if ($lvm) {
+    my $type   = $this->{type};
+    my $VGroup = $type->{lvmgroup};
+    if ($type->{lvm}) {
         KIWIQX::qxx ("vgremove --force $VGroup 2>&1");
         KIWIQX::qxx ("test -d /dev/$VGroup && rm -rf /dev/$VGroup 2>&1");
     }

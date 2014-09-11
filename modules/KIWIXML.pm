@@ -3356,6 +3356,7 @@ sub __createSystemDiskData {
     my $lvmDataNode = $lvmNode -> get_node(1);
     my %lvmData;
     $lvmData{name} = $lvmDataNode -> getAttribute('name');
+    $lvmData{preferlvm} = $lvmDataNode -> getAttribute('preferlvm');
     my @volumes = $lvmDataNode -> getChildrenByTagName('volume');
     my %volData;
     my $cntr = 1;

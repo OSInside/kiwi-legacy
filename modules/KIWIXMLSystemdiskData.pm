@@ -51,6 +51,7 @@ sub new {
     #
     # this = {
     #    name = ''
+    #    preferlvm = true|false
     #    volumes = {
     #        ID[+] = {
     #            freespace = ''
@@ -72,7 +73,7 @@ sub new {
     #==========================================
     # Argument checking and object data store
     #------------------------------------------
-    my %keywords = map { ($_ => 1) } qw( name volumes );
+    my %keywords = map { ($_ => 1) } qw( name preferlvm volumes );
     $this->{supportedKeywords} = \%keywords;
     if (! $this -> p_isInitHashRef($init) ) {
         return;
@@ -85,12 +86,17 @@ sub new {
         if (! $this -> __isInitConsistent($init)) {
             return;
         }
-        $this->{name}    = $init->{name};
-        $this->{volumes} = $init->{volumes};
+        $this->{name}      = $init->{name};
+        $this->{preferlvm} = $init->{preferlvm};
+        $this->{volumes}   = $init->{volumes};
     }
     # Set the default name
     if (! $this->{name} ) {
         $this->{name} = 'kiwiVG';
+    }
+    # Set the default volume management preference
+    if (! $this->{preferlvm}) {
+        $this->{preferlvm} = 'false';
     }
     return $this;
 }
@@ -176,6 +182,20 @@ sub getVGName {
     # ---
     my $this = shift;
     return $this->{name};
+}
+
+#==========================================
+# getLVMVolumeManagement
+#------------------------------------------
+sub getLVMVolumeManagement {
+    # ...
+    # Return the configured boolean value to prefer LVM or not
+    # ---
+    my $this = shift;
+    if ($this->{preferlvm} eq 'false') {
+        return 0;
+    }
+    return 1;
 }
 
 #==========================================
@@ -326,7 +346,16 @@ sub getXMLElement {
     # ---
     my $this = shift;
     my $element = XML::LibXML::Element -> new('systemdisk');
-    $element -> setAttribute('name', $this -> getVGName());
+    $element -> setAttribute('name',
+        $this -> getVGName()
+    );
+    my $preferlvm = $this -> getLVMVolumeManagement();
+    if ($preferlvm == 0) {
+        $preferlvm = 'false';
+    } else {
+        $preferlvm = 'true';
+    }
+    $element -> setAttribute('preferlvm',$preferlvm);
     my @vIDs = @{$this -> getVolumeIDs()};
     if (@vIDs) {
         for my $id (@vIDs) {
@@ -372,6 +401,23 @@ sub setVGName {
     }
     $this->{name} = $name;
     return $this;
+}
+
+#==========================================
+# setLVMVolumeManagement
+#------------------------------------------
+sub setLVMVolumeManagement {
+    # ...
+    # Set the boolean value to prefer LVM or not
+    # ---
+    my $this  = shift;
+    my $value = shift;
+    my %settings = (
+        attr   => 'preferlvm',
+        value  => $value,
+        caller => 'setLVMVolumeManagement'
+    );
+    return $this -> p_setBooleanValue(\%settings);
 }
 
 #==========================================

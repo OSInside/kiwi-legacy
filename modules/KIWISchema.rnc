@@ -1487,17 +1487,23 @@ div {
 # common element <systemdisk>
 #
 div {
-    k.systemdisk.lvmgroup.attribute =
-        ## Specify Volume group name, default is kiwiVG.
+    k.systemdisk.name.attribute =
+        ## Specify Volume group name, default is kiwiVG. This
+        ## information is only used if the LVM volume management
+        ## is used
         attribute name { text }
+    k.systemdisk.preferlvm.attribute =
+        ## Prefer LVM even if the used filesystem has its own
+        ## volume management system
+        attribute preferlvm { xsd:boolean }
     k.systemdisk.attlist =
-        k.systemdisk.lvmgroup.attribute?
-
+        k.systemdisk.name.attribute? &
+        k.systemdisk.preferlvm.attribute?
     k.systemdisk =
-        ## Specify LVM volumes other than the root volume
+        ## Specify volumes and size attributes
         [
         db:para [
-            "Specify LVM volumes other than the root volume."
+            "Specify volumes and size attributes"
         ]
         ]
         element systemdisk {
