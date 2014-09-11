@@ -1917,13 +1917,15 @@ sub lookUpAllPackages {
                     $package->{'repo'} = $this->{m_repos}->{$r};
                     $package->{'localfile'} = $uri;
                     $package->{'disturl'} = $flags{'DISTURL'}[0];
-                    my $appdata = $uri;
-                    # Old appdata location before OBS 2.5
-                    $appdata =~ s,[^/]*$,$name-appdata.xml,;
-                    $package->{'appdata'} = $appdata if (-s $appdata);
-                    # New appdata location since OBS 2.5.0
-                    $appdata =~ s,[^/]*$,../appdata/$name-appdata.xml,;
-                    $package->{'appdata'} = $appdata if (-s $appdata);
+                    if ($flags{'SOURCERPM'}) {
+                        my $appdata = $uri;
+                        # Old appdata location before OBS 2.5
+                        $appdata =~ s,[^/]*$,$name-appdata.xml,;
+                        $package->{'appdata'} = $appdata if (-s $appdata);
+                        # New appdata location since OBS 2.5.0
+                        $appdata =~ s,[^/]*$,../appdata/$name-appdata.xml,;
+                        $package->{'appdata'} = $appdata if (-s $appdata);
+                    }
                     $package->{'epoch'} = $flags{'EPOCH'}[0];
                     $package->{'version'} = $flags{'VERSION'}[0];
                     $package->{'release'} = $flags{'RELEASE'}[0];
