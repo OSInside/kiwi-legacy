@@ -3641,6 +3641,14 @@ and setup the system disk</db:para>
     <define name="k.vagrantconfig.virtualsize.attribute">
       <attribute name="virtualsize">
         <a:documentation>The vagrant virtual image size in GB</a:documentation>
+        <db:para>virtualsize provides the value of the virtual_size key
+which is embedded in the metadata.json hash inside the
+.box file, as described here:
+
+    http://docs.vagrantup.com/v2/boxes/format.html
+
+This tells the Vagrant provider how big to make the
+virtual disk when it creates the VM.</db:para>
         <data type="nonNegativeInteger"/>
       </attribute>
     </define>
