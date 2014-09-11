@@ -852,7 +852,6 @@ sub createImageRootAndBoot {
     my $xml        = $this->{xml};
     my $cmdL       = $this->{cmdL};
     my $idest      = $cmdL->getImageIntermediateTargetDir();
-    my $sysdisk    = $xml -> getSystemDiskConfig();
     my $xmltype    = $xml -> getImageType();
     my $imageTree  = $this->{imageTree};
     my $baseSystem = $this->{baseSystem};
@@ -882,8 +881,8 @@ sub createImageRootAndBoot {
     if (($text ne 'VMX') || ($luks)) {
         $treeAccess = 0;
     }
-    my $lvm = $xmltype -> useLVM();
-    if (($sysdisk) && ($lvm)) {
+    my $lvm = KIWIGlobals -> instance() -> useLVM($xml);
+    if ($lvm) {
         $treeAccess = 1;
     }
     #==========================================

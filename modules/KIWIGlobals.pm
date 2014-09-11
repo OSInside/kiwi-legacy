@@ -1977,4 +1977,40 @@ sub _new_instance {
     return $this;
 }
 
+#==========================================
+# useLVM
+#------------------------------------------
+sub useLVM {
+    my $this = shift;
+    my $xml = shift;
+    my $bldType = $xml -> getImageType();
+    if (! $bldType) {
+        return 0;
+    }
+    my $filesystem = $bldType -> getFilesystem();
+    my $typename = $bldType -> getTypeName();
+    my $sysdisk = $xml -> getSystemDiskConfig();
+    if (! $sysdisk) {
+        # no systemdisk section exists, no volume
+        # management required
+        return 0;
+    }
+    if (($sysdisk -> getLVMVolumeManagement()) == 1) {
+        # LVM volume management is preferred, use it
+        return 1;
+    }
+    if (($typename) && ($typename =~ /zfs|btrfs/)) {
+        # btrfs has its own volume management
+        return 0;
+    }
+    if (($filesystem) && ($filesystem =~ /zfs|btrfs/)) {
+        # zfs has its own volume management
+        return 0;
+    }
+    # systemdisk section is specified with non volume
+    # capable filesystem and no volume management
+    # preference. So let's use LVM by default
+    return 1;
+}
+
 1;

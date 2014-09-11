@@ -260,6 +260,7 @@ sub new {
         if (! $xmltype) {
             return;
         }
+        $type{lvm} = KIWIGlobals -> instance() -> useLVM($xml);
         $type{lvmgroup}               = "kiwiVG";
         $type{bootfilesystem}         = $xmltype -> getBootImageFileSystem();
         $type{bootloader}             = $xmltype -> getBootLoader();
@@ -278,7 +279,6 @@ sub new {
         $type{installstick}           = $xmltype -> getInstallStick();
         $type{luks}                   = $xmltype -> getLuksPass();
         $type{luksOS}                 = $xmltype -> getLuksOS();
-        $type{lvm}                    = $xmltype -> useLVM();
         $type{mdraid}                 = $xmltype -> getMDRaid();
         $type{type}                   = $xmltype -> getTypeName();
         $type{vga}                    = $xmltype -> getVGA();
@@ -292,10 +292,6 @@ sub new {
         }
         if ($this->{sysdisk}) {
             $type{lvmgroup} = $this->{sysdisk} -> getVGName();
-            if (($this->{sysdisk}->getLVMVolumeManagement()) == 1) {
-                # LVM volume management is preferred
-                $type{lvm} = 1;
-            }
         }
     }
     #==========================================
