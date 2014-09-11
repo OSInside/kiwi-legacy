@@ -198,6 +198,7 @@ function suseImportBuildKey {
     # ----
     local KEY
     local TDIR=$(mktemp -d)
+    local dumpsigs=/usr/lib/rpm/gnupg/dumpsigs
     if [ ! -d "$TDIR" ]; then
         echo "suseImportBuildKey: Failed to create temp dir"
         return
@@ -206,9 +207,19 @@ function suseImportBuildKey {
         pushd "/usr/lib/rpm/gnupg/keys"
     else
         pushd "$TDIR"
-        /usr/lib/rpm/gnupg/dumpsigs /usr/lib/rpm/gnupg/suse-build-key.gpg
+        if [ -x $dumpsigs ];then
+            $dumpsigs /usr/lib/rpm/gnupg/suse-build-key.gpg
+        fi
     fi
-    ls gpg-pubkey-*.asc | while read KFN; do
+    for KFN in gpg-pubkey-*.asc; do
+        if [ ! -e "$KFN" ];then
+            #
+            # check if file exists because if the glob match did
+            # not find files bash will use the glob string as
+            # result and we just continue in this case
+            #
+            continue
+        fi
         KEY=$(basename "$KFN" .asc)
         rpm -q "$KEY" >/dev/null
         [ $? -eq 0 ] && continue
