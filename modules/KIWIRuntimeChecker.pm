@@ -158,6 +158,9 @@ sub createChecks {
     if (! $this -> __hasBootLoaderTools()) {
         return;
     }
+    if (! $this -> __checkNoBootPartitionValid()) {
+        return;
+    }
     if (! $this -> __hasBootDescription()) {
         return;
     }
@@ -215,6 +218,9 @@ sub prepareChecks {
         return;
     }
     if (! $this -> __hasBootLoaderTools()) {
+        return;
+    }
+    if (! $this -> __checkNoBootPartitionValid()) {
         return;
     }
     if (! $this -> __hasBootDescription()) {
@@ -1355,6 +1361,44 @@ sub __hasBootDescription {
     if (! $bootdir) {
         my $msg = "The required boot image description: '$description' ";
         $msg.= "for the selected build type: '$imgType' does not exist. ";
+        $kiwi -> error($msg);
+        $kiwi -> failed();
+        return;
+    }
+    return 1;
+}
+
+#==========================================
+# __checkNoBootPartitionValid
+#------------------------------------------
+sub __checkNoBootPartitionValid {
+    # ...
+    # Check if the system will work if the use of
+    # a boot partition is switched off
+    #
+    my $this = shift;
+    my $kiwi = $this->{kiwi};
+    my $locator = $this->{locator};
+    my $xml = $this->{xml};
+    my $bldType = $xml -> getImageType();
+    if (! $bldType) {
+        return 1;
+    }
+    my $bootpartition = $bldType -> getBootPartition();
+    my $filesystem = $bldType -> getFilesystem();
+    if ((! $bootpartition) || ($bootpartition eq "true")) {
+        return 1;
+    }
+    if ($filesystem !~ /btrfs|zfs|xfs/) {
+        return 1;
+    }
+    my $bootloader = $bldType -> getBootLoader();
+    if ($bootloader ne "grub2") {
+        my $msg = "The system is explicitly configured to work ";
+        $msg.= "without a boot partition for the $filesystem filesystem. ";
+        $msg.= "But this is only supported with the grub2 bootloader. ";
+        $msg.= "The currently configured $bootloader bootloader is not ";
+        $msg.= "supported in this setup";
         $kiwi -> error($msg);
         $kiwi -> failed();
         return;
