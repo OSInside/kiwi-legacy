@@ -4743,7 +4743,6 @@ sub getSize {
         $minsize = sprintf ("%.0f",$minsize);
     }
     $minsize+= $spare;
-    $xmlsize = $minsize;
     $kiwi -> loginfo ("getSize: minsz: $minsize Bytes\n");
     #==========================================
     # XML size calculated in Byte
