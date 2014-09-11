@@ -1962,20 +1962,34 @@ used for.</db:para>
     
   -->
   <div>
-    <define name="k.systemdisk.lvmgroup.attribute">
+    <define name="k.systemdisk.name.attribute">
       <attribute name="name">
-        <a:documentation>Specify Volume group name, default is kiwiVG.</a:documentation>
+        <a:documentation>Specify Volume group name, default is kiwiVG. This
+information is only used if the LVM volume management
+is used</a:documentation>
+      </attribute>
+    </define>
+    <define name="k.systemdisk.preferlvm.attribute">
+      <attribute name="preferlvm">
+        <a:documentation>Prefer LVM even if the used filesystem has its own
+volume management system</a:documentation>
+        <data type="boolean"/>
       </attribute>
     </define>
     <define name="k.systemdisk.attlist">
-      <optional>
-        <ref name="k.systemdisk.lvmgroup.attribute"/>
-      </optional>
+      <interleave>
+        <optional>
+          <ref name="k.systemdisk.name.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.systemdisk.preferlvm.attribute"/>
+        </optional>
+      </interleave>
     </define>
     <define name="k.systemdisk">
       <element name="systemdisk">
-        <a:documentation>Specify LVM volumes other than the root volume</a:documentation>
-        <db:para>Specify LVM volumes other than the root volume.</db:para>
+        <a:documentation>Specify volumes and size attributes</a:documentation>
+        <db:para>Specify volumes and size attributes</db:para>
         <interleave>
           <ref name="k.systemdisk.attlist"/>
           <zeroOrMore>

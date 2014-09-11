@@ -713,6 +713,27 @@ sub test_getVGName {
 }
 
 #==========================================
+# test_getLVMVolumeManagement
+#------------------------------------------
+sub test_getLVMVolumeManagement {
+    # ...
+    # Test the getLVMVolumeManagement method
+    # ---
+    my $this = shift;
+    my $kiwi = $this -> {kiwi};
+    my $sysdDataObj = $this -> __getSystemdiskObj();
+    my $name = $sysdDataObj -> getLVMVolumeManagement();
+    my $msg = $kiwi -> getMessage();
+    $this -> assert_str_equals('No messages set', $msg);
+    my $msgT = $kiwi -> getMessageType();
+    $this -> assert_str_equals('none', $msgT);
+    my $state = $kiwi -> getState();
+    $this -> assert_str_equals('No state set', $state);
+    $this -> assert_str_equals(0, $name);
+    return;
+}
+
+#==========================================
 # test_getVGNameDefault
 #------------------------------------------
 sub test_getVGNameDefault {
@@ -982,7 +1003,8 @@ sub test_getXMLElement{
     $this -> assert_str_equals('No state set', $state);
     $this -> assert_not_null($elem);
     my $xmlstr = $elem -> toString();
-    my $expected = '<systemdisk name="testVG">'
+    my $expected = '<systemdisk name="testVG" '
+        . 'preferlvm="false">'
         . '<volume name="test_VOL" freespace="20M" size="30G"/>'
         . '<volume name="data_VOL" size="100G"/>'
         . '</systemdisk>';
@@ -1016,6 +1038,35 @@ sub test_setVGName {
     $state = $kiwi -> getState();
     $this -> assert_str_equals('No state set', $state);
     $this -> assert_str_equals('foo_VG', $name);
+    return;
+}
+
+#==========================================
+# test_setLVMVolumeManagement
+#------------------------------------------
+sub test_setLVMVolumeManagement {
+    # ...
+    # Test the setLVMVolumeManagement method
+    # ---
+    my $this = shift;
+    my $kiwi = $this -> {kiwi};
+    my $sysdDataObj = KIWIXMLSystemdiskData -> new();
+    $sysdDataObj = $sysdDataObj -> setLVMVolumeManagement('true');
+    my $msg = $kiwi -> getMessage();
+    $this -> assert_str_equals('No messages set', $msg);
+    my $msgT = $kiwi -> getMessageType();
+    $this -> assert_str_equals('none', $msgT);
+    my $state = $kiwi -> getState();
+    $this -> assert_str_equals('No state set', $state);
+    $this -> assert_not_null($sysdDataObj);
+    my $name = $sysdDataObj -> getLVMVolumeManagement();
+    $msg = $kiwi -> getMessage();
+    $this -> assert_str_equals('No messages set', $msg);
+    $msgT = $kiwi -> getMessageType();
+    $this -> assert_str_equals('none', $msgT);
+    $state = $kiwi -> getState();
+    $this -> assert_str_equals('No state set', $state);
+    $this -> assert_str_equals(1, $name);
     return;
 }
 
