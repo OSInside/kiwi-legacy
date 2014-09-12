@@ -1169,7 +1169,9 @@ sub setupInstallStick {
     #==========================================
     # Do we need a bios legacy partition
     #------------------------------------------
-    if (($firmware eq "efi") || ($firmware eq "uefi")) {
+    if (($arch =~ /i.86|x86_64/) &&
+        (($firmware eq "efi") || ($firmware eq "uefi"))
+    ) {
         $needBiosP = 1;
     }
     #==========================================
@@ -1969,7 +1971,9 @@ sub setupBootDisk {
     #==========================================
     # Do we need a bios legacy partition
     #------------------------------------------
-    if (($firmware eq "efi") || ($firmware eq "uefi")) {
+    if (($arch =~ /i.86|x86_64/) &&
+        (($firmware eq "efi") || ($firmware eq "uefi"))
+    ) {
         $needBiosP = 1;
         $this->{legacysize} = 2;
         $this -> __updateDiskSize ($this->{legacysize});
@@ -2330,7 +2334,7 @@ sub setupBootDisk {
             $this -> cleanStack ();
             return;
         }
-        if (($needJumpP) && ($arch =~ /i.86|x86_64/)) {
+        if ($needBiosP) {
             $status = KIWIQX::qxx (
                 "parted $this->{loop} set 1 bios_grub on 2>&1"
             );
