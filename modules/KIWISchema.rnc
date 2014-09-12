@@ -2550,6 +2550,18 @@ div {
         attribute provider { "libvirt" | "virtualbox" }
     k.vagrantconfig.virtualsize.attribute =
         ## The vagrant virtual image size in GB
+        [
+        db:para [
+            "virtualsize provides the value of the virtual_size key"
+            "which is embedded in the metadata.json hash inside the"
+            ".box file, as described here:"
+            ""
+            "http://docs.vagrantup.com/v2/boxes/format.html"
+            ""
+            "This tells the Vagrant provider how big to make the"
+            "virtual disk when it creates the VM."
+        ]
+        ]
         attribute virtualsize { xsd:nonNegativeInteger }
     k.vagrantconfig.attlist =
         k.vagrantconfig.provider.attribute &
