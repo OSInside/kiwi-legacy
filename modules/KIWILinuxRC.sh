@@ -2874,8 +2874,12 @@ EOF
     # activate secure boot if required
     #--------------------------------------
     if [ "$kiwi_firmware" = "uefi" ];then
-        echo "GRUB_USE_LINUXEFI=true"  >> $inst_default_grub
-        echo "GRUB_USE_INITRDEFI=true" >> $inst_default_grub
+        case $arch in
+          i?86|x86_64)
+            echo "GRUB_USE_LINUXEFI=true"  >> $inst_default_grub
+            echo "GRUB_USE_INITRDEFI=true" >> $inst_default_grub
+            ;;
+        esac
     fi
     #======================================
     # write vesa vga setup
