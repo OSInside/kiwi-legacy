@@ -157,8 +157,10 @@ sub createTestTmpDir {
     my $this = shift;
     # Lets assume /tmp exists
     my $testDir = '/tmp/kiwiDevTests';
-    my $res = mkdir $testDir;
-    $this -> assert_equals(1, $res);
+    if (! -d $testDir) {
+        my $res = mkdir $testDir;
+        $this -> assert_equals(1, $res);
+    }
     return $testDir;
 }
 
