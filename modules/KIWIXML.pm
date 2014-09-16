@@ -5797,9 +5797,9 @@ sub getSingleInstSourceSatSolvable {
     #==========================================
     # check/create cache directory
     #------------------------------------------
-    my $sdir = "/var/cache/kiwi/satsolver";
+    my $sdir = "/var/tmp/kiwi/satsolver";
     if (! -d $sdir) {
-        my $data = KIWIQX::qxx ("mkdir -p $sdir 2>&1");
+        my $data = KIWIQX::qxx ("mkdir -m 777 -p $sdir 2>&1");
         my $code = $? >> 8;
         if ($code != 0) {
             $kiwi -> failed ();

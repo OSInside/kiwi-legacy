@@ -957,8 +957,9 @@ sub __setupRepoMounts {
                 "mkdir -p $uri; mount -o loop $iso $uri 2>&1"
             );
             my $code = $? >> 8;
+            chomp $data;
             if ($code != 0) {
-                $kiwi -> error  ("Failed to loop mount ISO path: $data");
+                $kiwi -> error  ("Failed to loop mount $iso: $data");
                 $kiwi -> failed ();
                 rmdir $uri;
                 return;

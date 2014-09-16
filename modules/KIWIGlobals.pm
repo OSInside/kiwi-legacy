@@ -1235,7 +1235,7 @@ sub downloadFile {
     # a regular expression to find the file. After that repeat
     # the download
     # ----
-    KIWIQX::qxx ("chmod u+x $lwp 2>&1");
+    KIWIQX::qxx ("chmod a+x $lwp 2>&1");
     $dest = $dirname."/".$basename;
     my $data = KIWIQX::qxx ("$lwp $url $dest 2>&1");
     my $code = $? >> 8;

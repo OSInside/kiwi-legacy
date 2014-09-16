@@ -486,26 +486,6 @@ sub main {
     }
 
     #==========================================
-    # List XML and repo information
-    #------------------------------------------
-    if ($cmdL->getOperationMode("listXMLInfo")) {
-        $cmdL -> setConfigDir(
-            $cmdL->getOperationMode("listXMLInfo")
-        );
-        my $info = KIWIXMLInfo -> new ($cmdL);
-        if (! $info) {
-            kiwiExit (1);
-        }
-        my $res = $info -> printXMLInfo (
-            $cmdL -> getXMLInfoSelection()
-        );
-        if (! $res) {
-            kiwiExit (1);
-        }
-        kiwiExit (0);
-    }
-
-    #==========================================
     # Test suite
     #------------------------------------------
     if ($cmdL->getOperationMode("testImage")) {
@@ -1374,9 +1354,6 @@ sub init {
     if (defined $TestImage) {
         $cmdL -> setOperationMode ("testImage",$TestImage);
     }
-    if (defined $ListXMLInfo) {
-        $cmdL -> setOperationMode ("listXMLInfo",$ListXMLInfo);
-    }
     #========================================
     # store original value of Profiles
     #----------------------------------------
@@ -1404,6 +1381,12 @@ sub init {
     #----------------------------------------
     if (defined $SetImageType) {
         $cmdL -> setBuildType($SetImageType);
+    }
+    #==========================================
+    # non root task: get XML information
+    #------------------------------------------
+    if (defined $ListXMLInfo) {
+        getXMLInfo ($ListXMLInfo);
     }
     #==========================================
     # non root task: Check XML configuration
@@ -2114,6 +2097,26 @@ sub version {
     $kiwi -> info ("--> vnr: $gdata->{Version}\n");
     $kiwi -> info ("--> git: $rev\n");
     exit ($exit);
+}
+
+#==========================================
+# getXMLInfo
+#------------------------------------------
+sub getXMLInfo {
+    my $config = shift;
+    $cmdL -> setConfigDir($config);
+    my $info = KIWIXMLInfo -> new ($cmdL);
+    if (! $info) {
+        kiwiExit (1);
+    }
+    my $res = $info -> printXMLInfo (
+        $cmdL -> getXMLInfoSelection()
+    );
+    if (! $res) {
+        kiwiExit (1);
+    }
+    kiwiExit (0);
+    return;
 }
 
 #==========================================

@@ -95,8 +95,9 @@ sub new {
     my $failed;    # failed jobs
     my $job;       # job queue
     my $problems;  # solver problems
-    if (! -d "/var/cache/kiwi/satsolver") {
-        KIWIQX::qxx ("mkdir -p /var/cache/kiwi/satsolver");
+    my $solvstore = "/var/tmp/kiwi/satsolver";
+    if (! -d $solvstore) {
+        KIWIQX::qxx ("mkdir -m 777 -p $solvstore");
     }
     if (! defined $pool) {
         if (! defined $quiet) {
@@ -179,7 +180,7 @@ sub new {
         # Create list of solvables
         #------------------------------------------
         my @files   = ();
-        my $solfile = '/var/cache/kiwi/satsolver/merged.solv';
+        my $solfile = $solvstore.'/merged.solv';
         if (($solvtype) && ($solvtype eq "system-solvable")) {
             #==========================================
             # read solv files locally stored by zypper
