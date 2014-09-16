@@ -4728,7 +4728,8 @@ function setupNetworkWicked {
     local nic_config
     local dhcp_info
     local wicked_dhcp4=/usr/lib/wicked/bin/wickedd-dhcp4
-    for try_iface in ${dev_list[*]}; do
+    for try_iface in ${prefer_iface[*]}; do
+        # try DHCP_DISCOVER on all prefered interfaces
         if ip link set dev $try_iface up;then
             if [ $try_iface = "lo" ];then
                 continue
@@ -4759,9 +4760,9 @@ function setupNetworkWicked {
         fi
     fi
     #======================================
-    # select interface from preferred list
+    # setup routing for first discovered
     #--------------------------------------
-    for try_iface in ${prefer_iface[*]} $DHCPCD_STARTED; do
+    for try_iface in $DHCPCD_STARTED; do
         dhcp_info=/var/run/wicked/wicked-${try_iface}.info
         if [ -s $dhcp_info ]; then
             export PXE_IFACE=$try_iface
@@ -4771,6 +4772,7 @@ function setupNetworkWicked {
                 local gw=$(echo $GATEWAYS | cut -f1 -d " ")
                 ip route change default via $gw dev $PXE_IFACE
             fi
+            break
         fi
     done
     #======================================
@@ -5040,7 +5042,7 @@ function setupNetwork {
     #======================================
     # continue to be smarter in nic check
     #--------------------------------------
-    if [ -z $BOOTIF ];then
+    if [ -z "$BOOTIF" ];then
         # /.../
         # there is no PXE boot interface information. We will use
         # the first interface that responds to dhcp
