@@ -35,6 +35,7 @@ Provides:       kiwi:%{_mandir}/man1/kiwi.1.gz
 Provides:       kiwi:%{_mandir}/man1/KIWI::images.sh.1.gz
 Provides:       kiwi:%{_mandir}/man1/KIWI::config.sh.1.gz
 Provides:       kiwi:%{_mandir}/man1/KIWI::kiwirc.1.gz
+Conflicts:      kiwi-doc < 5
 Release:        0
 # requirements to build packages
 BuildRequires:  diffutils
@@ -244,10 +245,6 @@ Authors:
 
 %package -n kiwi-doc
 Summary:        KIWI - Appliance Builder Documentation
-Obsoletes:      kiwi-doc:%{_mandir}/man1/kiwi.1.gz
-Obsoletes:      kiwi-doc:%{_mandir}/man1/KIWI::images.sh.1.gz
-Obsoletes:      kiwi-doc:%{_mandir}/man1/KIWI::config.sh.1.gz
-Obsoletes:      kiwi-doc:%{_mandir}/man1/KIWI::kiwirc.1.gz
 License:        LGPL-2.0+
 Group:          Documentation/Howto
 %if 0%{?suse_version} > 1120
