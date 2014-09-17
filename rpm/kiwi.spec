@@ -88,6 +88,8 @@ Requires:       perl-XML-SAX
 Requires:       perl-libwww-perl
 Requires:       rsync
 Requires:       screen
+Requires:       tar
+Requires:       psmisc
 Requires:       util-linux
 %if 0%{?suse_version}
 # SUSE specific requires
