@@ -603,6 +603,7 @@ sub Init {
         }
         my $num = $n;
         if ( $this->{m_proddata}->getVar("FLAVOR", '') eq "ftp"
+            or $this->{m_proddata}->getVar("FLAVOR", '') eq "POOL"
             or $n == $this->{m_debugmedium}
         ) {
             $num = 1;
@@ -2310,6 +2311,7 @@ sub createMetadata {
         for my $n(@media) {
             my $num = $n;
             if ( $this->{m_proddata}->getVar("FLAVOR") eq "ftp"
+                or $this->{m_proddata}->getVar("FLAVOR") eq "POOL"
                 or $n == $this->{m_debugmedium}
             ) {
                 $num = 1;
@@ -2326,6 +2328,7 @@ sub createMetadata {
                 # some specialities for medium number 1: contains a line with
                 # the number of media
                 if ( $this->{m_proddata}->getVar("FLAVOR") eq "ftp"
+                    or $this->{m_proddata}->getVar("FLAVOR") eq "POOL"
                     or $n == $this->{m_debugmedium}
                 ) {
                     print $MEDIA "1\n";
@@ -2406,6 +2409,7 @@ sub createMetadata {
         for my $n($this->getMediaNumbers()) {
             my $num = $n;
             if ( $this->{m_proddata}->getVar("FLAVOR") eq "ftp"
+                or $this->{m_proddata}->getVar("FLAVOR") eq "POOL"
                 or $n == $this->{m_debugmedium}
             ) {
                 $num = 1;
