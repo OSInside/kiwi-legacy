@@ -738,6 +738,13 @@ for dist in ${oldDists[@]};do
 done
 %endif
 
+%post -n kiwi
+# make sure kiwi can create this file from scratch with the
+# permissions it needs and is not in trouble if it exists
+# already with permissions which doesn't allow kiwi to create
+# or use this file if kiwi is called as non root user
+rm -f /dev/shm/lwp-download
+
 %clean
 rm -rf $RPM_BUILD_ROOT
 #=================================================
