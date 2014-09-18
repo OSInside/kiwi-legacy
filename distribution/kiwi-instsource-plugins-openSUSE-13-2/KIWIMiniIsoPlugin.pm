@@ -27,6 +27,7 @@ use Config::IniFiles;
 use File::Find;
 use FileHandle;
 use Carp;
+use File::Basename qw /dirname/;
 
 sub new {
     # ...
@@ -132,10 +133,10 @@ sub execute {
         sub { find_cb($this, '.*/root$', \@rootfiles) },
         $this->handler()->collect()->basedir()
     );
-    foreach(@rootfiles) {
-        $this->logMsg("I", "removing file <$_>");
-        unlink $_;
+    if (@rootfiles) {
+        $this->removeInstallSystem($rootfiles[0]);
     }
+
     if (!@gfxbootfiles) {
         my $msg = "No gfxboot.cfg file found! "
             . "This _MIGHT_ be ok for S/390. "
@@ -148,6 +149,21 @@ sub execute {
         \@gfxbootfiles, $repoloc, $srv, $path
     );
     return $retval;
+}
+
+sub removeInstallSystem($) {
+    my $this = shift;
+    my $rootfile = shift;
+
+    print STDERR "RF $rootfile\n";
+    my $rootdir = dirname($rootfile);
+    $this->logMsg("I", "removing files from <$rootdir>");
+    foreach my $file (glob("$rootdir/*")) {
+        if (-f $file && $file !~ m,/efi$,) {
+            $this->logMsg("I", "removing <$file>");
+	    unlink $file;
+        }
+    }
 }
 
 sub updateGraphicsBootConfig {
