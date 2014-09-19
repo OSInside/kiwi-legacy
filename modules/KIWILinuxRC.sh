@@ -10037,7 +10037,6 @@ function setupBootPartitionPXE {
     #======================================
     # export bootpart relevant variables
     #--------------------------------------
-    export haveBootPartition=1
     export bootPartitionFSType=$fs_type
     export kiwi_BootPart=$bootid
     #======================================
@@ -10077,7 +10076,6 @@ function setupBootPartition {
     local IFS=$IFS_ORIG
     local label=undef
     local mpoint=boot_bind
-    local haveBootPartition=0
     local FSTYPE_SAVE=$FSTYPE
     local fs_type=undef
     local BID=1
@@ -10096,7 +10094,6 @@ function setupBootPartition {
     fi
     label=$(blkid $(ddn $imageDiskDevice $BID) -s LABEL -o value)
     if [ "$label" = "BOOT" ];then
-        export haveBootPartition=1
         export imageBootDevice=$(ddn $imageDiskDevice $BID)
     fi
     #======================================
@@ -10114,7 +10111,7 @@ function setupBootPartition {
     #======================================
     # Return if no boot setup required
     #--------------------------------------
-    if [ $haveBootPartition -eq 0 ] || [ ! -e "$imageBootDevice" ];then
+    if [ ! "$label" = "BOOT" ] || [ ! -e "$imageBootDevice" ];then
         return
     fi
     #======================================

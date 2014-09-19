@@ -165,7 +165,7 @@ function OEMRepartStandard {
         #======================================
         # clean/backup boot partition
         #--------------------------------------
-        if [ "$haveBootPartition" = "yes" ];then
+        if [ "$kiwi_RootPart" ];then
             pID=$kiwi_RootPart
             rootParam=$pID
         fi
@@ -695,7 +695,7 @@ function OEMRepart {
         if ! mount $imageRootDevice /reco-root >/dev/null;then
             systemException "Failed to mount root device" "reboot"
         fi
-        if [ "$haveBootPartition" = "yes" ];then
+        if [ "$kiwi_BootPart" ];then
             if [ ! "$kiwi_BootPart" = "$kiwi_RootPart" ];then
                 mkdir -p /recoboot
                 mount $(ddn $imageDiskDevice $kiwi_BootPart) /recoboot
@@ -764,7 +764,7 @@ function OEMRepart {
                 systemException "Failed to store LVM metadata" "reboot"
             fi
         fi
-        if [ "$haveBootPartition" = "yes" ];then
+        if [ "$kiwi_BootPart" ];then
             if [ ! "$kiwi_BootPart" = "$kiwi_RootPart" ];then
                 umount /reco-root/boot
                 umount /recoboot && rmdir /recoboot
@@ -876,15 +876,6 @@ function setupDeviceNames {
 # createBootDeviceData
 #--------------------------------------
 function createBootDeviceData {
-    #====================================== 
-    # check for boot partition
-    #--------------------------------------
-    if [ "$kiwi_BootPart" != "$kiwi_RootPart" ];then
-        export haveBootPartition=yes
-    fi
-    if [ ! -z "$kiwi_BiosGrub" ];then
-        export haveBootPartition=yes
-    fi
     #====================================== 
     # check for overlay type
     #--------------------------------------
