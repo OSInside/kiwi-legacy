@@ -27,6 +27,7 @@ use Config::IniFiles;
 use File::Find;
 use FileHandle;
 use Carp;
+use File::Basename qw /dirname/;
 
 sub new {
     # ...
@@ -122,20 +123,31 @@ sub execute {
             return $retval;
         }
     }
-    my @gfxbootfiles;
-    find(
-        sub { find_cb($this, '.*/gfxboot\.cfg$', \@gfxbootfiles) },
-        $this->handler()->collect()->basedir()
-    );
+    
     my @rootfiles;
     find(
         sub { find_cb($this, '.*/root$', \@rootfiles) },
         $this->handler()->collect()->basedir()
     );
-    foreach(@rootfiles) {
-        $this->logMsg("I", "removing file <$_>");
-        unlink $_;
+    if (@rootfiles) {
+        $this->removeInstallSystem($rootfiles[0]);
     }
+
+    my @isolxfiles;
+    find(
+        sub { find_cb($this, '.*/isolinux.cfg$', \@isolxfiles) },
+        $this->handler()->collect()->basedir()
+    );
+    if (@isolxfiles) {
+        $this->removeMediaCheck($isolxfiles[0]);
+    }
+
+    my @gfxbootfiles;
+    find(
+        sub { find_cb($this, '.*/gfxboot\.cfg$', \@gfxbootfiles) },
+        $this->handler()->collect()->basedir()
+    );
+
     if (!@gfxbootfiles) {
         my $msg = "No gfxboot.cfg file found! "
             . "This _MIGHT_ be ok for S/390. "
@@ -147,7 +159,64 @@ sub execute {
     $retval = $this -> updateGraphicsBootConfig (
         \@gfxbootfiles, $repoloc, $srv, $path
     );
+
     return $retval;
+}
+
+sub removeInstallSystem($) {
+    my $this = shift;
+    my $rootfile = shift;
+
+    print STDERR "RF $rootfile\n";
+    my $rootdir = dirname($rootfile);
+    $this->logMsg("I", "removing files from <$rootdir>");
+    foreach my $file (glob("$rootdir/*")) {
+        if (-f $file && $file !~ m,/efi$,) {
+            $this->logMsg("I", "removing <$file>");
+	    unlink $file;
+        }
+    }
+}
+
+sub removeMediaCheck {
+	my $this = shift;
+	my $cfg = shift;
+
+	$this->logMsg("I", "Processing file <$cfg>: ");
+
+	if (!open(CFG, "$cfg")) {
+		$this->logMsg("E", "Cant open file <$cfg>!");
+		return;
+	}
+
+	if (!open(CFGNEW, ">$cfg.new")) {
+		$this->logMsg("E", "Cant open file <$cfg.new>!");
+		return;
+	}
+
+	my $mediacheck = -1;
+	while ( <CFG> ) {
+		chomp;
+
+		if (m/label mediachk/) {
+			$mediacheck = 1;
+		}
+		if ($mediacheck == 1 && m/^\s*$/) {
+			$mediacheck = -1;
+		}
+
+		if ($mediacheck == 1) {
+			print CFGNEW "#$_\n";
+		} else {
+			print CFGNEW "$_\n";
+		}
+	}
+
+	close(CFG);
+	close(CFGNEW);
+
+	unlink $cfg;
+	rename "$cfg.new", $cfg;
 }
 
 sub updateGraphicsBootConfig {
