@@ -10551,6 +10551,11 @@ function createOriginSnapshot {
 # activateBootPartition
 #--------------------------------------
 function activateBootPartition {
+    if [[ ! $arch =~ i.86|x86_64 ]];then
+        # activation of a partition is only needed on
+        # x86 legacy BIOS implementations
+        return
+    fi
     local IFS=$IFS_ORIG
     local device=$imageBootDevice
     if [ ! -e $device ];then
