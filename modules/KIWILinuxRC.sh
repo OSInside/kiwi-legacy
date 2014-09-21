@@ -6849,7 +6849,7 @@ function waitForStorageDevice {
         if [ $? = 0 ];then
             sleep 1; return 0
         fi
-        if [ $check -eq 15 ];then
+        if [ $check -eq 30 ];then
             return 1
         fi
         Echo "Waiting for device $device to settle..."
