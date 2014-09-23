@@ -195,6 +195,7 @@ Authors:
 %package -n kiwi-requires
 Summary:        KIWI - buildservice package requirements
 Provides:       kiwi-filesystem:btrfs
+Provides:       kiwi-filesystem:xfs
 Provides:       kiwi-filesystem:ext3
 Provides:       kiwi-filesystem:ext4
 Provides:       kiwi-filesystem:squashfs
