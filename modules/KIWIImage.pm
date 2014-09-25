@@ -877,13 +877,8 @@ sub createImageRootAndBoot {
     #==========================================
     # Check for direct tree access
     #------------------------------------------
-    my $luks = $xmltype -> getLuksPass();
-    if (($text ne 'VMX') || ($luks)) {
+    if ($text eq 'PXE') {
         $treeAccess = 0;
-    }
-    my $lvm = KIWIGlobals -> instance() -> useLVM($xml);
-    if ($lvm) {
-        $treeAccess = 1;
     }
     #==========================================
     # Walk through the types
