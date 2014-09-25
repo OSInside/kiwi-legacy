@@ -322,8 +322,11 @@ sub setupInstallationSource {
                 if ($val =~ /^'\//) {
                     $val =~ s/^'(.*)'$/"file:\/\/$1"/
                 }
-                if ($val =~ /^'https:/ && ! ($val =~ /credentials=\w/)) {
-                        chop $val;
+                my $credFile = "$dataDir/credentials.d/kiwiRepoCredentials";
+                if ((-e $credFile) &&
+                    ($val =~ /^'https:/) && ($val !~ /credentials=\w/)
+                ) {
+                    chop $val;
                     $val .= "?credentials=kiwiRepoCredentials'";
                 }
                 push (@zopts,$val);
