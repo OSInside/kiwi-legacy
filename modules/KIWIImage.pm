@@ -3739,19 +3739,19 @@ sub setupEncoding {
         $kiwi -> failed ();
         return;
     }
-    $data = KIWIQX::qxx (
-        "echo $cipher | cryptsetup -q $opts luksFormat $loop 2>&1"
+    $code = KIWIGlobals -> instance() -> cryptsetup (
+        $cipher, "-q $opts luksFormat $loop"
     );
-    $code = $? >> 8;
     if ($code != 0) {
         $kiwi -> error  ("Couldn't setup luks format: $loop");
         $kiwi -> failed ();
         return;
     }
-    $data = KIWIQX::qxx ("echo $cipher | cryptsetup luksOpen $loop $name 2>&1");
-    $code = $? >> 8;
+    $code = KIWIGlobals -> instance() -> cryptsetup (
+        $cipher, "luksOpen $loop $name"
+    );
     if ($code != 0) {
-        $kiwi -> error  ("Couldn't open luks device: $data");
+        $kiwi -> error  ("Couldn't open luks device: $loop");
         $kiwi -> failed ();
         $this -> cleanLuks ();
         return;

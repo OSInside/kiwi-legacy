@@ -6667,21 +6667,19 @@ sub setupEncoding {
         return;
     }
     $kiwi -> info ("--> Creating LUKS encoding\n");
-    $data = KIWIQX::qxx (
-        "echo $cipher | cryptsetup -q $opts luksFormat $device 2>&1"
+    $code = KIWIGlobals -> instance() -> cryptsetup (
+        $cipher, "-q $opts luksFormat $device"
     );
-    $code = $? >> 8;
     if ($code != 0) {
         $kiwi -> error  ("Couldn't setup luks format: $device");
         $kiwi -> failed ();
         return;
     }
-    $data = KIWIQX::qxx (
-        "echo $cipher | cryptsetup luksOpen $device $name 2>&1"
+    $code = KIWIGlobals -> instance() -> cryptsetup (
+        $cipher, "luksOpen $device $name"
     );
-    $code = $? >> 8;
     if ($code != 0) {
-        $kiwi -> error  ("Couldn't open luks device: $data");
+        $kiwi -> error  ("Couldn't open luks device: $device");
         $kiwi -> failed ();
         $this -> cleanStack ();
         return;
@@ -6939,16 +6937,16 @@ sub luksResize {
     # open luks device
     #------------------------------------------
     if ($cipher) {
-        $status = KIWIQX::qxx (
-            "echo $cipher | cryptsetup luksOpen $source $name 2>&1"
+        $result = KIWIGlobals -> instance() -> cryptsetup(
+            $cipher, "luksOpen $source $name"
         );
     } else {
-        $status = KIWIQX::qxx ("cryptsetup luksOpen $source $name 2>&1");
+        KIWIQX::qxx ("cryptsetup luksOpen $source $name 2>&1");
+        $result = $? >> 8;
     }
-    $result = $? >> 8;
     if ($result != 0) {
         $kiwi -> failed ();
-        $kiwi -> error  ("Couldn't open luks device: $status");
+        $kiwi -> error  ("Couldn't open luks device: $source");
         $kiwi -> failed ();
         return;
     }
