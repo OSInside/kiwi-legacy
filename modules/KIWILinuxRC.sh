@@ -4734,8 +4734,7 @@ function setupNetworkWicked {
             if [ $try_iface = "lo" ];then
                 continue
             fi
-            Echo "Waiting for link up on $try_iface..."
-            sleep 1
+            waitForLinkUp $try_iface
             dhcp_info=/var/run/wicked/wicked-${try_iface}.info
             $wicked_dhcp4 --debug all \
                 --test --test-output $dhcp_info $try_iface
@@ -6857,7 +6856,29 @@ function waitForStorageDevice {
         sleep 2
     done
 }
-
+#======================================
+# waitForLinkUp
+#--------------------------------------
+function waitForLinkUp {
+    # /.../
+    # wait for the network link to enter UP state
+    # ----
+    local IFS=$IFS_ORIG
+    local dev=$1
+    local check=0
+    while true;do
+        ip link ls $dev | grep -qi "state UP"
+        if [ $? = 0 ];then
+            sleep 1; return 0
+        fi
+        if [ $check -eq 30 ];then
+            return 1
+        fi
+        Echo "Waiting for link up on ${dev}..."
+        check=$((check + 1))
+        sleep 2
+    done
+}
 #======================================
 # waitForBlockDevice
 #--------------------------------------
