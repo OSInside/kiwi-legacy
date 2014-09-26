@@ -228,6 +228,7 @@ sub mount {
 	my $salt   = int (rand(20));
 	my $cipher = $this->{data}->{LuksCipher};
 	my @UmountStack = @{$this->{UmountStack}};
+    my $global = KIWIGlobals -> instance();
 	my $status;
 	my $result;
 	my %fsattr;
@@ -351,17 +352,15 @@ sub mount {
 			$this->{UmountStack} = \@UmountStack;
 		}
 		if ($cipher) {
-			$status = KIWIQX::qxx (
-				"echo $cipher | cryptsetup luksOpen $source luks-$salt 2>&1"
-			);
+            $result = $global -> cryptsetup (
+                $cipher, "luksOpen $source luks-$salt"
+            );
 		} else {
-			$status = KIWIQX::qxx (
-				"cryptsetup luksOpen $source luks-$salt 2>&1"
-			);
+            KIWIQX::qxx ("cryptsetup luksOpen $source luks-$salt");
+            $result = $? >> 8;
 		}
-		$result = $? >> 8;
 		if ($result != 0) {
-			$kiwi -> error  ("Couldn't open luks device: $status");
+			$kiwi -> error  ("Couldn't open luks device: $source");
 			$kiwi -> failed ();
 			$this -> umount();
 			return;
@@ -1593,6 +1592,28 @@ sub _new_instance {
 	$this->{data} = \%data;
 	$this->{UmountStack} = [];
 	return $this;
+}
+
+#==========================================
+# cryptsetup
+#------------------------------------------
+sub cryptsetup {
+    # ...
+    # Calls cryptsetup with the given options and expects
+    # an input blob on stdin as the credentials
+    # ---
+    my $this   = shift;
+    my $kiwi   = $this->{kiwi};
+    my $cipher = shift;
+    my $copts  = shift;
+    $kiwi -> loginfo("EXEC [cryptsetup $copts]\n");
+    my $C = FileHandle -> new();
+    if ($C -> open ("|cryptsetup $copts")) {
+        print $C $cipher;
+        $C -> close();
+        return 0;
+    }
+    return 1;
 }
 
 1;

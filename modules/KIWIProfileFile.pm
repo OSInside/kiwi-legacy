@@ -78,7 +78,6 @@ sub new {
 		kiwi_keytable
 		kiwi_language
 		kiwi_loader_theme
-		kiwi_luks
 		kiwi_lvm
 		kiwi_lvmgroup
 		kiwi_oemalign
