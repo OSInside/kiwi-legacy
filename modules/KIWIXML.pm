@@ -5876,7 +5876,7 @@ sub getSingleInstSourceSatSolvable {
         my $TFD = FileHandle -> new();
         if ($TFD -> open ("$index.timestamp")) {
             my $curstamp = <$TFD>; chomp $curstamp; $TFD -> close();
-            if ($curstamp eq $time) {
+            if (($time) && ($curstamp eq $time)) {
                 $kiwi -> done();
                 unlink $repoMD;
                 return $index;
@@ -5915,9 +5915,9 @@ sub getSingleInstSourceSatSolvable {
         #==========================================
         # Store new time stamp
         #------------------------------------------
-        if (! open ($RXML, '>', "$index.timestamp")) {
+        if ((! $time) || (! open ($RXML, '>', "$index.timestamp"))) {
             $kiwi -> failed ();
-            $kiwi -> error ("--> Failed to create timestamp: $!");
+            $kiwi -> error ("--> Failed to create timestamp: $index.timestamp");
             $kiwi -> failed ();
             unlink $repoMD;
             return;
