@@ -141,6 +141,10 @@ sub new {
     $base{ppc64le}{boot}    = "boot/ppc64le";
     $base{ppc64le}{loader}  = "undef";
     $base{ppc64le}{efi}     = "undef";
+    # aarch64
+    $base{aarch64}{boot}    = "boot/aarch64";
+    $base{aarch64}{loader}  = "undef";
+    $base{aarch64}{efi}     = "boot/aarch64/efi";
     #=======================================
     # 1) search for legacy boot
     #---------------------------------------
@@ -178,6 +182,9 @@ sub new {
             }
             if ($arch eq "ia64") {
                 push (@catalog, "ia64_efi");
+            }
+            if ($arch eq "aarch64") {
+                push (@catalog, "aarch64_efi");
             }
         }
     }
@@ -380,6 +387,23 @@ sub ppc64_default {
     $para.= " --netatalk";
     $para.= " -part";
     $para.= " -U";
+    $this -> {params} = $para;
+    return $this;
+}
+
+#==========================================
+# aarch64_efi
+#------------------------------------------
+sub aarch64_efi {
+    my $this  = shift;
+    my $arch  = shift;
+    my %base  = %{$this->{base}};
+    my $para  = $this -> {params};
+    my $boot  = $base{$arch}{boot};
+    my $loader= $base{$arch}{efi};
+    $para.= " -no-emul-boot";
+    $para.= " -boot-load-size 1";
+    $para.= " -b $loader";
     $this -> {params} = $para;
     return $this;
 }
@@ -1269,8 +1293,10 @@ sub makeIsoEFIBootable {
     }
     my $arch = KIWIQX::qxx ("uname -m");
     chomp $arch;
-    if ($arch ne 'x86_64') {
+    if ($arch =~ /i.86/) {
         $efi_arch = 'i386';
+    } else {
+        $efi_arch = $arch;
     }
     my $efi_fat = "$source/boot/$efi_arch/efi";
     if (-e $efi_fat) {

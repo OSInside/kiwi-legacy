@@ -98,7 +98,9 @@ sub execute {
     my $firmware = $type->getFirmwareType();
     if ($firmware eq "efi" || $firmware eq "uefi") {
         my $dir = $this->collect()->basesubdirs()->{$cd};
-        my $efi = "$dir/boot/x86_64/efi";
+        my $arch = KIWIQX::qxx ("uname -m");
+        chomp $arch;
+        my $efi = "$dir/boot/$arch/efi";
         $this->logMsg("I", "creating $efi");
         $this -> callCmd("dd if=/dev/zero of=$efi bs=1M count=4");
         $this -> callCmd("/usr/sbin/mkdosfs -n 'BOOT' $efi");
