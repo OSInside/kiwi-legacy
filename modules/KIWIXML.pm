@@ -2962,6 +2962,8 @@ sub __createVagrantConfig {
     my @vagrantConfigData;
     for my $vagrantConfig (@vagrantConfigNodes) {
         my %vagrantConfigSet;
+        $vagrantConfigSet{boxname} =
+            $vagrantConfig -> getAttribute('boxname');
         $vagrantConfigSet{provider} =
             $vagrantConfig -> getAttribute('provider');
         $vagrantConfigSet{virtual_size} =

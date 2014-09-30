@@ -26,7 +26,6 @@ use base qw /Common::ktTestCase/;
 
 use KIWIXMLVagrantConfigData;
 
-
 #==========================================
 # Constructor
 #------------------------------------------
@@ -139,6 +138,36 @@ sub test_getProvider {
 }
 
 #==========================================
+# test_getBoxName
+#------------------------------------------
+sub test_getBoxName {
+    # ...
+    # Test the getBoxName method
+    # ---
+    my $this = shift;
+    my $kiwi = $this->{kiwi};
+    my $init = $this -> __getBaseInitHash();
+    my $confDataObj = KIWIXMLVagrantConfigData -> new($init);
+    my $msg = $kiwi -> getMessage();
+    $this -> assert_str_equals('No messages set', $msg);
+    my $msgT = $kiwi -> getMessageType();
+    $this -> assert_str_equals('none', $msgT);
+    my $state = $kiwi -> getState();
+    $this -> assert_str_equals('No state set', $state);
+    # Test this condition last to get potential error messages
+    $this -> assert_not_null($confDataObj);
+    my $scan = $confDataObj -> getBoxName();
+    $msg = $kiwi -> getMessage();
+    $this -> assert_str_equals('No messages set', $msg);
+    $msgT = $kiwi -> getMessageType();
+    $this -> assert_str_equals('none', $msgT);
+    $state = $kiwi -> getState();
+    $this -> assert_str_equals('No state set', $state);
+    $this -> assert_str_equals('foo', $scan);
+    return;
+}
+
+#==========================================
 # test_getVirtualSize
 #------------------------------------------
 sub test_getVirtualSize {
@@ -182,6 +211,7 @@ sub __getBaseInitHash {
     # ---
     my $this = shift;
     my %init = (
+        boxname => 'foo',
         provider  => 'libvirt',
         virtual_size => '42'
     );

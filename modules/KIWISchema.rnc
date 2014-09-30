@@ -2563,9 +2563,20 @@ div {
         ]
         ]
         attribute virtualsize { xsd:nonNegativeInteger }
+    k.vagrantconfig.boxname.attribute =
+        ## The boxname as it's written into the json file
+        ## If not specified the image name is used
+        [
+        db:para [
+            "The boxname as it's written into the json file."
+            "If not specified the image name is used."
+        ]
+        ]
+        attribute boxname { text }
     k.vagrantconfig.attlist =
         k.vagrantconfig.provider.attribute &
-        k.vagrantconfig.virtualsize.attribute
+        k.vagrantconfig.virtualsize.attribute &
+        k.vagrantconfig.boxname.attribute?
     k.vagrantconfig =
         ## Specifies the Vagrant configuration section
         [

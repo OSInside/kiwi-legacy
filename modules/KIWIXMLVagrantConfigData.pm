@@ -46,6 +46,7 @@ sub new {
     # this = {
     #    provider = ''
     #    virtual_size = ''
+    #    boxname = ''
     # }
     # ---
     #==========================================
@@ -63,6 +64,7 @@ sub new {
     my %keywords = map { ($_ => 1) } qw(
         provider
         virtual_size
+        boxname
     );
     $this->{supportedKeywords} = \%keywords;
     if (! $this -> p_isInitHashRef($init) ) {
@@ -73,6 +75,7 @@ sub new {
     }
     $this->{provider} = $init->{provider};
     $this->{virtual_size} = $init->{virtual_size};
+    $this->{boxname} = $init->{boxname};
     return $this;
 }
 
@@ -119,6 +122,37 @@ sub getVirtualSize {
 }
 
 #==========================================
+# getBoxName
+#------------------------------------------
+sub getBoxName {
+    # ...
+    # Return the setting for the boxname configuration
+    # ---
+    my $this = shift;
+    return $this->{boxname};
+}
+
+#==========================================
+# setBoxName
+#------------------------------------------
+sub setBoxName {
+    # ...
+    # Set the boxname attribute, if called with no argument the
+    # attribute is erased
+    # ---
+    my $this = shift;
+    my $val  = shift;
+    if (! $val) {
+        if ($this->{boxname}) {
+            delete $this->{boxname};
+        }
+    } else {
+        $this->{boxname} = $val;
+    }
+    return $this;
+}
+
+#==========================================
 # setVirtualSize
 #------------------------------------------
 sub setVirtualSize {
@@ -149,6 +183,10 @@ sub getXMLElement {
     my $element = XML::LibXML::Element -> new('vagrantconfig');
     my $provider = $this -> getProvider();
     my $vsize = $this -> getVirtualSize();
+    my $boxname = $this -> getBoxName();
+    if ($boxname) {
+        $element -> setAttribute('boxname', $provider);
+    }
     if ($provider) {
         $element -> setAttribute('provider', $provider);
     }

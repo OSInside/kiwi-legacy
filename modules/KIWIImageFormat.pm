@@ -533,6 +533,10 @@ sub createVagrantBox {
     foreach my $vgc (@{$vgclist}) {
         my $box = $this->{image};
         my $provider = $vgc -> getProvider();
+        my $boxname = $vgc -> getBoxName();
+        if (! $boxname) {
+            $boxname = $xml -> getImageName();
+        }
         $kiwi -> info ("Creating vagrant box for $provider provider\n");
         #==========================================
         # create vagrant image
@@ -603,7 +607,7 @@ sub createVagrantBox {
         $providers->[0]->{url} = basename $box;
         $versions->[0]->{version} = $pref -> getVersion();
         $versions->[0]->{providers} = $providers;
-        $json_data{name} = $xml -> getImageName();
+        $json_data{name} = $boxname;
         $json_data{description} = $desc -> getSpecificationDescript();
         $json_data{description} =~ s/[\n\t]+//g;
         $json_data{versions} = $versions;

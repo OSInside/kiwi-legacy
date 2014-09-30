@@ -3659,10 +3659,20 @@ and setup the system disk</db:para>
         <data type="nonNegativeInteger"/>
       </attribute>
     </define>
+    <define name="k.vagrantconfig.boxname.attribute">
+      <attribute name="boxname">
+        <a:documentation>The boxname as it's written into the json file
+If not specified the image name is used</a:documentation>
+        <db:para>The boxname as it's written into the json file.If not specified the image name is used.</db:para>
+      </attribute>
+    </define>
     <define name="k.vagrantconfig.attlist">
       <interleave>
         <ref name="k.vagrantconfig.provider.attribute"/>
         <ref name="k.vagrantconfig.virtualsize.attribute"/>
+        <optional>
+          <ref name="k.vagrantconfig.boxname.attribute"/>
+        </optional>
       </interleave>
     </define>
     <define name="k.vagrantconfig">
