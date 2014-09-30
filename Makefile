@@ -281,6 +281,7 @@ uninstall:
 	rm -f /usr/sbin/kiwi
 	rm -f /usr/share/emacs/site-lisp/suse-start-kiwi-mode.el
 	rm -f /etc/bash_completion.d/kiwi.sh
+	rm -f /dev/shm/lwp-download
 
 build:
 	./.doit -p --local
