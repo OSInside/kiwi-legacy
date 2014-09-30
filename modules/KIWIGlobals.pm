@@ -1130,6 +1130,7 @@ sub downloadFile {
     my $this    = shift;
     my $url     = shift;
     my $dest    = shift;
+    my $kiwi    = $this->{kiwi};
     my $dirname;
     my $basename;
     my $proxy;
@@ -1211,6 +1212,7 @@ sub downloadFile {
     }
     my $LWP = FileHandle -> new();
     if (! $LWP -> open (">$lwp")) {
+        $kiwi->loginfo("downloadFile::Failed to create $lwp: $!");
         return;
     }
     if ($proxy) {
@@ -1224,6 +1226,7 @@ sub downloadFile {
     my $locator = KIWILocator -> instance();
     my $lwpload = $locator -> getExecPath ('lwp-download');
     if (! $lwpload) {
+        $kiwi->loginfo("downloadFile::Can't find lwp-download");
         return;
     }
     print $LWP $lwpload.' "$1" "$2"'."\n";
@@ -1235,6 +1238,7 @@ sub downloadFile {
     # the download
     # ----
     KIWIQX::qxx ("chmod a+x $lwp 2>&1");
+    KIWIQX::qxx ("chmod a+w $lwp 2>&1");
     $dest = $dirname."/".$basename;
     my $data = KIWIQX::qxx ("$lwp $url $dest 2>&1");
     my $code = $? >> 8;
