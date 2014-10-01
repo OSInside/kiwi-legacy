@@ -1,103 +1,105 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
-                                                 "http://www.docbook.org/xml/4.5/docbookx.dtd">
+                         "http://www.docbook.org/xml/4.5/docbookx.dtd">
 
 <chapter id="chap.maintenance">
-    <title>Maintenance of Operating System Images</title>
-    <indexterm>
-            <primary>KIWI</primary>
-            <secondary>maintenance</secondary>
-        </indexterm>
-    <para>Creating an image often results in an appliance solution for a
-        customer and gives you the freedom of a working solution at that
-        time. But software develops and you don’t want your solution to
-        become outdated. Because of this together with an image people
-        always should think of <emphasis>image-maintenance</emphasis>. The
-        following paragraph just reflects ideas how to maintain images
-        created by KIWI: </para>
+  <title>Maintenance of Operating System Images</title>
+  <indexterm>
+      <primary>KIWI</primary>
+      <secondary>maintenance</secondary>
+    </indexterm>
+  <para>
+    Creating an image often results in an appliance solution for a
+    customer and gives you the freedom of a working solution at that
+    time. But software develops and you don’t want your solution to
+    become outdated. Because of this together with an image people
+    always should think of <emphasis>image-maintenance</emphasis>. The
+    following paragraph just reflects ideas how to maintain images
+    created by KIWI:
+   </para>
 
-    <figure id="fig.maintain">
-        <title>Image Maintenance Scenarios</title>
-        <mediaobjectco>
-            <imageobjectco>
-                <areaspec>
-                    <area coords="100 100"   id="co.maintain.imagedescr"/>
-                    <area coords="200 200" id="co.maintain.sourcechanges"/>
-                    <area coords="300 300" id="co.maintain.plusminus1"/>
-                    <area coords="400 400" id="co.maintain.imgchanges"/>
-                    <area coords="500 500" id="co.maintain.plusminus2"/>
-                </areaspec>
-                <imageobject>
-                    <imagedata fileref="images/maintain.png"/><!--  width="50%" -->
-                </imageobject>
-                <calloutlist>
-                    <callout arearefs="co.maintain.imagedescr">
-                        <para>Image Description as part of a versioning system like
-                            Git, Subversion, etc. to track changes</para>
-                    </callout>
-                    <callout arearefs="co.maintain.sourcechanges">
-                        <para>Software package source changes</para>
-                    </callout>
-                    <callout arearefs="co.maintain.plusminus1">
-                        <para><simplelist type="inline">
-                            <member>Faster, because already prepared</member>
-                            <member>cannot handle image description changes</member>
-                            <member>requires free space to store
-                                <filename>/tmp/myOSImage</filename></member>
-                        </simplelist>
-                        </para>
-                    </callout>
-                    <callout arearefs="co.maintain.imgchanges">
-                        <para>Image Description changes</para>
-                    </callout>
-                    <callout arearefs="co.maintain.plusminus2">
-                        <para><simplelist type="inline">
-                            <member>Covers all possible changes</member>
-                            <member>does not require storage for prepared trees</member>
-                            <member>slower, because KIWI prepare runs again</member>
-                        </simplelist>
-                        </para>
-                    </callout>
-                </calloutlist>
-            </imageobjectco>
-        </mediaobjectco>
-        
-    </figure>
+  <figure id="fig.maintain">
+    <title>Image Maintenance Scenarios</title>
+    <mediaobjectco>
+      <imageobjectco>
+        <areaspec>
+          <area coords="100 100"   id="co.maintain.imagedescr"/>
+          <area coords="200 200" id="co.maintain.sourcechanges"/>
+          <area coords="300 300" id="co.maintain.plusminus1"/>
+          <area coords="400 400" id="co.maintain.imgchanges"/>
+          <area coords="500 500" id="co.maintain.plusminus2"/>
+        </areaspec>
+        <imageobject>
+          <imagedata fileref="images/maintain.png"/><!--  width="50%" -->
+        </imageobject>
+        <calloutlist>
+          <callout arearefs="co.maintain.imagedescr">
+            <para>Image Description as part of a versioning system like
+              Git, Subversion, etc. to track changes</para>
+          </callout>
+          <callout arearefs="co.maintain.sourcechanges">
+            <para>Software package source changes</para>
+          </callout>
+          <callout arearefs="co.maintain.plusminus1">
+            <para><simplelist type="inline">
+              <member>Faster, because already prepared</member>
+              <member>cannot handle image description changes</member>
+              <member>requires free space to store
+                <filename>/tmp/myOSImage</filename></member>
+            </simplelist>
+            </para>
+          </callout>
+          <callout arearefs="co.maintain.imgchanges">
+            <para>Image Description changes</para>
+          </callout>
+          <callout arearefs="co.maintain.plusminus2">
+            <para><simplelist type="inline">
+              <member>Covers all possible changes</member>
+              <member>does not require storage for prepared trees</member>
+              <member>slower, because KIWI prepare runs again</member>
+            </simplelist>
+            </para>
+          </callout>
+        </calloutlist>
+      </imageobjectco>
+    </mediaobjectco>
+    
+  </figure>
 
 
-    <para>The picture in <xref linkend="fig.maintain"
-        xrefstyle="select:label"/> shows two possible
-        scenarios which requires an image to become updated. The first
-        reason for updating an image are changes to the software, for
-        example a new kernel should be used. If this change doesn’t require
-        additional software or changes in the configuration the update can
-        be done by KIWI itself using its <option>--upgrade</option> option.
-        In combination with <option>--upgrade</option> KIWI allows to add
-        an additional repository which may be needed if the updated software
-        is not part of the original repository. An important thing to know
-        is that this additional repository is <emphasis>not</emphasis>
-        stored into the original <filename>config.xml</filename> file of the
-        image description. </para>
-    <para>Another reason for updating an image beside software updates are
-        configuration changes or enhancements, for example an image should
-        have replaced its browser with another better browser or a new
-        service like apache should be enabled. In principle it’s possible to
-        do all those changes manually within the physical extend but
-        concerning maintenance this would be a nightmare. Why, because it
-        will leave the system in an unversioned condition. Nobody knows what
-        has changed since the very first preparation of this image. So in
-        short:</para>
-    <indexterm>
-            <primary>KIWI</primary>
-            <secondary>physical extends</secondary>
-        </indexterm>
-    <blockquote>
-        <para>Don’t modify physical extends manually!</para>
-    </blockquote>
-    <para>Changes to the image configuration should be done within the
-        image description. The image description itself should be part of a
-        versioning system like subversion. All changes can be tracked down
-        then and maybe more important can be assigned to product tags and
-        branches. As a consequence an image must be prepared from scratch
-        and the old physical extend could be removed. </para>
+  <para>The picture in <xref linkend="fig.maintain"
+    xrefstyle="select:label"/> shows two possible
+    scenarios which requires an image to become updated. The first
+    reason for updating an image are changes to the software, for
+    example a new kernel should be used. If this change doesn’t require
+    additional software or changes in the configuration the update can
+    be done by KIWI itself using its <option>--upgrade</option> option.
+    In combination with <option>--upgrade</option> KIWI allows to add
+    an additional repository which may be needed if the updated software
+    is not part of the original repository. An important thing to know
+    is that this additional repository is <emphasis>not</emphasis>
+    stored into the original <filename>config.xml</filename> file of the
+    image description. </para>
+  <para>Another reason for updating an image beside software updates are
+    configuration changes or enhancements, for example an image should
+    have replaced its browser with another better browser or a new
+    service like apache should be enabled. In principle it’s possible to
+    do all those changes manually within the physical extend but
+    concerning maintenance this would be a nightmare. Why, because it
+    will leave the system in an unversioned condition. Nobody knows what
+    has changed since the very first preparation of this image. So in
+    short:</para>
+  <indexterm>
+      <primary>KIWI</primary>
+      <secondary>physical extends</secondary>
+    </indexterm>
+  <blockquote>
+    <para>Don’t modify physical extends manually!</para>
+  </blockquote>
+  <para>Changes to the image configuration should be done within the
+    image description. The image description itself should be part of a
+    versioning system like subversion. All changes can be tracked down
+    then and maybe more important can be assigned to product tags and
+    branches. As a consequence an image must be prepared from scratch
+    and the old physical extend could be removed. </para>
 </chapter>

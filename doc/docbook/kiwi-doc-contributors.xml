@@ -1,73 +1,73 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
-                                                 "http://www.docbook.org/xml/4.5/docbookx.dtd">
+                         "http://www.docbook.org/xml/4.5/docbookx.dtd">
 
 <chapter id="chap.contributors">
-    <title>Contributors</title>
-    <indexterm>
-        <primary>KIWI</primary>
-        <secondary>Contributors</secondary>
-    </indexterm>
-    
-    <sect1 id="sec.contributors">
-        <title>Contributors to KIWI</title>
-            <info>
-                <authorgroup>
-                    <author>
-                        <affiliation>
-                            <orgname>SUSE LINUX Products GmbH</orgname>
-                        </affiliation>
-                        <firstname>Marcus</firstname>
-                        <surname>Sch??fer</surname>
-                        <contrib>Project Lead, Design, Doc, Implementation</contrib>
-                        <email>ms@suse.de</email>
-                    </author>
-                    <othercredit>
-                        <affiliation>
-                            <orgname>Dell</orgname>
-                        </affiliation>
-                        <firstname>Praveen</firstname>
-                        <surname>Paladugu</surname>
-                        <contrib>Implementation Centos/RHEL focus</contrib>
-                        <email>Praveen_Paladugu@dell.com </email>
-                    </othercredit>
-                    <othercredit>
-                        <affiliation>
-                            <orgname>SUSE LINUX Products GmbH</orgname>
-                        </affiliation>
-                        <firstname>Thomas</firstname>
-                        <surname>Schraitle</surname>
-                        <contrib>Documentation, XSLT</contrib>
-                        <email>toms@suse.de</email>
-                    </othercredit>
-                    <othercredit>
-                        <affiliation>
-                            <orgname>SUSE LINUX Products GmbH</orgname>
-                        </affiliation>
-                        <firstname>Adrian</firstname>
-                        <surname>Schroeter</surname>
-                        <contrib>Build Service integration</contrib>
-                        <email>adrian@suse.de</email>
-                    </othercredit>
-                    <othercredit>
-                        <affiliation>
-                            <orgname>SUSE</orgname>
-                        </affiliation>
-                        <firstname>Robert</firstname>
-                        <surname>Schweikert</surname>
-                        <contrib>Design, Doc, Implementation</contrib>
-                        <email>rjschwei@suse.com</email>
-                    </othercredit>
-                    <othercredit>
-                        <affiliation>
-                            <orgname>SUSE</orgname>
-                        </affiliation>
-                        <firstname>Dinar</firstname>
-                        <surname>Valeev</surname>
-                        <contrib>Implementation, Power architecture</contrib>
-                        <email>dvaleev@suse.com</email>
-                    </othercredit>
-                </authorgroup>
-            </info>
-     </sect1>
+  <title>Contributors</title>
+  <indexterm>
+    <primary>KIWI</primary>
+    <secondary>Contributors</secondary>
+  </indexterm>
+  
+  <sect1 id="sec.contributors">
+    <title>Contributors to KIWI</title>
+      <info>
+        <authorgroup>
+          <author>
+            <affiliation>
+              <orgname>SUSE LINUX Products GmbH</orgname>
+            </affiliation>
+            <firstname>Marcus</firstname>
+            <surname>Sch??fer</surname>
+            <contrib>Project Lead, Design, Doc, Implementation</contrib>
+            <email>ms@suse.de</email>
+          </author>
+          <othercredit>
+            <affiliation>
+              <orgname>Dell</orgname>
+            </affiliation>
+            <firstname>Praveen</firstname>
+            <surname>Paladugu</surname>
+            <contrib>Implementation Centos/RHEL focus</contrib>
+            <email>Praveen_Paladugu@dell.com </email>
+          </othercredit>
+          <othercredit>
+            <affiliation>
+              <orgname>SUSE LINUX Products GmbH</orgname>
+            </affiliation>
+            <firstname>Thomas</firstname>
+            <surname>Schraitle</surname>
+            <contrib>Documentation, XSLT</contrib>
+            <email>toms@suse.de</email>
+          </othercredit>
+          <othercredit>
+            <affiliation>
+              <orgname>SUSE LINUX Products GmbH</orgname>
+            </affiliation>
+            <firstname>Adrian</firstname>
+            <surname>Schroeter</surname>
+            <contrib>Build Service integration</contrib>
+            <email>adrian@suse.de</email>
+          </othercredit>
+          <othercredit>
+            <affiliation>
+              <orgname>SUSE</orgname>
+            </affiliation>
+            <firstname>Robert</firstname>
+            <surname>Schweikert</surname>
+            <contrib>Design, Doc, Implementation</contrib>
+            <email>rjschwei@suse.com</email>
+          </othercredit>
+          <othercredit>
+            <affiliation>
+              <orgname>SUSE</orgname>
+            </affiliation>
+            <firstname>Dinar</firstname>
+            <surname>Valeev</surname>
+            <contrib>Implementation, Power architecture</contrib>
+            <email>dvaleev@suse.com</email>
+          </othercredit>
+        </authorgroup>
+      </info>
+   </sect1>
 </chapter>

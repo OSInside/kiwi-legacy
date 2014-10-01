@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+                         "http://www.docbook.org/xml/4.5/docbookx.dtd">
+
+<chapter id="chap.partitions">
+  <title>KIWI Custom Partitions</title>
+  <indexterm>
+    <primary>KIWI</primary>
+    <secondary>LVM</secondary>
+  </indexterm>
+  <indexterm>
+    <primary>KIWI</primary>
+    <secondary>Btrfs</secondary>
+  </indexterm>
+  <indexterm>
+    <primary>KIWI</primary>
+    <secondary>zfs</secondary>
+  </indexterm>
+  <para>
+   KIWI supports custom parttions only via LVM, the logical volume manager for the Linux kernel,
+   or filesystems with volume support like btrfs or zfs.
+  </para>
+  <sect1 id="chap.partitions.lvm">
+   <title>Custom Partitioning via LVM</title>
+  <para>
+   KIWI supports LVM, the logical volume manager for the Linux kernel
+   that manages disk drives and similar mass-storage devices. KIWI
+   supports custom parttion only via LVM or filesystems with volume
+   support like btrfs or zfs.
+  </para>
+  <para>
+   To define a LVM volume, a <sgmltag class="element">systemdisk</sgmltag> element
+   within the <sgmltag class="element">type</sgmltag> element in the <filename>config.xml</filename> file.
+   The <sgmltag class="element">systemdisk</sgmltag> element has an optional
+   attribute <sgmltag class="attribute">name</sgmltag>, which specifies
+   the volume group name.
+  </para>
+  <para>
+   The <sgmltag class="element">systemdisk</sgmltag> element must contain
+   the child element <sgmltag class="element">volume</sgmltag>, with
+   four possible attributes:
+  </para>
+  <variablelist>
+    <varlistentry>
+      <term><sgmltag class="attribute">name</sgmltag></term>
+      <listitem>
+        <para>
+         A required attribute. The name of the volume.
+         If mountpoint is not specified the name specifies
+         a path which has to exist inside the root directory.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><sgmltag class="attribute">size</sgmltag></term>
+      <listitem>
+        <para>
+         An optional attribute. Absolute size of the volume. If the size value
+         is too small to store all data kiwi will exit.
+The value is used as MB by default but you can add "M" and/or "G" as postfix.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><sgmltag class="attribute">freespace</sgmltag></term>
+      <listitem>
+        <para>
+         An optional attribute. Free space to be added to this volume. The value is
+used as MB by default but you can add "M" and/or "G" as postfix.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><sgmltag class="attribute">mountpoint</sgmltag></term>
+      <listitem>
+        <para>
+         An optional attribute. The mountpoint specifies a path which has to
+         exist inside the root directory.
+        </para>
+      </listitem>
+    </varlistentry>
+  </variablelist>
+  <para>
+   For example, the following example will create
+   a logical volume named LVtmp with minimal size to
+   just store what is in <filename class="directory">/tmp</filename>
+   of the image at build time. The volume is mounted to
+   <filename class="directory">/tmp</filename>:
+  </para>
+  <screen>
+  &lt;systemdisk name="vgroup-name"&gt;
+      &lt;volume name="tmp"/&gt;
+  &lt;/systemdisk&gt;
+  </screen>
+  <para>
+   To do the same but with 200 MB of size, use:
+  </para>
+  <screen>
+  &lt;systemdisk name="vgroup-name"&gt;
+      &lt;volume name="tmp" size="200M"/&gt;
+  &lt;/systemdisk&gt;
+  </screen>
+  <para>
+    To create the logical volume named
+   'foo' >with 200 MB of free space mounted as
+   <filename class="directory">/tmp</filename>, use:
+  </para>
+  <screen>
+  &lt;systemdisk name="vgroup-name"&gt;
+      &lt;volume name="tmp" freespace="200M" mountpoint="tmp"/&gt;
+  &lt;/systemdisk&gt;
+  </screen>
+  <para>
+   There are always the volumes LVRoot and LVSwap for the
+   rootfs and the swap space. In order to influence LVRoot
+   one can use "@root" as a name:
+  </para>
+  <screen>
+  &lt;systemdisk name="vgroup-name"&gt;
+      &lt;volume name="@root" size="2M"/&gt;
+  &lt;/systemdisk&gt;
+  </screen>
+ </sect1>
+ <sect1 id="chap.partitions.btrfs">
+  <title>Custom Partitioning via Btrfs</title>
+  <para>
+   If Btrfs is used as a filesystem, the subvolume
+   management is configured via the same
+   <sgmltag class="element">systemdisk</sgmltag> element
+   as in the case of LVM. However, because there is
+   no extra subsystem involved, the attributes
+   <sgmltag class="attribute">name</sgmltag>
+   and <sgmltag class="attribute">mountpoint</sgmltag>
+   of the <sgmltag class="element">volume</sgmltag>
+   element are not used.
+  </para>
+ </sect1>
+</chapter>
+
