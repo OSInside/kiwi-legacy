@@ -2,12 +2,12 @@
 .\"     Title: kiwi
 .\"    Author: Marcus Schaefer <ms (AT) suse.de>
 .\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: Created: 09/30/2014
+.\"      Date: Created: 10/01/2014
 .\"    Manual: KIWI Manualpage
 .\"    Source: KIWI 7.01
 .\"  Language: English
 .\"
-.TH "KIWI" "1" "Created: 09/30/2014" "KIWI 7\&.01" "KIWI Manualpage"
+.TH "KIWI" "1" "Created: 10/01/2014" "KIWI 7\&.01" "KIWI Manualpage"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -55,6 +55,27 @@ command\&.
 In the preparation step, you prepare a directory including the contents of your new filesystem based on one or more software package source(s) The creation step is based on the result of the preparation step and uses the contents of the new image root tree to create the output image\&. If the image type ISO was requested, the output image would be a file with the suffix
 \&.iso
 representing a live system on CD or DVD\&. Other than that KIWI is able to create images for virtual and para\-virtual (Xen) environments as well as for USB stick, PXE network clients and OEM customized Linux systems\&.
+.SH "GENERAL OPTIONS"
+.PP
+[\fB\-h\fR | \fB\-\-help\fR]
+.RS 4
+Display help\&.
+.RE
+.PP
+[\fB\-\-version\fR]
+.RS 4
+Display the KIWI version\&.
+.RE
+.PP
+[\fB\-\-check\-config \fR\fB\fIpath\-to\-the\-configuration\-file\fR\fR]
+.RS 4
+Checks the XML configuration file\&.
+.RE
+.PP
+[\fB\-\-nocolor\fR]
+.RS 4
+Do not use colored output\&.
+.RE
 .SH "IMAGE PREPARATION AND CREATION"
 .HP \w'\fBkiwi\fR\ 'u
 \fBkiwi\fR {\-p | \-\-prepare} \fIimage\-path\fR
@@ -91,6 +112,8 @@ The KIWI post\-processing modes are used for special image deployment tasks, lik
 \fBkiwi\fR \-\-bootvm\ \fIinitrd\fR \-\-bootvm\-system\ \fIsystemImage\fR [\-\-bootvm\-disksize\ \fIsize\fR]
 .HP \w'\fBkiwi\fR\ 'u
 \fBkiwi\fR \-\-bootcd\ \fIinitrd\fR
+.HP \w'\fBkiwi\fR\ 'u
+\fBkiwi\fR \-\-bootusb\ \fIinitrd\fR
 .HP \w'\fBkiwi\fR\ 'u
 \fBkiwi\fR \-\-installcd\ \fIinitrd\fR \-\-installcd\-system\ \fIraw\-system\-image\fR
 .HP \w'\fBkiwi\fR\ 'u
@@ -218,6 +241,21 @@ Set a special target\-architecture\&. This overrides the used architecture for t
 zypp\&.conf\&. When used with smart this option doesn\*(Aqt have any effect\&.
 .RE
 .PP
+[\fB\-\-disk\-start\-sector \fR\fB\fInumber\fR\fR]
+.RS 4
+The start sector value for virtual disk based images\&. The default is 2048\&. For newer disks including SSD this is a reasonable default\&. In order to use the old style disk layout the value can be set to 32\&.
+.RE
+.PP
+[\fB\-\-disk\-sector\-size \fR\fB\fInumber\fR\fR]
+.RS 4
+Overwrite the default 512 byte sector size value\&. This will influence the partition alignment\&.
+.RE
+.PP
+[\fB\-\-disk\-alignment \fR\fB\fInumber\fR\fR]
+.RS 4
+Align the start of each partition to the specified value\&. By default 4096 bytes are used\&.
+.RE
+.PP
 [\fB\-\-debug\fR]
 .RS 4
 Prints a stack trace in case of internal errors
@@ -226,6 +264,29 @@ Prints a stack trace in case of internal errors
 [\fB\-\-verbose \fR\fB\fI1|2|3\fR\fR ]
 .RS 4
 Controls the verbosity level for the instsource module
+.RE
+.PP
+[\fB\-y\fR | \fB\-\-yes\fR ]
+.RS 4
+Answer any interactive questions with yes
+.RE
+.PP
+[\fB\-\-create\-instsource \fR\fB\fIpath\-to\-config\&.xml\fR\fR ]
+.RS 4
+Using this option, it is possible to create a valid installation repository from blank RPM file trees\&. The created tree can be used directly for the image creation process afterwards\&.
+.RE
+.PP
+[\fB\-\-bundle\-build\fR ]
+.RS 4
+This option bundles the build results to be suitable for publishing it in the buildservice\&. It allows adding a build\-number in combination with the
+\fB\-\-bundle\-id\fR
+option as well as a SHA key to the results\&. It also removes intermediate build results not relevant for users if they don\*(Aqt want to rebuild the image\&.
+.RE
+.PP
+[\fB\-\-bundle\-id \fR\fB\fIbuild\-number\fR\fR ]
+.RS 4
+The build\-number/string in combination with
+\fB\-\-bundle\-build\fR
 .RE
 .SH "IMAGE PREPARATION OPTIONS"
 .PP
@@ -248,6 +309,21 @@ Force creation of new root directory\&. If the directory already exists, it is d
 [\fB\-\-cache\fR \fIdirectory\fR ]
 .RS 4
 When specifying a cache directory, KIWI will create a cache each for patterns and packages and re\-use them, if possible, for subsequent root tree preparations of this and/or other images
+.RE
+.PP
+[\fB\-\-init\-cache\fR \fIimage description\fR ]
+.RS 4
+Creates a cache from a KIWI image description\&.
+.RE
+.PP
+[\fB\-\-recycle\-root\fR]
+.RS 4
+Uses an existing root tree and base the kiwi prepare step on top of it\&. This is used to speed things up\&.
+.RE
+.PP
+[\fB\-\-force\-bootstrap\fR]
+.RS 4
+In combination with recycle\-root this option forces to call the bootstrap phase of kiwi, which is not considered necessary under normal circumstations\&.
 .RE
 .PP
 [\fB\-\-add\-package\fR \fIpackage\fR ]
@@ -375,6 +451,23 @@ Specifies a custom mbrid\&. The number value is treated as decimal number which 
 [\fB\-\-edit\-bootconfig \fR\fB\fIscript\fR\fR]
 .RS 4
 Specifies the location of a custom script which is called right before the bootloader is installed\&. This allows to modify the bootloader configuration file written by kiwi\&. The scripts working directory is the one which represents the image structure including the bootloader configuration files\&. Please have in mind that according to the image type, architecture and bootloader type the files/directory structure and also the name of the bootloader configuration files might be different\&.
+.RE
+.PP
+[\fB\-\-edit\-bootinstall \fR\fB\fIscript\fR\fR]
+.RS 4
+Specifies the location of a custom script which is called right after the bootloader is installed\&.
+.RE
+.PP
+[\fB\-\-archive\-image\fR]
+.RS 4
+When calling kiwi
+\fB\-\-create\fR
+this option allows to pack the build result(s) into a tar archive\&.
+.RE
+.PP
+[\fB\-\-targetdevice\fR \fIdevice\fR]
+.RS 4
+Use an alternative device instead of the loop device\&.
 .RE
 .SH "FOR MORE INFORMATION"
 .PP
