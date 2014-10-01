@@ -369,8 +369,14 @@ sub setupInstallationSource {
         if (! $chroot) {
             if (! $repo_exists) {
                 $kiwi -> info ("Adding bootstrap zypper service: $alias");
+                KIWIQX::qxx(
+                    "mv /var/cache/kiwi/packages /var/cache/kiwi/packs"
+                );
                 $data = KIWIQX::qxx ("@zypper --root \"$root\" $sadd 2>&1");
                 $code = $? >> 8;
+                KIWIQX::qxx(
+                    "mv /var/cache/kiwi/packs /var/cache/kiwi/packages"
+                );
             } else {
                 $kiwi -> info ("Updating bootstrap zypper service: $alias");
                 $data = KIWIQX::qxx (
@@ -395,8 +401,14 @@ sub setupInstallationSource {
             my @zypper= @{$this->{zypper_chroot}};
             if (! $repo_exists) {
                 $kiwi -> info ("Adding chroot zypper service: $alias");
+                KIWIQX::qxx(
+                    "mv /var/cache/kiwi/packages /var/cache/kiwi/packs"
+                );
                 $data = KIWIQX::qxx ("@kchroot @zypper $sadd 2>&1");
                 $code = $? >> 8;
+                KIWIQX::qxx(
+                    "mv /var/cache/kiwi/packs /var/cache/kiwi/packages"
+                );
             } else {
                 $kiwi -> info ("Updating chroot zypper service: $alias");
                 $data = KIWIQX::qxx (
@@ -417,9 +429,15 @@ sub setupInstallationSource {
             $kiwi -> done ();
             if (($source{$alias}{imgincl}) && (! -f $imgRepo)) {
                 $kiwi -> info ("Adding $alias repo to image");
+                KIWIQX::qxx(
+                    "mv /var/cache/kiwi/packages /var/cache/kiwi/packs"
+                );
                 $sadd =~ s/--keep-packages//;
                 $data = KIWIQX::qxx ("@kchroot zypper $sadd 2>&1");
                 $code = $? >> 8;
+                KIWIQX::qxx(
+                    "mv /var/cache/kiwi/packs /var/cache/kiwi/packages"
+                );
                 if ($code != 0) {
                     $kiwi -> failed ();
                     $kiwi -> error  ("zypper: $data");
