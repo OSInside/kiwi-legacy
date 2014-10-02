@@ -204,6 +204,9 @@ sub createFormat {
     } elsif ($format eq "qcow2") {
         $kiwi -> info ("Starting raw => $format conversion\n");
         return $this -> createQCOW2();
+    } elsif ($format eq "gce") {
+        $kiwi -> info ("Starting raw => $format conversion\n");
+        return $this -> createGoogleComputeEngine();
     } else {
         $kiwi -> warning (
             "Can't convert image type $imgtype to $format format"
@@ -502,6 +505,40 @@ sub createQCOW2 {
     if ($result != 0) {
         $kiwi -> failed ();
         $kiwi -> error  ("Couldn't create qcow2 image: $status");
+        $kiwi -> failed ();
+        return;
+    }
+    $kiwi -> done ();
+    return $target;
+}
+
+#==========================================
+# createGoogleComputeEngine
+#------------------------------------------
+sub createGoogleComputeEngine {
+    my $this   = shift;
+    my $kiwi   = $this->{kiwi};
+    my $source = $this->{image};
+    my $target = $source;
+    my $gce_source = $source;
+    my $convert;
+    my $status;
+    my $result;
+    $kiwi -> info ("Creating Google Compute Engine image...");
+    $target  =~ s/\.raw$/\.gce/;
+    $gce_source =~ s/\.raw$/\.disk/;
+    $status = KIWIQX::qxx ("mv $source $gce_source 2>&1");
+    $result = $? >> 8;
+    if ($result == 0) {
+        $status = KIWIQX::qxx (
+            "tar --format=gnu -cSzf $target $gce_source 2>&1"
+        );
+        $result = $? >> 8;
+    }
+    KIWIQX::qxx ("mv $gce_source $source 2>&1");
+    if ($result != 0) {
+        $kiwi -> failed ();
+        $kiwi -> error  ("Couldn't create gce image: $status");
         $kiwi -> failed ();
         return;
     }
