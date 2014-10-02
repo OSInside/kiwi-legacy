@@ -99,6 +99,7 @@
         <package name="openssh"/>
         <package name="rsync"/>
         <package name="psmisc"/>
+        <package name="sudo"/>
     </packages>
     <packages type="iso">
         <package name="gfxboot-branding-SLE" bootinclude="true" bootdelete="true"/>
