@@ -548,12 +548,12 @@ sub createGoogleComputeEngine {
         $kiwi -> failed ();
         return;
     }
-    $target = $src_dirname."/".$dist."-guest-gce-".$version.".tar.gz";
+    $target = $dist."-guest-gce-".$version.".tar.gz";
     $status = KIWIQX::qxx ("mv $source $gce_source 2>&1");
     $result = $? >> 8;
     if ($result == 0) {
         $status = KIWIQX::qxx (
-            "tar --format=gnu -cSzf $target $gce_source 2>&1"
+            "cd $src_dirname && tar --format=gnu -cSzf $target disk.raw 2>&1"
         );
         $result = $? >> 8;
     }
@@ -565,7 +565,7 @@ sub createGoogleComputeEngine {
         return;
     }
     $kiwi -> done ();
-    return $target;
+    return $src_dirname."/".$target;
 }
 
 #==========================================
