@@ -124,6 +124,7 @@ sub new {
     #==========================================
     # Store object data
     #------------------------------------------
+    $this->{type}    = $type;
     $this->{cmdL}    = $cmdL;
     $this->{vmdata}  = $vconf;
     $this->{kiwi}    = $kiwi;
@@ -519,14 +520,35 @@ sub createGoogleComputeEngine {
     my $this   = shift;
     my $kiwi   = $this->{kiwi};
     my $source = $this->{image};
+    my $type   = $this->{type};
+    my $xml    = $this->{xml};
     my $target = $source;
-    my $gce_source = $source;
-    my $convert;
+    my $src_dirname = dirname $source;
+    my $gce_source = $src_dirname."/disk.raw";
+    my $boot = $type -> getBootImageDescript();
+    my $version = $xml -> getPreferences() -> getVersion();
     my $status;
     my $result;
+    my $dist;
     $kiwi -> info ("Creating Google Compute Engine image...");
-    $target  =~ s/\.raw$/\.gce/;
-    $gce_source =~ s/\.raw$/\.disk/;
+    if (! $boot) {
+        $kiwi -> failed ();
+        $kiwi -> error  ("Couldn't find boot image information");
+        $kiwi -> failed ();
+        return;
+    }
+    if ($boot =~ /.*-(.*)$/) {
+        $dist = $1;
+        $dist = lc $dist;
+    } else {
+        $kiwi -> failed ();
+        $kiwi -> error  (
+            "Failed to extract distribution from boot attribute: $boot"
+        );
+        $kiwi -> failed ();
+        return;
+    }
+    $target = $src_dirname."/".$dist."-guest-gce-".$version.".tar.gz";
     $status = KIWIQX::qxx ("mv $source $gce_source 2>&1");
     $result = $? >> 8;
     if ($result == 0) {
