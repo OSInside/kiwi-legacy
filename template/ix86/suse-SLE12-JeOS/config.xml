@@ -65,6 +65,9 @@
     <users group="root">
         <user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
     </users>
+    <users group='kiwi'>
+        <user name='kiwi' password='2exADvrjjX/kk' home='/home/kiwi'/>
+    </users>
     <repository type="rpm-md">
         <source path="http://download.suse.de/ibs/SUSE:/SLE-12:/GA/standard/"/>
     </repository>
@@ -94,6 +97,8 @@
         <package name="kiwi-desc-vmxboot"/>
         <package name="kiwi-desc-netboot"/>
         <package name="openssh"/>
+        <package name="rsync"/>
+        <package name="psmisc"/>
     </packages>
     <packages type="iso">
         <package name="gfxboot-branding-SLE" bootinclude="true" bootdelete="true"/>
