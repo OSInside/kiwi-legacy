@@ -1676,7 +1676,7 @@ div {
         ## Error message than we receive from the parser.
         ## To be remove from here by the end of 2014
         attribute format {
-            "ec2" | "ovf" | "ova" | "qcow2" | "vagrant" | "vmdk" |
+            "ec2" | "gce" | "ovf" | "ova" | "qcow2" | "vagrant" | "vmdk" |
             "vdi" | "vhd" | "vhd-fixed"
         }
     k.type.fsnocheck.attribute =
