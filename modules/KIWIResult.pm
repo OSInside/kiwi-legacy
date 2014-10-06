@@ -398,6 +398,19 @@ sub __bundleDisk {
     if (! $format) {
         return $this -> __bundleExtension ('raw');
     }
+    if ($format eq 'gce') {
+        my @archives = glob ("$source/*gce-*.tar.gz");
+        if (! @archives) {
+            $kiwi -> error  ("No GCE archive(s) found");
+            $kiwi -> failed ();
+            return;
+        }
+        foreach my $archive (@archives) {
+            if ($archive =~ /$source\/(.*gce-.*)\.tar\.gz/) {
+                return $this -> __bundleExtension ('tar.gz', $1);
+            }
+        }
+    }
     if ($format eq 'vagrant') {
         my @boxes = glob ("$source/$base.*.box");
         if (! @boxes) {
