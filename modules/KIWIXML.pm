@@ -5800,6 +5800,7 @@ sub getSingleInstSourceSatSolvable {
     # check/create cache directory
     #------------------------------------------
     my $sdir = "/var/tmp/kiwi/satsolver";
+    my $sdir_orig = $sdir;
     if (! -d $sdir) {
         my $data = KIWIQX::qxx ("mkdir -m 777 -p $sdir 2>&1");
         my $code = $? >> 8;
@@ -5835,7 +5836,7 @@ sub getSingleInstSourceSatSolvable {
     #==========================================
     # download repo XML metadata
     #------------------------------------------
-    my $repoMD = $sdir."/repomd.xml"; unlink $repoMD;
+    my $repoMD = $sdir."/repomd.xml-$$";
     foreach my $md (keys %repoxml) {
         if (KIWIGlobals->instance()->downloadFile ($repo.$md,$repoMD)) {
             last if -e $repoMD;
@@ -5933,6 +5934,18 @@ sub getSingleInstSourceSatSolvable {
     if (open (my $FD, '>', "$index.info")) {
         print $FD $repo."\n";
         close $FD;
+    }
+    #==========================================
+    # create tmp cache for repo data download
+    #------------------------------------------
+    $sdir = "/var/tmp/kiwi/satsolver/$$";
+    my $data = KIWIQX::qxx ("mkdir -m 777 -p $sdir 2>&1");
+    $code = $? >> 8;
+    if ($code != 0) {
+        $kiwi -> failed ();
+        $kiwi -> error  ("--> Couldn't create tmp cache dir: $data");
+        $kiwi -> failed ();
+        return;
     }
     #==========================================
     # download distro solvable(s)
@@ -6132,12 +6145,8 @@ sub getSingleInstSourceSatSolvable {
     #==========================================
     # cleanup cache dir
     #------------------------------------------
-    KIWIQX::qxx ("rm -f $sdir/repomd.xml");
-    KIWIQX::qxx ("rm -f $sdir/primary-*");
-    KIWIQX::qxx ("rm -f $sdir/projectxml-*");
-    KIWIQX::qxx ("rm -f $sdir/distxml-*");
-    KIWIQX::qxx ("rm -f $sdir/packages-*");
-    KIWIQX::qxx ("rm -f $sdir/*.pat*");
+    KIWIQX::qxx ("rm -f $sdir_orig/repomd.xml-$$");
+    KIWIQX::qxx ("rm -rf $sdir");
     if (! $error) {
         $kiwi -> done();
         return $index;
