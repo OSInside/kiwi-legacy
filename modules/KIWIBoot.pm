@@ -5243,10 +5243,8 @@ sub setupBootLoaderConfiguration {
             $kiwi -> error  ("*** uboot: CD boot not supported ***");
             $kiwi -> failed ();
             return;
-        } elsif (($topic=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
-            print $FD "setenv bootargs $cmdline \${append}\n";
         } else {
-            print $FD "setenv bootargs $cmdline \${append}\n"
+            print $FD "setenv bootargs \"$cmdline \${append}\"\n";
         }
         $FD -> close();
         $kiwi -> done();
