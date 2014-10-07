@@ -4716,6 +4716,10 @@ function dhclientImportInfo {
         cat $lease | grep 'domain-name-servers'|\
         awk '{print $3}'| tr -d ';' | tr ',' ' '
     )
+    export DHCPSIADDR=$(
+        cat $lease | grep 'dhcp-server-identifier'|\
+        awk '{print $3}'| tr -d ';' | tr ',' ' '
+    )
     export DNS=$DNSSERVERS
     export DHCPCHADDR=$(
         ip link show $1| grep link | awk '{print $2}'
