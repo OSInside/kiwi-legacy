@@ -298,6 +298,7 @@ sub setupInstallationSource {
     #==========================================
     # Add/Update repos
     #------------------------------------------
+    $this -> preserveRepoCache();
     foreach my $alias (keys %{$source{$stype}}) {
         my @sopts = @{$source{$stype}{$alias}};
         my @zopts = ();
@@ -369,14 +370,8 @@ sub setupInstallationSource {
         if (! $chroot) {
             if (! $repo_exists) {
                 $kiwi -> info ("Adding bootstrap zypper service: $alias");
-                KIWIQX::qxx(
-                    "mv /var/cache/kiwi/packages /var/cache/kiwi/packs"
-                );
                 $data = KIWIQX::qxx ("@zypper --root \"$root\" $sadd 2>&1");
                 $code = $? >> 8;
-                KIWIQX::qxx(
-                    "mv /var/cache/kiwi/packs /var/cache/kiwi/packages"
-                );
             } else {
                 $kiwi -> info ("Updating bootstrap zypper service: $alias");
                 $data = KIWIQX::qxx (
@@ -394,6 +389,7 @@ sub setupInstallationSource {
             if ($code != 0) {
                 $kiwi -> failed ();
                 $kiwi -> error  ("zypper: $data");
+                $this -> restoreRepoCache();
                 return;
             }
             $kiwi -> done ();
@@ -401,14 +397,8 @@ sub setupInstallationSource {
             my @zypper= @{$this->{zypper_chroot}};
             if (! $repo_exists) {
                 $kiwi -> info ("Adding chroot zypper service: $alias");
-                KIWIQX::qxx(
-                    "mv /var/cache/kiwi/packages /var/cache/kiwi/packs"
-                );
                 $data = KIWIQX::qxx ("@kchroot @zypper $sadd 2>&1");
                 $code = $? >> 8;
-                KIWIQX::qxx(
-                    "mv /var/cache/kiwi/packs /var/cache/kiwi/packages"
-                );
             } else {
                 $kiwi -> info ("Updating chroot zypper service: $alias");
                 $data = KIWIQX::qxx (
@@ -424,23 +414,19 @@ sub setupInstallationSource {
             if ($code != 0) {
                 $kiwi -> failed ();
                 $kiwi -> error  ("zypper: $data");
+                $this -> restoreRepoCache();
                 return;
             }
             $kiwi -> done ();
             if (($source{$alias}{imgincl}) && (! -f $imgRepo)) {
                 $kiwi -> info ("Adding $alias repo to image");
-                KIWIQX::qxx(
-                    "mv /var/cache/kiwi/packages /var/cache/kiwi/packs"
-                );
                 $sadd =~ s/--keep-packages//;
                 $data = KIWIQX::qxx ("@kchroot zypper $sadd 2>&1");
                 $code = $? >> 8;
-                KIWIQX::qxx(
-                    "mv /var/cache/kiwi/packs /var/cache/kiwi/packages"
-                );
                 if ($code != 0) {
                     $kiwi -> failed ();
                     $kiwi -> error  ("zypper: $data");
+                    $this -> restoreRepoCache();
                     return;
                 }
                 if ( $prio ) {
@@ -451,6 +437,7 @@ sub setupInstallationSource {
                     if ($code != 0) {
                         $kiwi -> failed ();
                         $kiwi -> error  ("zypper: $data");
+                        $this -> restoreRepoCache();
                         return;
                     }
                 }
@@ -471,13 +458,51 @@ sub setupInstallationSource {
             if ($code != 0) {
                 $kiwi -> failed ();
                 $kiwi -> error  ("zypper: $data");
+                $this -> restoreRepoCache();
                 return;
             }
             $kiwi -> done ();
         }
         push (@channelList,$alias);
     }
+    $this -> restoreRepoCache();
     $this->{channelList} = \@channelList;
+    return $this;
+}
+
+#==========================================
+# restoreRepoCache
+#------------------------------------------
+sub restoreRepoCache {
+    # ...
+    # activate preserved package cache for use
+    # with build repo setup
+    #
+    my $this = shift;
+    my $kiwi = $this->{kiwi};
+    $kiwi -> loginfo("Restoring Zypper package cache");
+    KIWIQX::qxx(
+        "mv /var/cache/kiwi/packs /var/cache/kiwi/packages &>/dev/null"
+    );
+    return $this;
+}
+
+#==========================================
+# preserveRepoCache
+#------------------------------------------
+sub preserveRepoCache {
+    # ...
+    # preserve repo cache which otherwise will be removed by
+    # zypper if no repo file is found. But this situation is
+    # normal for an image build process which setup and remove
+    # repos for building at runtime
+    # ---
+    my $this = shift;
+    my $kiwi = $this->{kiwi};
+    $kiwi -> loginfo("Preserving Zypper package cache");
+    KIWIQX::qxx(
+        "mv /var/cache/kiwi/packages /var/cache/kiwi/packs"
+    );
     return $this;
 }
 
