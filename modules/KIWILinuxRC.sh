@@ -6418,7 +6418,7 @@ function mountSystemCombined {
             target=/mnt/read-write
         fi
         mkdir -p /mnt-tmp
-        if ! mount ${loopf}-read-write /mnt-tmp;then
+        if ! mount -o loop ${loopf}-read-write /mnt-tmp;then
             systemException \
                 "Failed to mount read-write data file" \
             "reboot"
