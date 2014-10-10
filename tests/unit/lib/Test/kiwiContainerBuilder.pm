@@ -386,13 +386,13 @@ sub test_createContainerBundle {
     $this -> assert_not_null($res);
     my $expectedFl = 'lxc/container-test-lxc.';
     my $arch = KIWIQX::qxx ("uname -m"); chomp ( $arch );
-    $expectedFl .= $arch . '-1.0.0.tbz';
+    $expectedFl .= $arch . '-1.0.0.tar.xz';
     $this -> assert_file_exists($tmpDir . '/' . $expectedFl);
     my $CHILDWRITE;
     my $CHILDSTDO;
     my $CHILDSTDE;
     my $pid = open3 (
-        $CHILDWRITE, $CHILDSTDO, $CHILDSTDE, "tar -tjvf $tmpDir/$expectedFl"
+        $CHILDWRITE, $CHILDSTDO, $CHILDSTDE, "tar -tJvf $tmpDir/$expectedFl"
     );
     waitpid( $pid, 0 );
     $status = $? >> 8;
