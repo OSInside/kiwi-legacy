@@ -27,6 +27,7 @@ use File::Find;
 use File::Path;
 use Cwd 'abs_path';
 use Data::Dumper;
+use Digest::MD5 ();
 
 #==========================================
 # Dynamic Modules
@@ -118,6 +119,9 @@ sub new {
         m_debug        => undef,
         m_rmlists      => undef,
         m_appdata      => undef,
+        m_appdata_seen => undef,
+        m_appdata_base => undef,
+        m_appdata_type => undef,
         m_reportLog    => {},
     };
 
@@ -952,12 +956,27 @@ sub addAppdata {
         return;
     }
     $XML->seek(0, 0);
+    my $appdata = '';
     while ( <$XML> ) {
         next if m,<\?xml,;
-        next if m,^\s*</?applications,;
-        $this->{m_appdata} .= $_;
+        if (m,<((applications|components)[^\>\n]*)>,s) {
+            if (!$this->{m_appdata_type} ||
+                ($2 eq 'components' &&
+                 $this->{m_appdata_type} eq 'applications')) {
+                $this->{m_appdata_base} = $1;
+                $this->{m_appdata_type} = $2;
+            }
+        }
+        next if m,^\s*</?(?:applications|components),;
+        $appdata .= $_;
     }
     $XML -> close();
+    my $appdata_md5 = Digest::MD5::md5_hex($appdata);
+    $this->{m_appdata_seen} ||= {};
+    if (!$this->{m_appdata_seen}->{$appdata_md5}) {
+        $this->{m_appdata} .= $appdata;
+        $this->{m_appdata_seen}->{$appdata_md5} = 1;
+    }
     return;
 }
 
@@ -1289,6 +1308,24 @@ sub setupPackageFiles {
 }
 
 #==========================================
+# writeAppdata
+#------------------------------------------
+sub writeAppdata {
+    my $this = shift;
+    my $dir = shift;
+    $this->logMsg('I', "write appdata to $dir\n");
+    my $XML = FileHandle -> new();
+    my $appdata_type = $this->{m_appdata_type} || 'applications';
+    my $appdata_base = $this->{m_appdata_base } || $appdata_type;
+    $XML -> open (">$dir/appdata.xml") or die("$dir/appdata.xml: $!\n");
+    print $XML "<?xml version='1.0' ?>\n";
+    print $XML "<$appdata_base>\n";
+    print $XML $this->{m_appdata};
+    print $XML "</$appdata_type>\n";
+    $XML -> close ();
+}
+
+#==========================================
 # collectPackages
 #------------------------------------------
 sub collectPackages {
@@ -1393,29 +1430,13 @@ sub collectPackages {
     }
     my $descrdir = $this->{m_proddata}->getInfo("DESCRDIR");
     if ($descrdir && $this->{m_appdata}) {
-        my $dirbase = "$this->{m_basesubdir}->{1}";
-        $this->logMsg('I', "write appdata to $dirbase/$descrdir\n");
-        my $XML = FileHandle -> new();
-        $XML -> open (">$dirbase/$descrdir/appdata.xml") or die "WHAT";
-        print $XML "<?xml version='1.0' ?>\n";
-        print $XML "<applications>\n";
-        print $XML $this->{m_appdata};
-        print $XML "</applications>\n";
-        $XML -> close ();
+        $this->writeAppdata("$this->{m_basesubdir}->{1}/$descrdir");
     }
     my $datadir = $this->{m_proddata}->getInfo("DATADIR");
     if ( defined($this->{m_proddata}->getVar("CREATE_REPOMD"))
         && $this->{m_proddata}->getVar("CREATE_REPOMD") eq "true"
         && $this->{m_appdata}) {
-        my $dirbase = "$this->{m_basesubdir}->{1}";
-        $this->logMsg('I', "write appdata to $dirbase/$datadir/repodata\n");
-        my $XML = FileHandle -> new();
-        $XML -> open (">$dirbase/$datadir/repodata/appdata.xml") or die "WHAT";
-        print $XML "<?xml version='1.0' ?>\n";
-        print $XML "<applications>\n";
-        print $XML $this->{m_appdata};
-        print $XML "</applications>\n";
-        $XML -> close ();
+        $this->writeAppdata("$this->{m_basesubdir}->{1}/$datadir/repodata");
     }
     my @packagelist = sort(keys(%{$this->{m_metaPacks}}));
     if($this->unpackMetapackages(@packagelist) != 0) {
