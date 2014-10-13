@@ -335,7 +335,7 @@ sub __createContainerBundle {
     my $imgFlName = $globals -> generateBuildImageName(
         $xml, '-', $extension
     );
-    $imgFlName .= '.tbz';
+    $imgFlName .= '.tar.xz';
     my $tar = $locator -> getExecPath('tar');
     if (! $tar) {
         $kiwi -> failed();
@@ -360,7 +360,7 @@ sub __createContainerBundle {
         return;
     }
     my $data = KIWIQX::qxx (
-        "$tar -C $origin -cjf $baseBuildDir/$imgFlName @dirlist 2>&1"
+        "$tar -C $origin -cJf $baseBuildDir/$imgFlName @dirlist 2>&1"
     );
     my $code = $? >> 8;
     if ($code != 0) {
