@@ -1832,15 +1832,13 @@ sub createImageLiveCD {
                     $s_shim = $s_shim_suse;
                 }
                 $kiwi -> failed ();
-                $kiwi -> error  (
-                    "Can't find $s_shim in initrd");
+                $kiwi -> error  ("Can't find $s_shim in initrd");
                 $kiwi -> failed ();
                 return;
             }
             if (! -e $s_signed) {
                 $kiwi -> failed ();
-                $kiwi -> error  (
-                    "Can't find grub2 $s_signed in initrd");
+                $kiwi -> error  ("Can't find grub2 $s_signed in initrd");
                 $kiwi -> failed ();
                 return;
             }
@@ -2024,7 +2022,7 @@ sub createImageLiveCD {
     #------------------------------------------
     $kiwi -> info ("Setting up isolinux boot CD [$isoarch]");
     my $gfx = $tmpdir."/image/loader";
-    $data = KIWIQX::qxx ("cp -a $gfx/* $destination");
+    $data = KIWIQX::qxx ("cp -a $gfx/* $destination 2>&1");
     $code = $? >> 8;
     if ($code != 0) {
         $kiwi -> failed ();
