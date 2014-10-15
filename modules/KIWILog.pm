@@ -467,7 +467,7 @@ sub printLog {
         if (($needCR) && ($this->{fileLog})) {
             print $prev_channel "\n";
         }
-        print $FD $result;
+        print $prev_channel $result;
     }
     #==========================================
     # save in cache if needed
