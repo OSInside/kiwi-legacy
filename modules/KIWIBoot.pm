@@ -5345,7 +5345,7 @@ sub copyBootCode {
     #------------------------------------------
     if ($this->{needJumpP}) {
         if (($firmware eq "efi") || ($firmware eq "uefi")) {
-            $status = KIWIQX::qxx ("cp -a $source/EFI $dest");
+            $status = KIWIQX::qxx ("cp -a $source/EFI $dest 2>&1");
             $result = $? >> 8;
             if ($result != 0) {
                 $kiwi -> failed ();
