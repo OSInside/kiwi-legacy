@@ -179,6 +179,7 @@ sub new {
             $channel =~ s/_\$//g;
             $channel =~ s/^_//;
             $channel =~ s/_$//;
+            $channel =~ s/\?.*//;
         }
         #==========================================
         # build source key...
