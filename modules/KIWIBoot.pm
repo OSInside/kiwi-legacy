@@ -3471,16 +3471,17 @@ sub setupBootLoaderStages {
         my $grub_ofw   = 'grub2';
         my $grub_share = 'grub2';
         my $lib        = 'lib';
+        my $bootkernel = $this->{xml}->getImageType()->getBootKernel();
         if ($arch eq 'x86_64') {
             $efipc = 'x86_64-efi';
             $grubpc = 'i386-pc';
-            if ($firmware eq 'ec2') {
+            if ($firmware eq 'ec2' && $bootkernel && $bootkernel eq 'ec2k') {
                 $grubpc = 'x86_64-xen';
             }
         } elsif ($arch =~ /i.86/) {
             $efipc = 'i386-efi';
             $grubpc = 'i386-pc';
-            if ($firmware eq 'ec2') {
+            if ($firmware eq 'ec2' && $bootkernel && $bootkernel eq 'ec2k') {
                 $grubpc = 'i386-xen';
             }
         } elsif (($arch eq 'aarch64') || ($arch eq 'arm64')) {
