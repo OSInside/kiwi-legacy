@@ -3460,6 +3460,7 @@ sub setupBootLoaderStages {
         my $efipc;
         my $grubpc;
         my $grubofw;
+        my $xenpc;
         my $bootbios   = "$tmpdir/boot/grub2/bootpart.cfg";
         my $bootofw    = "$tmpdir/boot/grub2/bootpart.cfg";
         my $bootefi    = "$tmpdir/boot/grub2-efi/bootpart.cfg";
@@ -3474,15 +3475,11 @@ sub setupBootLoaderStages {
         if ($arch eq 'x86_64') {
             $efipc = 'x86_64-efi';
             $grubpc = 'i386-pc';
-            if (($firmware eq 'ec2') || ($firmware eq 'ec2hvm')) {
-                $grubpc = 'x86_64-xen';
-            }
+            $xenpc  = 'x86_64-xen';
         } elsif ($arch =~ /i.86/) {
             $efipc = 'i386-efi';
             $grubpc = 'i386-pc';
-            if (($firmware eq 'ec2') || ($firmware eq 'ec2hvm')) {
-                $grubpc = 'i386-xen';
-            }
+            $xenpc = 'i386-xen';
         } elsif (($arch eq 'aarch64') || ($arch eq 'arm64')) {
             $efipc = 'arm64-efi';
             $grubpc = 'arm64-efi';
@@ -3547,6 +3544,11 @@ sub setupBootLoaderStages {
             $stages{efi}{shim_suse} = "usr/$lib/efi/shim-opensuse.efi";
             $stages{efi}{signed}    = "usr/$lib/efi/grub.efi";
         }
+        if (($firmware eq "ec2") || ($firmware eq "ec2hvm")) {
+            $stages{ec2}{initrd}   = "'usr/lib/$grub_bios/$xenpc/*'";
+            $stages{ec2}{stageSRC} = "/usr/lib/$grub_bios/$xenpc";
+            $stages{ec2}{stageDST} = "/boot/grub2/$xenpc";
+        }
         if ($firmware eq "ofw") {
             $stages{ofw}{initrd}    = "'usr/lib/$grub_ofw/$grubofw/*'";
             $stages{ofw}{stageSRC}  = "/usr/lib/$grub_ofw/$grubofw";
@@ -3574,12 +3576,10 @@ sub setupBootLoaderStages {
         if ($typeinfo->{lvm}) {
             push @core_modules, 'lvm';
         }
-        if (($firmware ne 'ec2') && ($firmware ne 'ec2hvm')) {
-            push @core_modules, 'boot';
-            push @bios_core_modules, qw /chain/;
-            if ($arch =~ /i.86|x86_64/) {
-                push @bios_core_modules, qw /biosdisk vga vbe multiboot/;
-            }
+        push @core_modules, 'boot';
+        push @bios_core_modules, qw /chain/;
+        if ($arch =~ /i.86|x86_64/) {
+            push @bios_core_modules, qw /biosdisk vga vbe multiboot/;
         }
         my @efi_core_modules = (
             'part_gpt','efi_gop'
@@ -3601,6 +3601,9 @@ sub setupBootLoaderStages {
         }
         if ($firmware eq "ofw") {
             @bootdir = ("$tmpdir/boot/grub2/$grubofw");
+        }
+        if (($firmware eq 'ec2') || ($firmware eq 'ec2hvm')) {
+            push @bootdir,"$tmpdir/boot/grub2/$xenpc";
         }
         if ($arch =~ /i.86|x86_64/) {
             push @efi_core_modules,'efi_uga';
@@ -3657,27 +3660,31 @@ sub setupBootLoaderStages {
         #------------------------------------------
         $kiwi -> info ("Importing grub2 stage and theming files");
         my $figure= "'usr/share/$grub_share/themes/*'";
-        my $s_efi = $stages{efi}{initrd};
-        my $s_bio = $stages{bios}{initrd};
-        my $s_ofw = $stages{ofw}{initrd};
-        if (! $s_efi) {
-            $s_efi = "";
+        my $s_efi = "";
+        my $s_bio = "";
+        my $s_ofw = "";
+        my $s_ec2 = "";
+        if ($stages{efi}{initrd}) {
+            $s_efi = "-d $stages{efi}{initrd}";
         }
-        if (! $s_bio) {
-            $s_bio = "";
+        if ($stages{bios}{initrd}) {
+            $s_bio = "-d $stages{bios}{initrd}";
         }
-        if (! $s_ofw) {
-            $s_ofw = "";
+        if ($stages{ofw}{initrd}) {
+            $s_ofw = "-d $stages{ofw}{initrd}";
+        }
+        if ($stages{ec2}{initrd}) {
+            $s_ec2 = "-d $stages{ec2}{initrd}";
         }
         if ($zipped) {
             $status= KIWIQX::qxx (
                 "$unzip | \\
-                (cd $tmpdir && cpio -i -d $figure -d $s_bio -d $s_efi -d $s_ofw 2>&1)"
+                (cd $tmpdir && cpio -i -d $figure $s_bio $s_efi $s_ofw $s_ec2 2>&1)"
             );
         } else {
             $status= KIWIQX::qxx (
                 "cat $initrd | \\
-                (cd $tmpdir && cpio -i -d $figure -d $s_bio -d $s_efi -d $s_ofw 2>&1)"
+                (cd $tmpdir && cpio -i -d $figure $s_bio $s_efi $s_ofw $s_ec2 2>&1)"
             );
         }
         #==========================================
@@ -3698,12 +3705,16 @@ sub setupBootLoaderStages {
         my $stagesBIOS = 0;
         my $stagesEFI  = 0;
         my $stagesOFW  = 0;
+        my $stagesEC2  = 0;
         my @stageFiles = ('bios');
         if (($firmware eq "efi") || ($firmware eq "uefi")) {
             push @stageFiles,'efi';
         }
         if ($firmware eq "ofw") {
             @stageFiles = ('ofw');
+        }
+        if (($firmware eq "ec2") || ($firmware eq "ec2hvm")) {
+            push @stageFiles,'ec2';
         }
         foreach my $stage (@stageFiles) {
             my $stageD = $stages{$stage}{stageSRC};
@@ -3719,6 +3730,8 @@ sub setupBootLoaderStages {
                 $stagesOK = 1;
                 if ($stage eq 'bios') {
                     $stagesBIOS = 1;
+                } elsif ($stage eq 'ec2') {
+                    $stagesEC2 = 1;
                 } elsif ($stage eq 'efi') {
                     $stagesEFI = 1;
                 } elsif ($stage eq 'ofw') {
@@ -3747,6 +3760,12 @@ sub setupBootLoaderStages {
         if (($firmware eq 'ofw') && (! $stagesOFW)) {
             $kiwi -> failed ();
             $kiwi -> error  ("No grub2 OFW stage files found in boot image");
+            $kiwi -> failed ();
+            return;
+        }
+        if (($firmware =~ /ec2/) && (! $stagesEC2)) {
+            $kiwi -> failed ();
+            $kiwi -> error  ("No grub2 EC2 Xen stage files found in boot image");
             $kiwi -> failed ();
             return;
         }
@@ -3911,7 +3930,7 @@ sub setupBootLoaderStages {
         #==========================================
         # Create core grub2 boot images
         #------------------------------------------
-        if ($stagesBIOS) {
+        if (($stagesBIOS) || ($stagesEC2)) {
             $kiwi -> info ("Creating grub2 core boot image");
             if (! $grub2_bios_mkimage) {
                 $kiwi -> failed ();
@@ -5517,7 +5536,7 @@ sub installBootLoader {
             $kiwi -> failed ();
             return;
         }
-        if (($firmware =~ /bios|ofw/) && (! -e "$stages/$grubimg")) {
+        if (($firmware =~ /ec2|bios|ofw/) && (! -e "$stages/$grubimg")) {
             $kiwi -> error  ("Mandatory grub2 modules not found");
             $kiwi -> failed ();
             return;
