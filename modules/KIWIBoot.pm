@@ -3474,13 +3474,13 @@ sub setupBootLoaderStages {
         if ($arch eq 'x86_64') {
             $efipc = 'x86_64-efi';
             $grubpc = 'i386-pc';
-            if ($firmware eq 'ec2') {
+            if (($firmware eq 'ec2') || ($firmware eq 'ec2hvm')) {
                 $grubpc = 'x86_64-xen';
             }
         } elsif ($arch =~ /i.86/) {
             $efipc = 'i386-efi';
             $grubpc = 'i386-pc';
-            if ($firmware eq 'ec2') {
+            if (($firmware eq 'ec2') || ($firmware eq 'ec2hvm')) {
                 $grubpc = 'i386-xen';
             }
         } elsif (($arch eq 'aarch64') || ($arch eq 'arm64')) {
