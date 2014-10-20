@@ -2025,7 +2025,7 @@ sub __addTypeToBootXML {
     #------------------------------------------
     my $boottimeout = $systemType -> getBootTimeout();
     if (defined $boottimeout) {
-        $kiwi -> info ("--> boottimout: $boottimeout");
+        $kiwi -> info ("--> boottimeout: $boottimeout");
         $bootType -> setBootTimeout($boottimeout);
         $kiwi -> done();
     }
