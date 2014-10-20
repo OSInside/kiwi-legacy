@@ -3574,7 +3574,7 @@ sub setupBootLoaderStages {
         if ($typeinfo->{lvm}) {
             push @core_modules, 'lvm';
         }
-        if ($firmware ne 'ec2') {
+        if (($firmware ne 'ec2') && ($firmware ne 'ec2hvm')) {
             push @core_modules, 'boot';
             push @bios_core_modules, qw /chain/;
             if ($arch =~ /i.86|x86_64/) {
@@ -4373,7 +4373,7 @@ sub setupBootLoaderConfiguration {
             if ($config eq 'grub2-efi') {
                 print $FD 'set prefix=($root)/boot/grub2-efi'."\n";
             } else {
-                if ($firmware ne 'ec2') {
+                if (($firmware ne 'ec2') && ($firmware ne 'ec2hvm')) {
                     print $FD 'set prefix=($root)/boot/grub2'."\n";
                 }
             }
