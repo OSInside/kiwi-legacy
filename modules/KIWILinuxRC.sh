@@ -4266,7 +4266,11 @@ function searchBIOSBootDevice {
     # Check root variable
     #--------------------------------------
     if [ ! -z "$root" ];then
-        waitForStorageDevice $root
+        if ! waitForStorageDevice $root;then
+            systemException \
+                "Specified root device $root doesn't appear... fatal !" \
+            "reboot"
+        fi
         export biosBootDevice=$(dn $root)
         if [ ! -e /config.partids ];then
             echo "kiwi_RootPart=1" > /config.partids
