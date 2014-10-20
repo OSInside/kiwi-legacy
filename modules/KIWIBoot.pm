@@ -4373,9 +4373,7 @@ sub setupBootLoaderConfiguration {
             if ($config eq 'grub2-efi') {
                 print $FD 'set prefix=($root)/boot/grub2-efi'."\n";
             } else {
-                if (($firmware ne 'ec2') && ($firmware ne 'ec2hvm')) {
-                    print $FD 'set prefix=($root)/boot/grub2'."\n";
-                }
+                print $FD 'set prefix=($root)/boot/grub2'."\n";
             }
             # print $FD "set debug=all\n";
             print $FD "set default=$defaultBootNr\n";
