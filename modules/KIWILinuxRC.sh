@@ -328,6 +328,11 @@ function systemException {
     Echo -e "$1"
     case "$what" in
     "reboot")
+        # in order to see all log information in case of a reboot exception
+        # we print the current log contents to the console. On systems like
+        # public clouds the console information is stored and provided to
+        # the user. Thus it makes sense to be verbose here
+        cat $ELOG_FILE
         Echo "rebootException: reboot in 120 sec..."; sleep 120
         /sbin/reboot -f -i >$nuldev
     ;;
@@ -4267,8 +4272,10 @@ function searchBIOSBootDevice {
     #--------------------------------------
     if [ ! -z "$root" ];then
         if ! waitForStorageDevice $root;then
+            Echo "Specified root device $root not found. Found devices:"
+            hwinfo --disk
             systemException \
-                "Specified root device $root doesn't appear... fatal !" \
+                "root device not found... fatal !" \
             "reboot"
         fi
         export biosBootDevice=$(dn $root)
@@ -7809,8 +7816,8 @@ function bootImage {
     if [ -e /mnt/dev/shm/initrd.msg ];then
         cp -f /mnt/dev/shm/initrd.msg /mnt/var/log/boot.msg
     fi
-    if [ -e /var/log/boot.kiwi ];then
-        cp -f /var/log/boot.kiwi /mnt/var/log/boot.kiwi
+    if [ -e $ELOG_FILE ];then
+        cp -f $ELOG_FILE /mnt/$ELOG_FILE
     fi
     if [ ! -d /mnt/var/log/ConsoleKit ];then
         mkdir -p /mnt/var/log/ConsoleKit
@@ -8308,7 +8315,7 @@ function importText {
     export TEXT_BOOT_SETUP_FAILED=$(
         getText "Bootloader installation has failed")
     export TEXT_BOOT_SETUP_FAILED_INFO=$(
-        getText "The system will not be able to reboot. Please make sure to fixup and install the bootloader before next reboot. Check /var/log/boot.kiwi for details")
+        getText "The system will not be able to reboot. Please make sure to fixup and install the bootloader before next reboot. Check $ELOG_FILE for details")
 }
 #======================================
 # selectLanguage
