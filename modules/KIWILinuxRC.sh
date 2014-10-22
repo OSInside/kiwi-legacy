@@ -3161,19 +3161,24 @@ function setupDefaultPXENetwork {
 #--------------------------------------
 function setupDefaultFstab {
     # /.../
-    # create a new /etc/fstab file with the default entries
+    # Update or create new /etc/fstab file with the default entries
     # ----
     local IFS=$IFS_ORIG
     local prefix=$1
     local nfstab=$prefix/etc/fstab
     mkdir -p $prefix/etc
-    cat > $nfstab < /dev/null
-    echo "devpts  /dev/pts          devpts  mode=0620,gid=5 0 0"  >> $nfstab
-    echo "proc    /proc             proc    defaults        0 0"  >> $nfstab
-    echo "sysfs   /sys              sysfs   noauto          0 0"  >> $nfstab
-    echo "debugfs /sys/kernel/debug debugfs noauto          0 0"  >> $nfstab
-    echo "usbfs   /proc/bus/usb     usbfs   noauto          0 0"  >> $nfstab
-    echo "tmpfs   /run              tmpfs   noauto          0 0"  >> $nfstab
+    grep -q devpts $nfstab || \
+        echo "devpts  /dev/pts          devpts  mode=0620,gid=5 0 0"  >> $nfstab
+    grep -q proc $nfstab || \
+        echo "proc    /proc             proc    defaults        0 0"  >> $nfstab
+    grep -q sysfs $nfstab || \
+        echo "sysfs   /sys              sysfs   noauto          0 0"  >> $nfstab
+    grep -q debugfs $nfstab || test -e /sys/kernel/debug && \
+        echo "debugfs /sys/kernel/debug debugfs noauto          0 0"  >> $nfstab
+    grep -q usbfs $nfstab || test -e /proc/bus/usb && \
+        echo "usbfs   /proc/bus/usb     usbfs   noauto          0 0"  >> $nfstab
+    grep -q /run $nfstab || test -e /run && \
+        echo "tmpfs   /run              tmpfs   noauto          0 0"  >> $nfstab
 }
 #======================================
 # updateRootDeviceFstab
