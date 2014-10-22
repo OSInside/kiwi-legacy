@@ -22,7 +22,8 @@ export BOOTABLE_FLAG="$(echo -ne '\x80')"
 export ELOG_FILE=/var/log/boot.kiwi
 export TRANSFER_ERRORS_FILE=/tmp/transfer.errors
 export UFONT=/usr/share/fbiterm/fonts/b16.pcf.gz
-export HYBRID_PERSISTENT_FS=ext3
+export HYBRID_PERSISTENT_FS=btrfs
+export HYBRID_PERSISTENT_OPTS=""
 export HYBRID_PERSISTENT_ID=83
 export HYBRID_PERSISTENT_DIR=/read-write
 export UTIMER_INFO=/dev/utimer
@@ -8691,9 +8692,8 @@ function createHybridPersistent {
     #======================================
     # create filesystem on write partition
     #--------------------------------------
-    local hybrid_opts="-E lazy_itable_init"
     local hybrid_device=$(ddn $device $pID)
-    if ! mkfs.$HYBRID_PERSISTENT_FS -L hybrid $hybrid_opts $hybrid_device;then
+    if ! mkfs.$HYBRID_PERSISTENT_FS -L hybrid $HYBRID_PERSISTENT_OPTS $hybrid_device;then
         Echo "Failed to create hybrid persistent filesystem"
         Echo "Persistent writing deactivated"
         unset kiwi_hybridpersistent
