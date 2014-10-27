@@ -404,6 +404,8 @@ sub aarch64_efi {
     $para.= " -no-emul-boot";
     $para.= " -boot-load-size 1";
     $para.= " -b $loader";
+    $para.= " -c $boot/boot.catalog";
+    $para.= " -hide $boot/boot.catalog -hide-joliet $boot/boot.catalog";
     $this -> {params} = $para;
     return $this;
 }
