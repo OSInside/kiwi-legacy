@@ -308,6 +308,7 @@
         <file name="libjpeg"/>
         <file name="libkms"/>
         <file name="libaio"/>
+        <file name="libdrm"/>
     </strip>
 
 </initrd>
