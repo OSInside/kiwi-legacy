@@ -6,7 +6,7 @@ for item in $(
 ); do
     commit=$(echo $item | cut -f1 -d,)
     version=$(echo $item | cut -f2 -d,)
-    last_tagged=$(git tag --list --contains $commit 2>/dev/null)
+    last_tagged=$(git tag --list --contains $commit | head -n 1 2>/dev/null)
     if [ ! -z "$last_tagged" ];then
         echo "Current tagged version: $last_tagged"
         break
