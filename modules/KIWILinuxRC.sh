@@ -2749,6 +2749,7 @@ function setupBootLoaderGrub2 {
     local cmdline
     local timeout
     local vesa
+    local loader_type="grub2"
     #======================================
     # vesa hex => resolution table
     #--------------------------------------
@@ -2886,6 +2887,7 @@ EOF
             echo "GRUB_USE_INITRDEFI=true" >> $inst_default_grub
             ;;
         esac
+        loader_type="grub2-efi"
     fi
     #======================================
     # write vesa vga setup
@@ -2917,7 +2919,7 @@ EOF
     #--------------------------------------
     mkdir -p $destsPrefix/etc/sysconfig
     local sysb=$destsPrefix/etc/sysconfig/bootloader
-    echo "LOADER_TYPE=\"grub2\""                   > $sysb
+    echo "LOADER_TYPE=\"$loader_type\""            > $sysb
     echo "LOADER_LOCATION=\"mbr\""                >> $sysb
     echo "DEFAULT_APPEND=\"$cmdline\""            >> $sysb
     echo "FAILSAFE_APPEND=\"$failsafe $cmdline\"" >> $sysb
