@@ -1,6 +1,0 @@
-[Remote libvirt SSH access]
- Identity=unix-user:oneadmin
- Action=org.libvirt.unix.manage
- ResultAny=yes
- ResultInactive=yes
- ResultActive=yes

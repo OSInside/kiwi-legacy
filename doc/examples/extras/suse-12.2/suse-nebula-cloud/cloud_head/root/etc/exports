@@ -1,1 +1,0 @@
-/var/lib/one *(no_subtree_check,rw,root_squash,sync)
