@@ -463,7 +463,7 @@ sub printLog {
     #==========================================
     # print message to log channel (stdin,file)
     #------------------------------------------
-    if (($FD) && ((! defined $flag) || ($this->{fileLog}))) {
+    if (($prev_channel) && ((! defined $flag) || ($this->{fileLog}))) {
         if (($needCR) && ($this->{fileLog})) {
             print $prev_channel "\n";
         }
