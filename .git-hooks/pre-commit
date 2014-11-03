@@ -568,9 +568,10 @@ if ($TestAllModules) {
 # Should the code layout in our repository change,
 # these definitions have to be updated
 my $modulesDir = getcwd() . '/modules';
-# Just add one of the plugin directories, all contain the same files
-# this needs some cleaning up TODO
-my $pluginsDir = getcwd() . '/distribution/kiwi-instsource-plugins-SLE-11-SP2';
+my $pluginsDir;
+foreach my $plugdir (glob(getcwd() . '/distribution/*')) {
+    $pluginsDir .= $plugdir. ':';
+}
 my $testInclDir = getcwd() . '/tests/unit/lib';
 my $pathEnv = "$modulesDir:$testInclDir:$pluginsDir";
 
