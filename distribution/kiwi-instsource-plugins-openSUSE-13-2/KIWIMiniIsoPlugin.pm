@@ -163,7 +163,7 @@ sub execute {
     return $retval;
 }
 
-sub removeInstallSystem($) {
+sub removeInstallSystem {
     my $this = shift;
     my $rootfile = shift;
 
@@ -173,9 +173,10 @@ sub removeInstallSystem($) {
     foreach my $file (glob("$rootdir/*")) {
         if (-f $file && $file !~ m,/efi$,) {
             $this->logMsg("I", "removing <$file>");
-	    unlink $file;
+	        unlink $file;
         }
     }
+    return $this;
 }
 
 sub removeMediaCheck {
@@ -184,18 +185,20 @@ sub removeMediaCheck {
 
 	$this->logMsg("I", "Processing file <$cfg>: ");
 
-	if (!open(CFG, "$cfg")) {
+    my $CFG = FileHandle -> new();
+    if (! $CFG -> open($cfg)) {
 		$this->logMsg("E", "Cant open file <$cfg>!");
 		return;
 	}
 
-	if (!open(CFGNEW, ">$cfg.new")) {
+    my $CFGNEW = FileHandle -> new();
+    if (! $CFGNEW -> open(">$cfg.new")) {
 		$this->logMsg("E", "Cant open file <$cfg.new>!");
 		return;
 	}
 
 	my $mediacheck = -1;
-	while ( <CFG> ) {
+	while ( <$CFG> ) {
 		chomp;
 
 		if (m/label mediachk/) {
@@ -206,17 +209,18 @@ sub removeMediaCheck {
 		}
 
 		if ($mediacheck == 1) {
-			print CFGNEW "#$_\n";
+			print $CFGNEW "#$_\n";
 		} else {
-			print CFGNEW "$_\n";
+			print $CFGNEW "$_\n";
 		}
 	}
 
-	close(CFG);
-	close(CFGNEW);
+	$CFG -> close();
+	$CFGNEW -> close();
 
 	unlink $cfg;
 	rename "$cfg.new", $cfg;
+    return $this;
 }
 
 sub updateGraphicsBootConfig {
