@@ -65,8 +65,8 @@
     <users group="root">
         <user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
     </users>
-    <users group='kiwi'>
-        <user name='kiwi' password='2exADvrjjX/kk' home='/home/kiwi'/>
+    <users group="kiwi">
+        <user name="kiwi" password="2exADvrjjX/kk" home="/home/kiwi"/>
     </users>
     <repository type="rpm-md">
         <source path="http://download.suse.de/ibs/SUSE:/SLE-12:/GA/standard/"/>
