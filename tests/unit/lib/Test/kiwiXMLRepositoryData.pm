@@ -527,7 +527,8 @@ sub test_setAlias {
     my $this = shift;
     my $kiwi = $this -> {kiwi};
     my $repoDataObj = $this->__getRepoDataObj();
-    $repoDataObj = $repoDataObj->setAlias('testName');
+    # condition one with spaces
+    $repoDataObj = $repoDataObj->setAlias('test Name');
     my $msg = $kiwi -> getMessage();
     $this -> assert_str_equals('No messages set', $msg);
     my $msgT = $kiwi -> getMessageType();
@@ -536,7 +537,11 @@ sub test_setAlias {
     $this -> assert_str_equals('No state set', $state);
     $this -> assert_not_null($repoDataObj);
     my $res = $repoDataObj->getAlias();
-    $this -> assert_str_equals('testName', $res);
+    $this -> assert_str_equals('test_Name', $res);
+    # condition two normal text
+    $repoDataObj = $repoDataObj->setAlias('xxx');
+    $res = $repoDataObj->getAlias();
+    $this -> assert_str_equals('xxx', $res);
     return;
 }
 

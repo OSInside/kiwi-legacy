@@ -100,12 +100,14 @@ sub new {
         return;
     }
     $this -> p_initializeBoolMembers($init);
-    $this->{alias}        = $init->{alias};
     $this->{components}   = $init->{components};
     $this->{distribution} = $init->{distribution};
     $this->{elname}       = 'repository';
     $this->{status}       = $init->{status};
     $this->{type}         = $init->{type};
+    if ($init->{alias}) {
+        $this -> setAlias($init->{alias});
+    }
     # Default settings
     if (! $init->{status} ) {
         $this->{status} = 'replaceable';
@@ -250,6 +252,8 @@ sub setAlias{
         $kiwi -> failed();
         return;
     }
+    # replace any occurrences of spaces with an underscore
+    $alias =~ s/\s+/_/gsxm;
     $this->{alias} = $alias;
     return $this;
 }
