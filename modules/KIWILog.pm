@@ -408,6 +408,9 @@ sub printLog {
     # set log status 
     #------------------------------------------
     my $FD = $this->{channel};
+    if (! $prev_channel) {
+        $prev_channel = $FD;
+    }
     #==========================================
     # setup message string
     #------------------------------------------
