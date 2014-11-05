@@ -242,7 +242,6 @@ test:
 	cd tests/unit && \
 		${NONETWORKTEST} ${KIWINOFSTEST} perl /usr/bin/prove \
 		${TESTVERBOSE} .
-	rm -f .revision
 
 critic:
 	#============================================
