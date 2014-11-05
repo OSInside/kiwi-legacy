@@ -5,7 +5,7 @@ callpath=$(dirname $0)
 
 pushd $callpath &>/dev/null
 
-if [ ! -e ".revision" ];then
+if [ ! -s ".revision" ];then
     ./.version > .revision
 fi
 if [ ! -s ".kiwirc" ];then
