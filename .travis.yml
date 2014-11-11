@@ -1,8 +1,15 @@
+branches:
+  only:
+    - master
+
 language: perl
+
 before_install:
     - sudo apt-get update -qq
     - sudo apt-get install -y xsltproc
     - sudo apt-get install -y syslinux
+
 install:
     - cpanm -f -n $(cat .perlmodules | tr "\n" " ")
+
 script: make test
