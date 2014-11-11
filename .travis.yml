@@ -5,4 +5,4 @@ before_install:
     - sudo apt-get install -y syslinux
 install:
     - cpanm -f -n $(cat .perlmodules | tr "\n" " ")
-script: make test
+script: make clean test
