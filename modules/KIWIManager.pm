@@ -585,18 +585,26 @@ sub cleanupRPMDatabase {
     my $kiwi    = $this->{kiwi};
     my @kchroot = @{$this->{kchroot}};
     my $root    = $this->{root};
+    my $locator = $this->{locator};
     my $data;
     my $code;
     #==========================================
     # check for rpm binary
     #------------------------------------------
-    if (! -e "$root/bin/rpm") {
+    my $rpm    = $locator -> getExecPath('rpm');
+    my $rpmdb  = $locator -> getExecPath('rpmdb');
+    my $dbdump = $locator -> getExecPath('db_dump');
+    my $dbload = $locator -> getExecPath('db45_load');
+    if (! $rpm) {
         return $this;
+    }
+    if (! $rpmdb) {
+        $rpmdb = $rpm;
     }
     #==========================================
     # try to initialize rpm database
     #------------------------------------------
-    $data = KIWIQX::qxx ("@kchroot /bin/rpm --initdb &>/dev/null");
+    $data = KIWIQX::qxx ("@kchroot $rpmdb --initdb &>/dev/null");
     $code = $? >> 8;
     #==========================================
     # try to rebuild DB on failed init
@@ -605,23 +613,23 @@ sub cleanupRPMDatabase {
         $kiwi -> info ('Rebuild RPM package db...');
         my $nameIndex = "$root/var/lib/rpm/Name";
         my $packIndex = "$root/var/lib/rpm/Packages";
-        if (! -x "/usr/bin/db_dump") {
+        if (! $dbdump) {
             $kiwi -> failed ();
             $kiwi -> error ("db_dump tool required for rpm db rebuild\n");
             return;
         }
-        if (! -x "/usr/bin/db45_load") {
+        if (! $dbload) {
             $kiwi -> failed ();
             $kiwi -> error ("db45_load tool required for rpm db rebuild\n");
             return;
         }
         KIWIQX::qxx ('mv '.$packIndex.' '.$packIndex.'.bak');
         KIWIQX::qxx ('mv '.$nameIndex.' '.$nameIndex.'.bak');
-        KIWIQX::qxx ('db_dump '.$packIndex.'.bak | db45_load '.$packIndex);
-        KIWIQX::qxx ('db_dump '.$nameIndex.'.bak | db45_load '.$nameIndex);
+        KIWIQX::qxx ($dbdump.' '.$packIndex.'.bak | '.$dbload.' '.$packIndex);
+        KIWIQX::qxx ($dbdump.' '.$nameIndex.'.bak | '.$dbload.' '.$nameIndex);
         KIWIQX::qxx ('rm -f '.$packIndex.'.bak');
         KIWIQX::qxx ('rm -f '.$nameIndex.'.bak');
-        $data = KIWIQX::qxx ("@kchroot /bin/rpm --rebuilddb 2>&1");
+        $data = KIWIQX::qxx ("@kchroot $rpmdb --rebuilddb 2>&1");
         $code = $? >> 8;
         if ($code != 0) {
             $kiwi -> failed ();
