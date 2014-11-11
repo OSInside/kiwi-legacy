@@ -99,6 +99,9 @@
         <package name="kiwi-desc-vmxboot"/>
         <package name="kiwi-desc-netboot"/>
         <package name="openssh"/>
+        <package name="iproute2"/>
+        <package name="less"/>
+        <package name="bash-completion"/>
     </packages>
     <packages type="iso">
         <package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
