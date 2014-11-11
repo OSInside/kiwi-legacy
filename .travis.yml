@@ -3,6 +3,8 @@ branches:
     - master
 
 language: perl
+
+perl:
     - "5.18"
 
 before_install:
