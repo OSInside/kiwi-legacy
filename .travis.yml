@@ -3,6 +3,7 @@ branches:
     - master
 
 language: perl
+    - "5.18"
 
 before_install:
     - sudo apt-get update -qq
