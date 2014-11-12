@@ -1,0 +1,11 @@
+Test::Unit::Lite
+Class::Singleton
+Config::IniFiles
+Digest::SHA1
+File::Slurp
+JSON
+Readonly
+XML::LibXML
+XML::LibXML::Common
+XML::SAX
+LWP
