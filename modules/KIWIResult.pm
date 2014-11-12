@@ -389,7 +389,7 @@ sub __bundleDisk {
     } elsif ($buildinfo->exists('main','install.stick')) {
         return $this -> __bundleExtension ('install.raw');
     } elsif ($buildinfo->exists('main','install.pxe')) {
-        return $this -> __bundleExtension ('install.tgz');
+        return $this -> __bundleExtension ('install.tar.xz');
     }
     #==========================================
     # handle formats

@@ -1616,12 +1616,12 @@ sub setupInstallPXE {
     #------------------------------------------
     $kiwi -> info ("Packing installation data...");
     $tarname = $system;
-    $tarname =~ s/\.raw$/\.install\.tgz/;
+    $tarname =~ s/\.raw$/\.install\.tar\.xz/;
     foreach my $file ($md5name,$sysname,$irdname,$krnname,$appname) {
         push @packfiles, basename $file;
     }
     $status = KIWIQX::qxx (
-        "tar -C $destdir -czf $tarname @packfiles"
+        "tar -C $destdir -cJf $tarname @packfiles"
     );
     $result = $? >> 8;
     if ($result != 0) {
