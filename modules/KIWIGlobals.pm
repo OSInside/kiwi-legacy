@@ -1835,7 +1835,7 @@ sub _new_instance {
     # Globals (generic)
     #------------------------------------------
     my %data;
-    $data{Version}         = "7.01.16";
+    $data{Version}         = "7.02.1";
     $data{Publisher}       = "SUSE LINUX GmbH";
     $data{Preparer}        = "KIWI - http://opensuse.github.com/kiwi";
     $data{ConfigName}      = "config.xml";
