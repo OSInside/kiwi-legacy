@@ -26,7 +26,7 @@ Name:           kiwi
 Summary:        openSUSE - KIWI Image System
 License:        GPL-2.0
 Group:          System/Management
-Version:        5.05.79
+Version:        5.05.80
 Provides:       kiwi-schema = 5.8
 Conflicts:      yast2-product-creator <= 2.17.58
 Release:        0
