@@ -398,6 +398,12 @@ sub __bundleDisk {
     if (! $format) {
         return $this -> __bundleExtension ('raw');
     }
+    if ($format eq 'vhd-fixed') {
+        # inconsistency between format specified in schema and
+        # extension used in the result file. More clean fix would
+        # be a schema change plus xsl stylesheet
+        $format = 'vhdfixed';
+    }
     if ($format eq 'gce') {
         my @archives = glob ("$source/*gce-*.tar.gz");
         if (! @archives) {
