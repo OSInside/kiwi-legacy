@@ -459,17 +459,6 @@ sub skipped {
 }
 
 #==========================================
-# storeXML
-#------------------------------------------
-sub storeXML {
-    # ...
-    # Dummy function, storing the XML has nothing really to do with logging
-    # but that's a discussion for another day.
-    my $this = shift;
-    return $this;
-}
-
-#==========================================
 # warning
 #------------------------------------------
 sub warning {
@@ -479,17 +468,6 @@ sub warning {
     my $this = shift;
     $this -> {warnMsg} = shift;
     $this -> {msgType} = 'warning';
-    return $this;
-}
-
-#==========================================
-# writeXMLDiff
-#------------------------------------------
-sub writeXMLDiff {
-    # ...
-    # Dummy implementation to mimick regular KIWILog object
-    # ---
-    my $this = shift;
     return $this;
 }
 
@@ -642,5 +620,12 @@ sub __resetState {
     $this -> {skipped}   = 0;
     return $this;
 }
-
 1;
+
+## no critic (Multiple "package" declarations)
+package KIWILog;
+sub instance {
+    return Common::ktLog -> instance();
+}
+1;
+## use critic
