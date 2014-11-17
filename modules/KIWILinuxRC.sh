@@ -9383,16 +9383,16 @@ function pxeSetupDownloadServer {
     pxeCheckServer
     if [ -z "$SERVER" ];then
         if [ ! -z "$ip" ];then
-            Echo "Found server in PXE ip kernel cmdline"
+            Echo "Found PXE download server IP in kernel cmdline"
             SERVER=$(echo $ip | awk -F ':' '{ print $2 }')
         else
-            Echo "No server configured, trying: tftp.$DOMAIN"
+            Echo "No PXE download server configured, trying: tftp.$DOMAIN"
             SERVER=tftp.$DOMAIN
         fi
     fi
-    Echo "Checking Server name: $SERVER"
+    Echo "Checking connectivity of PXE download server: $SERVER"
     if ! ping -c 1 -w 30 $SERVER >/dev/null 2>&1;then
-        Echo "Server: $SERVER not found"
+        Echo "PXE download server: $SERVER not found"
         if [ -z "$SERVERTYPE" ] || [ "$SERVERTYPE" = "tftp" ]; then
             if [ ! -z "$DHCPSIADDR" ];then
                 Echo "Using: $DHCPSIADDR from DHCP info"
@@ -9405,7 +9405,7 @@ function pxeSetupDownloadServer {
                 SERVER=$SERVERID
             else
                 systemException \
-                    "Can't assign SERVER IP/name... fatal !" \
+                    "Can't find responding PXE download server... fatal !" \
                 "reboot"
             fi
         fi

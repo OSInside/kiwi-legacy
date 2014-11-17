@@ -36,27 +36,7 @@ function OEMNetwork {
     #======================================
     # find TFTP server from lease file
     #--------------------------------------
-    pxeCheckServer
-    if [ -z $SERVER ];then
-        SERVER=tftp.$DOMAIN
-    fi
-    Echo "Checking Server name: $SERVER"
-    if ! ping -c 1 $SERVER >/dev/null 2>&1;then
-        Echo "Server: $SERVER not found"
-        if [ -z "$SERVERTYPE" ] || [ "$SERVERTYPE" = "tftp" ]; then
-            if [ ! -z "$DHCPSIADDR" ];then
-                Echo "Using: $DHCPSIADDR from dhcpcd-info"
-                SERVER=$DHCPSIADDR
-            elif [ ! -z "$DHCPSID" ];then
-                Echo "Using: $DHCPSID from dhcpcd-info"
-                SERVER=$DHCPSID
-            else
-                systemException \
-                    "Can't assign SERVER IP/name... fatal !" \
-                "reboot"
-            fi
-        fi
-    fi
+    pxeSetupDownloadServer
     #======================================
     # setup server name and blocksize
     #--------------------------------------
