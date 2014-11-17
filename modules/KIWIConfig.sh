@@ -1579,20 +1579,20 @@ function suseStripKernel {
                     fi
                 done
             done
-            for mod in `find $stripdir -name "*.ko"`;do
-                d=`/usr/bin/basename $mod`
-                i=`/sbin/modprobe \
+            for mod in $(find $stripdir -name "*.ko");do
+                d=$(/usr/bin/basename $mod)
+                i=$(/sbin/modprobe \
                     --set-version $VERSION \
                     --ignore-install \
                     --show-depends \
-                    ${d%.ko} | sed -ne 's:.*insmod /\?::p'`
+                    ${d%.ko} | sed -ne 's:.*insmod /\?::p')
                 for d in $i; do
                     case "$d" in
                         *=*) ;;
                         *)
-                        if ! test -f $stripdir/$d ; then
+                        if [ -f $d ] && [ ! -f $stripdir/$d ]; then
                             echo "Fixing kernel module Dependency: $d"
-                            mkdir -vp `/usr/bin/dirname $stripdir/$d`
+                            mkdir -vp $(/usr/bin/dirname $stripdir/$d)
                             cp -flav $d $stripdir/$d
                         fi
                         ;;
