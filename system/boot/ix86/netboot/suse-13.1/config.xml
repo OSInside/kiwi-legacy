@@ -27,6 +27,7 @@
     </drivers>
     <drivers profiles="default,xen">
         <file name="crypto/*"/>
+        <file name="drivers/virtio/*"/>
         <file name="drivers/acpi/dock.ko"/>
         <file name="drivers/ata/*"/>
         <file name="drivers/block/aoe/aoe.ko"/>

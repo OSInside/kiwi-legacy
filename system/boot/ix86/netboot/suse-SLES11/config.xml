@@ -27,6 +27,7 @@
     </drivers>
     <drivers profiles="default,xen">
         <file name="crypto/*"/>
+        <file name="drivers/virtio/*"/>
         <file name="drivers/usb/core/usbcore.ko"/>
         <file name="drivers/usb/host/*"/>
         <file name="drivers/usb/storage/usb-storage.ko"/>
