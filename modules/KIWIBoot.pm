@@ -1191,7 +1191,7 @@ sub setupInstallStick {
     if ($needBiosP) {
         $pnr++;
         push @commands,"n","p:legacy",$pnr,".","+".$legacysize."M";
-        $this->{partids}{biosgrub}  = $pnr;
+        $this->{partids}{biosgrub} = $pnr;
     }
     #==========================================
     # setup Power PReP partition
@@ -1201,7 +1201,7 @@ sub setupInstallStick {
         push @commands,"n","p:prep",$pnr,".","+".$prepsize."M";
         push @commands,"t",$pnr,"41";
         push @commands,"a",$pnr;
-        $this->{partids}{prep}    = $pnr;
+        $this->{partids}{prep} = $pnr;
     }
     #==========================================
     # setup boot partition
@@ -1440,8 +1440,8 @@ sub setupInstallStick {
     #==========================================
     # Install boot loader on disk
     #------------------------------------------
-    my $bootdevice = $diskname;
-    if (! $this -> installBootLoader ($bootloader, $bootdevice)) {
+    my $diskdevice = $diskname;
+    if (! $this -> installBootLoader ($bootloader, $diskdevice, \%deviceMap)) {
         $this -> cleanStack ();
         return;
     }
@@ -2821,11 +2821,11 @@ sub setupBootDisk {
     #==========================================
     # Install boot loader on disk
     #------------------------------------------
-    my $bootdevice = $diskname;
+    my $diskdevice = $diskname;
     if ($haveDiskDevice) {
-        $bootdevice = $this->{loop};
+        $diskdevice = $this->{loop};
     }
-    if (! $this->installBootLoader ($bootloader,$bootdevice)) {
+    if (! $this->installBootLoader ($bootloader,$diskdevice, \%deviceMap)) {
         $this -> cleanStack ();
         return;
     }
@@ -5453,6 +5453,7 @@ sub installBootLoader {
     my $this     = shift;
     my $loader   = shift;
     my $diskname = shift;
+    my $deviceMap= shift;
     my $kiwi     = $this->{kiwi};
     my $tmpdir   = $this->{tmpdir};
     my $chainload= $this->{chainload};
@@ -5463,7 +5464,6 @@ sub installBootLoader {
     my $haveTree = $this->{haveTree};
     my $locator  = KIWILocator -> instance();
     my $bootdev;
-    my $prepdev;
     my $result;
     my $status;
     my $grubtool;
@@ -5472,26 +5472,10 @@ sub installBootLoader {
     #==========================================
     # Setup boot device name
     #------------------------------------------
-    my $boot_id = 1;
-    my $prep_id = 1;
-    if ($this->{partids}) {
-        if ($this->{partids}{prep}) {
-            $prep_id = $this->{partids}{prep};
-        }
-        if ($this->{partids}{installboot}) {
-            $boot_id = $this->{partids}{installboot};
-        } elsif ($this->{partids}{boot}) {
-            $boot_id = $this->{partids}{boot};
-        } elsif ($this->{partids}{root}) {
-            $boot_id = $this->{partids}{root};
-        }
-    }
-    if ((! $this->{bindloop}) && (-b $diskname)) {
-        $bootdev = $this -> __getPartBase ($diskname).$boot_id;
-        $prepdev = $this -> __getPartBase ($diskname).$prep_id;
+    if ($deviceMap->{boot}) {
+        $bootdev = $deviceMap->{boot};
     } else {
-        $bootdev = $this->{bindloop}.$boot_id;
-        $prepdev = $this->{bindloop}.$prep_id;
+        $bootdev = $deviceMap->{root};
     }
     #==========================================
     # Grub2
@@ -5532,7 +5516,7 @@ sub installBootLoader {
         #------------------------------------------
         my $stages = "/mnt/boot/grub2/$grubarch";
         if (! KIWIGlobals -> instance() -> mount ($bootdev, '/mnt')) {
-            $kiwi -> error ("Couldn't mount boot partition: $status");
+            $kiwi -> error ("Couldn't mount boot partition: $bootdev");
             $kiwi -> failed ();
             return;
         }
@@ -5579,7 +5563,7 @@ sub installBootLoader {
             }
         } elsif (-e "$stages/core.elf") {
             # architectures: ppc64le
-            $loaderTarget = $prepdev;
+            $loaderTarget = $deviceMap->{prep};
             $grubtoolopts = "--grub-mkdevicemap=$dmfile -v ";
             $grubtoolopts.= "-d /mnt/usr/lib/grub2/$grubarch ";
             $grubtoolopts.= "--root-directory=/mnt --force --no-nvram ";
@@ -5663,7 +5647,7 @@ sub installBootLoader {
         #==========================================
         # re-init bootid, legacy grub starts at 0
         #------------------------------------------
-        $boot_id = 0;
+        my $boot_id = 0;
         if ($this->{partids}) {
             if ($this->{partids}{boot}) {
                 $boot_id = $this->{partids}{boot} - 1;
@@ -6160,7 +6144,6 @@ sub bindDiskPartitions {
     $this->{cleanupStack} = \@cStack;
     $disk =~ s/dev\///;
     $part = "/dev/mapper".$disk."p";
-    $this->{bindloop} = $part;
     return $this;
 }
 
@@ -6564,7 +6547,7 @@ sub setDefaultDeviceMap {
     # wait for udev to finish device creation
     KIWIQX::qxx ("udevadm settle --timeout=30 2>&1");
     for my $part
-        (qw(root readonly readwrite boot jump installroot installboot)
+        (qw(root readonly readwrite boot jump installroot installboot prep)
     ) {
         if ($this->{partids}{$part}) {
             $result{$part} = $this -> __getPartDevice (
@@ -6623,7 +6606,7 @@ sub setLVMDeviceMap {
             $result{$part} = "/dev/$group/".$this->{partids}{$part."_lv"};
         }
     }
-    for my $part (qw(boot jump)) {
+    for my $part (qw(boot jump prep)) {
         if ($this->{partids}{$part}) {
             $result{$part} = $this -> __getPartDevice (
                 $device,$this->{partids}{$part}
@@ -7564,59 +7547,6 @@ sub __updateCustomDiskSize {
     $this->{vmmbyte} = $vmmbyte;
     $this->{vmsize}  = $vmsize;
     return $this;
-}
-
-#==========================================
-# __getPartID
-#------------------------------------------
-sub __getPartID {
-    # ...
-    # try to find the partition number which references
-    # the provided flag like "boot" or "lvm"
-    # ---
-    my $this = shift;
-    my $disk = shift;
-    my $flag = shift;
-    my $fd   = FileHandle -> new();
-    if ($fd -> open ("parted -m $disk print | cut -f1,7 -d:|")) {
-        while (my $line = <$fd>) {
-            if ($line =~ /^(\d):[ ,]*$flag/) {
-                return $1;
-            }
-        }
-        $fd -> close();
-    }
-    return 0;
-}
-
-#==========================================
-# __getPartBase
-#------------------------------------------
-sub __getPartBase {
-    # ...
-    # find the correct partition device for a
-    # given disk device by checking for the first
-    # two partitions
-    # ---
-    my $this = shift;
-    my $disk = shift;
-    my $devcopy = $disk;
-    my $devbase = basename $devcopy;
-    my @checklist = (
-        "/dev/mapper/".$devbase."p1",
-        "/dev/mapper/".$devbase."p2",
-        "/dev/".$devbase."p1",
-        "/dev/".$devbase."p2",
-        "/dev/".$devbase."1",
-        "/dev/".$devbase."2"
-    );
-    foreach my $device (@checklist) {
-        if (-b $device) {
-            chop $device;
-            return $device;
-        }
-    }
-    return;
 }
 
 #==========================================
