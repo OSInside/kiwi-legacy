@@ -171,9 +171,9 @@ sub removeInstallSystem {
     my $rootdir = dirname($rootfile);
     $this->logMsg("I", "removing files from <$rootdir>");
     foreach my $file (glob("$rootdir/*")) {
-        if (-f $file && $file !~ m,/efi$,) {
+        if (-f $file && $file !~ m,/(efi|linux|initrd)$,) {
             $this->logMsg("I", "removing <$file>");
-	        unlink $file;
+	    unlink $file;
         }
     }
     return $this;
