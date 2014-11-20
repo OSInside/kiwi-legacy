@@ -8,3 +8,7 @@ tests/.timestamps
 *.op.*.old
 # hidden temporary files
 .tmp.*
+# kiwirc file created if kiwi is called from git checkout
+.kiwirc
+# revision file created for packaging or if called from git checkout
+.revision

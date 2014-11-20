@@ -598,6 +598,8 @@ Recommends:     kiwi-desc-vmxboot
 Recommends:     kiwi-desc-isoboot
 Recommends:     kiwi-desc-netboot
 Recommends:     kiwi-templates
+Recommends:     fribidi
+Recommends:     fbiterm
 %ifarch x86_64
 %if 0%{?suse_version} > 1220
 Recommends:     shim
