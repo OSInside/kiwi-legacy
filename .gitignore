@@ -12,3 +12,5 @@ tests/.timestamps
 .kiwirc
 # revision file created for packaging or if called from git checkout
 .revision
+# d3 css data packed into a tarball
+metadata/KIWIAnalyse.tgz
