@@ -270,6 +270,7 @@ clean:
 	${MAKE} -C locale clean
 	rm -f tools/burner/Makefile
 	rm -f tools/burner/imagewriter
+	rm -f metadata/KIWIAnalyse.tgz
 	rm -f .revision
 	rm -f .kiwirc
 
@@ -282,5 +283,5 @@ uninstall:
 	rm -f /etc/bash_completion.d/kiwi.sh
 	rm -f /dev/shm/lwp-download
 
-build:
+build: clean
 	./.doit -p --local
