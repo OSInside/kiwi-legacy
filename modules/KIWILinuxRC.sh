@@ -8682,6 +8682,12 @@ function createHybridPersistent {
     #--------------------------------------
     Echo "Creating hybrid persistent partition for COW data"
     export imageDiskDevice=$device
+    if [ ! -e "$imageDiskDevice" ];then
+        Echo "Disk device $device does not exist, most likely not a disk"
+        Echo "Persistent writing deactivated"
+        unset kiwi_hybridpersistent
+        return
+    fi
     pID=$(parted -m -s $device print | grep -E ^[1-9]+: | wc -l)
     pID=$((pID + 1))
     createPartitionerInput \
