@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="6.1" name="LimeJeOS-openSUSE-12.3">
+<image schemaversion="6.2" name="LimeJeOS-openSUSE-12.3">
     <description type="system">
         <author>Marcus Schäfer</author>
         <contact>ms@novell.com</contact>

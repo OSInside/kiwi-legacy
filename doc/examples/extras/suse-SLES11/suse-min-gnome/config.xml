@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="6.1" name="suse-sle11-gnome-demo">
+<image schemaversion="6.2" name="suse-sle11-gnome-demo">
     <description type="system">
         <author>Robert Schweikert</author>
         <contact>rjschwei@suse.com</contact>
         <specification>SUSE LE 11 Appliance using GNOME</specification>
     </description>
     <preferences>
-        <type image="vmx" primary="true" filesystem="ext4" boot="vmxboot/suse-SLES11" format="vmdk">
+        <type bootloader="grub" image="vmx" primary="true" filesystem="ext4" boot="vmxboot/suse-SLES11" format="vmdk">
             <machine memory="1024">
                 <vmdisk id="0" controller="ide"/>
             </machine>
