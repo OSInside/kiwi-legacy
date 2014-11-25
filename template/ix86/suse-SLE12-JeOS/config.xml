@@ -100,6 +100,8 @@
         <package name="rsync"/>
         <package name="psmisc"/>
         <package name="sudo"/>
+        <package name="dhcp-client"/>
+        <package name="which"/>
     </packages>
     <packages type="iso">
         <package name="gfxboot-branding-SLE" bootinclude="true" bootdelete="true"/>

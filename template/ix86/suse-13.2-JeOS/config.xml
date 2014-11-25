@@ -102,6 +102,8 @@
         <package name="iproute2"/>
         <package name="less"/>
         <package name="bash-completion"/>
+        <package name="dhcp-client"/>
+        <package name="which"/>
     </packages>
     <packages type="iso">
         <package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
