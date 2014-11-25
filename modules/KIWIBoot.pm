@@ -423,6 +423,13 @@ sub new {
         }
     }
     #==========================================
+    # set the bootloader
+    #------------------------------------------
+    my $bootloader = "grub2";
+    if ($type{bootloader}) {
+        $bootloader = $type{bootloader};
+    }
+    #==========================================
     # check partitioner
     #------------------------------------------
     my $ptool;
@@ -453,6 +460,7 @@ sub new {
     $this->{isxen}     = $isxen;
     $this->{xengz}     = $xengz;
     $this->{arch}      = $arch;
+    $this->{bootloader}= $bootloader;
     $this->{ptool}     = $ptool;
     $this->{vga}       = $vga;
     $this->{xml}       = $xml;
@@ -561,15 +569,6 @@ sub setupInstallCD {
     my $volid     = "KIWI CD/DVD Installation";
     my $appid     = $this->{mbrid};
     my $type      = $this->{type};
-    my $bootloader= "syslinux";
-    my $efi_arch;
-    if ($arch eq 'x86_64') {
-        $efi_arch  = 'x86_64';
-    } elsif ($arch =~ /i.86/) {
-        $efi_arch = 'i386';
-    } elsif (($arch eq 'aarch64') || ($arch eq 'arm64')) {
-        $efi_arch = 'arm64';
-    }
     my $status;
     my $result;
     my $tmpdir;
@@ -577,6 +576,10 @@ sub setupInstallCD {
     my $version;
     my $FD;
     my $hybrid;
+    #==========================================
+    # Overwrite bootloader with syslinux
+    #------------------------------------------
+    my $bootloader= "syslinux";
     #==========================================
     # Check for hybrid setup
     #------------------------------------------
@@ -968,6 +971,7 @@ sub setupInstallStick {
     my $cmdL      = $this->{cmdL};
     my $firmware  = $this->{firmware};
     my $type      = $this->{type};
+    my $bootloader= $this->{bootloader};
     my $bootsize  = $this -> __getBootSize ();
     my $global    = KIWIGlobals -> instance();
     my $vmsize    = $global -> isize ($system);
@@ -976,19 +980,6 @@ sub setupInstallStick {
     my %deviceMap = ();
     my @commands  = ();
     my $gotsys    = 1;
-    my $bootloader;
-    if ($arch =~ /ppc|ppc64|ppc64le/) {
-        $bootloader = "yaboot";
-        if ($firmware eq "ofw") {
-            $bootloader = "grub2";
-        }
-    } elsif ($arch =~ /arm/) {
-        $bootloader = "uboot";
-    } elsif (($firmware eq "efi") || ($firmware eq "uefi")) {
-        $bootloader = "grub2";
-    } else {
-        $bootloader = "grub";
-    }
     my $haveDiskDevice;
     my $status;
     my $result;
@@ -1014,12 +1005,6 @@ sub setupInstallStick {
         $system  = $destdir."/".$system.".".$arch."-".$version.".raw";
         $md5name = $system;
         $this->{system} = $system;
-    }
-    #==========================================
-    # setup boot loader type
-    #------------------------------------------
-    if ($type->{bootloader}) {
-        $bootloader = $type->{bootloader};
     }
     #==========================================
     # create tmp directory
@@ -1665,6 +1650,7 @@ sub setupBootDisk {
     my $firmware  = $this->{firmware};
     my $type      = $this->{type};
     my $systemDisk= $this->{sysdisk};
+    my $bootloader= $this->{bootloader};
     my $diskname  = $system.".raw";
     my %deviceMap = ();
     my @commands  = ();
@@ -1676,21 +1662,6 @@ sub setupBootDisk {
     my $needPrepP = 0;
     my $needRoP   = 0;
     my $rawRW     = 0;
-    my $bootloader;
-    if ($arch =~ /ppc|ppc64|ppc64le/) {
-        $bootloader = "yaboot";
-        if ($firmware eq "ofw") {
-            $bootloader = "grub2";
-        }
-    } elsif ($arch =~ /arm/) {
-        $bootloader = "uboot";
-    } elsif ($arch =~ /s390/) {
-        $bootloader = "zipl";
-    } elsif (($firmware eq "efi") || ($firmware eq "uefi")) {
-        $bootloader = "grub2";
-    } else {
-        $bootloader = "grub";
-    }
     my $boot;
     my $partidfile;
     my $haveDiskDevice;
@@ -1961,13 +1932,6 @@ sub setupBootDisk {
     if ($type->{filesystem} =~ /clicfs/) {
         $rawRW = 1;
     }
-    #==========================================
-    # setup boot loader type
-    #------------------------------------------
-    if ($type->{bootloader}) {
-        $bootloader = $type->{bootloader};
-    }
-    $this->{bootloader} = $bootloader;
     #==========================================
     # Do we need a bios legacy partition
     #------------------------------------------

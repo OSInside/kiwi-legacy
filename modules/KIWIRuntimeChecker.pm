@@ -390,9 +390,6 @@ sub __checkSelectedBootLoaderIncluded {
         return 1;
     }
     my $bootloader = $type -> getBootLoader();
-    if (! $bootloader) {
-        $bootloader = 'grub';
-    }
     my $loaderPackage = $loaderPackages{$bootloader};
     if (! $loaderPackage) {
         return 1;
@@ -1486,18 +1483,16 @@ sub __isoHybridCapable {
     my $bootloader = $bldType -> getBootLoader();
     my $hybPersist = $bldType -> getHybridPersistent();
     my $arch = KIWIGlobals -> instance() -> getArch();
-
-    if (
-        ( $instIso
-        && $instIso eq 'true'
-        && $bootloader
-        && $bootloader =~ /(sys|ext)linux/smx
-        && $imgType eq 'oem'
-        )
-        ||
-        ( $hybPersist
-        && $hybPersist eq 'true'
-        && $imgType eq 'iso'
+    if ((
+            $instIso &&
+            $instIso eq 'true' &&
+            $bootloader &&
+            $bootloader =~ /(sys|ext)linux/smx &&
+            $imgType eq 'oem'
+        ) || (
+            $hybPersist &&
+            $hybPersist eq 'true' &&
+            $imgType eq 'iso'
         )
     ) {
         if ($arch ne 'i686' && $arch ne 'i586' && $arch ne 'x86_64') {
