@@ -1717,7 +1717,9 @@ sub getPackageCollections {
     my $this = shift;
     my $collections = $this -> __getInstallData('pkgsCollect');
     my $bCollections = $this -> getBootIncludePackageCollections();
-    push @{$collections}, @{$bCollections};
+    if ($bCollections) {
+        push @{$collections}, @{$bCollections};
+    }
     return $collections;
 }
 
