@@ -1892,6 +1892,16 @@ sub __addSystemDiskToBootXML {
         $kiwi -> info ("--> Volume group name: $lvmgroup\n");
         $lvmData{name} = $lvmgroup;
         #==========================================
+        # LVM volume management
+        #------------------------------------------
+        my $preferlvm = $systemdisk -> getLVMVolumeManagement();
+        if ($preferlvm == 0) {
+            $preferlvm = 'false';
+        } else {
+            $preferlvm = 'true';
+        }
+        $lvmData{preferlvm} = $preferlvm;
+        #==========================================
         # volumes
         #------------------------------------------
         my %volData;
