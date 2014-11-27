@@ -1970,6 +1970,14 @@ function setupBootLoaderGrub2Recovery {
     #======================================
     # create recovery grub.cfg
     #--------------------------------------
+    local boot_postfix=""
+    if [ "$kiwi_firmware" = "uefi" ];then
+        case $arch in
+          i?86|x86_64)
+            boot_postfix=efi
+            ;;
+        esac
+    fi
 cat > $conf << EOF
 insmod ext2
 insmod gettext
@@ -2031,17 +2039,17 @@ menuentry 'Recover/Repair System' --class os {
     set root='hd0,$recoid'
     echo Loading $kernel...
     set gfxpayload=keep
-    linux /boot/$kernel $cmdline showopts
+    linux$boot_postfix /boot/$kernel $cmdline showopts
     echo Loading $initrd...
-    initrd /boot/$initrd
+    initrd$boot_postfix /boot/$initrd
 }
 menuentry 'Restore Factory System' --class os {
     set root='hd0,$recoid'
     echo Loading $kernel...
     set gfxpayload=keep
-    linux /boot/$kernel $cmdline RESTORE=1 showopts
+    linux$boot_postfix /boot/$kernel $cmdline RESTORE=1 showopts
     echo Loading $initrd...
-    initrd /boot/$initrd
+    initrd$boot_postfix /boot/$initrd
 }
 EOF
     fi
