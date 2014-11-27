@@ -10680,6 +10680,42 @@ function FBOK {
     return 0
 }
 #======================================
+# backupDiskLayout
+#--------------------------------------
+function backupDiskLayout {
+    local IFS=$IFS_ORIG
+    local devname=$1
+    local device=$(getDiskDevice $devname)
+    IFS=""
+    local parted=$(parted -m -s $device unit cyl print | grep -v Warning:)
+    local pcount=$(echo $parted | tail -n 1 | cut -f1 -d:)
+    local diskhd=$(echo $parted | head -n 3 | tail -n 2 | head -n 1)
+    local plabel=$(echo $diskhd | cut -f6 -d:)
+    IFS=$IFS_ORIG
+    if [[ $plabel =~ gpt ]];then
+        backupGPT $device $pcount
+    else
+        backupMBR $device
+    fi
+}
+#======================================
+# backupMBR
+#--------------------------------------
+function backupMBR {
+    local IFS=$IFS_ORIG
+    local device=$1
+    dd if=$device bs=1 count=512
+}
+#======================================
+# backupGPT
+#--------------------------------------
+function backupGPT {
+    local IFS=$IFS_ORIG
+    local device=$1
+    local pcount=$2
+    dd if=$device bs=1 count=$(((128 * pcount) + 1024))
+}
+#======================================
 # initialize
 #--------------------------------------
 function initialize {

@@ -371,8 +371,8 @@ if [ ! -z "$KIWI_RECOVERY" ];then
     # 16.2) restore MBR/LVM in restore mode
     #--------------------------------------
     if [ ! -z "$RESTORE" ];then
-        if ! dd if=/reco-save/mbr of=$imageDiskDevice;then
-            systemException "Failed to restore MBR" "reboot"
+        if ! dd if=/reco-save/disk-layout of=$imageDiskDevice;then
+            systemException "Failed to restore disk layout" "reboot"
         fi
         umount $imageRecoveryDevice
         blockdev --rereadpt $imageDiskDevice
