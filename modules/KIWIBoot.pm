@@ -4399,12 +4399,13 @@ sub setupBootLoaderConfiguration {
                 print $FD ' --class opensuse --class os {'."\n";
                 if (($firmware eq "efi") || ($firmware eq "uefi")) {
                     print $FD "\t"."set root='hd0,1'"."\n";
+                    my $prefix = '(${root})/EFI/BOOT';
                     if ($arch eq 'x86_64') {
-                        print $FD "\t".'chainloader /EFI/BOOT/bootx64.efi'."\n";
+                        print $FD "\t"."chainloader $prefix/bootx64.efi"."\n";
                     } elsif ($arch =~ /i.86/) {
-                        print $FD "\t".'chainloader /EFI/BOOT/bootx32.efi'."\n";
+                        print $FD "\t"."chainloader $prefix/bootx32.efi"."\n";
                     } elsif (($arch eq 'aarch64') || ($arch eq 'arm64')) {
-                        print $FD "\t".'chainloader /EFI/BOOT/bootaa64.efi'."\n";
+                        print $FD "\t"."chainloader $prefix/bootaa64.efi"."\n";
                     }
                 } else {
                     print $FD "\t"."set root='hd0'"."\n";
