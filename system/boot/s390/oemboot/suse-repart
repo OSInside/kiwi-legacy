@@ -757,8 +757,8 @@ function OEMRepart {
             fi
 
         fi
-        if ! dd if=$imageDiskDevice of=/reco-save/mbr bs=1 count=512;then
-            systemException "Failed to store MBR" "reboot"
+        if ! backupDiskLayout $imageDiskDevice >/reco-save/disk-layout;then
+            systemException "Failed to store disk layout" "reboot"
         fi
         if [ ! -z "$haveLVM" ];then
             if ! vgcfgbackup -f /reco-save/lvm $kiwi_lvmgroup;then
