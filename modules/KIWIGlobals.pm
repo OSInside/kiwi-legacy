@@ -1848,8 +1848,6 @@ sub _new_instance {
     $data{DiskStartSector} = 2048;  # Sector-Number
     $data{DiskSectorSize}  = 512;   # Bytes
     $data{DiskAlignment}   = 1024;  # Kilo-Bytes
-    $data{SnapshotChunk}   = 4096;  # Bytes
-    $data{SnapshotCount}   = "5G";  # Unit-String
     $data{VolumeFree}      = 20;    # Mega-Bytes
     #============================================
     # Read .kiwirc
