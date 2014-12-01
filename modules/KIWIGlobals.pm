@@ -1846,7 +1846,7 @@ sub _new_instance {
     $data{OverlayRootTree} = 0;
     $data{FSInodeSize}     = 256;   # Bytes
     $data{DiskStartSector} = 2048;  # Sector-Number
-    $data{DiskSectorSize}  = 512;   # Bytes
+    $data{DiskSectorSize}  = 512;   # Bytes (logical block size)
     $data{DiskAlignment}   = 1024;  # Kilo-Bytes
     $data{VolumeFree}      = 20;    # Mega-Bytes
     #============================================
