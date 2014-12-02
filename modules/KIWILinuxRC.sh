@@ -9299,6 +9299,32 @@ function createFilesystem {
     fi
 }
 #======================================
+# restoreBtrfsSubVolumes
+#--------------------------------------
+function restoreBtrfsSubVolumes {
+    local IFS=$IFS_ORIG
+    local root=$1
+    local variable
+    local volume
+    local content
+    local volpath
+    local mpoint
+    local mppath
+    btrfs subvolume create $root/@ || return
+    for i in $(cat /.profile | grep -E 'kiwi_LVM_|kiwi_allFreeVolume');do
+        variable=$(echo $i|cut -f1 -d=)
+        volume=$(echo $i| cut -f3- -d_ | cut -f1 -d=)
+        content=$(eval echo \$$variable)
+        volpath=$(echo $content | cut -f3 -d:)
+        if [ -z "$volpath" ];then
+            volpath=$volume
+        fi
+        volpath=$(echo $volpath | cut -f4 -d/ | cut -c3-)
+        mpoint=$(echo $volpath | tr -d LV | tr _ /)
+        btrfs subvolume create $root/@/$mpoint || return
+    done
+}
+#======================================
 # restoreLVMMetadata
 #--------------------------------------
 function restoreLVMPhysicalVolumes {
