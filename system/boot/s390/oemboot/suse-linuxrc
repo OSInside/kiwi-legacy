@@ -404,6 +404,12 @@ if [ ! -z "$KIWI_RECOVERY" ];then
                 Echo "Failed to mount root filesystem"
                 exit 1
             fi
+            if [ "$FSTYPE" = "btrfs" ];then
+                if ! restoreBtrfsSubVolumes /mnt;then
+                    Echo "Failed to restore btrfs subvolumes"
+                    exit 1
+                fi
+            fi
             for i in dev sys proc;do
                 mkdir -p /mnt/$i
             done

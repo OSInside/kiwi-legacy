@@ -372,6 +372,7 @@ if [ ! -z "$KIWI_RECOVERY" ];then
         fi
         umount $imageRecoveryDevice
         blockdev --rereadpt $imageDiskDevice
+        updateProtectiveMBR
         waitForStorageDevice $imageRecoveryDevice
         if ! mount -o ro $imageRecoveryDevice /reco-save >/dev/null;then
             systemException "Failed to remount recovery device" "reboot"
@@ -399,6 +400,12 @@ if [ ! -z "$KIWI_RECOVERY" ];then
             if ! mountSystem $imageRootDevice;then
                 Echo "Failed to mount root filesystem"
                 exit 1
+            fi
+            if [ "$FSTYPE" = "btrfs" ];then
+                if ! restoreBtrfsSubVolumes /mnt;then
+                    Echo "Failed to restore btrfs subvolumes"
+                    exit 1
+                fi
             fi
             for i in dev sys proc;do
                 mkdir -p /mnt/$i
