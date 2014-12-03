@@ -1976,14 +1976,6 @@ function setupBootLoaderGrub2Recovery {
     #======================================
     # create recovery grub.cfg
     #--------------------------------------
-    local boot_postfix=""
-    if [ "$kiwi_firmware" = "uefi" ];then
-        case $arch in
-          i?86|x86_64)
-            boot_postfix=efi
-            ;;
-        esac
-    fi
 cat > $conf << EOF
 insmod ext2
 insmod gettext
@@ -2013,6 +2005,13 @@ if loadfont /boot/grub2/themes/$theme/ascii.pf2;then
     set theme=/boot/grub2/themes/$theme/theme.txt
     set bgimg=/boot/grub2/themes/$theme/background.png
     background_image -m stretch \$bgimg
+fi
+if [ \$grub_platform = "efi" ]; then
+    set linux=linuxefi
+    set initrd=initrdefi
+else
+    set linux=linux
+    set initrd=initrd
 fi
 set timeout=30
 EOF
@@ -2045,17 +2044,17 @@ menuentry 'Recover/Repair System' --class os {
     set root='hd0,$recoid'
     echo Loading $kernel...
     set gfxpayload=keep
-    linux$boot_postfix /boot/$kernel $cmdline showopts
+    \$linux /boot/$kernel $cmdline showopts
     echo Loading $initrd...
-    initrd$boot_postfix /boot/$initrd
+    \$initrd /boot/$initrd
 }
 menuentry 'Restore Factory System' --class os {
     set root='hd0,$recoid'
     echo Loading $kernel...
     set gfxpayload=keep
-    linux$boot_postfix /boot/$kernel $cmdline RESTORE=1 showopts
+    \$linux /boot/$kernel $cmdline RESTORE=1 showopts
     echo Loading $initrd...
-    initrd$boot_postfix /boot/$initrd
+    \$initrd /boot/$initrd
 }
 EOF
     fi
@@ -2886,9 +2885,9 @@ cat > $inst_default_grubmap << EOF
 (hd0) $diskByID
 EOF
     #======================================
-    # activate secure boot if required
+    # Use linuxefi/initrdefi if needed
     #--------------------------------------
-    if [ "$kiwi_firmware" = "uefi" ];then
+    if [ "$kiwi_firmware" = "uefi" ] || [ "$kiwi_firmware" = "efi" ];then
         case $arch in
           i?86|x86_64)
             echo "GRUB_USE_LINUXEFI=true"  >> $inst_default_grub
