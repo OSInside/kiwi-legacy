@@ -154,6 +154,7 @@
         <file name="mkfifo"/>
         <file name="mkfs.btrfs"/>
         <file name="mkfs.cramfs"/>
+        <file name="mkfs.fat"/>
         <file name="mkfs.ext2"/>
         <file name="mkfs.ext3"/>
         <file name="mkfs.ext4"/>
