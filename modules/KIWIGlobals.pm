@@ -946,10 +946,19 @@ sub setupBTRFSSubVolumes {
         foreach my $level (sort {($a <=> $b) || ($a cmp $b)} keys %phash) {
             foreach my $vol (@{$phash{$level}}) {
                 $kiwi -> info ("--> Adding subvolume $vol");
-                $data = KIWIQX::qxx (
-                    'btrfs subvolume create '.$path.'/@/'.$vol.' 2>&1'
-                );
-                $code = $? >> 8;
+                my $vol_path = dirname($vol);
+                if (! -d $path.'/@/'.$vol_path) {
+                    $data = KIWIQX::qxx (
+                        'mkdir -p '.$path.'/@/'.$vol_path.' 2>&1'
+                    );
+                    $code = $? >> 8;
+                }
+                if ($code == 0) {
+                    $data = KIWIQX::qxx (
+                        'btrfs subvolume create '.$path.'/@/'.$vol.' 2>&1'
+                    );
+                    $code = $? >> 8;
+                }
                 if ($code == 0) {
                     $kiwi -> done();
                 } else {
