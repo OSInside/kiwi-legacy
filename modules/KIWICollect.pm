@@ -985,20 +985,13 @@ sub addDebugPackage {
     my $packPointer = shift;
     if ( $this->{m_debugPacks}->{$packname} ){
         $this->{m_debugPacks}->{$packname}->{'onlyarch'} .= ",$arch";
-        $this->{m_debugPacks}->{$packname}->{'onlyarch'} .= ",$arch";
     } else {
         $this->{m_debugPacks}->{$packname} = {
             'medium' => $this->{m_debugmedium},
             'onlyarch' => $arch
         };
-        $this->{m_debugPacks}->{$packname} = {
-            'medium' => $this->{m_debugmedium},
-            'onlyarch' => $arch
-        };
     }
-    $this->{m_debugPacks}->{$packname}->{'requireVersion'}->
-    { $packPointer->{'version'}."-".$packPointer->{'release'} } = 1;
-    $this->{m_debugPacks}->{$packname}->{'requireVersion'}->
+    $this->{m_debugPacks}->{$packname}->{'requireVersionArch'}->
     { $packPointer->{'version'}."-".$packPointer->{'release'} } = 1;
     return;
 }
@@ -1061,7 +1054,9 @@ sub setupPackageFiles {
         $count_packs++;
         if ( $mode == 2 ) {
             # use src or nosrc only for this package
-            push @archs, $packOptions->{'arch'};
+            for my $a (split(/,\s*/, $packOptions->{'onlyarch'})) {
+              push @archs, $a;
+            }
         } else {
             @archs = $this->getArchList($packOptions, $packName, \$nofallback);
         }
@@ -1146,11 +1141,13 @@ sub setupPackageFiles {
                             }
                         }
                     }
-                    if ( scalar(keys %{$packOptions->{requireVersion}}) > 0
-                        && ! defined( $packOptions->{requireVersion}->{
+                    if ( scalar(keys %{$packOptions->{requireVersionArch}}) > 0
+                        && ! defined( $packOptions->{requireVersionArch}->{
                                 $packPointer->{version}
                                 . "-"
-                                . $packPointer->{release}})
+                                . $packPointer->{release}
+                                . "."
+                                . $packPointer->{arch}})
                     ) {
                         if ($this->{m_debug} >= 4) {
                             my $msg = "     => package "
@@ -1159,8 +1156,10 @@ sub setupPackageFiles {
                                 . $packPointer->{version}
                                 . '-'
                                 . $packPointer->{release}
-                                ." not available for arch $arch in "
-                                . "repo $packKey in this version";
+                                . '.'
+                                . $packPointer->{arch}
+                                ." not available in "
+                                . "repo $packKey in this version and arch";
                             $this->logMsg('D', $msg);
                         }
                         next PACKKEY;
@@ -1229,18 +1228,21 @@ sub setupPackageFiles {
                             if ( $this->{m_srcmedium} > 0 ) {
                                 my $srcarch = $packPointer->{sourcepackage};
                                 $srcarch =~ s{.*\.(.*)\.rpm$}{$1};
-                                if (!$this->{m_sourcePacks}->{$srcname}) {
+                                if ($this->{m_sourcePacks}->{$srcname}) {
+                                    # we may have src and nosrc variations of same package
+                                    $this->{m_sourcePacks}->{$srcname}->{'onlyarch'} .= ",$srcarch";
+                                } else {
                                     $this->{m_sourcePacks}->{$srcname} = {
                                         'medium' => $this->{m_srcmedium},
                                         'arch' => $srcarch,
                                         'onlyarch' => $srcarch
                                     };
                                 }
-                                # get version-release string
+                                # get a version-release.arch key
                                 $packPointer->{sourcepackage} =~
-                                    m/.*-([^-]*-[^-]*)\.[^\.]*\.rpm/;
+                                    m/.*-([^-]*-[^-]*\.[^\.]*)\.rpm/;
                                 $this->{m_sourcePacks}->{$srcname}->
-                                    {'requireVersion'}->{ $1 } = 1;
+                                    {'requireVersionArch'}->{ $1 } = 1;
                             }
                             if ( $this->{m_debugmedium} > 0 ) {
                                 # Add debug packages, we do not know,
