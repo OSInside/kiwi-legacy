@@ -2866,7 +2866,7 @@ EOF
     #======================================
     # set terminal mode
     #--------------------------------------
-    if [ -e $unifont ] && [ ! "$kiwi_firmware" = "uefi" ];then
+    if [ -e $unifont ];then
         echo "GRUB_TERMINAL=gfxterm"  >> $inst_default_grub
     else
         echo "GRUB_TERMINAL=console"  >> $inst_default_grub
