@@ -123,13 +123,14 @@ sub unionOverlay {
     #==========================================
     # Create tmpdir for mount point
     #------------------------------------------
-    $tmpdir = KIWIQX::qxx ("mktemp -qdt kiwiRootOverlay.XXXXXX"); chomp $tmpdir;
+    $tmpdir = KIWIQX::qxx ("mktemp -qdt kiwiRootOverlay.XXXXXX");
     $result = $? >> 8;
     if ($result != 0) {
         $kiwi -> failed ();
         $kiwi -> error  ("Failed to create overlay tmpdir");
         return;
     }
+    chomp $tmpdir;
     $this->{tmpdir} = $tmpdir;
     #==========================================
     # Mount cache as snapshot
@@ -146,15 +147,14 @@ sub unionOverlay {
     );
     $result = $? >> 8;
     if ($result != 0) {
-        $workdir = KIWIQX::qxx ("mktemp -qdt kiwiOverlayWorkDir.XXXXXX");
+        $workdir = $rootRW.'/work-stage';
+        $status = KIWIQX::qxx ("mkdir $workdir 2>&1");
         $result = $? >> 8;
         if ($result != 0) {
             $kiwi -> failed ();
-            $kiwi -> error  ("Failed to create overlay workdir");
+            $kiwi -> error  ("Failed to create overlay workdir: $status");
             return;
         }
-        chomp $workdir;
-        push @mount,"rmdir $workdir";
         $opts += ",workdir=$workdir";
         $status = KIWIQX::qxx (
             "mount -n -t overlay -o $opts overlay $tmpdir 2>&1"
