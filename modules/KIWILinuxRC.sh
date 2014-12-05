@@ -6132,6 +6132,7 @@ function mountSystemUnionFS {
     local loopf=$1
     local roDir=/read-only
     local rwDir=/read-write
+    local wkDir=/work-stage
     local rwDevice=`echo $UNIONFS_CONFIG | cut -d , -f 1`
     local roDevice=`echo $UNIONFS_CONFIG | cut -d , -f 2`
     local unionFST=`echo $UNIONFS_CONFIG | cut -d , -f 3`
@@ -6144,6 +6145,7 @@ function mountSystemUnionFS {
     #--------------------------------------
     mkdir -p $roDir
     mkdir -p $rwDir
+    mkdir -p $wkDir
     #======================================
     # check read/only device location
     #--------------------------------------
@@ -6193,10 +6195,13 @@ function mountSystemUnionFS {
         #======================================
         # setup overlayfs mount
         #--------------------------------------
-        local opts="lowerdir=$roDir,upperdir=$rwDir"
+        local opts="rw,lowerdir=$roDir,upperdir=$rwDir"
         if ! mount -t overlayfs -o $opts overlayfs /mnt;then
-            Echo "Failed to mount root via overlayfs"
-            return 1
+            opts="$opts,workdir=$wkDir"
+            if ! mount -t overlay -o $opts overlay /mnt;then
+                Echo "Failed to mount root via overlayfs"
+                return 1
+            fi
         fi
     elif [ "$unionFST" = "unionfs" ];then
         #======================================
@@ -7570,6 +7575,7 @@ function activateImage {
     #--------------------------------------
     local roDir=read-only
     local rwDir=read-write
+    local wkDir=work-stage
     local xiDir=xino
     if [ -z "$NFSROOT" ];then
         if [ -d $roDir ];then
@@ -7577,6 +7583,9 @@ function activateImage {
         fi
         if [ -d $rwDir ];then
             mkdir -p /mnt/$rwDir && mount --move /$rwDir /mnt/$rwDir
+        fi
+        if [ -d $wkDir ];then
+            mkdir -p /mnt/$wkDir && mount --move /$wkDir /mnt/$wkDir
         fi
         if [ -d $xiDir ];then
             mkdir -p /mnt/$xiDir && mount --move /$xiDir /mnt/$xiDir
