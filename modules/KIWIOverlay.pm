@@ -119,6 +119,7 @@ sub unionOverlay {
     my $tmpdir;
     my $result;
     my $status;
+    my $workdir;
     #==========================================
     # Create tmpdir for mount point
     #------------------------------------------
@@ -139,15 +140,31 @@ sub unionOverlay {
     #==========================================
     # overlay mount both paths
     #------------------------------------------
-    my $opts= "lowerdir=$baseRO,upperdir=$rootRW";
+    my $opts= "rw,lowerdir=$baseRO,upperdir=$rootRW";
     $status = KIWIQX::qxx (
         "mount -n -t overlayfs -o $opts overlayfs $tmpdir 2>&1"
     );
     $result = $? >> 8;
     if ($result != 0) {
-        $kiwi -> error  ("Failed to overlay mount paths: $status");
-        $kiwi -> failed ();
-        return;
+        $workdir = KIWIQX::qxx ("mktemp -qdt kiwiOverlayWorkDir.XXXXXX");
+        $result = $? >> 8;
+        if ($result != 0) {
+            $kiwi -> failed ();
+            $kiwi -> error  ("Failed to create overlay workdir");
+            return;
+        }
+        chomp $workdir;
+        push @mount,"rmdir $workdir";
+        $opts += ",workdir=$workdir";
+        $status = KIWIQX::qxx (
+            "mount -n -t overlay -o $opts overlay $tmpdir 2>&1"
+        );
+        $result = $? >> 8;
+        if ($result != 0) {
+           $kiwi -> error  ("Failed to overlay mount paths: $status");
+           $kiwi -> failed ();
+           return;
+        }
     }
     push @mount,"umount $tmpdir";
     $this->{mount} = \@mount;
