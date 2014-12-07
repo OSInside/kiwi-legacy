@@ -119,7 +119,6 @@ sub unionOverlay {
     my $tmpdir;
     my $result;
     my $status;
-    my $workdir;
     #==========================================
     # Create tmpdir for mount point
     #------------------------------------------
@@ -147,15 +146,21 @@ sub unionOverlay {
     );
     $result = $? >> 8;
     if ($result != 0) {
-        $workdir = $rootRW.'/work-stage';
-        $status = KIWIQX::qxx ("mkdir $workdir 2>&1");
+        # overlayfs in version >= v22 behaves differently
+        # + renamed from overlayfs to overlay
+        # + requires a workdir to become mounted
+        # + requires workdir and upperdir to reside under the same mount
+        # + requires workdir and upperdir to be in separate subdirs
+        my $workdir = $rootRW.'/work';
+        my $upperdir= $rootRW.'/rw';
+        $status = KIWIQX::qxx ("mkdir -p $workdir $upperdir 2>&1");
         $result = $? >> 8;
         if ($result != 0) {
             $kiwi -> failed ();
-            $kiwi -> error  ("Failed to create overlay workdir: $status");
+            $kiwi -> error  ("Failed to create overlay work/upperdir: $status");
             return;
         }
-        $opts += ",workdir=$workdir";
+        $opts = "rw,lowerdir=$baseRO,upperdir=$upperdir,workdir=$workdir";
         $status = KIWIQX::qxx (
             "mount -n -t overlay -o $opts overlay $tmpdir 2>&1"
         );

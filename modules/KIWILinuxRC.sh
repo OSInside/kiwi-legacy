@@ -6132,7 +6132,6 @@ function mountSystemUnionFS {
     local loopf=$1
     local roDir=/read-only
     local rwDir=/read-write
-    local wkDir=$rwDir/work-stage
     local rwDevice=`echo $UNIONFS_CONFIG | cut -d , -f 1`
     local roDevice=`echo $UNIONFS_CONFIG | cut -d , -f 2`
     local unionFST=`echo $UNIONFS_CONFIG | cut -d , -f 3`
@@ -6196,8 +6195,14 @@ function mountSystemUnionFS {
         #--------------------------------------
         local opts="rw,lowerdir=$roDir,upperdir=$rwDir"
         if ! mount -t overlayfs -o $opts overlayfs /mnt;then
-            mkdir -p $wkDir
-            opts="$opts,workdir=$wkDir"
+            # overlayfs in version >= v22 behaves differently
+            # + renamed from overlayfs to overlay
+            # + requires a workdir to become mounted
+            # + requires workdir and upperdir to reside under the same mount
+            # + requires workdir and upperdir to be in separate subdirs
+            mkdir -p $rwDir/work
+            mkdir -p $rwDir/rw
+            opts="rw,lowerdir=$roDir,upperdir=$rwDir/rw,workdir=$rwDir/work"
             if ! mount -t overlay -o $opts overlay /mnt;then
                 Echo "Failed to mount root via overlayfs"
                 return 1
