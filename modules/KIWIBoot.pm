@@ -3447,6 +3447,9 @@ sub setupBootLoaderStages {
         } elsif (($arch eq 'aarch64') || ($arch eq 'arm64')) {
             $efipc = 'arm64-efi';
             $grubpc = 'arm64-efi';
+        } elsif ($arch =~ /arm/) {
+            $efipc = 'arm-efi';
+            $grubpc = 'arm-efi';
         } elsif ($arch =~ /ppc|ppc64|ppc64le/) {
             if ($firmware eq 'ofw') {
                 $grubofw = 'powerpc-ieee1275';
@@ -3772,6 +3775,9 @@ sub setupBootLoaderStages {
             } elsif (($arch eq 'aarch64') || ($arch eq 'arm64')) {
                 $fo     = 'arm64-efi';
                 $fo_bin = 'bootaa64.efi';
+            } elsif ($arch =~ /arm/) {
+                $fo     = 'arm-efi';
+                $fo_bin = 'bootarm.efi';
             }
             my $core= "$tmpdir/EFI/BOOT/$fo_bin";
             my $core_opts;
@@ -3805,6 +3811,8 @@ sub setupBootLoaderStages {
                 $fo_bin = 'bootx32.efi';
             } elsif (($arch eq 'aarch64') || ($arch eq 'arm64')) {
                 $fo_bin = 'bootaa64.efi';
+            } elsif ($arch =~ /arm/) {
+                $fo_bin = 'bootarm.efi';
             }
             $result = 0;
             if ($zipped) {
@@ -4406,6 +4414,8 @@ sub setupBootLoaderConfiguration {
                         print $FD "\t"."chainloader $prefix/bootx32.efi"."\n";
                     } elsif (($arch eq 'aarch64') || ($arch eq 'arm64')) {
                         print $FD "\t"."chainloader $prefix/bootaa64.efi"."\n";
+                    } elsif ($arch =~ /arm/) {
+                        print $FD "\t"."chainloader $prefix/bootarm.efi"."\n";
                     }
                 } else {
                     print $FD "\t"."set root='hd0'"."\n";
