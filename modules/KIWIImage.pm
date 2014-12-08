@@ -1695,7 +1695,7 @@ sub createImageLiveCD {
         #==========================================
         # Setup grub2 if efi live iso is requested
         #------------------------------------------
-        my $grub_efi   = 'grub2-efi';
+        my $grub_efi   = 'grub2';
         my $grub_share = 'grub2';
         my $efi_fo     = 'x86_64-efi';
         my $efi_bin    = 'bootx64.efi';
@@ -1719,17 +1719,13 @@ sub createImageLiveCD {
         my $ir_themes  = "$tmpdir/usr/share/$grub_share/themes";
         my $ir_font    = "$tmpdir/usr/share/$grub_share/unicode.pf2";
         my $efi_modules= "$CD/EFI/BOOT";
-        my $cd_modules = "$CD/boot/grub2-efi/$efi_fo";
-        my $cd_loader  = "$CD/boot/grub2-efi";
+        my $cd_modules = "$CD/boot/grub2/$efi_fo";
+        my $cd_loader  = "$CD/boot/grub2";
         my $theme      = $theme[1];
         my $ir_bg      = "$ir_themes/$theme/background.png";
         my $cd_bg      = "$cd_loader/themes/$theme/background.png";
-        my $fodir      = '/boot/grub2-efi/themes/';
+        my $fodir      = '/boot/grub2/themes/';
         my $ascii      = 'ascii.pf2';
-        my $efi_suffix = '';
-        if ($firmware eq "uefi") {
-            $efi_suffix = 'efi';
-        }
         my @fonts = (
             "DejaVuSans-Bold14.pf2",
             "DejaVuSans10.pf2",
@@ -1746,7 +1742,7 @@ sub createImageLiveCD {
         my $status;
         my $result;
         #==========================================
-        # Check for grub2-efi
+        # Check for grub2 efi modules in initrd
         #------------------------------------------
         if (! -d $ir_modules) {
             $kiwi -> error ("Couldn't find EFI grub2 data in: $ir_modules");
@@ -1785,7 +1781,7 @@ sub createImageLiveCD {
             return;
         }
         print $bpfd "search --file /boot/$this->{mbrid} --set"."\n";
-        print $bpfd 'set prefix=($root)/boot/grub2-efi'."\n";
+        print $bpfd 'set prefix=($root)/boot/grub2'."\n";
         $bpfd -> close();
         #==========================================
         # create / use efi boot image
@@ -1793,10 +1789,7 @@ sub createImageLiveCD {
         if ($firmware eq "efi") {
             $kiwi -> info ("Creating grub2 efi boot image");
             my $locator = KIWILocator -> instance();
-            my $grub2_mkimage = $locator -> getExecPath ("grub2-efi-mkimage");
-            if (! $grub2_mkimage) {
-                $grub2_mkimage = $locator -> getExecPath ("grub2-mkimage");
-            }
+            my $grub2_mkimage = $locator -> getExecPath ("grub2-mkimage");
             if (! $grub2_mkimage) {
                 $kiwi -> failed ();
                 $kiwi -> error  ("Can't find grub2 mkimage tool");
@@ -1873,7 +1866,7 @@ sub createImageLiveCD {
         #------------------------------------------
         $kiwi -> info ("Creating grub2 configuration file...");
         my $FD = FileHandle -> new();
-        if (! $FD -> open(">$CD/boot/grub2-efi/grub.cfg")) {
+        if (! $FD -> open(">$CD/boot/grub2/grub.cfg")) {
             $kiwi -> failed ();
             $kiwi -> error  ("Couldn't create grub.cfg: $!");
             $kiwi -> failed ();
@@ -1883,6 +1876,14 @@ sub createImageLiveCD {
             print $FD "insmod $module"."\n";
         }
         print $FD "search --file /boot/$this->{mbrid} --set"."\n";
+        # print $FD "set debug=all\n";
+        print $FD 'if [ $grub_platform = "efi" ]; then'."\n";
+        print $FD '    set linux=linuxefi'."\n";
+        print $FD '    set initrd=initrdefi'."\n";
+        print $FD 'else'."\n";
+        print $FD '    set linux=linux'."\n";
+        print $FD '    set initrd=initrd'."\n";
+        print $FD 'fi'."\n";
         print $FD "set default=0\n";
         print $FD "set font=/boot/unicode.pf2"."\n";
         print $FD 'if loadfont $font ;then'."\n";
@@ -1918,10 +1919,10 @@ sub createImageLiveCD {
         if (! $isxen) {
             print $FD "\t"."echo Loading linux...\n";
             print $FD "\t"."set gfxpayload=keep"."\n";
-            print $FD "\t"."linux$efi_suffix /boot/$isoarch/loader/linux";
+            print $FD "\t"."\$linux /boot/$isoarch/loader/linux";
             print $FD ' ramdisk_size=512000 ramdisk_blocksize=4096'."\n";
             print $FD "\t"."echo Loading initrd...\n";
-            print $FD "\t"."initrd$efi_suffix /boot/$isoarch/loader/initrd\n";
+            print $FD "\t"."\$initrd /boot/$isoarch/loader/initrd\n";
             print $FD "}\n";
         } else {
             print $FD "\t"."echo Loading Xen\n";
@@ -1942,11 +1943,11 @@ sub createImageLiveCD {
         if (! $isxen) {
             print $FD "\t"."echo Loading linux...\n";
             print $FD "\t"."set gfxpayload=keep"."\n";
-            print $FD "\t"."linux$efi_suffix /boot/$isoarch/loader/linux";
+            print $FD "\t"."\$linux /boot/$isoarch/loader/linux";
             print $FD ' ramdisk_size=512000 ramdisk_blocksize=4096';
             print $FD " @failsafe"."\n";
             print $FD "\t"."echo Loading initrd...\n";
-            print $FD "\t"."initrd$efi_suffix /boot/$isoarch/loader/initrd\n";
+            print $FD "\t"."\$initrd /boot/$isoarch/loader/initrd\n";
             print $FD "}\n";
         } else {
             print $FD "\t"."echo Loading Xen\n";
@@ -1969,10 +1970,10 @@ sub createImageLiveCD {
             if (! $isxen) {
                 print $FD "\t"."echo Loading linux...\n";
                 print $FD "\t"."set gfxpayload=keep"."\n";
-                print $FD "\t"."linux$efi_suffix /boot/$isoarch/loader/linux";
+                print $FD "\t"."\$linux /boot/$isoarch/loader/linux";
                 print $FD " mediacheck=1";
                 print $FD "\t"."echo Loading initrd...\n";
-                print $FD "\t"."initrd$efi_suffix /boot/$isoarch/loader/initrd";
+                print $FD "\t"."\$initrd /boot/$isoarch/loader/initrd";
                 print $FD "\n}\n";
             } else {
                 print $FD "\t"."echo Loading Xen\n";
@@ -2005,7 +2006,7 @@ sub createImageLiveCD {
         #==========================================
         # setup memtest entry
         #------------------------------------------
-        # memtest will not work in grub2-efi. This is because efi
+        # memtest will not work in grub2 efi. This is because efi
         # does not support launching 16-bit binaries and memtest is
         # a 16-bit binary. Thats also the reason why there is no
         # linux16 command/module in grub2 efi
@@ -2014,7 +2015,7 @@ sub createImageLiveCD {
         #==========================================
         # copy grub config to efi directory too
         #------------------------------------------
-        KIWIQX::qxx ("cp $CD/boot/grub2-efi/grub.cfg $CD/EFI/BOOT");
+        KIWIQX::qxx ("cp $CD/boot/grub2/grub.cfg $CD/EFI/BOOT");
         $kiwi -> done();
     }
     #==========================================

@@ -1076,7 +1076,6 @@ function installBootLoaderGrub2 {
     local confTool=grub2-mkconfig
     local instTool=grub2-install
     local confFile_grub_bios=/boot/grub2/grub.cfg
-    local confFile_grub_efi=/boot/grub2-efi/grub.cfg
     local confFile_uefi=/boot/efi/EFI/BOOT/grub.cfg
     local confFile_grub=$confFile_grub_bios
     local bios_grub=/boot/grub2/i386-pc
@@ -1152,13 +1151,6 @@ EOF
             #--------------------------------------
             return 0
         fi
-    fi
-    #======================================
-    # lookup grub2 mkconfig tool
-    #--------------------------------------
-    if [ $isEFI -eq 1 ];then
-        lookup grub2-efi-mkconfig &>/dev/null && confTool=grub2-efi-mkconfig
-        confFile_grub=$confFile_grub_efi
     fi
     if ! lookup $confTool &>/dev/null;then
         Echo "Image doesn't have grub2 installed"
@@ -1305,7 +1297,6 @@ function installBootLoaderGrub2Recovery {
     local IFS=$IFS_ORIG
     local confTool=grub2-mkconfig
     local confFile_grub_bios=/boot/grub2/grub.cfg
-    local confFile_grub_efi=/boot/grub2-efi/grub.cfg
     local confFile_uefi=/boot/efi/EFI/BOOT/grub.cfg
     local confFile_grub=$confFile_grub_bios
     local bios_grub=/reco-save/boot/grub2/i386-pc
@@ -1344,12 +1335,6 @@ DONE
     if [ ! $? = 0 ];then
         Echo "Failed to create grub2 boot configuration"
         return 1
-    fi
-    #======================================
-    # update efi grub2 config file(s)
-    #--------------------------------------
-    if [ -e $confFile_grub_efi ];then
-        cp $confFile_grub $confFile_grub_efi
     fi
     if [ ! -z "$kiwi_JumpPart" ];then
         local jdev=$(ddn $imageDiskDevice $kiwi_JumpPart)
