@@ -1569,9 +1569,10 @@ function setupBootLoader {
         s390-zipl)       eval setupBootLoaderS390 $para ;;
         s390x-zipl)      eval setupBootLoaderS390 $para ;;
         ppc*)            eval setupBootLoaderYaboot $para ;;
-        arm*)            eval setupBootLoaderUBoot $para ;;
         aarch64-uboot)   eval setupBootLoaderUBoot $para ;;
         aarch64-grub2)   eval setupBootLoaderGrub2 $para ;;
+        arm*-grub2)      eval setupBootLoaderGrub2 $para ;;
+        arm*)            eval setupBootLoaderUBoot $para ;;
         *)
         systemException \
             "*** boot loader setup for $arch-$loader not implemented ***" \
