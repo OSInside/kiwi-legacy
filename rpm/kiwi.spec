@@ -271,6 +271,8 @@ Authors:
     Marcus Schaefer <ms@suse.com>
 
 %package -n kiwi-desc-isoboot-requires
+Provides:       kiwi-image:iso
+Provides:       kiwi-boot:isoboot
 Requires:       kiwi-desc-isoboot = %{version}
 Requires:       %(echo `bash %{S:4} %{S:0} isoboot %{myarch} %{mysystems}`)
 Summary:        openSUSE - KIWI Image System ISO boot required packages
@@ -320,6 +322,8 @@ Authors:
     Marcus Schaefer <ms@suse.com>
 
 %package -n kiwi-desc-vmxboot-requires
+Provides:       kiwi-image:vmx
+Provides:       kiwi-boot:vmxboot
 Requires:       kiwi-desc-vmxboot = %{version}
 Requires:       %(echo `bash %{S:4} %{S:0} vmxboot %{myarch} %{mysystems}`)
 Summary:        openSUSE - KIWI Image System VMX boot required packages
@@ -357,6 +361,8 @@ Authors:
     Marcus Schaefer <ms@suse.com>
 
 %package -n kiwi-desc-netboot-requires
+Provides:       kiwi-image:pxe
+Provides:       kiwi-boot:netboot
 Requires:       kiwi-desc-netboot = %{version}
 Requires:       %(echo `bash %{S:4} %{S:0} netboot %{myarch} %{mysystems}`)
 Summary:        openSUSE - KIWI Image System NET boot required packages
@@ -412,6 +418,9 @@ Authors:
     Marcus Schaefer <ms@suse.com>
 
 %package -n kiwi-desc-oemboot-requires
+Provides:       kiwi-image:oem
+Provides:       kiwi-boot:oemboot
+Provides:       kiwi-boot:tbz
 Requires:       kiwi-desc-oemboot = %{version}
 Requires:       %(echo `bash %{S:4} %{S:0} oemboot %{myarch} %{mysystems}`)
 Summary:        openSUSE - KIWI Image System oem boot required packages
