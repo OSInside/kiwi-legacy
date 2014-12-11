@@ -1,7 +1,6 @@
 use File::Spec;
 
 our $BasePath = File::Spec->rel2abs ("../../");
-open  FD,">../../.revision";
-print FD "4711\n";
-close FD;
-
+if (! -f "../../.revision") {
+    qx(cd ../../ && ./.version > .revision)
+}
