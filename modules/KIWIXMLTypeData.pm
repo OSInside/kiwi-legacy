@@ -71,6 +71,7 @@ sub new {
     #     firmware               = ''
     #     flags                  = ''
     #     format                 = ''
+    #     formatoptions          = ''
     #     fsmountoptions         = ''
     #     zfsoptions             = ''
     #     fsnocheck              = ''
@@ -136,6 +137,7 @@ sub new {
         firmware
         flags
         format
+        formatoptions
         fsmountoptions
         zfsoptions
         fsnocheck
@@ -204,6 +206,7 @@ sub new {
     $this->{firmware}               = $init->{firmware};
     $this->{flags}                  = $init->{flags};
     $this->{format}                 = $init->{format};
+    $this->{formatoptions}          = $init->{formatoptions};
     $this->{fsmountoptions}         = $init->{fsmountoptions};
     $this->{zfsoptions}             = $init->{zfsoptions};
     $this->{fsreadonly}             = $init->{fsreadonly};
@@ -448,6 +451,17 @@ sub getFormat {
     # ---
     my $this = shift;
     return $this->{format};
+}
+
+#==========================================
+# getFormatOptions
+#------------------------------------------
+sub getFormatOptions {
+    # ...
+    # Return the format options for the virtual image format
+    # ---
+    my $this = shift;
+    return $this->{formatoptions};
 }
 
 #==========================================
@@ -901,6 +915,10 @@ sub getXMLElement {
     if ($format) {
         $element -> setAttribute('format', $format);
     }
+    my $formatoptions = $this -> getFormatOptions();
+    if ($formatoptions) {
+        $element -> setAttribute('formatoptions', $formatoptions);
+    }
     my $fsOpts = $this -> getFSMountOptions();
     if ($fsOpts) {
         $element -> setAttribute('fsmountoptions', $fsOpts);
@@ -1328,6 +1346,19 @@ sub setFormat {
         return;
     }
     $this->{format} = $format;
+    return $this;
+}
+
+#==========================================
+# setFormatOptions
+#------------------------------------------
+sub setFormatOptions {
+    # ...
+    # Set format options for the virtual image format
+    # ---
+    my $this   = shift;
+    my $options= shift;
+    $this->{formatoptions} = $options;
     return $this;
 }
 

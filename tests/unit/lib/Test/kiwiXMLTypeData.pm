@@ -1201,6 +1201,27 @@ sub test_getFormat {
 }
 
 #==========================================
+# test_getFormatOptions
+#------------------------------------------
+sub test_getFormatOptions {
+    # ...
+    # Test the getFormatOptions method
+    # ---
+    my $this = shift;
+    my $kiwi = $this -> {kiwi};
+    my $typeDataObj = $this -> __getTypeObj();
+    my $format = $typeDataObj -> getFormatOptions();
+    my $msg = $kiwi -> getMessage();
+    $this -> assert_str_equals('No messages set', $msg);
+    my $msgT = $kiwi -> getMessageType();
+    $this -> assert_str_equals('none', $msgT);
+    my $state = $kiwi -> getState();
+    $this -> assert_str_equals('No state set', $state);
+    $this -> assert_str_equals('compat=bob,name=xxx', $format);
+    return;
+}
+
+#==========================================
 # test_getFSMountOptions
 #------------------------------------------
 sub test_getFSMountOptions {
@@ -1816,6 +1837,7 @@ sub test_getXMLElement{
         . 'firmware="efi" '
         . 'flags="compressed" '
         . 'format="qcow2" '
+        . 'formatoptions="compat=bob,name=xxx" '
         . 'fsmountoptions="barrier" '
         . 'fsnocheck="true" '
         . 'fsreadonly="ext3" '
@@ -5112,6 +5134,7 @@ sub __getTypeObj {
                 firmware               => 'efi',
                 flags                  => 'compressed',
                 format                 => 'qcow2',
+                formatoptions          => 'compat=bob,name=xxx',
                 fsmountoptions         => 'barrier',
                 fsnocheck              => 'true',
                 fsreadonly             => 'ext3',
