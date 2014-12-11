@@ -110,6 +110,10 @@ sub new {
         $format = $xmlformat;
     }
     #==========================================
+    # get format options
+    #------------------------------------------
+    my $format_options = $type -> getFormatOptions();
+    #==========================================
     # check for guid in vhd-fixed format
     #------------------------------------------
     my $guid = $type -> getVHDFixedTag();
@@ -130,6 +134,7 @@ sub new {
     $this->{kiwi}    = $kiwi;
     $this->{xml}     = $xml;
     $this->{format}  = $format;
+    $this->{formatoptions} = $format_options;
     $this->{image}   = $image;
     $this->{bootp}   = $bootp;
     $this->{guid}    = $guid;
@@ -342,6 +347,7 @@ sub createVMDK {
     my $source = $this->{image};
     my $vmdata = $this->{vmdata};
     my $target = $source;
+    my @options;
     my $convert;
     my $status;
     my $result;
@@ -358,6 +364,9 @@ sub createVMDK {
     $kiwi -> info ("Creating $format image...");
     $target  =~ s/\.raw$/\.$format/;
     $convert = "convert -f raw $source -O $format";
+    if ($this->{formatoptions}) {
+        @options = split(/,/, $this->{formatoptions});
+    }
     if (($format ne 'ovf') && ($format ne 'ova')) {
         # /.../
         # if the format is set to ova/ovf the format parameters
@@ -366,11 +375,15 @@ sub createVMDK {
         # case
         # -----
         if (($diskCnt) && ($diskCnt ne 'ide')) {
-            $convert .= " -o adapter_type=$diskCnt";
+            push @options, "adapter_type=$diskCnt";
         }
         if ($diskMode) {
-            $convert .= " -o subformat=$diskMode";
+            push @options, "subformat=$diskMode";
         }
+    }
+    if (@options) {
+        my $optlist = join(',', @options);
+        $convert .= " -o $optlist";
     }
     $status = KIWIQX::qxx ("$qemu_img $convert $target 2>&1");
     $result = $? >> 8;
@@ -403,6 +416,9 @@ sub createVDI {
     $kiwi -> info ("Creating $format image...");
     $target  =~ s/\.raw$/\.$format/;
     $convert = "convert -f raw $source -O $format";
+    if ($this->{formatoptions}) {
+        $convert .= " -o $this->{formatoptions}";
+    }
     $status = KIWIQX::qxx ("$qemu_img $convert $target 2>&1");
     $result = $? >> 8;
     if ($result != 0) {
@@ -433,6 +449,9 @@ sub createVHD {
     $kiwi -> info ("Creating vhd image...");
     $target  =~ s/\.raw$/\.vhd/;
     $convert = "convert -f raw $source -O vpc";
+    if ($this->{formatoptions}) {
+        $convert .= " -o $this->{formatoptions}";
+    }
     $status = KIWIQX::qxx ("$qemu_img $convert $target 2>&1");
     $result = $? >> 8;
     if ($result != 0) {
@@ -464,6 +483,9 @@ sub createVHDSubFormatFixed {
     $kiwi -> info ("Creating vhd-fixed image...");
     $target  =~ s/\.raw$/\.vhdfixed/;
     $convert = "convert -f raw -O vpc -o subformat=fixed";
+    if ($this->{formatoptions}) {
+        $convert .= " -o $this->{formatoptions}";
+    }
     $status = KIWIQX::qxx ("$qemu_img $convert $source $target 2>&1");
     $result = $? >> 8;
     if ($result != 0) {
@@ -501,6 +523,9 @@ sub createQCOW2 {
     $kiwi -> info ("Creating qcow2 image...");
     $target  =~ s/\.raw$/\.qcow2/;
     $convert = "convert -c -f raw $source -O qcow2";
+    if ($this->{formatoptions}) {
+        $convert .= " -o $this->{formatoptions}";
+    }
     $status = KIWIQX::qxx ("$qemu_img $convert $target 2>&1");
     $result = $? >> 8;
     if ($result != 0) {

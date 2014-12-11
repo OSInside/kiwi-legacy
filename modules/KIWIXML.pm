@@ -3888,6 +3888,7 @@ sub __genTypeHash {
         'firmware',
         'flags',
         'format',
+        'formatoptions',
         'fsmountoptions',
         'zfsoptions',
         'fsnocheck',

@@ -1679,6 +1679,13 @@ div {
             "ec2" | "gce" | "ovf" | "ova" | "qcow2" | "vagrant" | "vmdk" |
             "vdi" | "vhd" | "vhd-fixed"
         }
+    k.type.formatoptions.attribute =
+        ## Specifies additional format options passed on to qemu-img
+        ## formatoptions is a comma separated list of format specific
+        ## options in a name=value format like qemu-img expects it.
+        ## kiwi will take the information and pass it as parameter to
+        ## the -o option in the qemu-img call
+        attribute formatoptions { text }
     k.type.fsnocheck.attribute =
         ## Turn off periodic filesystem checks on ext2/3/4.
         attribute fsnocheck { xsd:boolean }
@@ -1801,6 +1808,7 @@ div {
         k.type.filesystem.attribute? &
         k.type.flags.attribute? &
         k.type.format.attribute? &
+        k.type.formatoptions.attribute? &
         k.type.fsnocheck.attribute? &
         k.type.fsreadonly.attribute? &
         k.type.fsreadwrite.attribute? &

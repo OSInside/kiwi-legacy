@@ -20,7 +20,7 @@
   STATUS        : Development
   ****************
 -->
-<grammar xmlns:db="http://docbook.org/ns/docbook" xmlns:a="http://relaxng.org/ns/compatibility/annotations/1.0" xmlns:rng="http://relaxng.org/ns/structure/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+<grammar xmlns:a="http://relaxng.org/ns/compatibility/annotations/1.0" xmlns:rng="http://relaxng.org/ns/structure/1.0" xmlns:db="http://docbook.org/ns/docbook" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
   <db:info>
     <db:releaseinfo>$Id: kiwi.rnc 2957 2008-01-11 12:53:39Z thomas-schraitle $</db:releaseinfo>
     <db:releaseinfo>RNC Schema Version 6.2</db:releaseinfo>
@@ -2262,6 +2262,15 @@ To be remove from here by the end of 2014</a:documentation>
         </choice>
       </attribute>
     </define>
+    <define name="k.type.formatoptions.attribute">
+      <attribute name="formatoptions">
+        <a:documentation>Specifies additional format options passed on to qemu-img
+formatoptions is a comma separated list of format specific
+options in a name=value format like qemu-img expects it.
+kiwi will take the information and pass it as parameter to
+the -o option in the qemu-img call</a:documentation>
+      </attribute>
+    </define>
     <define name="k.type.fsnocheck.attribute">
       <attribute name="fsnocheck">
         <a:documentation>Turn off periodic filesystem checks on ext2/3/4.</a:documentation>
@@ -2501,6 +2510,9 @@ into the master block. There is space for 32 characters.</a:documentation>
         </optional>
         <optional>
           <ref name="k.type.format.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.type.formatoptions.attribute"/>
         </optional>
         <optional>
           <ref name="k.type.fsnocheck.attribute"/>
