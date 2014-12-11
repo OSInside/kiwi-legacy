@@ -307,6 +307,7 @@ sub closeRootChannel {
         close $this->{rootefd};
         if ($this->{rootefd} eq $this->{channel}) {
             undef $this->{channel};
+            undef $this->{last_channel};
         }
         undef $this->{rootefd};
     }
@@ -339,6 +340,7 @@ sub reopenRootChannel {
     $this->{rootefd} = *$EFD;
     if ($this->{fileLog}) {
         $this->{channel} = *$EFD;
+        $this->{last_channel} = $this->{channel};
     }
     return $this;
 }
