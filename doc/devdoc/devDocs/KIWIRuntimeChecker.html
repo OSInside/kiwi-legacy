@@ -47,38 +47,11 @@
 <li><a href="#__isoHybridCapable">__isoHybridCapable</a></li>
 </ul>
 <hr>
-<a name="createChecks"><h2>createChecks</h2></a>
-<p>
-     Runtime checks specific to the create step
-<p>
-Defined on line: 105
-<p>
-Called in
-<ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 766</li></ul>
-<a name="new"><h2>new</h2></a>
-<p>
-     Create the RuntimChecker object
-<p>
-Defined on line: 60
-<p>
-Called in
-<ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 467</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 533</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 742</li></ul>
-<a name="prepareChecks"><h2>prepareChecks</h2></a>
-<p>
-     Runtime checks specific to the prepare step
-<p>
-Defined on line: 173
-<p>
-Called in
-<ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 475</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 563</li></ul>
 <a name="__checkContainerHasLXC"><h2>__checkContainerHasLXC</h2></a>
 <p>
      A container build must include the lxc package
 <p>
-Defined on line: 418
+Defined on line: 415
 <p>
 Called in
 <ul>
@@ -86,7 +59,7 @@ Called in
 <a name="__checkCorrectRootFSPermissons"><h2>__checkCorrectRootFSPermissons</h2></a>
 <p>
 Missing<p>
-Defined on line: 1538
+Defined on line: 1533
 <p>
 Called in
 <ul>
@@ -96,7 +69,7 @@ Called in
      Check that the build system has the necessary file
      system tools installed for the requested build.
 <p>
-Defined on line: 546
+Defined on line: 543
 <p>
 Called in
 <ul>
@@ -104,7 +77,7 @@ Called in
 <a name="__checkHaveTypeToBuild"><h2>__checkHaveTypeToBuild</h2></a>
 <p>
 Missing<p>
-Defined on line: 637
+Defined on line: 634
 <p>
 Called in
 <ul>
@@ -114,7 +87,7 @@ Called in
      Verify that the specified LVM size requirements do not
      exceed the specified OEM system size if specified
 <p>
-Defined on line: 451
+Defined on line: 448
 <p>
 Called in
 <ul>
@@ -123,7 +96,7 @@ Called in
 <p>
      Verify that the image fits within the specified size
 <p>
-Defined on line: 652
+Defined on line: 649
 <p>
 Called in
 <ul>
@@ -132,7 +105,7 @@ Called in
 <p>
      Check that the specified package manager exists
 <p>
-Defined on line: 700
+Defined on line: 697
 <p>
 Called in
 <ul>
@@ -145,7 +118,7 @@ Called in
      or if the configuration contains a <packages> element without a
      profile attribute there is nothing to do.
 <p>
-Defined on line: 743
+Defined on line: 740
 <p>
 Called in
 <ul>
@@ -154,7 +127,7 @@ Called in
 <p>
      Check if the selected profiles exists
 <p>
-Defined on line: 724
+Defined on line: 721
 <p>
 Called in
 <ul>
@@ -163,7 +136,7 @@ Called in
 <p>
      Verify that the repo alias is unique across the currently active repos
 <p>
-Defined on line: 796
+Defined on line: 793
 <p>
 Called in
 <ul>
@@ -174,7 +147,7 @@ Called in
      it's not allowed to use a root tree which is based on
      an image cache
 <p>
-Defined on line: 825
+Defined on line: 822
 <p>
 Called in
 <ul>
@@ -201,7 +174,7 @@ Defined on line: 287
 <a name="__checkSystemDiskData"><h2>__checkSystemDiskData</h2></a>
 <p>
 Missing<p>
-Defined on line: 851
+Defined on line: 848
 <p>
 Called in
 <ul>
@@ -212,7 +185,7 @@ Called in
      static definition. However, at build time only profiles with
      non conflicting user definitions may be selected.
 <p>
-Defined on line: 960
+Defined on line: 957
 <p>
 Called in
 <ul>
@@ -222,7 +195,7 @@ Called in
      If a VM image is being built and the specified vmdisk controller,
      then the qemu-img command on the system must support this option.
 <p>
-Defined on line: 1017
+Defined on line: 1014
 <p>
 Called in
 <ul>
@@ -231,7 +204,7 @@ Called in
 <p>
      Check that the preferred converter exists
 <p>
-Defined on line: 978
+Defined on line: 975
 <p>
 Called in
 <ul>
@@ -240,7 +213,7 @@ Called in
 <p>
      qemu-img command must support specified diskmode
 <p>
-Defined on line: 1085
+Defined on line: 1082
 <p>
 Called in
 <ul>
@@ -258,7 +231,7 @@ Called in
      Check if the boot description exists according
      to the selected image type
 <p>
-Defined on line: 1342
+Defined on line: 1339
 <p>
 Called in
 <ul>
@@ -303,7 +276,7 @@ Called in
 ------------------------------------------
      Check if the selected bootloader can be installed
 <p>
-Defined on line: 1412
+Defined on line: 1409
 <p>
 Called in
 <ul>
@@ -313,7 +286,7 @@ Called in
      check if the optional given archives doesn't
      include bogus files
 <p>
-Defined on line: 1188
+Defined on line: 1185
 <p>
 Called in
 <ul>
@@ -323,7 +296,7 @@ Called in
      check if the optional LVM group name doesn't
      exist on the build host
 <p>
-Defined on line: 1142
+Defined on line: 1139
 <p>
 Called in
 <ul>
@@ -337,7 +310,7 @@ Called in
      using prepare + create in one call by the --build
      option
 <p>
-Defined on line: 1239
+Defined on line: 1236
 <p>
 Called in
 <ul>
@@ -346,19 +319,46 @@ Called in
 <p>
      Find the tool for a given filesystem name
 <p>
-Defined on line: 1297
+Defined on line: 1294
 <p>
 Called in
 <ul>
-<li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 566</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 586</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 589</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 592</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 614</li></ul>
+<li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 563</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 583</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 586</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 589</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 611</li></ul>
 <a name="__isoHybridCapable"><h2>__isoHybridCapable</h2></a>
 <p>
      If an ISO image is being built check that if an iso hybrid is
      requested, the platform is capable. Check if the uefi capability
      exists if isohybrid is allowed on given platform.
 <p>
-Defined on line: 1467
+Defined on line: 1464
 <p>
 Called in
 <ul>
 <li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 149</li></ul>
+<a name="createChecks"><h2>createChecks</h2></a>
+<p>
+     Runtime checks specific to the create step
+<p>
+Defined on line: 105
+<p>
+Called in
+<ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 766</li></ul>
+<a name="new"><h2>new</h2></a>
+<p>
+     Create the RuntimChecker object
+<p>
+Defined on line: 60
+<p>
+Called in
+<ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 467</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 533</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 742</li></ul>
+<a name="prepareChecks"><h2>prepareChecks</h2></a>
+<p>
+     Runtime checks specific to the prepare step
+<p>
+Defined on line: 173
+<p>
+Called in
+<ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 475</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 563</li></ul>

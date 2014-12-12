@@ -165,6 +165,636 @@
 <li><a href="#__verifyProfNames">__verifyProfNames</a></li>
 </ul>
 <hr>
+<a name="__addDefaultSplitNode"><h2>__addDefaultSplitNode</h2></a>
+<p>
+     if no split section is setup we add a default section
+     from the contents of the KIWISplit.txt file and apply
+     it to the split types
+<p>
+Defined on line: 6168
+<p>
+Called in
+<ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 383</li></ul>
+<a name="__clearInstallData"><h2>__clearInstallData</h2></a>
+<p>
+     Clear the given install data object in the proper
+     location in the data structure.
+<p>
+Defined on line: 5359
+<p>
+Called in
+<ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 1760</li></ul>
+<a name="__collectBootStrapPackagesData"><h2>__collectBootStrapPackagesData</h2></a>
+<p>
+     Collect and coalesce data for the <packages type="bootstrap">
+<p>
+Defined on line: 2686
+<p>
+Called in
+<ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 2623</li></ul>
+<a name="__collectDefaultData"><h2>__collectDefaultData</h2></a>
+<p>
+     Collect data for the default profile for the given storage location
+     in the data strcuture
+<p>
+Defined on line: 2697
+<p>
+Called in
+<ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 2480</li><li><a href="KIWIXML.html">KIWIXML</a> : 2511</li><li><a href="KIWIXML.html">KIWIXML</a> : 2567</li><li><a href="KIWIXML.html">KIWIXML</a> : 2595</li><li><a href="KIWIXML.html">KIWIXML</a> : 2615</li><li><a href="KIWIXML.html">KIWIXML</a> : 2644</li></ul>
+<a name="__collectDeletePackagesData"><h2>__collectDeletePackagesData</h2></a>
+<p>
+     Collect and coalesce data for the <packages type="delete">
+<p>
+Defined on line: 2746
+<p>
+Called in
+<ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 2603</li></ul>
+<a name="__collectDriverData"><h2>__collectDriverData</h2></a>
+<p>
+     Collect and coalesce data for the <drivers> list
+<p>
+Defined on line: 2757
+<p>
+Called in
+<ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 2488</li></ul>
+<a name="__collectPackagesData"><h2>__collectPackagesData</h2></a>
+<p>
+     Collect and coalesce data for the <packages type="image"> list
+<p>
+Defined on line: 2768
+<p>
+Called in
+<ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 2541</li><li><a href="KIWIXML.html">KIWIXML</a> : 2588</li></ul>
+<a name="__collectStripData"><h2>__collectStripData</h2></a>
+<p>
+     Collect strip data for the given access pattern
+<p>
+Defined on line: 2814
+<p>
+Called in
+<ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 2652</li></ul>
+<a name="__collectXMLListData"><h2>__collectXMLListData</h2></a>
+<p>
+     Collect and coalesce data that is part of a list in XML
+     Items to be collected must have a getName method.
+<p>
+Defined on line: 2834
+<p>
+Called in
+<ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 2691</li><li><a href="KIWIXML.html">KIWIXML</a> : 2751</li><li><a href="KIWIXML.html">KIWIXML</a> : 2762</li><li><a href="KIWIXML.html">KIWIXML</a> : 2775</li><li><a href="KIWIXML.html">KIWIXML</a> : 2777</li><li><a href="KIWIXML.html">KIWIXML</a> : 2779</li><li><a href="KIWIXML.html">KIWIXML</a> : 2781</li><li><a href="KIWIXML.html">KIWIXML</a> : 2783</li><li><a href="KIWIXML.html">KIWIXML</a> : 2785</li><li><a href="KIWIXML.html">KIWIXML</a> : 2787</li><li><a href="KIWIXML.html">KIWIXML</a> : 2789</li><li><a href="KIWIXML.html">KIWIXML</a> : 2828</li></ul>
+<a name="__convertSizeStrToMBVal"><h2>__convertSizeStrToMBVal</h2></a>
+<p>
+     Convert a given size string that contains M or G into a value
+     that is a representation in MB.
+<p>
+Defined on line: 2924
+<p>
+Called in
+<ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 3369</li><li><a href="KIWIXML.html">KIWIXML</a> : 3391</li></ul>
+<a name="__createOEMConfig"><h2>__createOEMConfig</h2></a>
+<p>
+     Return a ref to a hash containing the configuration for <oemconfig>
+     of the given XML:ELEMENT object. Build a data structure that
+     matches the structure defined in
+     KIWIXMLOEMConfigData
+<p>
+Defined on line: 2984
+<p>
+Called in
+<ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 3949</li></ul>
+<a name="__createPXEDeployConfig"><h2>__createPXEDeployConfig</h2></a>
+<p>
+     Return a KIWIXMLPXEDeployData object created from the information
+     in the <pxedeploy> element of the given XML:ELEMENT object.
+<p>
+Defined on line: 3171
+<p>
+Called in
+<ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 3963</li></ul>
+<a name="__createPXEDeployConfigData"><h2>__createPXEDeployConfigData</h2></a>
+<p>
+     Return an array ref to an array containing KIWIXMLPXEDeployConfigData
+     objects. Created from the information
+     in the <pxedeploy> element of the given XML:ELEMENT object.
+<p>
+Defined on line: 3227
+<p>
+Called in
+<ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 3967</li></ul>
+<a name="__createPackageCollectionDataXML"><h2>__createPackageCollectionDataXML</h2></a>
+<p>
+     Add data from a collection to the given string
+<p>
+Defined on line: 3053
+<p>
+Called in
+<ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 2542</li><li><a href="KIWIXML.html">KIWIXML</a> : 2590</li></ul>
+<a name="__createProductOptions"><h2>__createProductOptions</h2></a>
+<p>
+     Return a KIWIXMLProductOptionsData object created from the
+     <productoptions> data in the given <instsource> node.
+<p>
+Defined on line: 3125
+<p>
+Called in
+<ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 4613</li></ul>
+<a name="__createSplitData"><h2>__createSplitData</h2></a>
+<p>
+     Return a ref to a hash containing the configuration for <split>
+     of the given XML:ELEMENT object. Build a data structure that
+     matches the structure defined in KIWIXMLSplitData
+<p>
+Defined on line: 3269
+<p>
+Called in
+<ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 3974</li></ul>
+<a name="__createSystemDiskData"><h2>__createSystemDiskData</h2></a>
+<p>
+     Return a ref to a hash containing the configuration for <systemdisk>
+     of the given XML:ELEMENT object. Build a data structure that
+     matches the structure defined in KIWIXMLSystemdiskData
+<p>
+Defined on line: 3347
+<p>
+Called in
+<ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 3981</li></ul>
+<a name="__createVMachineConfig"><h2>__createVMachineConfig</h2></a>
+<p>
+     Return a ref to a hash that contains the configuration data
+     for the <machine> element and it's children for the
+     given XML:ELEMENT object
+<p>
+Defined on line: 3405
+<p>
+Called in
+<ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 3945</li></ul>
+<a name="__createVagrantConfig"><h2>__createVagrantConfig</h2></a>
+<p>
+     Return a ref to a hash that contains the configuration data
+     for the <vagrantconfig> elements and it's children for the
+     given XML:ELEMENT object
+<p>
+Defined on line: 2950
+<p>
+Called in
+<ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 3941</li></ul>
+<a name="__dumpInternalXMLDescription"><h2>__dumpInternalXMLDescription</h2></a>
+<p>
+     return the contents of the imageConfig data
+     structure in a readable format
+<p>
+Defined on line: 3493
+<a name="__genDUDInstSysPkgsArray"><h2>__genDUDInstSysPkgsArray</h2></a>
+<p>
+     Return a ref to an array containing ProductPackageData
+     objects created from the <repopackage> children of the <instsys> data
+     of the XML from the given <driverupdate> node.
+<p>
+Defined on line: 3510
+<p>
+Called in
+<ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 4578</li></ul>
+<a name="__genDUDModulePkgsArray"><h2>__genDUDModulePkgsArray</h2></a>
+<p>
+     Return a ref to an array containing ProductPackageData
+     objects created from the <repopackage> children of the <modules> data
+     of the XML from the given <driverupdate> node.
+<p>
+Defined on line: 3533
+<p>
+Called in
+<ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 4582</li></ul>
+<a name="__genDUDPkgsArray"><h2>__genDUDPkgsArray</h2></a>
+<p>
+     Return a ref to an array containing ProductPackageData
+     objects created from the <repopackage> children of the <install> data
+     of the XML from the given <driverupdate> node.
+<p>
+Defined on line: 3556
+<p>
+Called in
+<ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 4586</li></ul>
+<a name="__genInstRepoArray"><h2>__genInstRepoArray</h2></a>
+<p>
+     Return a ref to an array containing InstRepositoryData objects
+     created from the <instrepo> data of the XML from the given
+     <instsource> node.
+<p>
+Defined on line: 3579
+<p>
+Called in
+<ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 4591</li></ul>
+<a name="__genMetadataChrootArray"><h2>__genMetadataChrootArray</h2></a>
+<p>
+     Return a ref to an array containing ProductMetaChrootData objects
+     created from the <chroot> data of the XML from the given
+     <instsource> node.
+<p>
+Defined on line: 3615
+<p>
+Called in
+<ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 4600</li></ul>
+<a name="__genMetadataFileArray{"><h2>__genMetadataFileArray{</h2></a>
+<p>
+     Return a ref to an array containing ProductMetaFileData objects
+     created from the <metafile> data of the XML from the given
+     <instsource> node.
+<p>
+Defined on line: 3646
+<a name="__genMetadataPkgsArray"><h2>__genMetadataPkgsArray</h2></a>
+<p>
+     Return a ref to an array containing ProductPackageData objects
+     created from the <repopackage> data of the XML from the given
+     <instsource> node.
+<p>
+Defined on line: 3678
+<p>
+Called in
+<ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 4608</li></ul>
+<a name="__genProductArchitectureArray"><h2>__genProductArchitectureArray</h2></a>
+<p>
+     Return a ref to an array containing ProductArchitectureData
+     objects created from the <arch> data of the XML from the given
+     <instsource> node.
+<p>
+Defined on line: 3716
+<p>
+Called in
+<ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 4559</li></ul>
+<a name="__genProductPackagesArray"><h2>__genProductPackagesArray</h2></a>
+<p>
+     Return a ref to an array containing ProductPackageData
+     objects created from the <repopackage> data of the XML from the given
+     <instsource> node.
+<p>
+Defined on line: 3751
+<p>
+Called in
+<ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 4617</li></ul>
+<a name="__genProductReqArchHash"><h2>__genProductReqArchHash</h2></a>
+<p>
+     Get the architecture list used for building up
+     an installation source tree
+<p>
+Defined on line: 3772
+<p>
+Called in
+<ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 4621</li></ul>
+<a name="__genRepoPackagesArray"><h2>__genRepoPackagesArray</h2></a>
+<p>
+     Return a ref to an array containing ProductPackageData objects
+     created from the <repopackage> children of the given node.
+<p>
+Defined on line: 3817
+<p>
+Called in
+<ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 3521</li><li><a href="KIWIXML.html">KIWIXML</a> : 3544</li><li><a href="KIWIXML.html">KIWIXML</a> : 3567</li><li><a href="KIWIXML.html">KIWIXML</a> : 3763</li></ul>
+<a name="__genTypeHash"><h2>__genTypeHash</h2></a>
+<p>
+     Return a ref to a hash keyed by the image type values for all <type>
+     definitions that are children of the given XML:ELEMENT object
+     Build a data structure that matches the structure defined in
+     KIWIXMLTypeData
+<p>
+Defined on line: 3853
+<p>
+Called in
+<ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 4994</li></ul>
+<a name="__getChildNodeTextValue"><h2>__getChildNodeTextValue</h2></a>
+<p>
+     Return the value of the node identified by the
+     given name as text.
+<p>
+Defined on line: 4008
+<p>
+Called in
+<ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 3001</li><li><a href="KIWIXML.html">KIWIXML</a> : 3003</li><li><a href="KIWIXML.html">KIWIXML</a> : 3005</li><li><a href="KIWIXML.html">KIWIXML</a> : 3007</li><li><a href="KIWIXML.html">KIWIXML</a> : 3009</li><li><a href="KIWIXML.html">KIWIXML</a> : 3011</li><li><a href="KIWIXML.html">KIWIXML</a> : 3013</li><li><a href="KIWIXML.html">KIWIXML</a> : 3015</li><li><a href="KIWIXML.html">KIWIXML</a> : 3017</li><li><a href="KIWIXML.html">KIWIXML</a> : 3019</li><li><a href="KIWIXML.html">KIWIXML</a> : 3021</li><li><a href="KIWIXML.html">KIWIXML</a> : 3023</li><li><a href="KIWIXML.html">KIWIXML</a> : 3025</li><li><a href="KIWIXML.html">KIWIXML</a> : 3027</li><li><a href="KIWIXML.html">KIWIXML</a> : 3029</li><li><a href="KIWIXML.html">KIWIXML</a> : 3031</li><li><a href="KIWIXML.html">KIWIXML</a> : 3033</li><li><a href="KIWIXML.html">KIWIXML</a> : 3035</li><li><a href="KIWIXML.html">KIWIXML</a> : 3037</li><li><a href="KIWIXML.html">KIWIXML</a> : 3039</li><li><a href="KIWIXML.html">KIWIXML</a> : 3041</li><li><a href="KIWIXML.html">KIWIXML</a> : 3043</li><li><a href="KIWIXML.html">KIWIXML</a> : 3045</li><li><a href="KIWIXML.html">KIWIXML</a> : 3186</li><li><a href="KIWIXML.html">KIWIXML</a> : 3187</li><li><a href="KIWIXML.html">KIWIXML</a> : 3209</li><li><a href="KIWIXML.html">KIWIXML</a> : 3953</li><li><a href="KIWIXML.html">KIWIXML</a> : 4524</li><li><a href="KIWIXML.html">KIWIXML</a> : 4531</li><li><a href="KIWIXML.html">KIWIXML</a> : 4943</li><li><a href="KIWIXML.html">KIWIXML</a> : 4946</li><li><a href="KIWIXML.html">KIWIXML</a> : 4949</li><li><a href="KIWIXML.html">KIWIXML</a> : 4952</li><li><a href="KIWIXML.html">KIWIXML</a> : 4955</li><li><a href="KIWIXML.html">KIWIXML</a> : 4958</li><li><a href="KIWIXML.html">KIWIXML</a> : 4961</li><li><a href="KIWIXML.html">KIWIXML</a> : 4964</li><li><a href="KIWIXML.html">KIWIXML</a> : 4967</li><li><a href="KIWIXML.html">KIWIXML</a> : 4970</li><li><a href="KIWIXML.html">KIWIXML</a> : 4973</li><li><a href="KIWIXML.html">KIWIXML</a> : 4976</li><li><a href="KIWIXML.html">KIWIXML</a> : 4979</li><li><a href="KIWIXML.html">KIWIXML</a> : 4991</li><li><a href="KIWIXML.html">KIWIXML</a> : 4998</li></ul>
+<a name="__getEntryPath"><h2>__getEntryPath</h2></a>
+<p>
+     Return the position in the imageConfig structure where
+     install data objects shold be stored. Install data objects
+     are children of the <packages> or <driver> elements
+<p>
+Defined on line: 4026
+<p>
+Called in
+<ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 5383</li><li><a href="KIWIXML.html">KIWIXML</a> : 5426</li></ul>
+<a name="__getInstallData"><h2>__getInstallData</h2></a>
+<p>
+     Return a ref to an array containing objects accumulated
+     across the image config data structure for the given
+     accessID.
+<p>
+Defined on line: 4087
+<p>
+Called in
+<ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 1269</li><li><a href="KIWIXML.html">KIWIXML</a> : 1287</li><li><a href="KIWIXML.html">KIWIXML</a> : 1299</li><li><a href="KIWIXML.html">KIWIXML</a> : 1310</li><li><a href="KIWIXML.html">KIWIXML</a> : 1321</li><li><a href="KIWIXML.html">KIWIXML</a> : 1364</li><li><a href="KIWIXML.html">KIWIXML</a> : 1377</li><li><a href="KIWIXML.html">KIWIXML</a> : 1394</li><li><a href="KIWIXML.html">KIWIXML</a> : 1443</li><li><a href="KIWIXML.html">KIWIXML</a> : 1530</li><li><a href="KIWIXML.html">KIWIXML</a> : 1620</li><li><a href="KIWIXML.html">KIWIXML</a> : 1674</li><li><a href="KIWIXML.html">KIWIXML</a> : 1718</li><li><a href="KIWIXML.html">KIWIXML</a> : 1735</li><li><a href="KIWIXML.html">KIWIXML</a> : 1905</li><li><a href="KIWIXML.html">KIWIXML</a> : 2019</li></ul>
+<a name="__getPreferencesXMLElement"><h2>__getPreferencesXMLElement</h2></a>
+<p>
+     Return a complete preferences element for the given profile name
+<p>
+Defined on line: 4164
+<p>
+Called in
+<ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 2450</li></ul>
+<a name="__getProfsToModify"><h2>__getProfsToModify</h2></a>
+<p>
+     Given an array ref, the keyword "default", or no argument
+     generate an array of profile names
+<p>
+Defined on line: 4238
+<p>
+Called in
+<ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 493</li><li><a href="KIWIXML.html">KIWIXML</a> : 550</li><li><a href="KIWIXML.html">KIWIXML</a> : 600</li><li><a href="KIWIXML.html">KIWIXML</a> : 652</li><li><a href="KIWIXML.html">KIWIXML</a> : 715</li><li><a href="KIWIXML.html">KIWIXML</a> : 767</li><li><a href="KIWIXML.html">KIWIXML</a> : 818</li><li><a href="KIWIXML.html">KIWIXML</a> : 886</li><li><a href="KIWIXML.html">KIWIXML</a> : 942</li><li><a href="KIWIXML.html">KIWIXML</a> : 991</li><li><a href="KIWIXML.html">KIWIXML</a> : 1058</li><li><a href="KIWIXML.html">KIWIXML</a> : 1190</li><li><a href="KIWIXML.html">KIWIXML</a> : 1750</li><li><a href="KIWIXML.html">KIWIXML</a> : 5525</li></ul>
+<a name="__getSchemaVersion"><h2>__getSchemaVersion</h2></a>
+<p>
+     Return the schema version extracted from KIWISchema.rnc
+<p>
+Defined on line: 4282
+<p>
+Called in
+<ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 2419</li></ul>
+<a name="__getTypeNamesForProfs"><h2>__getTypeNamesForProfs</h2></a>
+<p>
+     Retun an array ref containing names of the configured types for the
+     given profile names.
+<p>
+Defined on line: 4307
+<p>
+Called in
+<ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 5531</li></ul>
+<a name="__getVMConfigOpts"><h2>__getVMConfigOpts</h2></a>
+<p>
+     Extract the <vmconfig-entry> information from the
+     XML and return all options in a list
+<p>
+Defined on line: 6241
+<a name="__hasDefaultProfName"><h2>__hasDefaultProfName</h2></a>
+<p>
+     Check whether the default profile name "kiwi_default" is in the
+     provided array ref of strings
+<p>
+Defined on line: 6260
+<p>
+Called in
+<ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 2365</li></ul>
+<a name="__mergePreferenceData"><h2>__mergePreferenceData</h2></a>
+<p>
+     Merge two hashes that represent <preferences> data into one.
+     Expecting two hash refs as arguments and return a hashref to
+     the merged data. If both hashes have definitions for the
+     same data issues an error.
+<p>
+Defined on line: 4347
+<p>
+Called in
+<ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 1784</li><li><a href="KIWIXML.html">KIWIXML</a> : 5024</li></ul>
+<a name="__mergeUsers"><h2>__mergeUsers</h2></a>
+<p>
+     Merge the given UserData objects. The data from the second user
+     passed is subsumed by the first user object.
+<p>
+Defined on line: 4435
+<p>
+Called in
+<ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 2071</li><li><a href="KIWIXML.html">KIWIXML</a> : 5260</li></ul>
+<a name="__populateArchiveInfo"><h2>__populateArchiveInfo</h2></a>
+<p>
+     Populate the imageConfig member with the
+     information from <archive> elements from <packages>
+<p>
+Defined on line: 4461
+<p>
+Called in
+<ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 423</li></ul>
+<a name="__populateDescriptionInfo"><h2>__populateDescriptionInfo</h2></a>
+<p>
+     Populate the imageConfig member with the
+     description data from the XML file.
+<p>
+Defined on line: 4513
+<p>
+Called in
+<ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 389</li></ul>
+<a name="__populateDriverInfo"><h2>__populateDriverInfo</h2></a>
+<p>
+     Populate the imageConfig member with the
+     drivers data from the XML file.
+<p>
+Defined on line: 4647
+<p>
+Called in
+<ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 401</li></ul>
+<a name="__populateIgnorePackageInfo"><h2>__populateIgnorePackageInfo</h2></a>
+<p>
+     Populate the imageConfig member with the
+     information from <ignore>
+<p>
+Defined on line: 4693
+<p>
+Called in
+<ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 427</li></ul>
+<a name="__populateInstSource"><h2>__populateInstSource</h2></a>
+<p>
+     Populate the imageConfig member with the
+     product data provided with the <instsource> element and
+     its children from the XML file.
+<p>
+Defined on line: 4548
+<p>
+Called in
+<ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 393</li></ul>
+<a name="__populatePackageCollectionInfo"><h2>__populatePackageCollectionInfo</h2></a>
+<p>
+     Populate the imageConfig member with the
+     information from <namedCollection>
+<p>
+Defined on line: 4821
+<p>
+Called in
+<ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 435</li></ul>
+<a name="__populatePackageInfo"><h2>__populatePackageInfo</h2></a>
+<p>
+     Populate the imageConfig member with the
+     information from <package>
+<p>
+Defined on line: 4737
+<p>
+Called in
+<ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 431</li></ul>
+<a name="__populatePackageProductInfo"><h2>__populatePackageProductInfo</h2></a>
+<p>
+     Populate the imageConfig member with the
+     information from <product>
+<p>
+Defined on line: 4874
+<p>
+Called in
+<ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 439</li></ul>
+<a name="__populatePreferenceInfo"><h2>__populatePreferenceInfo</h2></a>
+<p>
+     Populate the imageConfig member with the
+     preferences data from the XML file.
+<p>
+Defined on line: 4920
+<p>
+Called in
+<ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 405</li></ul>
+<a name="__populateProfileInfo"><h2>__populateProfileInfo</h2></a>
+<p>
+     Populate the imageConfig member with the
+     profile data from the XML file.
+<p>
+Defined on line: 5040
+<p>
+Called in
+<ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 397</li><li><a href="KIWIXML.html">KIWIXML</a> : 2345</li></ul>
+<a name="__populateRepositoryInfo"><h2>__populateRepositoryInfo</h2></a>
+<p>
+     Populate the imageConfig member with the
+     repository data from the XML file.
+<p>
+Defined on line: 5105
+<p>
+Called in
+<ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 443</li></ul>
+<a name="__populateStripInfo"><h2>__populateStripInfo</h2></a>
+<p>
+     Populate the imageConfig member with the strip data from the XML file.
+<p>
+Defined on line: 5162
+<p>
+Called in
+<ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 447</li></ul>
+<a name="__populateUserInfo"><h2>__populateUserInfo</h2></a>
+<p>
+     Populate the imageConfig member with the
+     user data from the XML file.
+<p>
+Defined on line: 5219
+<p>
+Called in
+<ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 451</li></ul>
+<a name="__resolveArchitecture"><h2>__resolveArchitecture</h2></a>
+<p>
+Missing<p>
+Defined on line: 6295
+<p>
+Called in
+<ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 6282</li></ul>
+<a name="__resolveLink"><h2>__resolveLink</h2></a>
+<p>
+Missing<p>
+Defined on line: 6279
+<p>
+Called in
+<ul>
+<li><a href="KIWICollect.html">KIWICollect</a> : 361</li></ul>
+<a name="__setDefaultBuildType"><h2>__setDefaultBuildType</h2></a>
+<p>
+     Set the default built type, which upon object construction is also the
+     the selected built type. The default built type is the first <type>
+     specification processed or the one type marked with primary="true"
+     across all the selected profiles. Unless a type is marked primary,
+     the default type of the default profile always wins. The default
+     type is a ref to a hash that is set as the default type as
+     differentiation by name is not sufficient, as multiple profiles
+     my have the same image type definition, which is valid as long as
+     those profiles are not processed together.
+<p>
+Defined on line: 5282
+<p>
+Called in
+<ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 411</li></ul>
+<a name="__storeInstallData"><h2>__storeInstallData</h2></a>
+<p>
+     Store the given install data object in the proper
+     location in the data structure. Install data objects
+     are objects of children of the <packages> or <driver>
+     elements. If the object was stored, return the object
+     If the object was already present return 1
+<p>
+Defined on line: 5394
+<p>
+Called in
+<ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 514</li><li><a href="KIWIXML.html">KIWIXML</a> : 565</li><li><a href="KIWIXML.html">KIWIXML</a> : 614</li><li><a href="KIWIXML.html">KIWIXML</a> : 667</li><li><a href="KIWIXML.html">KIWIXML</a> : 729</li><li><a href="KIWIXML.html">KIWIXML</a> : 781</li><li><a href="KIWIXML.html">KIWIXML</a> : 848</li><li><a href="KIWIXML.html">KIWIXML</a> : 907</li><li><a href="KIWIXML.html">KIWIXML</a> : 956</li><li><a href="KIWIXML.html">KIWIXML</a> : 1005</li><li><a href="KIWIXML.html">KIWIXML</a> : 1204</li><li><a href="KIWIXML.html">KIWIXML</a> : 4501</li><li><a href="KIWIXML.html">KIWIXML</a> : 4681</li><li><a href="KIWIXML.html">KIWIXML</a> : 4725</li><li><a href="KIWIXML.html">KIWIXML</a> : 4808</li><li><a href="KIWIXML.html">KIWIXML</a> : 4862</li><li><a href="KIWIXML.html">KIWIXML</a> : 4908</li><li><a href="KIWIXML.html">KIWIXML</a> : 5207</li></ul>
+<a name="__verifyAddInstallDataArgs"><h2>__verifyAddInstallDataArgs</h2></a>
+<p>
+     Verify the arguments given to any of the add* methods that handle
+     image installation data.
+<p>
+Defined on line: 5462
+<p>
+Called in
+<ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 490</li><li><a href="KIWIXML.html">KIWIXML</a> : 547</li><li><a href="KIWIXML.html">KIWIXML</a> : 597</li><li><a href="KIWIXML.html">KIWIXML</a> : 645</li><li><a href="KIWIXML.html">KIWIXML</a> : 708</li><li><a href="KIWIXML.html">KIWIXML</a> : 760</li><li><a href="KIWIXML.html">KIWIXML</a> : 815</li><li><a href="KIWIXML.html">KIWIXML</a> : 883</li><li><a href="KIWIXML.html">KIWIXML</a> : 939</li><li><a href="KIWIXML.html">KIWIXML</a> : 988</li><li><a href="KIWIXML.html">KIWIXML</a> : 1183</li></ul>
+<a name="__verifyProfNames"><h2>__verifyProfNames</h2></a>
+<p>
+     Verify that the profile names in the given array ref are available,
+     if not print the given msg substituting PROF_NAME in the message
+     with the name that is in violation.
+<p>
+Defined on line: 5547
+<p>
+Called in
+<ul>
+<li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 731</li><li><a href="KIWIXML.html">KIWIXML</a> : 2356</li><li><a href="KIWIXML.html">KIWIXML</a> : 4253</li></ul>
 <a name="addArchives"><h2>addArchives</h2></a>
 <p>
      Add the given archives to
@@ -237,7 +867,7 @@ Defined on line: 688
 <p>
 Called in
 <ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 2164</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 2292</li></ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 2174</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 2302</li></ul>
 <a name="addLibsToKeep"><h2>addLibsToKeep</h2></a>
 <p>
      Add the given StripData objects to
@@ -252,7 +882,7 @@ Defined on line: 740
 <p>
 Called in
 <ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 2165</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 2296</li></ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 2175</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 2306</li></ul>
 <a name="addPackageCollections"><h2>addPackageCollections</h2></a>
 <p>
      Add the given package collections to
@@ -299,7 +929,7 @@ Defined on line: 918
 <p>
 Called in
 <ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1452</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1763</li><li><a href="KIWIXML.html">KIWIXML</a> : 1760</li></ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1452</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1763</li><li><a href="KIWIXML.html">KIWIXML</a> : 1762</li></ul>
 <a name="addPackagesToIgnore"><h2>addPackagesToIgnore</h2></a>
 <p>
      Add the given packages to
@@ -339,7 +969,7 @@ Defined on line: 1128
 <p>
 Called in
 <ul>
-<li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1328</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1339</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1940</li></ul>
+<li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1337</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1348</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1950</li></ul>
 <a name="addToolsToKeep"><h2>addToolsToKeep</h2></a>
 <p>
      Add the given StripData objects to
@@ -354,7 +984,7 @@ Defined on line: 1163
 <p>
 Called in
 <ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 2166</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 2272</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 2300</li></ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 2176</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 2282</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 2310</li></ul>
 <a name="discardReplacableRepos"><h2>discardReplacableRepos</h2></a>
 <p>
      Remove all repositories marked as replaceable
@@ -374,12 +1004,12 @@ Defined on line: 1243
 <p>
 Called in
 <ul>
-<li><a href="KIWIImageBuilderBase.html">KIWIImageBuilderBase</a> : 323</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 785</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 2362</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 238</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 731</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 766</li></ul>
+<li><a href="KIWIImageBuilderBase.html">KIWIImageBuilderBase</a> : 323</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 785</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 2372</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 238</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 728</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 763</li></ul>
 <a name="getArch"><h2>getArch</h2></a>
 <p>
      Return the architecture currently used for data selection
 <p>
-Defined on line: 5690
+Defined on line: 5693
 <a name="getArchives"><h2>getArchives</h2></a>
 <p>
      Return an array ref containing ArchiveData objects
@@ -388,7 +1018,7 @@ Defined on line: 1264
 <p>
 Called in
 <ul>
-<li><a href="KIWIRoot.html">KIWIRoot</a> : 882</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 1197</li><li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 476</li></ul>
+<li><a href="KIWIRoot.html">KIWIRoot</a> : 882</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 1194</li><li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 476</li></ul>
 <a name="getBootDeletePackages"><h2>getBootDeletePackages</h2></a>
 <p>
      Return an array ref containing PackageData objects for the packages
@@ -425,7 +1055,7 @@ Defined on line: 1316
 <p>
 Called in
 <ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1727</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 2222</li><li><a href="KIWIXML.html">KIWIXML</a> : 1378</li></ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1727</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 2232</li><li><a href="KIWIXML.html">KIWIXML</a> : 1378</li></ul>
 <a name="getBootKernel"><h2>getBootKernel</h2></a>
 <p>
 Missing<p>
@@ -444,11 +1074,11 @@ Defined on line: 1370
 <p>
 Called in
 <ul>
-<li><a href="KIWICache.html">KIWICache</a> : 162</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 814</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1613</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 453</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 262</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 401</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 431</li><li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 119</li></ul>
+<li><a href="KIWICache.html">KIWICache</a> : 162</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 814</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1613</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 453</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 262</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 398</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 428</li><li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 119</li></ul>
 <a name="getConfigName"><h2>getConfigName</h2></a>
 <p>
 Missing<p>
-Defined on line: 5576
+Defined on line: 5579
 <p>
 Called in
 <ul>
@@ -462,7 +1092,7 @@ Defined on line: 1400
 <p>
 Called in
 <ul>
-<li><a href="KIWICache.html">KIWICache</a> : 144</li><li><a href="KIWIXML.html">KIWIXML</a> : 2160</li><li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 566</li></ul>
+<li><a href="KIWICache.html">KIWICache</a> : 144</li><li><a href="KIWIXML.html">KIWIXML</a> : 2162</li><li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 566</li></ul>
 <a name="getDUDArchitectures"><h2>getDUDArchitectures</h2></a>
 <p>
      Return a hash ref containing strings indicating the driver update
@@ -472,7 +1102,7 @@ Defined on line: 1467
 <p>
 Called in
 <ul>
-<li><a href="KIWICollect.html">KIWICollect</a> : 2582</li><li><a href="KIWICollect.html">KIWICollect</a> : 2656</li><li><a href="KIWICollect.html">KIWICollect</a> : 2710</li></ul>
+<li><a href="KIWICollect.html">KIWICollect</a> : 2584</li><li><a href="KIWICollect.html">KIWICollect</a> : 2658</li><li><a href="KIWICollect.html">KIWICollect</a> : 2712</li></ul>
 <a name="getDUDInstallSystemPackages"><h2>getDUDInstallSystemPackages</h2></a>
 <p>
      Return an array ref containing ProductPackageData objects
@@ -481,7 +1111,7 @@ Defined on line: 1482
 <p>
 Called in
 <ul>
-<li><a href="KIWICollect.html">KIWICollect</a> : 2651</li><li><a href="KIWICollect.html">KIWICollect</a> : 2700</li></ul>
+<li><a href="KIWICollect.html">KIWICollect</a> : 2653</li><li><a href="KIWICollect.html">KIWICollect</a> : 2702</li></ul>
 <a name="getDUDModulePackages"><h2>getDUDModulePackages</h2></a>
 <p>
      Return an array ref containing ProductPackageData objects
@@ -490,7 +1120,7 @@ Defined on line: 1496
 <p>
 Called in
 <ul>
-<li><a href="KIWICollect.html">KIWICollect</a> : 2577</li><li><a href="KIWICollect.html">KIWICollect</a> : 2701</li></ul>
+<li><a href="KIWICollect.html">KIWICollect</a> : 2579</li><li><a href="KIWICollect.html">KIWICollect</a> : 2703</li></ul>
 <a name="getDUDPackages"><h2>getDUDPackages</h2></a>
 <p>
      Return an array ref containing ProductPackageData objects
@@ -504,7 +1134,7 @@ Defined on line: 1426
 <p>
 Called in
 <ul>
-<li><a href="KIWIAnalyseTemplate.html">KIWIAnalyseTemplate</a> : 144</li><li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 580</li><li><a href="KIWIXML.html">KIWIXML</a> : 2427</li></ul>
+<li><a href="KIWIAnalyseTemplate.html">KIWIAnalyseTemplate</a> : 144</li><li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 605</li><li><a href="KIWIXML.html">KIWIXML</a> : 2429</li></ul>
 <a name="getDrivers"><h2>getDrivers</h2></a>
 <p>
      Return an array ref containing DriverData objects for the current
@@ -529,11 +1159,11 @@ Defined on line: 1536
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 650</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1060</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2078</li><li><a href="KIWIImage.html">KIWIImage</a> : 1171</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 328</li><li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 843</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 282</li><li><a href="KIWIXML.html">KIWIXML</a> : 2419</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 653</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1045</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2042</li><li><a href="KIWIImage.html">KIWIImage</a> : 1171</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 328</li><li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 868</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 282</li><li><a href="KIWIXML.html">KIWIXML</a> : 2421</li></ul>
 <a name="getImageID"><h2>getImageID</h2></a>
 <p>
 Missing<p>
-Defined on line: 5585
+Defined on line: 5588
 <p>
 Called in
 <ul>
@@ -546,7 +1176,7 @@ Defined on line: 1560
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 592</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1013</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1492</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2080</li><li><a href="KIWICache.html">KIWICache</a> : 143</li><li><a href="KIWICache.html">KIWICache</a> : 228</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 613</li><li><a href="KIWIImage.html">KIWIImage</a> : 1170</li><li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 597</li><li><a href="KIWIManagerEnsconce.html">KIWIManagerEnsconce</a> : 312</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 269</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 410</li><li><a href="KIWIXML.html">KIWIXML</a> : 2415</li><li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 589</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 595</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1004</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1477</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2044</li><li><a href="KIWICache.html">KIWICache</a> : 143</li><li><a href="KIWICache.html">KIWICache</a> : 228</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 613</li><li><a href="KIWIImage.html">KIWIImage</a> : 1170</li><li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 622</li><li><a href="KIWIManagerEnsconce.html">KIWIManagerEnsconce</a> : 312</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 269</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 410</li><li><a href="KIWIXML.html">KIWIXML</a> : 2417</li><li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 589</li></ul>
 <a name="getImageType"><h2>getImageType</h2></a>
 <p>
      Return a TypeData object for the selected build type
@@ -555,11 +1185,11 @@ Defined on line: 1571
 <p>
 Called in
 <ul>
-<li><a href="KIWIAnalyseTemplate.html">KIWIAnalyseTemplate</a> : 163</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 259</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 345</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 350</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 366</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 584</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 5305</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 6039</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 7135</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 7136</li><li><a href="KIWICollect.html">KIWICollect</a> : 853</li><li><a href="KIWIConfigWriterFactory.html">KIWIConfigWriterFactory</a> : 94</li><li><a href="KIWIContainerBuilder.html">KIWIContainerBuilder</a> : 323</li><li><a href="KIWIContainerBuilder.html">KIWIContainerBuilder</a> : 394</li><li><a href="KIWIContainerBuilder.html">KIWIContainerBuilder</a> : 628</li><li><a href="KIWIContainerConfigWriter.html">KIWIContainerConfigWriter</a> : 104</li><li><a href="KIWIContainerConfigWriter.html">KIWIContainerConfigWriter</a> : 165</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 557</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1295</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1989</li><li><a href="KIWIImage.html">KIWIImage</a> : 680</li><li><a href="KIWIImage.html">KIWIImage</a> : 855</li><li><a href="KIWIImage.html">KIWIImage</a> : 1175</li><li><a href="KIWIImage.html">KIWIImage</a> : 2218</li><li><a href="KIWIImage.html">KIWIImage</a> : 2304</li><li><a href="KIWIImage.html">KIWIImage</a> : 2458</li><li><a href="KIWIImage.html">KIWIImage</a> : 3226</li><li><a href="KIWIImage.html">KIWIImage</a> : 3430</li><li><a href="KIWIImage.html">KIWIImage</a> : 3601</li><li><a href="KIWIImage.html">KIWIImage</a> : 3909</li><li><a href="KIWIImage.html">KIWIImage</a> : 4082</li><li><a href="KIWIImage.html">KIWIImage</a> : 4212</li><li><a href="KIWIImage.html">KIWIImage</a> : 4357</li><li><a href="KIWIImage.html">KIWIImage</a> : 4446</li><li><a href="KIWIImage.html">KIWIImage</a> : 4447</li><li><a href="KIWIImage.html">KIWIImage</a> : 4709</li><li><a href="KIWIImage.html">KIWIImage</a> : 4742</li><li><a href="KIWIImage.html">KIWIImage</a> : 4748</li><li><a href="KIWIImageBuilderBase.html">KIWIImageBuilderBase</a> : 322</li><li><a href="KIWIImageBuildFactory.html">KIWIImageBuildFactory</a> : 99</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 134</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 155</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 232</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 279</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 783</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1603</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1957</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1958</li><li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 100</li><li><a href="KIWIIsoLinux.html">KIWIIsoLinux</a> : 444</li><li><a href="KIWIIsoLinux.html">KIWIIsoLinux</a> : 878</li><li><a href="KIWIIsoLinux.html">KIWIIsoLinux</a> : 891</li><li><a href="KIWIIsoLinux.html">KIWIIsoLinux</a> : 957</li><li><a href="KIWIIsoLinux.html">KIWIIsoLinux</a> : 1084</li><li><a href="KIWIIsoLinux.html">KIWIIsoLinux</a> : 1284</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 234</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 367</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 533</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 291</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 384</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 424</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 459</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 554</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 641</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 659</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 856</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 985</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 1025</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 1091</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 1284</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 1351</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 1383</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 1420</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 1477</li><li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 560</li></ul>
+<li><a href="KIWIAnalyseTemplate.html">KIWIAnalyseTemplate</a> : 163</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 259</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 345</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 350</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 366</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 587</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 5313</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 6028</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 7123</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 7124</li><li><a href="KIWICollect.html">KIWICollect</a> : 853</li><li><a href="KIWIConfigWriterFactory.html">KIWIConfigWriterFactory</a> : 94</li><li><a href="KIWIContainerBuilder.html">KIWIContainerBuilder</a> : 323</li><li><a href="KIWIContainerBuilder.html">KIWIContainerBuilder</a> : 394</li><li><a href="KIWIContainerBuilder.html">KIWIContainerBuilder</a> : 628</li><li><a href="KIWIContainerConfigWriter.html">KIWIContainerConfigWriter</a> : 104</li><li><a href="KIWIContainerConfigWriter.html">KIWIContainerConfigWriter</a> : 165</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 557</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1304</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1996</li><li><a href="KIWIImage.html">KIWIImage</a> : 680</li><li><a href="KIWIImage.html">KIWIImage</a> : 855</li><li><a href="KIWIImage.html">KIWIImage</a> : 1175</li><li><a href="KIWIImage.html">KIWIImage</a> : 2219</li><li><a href="KIWIImage.html">KIWIImage</a> : 2305</li><li><a href="KIWIImage.html">KIWIImage</a> : 2459</li><li><a href="KIWIImage.html">KIWIImage</a> : 3227</li><li><a href="KIWIImage.html">KIWIImage</a> : 3431</li><li><a href="KIWIImage.html">KIWIImage</a> : 3602</li><li><a href="KIWIImage.html">KIWIImage</a> : 3910</li><li><a href="KIWIImage.html">KIWIImage</a> : 4083</li><li><a href="KIWIImage.html">KIWIImage</a> : 4213</li><li><a href="KIWIImage.html">KIWIImage</a> : 4358</li><li><a href="KIWIImage.html">KIWIImage</a> : 4447</li><li><a href="KIWIImage.html">KIWIImage</a> : 4448</li><li><a href="KIWIImage.html">KIWIImage</a> : 4710</li><li><a href="KIWIImage.html">KIWIImage</a> : 4743</li><li><a href="KIWIImage.html">KIWIImage</a> : 4749</li><li><a href="KIWIImageBuilderBase.html">KIWIImageBuilderBase</a> : 322</li><li><a href="KIWIImageBuildFactory.html">KIWIImageBuildFactory</a> : 99</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 134</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 155</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 232</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 279</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 783</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1603</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1967</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1968</li><li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 100</li><li><a href="KIWIIsoLinux.html">KIWIIsoLinux</a> : 444</li><li><a href="KIWIIsoLinux.html">KIWIIsoLinux</a> : 878</li><li><a href="KIWIIsoLinux.html">KIWIIsoLinux</a> : 891</li><li><a href="KIWIIsoLinux.html">KIWIIsoLinux</a> : 957</li><li><a href="KIWIIsoLinux.html">KIWIIsoLinux</a> : 1084</li><li><a href="KIWIIsoLinux.html">KIWIIsoLinux</a> : 1284</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 234</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 367</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 533</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 291</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 384</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 421</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 456</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 551</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 638</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 656</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 853</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 982</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 1022</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 1088</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 1281</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 1348</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 1380</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 1417</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 1474</li><li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 560</li></ul>
 <a name="getInstSourceSatSolvable"><h2>getInstSourceSatSolvable</h2></a>
 <p>
 Missing<p>
-Defined on line: 5701
+Defined on line: 5704
 <p>
 Called in
 <ul>
@@ -575,7 +1205,7 @@ Defined on line: 1582
 <p>
 Called in
 <ul>
-<li><a href="KIWIManagerZypper.html">KIWIManagerZypper</a> : 706</li><li><a href="KIWIManagerZypper.html">KIWIManagerZypper</a> : 830</li><li><a href="KIWIManagerZypper.html">KIWIManagerZypper</a> : 930</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 776</li><li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 145</li></ul>
+<li><a href="KIWIManagerZypper.html">KIWIManagerZypper</a> : 706</li><li><a href="KIWIManagerZypper.html">KIWIManagerZypper</a> : 830</li><li><a href="KIWIManagerZypper.html">KIWIManagerZypper</a> : 930</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 773</li><li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 145</li></ul>
 <a name="getLibsToKeep"><h2>getLibsToKeep</h2></a>
 <p>
      Return an array ref containing StripData objects for the current
@@ -590,27 +1220,27 @@ Defined on line: 1638
 <p>
 Called in
 <ul>
-<li><a href="KIWIAnalyseTemplate.html">KIWIAnalyseTemplate</a> : 168</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2089</li><li><a href="KIWIConfigure.html">KIWIConfigure</a> : 590</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 2114</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 2117</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 613</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 293</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 460</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 676</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 857</li></ul>
+<li><a href="KIWIAnalyseTemplate.html">KIWIAnalyseTemplate</a> : 168</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2053</li><li><a href="KIWIConfigure.html">KIWIConfigure</a> : 590</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 2124</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 2127</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 613</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 293</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 457</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 673</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 854</li></ul>
 <a name="getPXEConfig"><h2>getPXEConfig</h2></a>
 <p>
      Return a PXEDeployData object for the PXE boot configuration of the
      current build type.
 <p>
-Defined on line: 1943
+Defined on line: 1945
 <p>
 Called in
 <ul>
-<li><a href="KIWIImage.html">KIWIImage</a> : 3225</li></ul>
+<li><a href="KIWIImage.html">KIWIImage</a> : 3226</li></ul>
 <a name="getPXEConfigData"><h2>getPXEConfigData</h2></a>
 <p>
      Return an array ref containing PXEDeployConfigData objects for
      current build type.
 <p>
-Defined on line: 1955
+Defined on line: 1957
 <p>
 Called in
 <ul>
-<li><a href="KIWIImage.html">KIWIImage</a> : 3325</li></ul>
+<li><a href="KIWIImage.html">KIWIImage</a> : 3326</li></ul>
 <a name="getPackageCollections"><h2>getPackageCollections</h2></a>
 <p>
      Return an array ref containing PackageCollectData objects
@@ -624,13 +1254,13 @@ Defined on line: 1669
 <p>
 Called in
 <ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 2514</li></ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 2516</li></ul>
 <a name="getPackagesToDelete"><h2>getPackagesToDelete</h2></a>
 <p>
      Return an array ref containing PackageData objects for the packages
      that should be deleted.
 <p>
-Defined on line: 1727
+Defined on line: 1729
 <a name="getPackagesToIgnore"><h2>getPackagesToIgnore</h2></a>
 <p>
      Return an array ref containing IgnorePackageData objects
@@ -641,29 +1271,29 @@ Defined on line: 1280
 <p>
 Called in
 <ul>
-<li><a href="KIWIManagerZypper.html">KIWIManagerZypper</a> : 821</li><li><a href="KIWIXML.html">KIWIXML</a> : 1684</li><li><a href="KIWIXML.html">KIWIXML</a> : 2518</li></ul>
+<li><a href="KIWIManagerZypper.html">KIWIManagerZypper</a> : 821</li><li><a href="KIWIXML.html">KIWIXML</a> : 1684</li><li><a href="KIWIXML.html">KIWIXML</a> : 2520</li></ul>
 <a name="getPreferences"><h2>getPreferences</h2></a>
 <p>
      Return a new KIWIXMLPreferenceData object which references
      the sum of all default and currently selected build
      profile(s)
 <p>
-Defined on line: 1768
+Defined on line: 1770
 <p>
 Called in
 <ul>
-<li><a href="KIWIAnalyseTemplate.html">KIWIAnalyseTemplate</a> : 153</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 431</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 591</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1012</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1491</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2079</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 4310</li><li><a href="KIWIConfigure.html">KIWIConfigure</a> : 505</li><li><a href="KIWIConfigure.html">KIWIConfigure</a> : 536</li><li><a href="KIWIConfigure.html">KIWIConfigure</a> : 563</li><li><a href="KIWIConfigure.html">KIWIConfigure</a> : 711</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 614</li><li><a href="KIWIImage.html">KIWIImage</a> : 1715</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 288</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 542</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 750</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1467</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1622</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1809</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1810</li><li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 529</li><li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 581</li><li><a href="KIWIManager.html">KIWIManager</a> : 91</li><li><a href="KIWIManagerSmart.html">KIWIManagerSmart</a> : 107</li><li><a href="KIWIManagerSmart.html">KIWIManagerSmart</a> : 196</li><li><a href="KIWIManagerSmart.html">KIWIManagerSmart</a> : 573</li><li><a href="KIWIManagerSmart.html">KIWIManagerSmart</a> : 683</li><li><a href="KIWIManagerSmart.html">KIWIManagerSmart</a> : 728</li><li><a href="KIWIManagerYum.html">KIWIManagerYum</a> : 100</li><li><a href="KIWIManagerZypper.html">KIWIManagerZypper</a> : 117</li><li><a href="KIWIManagerZypper.html">KIWIManagerZypper</a> : 199</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 404</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 107</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 407</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 409</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 705</li><li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 140</li><li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 588</li><li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 1015</li></ul>
+<li><a href="KIWIAnalyseTemplate.html">KIWIAnalyseTemplate</a> : 153</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 438</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 594</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1003</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 1476</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 2043</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 4265</li><li><a href="KIWIConfigure.html">KIWIConfigure</a> : 505</li><li><a href="KIWIConfigure.html">KIWIConfigure</a> : 536</li><li><a href="KIWIConfigure.html">KIWIConfigure</a> : 563</li><li><a href="KIWIConfigure.html">KIWIConfigure</a> : 711</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 614</li><li><a href="KIWIImage.html">KIWIImage</a> : 1715</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 288</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 542</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 750</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1467</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1622</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1809</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1810</li><li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 554</li><li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 606</li><li><a href="KIWIManager.html">KIWIManager</a> : 91</li><li><a href="KIWIManagerSmart.html">KIWIManagerSmart</a> : 107</li><li><a href="KIWIManagerSmart.html">KIWIManagerSmart</a> : 196</li><li><a href="KIWIManagerSmart.html">KIWIManagerSmart</a> : 573</li><li><a href="KIWIManagerSmart.html">KIWIManagerSmart</a> : 683</li><li><a href="KIWIManagerSmart.html">KIWIManagerSmart</a> : 728</li><li><a href="KIWIManagerYum.html">KIWIManagerYum</a> : 100</li><li><a href="KIWIManagerZypper.html">KIWIManagerZypper</a> : 117</li><li><a href="KIWIManagerZypper.html">KIWIManagerZypper</a> : 199</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 404</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 107</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 407</li><li><a href="KIWIRoot.html">KIWIRoot</a> : 409</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 702</li><li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 140</li><li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 588</li><li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 1015</li></ul>
 <a name="getProductArchitectures"><h2>getProductArchitectures</h2></a>
 <p>
      Return an array ref of ProductArchitectureData objects.
 <p>
-Defined on line: 1796
+Defined on line: 1798
 <a name="getProductMetaChroots"><h2>getProductMetaChroots</h2></a>
 <p>
      Return an array ref of ProductMetaChrootData objects specified as
      metadata.
 <p>
-Defined on line: 1810
+Defined on line: 1812
 <p>
 Called in
 <ul>
@@ -673,7 +1303,7 @@ Called in
      Return an array ref of ProductMetaFileData objects specified as
      metadata.
 <p>
-Defined on line: 1825
+Defined on line: 1827
 <p>
 Called in
 <ul>
@@ -683,7 +1313,7 @@ Called in
      Return an array ref of ProductPackageData objects specified as
      metadata.
 <p>
-Defined on line: 1840
+Defined on line: 1842
 <p>
 Called in
 <ul>
@@ -693,7 +1323,7 @@ Called in
      Return a ProductOptionsData object providing all information from
      <productinfo>, <productoption>, and <productvar> elements.
 <p>
-Defined on line: 1855
+Defined on line: 1857
 <p>
 Called in
 <ul>
@@ -702,7 +1332,7 @@ Called in
 <p>
      Return an array ref of InstRepositoryData objects
 <p>
-Defined on line: 1870
+Defined on line: 1872
 <p>
 Called in
 <ul>
@@ -711,7 +1341,7 @@ Called in
 <p>
      Return a hash ref of strings indicating the required architectures
 <p>
-Defined on line: 1884
+Defined on line: 1886
 <p>
 Called in
 <ul>
@@ -720,7 +1350,7 @@ Called in
 <p>
      Return an array ref of ProductPackageData objects
 <p>
-Defined on line: 1909
+Defined on line: 1911
 <p>
 Called in
 <ul>
@@ -729,7 +1359,7 @@ Called in
 <p>
      Return an array ref containing ProductData objects
 <p>
-Defined on line: 1898
+Defined on line: 1900
 <p>
 Called in
 <ul>
@@ -738,45 +1368,45 @@ Called in
 <p>
      Return an array ref of ProfileData objects available for this image
 <p>
-Defined on line: 1923
+Defined on line: 1925
 <p>
 Called in
 <ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 2431</li><li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 395</li></ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 2433</li><li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 395</li></ul>
 <a name="getRepositories"><h2>getRepositories</h2></a>
 <p>
      Return an array reference of KIWIXMLRepositories objects that are
      specified to be part of the current profile(s)
 <p>
-Defined on line: 1967
+Defined on line: 1969
 <a name="getSingleInstSourceSatSolvable"><h2>getSingleInstSourceSatSolvable</h2></a>
 <p>
 Missing<p>
-Defined on line: 5731
+Defined on line: 5734
 <p>
 Called in
 <ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 77</li><li><a href="KIWIXML.html">KIWIXML</a> : 5712</li></ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 77</li><li><a href="KIWIXML.html">KIWIXML</a> : 5715</li></ul>
 <a name="getSplitConfig"><h2>getSplitConfig</h2></a>
 <p>
      Return a SplitData object for the <split> configuration of
      the current build type
 <p>
-Defined on line: 1987
+Defined on line: 1989
 <p>
 Called in
 <ul>
-<li><a href="KIWIImage.html">KIWIImage</a> : 2417</li></ul>
+<li><a href="KIWIImage.html">KIWIImage</a> : 2418</li></ul>
 <a name="getSystemDiskConfig"><h2>getSystemDiskConfig</h2></a>
 <p>
      Return a SystemdiskData object for the <systemdisk> configuration of
      the current build type
 <p>
-Defined on line: 1999
+Defined on line: 2001
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 253</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1324</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1335</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1995</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1881</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 527</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 292</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 485</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 874</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 1150</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 253</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1333</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1344</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 2002</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1881</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 527</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 292</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 482</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 871</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 1147</li></ul>
 <a name="getTestSuitePackages"><h2>getTestSuitePackages</h2></a>
 <p>
      Return an array ref containing PackageData objects for the packages
@@ -792,32 +1422,32 @@ Called in
      Return an array ref containing StripData objects for the current
      selected build profile(s)
 <p>
-Defined on line: 2011
+Defined on line: 2013
 <a name="getType"><h2>getType</h2></a>
 <p>
      Return a TypeDataObject for the given type if found in the
      active profiles.
 <p>
-Defined on line: 2023
+Defined on line: 2025
 <a name="getUsers"><h2>getUsers</h2></a>
 <p>
      Return a reference to an array holding UserData objects
 <p>
-Defined on line: 2055
+Defined on line: 2057
 <p>
 Called in
 <ul>
-<li><a href="KIWIConfigure.html">KIWIConfigure</a> : 453</li><li><a href="KIWIConfigure.html">KIWIConfigure</a> : 736</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 968</li></ul>
+<li><a href="KIWIConfigure.html">KIWIConfigure</a> : 453</li><li><a href="KIWIConfigure.html">KIWIConfigure</a> : 736</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 965</li></ul>
 <a name="getVMachineConfig"><h2>getVMachineConfig</h2></a>
 <p>
      Return a VMachineData object for the virtual machine configuration of
      the current build type
 <p>
-Defined on line: 2090
+Defined on line: 2092
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 301</li><li><a href="KIWIConfigWriterFactory.html">KIWIConfigWriterFactory</a> : 104</li><li><a href="KIWIContainerConfigWriter.html">KIWIContainerConfigWriter</a> : 70</li><li><a href="KIWIImage.html">KIWIImage</a> : 1053</li><li><a href="KIWIImage.html">KIWIImage</a> : 2426</li><li><a href="KIWIImage.html">KIWIImage</a> : 4129</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 2142</li><li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 123</li><li><a href="KIWIOVFConfigWriter.html">KIWIOVFConfigWriter</a> : 85</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 597</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 1040</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 1106</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 301</li><li><a href="KIWIConfigWriterFactory.html">KIWIConfigWriterFactory</a> : 104</li><li><a href="KIWIContainerConfigWriter.html">KIWIContainerConfigWriter</a> : 70</li><li><a href="KIWIImage.html">KIWIImage</a> : 1053</li><li><a href="KIWIImage.html">KIWIImage</a> : 2427</li><li><a href="KIWIImage.html">KIWIImage</a> : 4130</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 2152</li><li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 127</li><li><a href="KIWIOVFConfigWriter.html">KIWIOVFConfigWriter</a> : 85</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 597</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 1037</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 1103</li></ul>
 <a name="getVagrantConfig"><h2>getVagrantConfig</h2></a>
 <p>
      Return an array ref containing VagrantConfigData objects
@@ -827,12 +1457,12 @@ Defined on line: 1626
 <p>
 Called in
 <ul>
-<li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 579</li></ul>
+<li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 604</li></ul>
 <a name="ignoreRepositories"><h2>ignoreRepositories</h2></a>
 <p>
      Ignore all the repositories in the XML file.
 <p>
-Defined on line: 2122
+Defined on line: 2124
 <p>
 Called in
 <ul>
@@ -840,11 +1470,11 @@ Called in
 <a name="isArchAllowed"><h2>isArchAllowed</h2></a>
 <p>
 Missing<p>
-Defined on line: 5650
+Defined on line: 5653
 <a name="isDriverUpdateDisk"><h2>isDriverUpdateDisk</h2></a>
 <p>
 Missing<p>
-Defined on line: 5680
+Defined on line: 5683
 <p>
 Called in
 <ul>
@@ -1012,16 +1642,16 @@ Defined on line: 83
 <p>
 Called in
 <ul>
-<li><a href="KIWIAnalyseTemplate.html">KIWIAnalyseTemplate</a> : 135</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1775</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 129</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 148</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 257</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 460</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 526</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 734</li><li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 1006</li></ul>
+<li><a href="KIWIAnalyseTemplate.html">KIWIAnalyseTemplate</a> : 135</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1784</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 129</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 148</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 257</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 460</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 526</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 734</li><li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 1006</li></ul>
 <a name="setArch"><h2>setArch</h2></a>
 <p>
      Set the architecture to use to retrieve information
 <p>
-Defined on line: 5630
+Defined on line: 5633
 <a name="setBootProfiles"><h2>setBootProfiles</h2></a>
 <p>
 Missing<p>
-Defined on line: 5598
+Defined on line: 5601
 <p>
 Called in
 <ul>
@@ -1030,7 +1660,7 @@ Called in
 <p>
      Set the type to be used as the build type
 <p>
-Defined on line: 2146
+Defined on line: 2148
 <p>
 Called in
 <ul>
@@ -1039,7 +1669,7 @@ Called in
 <p>
      Set the description information for this configuration
 <p>
-Defined on line: 2187
+Defined on line: 2189
 <a name="setImageDisplayName"><h2>setImageDisplayName</h2></a>
 <p>
      Set the display name used for the boot menu
@@ -1057,13 +1687,13 @@ Defined on line: 1649
 <p>
 Called in
 <ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 2116</li></ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 2126</li></ul>
 <a name="setPackagesToDelete"><h2>setPackagesToDelete</h2></a>
 <p>
      set new list of PackageData objects for the packages
      that should be deleted.
 <p>
-Defined on line: 1739
+Defined on line: 1741
 <p>
 Called in
 <ul>
@@ -1079,7 +1709,7 @@ Called in
      the bootloader_theme is defined, A, B, or C or in the default profile
      if not defined in any of the other profiles.
 <p>
-Defined on line: 2209
+Defined on line: 2211
 <p>
 Called in
 <ul>
@@ -1090,7 +1720,7 @@ Called in
      currently active profiles, the search starts with the default
      profile
 <p>
-Defined on line: 2271
+Defined on line: 2273
 <p>
 Called in
 <ul>
@@ -1100,666 +1730,36 @@ Called in
      Set the information about which profiles to use for data access,
      if no argument is given set to the default profile(s)
 <p>
-Defined on line: 2331
+Defined on line: 2333
 <p>
 Called in
 <ul>
-<li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 771</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 789</li></ul>
+<li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 768</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 786</li></ul>
 <a name="setVMachineConfig"><h2>setVMachineConfig</h2></a>
 <p>
      Store a new VMachineData object
 <p>
-Defined on line: 2102
+Defined on line: 2104
 <p>
 Called in
 <ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 2147</li></ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 2157</li></ul>
 <a name="updateType"><h2>updateType</h2></a>
 <p>
      Modify the type that is currently the build type
 <p>
-Defined on line: 2373
+Defined on line: 2375
 <p>
 Called in
 <ul>
-<li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1323</li></ul>
+<li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1332</li></ul>
 <a name="writeXML"><h2>writeXML</h2></a>
 <p>
      Write the configuration to the given path
      Writes the XML in formated format
 <p>
-Defined on line: 2401
+Defined on line: 2403
 <p>
 Called in
 <ul>
 <li><a href="KIWIAnalyseTemplate.html">KIWIAnalyseTemplate</a> : 245</li></ul>
-<a name="__addDefaultSplitNode"><h2>__addDefaultSplitNode</h2></a>
-<p>
-     if no split section is setup we add a default section
-     from the contents of the KIWISplit.txt file and apply
-     it to the split types
-<p>
-Defined on line: 6165
-<p>
-Called in
-<ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 383</li></ul>
-<a name="__clearInstallData"><h2>__clearInstallData</h2></a>
-<p>
-     Clear the given install data object in the proper
-     location in the data structure.
-<p>
-Defined on line: 5356
-<p>
-Called in
-<ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 1758</li></ul>
-<a name="__collectBootStrapPackagesData"><h2>__collectBootStrapPackagesData</h2></a>
-<p>
-     Collect and coalesce data for the <packages type="bootstrap">
-<p>
-Defined on line: 2684
-<p>
-Called in
-<ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 2621</li></ul>
-<a name="__collectDefaultData"><h2>__collectDefaultData</h2></a>
-<p>
-     Collect data for the default profile for the given storage location
-     in the data strcuture
-<p>
-Defined on line: 2695
-<p>
-Called in
-<ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 2478</li><li><a href="KIWIXML.html">KIWIXML</a> : 2509</li><li><a href="KIWIXML.html">KIWIXML</a> : 2565</li><li><a href="KIWIXML.html">KIWIXML</a> : 2593</li><li><a href="KIWIXML.html">KIWIXML</a> : 2613</li><li><a href="KIWIXML.html">KIWIXML</a> : 2642</li></ul>
-<a name="__collectDeletePackagesData"><h2>__collectDeletePackagesData</h2></a>
-<p>
-     Collect and coalesce data for the <packages type="delete">
-<p>
-Defined on line: 2744
-<p>
-Called in
-<ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 2601</li></ul>
-<a name="__collectDriverData"><h2>__collectDriverData</h2></a>
-<p>
-     Collect and coalesce data for the <drivers> list
-<p>
-Defined on line: 2755
-<p>
-Called in
-<ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 2486</li></ul>
-<a name="__collectPackagesData"><h2>__collectPackagesData</h2></a>
-<p>
-     Collect and coalesce data for the <packages type="image"> list
-<p>
-Defined on line: 2766
-<p>
-Called in
-<ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 2539</li><li><a href="KIWIXML.html">KIWIXML</a> : 2586</li></ul>
-<a name="__collectStripData"><h2>__collectStripData</h2></a>
-<p>
-     Collect strip data for the given access pattern
-<p>
-Defined on line: 2812
-<p>
-Called in
-<ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 2650</li></ul>
-<a name="__collectXMLListData"><h2>__collectXMLListData</h2></a>
-<p>
-     Collect and coalesce data that is part of a list in XML
-     Items to be collected must have a getName method.
-<p>
-Defined on line: 2832
-<p>
-Called in
-<ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 2689</li><li><a href="KIWIXML.html">KIWIXML</a> : 2749</li><li><a href="KIWIXML.html">KIWIXML</a> : 2760</li><li><a href="KIWIXML.html">KIWIXML</a> : 2773</li><li><a href="KIWIXML.html">KIWIXML</a> : 2775</li><li><a href="KIWIXML.html">KIWIXML</a> : 2777</li><li><a href="KIWIXML.html">KIWIXML</a> : 2779</li><li><a href="KIWIXML.html">KIWIXML</a> : 2781</li><li><a href="KIWIXML.html">KIWIXML</a> : 2783</li><li><a href="KIWIXML.html">KIWIXML</a> : 2785</li><li><a href="KIWIXML.html">KIWIXML</a> : 2787</li><li><a href="KIWIXML.html">KIWIXML</a> : 2826</li></ul>
-<a name="__convertSizeStrToMBVal"><h2>__convertSizeStrToMBVal</h2></a>
-<p>
-     Convert a given size string that contains M or G into a value
-     that is a representation in MB.
-<p>
-Defined on line: 2922
-<p>
-Called in
-<ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 3367</li><li><a href="KIWIXML.html">KIWIXML</a> : 3389</li></ul>
-<a name="__createOEMConfig"><h2>__createOEMConfig</h2></a>
-<p>
-     Return a ref to a hash containing the configuration for <oemconfig>
-     of the given XML:ELEMENT object. Build a data structure that
-     matches the structure defined in
-     KIWIXMLOEMConfigData
-<p>
-Defined on line: 2982
-<p>
-Called in
-<ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 3946</li></ul>
-<a name="__createPXEDeployConfig"><h2>__createPXEDeployConfig</h2></a>
-<p>
-     Return a KIWIXMLPXEDeployData object created from the information
-     in the <pxedeploy> element of the given XML:ELEMENT object.
-<p>
-Defined on line: 3169
-<p>
-Called in
-<ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 3960</li></ul>
-<a name="__createPXEDeployConfigData"><h2>__createPXEDeployConfigData</h2></a>
-<p>
-     Return an array ref to an array containing KIWIXMLPXEDeployConfigData
-     objects. Created from the information
-     in the <pxedeploy> element of the given XML:ELEMENT object.
-<p>
-Defined on line: 3225
-<p>
-Called in
-<ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 3964</li></ul>
-<a name="__createPackageCollectionDataXML"><h2>__createPackageCollectionDataXML</h2></a>
-<p>
-     Add data from a collection to the given string
-<p>
-Defined on line: 3051
-<p>
-Called in
-<ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 2540</li><li><a href="KIWIXML.html">KIWIXML</a> : 2588</li></ul>
-<a name="__createProductOptions"><h2>__createProductOptions</h2></a>
-<p>
-     Return a KIWIXMLProductOptionsData object created from the
-     <productoptions> data in the given <instsource> node.
-<p>
-Defined on line: 3123
-<p>
-Called in
-<ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 4610</li></ul>
-<a name="__createSplitData"><h2>__createSplitData</h2></a>
-<p>
-     Return a ref to a hash containing the configuration for <split>
-     of the given XML:ELEMENT object. Build a data structure that
-     matches the structure defined in KIWIXMLSplitData
-<p>
-Defined on line: 3267
-<p>
-Called in
-<ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 3971</li></ul>
-<a name="__createSystemDiskData"><h2>__createSystemDiskData</h2></a>
-<p>
-     Return a ref to a hash containing the configuration for <systemdisk>
-     of the given XML:ELEMENT object. Build a data structure that
-     matches the structure defined in KIWIXMLSystemdiskData
-<p>
-Defined on line: 3345
-<p>
-Called in
-<ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 3978</li></ul>
-<a name="__createVMachineConfig"><h2>__createVMachineConfig</h2></a>
-<p>
-     Return a ref to a hash that contains the configuration data
-     for the <machine> element and it's children for the
-     given XML:ELEMENT object
-<p>
-Defined on line: 3403
-<p>
-Called in
-<ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 3942</li></ul>
-<a name="__createVagrantConfig"><h2>__createVagrantConfig</h2></a>
-<p>
-     Return a ref to a hash that contains the configuration data
-     for the <vagrantconfig> elements and it's children for the
-     given XML:ELEMENT object
-<p>
-Defined on line: 2948
-<p>
-Called in
-<ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 3938</li></ul>
-<a name="__dumpInternalXMLDescription"><h2>__dumpInternalXMLDescription</h2></a>
-<p>
-     return the contents of the imageConfig data
-     structure in a readable format
-<p>
-Defined on line: 3491
-<a name="__genDUDInstSysPkgsArray"><h2>__genDUDInstSysPkgsArray</h2></a>
-<p>
-     Return a ref to an array containing ProductPackageData
-     objects created from the <repopackage> children of the <instsys> data
-     of the XML from the given <driverupdate> node.
-<p>
-Defined on line: 3508
-<p>
-Called in
-<ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 4575</li></ul>
-<a name="__genDUDModulePkgsArray"><h2>__genDUDModulePkgsArray</h2></a>
-<p>
-     Return a ref to an array containing ProductPackageData
-     objects created from the <repopackage> children of the <modules> data
-     of the XML from the given <driverupdate> node.
-<p>
-Defined on line: 3531
-<p>
-Called in
-<ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 4579</li></ul>
-<a name="__genDUDPkgsArray"><h2>__genDUDPkgsArray</h2></a>
-<p>
-     Return a ref to an array containing ProductPackageData
-     objects created from the <repopackage> children of the <install> data
-     of the XML from the given <driverupdate> node.
-<p>
-Defined on line: 3554
-<p>
-Called in
-<ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 4583</li></ul>
-<a name="__genInstRepoArray"><h2>__genInstRepoArray</h2></a>
-<p>
-     Return a ref to an array containing InstRepositoryData objects
-     created from the <instrepo> data of the XML from the given
-     <instsource> node.
-<p>
-Defined on line: 3577
-<p>
-Called in
-<ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 4588</li></ul>
-<a name="__genMetadataChrootArray"><h2>__genMetadataChrootArray</h2></a>
-<p>
-     Return a ref to an array containing ProductMetaChrootData objects
-     created from the <chroot> data of the XML from the given
-     <instsource> node.
-<p>
-Defined on line: 3613
-<p>
-Called in
-<ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 4597</li></ul>
-<a name="__genMetadataFileArray{"><h2>__genMetadataFileArray{</h2></a>
-<p>
-     Return a ref to an array containing ProductMetaFileData objects
-     created from the <metafile> data of the XML from the given
-     <instsource> node.
-<p>
-Defined on line: 3644
-<a name="__genMetadataPkgsArray"><h2>__genMetadataPkgsArray</h2></a>
-<p>
-     Return a ref to an array containing ProductPackageData objects
-     created from the <repopackage> data of the XML from the given
-     <instsource> node.
-<p>
-Defined on line: 3676
-<p>
-Called in
-<ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 4605</li></ul>
-<a name="__genProductArchitectureArray"><h2>__genProductArchitectureArray</h2></a>
-<p>
-     Return a ref to an array containing ProductArchitectureData
-     objects created from the <arch> data of the XML from the given
-     <instsource> node.
-<p>
-Defined on line: 3714
-<p>
-Called in
-<ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 4556</li></ul>
-<a name="__genProductPackagesArray"><h2>__genProductPackagesArray</h2></a>
-<p>
-     Return a ref to an array containing ProductPackageData
-     objects created from the <repopackage> data of the XML from the given
-     <instsource> node.
-<p>
-Defined on line: 3749
-<p>
-Called in
-<ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 4614</li></ul>
-<a name="__genProductReqArchHash"><h2>__genProductReqArchHash</h2></a>
-<p>
-     Get the architecture list used for building up
-     an installation source tree
-<p>
-Defined on line: 3770
-<p>
-Called in
-<ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 4618</li></ul>
-<a name="__genRepoPackagesArray"><h2>__genRepoPackagesArray</h2></a>
-<p>
-     Return a ref to an array containing ProductPackageData objects
-     created from the <repopackage> children of the given node.
-<p>
-Defined on line: 3815
-<p>
-Called in
-<ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 3519</li><li><a href="KIWIXML.html">KIWIXML</a> : 3542</li><li><a href="KIWIXML.html">KIWIXML</a> : 3565</li><li><a href="KIWIXML.html">KIWIXML</a> : 3761</li></ul>
-<a name="__genTypeHash"><h2>__genTypeHash</h2></a>
-<p>
-     Return a ref to a hash keyed by the image type values for all <type>
-     definitions that are children of the given XML:ELEMENT object
-     Build a data structure that matches the structure defined in
-     KIWIXMLTypeData
-<p>
-Defined on line: 3851
-<p>
-Called in
-<ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 4991</li></ul>
-<a name="__getChildNodeTextValue"><h2>__getChildNodeTextValue</h2></a>
-<p>
-     Return the value of the node identified by the
-     given name as text.
-<p>
-Defined on line: 4005
-<p>
-Called in
-<ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 2999</li><li><a href="KIWIXML.html">KIWIXML</a> : 3001</li><li><a href="KIWIXML.html">KIWIXML</a> : 3003</li><li><a href="KIWIXML.html">KIWIXML</a> : 3005</li><li><a href="KIWIXML.html">KIWIXML</a> : 3007</li><li><a href="KIWIXML.html">KIWIXML</a> : 3009</li><li><a href="KIWIXML.html">KIWIXML</a> : 3011</li><li><a href="KIWIXML.html">KIWIXML</a> : 3013</li><li><a href="KIWIXML.html">KIWIXML</a> : 3015</li><li><a href="KIWIXML.html">KIWIXML</a> : 3017</li><li><a href="KIWIXML.html">KIWIXML</a> : 3019</li><li><a href="KIWIXML.html">KIWIXML</a> : 3021</li><li><a href="KIWIXML.html">KIWIXML</a> : 3023</li><li><a href="KIWIXML.html">KIWIXML</a> : 3025</li><li><a href="KIWIXML.html">KIWIXML</a> : 3027</li><li><a href="KIWIXML.html">KIWIXML</a> : 3029</li><li><a href="KIWIXML.html">KIWIXML</a> : 3031</li><li><a href="KIWIXML.html">KIWIXML</a> : 3033</li><li><a href="KIWIXML.html">KIWIXML</a> : 3035</li><li><a href="KIWIXML.html">KIWIXML</a> : 3037</li><li><a href="KIWIXML.html">KIWIXML</a> : 3039</li><li><a href="KIWIXML.html">KIWIXML</a> : 3041</li><li><a href="KIWIXML.html">KIWIXML</a> : 3043</li><li><a href="KIWIXML.html">KIWIXML</a> : 3184</li><li><a href="KIWIXML.html">KIWIXML</a> : 3185</li><li><a href="KIWIXML.html">KIWIXML</a> : 3207</li><li><a href="KIWIXML.html">KIWIXML</a> : 3950</li><li><a href="KIWIXML.html">KIWIXML</a> : 4521</li><li><a href="KIWIXML.html">KIWIXML</a> : 4528</li><li><a href="KIWIXML.html">KIWIXML</a> : 4940</li><li><a href="KIWIXML.html">KIWIXML</a> : 4943</li><li><a href="KIWIXML.html">KIWIXML</a> : 4946</li><li><a href="KIWIXML.html">KIWIXML</a> : 4949</li><li><a href="KIWIXML.html">KIWIXML</a> : 4952</li><li><a href="KIWIXML.html">KIWIXML</a> : 4955</li><li><a href="KIWIXML.html">KIWIXML</a> : 4958</li><li><a href="KIWIXML.html">KIWIXML</a> : 4961</li><li><a href="KIWIXML.html">KIWIXML</a> : 4964</li><li><a href="KIWIXML.html">KIWIXML</a> : 4967</li><li><a href="KIWIXML.html">KIWIXML</a> : 4970</li><li><a href="KIWIXML.html">KIWIXML</a> : 4973</li><li><a href="KIWIXML.html">KIWIXML</a> : 4976</li><li><a href="KIWIXML.html">KIWIXML</a> : 4988</li><li><a href="KIWIXML.html">KIWIXML</a> : 4995</li></ul>
-<a name="__getEntryPath"><h2>__getEntryPath</h2></a>
-<p>
-     Return the position in the imageConfig structure where
-     install data objects shold be stored. Install data objects
-     are children of the <packages> or <driver> elements
-<p>
-Defined on line: 4023
-<p>
-Called in
-<ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 5380</li><li><a href="KIWIXML.html">KIWIXML</a> : 5423</li></ul>
-<a name="__getInstallData"><h2>__getInstallData</h2></a>
-<p>
-     Return a ref to an array containing objects accumulated
-     across the image config data structure for the given
-     accessID.
-<p>
-Defined on line: 4084
-<p>
-Called in
-<ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 1269</li><li><a href="KIWIXML.html">KIWIXML</a> : 1287</li><li><a href="KIWIXML.html">KIWIXML</a> : 1299</li><li><a href="KIWIXML.html">KIWIXML</a> : 1310</li><li><a href="KIWIXML.html">KIWIXML</a> : 1321</li><li><a href="KIWIXML.html">KIWIXML</a> : 1364</li><li><a href="KIWIXML.html">KIWIXML</a> : 1377</li><li><a href="KIWIXML.html">KIWIXML</a> : 1394</li><li><a href="KIWIXML.html">KIWIXML</a> : 1443</li><li><a href="KIWIXML.html">KIWIXML</a> : 1530</li><li><a href="KIWIXML.html">KIWIXML</a> : 1620</li><li><a href="KIWIXML.html">KIWIXML</a> : 1674</li><li><a href="KIWIXML.html">KIWIXML</a> : 1718</li><li><a href="KIWIXML.html">KIWIXML</a> : 1733</li><li><a href="KIWIXML.html">KIWIXML</a> : 1903</li><li><a href="KIWIXML.html">KIWIXML</a> : 2017</li></ul>
-<a name="__getPreferencesXMLElement"><h2>__getPreferencesXMLElement</h2></a>
-<p>
-     Return a complete preferences element for the given profile name
-<p>
-Defined on line: 4161
-<p>
-Called in
-<ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 2448</li></ul>
-<a name="__getProfsToModify"><h2>__getProfsToModify</h2></a>
-<p>
-     Given an array ref, the keyword "default", or no argument
-     generate an array of profile names
-<p>
-Defined on line: 4235
-<p>
-Called in
-<ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 493</li><li><a href="KIWIXML.html">KIWIXML</a> : 550</li><li><a href="KIWIXML.html">KIWIXML</a> : 600</li><li><a href="KIWIXML.html">KIWIXML</a> : 652</li><li><a href="KIWIXML.html">KIWIXML</a> : 715</li><li><a href="KIWIXML.html">KIWIXML</a> : 767</li><li><a href="KIWIXML.html">KIWIXML</a> : 818</li><li><a href="KIWIXML.html">KIWIXML</a> : 886</li><li><a href="KIWIXML.html">KIWIXML</a> : 942</li><li><a href="KIWIXML.html">KIWIXML</a> : 991</li><li><a href="KIWIXML.html">KIWIXML</a> : 1058</li><li><a href="KIWIXML.html">KIWIXML</a> : 1190</li><li><a href="KIWIXML.html">KIWIXML</a> : 1748</li><li><a href="KIWIXML.html">KIWIXML</a> : 5522</li></ul>
-<a name="__getSchemaVersion"><h2>__getSchemaVersion</h2></a>
-<p>
-     Return the schema version extracted from KIWISchema.rnc
-<p>
-Defined on line: 4279
-<p>
-Called in
-<ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 2417</li></ul>
-<a name="__getTypeNamesForProfs"><h2>__getTypeNamesForProfs</h2></a>
-<p>
-     Retun an array ref containing names of the configured types for the
-     given profile names.
-<p>
-Defined on line: 4304
-<p>
-Called in
-<ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 5528</li></ul>
-<a name="__getVMConfigOpts"><h2>__getVMConfigOpts</h2></a>
-<p>
-     Extract the <vmconfig-entry> information from the
-     XML and return all options in a list
-<p>
-Defined on line: 6238
-<a name="__hasDefaultProfName"><h2>__hasDefaultProfName</h2></a>
-<p>
-     Check whether the default profile name "kiwi_default" is in the
-     provided array ref of strings
-<p>
-Defined on line: 6257
-<p>
-Called in
-<ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 2363</li></ul>
-<a name="__mergePreferenceData"><h2>__mergePreferenceData</h2></a>
-<p>
-     Merge two hashes that represent <preferences> data into one.
-     Expecting two hash refs as arguments and return a hashref to
-     the merged data. If both hashes have definitions for the
-     same data issues an error.
-<p>
-Defined on line: 4344
-<p>
-Called in
-<ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 1782</li><li><a href="KIWIXML.html">KIWIXML</a> : 5021</li></ul>
-<a name="__mergeUsers"><h2>__mergeUsers</h2></a>
-<p>
-     Merge the given UserData objects. The data from the second user
-     passed is subsumed by the first user object.
-<p>
-Defined on line: 4432
-<p>
-Called in
-<ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 2069</li><li><a href="KIWIXML.html">KIWIXML</a> : 5257</li></ul>
-<a name="__populateArchiveInfo"><h2>__populateArchiveInfo</h2></a>
-<p>
-     Populate the imageConfig member with the
-     information from <archive> elements from <packages>
-<p>
-Defined on line: 4458
-<p>
-Called in
-<ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 423</li></ul>
-<a name="__populateDescriptionInfo"><h2>__populateDescriptionInfo</h2></a>
-<p>
-     Populate the imageConfig member with the
-     description data from the XML file.
-<p>
-Defined on line: 4510
-<p>
-Called in
-<ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 389</li></ul>
-<a name="__populateDriverInfo"><h2>__populateDriverInfo</h2></a>
-<p>
-     Populate the imageConfig member with the
-     drivers data from the XML file.
-<p>
-Defined on line: 4644
-<p>
-Called in
-<ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 401</li></ul>
-<a name="__populateIgnorePackageInfo"><h2>__populateIgnorePackageInfo</h2></a>
-<p>
-     Populate the imageConfig member with the
-     information from <ignore>
-<p>
-Defined on line: 4690
-<p>
-Called in
-<ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 427</li></ul>
-<a name="__populateInstSource"><h2>__populateInstSource</h2></a>
-<p>
-     Populate the imageConfig member with the
-     product data provided with the <instsource> element and
-     its children from the XML file.
-<p>
-Defined on line: 4545
-<p>
-Called in
-<ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 393</li></ul>
-<a name="__populatePackageCollectionInfo"><h2>__populatePackageCollectionInfo</h2></a>
-<p>
-     Populate the imageConfig member with the
-     information from <namedCollection>
-<p>
-Defined on line: 4818
-<p>
-Called in
-<ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 435</li></ul>
-<a name="__populatePackageInfo"><h2>__populatePackageInfo</h2></a>
-<p>
-     Populate the imageConfig member with the
-     information from <package>
-<p>
-Defined on line: 4734
-<p>
-Called in
-<ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 431</li></ul>
-<a name="__populatePackageProductInfo"><h2>__populatePackageProductInfo</h2></a>
-<p>
-     Populate the imageConfig member with the
-     information from <product>
-<p>
-Defined on line: 4871
-<p>
-Called in
-<ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 439</li></ul>
-<a name="__populatePreferenceInfo"><h2>__populatePreferenceInfo</h2></a>
-<p>
-     Populate the imageConfig member with the
-     preferences data from the XML file.
-<p>
-Defined on line: 4917
-<p>
-Called in
-<ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 405</li></ul>
-<a name="__populateProfileInfo"><h2>__populateProfileInfo</h2></a>
-<p>
-     Populate the imageConfig member with the
-     profile data from the XML file.
-<p>
-Defined on line: 5037
-<p>
-Called in
-<ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 397</li><li><a href="KIWIXML.html">KIWIXML</a> : 2343</li></ul>
-<a name="__populateRepositoryInfo"><h2>__populateRepositoryInfo</h2></a>
-<p>
-     Populate the imageConfig member with the
-     repository data from the XML file.
-<p>
-Defined on line: 5102
-<p>
-Called in
-<ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 443</li></ul>
-<a name="__populateStripInfo"><h2>__populateStripInfo</h2></a>
-<p>
-     Populate the imageConfig member with the strip data from the XML file.
-<p>
-Defined on line: 5159
-<p>
-Called in
-<ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 447</li></ul>
-<a name="__populateUserInfo"><h2>__populateUserInfo</h2></a>
-<p>
-     Populate the imageConfig member with the
-     user data from the XML file.
-<p>
-Defined on line: 5216
-<p>
-Called in
-<ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 451</li></ul>
-<a name="__resolveArchitecture"><h2>__resolveArchitecture</h2></a>
-<p>
-Missing<p>
-Defined on line: 6292
-<p>
-Called in
-<ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 6279</li></ul>
-<a name="__resolveLink"><h2>__resolveLink</h2></a>
-<p>
-Missing<p>
-Defined on line: 6276
-<p>
-Called in
-<ul>
-<li><a href="KIWICollect.html">KIWICollect</a> : 361</li></ul>
-<a name="__setDefaultBuildType"><h2>__setDefaultBuildType</h2></a>
-<p>
-     Set the default built type, which upon object construction is also the
-     the selected built type. The default built type is the first <type>
-     specification processed or the one type marked with primary="true"
-     across all the selected profiles. Unless a type is marked primary,
-     the default type of the default profile always wins. The default
-     type is a ref to a hash that is set as the default type as
-     differentiation by name is not sufficient, as multiple profiles
-     my have the same image type definition, which is valid as long as
-     those profiles are not processed together.
-<p>
-Defined on line: 5279
-<p>
-Called in
-<ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 411</li></ul>
-<a name="__storeInstallData"><h2>__storeInstallData</h2></a>
-<p>
-     Store the given install data object in the proper
-     location in the data structure. Install data objects
-     are objects of children of the <packages> or <driver>
-     elements. If the object was stored, return the object
-     If the object was already present return 1
-<p>
-Defined on line: 5391
-<p>
-Called in
-<ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 514</li><li><a href="KIWIXML.html">KIWIXML</a> : 565</li><li><a href="KIWIXML.html">KIWIXML</a> : 614</li><li><a href="KIWIXML.html">KIWIXML</a> : 667</li><li><a href="KIWIXML.html">KIWIXML</a> : 729</li><li><a href="KIWIXML.html">KIWIXML</a> : 781</li><li><a href="KIWIXML.html">KIWIXML</a> : 848</li><li><a href="KIWIXML.html">KIWIXML</a> : 907</li><li><a href="KIWIXML.html">KIWIXML</a> : 956</li><li><a href="KIWIXML.html">KIWIXML</a> : 1005</li><li><a href="KIWIXML.html">KIWIXML</a> : 1204</li><li><a href="KIWIXML.html">KIWIXML</a> : 4498</li><li><a href="KIWIXML.html">KIWIXML</a> : 4678</li><li><a href="KIWIXML.html">KIWIXML</a> : 4722</li><li><a href="KIWIXML.html">KIWIXML</a> : 4805</li><li><a href="KIWIXML.html">KIWIXML</a> : 4859</li><li><a href="KIWIXML.html">KIWIXML</a> : 4905</li><li><a href="KIWIXML.html">KIWIXML</a> : 5204</li></ul>
-<a name="__verifyAddInstallDataArgs"><h2>__verifyAddInstallDataArgs</h2></a>
-<p>
-     Verify the arguments given to any of the add* methods that handle
-     image installation data.
-<p>
-Defined on line: 5459
-<p>
-Called in
-<ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 490</li><li><a href="KIWIXML.html">KIWIXML</a> : 547</li><li><a href="KIWIXML.html">KIWIXML</a> : 597</li><li><a href="KIWIXML.html">KIWIXML</a> : 645</li><li><a href="KIWIXML.html">KIWIXML</a> : 708</li><li><a href="KIWIXML.html">KIWIXML</a> : 760</li><li><a href="KIWIXML.html">KIWIXML</a> : 815</li><li><a href="KIWIXML.html">KIWIXML</a> : 883</li><li><a href="KIWIXML.html">KIWIXML</a> : 939</li><li><a href="KIWIXML.html">KIWIXML</a> : 988</li><li><a href="KIWIXML.html">KIWIXML</a> : 1183</li></ul>
-<a name="__verifyProfNames"><h2>__verifyProfNames</h2></a>
-<p>
-     Verify that the profile names in the given array ref are available,
-     if not print the given msg substituting PROF_NAME in the message
-     with the name that is in violation.
-<p>
-Defined on line: 5544
-<p>
-Called in
-<ul>
-<li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 734</li><li><a href="KIWIXML.html">KIWIXML</a> : 2354</li><li><a href="KIWIXML.html">KIWIXML</a> : 4250</li></ul>
