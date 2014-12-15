@@ -381,7 +381,6 @@ sub printLog {
     my $date    = $this -> getPrefix ( $lglevel );
     my $trace   = KIWITrace -> instance();
     my $prev    = $this->{last_line};
-    my $prev_channel = $this->{last_channel};
     #==========================================
     # no logdata -> return
     #------------------------------------------
@@ -395,7 +394,9 @@ sub printLog {
         } else {
             $this->{channel} = *STDOUT;
         }
+        $this->{last_channel} = $this->{channel};
     }
+    my $prev_channel = $this->{last_channel};
     #==========================================
     # check log status 
     #------------------------------------------
@@ -460,6 +461,7 @@ sub printLog {
     # print message to root file
     #------------------------------------------
     if (($this->{errorOk}) && ($rootEFD)) {
+        # messages for the runtime log while kiwi does a build
         if ($needCR) {
             print $rootEFD "\n";
         }
@@ -469,10 +471,11 @@ sub printLog {
     # print message to log channel (stdin,file)
     #------------------------------------------
     if (($prev_channel) && ((! defined $flag) || ($this->{fileLog}))) {
+        # messages to the default or configured log channel
         if (($needCR) && ($this->{fileLog})) {
             print $prev_channel "\n";
         }
-        print $prev_channel $result;
+        print $prev_channel "$result";
     }
     #==========================================
     # save in cache if needed
@@ -643,6 +646,17 @@ sub terminalLogging {
 }
 
 #==========================================
+# fileLogging
+#------------------------------------------
+sub fileLogging {
+    my $this = shift;
+    if (($this->{fileLog}) && ($this->{fileLog} == 1)) {
+        return 1;
+    }
+    return 0;
+}
+
+#==========================================
 # setLogFile
 #------------------------------------------
 sub setLogFile {
@@ -655,23 +669,26 @@ sub setLogFile {
     my $trace  = KIWITrace -> instance();
     if ($file eq "terminal") {
         $this->{fileLog} = 2;
-        return $this;
-    }
-    my $FD = FileHandle -> new();
-    if (! $FD -> open (">$file")) {
-        $this -> warning ("Couldn't open log channel: $!\n");
-        if ($this -> trace()) {
-            $trace->{BT}[$trace->{TL}] = eval {
-                Carp::longmess ($trace->{TT}.$trace->{TL}++)
-            };
+        $this->{channel} = *STDOUT;
+        undef $this->{rootLog};
+    } else {
+        my $FD = FileHandle -> new();
+        if (! $FD -> open (">$file")) {
+            $this -> warning ("Couldn't open log channel: $!\n");
+            if ($this -> trace()) {
+                $trace->{BT}[$trace->{TL}] = eval {
+                    Carp::longmess ($trace->{TT}.$trace->{TL}++)
+                };
+            }
+            return;
         }
-        return;
+        binmode($FD,':unix');
+        $this->{fileLog} = 1;
+        $this->{channel} = $FD;
+        $this->{rootLog} = $file;
     }
-    binmode($FD,':unix');
-    $this->{channel} = *$FD;
-    $this->{rootefd} = *$FD;
-    $this->{rootLog} = $file;
-    $this->{fileLog} = 1;
+    $this->{last_channel} = $this->{channel};
+    $this->{rootefd} = $this->{channel};
     return $this;
 }
 

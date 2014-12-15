@@ -109,16 +109,6 @@ sub main {
     #------------------------------------------
     init();
     #==========================================
-    # Setup logging location
-    #------------------------------------------
-    my $logFile = $cmdL -> getLogFile();
-    if (defined $logFile) {
-        $kiwi -> info ("Setting log file to: $logFile\n");
-        if (! $kiwi -> setLogFile ( $logFile )) {
-            kiwiExit (1);
-        }
-    }
-    #==========================================
     # Check for nocolor option
     #------------------------------------------
     if ($cmdL -> getNoColor()) {
@@ -864,9 +854,13 @@ sub init {
     #----------------------------------------
     if ($LogFile) {
         if ($InitCache) {
-            $cmdL -> setLogFile("terminal");
-        } else {
-            $cmdL -> setLogFile($LogFile);
+            # when cache init runs logging should happen on the console
+            $LogFile = "terminal";
+        }
+        $cmdL -> setLogFile($LogFile);
+        $kiwi -> info ("Setting log file to: $LogFile\n");
+        if (! $kiwi -> setLogFile ( $LogFile )) {
+            kiwiExit (1);
         }
     }
     #========================================
@@ -2002,9 +1996,12 @@ sub findLinksRelative {
 #------------------------------------------
 sub kiwiExit {
     my $code = shift;
+    my $good = "KIWI exited successfully\n";
+    my $bad  = "KIWI exited with error(s)\n";
     #==========================================
     # Reformat log file for human readers...
     #------------------------------------------
+    $kiwi -> info("Closing session with ecode: $code\n");
     $kiwi -> setLogHumanReadable();
     #==========================================
     # Check for backtrace and clean flag...
@@ -2013,9 +2010,17 @@ sub kiwiExit {
         if ($cmdL -> getDebug()) {
             $kiwi -> printBackTrace();
         }
-        $kiwi -> error  ("KIWI exited with error(s)\n");
+        $kiwi -> error($bad);
+        if ($kiwi -> fileLogging()) {
+            $kiwi -> setLogFile("terminal");
+            $kiwi -> info($bad);
+        }
     } else {
-        $kiwi -> info ("KIWI exited successfully\n");
+        $kiwi -> info($good);
+        if ($kiwi -> fileLogging()) {
+            $kiwi -> setLogFile("terminal");
+            $kiwi -> info($good);
+        }
     }
     #==========================================
     # Move process log to final logfile name...
