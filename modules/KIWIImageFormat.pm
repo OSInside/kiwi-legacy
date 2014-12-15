@@ -233,7 +233,7 @@ sub createMachineConfiguration {
     my $xml    = $this->{xml};
     my $bootp  = $this->{bootp};
     my $vconf  = $this->{vmdata};
-    if ((! $vconf) || ($format =~ /qcow2|raw|vagrant/)) {
+    if ((! $vconf) || (($format) && ($format =~ /qcow2|raw|vagrant/))) {
         # a machine configuration doesn't make sense with these
         # formats requested. Thus we can silently return here
         return;
