@@ -95,7 +95,9 @@ sub createDirInteractive {
             chomp ($answer = <>);
         }
         if ($answer eq "yes") {
+            $kiwi -> info ("--> Creating directory: $targetDir");
             KIWIQX::qxx ("mkdir -p $targetDir");
+            $kiwi -> done();
             return 1;
         }
     } else {
