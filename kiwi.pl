@@ -1876,7 +1876,6 @@ sub cloneImage {
     # that the clone will be changed
     # ----
     my $clone      = shift;
-    my $answer     = "unknown";
     my $gdata      = $global -> getKiwiConfig();
     my $configName = $gdata->{ConfigName};
     my $system     = $gdata->{System};
@@ -1890,7 +1889,7 @@ sub cloneImage {
         $kiwi -> failed ();
         kiwiExit (1);
     } else {
-        $kiwi -> info ("Cloning image $clone -> $destination...");
+        $kiwi -> info ("Cloning image $clone -> $destination\n");
     }
     #==========================================
     # Evaluate image path or name 
@@ -1904,12 +1903,10 @@ sub cloneImage {
         my @globsearch = glob ($clone."/*.kiwi");
         my $globitems  = @globsearch;
         if ($globitems == 0) {
-            $kiwi -> failed ();
             $kiwi -> error ("Cannot find control file: $cfg");
             $kiwi -> failed ();
             kiwiExit (1);
         } elsif ($globitems > 1) {
-            $kiwi -> failed ();
             $kiwi -> error ("Found multiple *.kiwi control files");
             $kiwi -> failed ();
             kiwiExit (1);
@@ -1921,19 +1918,17 @@ sub cloneImage {
     # Check if destdir exists or not 
     #------------------------------------------
     if (! -d $destination) {
-        my $prefix = $kiwi -> getPrefix (1);
-        $kiwi -> note ("\n");
-        $kiwi -> info ("Destination: $destination doesn't exist\n");
-        while ($answer !~ /^yes$|^no$/) {
-            print STDERR $prefix,
-                "Would you like kiwi to create it [yes/no] ? ";
-            chomp ($answer = <>);
-        }
-        if ($answer eq "yes") {
-            KIWIQX::qxx ("mkdir -p $destination");
-        } else {
+        $cmdL->setDefaultAnswer("yes");
+        my $dirCreated = $global -> createDirInteractive(
+            $destination, $cmdL->getDefaultAnswer()
+        );
+        if (! defined $dirCreated) {
             kiwiExit (1);
         }
+    } else {
+        $kiwi -> error ("Destination $destination already exists");
+        $kiwi -> failed ();
+        kiwiExit (1);
     }
     #==========================================
     # Copy path to destination 
@@ -1941,7 +1936,6 @@ sub cloneImage {
     my $data = KIWIQX::qxx ("cp -a $clone/* $destination 2>&1");
     my $code = $? >> 8;
     if ($code != 0) {
-        $kiwi -> failed ();
         $kiwi -> error ("Failed to copy $clone: $data");
         $kiwi -> failed ();
         kiwiExit (1);
@@ -1963,7 +1957,6 @@ sub cloneImage {
         $data = KIWIQX::qxx ("cp -L $src $dirn 2>&1");
         $code = $? >> 8;
         if ($code != 0) {
-            $kiwi -> failed ();
             $kiwi -> error ("Failed to fix-up link $src: $data");
             $kiwi -> failed ();
             kiwiExit (1);
@@ -1974,9 +1967,6 @@ sub cloneImage {
     #------------------------------------------
     if (-f $md5) {
         KIWIQX::qxx ("rm -f $md5 2>&1");
-    }
-    if ($answer ne "yes") {
-        $kiwi -> done();
     }
     kiwiExit (0);
     return;
