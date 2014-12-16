@@ -205,10 +205,15 @@ Provides:       kiwi-image:tbz
 Requires:       btrfsprogs
 Requires:       e2fsprogs
 Requires:       kiwi = %{version}
-Requires:       squashfs
 Requires:       zypper
 License:        GPL-2.0
 Group:          System/Management
+%if 0%{?rhel_version} || 0%{?fedora} || 0%{?centos}
+Requires:       squashfs-tools
+%endif
+%if 0%{?suse_version}
+Requires:       squashfs
+%endif
 %if 0%{?suse_version} > 1120
 BuildArch:      noarch
 %endif
@@ -379,13 +384,14 @@ Requires:       kiwi = %{version}
 Requires:       parted
 %if 0%{?suse_version}
 Requires:       multipath-tools
+Requires:       squashfs
 %endif
 %if 0%{?rhel_version} || 0%{?fedora} || 0%{?centos}
 Requires:       device-mapper-multipath
+Requires:       squashfs-tools
 %endif
 %ifarch %ix86 x86_64
 Requires:       syslinux
-Requires:       squashfs
 %if 0%{?suse_version} >= 1220
 Requires:       grub2
 %else
@@ -491,13 +497,14 @@ Requires:       parted
 Requires:       genisoimage
 Requires:       cdrkit-cdrtools-compat
 Requires:       multipath-tools
+Requires:       squashfs
 %endif
 %if 0%{?rhel_version} || 0%{?fedora} || 0%{?centos}
 Requires:       device-mapper-multipath
+Requires:       squashfs-tools
 %endif
 %ifarch %ix86 x86_64
 Requires:       syslinux
-Requires:       squashfs
 %if 0%{?suse_version} >= 1220
 Requires:       grub2
 %else
