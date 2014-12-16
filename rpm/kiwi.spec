@@ -736,7 +736,8 @@ fi
 #============================================================
 # Clean up old old template directories if present
 for dist in 10.1 10.2 10.3 11.0 11.1 11.2 11.3 12.1 12.2 SLE10 SLED10; do
-    rm -rf /usr/share/kiwi/image/suse-$dist-JeOS
+    description=/usr/share/kiwi/image/suse-$dist-JeOS
+    test -d $description && rm -rf $description
 done
 %endif
 
