@@ -30,13 +30,13 @@
         <type image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES11" bootprofile="ec2" bootkernel="ec2k" bootloader="grub" kernelcmdline="xencons=xvc0 console=xvc0 multipath=off splash=silent showopts"/>
     </preferences>
     <preferences profiles="xenFlavour">
-        <type bootloader="grub2" image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES11" bootprofile="xen" bootkernel="xenk">
+        <type bootloader="grub" image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES11" bootprofile="xen" bootkernel="xenk">
             <machine memory="512" domain="domU">
                 <vmdisk id="0" device="/dev/xvda" controller="ide"/>
                 <vmnic interface=""/>
             </machine>
         </type>
-        <type bootloader="grub2" image="oem" filesystem="ext3" boot="oemboot/suse-SLES11" bootprofile="xen" bootkernel="xenk" installiso="true">
+        <type bootloader="grub" image="oem" filesystem="ext3" boot="oemboot/suse-SLES11" bootprofile="xen" bootkernel="xenk" installiso="true">
             <oemconfig>
                 <oem-systemsize>2048</oem-systemsize>
                 <oem-swap>true</oem-swap>
@@ -47,13 +47,13 @@
         </type>
     </preferences>
     <preferences profiles="vmxFlavour,vmxFlavour-s390">
-        <type bootloader="grub2" image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES11" format="vmdk">
+        <type bootloader="grub" image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES11" format="vmdk">
             <machine memory="512" guestOS="suse" HWversion="4">
                 <vmdisk id="0" controller="ide"/>
                 <vmnic driver="e1000" interface="0" mode="bridged"/>
             </machine>
         </type>
-        <type bootloader="grub2" image="oem" filesystem="ext3" boot="oemboot/suse-SLES11" installiso="true">
+        <type bootloader="grub" image="oem" filesystem="ext3" boot="oemboot/suse-SLES11" installiso="true">
             <oemconfig>
                 <oem-systemsize>2048</oem-systemsize>
                 <oem-swap>true</oem-swap>
