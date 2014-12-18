@@ -22,6 +22,6 @@ suseStripInitrd
 #==========================================
 # umount
 #------------------------------------------
-umount /proc &>/dev/null
+umount /proc >/dev/null 2>&1
 
 exit 0
