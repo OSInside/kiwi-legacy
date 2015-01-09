@@ -992,7 +992,7 @@ sub addDebugPackage {
         };
     }
     $this->{m_debugPacks}->{$packname}->{'requireVersionArch'}->
-    { $packPointer->{'version'}."-".$packPointer->{'release'} } = 1;
+    { "$packPointer->{'version'}-$packPointer->{'release'}.$arch" } = 1;
     return;
 }
 
