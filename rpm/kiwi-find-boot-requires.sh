@@ -1,4 +1,9 @@
 #!/bin/bash
+# Author: Adrian Schröter <adrian@suse.com>
+#
+# This script creates the required package list from the kiwi
+# boot image descriptions
+#
 
 sourcearchive=$1
 shift
@@ -15,7 +20,10 @@ declare -i MISSING
 MISSING="1"
 for os in $oses; do
     file="kiwi/system/boot/$architecture/$boottype/$os/config.xml"
-    [ -e "$file" ] || echo "ERROR_NO_BOOT_CONFIG_FILE_FOUND"
+    if [ ! -e "$file" ];then
+        echo "ERROR_NO_${architecture}_${boottype}_${os}_BOOT_CONFIG_FILE_FOUND"
+        break
+    fi
 
     # my professional enterprise ready xml parser:
     while read line; do
