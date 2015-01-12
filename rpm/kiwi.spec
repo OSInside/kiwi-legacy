@@ -18,7 +18,7 @@
 #
 #
 #perl_verion is not defined in centos/RHEL yet
-%if 0%{?rhel_version} || 0%{?fedora} || 0%{?centos}
+%if 0%{?rhel_version} || 0%{?centos_version}
 %define perl_version    %(eval "`%{__perl} -V:version`"; echo $version)
 %endif
 
@@ -157,16 +157,16 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 %endif
 %endif
 # RHEL
-%if 0%{?rhel_version}
-%define mysystems %(echo `VER=%{rhel_version} echo "rhel-0${VER:0:1}.${VER:1:2}"`)
+%if 0%{?rhel_version} == 600
+%define mysystems rhel-06.0
 %endif
-# Fedora
-%if 0%{?fedora}
-%define mysystems %(echo `VER=%{fedora} echo "fedora-0${VER:0:1}.${VER:1:2}"`)
+%if 0%{?rhel_version} == 700
+%define mysystems rhel-07.0
 %endif
 # CentOS
-%if 0%{?centos}
-%define mysystems %(echo `VER=%{centos} echo "centos-0${VER:0:1}.${VER:1:2}"`)
+%if 0%{?centos_version} == 600
+# use the rhel templates for CentOS 6
+%define mysystems rhel-06.0
 %endif
 
 # find out about my arch name, could be done also via symlinks
@@ -208,7 +208,7 @@ Requires:       kiwi = %{version}
 Requires:       zypper
 License:        GPL-2.0
 Group:          System/Management
-%if 0%{?rhel_version} || 0%{?fedora} || 0%{?centos}
+%if 0%{?rhel_version} || 0%{?centos_version}
 Requires:       squashfs-tools
 %endif
 %if 0%{?suse_version}
@@ -286,7 +286,7 @@ Authors:
 %package -n kiwi-pxeboot
 Summary:        KIWI - PXE boot structure
 PreReq:         coreutils
-%if 0%{?rhel_version} || 0%{?fedora} || 0%{?centos}
+%if 0%{?rhel_version} || 0%{?centos_version}
 PreReq:         shadow-utils
 %else
 %if 0%{?suse_version} > 1220
@@ -386,7 +386,7 @@ Requires:       parted
 Requires:       multipath-tools
 Requires:       squashfs
 %endif
-%if 0%{?rhel_version} || 0%{?fedora} || 0%{?centos}
+%if 0%{?rhel_version} || 0%{?centos_version}
 Requires:       device-mapper-multipath
 Requires:       squashfs-tools
 %endif
@@ -499,7 +499,7 @@ Requires:       cdrkit-cdrtools-compat
 Requires:       multipath-tools
 Requires:       squashfs
 %endif
-%if 0%{?rhel_version} || 0%{?fedora} || 0%{?centos}
+%if 0%{?rhel_version} || 0%{?centos_version}
 Requires:       device-mapper-multipath
 Requires:       squashfs-tools
 %endif
