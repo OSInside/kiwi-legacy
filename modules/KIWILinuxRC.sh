@@ -30,6 +30,7 @@ export UTIMER_INFO=/dev/utimer
 export bootLoaderOK=0
 export enablePlymouth=1
 export IFS_ORIG=$IFS
+export MEDIACHECK_OK_TIMER=5
 
 #======================================
 # lookup
@@ -4046,6 +4047,8 @@ function runMediaCheck {
         "waitkey"
     else
         Echo "ISO check passed"
+        Echo "Press any key to continue (waiting $MEDIACHECK_OK_TIMER sec...)"
+        read -s -n 1 -t $MEDIACHECK_OK_TIMER
     fi
 }
 #======================================
