@@ -68,11 +68,13 @@ sub new {
     #------------------------------------------
     $this->{yum} = [
         $locator -> getExecPath('yum'),
+	"--disablerepo=*",
         "-c $dataDir/yum.conf",
         "-y"
     ];
     $this->{yum_chroot} = [
         "yum",
+	"--disablerepo=*",
         "-c $dataDir/yum.conf",
         "-y"
     ];
