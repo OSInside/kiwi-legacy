@@ -350,7 +350,7 @@ Requires:       yaboot
 %endif
 %endif
 %ifarch s390 s390x
-Requires:       zipl
+Requires:       s390-tools
 %endif
 %ifarch %ix86 x86_64
 %if 0%{?suse_version} < 1315
@@ -421,7 +421,7 @@ Requires:       yaboot
 %endif
 %endif
 %ifarch s390 s390x
-Requires:       zipl
+Requires:       s390-tools
 %endif
 %ifarch %ix86 x86_64
 %if 0%{?suse_version} < 1315
@@ -536,7 +536,7 @@ Requires:       yaboot
 %endif
 %endif
 %ifarch s390 s390x
-Requires:       zipl
+Requires:       s390-tools
 %endif
 %ifarch %ix86 x86_64
 %if 0%{?suse_version} < 1315
