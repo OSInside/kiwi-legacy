@@ -21,11 +21,6 @@ baseMount
 #...
 
 #======================================
-# Remove all documentation
-#--------------------------------------
-baseStripDocs
-
-#======================================
 # Setup default target, multi-user
 #--------------------------------------
 baseSetRunlevel 3

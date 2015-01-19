@@ -31,11 +31,6 @@ baseMount
 # TODO
 
 #======================================
-# Remove all documentation
-#--------------------------------------
-baseStripDocs
-
-#======================================
 # Umount kernel filesystems
 #--------------------------------------
 baseCleanMount
