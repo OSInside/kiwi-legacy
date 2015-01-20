@@ -401,7 +401,7 @@ function suseConfig {
     #--------------------------------------
     if [ ! -z "$kiwi_timezone" ];then
         if [ -f /usr/share/zoneinfo/$kiwi_timezone ];then
-            cp /usr/share/zoneinfo/$kiwi_timezone /etc/localtime
+            ln -sf /usr/share/zoneinfo/$kiwi_timezone /etc/localtime
             baseUpdateSysConfig \
                 /etc/sysconfig/clock TIMEZONE $kiwi_timezone
         else
