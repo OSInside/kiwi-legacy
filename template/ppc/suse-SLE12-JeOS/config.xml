@@ -16,7 +16,7 @@
         <keytable>us.map.gz</keytable>
         <timezone>Europe/Berlin</timezone>
         <hwclock>utc</hwclock>
-        <type image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES12" bootloader="yaboot" primary="true"/>
+        <type image="vmx" filesystem="ext4" boot="vmxboot/suse-SLES12" bootloader="grub2" firmware="ofw" primary="true"/>
     </preferences>
     <users group="root">
         <user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
@@ -25,18 +25,17 @@
         <source path="obs://SUSE:SLE-12:GA/standard"/>
     </repository>
     <packages type="image">
-        <namedCollection name="base"/>
-        <product name="SUSE_SLES"/>
+        <namedCollection name="Minimal"/>
         <package name="kernel-default"/>
-        <package name="ifplugd"/>
         <package name="iputils"/>
         <package name="vim"/>
-        <package name="syslog-ng"/>
+        <package name="grub2"/>
+        <package name="grub2-powerpc-ieee1275"/>
+        <package name="grub2-branding-SLE-12"/>
     </packages>
     <packages type="bootstrap">
         <package name="filesystem"/>
         <package name="glibc-locale"/>
         <package name="cracklib-dict-full"/>
-        <package name="openssl-certs"/>
     </packages>
 </image>
