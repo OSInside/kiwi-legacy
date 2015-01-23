@@ -85,6 +85,7 @@ sub new {
     my $knlink;
     my $tmpdir;
     my $loopdir;
+    my $boot_mount_point;
     my $result;
     my $status;
     my $isxen;
@@ -198,17 +199,27 @@ sub new {
     #==========================================
     # create tmp dir for operations
     #------------------------------------------
-    $tmpdir = KIWIQX::qxx ("mktemp -qdt kiwiboot.XXXXXX"); chomp $tmpdir;
+    $tmpdir = KIWIQX::qxx ("mktemp -qdt kiwiboot.XXXXXX");
+    chomp $tmpdir;
     $result = $? >> 8;
     if ($result != 0) {
         $kiwi -> error  ("Couldn't create tmp dir: $tmpdir: $!");
         $kiwi -> failed ();
         return;
     }
-    $loopdir = KIWIQX::qxx ("mktemp -qdt kiwiloop.XXXXXX"); chomp $loopdir;
+    $loopdir = KIWIQX::qxx ("mktemp -qdt kiwiloop.XXXXXX");
+    chomp $loopdir;
     $result  = $? >> 8;
     if ($result != 0) {
         $kiwi -> error  ("Couldn't create tmp dir: $loopdir: $!");
+        $kiwi -> failed ();
+        return;
+    }
+    $boot_mount_point = KIWIQX::qxx ("mktemp -qdt kiwiboot.XXXXXX");
+    chomp $boot_mount_point;
+    $result  = $? >> 8;
+    if ($result != 0) {
+        $kiwi -> error  ("Couldn't create tmp dir: $boot_mount_point: $!");
         $kiwi -> failed ();
         return;
     }
@@ -218,7 +229,8 @@ sub new {
     $this->{cleanupStack} = [];
     $this->{tmpdir}   = $tmpdir;
     $this->{loopdir}  = $loopdir;
-    $this->{tmpdirs}  = [ $tmpdir, $loopdir ];
+    $this->{bootmountpoint} = $boot_mount_point;
+    $this->{tmpdirs}  = [ $tmpdir, $loopdir, $boot_mount_point ];
     $this->{haveTree} = $haveTree;
     $this->{kiwi}     = $kiwi;
     $this->{bootsize} = 100;
@@ -5467,6 +5479,7 @@ sub installBootLoader {
     my $firmware = $this->{firmware};
     my $system   = $this->{system};
     my $haveTree = $this->{haveTree};
+    my $mount    = $this->{bootmountpoint};
     my $locator  = KIWILocator -> instance();
     my $bootdev;
     my $result;
@@ -5519,12 +5532,12 @@ sub installBootLoader {
         #==========================================
         # Mount boot partition
         #------------------------------------------
-        my $stages = "/mnt/boot/grub2/$grubarch";
-        if (! KIWIGlobals -> instance() -> mount ($bootdev, '/mnt')) {
+        if (! KIWIGlobals -> instance() -> mount ($bootdev, $mount)) {
             $kiwi -> error ("Couldn't mount boot partition: $bootdev");
             $kiwi -> failed ();
             return;
         }
+        my $stages = $mount."/boot/grub2/$grubarch";
         if (($firmware =~ /ec2|bios|ofw/) && (! -e "$stages/$grubimg")) {
             $kiwi -> error  ("Mandatory grub2 modules not found");
             $kiwi -> failed ();
@@ -5570,8 +5583,8 @@ sub installBootLoader {
             # architectures: ppc64le
             $loaderTarget = $deviceMap->{prep};
             $grubtoolopts = "--grub-mkdevicemap=$dmfile -v ";
-            $grubtoolopts.= "-d /mnt/usr/lib/grub2/$grubarch ";
-            $grubtoolopts.= "--root-directory=/mnt --force --no-nvram ";
+            $grubtoolopts.= "-d $mount/usr/lib/grub2/$grubarch ";
+            $grubtoolopts.= "--root-directory=$mount --force --no-nvram ";
             $targetMessage= "On PReP partition";
         } else {
             if (! -e "$stages/core.img") {
@@ -5843,13 +5856,13 @@ sub installBootLoader {
             $result = $? >> 8;
         } else {
             $kiwi -> info ("Installing extlinux on device: $bootdev");
-            if (KIWIGlobals -> instance() -> mount ($bootdev, '/mnt')) {
+            if (KIWIGlobals -> instance() -> mount ($bootdev, $mount)) {
                 $status = KIWIQX::qxx (
-                    "extlinux --install /mnt/boot/syslinux 2>&1"
+                    "extlinux --install $mount/boot/syslinux 2>&1"
                 );
                 $result = $? >> 8;
             }
-            $status = KIWIQX::qxx ("umount /mnt 2>&1");
+            $status = KIWIQX::qxx ("umount $mount 2>&1");
         }
         if ($result != 0) {
             $kiwi -> failed ();
@@ -5901,14 +5914,13 @@ sub installBootLoader {
         #==========================================
         # mount boot device...
         #------------------------------------------
-        if (! KIWIGlobals -> instance() -> mount ($bootdev, '/mnt')) {
+        if (! KIWIGlobals -> instance() -> mount ($bootdev, $mount)) {
             $kiwi -> failed ();
             $kiwi -> error  ("Can't mount boot partition: $status");
             $kiwi -> failed ();
             $this -> cleanStack ();
             return;
         }
-        my $mount = "/mnt";
         my $config = "$mount/boot/zipl.conf";
         if (! $haveRealDevice) {
             #==========================================
@@ -7354,6 +7366,17 @@ sub __expandFS {
     my $locator   = KIWILocator -> instance();
     my $result    = 1;
     my $status;
+    my $tmpdir = KIWIQX::qxx ("mktemp -qdt kiwiresize.XXXXXX");
+    chomp $tmpdir;
+    $result = $? >> 8;
+    if ($result != 0) {
+        $kiwi -> failed ();
+        $kiwi -> error  ("Couldn't create tmp dir: $tmpdir: $!");
+        $kiwi -> failed ();
+        $this -> luksClose();
+        return;
+    }
+    push @{$this->{tmpdirs}}, $tmpdir;
     $kiwi->loginfo ("Resize Operation: Device: $mapper\n");
     $kiwi->loginfo ("Resize Operation: Image Disk Type: $diskType\n");
     $kiwi->loginfo ("Resize Operation: Filesystem Type: $fsType\n");
@@ -7393,12 +7416,12 @@ sub __expandFS {
                 return;
             }
             if ($btrfs_tool) {
-                $btrfs_cmd = "$btrfs_tool filesystem resize max /mnt";
+                $btrfs_cmd = "$btrfs_tool filesystem resize max $tmpdir";
             } else {
-                $btrfs_cmd = "$btrfs_ctrl -r max /mnt";
+                $btrfs_cmd = "$btrfs_ctrl -r max $tmpdir";
             }
             $status = KIWIQX::qxx ("
-                mount $mapper /mnt && $btrfs_cmd; umount /mnt 2>&1"
+                mount $mapper $tmpdir && $btrfs_cmd; umount $tmpdir 2>&1"
             );
             $result = $? >> 8;
             last SWITCH;
@@ -7412,7 +7435,7 @@ sub __expandFS {
                 return;
             }
             $status = KIWIQX::qxx ("
-                mount $mapper /mnt && $xfsGrow /mnt; umount /mnt 2>&1"
+                mount $mapper $tmpdir && $xfsGrow $tmpdir; umount $tmpdir 2>&1"
             );
             $result = $? >> 8;
             last SWITCH;
