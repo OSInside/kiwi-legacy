@@ -28,6 +28,14 @@ export HYBRID_PERSISTENT_DIR=/read-write
 export UTIMER_INFO=/dev/utimer
 export bootLoaderOK=0
 export enablePlymouth=1
+export IFS_ORIG=$IFS
+
+#======================================
+# lookup
+#--------------------------------------
+function lookup {
+    bash -c "PATH=$PATH:/sbin:/usr/sbin:/bin:/usr/bin type -p $1"
+}
 
 #======================================
 # Exports (console)
@@ -601,24 +609,49 @@ function udevSystemStart {
 	# /.../
 	# start udev while in pre-init phase.
 	# ----
-	if [ -x /sbin/udevd ];then
-		/sbin/udevd --daemon
-	else
-		/lib/udev/udevd --daemon
+    local IFS=$IFS_ORIG
+    local udev_bin=/sbin/udevd
+	if [ ! -x $udev_bin ];then
+		udev_bin=/lib/udev/udevd
 	fi
-	UDEVD_PID=$(pidof -s /sbin/udevd)
+    if [ ! -x $udev_bin ];then
+        systemException \
+            "Can't find udev daemon" \
+        "reboot"
+    fi
+    $udev_bin --daemon
+    export UDEVD_PID=$(pidof $udev_bin | tr ' ' ,)
 }
 #======================================
 # udevSystemStop
 #--------------------------------------
 function udevSystemStop {
-	# /.../
-	# stop udev while in pre-init phase.
-	# ----
-	if kill -0 $UDEVD_PID &>/dev/null;then
-		udevPending
-		kill $UDEVD_PID
-	fi
+    # /.../
+    # stop udev while in pre-init phase.
+    # ----
+    local IFS=$IFS_ORIG
+    local udevadmExec=$(lookup udevadm 2>/dev/null)
+    local umountProc=0
+    if [ ! -e "/proc/mounts" ];then
+        mount -t proc proc /proc
+        umountProc=1
+    fi
+    if [ -x $udevadmExec ];then
+        $udevadmExec control --exit
+    fi
+    if [ -z "$UDEVD_PID" ];then
+        . /iprocs
+    fi
+    local IFS=,
+    for p in $UDEVD_PID; do
+        if kill -0 $p &>/dev/null;then
+            udevPending
+            kill $p
+        fi
+    done
+    if [ $umountProc -eq 1 ];then
+        umount /proc
+    fi
 }
 #======================================
 # udevStart
@@ -664,12 +697,7 @@ function udevStart {
 	# load modules required before udev
 	moduleLoadBeforeUdev
 	# start the udev daemon
-	if [ -x /sbin/udevd ];then
-		/sbin/udevd --daemon
-	else
-		/lib/udev/udevd --daemon
-	fi
-	UDEVD_PID=$(pidof -s /sbin/udevd)
+    udevSystemStart
 	echo UDEVD_PID=$UDEVD_PID >> /iprocs
 	# trigger events for all devices
 	udevTrigger
@@ -712,11 +740,8 @@ function loadAGPModules {
 # udevKill
 #--------------------------------------
 function udevKill {
-	. /iprocs
-	if kill -0 $UDEVD_PID &>/dev/null;then
-		udevPending
-		kill $UDEVD_PID
-	fi
+    local IFS=$IFS_ORIG
+    udevSystemStop
 }
 #======================================
 # startPlymouth
