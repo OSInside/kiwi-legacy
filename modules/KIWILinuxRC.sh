@@ -687,7 +687,7 @@ function udevSystemStart {
         "reboot"
     fi
     $udev_bin --daemon
-    export UDEVD_PID=$(pidof -s $udev_bin)
+    export UDEVD_PID=$(pidof $udev_bin | tr ' ' ,)
 }
 #======================================
 # udevSystemStop
@@ -698,12 +698,26 @@ function udevSystemStop {
     # ----
     local IFS=$IFS_ORIG
     local udevadmExec=$(lookup udevadm 2>/dev/null)
+    local umountProc=0
+    if [ ! -e "/proc/mounts" ];then
+        mount -t proc proc /proc
+        umountProc=1
+    fi
     if [ -x $udevadmExec ];then
         $udevadmExec control --exit
     fi
-    if kill -0 $UDEVD_PID &>/dev/null;then
-        udevPending
-        kill $UDEVD_PID
+    if [ -z "$UDEVD_PID" ];then
+        . /iprocs
+    fi
+    local IFS=,
+    for p in $UDEVD_PID; do
+        if kill -0 $p &>/dev/null;then
+            udevPending
+            kill $p
+        fi
+    done
+    if [ $umountProc -eq 1 ];then
+        umount /proc
     fi
 }
 #======================================
@@ -798,15 +812,7 @@ function loadAGPModules {
 #--------------------------------------
 function udevKill {
     local IFS=$IFS_ORIG
-    local udevadmExec=$(lookup udevadm 2>/dev/null)
-    if [ -x $udevadmExec ];then
-        $udevadmExec control --exit
-    fi
-    . /iprocs
-    if kill -0 $UDEVD_PID &>/dev/null;then
-        udevPending
-        kill $UDEVD_PID
-    fi
+    udevSystemStop
 }
 #======================================
 # activeConsoles
