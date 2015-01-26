@@ -697,6 +697,10 @@ function udevSystemStop {
     # stop udev while in pre-init phase.
     # ----
     local IFS=$IFS_ORIG
+    local udevadmExec=$(lookup udevadm 2>/dev/null)
+    if [ -x $udevadmExec ];then
+        $udevadmExec control --exit
+    fi
     if kill -0 $UDEVD_PID &>/dev/null;then
         udevPending
         kill $UDEVD_PID
@@ -794,6 +798,10 @@ function loadAGPModules {
 #--------------------------------------
 function udevKill {
     local IFS=$IFS_ORIG
+    local udevadmExec=$(lookup udevadm 2>/dev/null)
+    if [ -x $udevadmExec ];then
+        $udevadmExec control --exit
+    fi
     . /iprocs
     if kill -0 $UDEVD_PID &>/dev/null;then
         udevPending
