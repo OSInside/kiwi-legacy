@@ -26,6 +26,7 @@ use FileHandle;
 use File::Basename;
 use File::Spec;
 use Math::BigFloat;
+use Config::IniFiles;
 
 #==========================================
 # Base class
@@ -111,15 +112,33 @@ sub new {
         return;
     }
     #==========================================
-    # find image type...
+    # find image type from buildinfo
     #------------------------------------------
     if (($system) && (! defined $cmdL->getBuildType())) {
-        if (($initrd) && ($initrd =~ /oemboot/)) {
-            $cmdL -> setBuildType ("oem");
+        my $result_dir = dirname($initrd);
+        my $buildinfo_file = $result_dir.'/kiwi.buildinfo';
+        if (! -f $buildinfo_file) {
+            $kiwi -> error (
+                "Can't find buildinfo file in image result at: $result_dir"
+            );
+            $kiwi -> failed ();
+            return;
         }
-        if (($initrd) && ($initrd =~ /vmxboot/)) {
-            $cmdL -> setBuildType ("vmx");
+        my $buildinfo = Config::IniFiles -> new (
+            -file => $buildinfo_file, -allowedcommentchars => '#'
+        );
+        my $imagetype = $buildinfo->val('main','image.type');
+        if (! $imagetype) {
+            $kiwi -> error (
+                "Can't find image type in buildinfo file: $buildinfo_file"
+            );
+            $kiwi -> failed ();
+            return;
         }
+        if ($imagetype eq 'split') {
+            $haveSplit = 1;
+        }
+        $cmdL -> setBuildType($imagetype);
     }
     #==========================================
     # check system image file parameter
@@ -250,9 +269,6 @@ sub new {
         }
         if ($read_result{sysz_size}) {
             $syszip = $read_result{sysz_size};
-        }
-        if ($read_result{split}) {
-            $haveSplit = $read_result{split};
         }
         if ($read_result{originXMLPath}) {
             $this->{originXMLPath} = $read_result{originXMLPath};
@@ -2054,8 +2070,8 @@ sub setupBootDisk {
     $label      = $xml -> getImageDisplayName();
     $version    = $xml -> getPreferences() -> getVersion();
     $diskname   = $xml -> getImageName();
+    $splitfile  = $destdir."/".$diskname."-read-write.".$arch."-".$version;
     $diskname   = $destdir."/".$diskname.".".$arch."-".$version.".raw";
-    $splitfile  = $destdir."/".$label."-read-write.".$arch."-".$version;
     $partidfile = $diskname;
     $partidfile =~ s/\.raw$/\.pids/;
     $this->{bootlabel}= $label;

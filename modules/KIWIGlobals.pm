@@ -1706,7 +1706,6 @@ sub readXMLFromImage {
     my $global = KIWIGlobals -> instance();
     my $profile= $cmdL -> getBuildProfiles();
     my $syszSize = 0;
-    my $haveSplit= 0;
     my $originXMLPath;
     if ((! $system) || (! $cmdL)) {
         return;
@@ -1748,13 +1747,6 @@ sub readXMLFromImage {
         # set root path to mountpoint
         #------------------------------------------
         $rootpath = $tmpdir;
-    }
-    #==========================================
-    # check for split type
-    #------------------------------------------
-    if (-f "$rootpath/rootfs.tar") {
-        $cmdL -> setBuildType ("split");
-        $haveSplit = 1;
     }
     #==========================================
     # read origin path of XML description
@@ -1814,7 +1806,6 @@ sub readXMLFromImage {
     my %result = (
         "xml" => $xml,
         "sysz_size" => $syszSize,
-        "split" => $haveSplit,
         "originXMLPath" => $originXMLPath
     );
     return %result;
