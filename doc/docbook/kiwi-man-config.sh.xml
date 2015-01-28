@@ -249,7 +249,22 @@ exit 0</programlisting>
         <term><optional>baseStripRPM</optional></term>
         <listitem>
           <para>
-             remove rpms defined in <filename>config.xml</filename> under image=delete section
+             remove rpms defined in <filename>config.xml</filename> in the
+             image type=delete section
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><optional>suseRemovePackagesMarkedForDeletion</optional></term>
+        <listitem>
+          <para>
+             remove rpms defined in <filename>config.xml</filename> in the
+             image type=delete section. The difference compared to baseStripRPM
+             is that the suse variant checks if the package is really installed
+             prior to passing it to rpm to uninstall it. The suse rpm exits
+             with an error exit code while there are other rpm version which
+             just ignore if an uninstall request was set on a package which
+             is not installed
           </para>
         </listitem>
       </varlistentry>
@@ -322,15 +337,6 @@ exit 0</programlisting>
         </listitem>
       </varlistentry>
       <varlistentry>
-        <term><optional>suseActivateServices</optional></term>
-        <listitem>
-          <para>
-            Check all services in <filename class="directory">/etc/init.d/</filename> and activate them
-            by calling suseInsertService
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
          <term><optional>suseCloneRunlevel {runlevel}</optional></term>
         <listitem>
           <para>
@@ -378,15 +384,37 @@ exit 0</programlisting>
         </listitem>
       </varlistentry>
     <varlistentry>
-        <term><optional>suseServiceDefaultOn</optional></term>
+        <term><optional>suseActivateDefaultServices</optional></term>
         <listitem>
           <para>
             Activates the following services to be on by default using the
-            chkconfig program: boot.rootfsck boot.cleanup boot.localfs boot.localnet
-            boot.clock policykitd dbus consolekit haldaemon network atd syslog cron kbd
+            chkconfig program:
+            boot.rootfsck
+            boot.cleanup
+            boot.localfs
+            boot.localnet
+            boot.clock
+            policykitd
+            dbus
+            consolekit
+            haldaemon
+            network
+            atd
+            syslog
+            cron
+            kbd
           </para>
         </listitem>
       </varlistentry>
+      <varlistentry>
+        <term><optional>suseSetupProduct</optional></term>
+        <listitem>
+          <para>
+            This function creates the baseproduct link in /etc/products.d
+            pointing to the installed product
+          </para>
+        </listitem>
+     </varlistentry>
       <varlistentry>
         <term><optional>suseSetupProductInformation</optional></term>
         <listitem>

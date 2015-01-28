@@ -1957,10 +1957,9 @@
               function. This list can then be used to delete the
               packages ignoring requirements or dependencies. This can
               be accomplished in the <command>config.sh</command> or
-                <command>images.sh</command> script with the following
-              code snippet: </para>
-            <screen><command>rpm</command> -e --nodeps --noscripts \
-$(<command>rpm</command> -q ‘baseGetPackagesForDeletion‘ | <command>grep</command> -v "is not installed")</screen>
+                <command>images.sh</command> script by calling the following
+              helper function: </para>
+            <screen><command>suseRemovePackagesMarkedForDeletion</command></screen>
             <para>Note, that the delete value is indiscriminate of the
               image type being built. </para>
           </listitem>
