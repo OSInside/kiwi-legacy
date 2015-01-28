@@ -2,12 +2,12 @@
 .\"     Title: kiwi::config.sh
 .\"    Author: Marcus Schäfer <ms (AT) suse.de>
 .\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: Created: 01/14/2015
+.\"      Date: Created: 01/28/2015
 .\"    Manual: KIWI Manualpage
 .\"    Source: KIWI 7.02
 .\"  Language: English
 .\"
-.TH "KIWI::CONFIG\&.SH" "1" "Created: 01/14/2015" "KIWI 7\&.02" "KIWI Manualpage"
+.TH "KIWI::CONFIG\&.SH" "1" "Created: 01/28/2015" "KIWI 7\&.02" "KIWI Manualpage"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -203,7 +203,14 @@ remove all manual pages, except one given as parameter example: baseStripMans mo
 .RS 4
 remove rpms defined in
 config\&.xml
-under image=delete section
+in the image type=delete section
+.RE
+.PP
+[suseRemovePackagesMarkedForDeletion]
+.RS 4
+remove rpms defined in
+config\&.xml
+in the image type=delete section\&. The difference compared to baseStripRPM is that the suse variant checks if the package is really installed prior to passing it to rpm to uninstall it\&. The suse rpm exits with an error exit code while there are other rpm version which just ignore if an uninstall request was set on a package which is not installed
 .RE
 .PP
 [baseStripTools {list of toolpath} {list of tools}]
@@ -248,13 +255,6 @@ Helper function to the RPM function and announce it to log
 Call all postin scriptlets which among other things activates all required default services using suseInsertService
 .RE
 .PP
-[suseActivateServices]
-.RS 4
-Check all services in
-/etc/init\&.d/
-and activate them by calling suseInsertService
-.RE
-.PP
 [suseCloneRunlevel {runlevel}]
 .RS 4
 Clone the given runlevel to work in the same way as the default runlevel 3\&.
@@ -282,9 +282,14 @@ Remove a service and its dependent services using the suse insserv program
 Activate/Deactivate a service by using the chkconfig program The function requires the service name and the value on or off as parameters
 .RE
 .PP
-[suseServiceDefaultOn]
+[suseActivateDefaultServices]
 .RS 4
 Activates the following services to be on by default using the chkconfig program: boot\&.rootfsck boot\&.cleanup boot\&.localfs boot\&.localnet boot\&.clock policykitd dbus consolekit haldaemon network atd syslog cron kbd
+.RE
+.PP
+[suseSetupProduct]
+.RS 4
+This function creates the baseproduct link in /etc/products\&.d pointing to the installed product
 .RE
 .PP
 [suseSetupProductInformation]
