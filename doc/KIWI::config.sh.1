@@ -250,41 +250,41 @@ Helper function to delete files and announce it to log
 Helper function to the RPM function and announce it to log
 .RE
 .PP
-[suseActivateDefaultServices]
-.RS 4
-Call all postin scriptlets which among other things activates all required default services using suseInsertService
-.RE
-.PP
-[suseCloneRunlevel {runlevel}]
-.RS 4
-Clone the given runlevel to work in the same way as the default runlevel 3\&.
-.RE
-.PP
 [suseConfig]
 .RS 4
-Setup keytable language and timezone if specified in
+Setup keytable language, timezone and hwclock if specified in
 config\&.xml
-and call SuSEconfig afterwards
+and call SuSEconfig afterwards SuSEconfig is only called on systems which still support it
 .RE
 .PP
 [suseInsertService {servicename}]
 .RS 4
-Recursively insert a service\&. If there is a service required for this service it will be inserted first\&. The suse insserv program is used here
+This function calls baseInsertService and exists only for compatibility reasons
 .RE
 .PP
 [suseRemoveService {servicename}]
 .RS 4
-Remove a service and its dependent services using the suse insserv program
+This function calls baseRemoveService and exists only for compatibility reasons
 .RE
 .PP
-[suseService {servicename} {on|off}]
+[baseInsertService {servicename}]
 .RS 4
-Activate/Deactivate a service by using the chkconfig program The function requires the service name and the value on or off as parameters
+Activate the given service by using the chkconfig or systemctl program\&. Which init system is in use is auto detected
+.RE
+.PP
+[baseRemoveService {servicename}]
+.RS 4
+Deactive the given service by using the chkconfig or systemctl program\&. Which init system is in use is auto detected
+.RE
+.PP
+[baseService {servicename} {on|off}]
+.RS 4
+Activate/Deactivate a service by using the chkconfig or systemctl program\&. The function requires the service name and the value on or off as parameters\&. Which init system is in use is auto detected
 .RE
 .PP
 [suseActivateDefaultServices]
 .RS 4
-Activates the following services to be on by default using the chkconfig program: boot\&.rootfsck boot\&.cleanup boot\&.localfs boot\&.localnet boot\&.clock policykitd dbus consolekit haldaemon network atd syslog cron kbd
+Activates the following sysVInit services to be on by default using the chkconfig program: boot\&.rootfsck, boot\&.cleanup, boot\&.localfs, boot\&.localnet, boot\&.clock, policykitd, dbus, consolekit, haldaemon, network, atd, syslog, cron, kbd\&. And the following for systemd systems: network, cron
 .RE
 .PP
 [suseSetupProduct]
