@@ -30,23 +30,20 @@
         <user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
     </users>
     <repository type="yast2">
-        <source path="obs://SUSE:SLE-12:GA/standard"/>
+        <source path="http://download.suse.de/install/SLP/SLE-12-Server-GM/s390x/DVD1"/>
     </repository>
     <packages type="image">
-        <namedCollection name="base"/>
+        <namedCollection name="Minimal"/>
         <product name="SUSE_SLES"/>
         <package name="cmsfs"/>
         <package name="kernel-default"/>
-        <package name="ifplugd"/>
         <package name="iputils"/>
         <package name="vim"/>
         <package name="s390-tools"/>
-        <package name="syslog-ng"/>
     </packages>
     <packages type="bootstrap">
         <package name="filesystem"/>
         <package name="glibc-locale"/>
         <package name="cracklib-dict-full"/>
-        <package name="openssl-certs"/>
     </packages>
 </image>
