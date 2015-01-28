@@ -10461,7 +10461,7 @@ function resetBootBind {
     umount $bprefix/boot
     mv /$bootdir/boot /$bootdir/tmp
     mv /$bootdir/tmp/* /$bootdir
-    rmdir /$bootdir/tmp
+    rm -rf /$bootdir/tmp
     umount /$bootdir
     rmdir /$bootdir
     #======================================
