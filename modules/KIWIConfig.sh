@@ -32,6 +32,7 @@ for tool in setctsid klogconsole;do
         ln -s /usr/bin/$tool /usr/sbin/$tool
     fi
 done
+
 #======================================
 # baseSystemdServiceInstalled
 #--------------------------------------
@@ -68,18 +69,19 @@ function baseSystemdCall {
         systemctl "$@" "$service"
     fi
 }
+
 #======================================
-# suseInsertService
+# baseInsertService
 #--------------------------------------
-function suseInsertService {
+function baseInsertService {
     # /.../
-    # Insert a service using either chkconfig or systemctl
+    # Enable a service using either chkconfig or systemctl
     # Examples:
     #
-    # suseInsertService sshd
+    # baseInsertService sshd
     #   --> enable sshd service
     #
-    # suseInsertService sshd 35
+    # baseInsertService sshd 35
     #   --> enable sshd service, if sysVInit in level 3+5
     # ----
     local service=$1
@@ -97,14 +99,14 @@ function suseInsertService {
 }
 
 #======================================
-# suseRemoveService
+# baseRemoveService
 #--------------------------------------
-function suseRemoveService {
+function baseRemoveService {
     # /.../
-    # Remove a service using either chkconfig or systemctl
+    # Disable a service using either chkconfig or systemctl
     # Example:
     #
-    # suseRemoveService sshd
+    # baseRemoveService sshd
     #   --> disable sshd service
     # ----
     local service=$1
@@ -117,42 +119,58 @@ function suseRemoveService {
 }
 
 #======================================
-# suseService
+# baseService
 #--------------------------------------
-function suseService {
+function baseService {
     # /.../
-    # Enable | Disable a service transparently
+    # Enable or Disable a service transparently
     # for sysVInit and systemd
     # Examples:
     #
-    # suseService sshd on
+    # baseService sshd on
     #   --> enable sshd service
     #
-    # suseService sshd off
+    # baseService sshd off
     #   --> disable sshd service
     #
-    # suseService sshd 35
+    # baseService sshd 35
     #   --> enable sshd service, if sysVInit in level 3+5
     # ----
     local service=$1
     local target=$2
     if [ -z "$target" ];then
-        echo "suseService: no target specified"
+        echo "baseService: no target specified"
         return
     fi
     if [ -z "$service" ];then
-        echo "suseService: no service name specified"
+        echo "baseService: no service name specified"
         return
     fi
     if [ $target = off ];then
-        suseRemoveService $service
+        baseRemoveService $service
     else
-        suseInsertService $service $target
+        baseInsertService $service $target
     fi
 }
 
 #======================================
-# suseServiceDefaultOn
+# suseRemoveService
+#--------------------------------------
+function suseRemoveService {
+    # function kept for compatibility
+    baseRemoveService "$@"
+}
+
+#======================================
+# suseInsertService
+#--------------------------------------
+function suseInsertService {
+    # function kept for compatibility
+    baseInsertService "$@"
+}
+
+#======================================
+# suseActivateDefaultServices
 #--------------------------------------
 function suseActivateDefaultServices {
     # /.../
@@ -185,7 +203,7 @@ function suseActivateDefaultServices {
     fi
     for i in "${services[@]}";do
         echo "Activating service: $i"
-        suseInsertService $i
+        baseInsertService $i
     done
 }
 
