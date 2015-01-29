@@ -1445,7 +1445,7 @@ sub importHostPackageKeys {
         return $this;
     }
     $data.= KIWIQX::qxx (
-        "rpm -r $root --import $keydir/gpg-pubke* 2>&1"
+        "rpm -r $root --import $sigs/gpg-pubke* 2>&1"
     );
     $code = $? >> 8;
     if ($code != 0) {
@@ -1456,6 +1456,9 @@ sub importHostPackageKeys {
             KIWIQX::qxx ("rm -rf $sigs");
         }
         return $this;
+    }
+    if (-d $sigs) {
+        KIWIQX::qxx ("rm -rf $sigs");
     }
     $kiwi -> done();
     return $this;
