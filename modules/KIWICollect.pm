@@ -673,6 +673,7 @@ sub Init
 			    . "$this->{m_repos}->{$r}->{'source'}...";
 			$this->logMsg('I', $msg);
 		}
+		$this->{m_repos}->{$r}->{'origin'} = $this->{m_repos}->{$r}->{'source'};
 		$this->{m_repos}->{$r}->{'source'} =
 		    $this->{m_urlparser}->normalizePath(
 			    $this->{m_repos}->{$r}->{'source'});
@@ -1183,13 +1184,17 @@ sub setupPackageFiles
 						    . 'failed';
 						$this->logMsg('E', $msg);
 					} else {
-						$this->addToReportFile($packOptions->{$requestedArch}->{'newpath'}, $medium, $packPointer->{'localfile'});
+						my $lnkTarget =
+							$packOptions->{$requestedArch}->{'newpath'}
+							. "/$packOptions->{$requestedArch}->{'newfile'}";
+						$this->addToTrackFile(
+						    $packName, $packPointer, $medium, $lnkTarget
+						);
 						if ($this->{m_debug} >= 4) {
 							my $lnkTarget = $packOptions->{$requestedArch}->
 							{'newpath'};
 							my $msg = "	 linked file $packPointer->{'localfile'}"
-							    . " to $lnkTarget/"
-							    . "$packOptions->{$requestedArch}->{'newfile'}";
+							    . " to $lnkTarget";
 							$this->logMsg('I', $msg);
 						}
 						if ($this->{m_debug} >= 2) {
@@ -1418,29 +1423,99 @@ sub collectPackages {
 	}
 
 	# step 4: run scripts for other (non-meta) packages
-	# TODO (copy/paste?)
+	# collect support levels for _channel file
+	my %supporthash;
+	my $supportfile = abs_path($this->{m_xml}->{xmlOrigFile});
+	$supportfile =~ s/.kiwi$/.kwd/;
+	if ( -e $supportfile ) {
+	    my $support_fd = FileHandle -> new();
+	    if (! $support_fd -> open ($supportfile)) {
+		$this->logMsg(
+		    'E', "[collectPackages] failed to read support file!"
+		);
+		return 1;
+	    }
+	    while (my $line = <$support_fd>) {
+		$line =~ s/\n$//;
+		if ($line =~ /^([^:]*):.*support_([^\\]*)\\n-Kwd:$/) {
+		    $supporthash{$1} = $2;
+		}
+	    }
+	    $support_fd -> close();
+	}
 
-        # close all report log file handles
-        for my $r(keys(%{$this->{m_reportLog}})) {
-		close $this->{m_reportLog}->{$r};
-        }
+	# write out the channel files based on the collected rpms
+	for my $m (keys(%{$this->{m_reportLog}})) {
+	    my $medium = $this->{m_reportLog}->{$m};
+	    my $fd;
+	    if (! open($fd, ">", $medium->{filename})) {
+		die "Unable to open report file: $medium->{filename}";
+	    }
+	    print $fd "<report>\n";
+	    for my $entry(sort(keys(%{$medium->{entries}}))) {
+		my $binary = $medium->{entries}->{$entry};
+		$this->printTrackLine(
+		    $fd,
+		    "    <binary ", $binary, ">".$binary->{'localfile'}."</binary>",
+		    %supporthash
+		);
+	    }
+	    print $fd "</report>\n";
+	    close $fd;
+	}
 
 	return 0;
 }
 # /collectPackages
 
-sub addToReportFile
-{
-	my ($this, $source, $medium, $target) = @_;
-
-        if (!$this->{m_reportLog}->{$medium}) {
-         	open($this->{m_reportLog}->{$medium}, ">", "$this->{m_basesubdir}->{$medium}.packages") or die "Unable to open report file";
-        }
-
-        my $fh = $this->{m_reportLog}->{$medium};
-        print $fh "$source from $target\n";
-	return $this;
+#==========================================
+# printTrackLine
+#------------------------------------------
+sub printTrackLine {
+    my ($this, $fd, $prefix, $hash, $suffix, %supporthash) = @_;
+    print $fd $prefix;
+    my $name;
+    for my $k(sort(keys(%{$hash}))) {
+        next if $k eq 'localfile';
+        print $fd " ";
+        my $attribute = $k."='".$hash->{$k}."'";
+        print $fd $attribute;
+        $name = $hash->{$k} if $k eq 'name';
+    }
+    if ( $name && $supporthash{$name} ) {
+        print $fd " supportstatus='".$supporthash{$name}."'";
+    }
+    print $fd $suffix."\n";
+    return $this;
 }
+
+#==========================================
+# addToTrackFile
+#------------------------------------------
+sub addToTrackFile {
+    my ($this, $name, $pkg, $medium, $on_media_path) = @_;
+    if (!$this->{m_reportLog}->{$medium}) {
+	$this->{m_reportLog}->{$medium}->{filename} =
+	    "$this->{m_basesubdir}->{$medium}.report";
+    }
+    my %hash = (
+	"name"       => $name,
+	"version"    => $pkg->{version},
+	"release"    => $pkg->{release},
+	"binaryarch" => $pkg->{arch},
+	"buildtime"  => $pkg->{buildtime},
+	"disturl"    => $pkg->{disturl},
+        "localfile"  => $pkg->{repo}->{origin}.substr(
+	    $pkg->{localfile}, length($pkg->{repo}->{source})
+	)
+    );
+    if (defined($pkg->{epoch}) && $pkg->{epoch} ne "") {
+	$hash{"epoch"} = $pkg->{epoch};
+    }
+    $this->{m_reportLog}->{$medium}->{entries}->{$on_media_path} = \%hash;
+    return $this;
+}
+
 
 #==========================================
 # unpackMetapackages
@@ -1535,7 +1610,6 @@ sub unpackMetapackages
 
 					$this->logMsg('I', "unpack $packPointer->{localfile} ");
 					$this->{m_util}->unpac_package($packPointer->{localfile}, $tmp);
-					$this->addToReportFile($packPointer->{localfile}, $medium, "META");
 					# all metapackages contain at least a CD1 dir and _may_
 					# contain another /usr/share/<name> dir
 					if ( -d "$tmp/CD1") {
@@ -1836,10 +1910,10 @@ sub lookUpAllPackages
 					}
 				}
 
-				my %flags = RPMQ::rpmq_many("$uri", 'NAME', 'VERSION',
+				my %flags = RPMQ::rpmq_many("$uri", 'NAME', 'EPOCH', 'VERSION',
 							    'RELEASE', 'ARCH', 'SOURCE',
 							    'SOURCERPM', 'NOSOURCE',
-							    'NOPATCH');
+							    'NOPATCH', 'DISTURL', 'BUILDTIME');
 				if(!%flags || !$flags{'NAME'} || !$flags{'RELEASE'}
 				   || !$flags{'VERSION'} || !$flags{'RELEASE'} )
 				{
@@ -1866,12 +1940,16 @@ sub lookUpAllPackages
 					# directory structure up.
 					my $package;
 					$package->{'arch'} = $arch;
+					$package->{'repo'} = $this->{m_repos}->{$r};
 					$package->{'localfile'} = $uri;
+					$package->{'disturl'} = $flags{'DISTURL'}[0];
 					my $appdata = $uri;
 					$appdata =~ s,[^/]*$,$name-appdata.xml,;
 					$package->{'appdata'} = $appdata if (-s $appdata);
+					$package->{'epoch'} = $flags{'EPOCH'}[0];
 					$package->{'version'} = $flags{'VERSION'}[0];
 					$package->{'release'} = $flags{'RELEASE'}[0];
+					$package->{'buildtime'} = $flags{'BUILDTIME'}[0];
 					# needs to be a string or sort breaks later
 					$package->{'priority'} = "$this->{m_repos}->{$r}->{priority}";
 
