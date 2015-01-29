@@ -4196,6 +4196,10 @@ function searchBusIDBootDevice {
             # FCP devices
             haveZFCP=1
         else
+            systemException \
+                "Unknown Device type: $dev_type" \
+            "reboot"
+        fi
     else
         systemException \
             "Unknown IPL type: $ipl_type" \
