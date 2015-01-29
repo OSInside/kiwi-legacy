@@ -1247,27 +1247,23 @@ sub setupPackageFiles {
                             if ( $this->{m_debugmedium} > 0 ) {
                                 # Add debug packages, we do not know,
                                 # if they exist at all
-                                my $suffix = "";
-                                my $basename = $packName;
                                 for my $tsuffix (qw(32bit 64bit x86)) {
                                     if ( $packName =~ /^(.*)(-$tsuffix)$/ ) {
-                                        $basename = $1;
-                                        $suffix = $2;
-                                        last;
+                                         # special handling of baselib packages. SLE 12 style
+                                         $this->addDebugPackage(
+                                             $1."-debuginfo".$2,
+                                             $arch, $packPointer
+                                         );
                                     }
                                 }
                                 $this->addDebugPackage(
-                                    $srcname."-debuginfo".$suffix,
+                                    $packName."-debuginfo",
                                     $arch, $packPointer
                                 );
                                 $this->addDebugPackage(
                                     $srcname."-debugsource", $arch,
                                     $packPointer
                                 );
-                                $this->addDebugPackage(
-                                    $basename."-debuginfo".$suffix,
-                                    $arch, $packPointer
-                                ) unless $srcname eq $basename;
                             }
                         }
                     }
