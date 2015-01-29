@@ -737,7 +737,7 @@ if ( [ ! -e srv/tftpboot/pxelinux.cfg/default  ] ) ; then
 fi
 %endif
 
-%ifarch %ix86 x86_64 ppc ppc64 ppc64le  s390 s390x
+%ifarch %ix86 x86_64 ppc ppc64 ppc64le s390 s390x %arm aarch64
 
 %post -n kiwi-templates
 #============================================================
