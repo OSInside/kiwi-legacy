@@ -5893,18 +5893,17 @@ sub installBootLoader {
     if ($loader eq "zipl") {
         $kiwi -> info ("Installing zipl on device: $diskname\n");
         my $haveRealDevice = 1;
-        my $zipl_options = '';
+        my $offset;
         if (! -b $diskname) {
             #==========================================
             # detect disk offset of disk image file
             #------------------------------------------
-            my $offset = $this -> diskOffset ($diskname);
+            $offset = $this -> diskOffset ($diskname);
             if (! $offset) {
                 $kiwi -> error  ("Failed to detect disk offset");
                 $kiwi -> failed ();
                 return;
             }
-            $zipl_options .= " --targetoffset $offset";
             $haveRealDevice = 0;
         }
         #==========================================
@@ -5952,22 +5951,46 @@ sub installBootLoader {
                 }
             }
             #==========================================
-            # setup zipl caller options
+            # setup zipl caller options in zipl.conf
             #------------------------------------------
-            $kiwi -> info ("--> targetbase = $this->{loop}\n");
-            $zipl_options .= " --targetbase $this->{loop}";
-
-            $kiwi -> info ("--> targettype = $type\n");
-            $zipl_options .= " --targettype $type";
-
-            $kiwi -> info ("--> targetblocksize = $bsize\n");
-            $zipl_options .= " --targetblocksize $bsize";
+            my $readzconf = FileHandle -> new();
+            if (! $readzconf -> open ($config)) {
+                $kiwi -> error  ("Can't open config file for reading: $!");
+                $kiwi -> failed ();
+                KIWIQX::qxx ("umount $mount 2>&1");
+                $this -> cleanStack ();
+                return;
+            }
+            my @data = <$readzconf>;
+            $readzconf -> close();
+            my $zconffd = FileHandle -> new();
+            if (! $zconffd -> open (">$config")) {
+                $kiwi -> error  ("Can't open config file for writing: $!");
+                $kiwi -> failed ();
+                KIWIQX::qxx ("umount $mount 2>&1");
+                $this -> cleanStack ();
+                return;
+            }
+            foreach my $line (@data) {
+                print $zconffd $line;
+                if ($line =~ /^:menu/) {
+                    $kiwi -> info ("--> targetbase = $this->{loop}\n");
+                    $kiwi -> info ("--> targettype = $type\n");
+                    $kiwi -> info ("--> targetblocksize = $bsize\n");
+                    $kiwi -> info ("--> targetoffset = $offset\n");
+                    print $zconffd "\t"."targetbase = $this->{loop}"."\n";
+                    print $zconffd "\t"."targettype = $type"."\n";
+                    print $zconffd "\t"."targetblocksize = $bsize"."\n";
+                    print $zconffd "\t"."targetoffset = $offset"."\n";
+               }
+            }
+            $zconffd -> close();
         }
         #==========================================
         # call zipl...
         #------------------------------------------
         $status = KIWIQX::qxx (
-            "cd $mount && zipl -V -c $config -m menu $zipl_options 2>&1"
+            "cd $mount && zipl -V -c $config -m menu 2>&1"
         );
         $result = $? >> 8;
         if ($result != 0) {
@@ -5979,7 +6002,6 @@ sub installBootLoader {
         }
         $kiwi -> loginfo($status);
         KIWIQX::qxx ("umount $mount 2>&1");
-        $kiwi -> done();
         #==========================================
         # clean loop maps
         #------------------------------------------
