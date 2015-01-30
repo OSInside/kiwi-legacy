@@ -4199,14 +4199,21 @@ function searchBusIDBootDevice {
         "reboot"
     fi
     #======================================
-    # DASD
+    # DASD real in CDL / LDL mode
     #--------------------------------------
     if [ $haveDASD -eq 1 ];then
         dasd_configure $deviceID 1 0
         biosBootDevice="$dpath/ccw-$deviceID"
     fi
     #======================================
-    # ZFCP
+    # DASD emulated in FBA mode
+    #--------------------------------------
+    if [ $haveZFCP -eq 1 ] && [ "$ipl_type" = "ccw" ];then
+        dasd_configure $deviceID 1 0
+        biosBootDevice="$dpath/ccw-$deviceID"
+    fi
+    #======================================
+    # ZFCP real in SCSI mode
     #--------------------------------------
     if [ $haveZFCP -eq 1 ] && [ "$ipl_type" = "fcp" ];then
         wwpn=$(cat /sys/firmware/ipl/wwpn)
