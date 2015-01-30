@@ -502,6 +502,34 @@ sub test_ctor_initUnsupportedBootLoad {
 }
 
 #==========================================
+# test_ctor_initUnsupportedZiplTargetType
+#------------------------------------------
+sub test_ctor_initUnsupportedZiplTargetType {
+    # ...
+    # Test the TypeData constructor with an initialization hash
+    # that contains unsupported data for the zipl_targettype
+    # ---
+    my $this = shift;
+    my $kiwi = $this -> {kiwi};
+    my %init = (
+                zipl_targettype => 'foo',
+                image      => 'split'
+            );
+    my $typeDataObj = KIWIXMLTypeData -> new(\%init);
+    my $msg = $kiwi -> getMessage();
+    my $expected = 'object initialization: specified zipl target type '
+        . "'foo' is not supported.";
+    $this -> assert_str_equals($expected, $msg);
+    my $msgT = $kiwi -> getMessageType();
+    $this -> assert_str_equals('error', $msgT);
+    my $state = $kiwi -> getState();
+    $this -> assert_str_equals('failed', $state);
+    # Test this condition last to get potential error messages
+    $this -> assert_null($typeDataObj);
+    return;
+}
+
+#==========================================
 # test_ctor_initUnsupportedData
 #------------------------------------------
 sub test_ctor_initUnsupportedData {
@@ -880,6 +908,27 @@ sub test_getBootLoader {
     my $state = $kiwi -> getState();
     $this -> assert_str_equals('No state set', $state);
     $this -> assert_str_equals('grub2', $name);
+    return;
+}
+
+#==========================================
+# test_getZiplTargetType
+#------------------------------------------
+sub test_getZiplTargetType {
+    # ...
+    # Test the getZiplTargetType method
+    # ---
+    my $this = shift;
+    my $kiwi = $this -> {kiwi};
+    my $typeDataObj = $this -> __getTypeObj();
+    my $name = $typeDataObj -> getZiplTargetType();
+    my $msg = $kiwi -> getMessage();
+    $this -> assert_str_equals('No messages set', $msg);
+    my $msgT = $kiwi -> getMessageType();
+    $this -> assert_str_equals('none', $msgT);
+    my $state = $kiwi -> getState();
+    $this -> assert_str_equals('No state set', $state);
+    $this -> assert_str_equals('FBA', $name);
     return;
 }
 
@@ -1823,6 +1872,7 @@ sub test_getXMLElement{
         . 'bootfilesystem="fat32" '
         . 'bootkernel="xenk" '
         . 'bootloader="grub2" '
+        . 'zipl_targettype="FBA" '
         . 'bootpartsize="512" '
         . 'bootpartition="true" '
         . 'bootprofile="std" '
@@ -2070,6 +2120,35 @@ sub test_setBootLoader {
     $state = $kiwi -> getState();
     $this -> assert_str_equals('No state set', $state);
     $this -> assert_str_equals('yaboot', $bootL);
+    return;
+}
+
+#==========================================
+# test_setZiplTargetType
+#------------------------------------------
+sub test_setZiplTargetType {
+    # ...
+    # Test the setZiplTargetType method
+    # ---
+    my $this = shift;
+    my $kiwi = $this -> {kiwi};
+    my $typeDataObj = $this -> __getTypeObj();
+    $typeDataObj = $typeDataObj -> setZiplTargetType('CDL');
+    my $msg = $kiwi -> getMessage();
+    $this -> assert_str_equals('No messages set', $msg);
+    my $msgT = $kiwi -> getMessageType();
+    $this -> assert_str_equals('none', $msgT);
+    my $state = $kiwi -> getState();
+    $this -> assert_str_equals('No state set', $state);
+    $this -> assert_not_null($typeDataObj);
+    my $bootL = $typeDataObj -> getZiplTargetType();
+    $msg = $kiwi -> getMessage();
+    $this -> assert_str_equals('No messages set', $msg);
+    $msgT = $kiwi -> getMessageType();
+    $this -> assert_str_equals('none', $msgT);
+    $state = $kiwi -> getState();
+    $this -> assert_str_equals('No state set', $state);
+    $this -> assert_str_equals('CDL', $bootL);
     return;
 }
 
@@ -5120,6 +5199,7 @@ sub __getTypeObj {
                 bootfilesystem         => 'fat32',
                 bootkernel             => 'xenk',
                 bootloader             => 'grub2',
+                zipl_targettype        => 'FBA',
                 bootpartition          => 'true',
                 bootpartsize           => '512',
                 bootprofile            => 'std',

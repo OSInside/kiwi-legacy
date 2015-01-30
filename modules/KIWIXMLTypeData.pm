@@ -97,6 +97,7 @@ sub new {
     #     vga                    = ''
     #     vhdfixedtag            = ''
     #     volid                  = ''
+    #     zipl_targettype        = ''
     # }
     # ---
     #==========================================
@@ -163,6 +164,7 @@ sub new {
         vga
         vhdfixedtag
         volid
+        zipl_targettype
     );
     $this->{supportedKeywords} = \%keywords;
     my %boolKW = map { ($_ => 1) } qw(
@@ -195,6 +197,7 @@ sub new {
     $this->{bootfilesystem}         = $init->{bootfilesystem};
     $this->{bootkernel}             = $init->{bootkernel};
     $this->{bootloader}             = $init->{bootloader};
+    $this->{zipl_targettype}        = $init->{zipl_targettype};
     $this->{bootpartsize}           = $init->{bootpartsize};
     $this->{bootprofile}            = $init->{bootprofile};
     $this->{boottimeout}            = $init->{boottimeout};
@@ -292,6 +295,17 @@ sub getBootLoader {
     # ---
     my $this = shift;
     return $this->{bootloader};
+}
+
+#==========================================
+# getZiplTargetType
+#------------------------------------------
+sub getZiplTargetType {
+    # ...
+    # Return the configured zypl target type
+    # ---
+    my $this = shift;
+    return $this->{zipl_targettype};
 }
 
 #==========================================
@@ -857,6 +871,10 @@ sub getXMLElement {
             $element -> setAttribute('bootloader', $loader);
         }
     }
+    my $zipl_targettype = $this -> getZiplTargetType();
+    if ($zipl_targettype) {
+        $element -> setAttribute('zipl_targettype', $zipl_targettype);
+    }
     my $bPartSize = $this -> getBootPartitionSize();
     if ($bPartSize) {
         $element -> setAttribute('bootpartsize', $bPartSize);
@@ -1098,6 +1116,22 @@ sub setBootLoader {
         return;
     }
     $this->{bootloader} = $bootL;
+    return $this;
+}
+
+#==========================================
+# setZiplTargetType
+#------------------------------------------
+sub setZiplTargetType {
+    # ...
+    # Set the configuration for the zipl target type
+    # ---
+    my $this  = shift;
+    my $zipl_type = shift;
+    if (! $this -> __isValidZiplTargetType($zipl_type, 'setZiplTargetType')) {
+        return;
+    }
+    $this->{zipl_targettype} = $zipl_type;
     return $this;
 }
 
@@ -1940,6 +1974,52 @@ sub __isInitConsistent {
             $init->{sizeunit}, 'object initialization')) {
             return;
         }
+    }
+    if ($init->{zipl_targettype}) {
+        if (! $this->__isValidZiplTargetType(
+            $init->{zipl_targettype}, 'object initialization')) {
+            return;
+        }
+    }
+    return 1;
+}
+
+#==========================================
+# __isValidZiplTargetType
+#------------------------------------------
+sub __isValidZiplTargetType {
+    # ...
+    # Verify that the given zipl target type is supported
+    # ---
+    my $this   = shift;
+    my $zipl_type = shift;
+    my $caller = shift;
+    my $kiwi = $this->{kiwi};
+    if (! $caller ) {
+        my $msg = 'Internal error __isValidZiplTargetType called without '
+            . 'call origin argument.';
+        $kiwi -> info($msg);
+        $kiwi -> oops();
+    }
+    if (! $zipl_type ) {
+        my $msg = "$caller: no zipl target type argument specified, retaining "
+            . 'current data.';
+        $kiwi -> error($msg);
+        $kiwi -> failed();
+        return;
+    }
+    my %supported = map { ($_ => 1) } qw(
+        CDL
+        LDL
+        FBA
+        SCSI
+    );
+    if (! $supported{$zipl_type} ) {
+        my $msg = "$caller: specified zipl target type '$zipl_type' is not "
+            . 'supported.';
+        $kiwi -> error($msg);
+        $kiwi -> failed();
+        return;
     }
     return 1;
 }

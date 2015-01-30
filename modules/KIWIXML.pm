@@ -3909,7 +3909,8 @@ sub __genTypeHash {
         'mdraid',
         'vga',
         'vhdfixedtag',
-        'volid'
+        'volid',
+        'zipl_targettype'
     );
     #==========================================
     # store a value for the default type

@@ -5911,27 +5911,26 @@ sub installBootLoader {
     # Zipl
     #------------------------------------------
     if ($loader eq "zipl") {
-        $kiwi -> info ("Installing zipl on device: $diskname");
-        my $offset;
+        $kiwi -> info ("Installing zipl on device: $diskname\n");
         my $haveRealDevice = 1;
+        my $zipl_options = '';
         if (! -b $diskname) {
             #==========================================
             # detect disk offset of disk image file
             #------------------------------------------
-            $offset = $this -> diskOffset ($diskname);
+            my $offset = $this -> diskOffset ($diskname);
             if (! $offset) {
-                $kiwi -> failed ();
                 $kiwi -> error  ("Failed to detect disk offset");
                 $kiwi -> failed ();
                 return;
             }
+            $zipl_options .= " --targetoffset $offset";
             $haveRealDevice = 0;
         }
         #==========================================
         # mount boot device...
         #------------------------------------------
         if (! KIWIGlobals -> instance() -> mount ($bootdev, $mount)) {
-            $kiwi -> failed ();
             $kiwi -> error  ("Can't mount boot partition: $status");
             $kiwi -> failed ();
             $this -> cleanStack ();
@@ -5947,7 +5946,6 @@ sub installBootLoader {
             );
             my $result = $? >> 8;
             if ($result != 0) {
-                $kiwi -> failed ();
                 $kiwi -> error  (
                     "Can't get block size for device $this->{loop}: $bsize"
                 );
@@ -5958,66 +5956,48 @@ sub installBootLoader {
             }
             chomp $bsize;
             #==========================================
-            # try to identify target type
+            # set target type
             #------------------------------------------
-            my $type;
-            if ($bsize == 4096) {
-                $type = 'LDL';
-            } else {
-                $type = 'SCSI';
-            }
-            #==========================================
-            # rewrite zipl.conf with additional params
-            #------------------------------------------
-            my $readzconf = FileHandle -> new();
-            if (! $readzconf -> open ($config)) {
-                $kiwi -> failed ();
-                $kiwi -> error  ("Can't open config file for reading: $!");
-                $kiwi -> failed ();
-                KIWIQX::qxx ("umount $mount 2>&1");
-                $this -> cleanStack ();
-                return;
-            }
-            my @data = <$readzconf>;
-            $readzconf -> close();
-            my $zconffd = FileHandle -> new();
-            if (! $zconffd -> open (">$config")) {
-                $kiwi -> failed ();
-                $kiwi -> error  ("Can't open config file for writing: $!");
-                $kiwi -> failed ();
-                KIWIQX::qxx ("umount $mount 2>&1");
-                $this -> cleanStack ();
-                return;
-            }
-            $kiwi -> loginfo ("zipl.conf target values:\n");
-            foreach my $line (@data) {
-                print $zconffd $line;
-                if ($line =~ /^:menu/) {
-                    $kiwi -> loginfo ("targetbase = $this->{loop}\n");
-                    $kiwi -> loginfo ("targettype = $type\n");
-                    $kiwi -> loginfo ("targetblocksize = $bsize\n");
-                    $kiwi -> loginfo ("targetoffset = $offset\n");
-                    print $zconffd "\t"."targetbase = $this->{loop}"."\n";
-                    print $zconffd "\t"."targettype = $type"."\n";
-                    print $zconffd "\t"."targetblocksize = $bsize"."\n";
-                    print $zconffd "\t"."targetoffset = $offset"."\n";
+            my $type = $xml -> getImageType() -> getZiplTargetType();
+            if (! $type) {
+                if ($bsize == 4096) {
+                    # we assume the target is a 4k dasd device in LDL mode
+                    # this could be wrong, there are also CDL dasd devices
+                    $type = 'LDL';
+                } else {
+                    # we assume the target is a 512b scsi device in SCSI mode
+                    # this could be wrong, thre are also emulated dasd devices
+                    # using 512b blocksize in FBA mode
+                    $type = 'SCSI';
                 }
             }
-            $zconffd -> close();
+            #==========================================
+            # setup zipl caller options
+            #------------------------------------------
+            $kiwi -> info ("--> targetbase = $this->{loop}\n");
+            $zipl_options .= " --targetbase $this->{loop}";
+
+            $kiwi -> info ("--> targettype = $type\n");
+            $zipl_options .= " --targettype $type";
+
+            $kiwi -> info ("--> targetblocksize = $bsize\n");
+            $zipl_options .= " --targetblocksize $bsize";
         }
         #==========================================
         # call zipl...
         #------------------------------------------
-        $status = KIWIQX::qxx ("cd $mount && zipl -c $config 2>&1");
+        $status = KIWIQX::qxx (
+            "cd $mount && zipl -V -c $config -m menu $zipl_options 2>&1"
+        );
         $result = $? >> 8;
         if ($result != 0) {
-            $kiwi -> failed ();
             $kiwi -> error  ("Couldn't install zipl on $diskname: $status");
             $kiwi -> failed ();
             KIWIQX::qxx ("umount $mount 2>&1");
             $this -> cleanStack ();
             return;
         }
+        $kiwi -> loginfo($status);
         KIWIQX::qxx ("umount $mount 2>&1");
         $kiwi -> done();
         #==========================================
