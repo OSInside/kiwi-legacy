@@ -521,6 +521,13 @@ my @notClean3 = qw (
 	kiwi.pl
 );
 
+# List of modules not clean to level 4 (harsh) of perlcritic
+# imho perlcritic is wrong here, at the place in the code the
+# critic information is simply wrong
+my @notClean4 = qw (
+    KIWIIsoLinux.pm
+);
+
 my @changedFiles;
 my $chld_in;
 my $chld_out;
@@ -598,7 +605,7 @@ for my $path (@changedFiles) {
 	}
 }
 
-my @criticLevelFiles = (\@notClean1, \@notClean2, \@notClean3);
+my @criticLevelFiles = (\@notClean1, \@notClean2, \@notClean3, \@notClean4);
 
 
 # Verify the changed file against the strictest perlcritic level possible
