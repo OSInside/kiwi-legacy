@@ -8787,7 +8787,7 @@ function callPartitioner {
 #--------------------------------------
 function createPartitionerInput {
     local IFS=$IFS_ORIG
-    if echo $imageDiskDevice | grep -q 'dev\/dasd';then
+    if isDASDDevice; then
         PARTITIONER=fdasd
     fi
     if [ $PARTITIONER = "fdasd" ];then
