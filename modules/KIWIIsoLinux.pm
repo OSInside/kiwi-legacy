@@ -402,7 +402,7 @@ sub aarch64_efi {
     my $boot  = $base{$arch}{boot};
     my $loader= $base{$arch}{efi};
     $para.= " -no-emul-boot";
-    $para.= " -boot-load-size 1";
+    # do not add -boot-load-size 1 here
     $para.= " -b $loader";
     $para.= " -c $boot/boot.catalog";
     $para.= " -hide $boot/boot.catalog -hide-joliet $boot/boot.catalog";
