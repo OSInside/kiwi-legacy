@@ -59,6 +59,7 @@
 <li><a href="#getVolID">getVolID</a></li>
 <li><a href="#getXMLElement">getXMLElement</a></li>
 <li><a href="#getZFSOptions">getZFSOptions</a></li>
+<li><a href="#getZiplTargetType">getZiplTargetType</a></li>
 <li><a href="#isSizeAdditive">isSizeAdditive</a></li>
 <li><a href="#new">new</a></li>
 <li><a href="#setBootImageDescript">setBootImageDescript</a></li>
@@ -105,6 +106,7 @@
 <li><a href="#setVHDFixedTag">setVHDFixedTag</a></li>
 <li><a href="#setVolID">setVolID</a></li>
 <li><a href="#setZFSOptions">setZFSOptions</a></li>
+<li><a href="#setZiplTargetType">setZiplTargetType</a></li>
 </ul>
 <h2>Private methods</h2>
 <p>
@@ -122,6 +124,7 @@
 <li><a href="#__isValidInstBoot">__isValidInstBoot</a></li>
 <li><a href="#__isValidRaidType">__isValidRaidType</a></li>
 <li><a href="#__isValidSizeUnit">__isValidSizeUnit</a></li>
+<li><a href="#__isValidZiplTargetType">__isValidZiplTargetType</a></li>
 </ul>
 <hr>
 <a name="__byteValue"><h2>__byteValue</h2></a>
@@ -129,362 +132,371 @@
      turn given value into bytes, units M and G
      are allowed no unit assumes a MB value
 <p>
-Defined on line: 2382
+Defined on line: 2462
 <p>
 Called in
 <ul>
-<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 731</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 752</li></ul>
+<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 745</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 766</li></ul>
 <a name="__isInitConsistent"><h2>__isInitConsistent</h2></a>
 <p>
      Verify that the initialization hash is valid
 <p>
-Defined on line: 1852
+Defined on line: 1886
 <p>
 Called in
 <ul>
-<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 190</li></ul>
+<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 192</li></ul>
 <a name="__isValidBootFS"><h2>__isValidBootFS</h2></a>
 <p>
      Verify that the given boot filesystem type is supported
 <p>
-Defined on line: 1950
+Defined on line: 2030
 <p>
 Called in
 <ul>
-<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1060</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1876</li></ul>
+<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1078</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1910</li></ul>
 <a name="__isValidBootloader"><h2>__isValidBootloader</h2></a>
 <p>
      Verify that the given bootloader is supported
-<p>
-Defined on line: 1991
-<p>
-Called in
-<ul>
-<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1097</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1870</li></ul>
-<a name="__isValidDevPersist"><h2>__isValidDevPersist</h2></a>
-<p>
-     Verify that the given device persistency setting is supported
-<p>
-Defined on line: 2034
-<p>
-Called in
-<ul>
-<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1255</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1882</li></ul>
-<a name="__isValidFilesystem"><h2>__isValidFilesystem</h2></a>
-<p>
-     Verify that the given filesystem is supported
 <p>
 Defined on line: 2071
 <p>
 Called in
 <ul>
-<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1313</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1433</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1449</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1888</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1912</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1918</li></ul>
+<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1115</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1904</li></ul>
+<a name="__isValidDevPersist"><h2>__isValidDevPersist</h2></a>
+<p>
+     Verify that the given device persistency setting is supported
+<p>
+Defined on line: 2114
+<p>
+Called in
+<ul>
+<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1289</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1916</li></ul>
+<a name="__isValidFilesystem"><h2>__isValidFilesystem</h2></a>
+<p>
+     Verify that the given filesystem is supported
+<p>
+Defined on line: 2151
+<p>
+Called in
+<ul>
+<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1347</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1467</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1483</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1922</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1946</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1952</li></ul>
 <a name="__isValidFirmware"><h2>__isValidFirmware</h2></a>
 <p>
      Verify that the given firmware setting value is supported
 <p>
-Defined on line: 2108
+Defined on line: 2188
 <p>
 Called in
 <ul>
-<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1610</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1894</li></ul>
+<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1644</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1928</li></ul>
 <a name="__isValidFlags"><h2>__isValidFlags</h2></a>
 <p>
      Verify that the given flags value is supported
 <p>
-Defined on line: 2145
+Defined on line: 2225
 <p>
 Called in
 <ul>
-<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1329</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1900</li></ul>
+<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1363</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1934</li></ul>
 <a name="__isValidFormat"><h2>__isValidFormat</h2></a>
 <p>
      Verify that the given format value is supported
 <p>
-Defined on line: 2182
+Defined on line: 2262
 <p>
 Called in
 <ul>
-<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1345</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1906</li></ul>
+<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1379</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1940</li></ul>
 <a name="__isValidImage"><h2>__isValidImage</h2></a>
 <p>
      Verify that the given image type value is supported
 <p>
-Defined on line: 2219
+Defined on line: 2299
 <p>
 Called in
 <ul>
-<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1775</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1923</li></ul>
+<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1809</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1957</li></ul>
 <a name="__isValidInstBoot"><h2>__isValidInstBoot</h2></a>
 <p>
      Verify that the given installboot value is supported
 <p>
-Defined on line: 2274
+Defined on line: 2354
 <p>
 Called in
 <ul>
-<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1500</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1927</li></ul>
+<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1534</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1961</li></ul>
 <a name="__isValidRaidType"><h2>__isValidRaidType</h2></a>
 <p>
      Verify that the given raid type is supported
 <p>
-Defined on line: 2311
+Defined on line: 2391
 <p>
 Called in
 <ul>
-<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1669</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1933</li></ul>
+<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1703</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1967</li></ul>
 <a name="__isValidSizeUnit"><h2>__isValidSizeUnit</h2></a>
 <p>
      Verify that the given unit of measure for the size is a
      recognized value
 <p>
-Defined on line: 2348
+Defined on line: 2428
 <p>
 Called in
 <ul>
-<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1759</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1939</li></ul>
+<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1793</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1973</li></ul>
+<a name="__isValidZiplTargetType"><h2>__isValidZiplTargetType</h2></a>
+<p>
+     Verify that the given zipl target type is supported
+<p>
+Defined on line: 1990
+<p>
+Called in
+<ul>
+<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1131</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1979</li></ul>
 <a name="getBootImageDescript"><h2>getBootImageDescript</h2></a>
 <p>
      Return the configured boot image description
 <p>
-Defined on line: 256
+Defined on line: 259
 <p>
 Called in
 <ul>
-<li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1459</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 234</li><li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 553</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 1353</li><li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 784</li><li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 794</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 842</li></ul>
+<li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1459</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 234</li><li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 553</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 1353</li><li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 784</li><li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 794</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 856</li></ul>
 <a name="getBootImageFileSystem"><h2>getBootImageFileSystem</h2></a>
 <p>
      Return the option configured for the boot filesystem
 <p>
-Defined on line: 267
+Defined on line: 270
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 293</li><li><a href="KIWIImage.html">KIWIImage</a> : 2229</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 846</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 293</li><li><a href="KIWIImage.html">KIWIImage</a> : 2229</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 860</li></ul>
 <a name="getBootKernel"><h2>getBootKernel</h2></a>
 <p>
      Return the configured bootkernel
 <p>
-Defined on line: 278
+Defined on line: 281
 <p>
 Called in
 <ul>
-<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 850</li></ul>
+<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 864</li></ul>
 <a name="getBootLoader"><h2>getBootLoader</h2></a>
 <p>
      Return the configured bootloader
 <p>
-Defined on line: 289
+Defined on line: 292
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 294</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 2027</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 380</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 392</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 1392</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 1429</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 1483</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 855</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 294</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 2027</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 380</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 392</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 1392</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 1429</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 1483</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 869</li></ul>
 <a name="getBootPartition"><h2>getBootPartition</h2></a>
 <p>
      Return the configuration for the setup of a bootpartition
 <p>
-Defined on line: 315
+Defined on line: 329
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 295</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 1384</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 864</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 295</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 1384</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 882</li></ul>
 <a name="getBootPartitionSize"><h2>getBootPartitionSize</h2></a>
 <p>
      Return the configured bootpartition size
 <p>
-Defined on line: 300
+Defined on line: 314
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 296</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 860</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 296</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 878</li></ul>
 <a name="getBootProfile"><h2>getBootProfile</h2></a>
 <p>
      Return the configured bootprofile
 <p>
-Defined on line: 326
+Defined on line: 340
 <p>
 Called in
 <ul>
-<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 868</li></ul>
+<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 886</li></ul>
 <a name="getBootTimeout"><h2>getBootTimeout</h2></a>
 <p>
      Return the configured boot timeout
 <p>
-Defined on line: 337
+Defined on line: 351
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 297</li><li><a href="KIWIImage.html">KIWIImage</a> : 1907</li><li><a href="KIWIImage.html">KIWIImage</a> : 2047</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 2036</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 374</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 872</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 297</li><li><a href="KIWIImage.html">KIWIImage</a> : 1907</li><li><a href="KIWIImage.html">KIWIImage</a> : 2047</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 2036</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 374</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 890</li></ul>
 <a name="getCheckPrebuilt"><h2>getCheckPrebuilt</h2></a>
 <p>
      Return the configuration for the pre built boot image check
 <p>
-Defined on line: 348
+Defined on line: 362
 <p>
 Called in
 <ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 279</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 876</li></ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 279</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 894</li></ul>
 <a name="getCompressed"><h2>getCompressed</h2></a>
 <p>
      Return the configuration for compressed image generation
 <p>
-Defined on line: 359
+Defined on line: 373
 <p>
 Called in
 <ul>
-<li><a href="KIWIImage.html">KIWIImage</a> : 680</li><li><a href="KIWIImage.html">KIWIImage</a> : 3301</li><li><a href="KIWIImage.html">KIWIImage</a> : 3567</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 373</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 880</li></ul>
+<li><a href="KIWIImage.html">KIWIImage</a> : 680</li><li><a href="KIWIImage.html">KIWIImage</a> : 3301</li><li><a href="KIWIImage.html">KIWIImage</a> : 3567</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 373</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 898</li></ul>
 <a name="getContainerName"><h2>getContainerName</h2></a>
 <p>
      Return the configuration for the container name
 <p>
-Defined on line: 370
+Defined on line: 384
 <p>
 Called in
 <ul>
-<li><a href="KIWIContainerBuilder.html">KIWIContainerBuilder</a> : 395</li><li><a href="KIWIContainerBuilder.html">KIWIContainerBuilder</a> : 632</li><li><a href="KIWIContainerConfigWriter.html">KIWIContainerConfigWriter</a> : 104</li><li><a href="KIWIContainerConfigWriter.html">KIWIContainerConfigWriter</a> : 165</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 884</li></ul>
+<li><a href="KIWIContainerBuilder.html">KIWIContainerBuilder</a> : 395</li><li><a href="KIWIContainerBuilder.html">KIWIContainerBuilder</a> : 632</li><li><a href="KIWIContainerConfigWriter.html">KIWIContainerConfigWriter</a> : 104</li><li><a href="KIWIContainerConfigWriter.html">KIWIContainerConfigWriter</a> : 165</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 902</li></ul>
 <a name="getDevicePersistent"><h2>getDevicePersistent</h2></a>
 <p>
      Return the configuration for the device persistency method
 <p>
-Defined on line: 382
+Defined on line: 396
 <p>
 Called in
 <ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 2045</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 381</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 888</li></ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 2045</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 381</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 906</li></ul>
 <a name="getEditBootConfig"><h2>getEditBootConfig</h2></a>
 <p>
      Return the path to the script to modify the boot configuration
 <p>
-Defined on line: 393
+Defined on line: 407
 <p>
 Called in
 <ul>
-<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 892</li></ul>
+<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 910</li></ul>
 <a name="getEditBootInstall"><h2>getEditBootInstall</h2></a>
 <p>
      Return the path to the script to modify the boot configuration
 <p>
-Defined on line: 404
+Defined on line: 418
 <p>
 Called in
 <ul>
-<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 896</li></ul>
+<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 914</li></ul>
 <a name="getFSMountOptions"><h2>getFSMountOptions</h2></a>
 <p>
      Return the file system mount options
 <p>
-Defined on line: 470
+Defined on line: 484
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 301</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 7151</li><li><a href="KIWIImage.html">KIWIImage</a> : 3929</li><li><a href="KIWIImage.html">KIWIImage</a> : 4447</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 2081</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 384</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 922</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 301</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 7153</li><li><a href="KIWIImage.html">KIWIImage</a> : 3929</li><li><a href="KIWIImage.html">KIWIImage</a> : 4447</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 2081</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 384</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 940</li></ul>
 <a name="getFSNoCheck"><h2>getFSNoCheck</h2></a>
 <p>
      Return the value for the fscheck flag
 <p>
-Defined on line: 492
+Defined on line: 506
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 302</li><li><a href="KIWIImage.html">KIWIImage</a> : 4229</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 930</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 302</li><li><a href="KIWIImage.html">KIWIImage</a> : 4229</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 948</li></ul>
 <a name="getFSReadOnly"><h2>getFSReadOnly</h2></a>
 <p>
      Return the filesystem for read only access
 <p>
-Defined on line: 503
+Defined on line: 517
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 315</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1474</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 598</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 934</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 315</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1474</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 598</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 952</li></ul>
 <a name="getFSReadWrite"><h2>getFSReadWrite</h2></a>
 <p>
      Return the filesystem for read write access
 <p>
-Defined on line: 514
+Defined on line: 528
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 316</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1475</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 599</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 938</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 316</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1475</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 599</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 956</li></ul>
 <a name="getFilesystem"><h2>getFilesystem</h2></a>
 <p>
      Return the configured filesystem
 <p>
-Defined on line: 415
+Defined on line: 429
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 299</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1358</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1993</li><li><a href="KIWIImage.html">KIWIImage</a> : 3464</li><li><a href="KIWIImage.html">KIWIImage</a> : 4712</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 915</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1973</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 597</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 601</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 1385</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 900</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 299</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1358</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1993</li><li><a href="KIWIImage.html">KIWIImage</a> : 3464</li><li><a href="KIWIImage.html">KIWIImage</a> : 4712</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 915</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1973</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 597</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 601</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 1385</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 918</li></ul>
 <a name="getFirmwareType"><h2>getFirmwareType</h2></a>
 <p>
      Return the configured firmware type
 <p>
-Defined on line: 426
+Defined on line: 440
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 300</li><li><a href="KIWICollect.html">KIWICollect</a> : 853</li><li><a href="KIWIImage.html">KIWIImage</a> : 1677</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 2018</li><li><a href="KIWIIsoLinux.html">KIWIIsoLinux</a> : 445</li><li><a href="KIWIIsoLinux.html">KIWIIsoLinux</a> : 879</li><li><a href="KIWIIsoLinux.html">KIWIIsoLinux</a> : 1084</li><li><a href="KIWIIsoLinux.html">KIWIIsoLinux</a> : 1285</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 379</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 1422</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 1513</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 905</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 300</li><li><a href="KIWICollect.html">KIWICollect</a> : 853</li><li><a href="KIWIImage.html">KIWIImage</a> : 1677</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 2018</li><li><a href="KIWIIsoLinux.html">KIWIIsoLinux</a> : 445</li><li><a href="KIWIIsoLinux.html">KIWIIsoLinux</a> : 879</li><li><a href="KIWIIsoLinux.html">KIWIIsoLinux</a> : 1084</li><li><a href="KIWIIsoLinux.html">KIWIIsoLinux</a> : 1285</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 379</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 1422</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 1513</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 923</li></ul>
 <a name="getFlags"><h2>getFlags</h2></a>
 <p>
      Return the configuration for the fags setting
 <p>
-Defined on line: 437
+Defined on line: 451
 <p>
 Called in
 <ul>
-<li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1357</li><li><a href="KIWIImage.html">KIWIImage</a> : 2259</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 556</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 910</li></ul>
+<li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1357</li><li><a href="KIWIImage.html">KIWIImage</a> : 2259</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 556</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 928</li></ul>
 <a name="getFormat"><h2>getFormat</h2></a>
 <p>
      Return the format for the virtual image
 <p>
-Defined on line: 448
+Defined on line: 462
 <p>
 Called in
 <ul>
-<li><a href="KIWIGlobals.html">KIWIGlobals</a> : 561</li><li><a href="KIWIImage.html">KIWIImage</a> : 1004</li><li><a href="KIWIImage.html">KIWIImage</a> : 3089</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1062</li><li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 108</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 986</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 914</li></ul>
+<li><a href="KIWIGlobals.html">KIWIGlobals</a> : 561</li><li><a href="KIWIImage.html">KIWIImage</a> : 1004</li><li><a href="KIWIImage.html">KIWIImage</a> : 3089</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1062</li><li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 108</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 986</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 932</li></ul>
 <a name="getFormatOptions"><h2>getFormatOptions</h2></a>
 <p>
      Return the format options for the virtual image format
 <p>
-Defined on line: 459
+Defined on line: 473
 <p>
 Called in
 <ul>
-<li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 115</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 918</li></ul>
+<li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 115</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 936</li></ul>
 <a name="getHybrid"><h2>getHybrid</h2></a>
 <p>
      Return the flag value to indicate a hybrid image
 <p>
-Defined on line: 525
+Defined on line: 539
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 615</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1386</li><li><a href="KIWIImage.html">KIWIImage</a> : 1191</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1982</li><li><a href="KIWIIsoLinux.html">KIWIIsoLinux</a> : 883</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 375</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 942</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 615</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1386</li><li><a href="KIWIImage.html">KIWIImage</a> : 1191</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1982</li><li><a href="KIWIIsoLinux.html">KIWIIsoLinux</a> : 883</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 375</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 960</li></ul>
 <a name="getHybridPersistent"><h2>getHybridPersistent</h2></a>
 <p>
      Return the flag value indicating whether or not persistent storage
      is included in the hybrid image
 <p>
-Defined on line: 536
+Defined on line: 550
 <p>
 Called in
 <ul>
-<li><a href="KIWIImage.html">KIWIImage</a> : 1195</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1991</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 376</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 1484</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 946</li></ul>
+<li><a href="KIWIImage.html">KIWIImage</a> : 1195</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1991</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 376</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 1484</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 964</li></ul>
 <a name="getImageSize"><h2>getImageSize</h2></a>
 <p>
      return a size string with unit or the string 'auto'
 <p>
-Defined on line: 689
+Defined on line: 703
 <p>
 Called in
 <ul>
-<li><a href="KIWIImage.html">KIWIImage</a> : 4749</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 727</li></ul>
+<li><a href="KIWIImage.html">KIWIImage</a> : 4749</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 741</li></ul>
 <a name="getImageSizeAdditiveBytes"><h2>getImageSizeAdditiveBytes</h2></a>
 <p>
      return the size byte value if the additive
      attribute is set to true, otherwise return
      zero
 <p>
-Defined on line: 740
+Defined on line: 754
 <p>
 Called in
 <ul>
@@ -493,7 +505,7 @@ Called in
 <p>
      return a size byte value or 'auto'
 <p>
-Defined on line: 722
+Defined on line: 736
 <p>
 Called in
 <ul>
@@ -502,183 +514,192 @@ Called in
 <p>
      Return the option configured for the initial boot selection
 <p>
-Defined on line: 548
+Defined on line: 562
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 303</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 2054</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 382</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 950</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 303</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 2054</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 382</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 968</li></ul>
 <a name="getInstallIso"><h2>getInstallIso</h2></a>
 <p>
      Return the value indicating whether or not an ISO image should be
      created as install media
 <p>
-Defined on line: 571
+Defined on line: 585
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 304</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 577</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1403</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 1482</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 954</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 304</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 577</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1403</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 1482</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 972</li></ul>
 <a name="getInstallPXE"><h2>getInstallPXE</h2></a>
 <p>
      Return the value indicating whether or not all data required
      for an oem PXE installation should be created as install set
 <p>
-Defined on line: 595
+Defined on line: 609
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 306</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 579</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 964</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 306</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 579</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 982</li></ul>
 <a name="getInstallProvideFailsafe"><h2>getInstallProvideFailsafe</h2></a>
 <p>
      Return the value indicating whether the boot menu should have a
      failsfe entry or not
 <p>
-Defined on line: 559
+Defined on line: 573
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 305</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 2063</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 959</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 305</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 2063</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 977</li></ul>
 <a name="getInstallStick"><h2>getInstallStick</h2></a>
 <p>
      Return the value indicating whether or not an USB stick image
      should be created for installation
 <p>
-Defined on line: 583
+Defined on line: 597
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 307</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 578</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1404</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 968</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 307</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 578</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1404</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 986</li></ul>
 <a name="getKernelCmdOpts"><h2>getKernelCmdOpts</h2></a>
 <p>
      Return the configured kernel command line options
 <p>
-Defined on line: 607
+Defined on line: 621
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 298</li><li><a href="KIWIImage.html">KIWIImage</a> : 1202</li><li><a href="KIWIImage.html">KIWIImage</a> : 3386</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 2009</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 378</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 972</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 298</li><li><a href="KIWIImage.html">KIWIImage</a> : 1202</li><li><a href="KIWIImage.html">KIWIImage</a> : 3386</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 2009</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 378</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 990</li></ul>
 <a name="getLuksOS"><h2>getLuksOS</h2></a>
 <p>
      Return the configured luks target operating system name
 <p>
-Defined on line: 629
+Defined on line: 643
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 309</li><li><a href="KIWIImage.html">KIWIImage</a> : 3613</li><li><a href="KIWIImage.html">KIWIImage</a> : 4365</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 980</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 309</li><li><a href="KIWIImage.html">KIWIImage</a> : 3613</li><li><a href="KIWIImage.html">KIWIImage</a> : 4365</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 998</li></ul>
 <a name="getLuksPass"><h2>getLuksPass</h2></a>
 <p>
      Return the configured luks password for the filesystem encryption
 <p>
-Defined on line: 618
+Defined on line: 632
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 308</li><li><a href="KIWIImage.html">KIWIImage</a> : 3612</li><li><a href="KIWIImage.html">KIWIImage</a> : 4364</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 976</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 308</li><li><a href="KIWIImage.html">KIWIImage</a> : 3612</li><li><a href="KIWIImage.html">KIWIImage</a> : 4364</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 994</li></ul>
 <a name="getMDRaid"><h2>getMDRaid</h2></a>
 <p>
      Return the software raid type
 <p>
-Defined on line: 640
+Defined on line: 654
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 310</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 984</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 310</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1002</li></ul>
 <a name="getPrimary"><h2>getPrimary</h2></a>
 <p>
      Return the flag indicating if this type is marked default
 <p>
-Defined on line: 651
+Defined on line: 665
 <p>
 Called in
 <ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 5307</li><li><a href="KIWIXML.html">KIWIXML</a> : 5335</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 989</li></ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 5308</li><li><a href="KIWIXML.html">KIWIXML</a> : 5336</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1007</li></ul>
 <a name="getRAMOnly"><h2>getRAMOnly</h2></a>
 <p>
      Return the flag indicating whether overlay file system writes
      take place in RAM only
 <p>
-Defined on line: 662
+Defined on line: 676
 <p>
 Called in
 <ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 2000</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 377</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 994</li></ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 2000</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 377</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1012</li></ul>
 <a name="getSize"><h2>getSize</h2></a>
 <p>
      Return the systemsize for this type
 <p>
-Defined on line: 674
+Defined on line: 688
 <p>
 Called in
 <ul>
-<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 694</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 732</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 747</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 998</li></ul>
+<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 708</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 746</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 761</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1016</li></ul>
 <a name="getSizeUnit"><h2>getSizeUnit</h2></a>
 <p>
      Return the systemsize for this type
 <p>
-Defined on line: 762
+Defined on line: 776
 <p>
 Called in
 <ul>
-<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 695</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 733</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 753</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1010</li></ul>
+<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 709</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 747</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 767</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1028</li></ul>
 <a name="getTypeName"><h2>getTypeName</h2></a>
 <p>
      Return the image type
 <p>
-Defined on line: 773
+Defined on line: 787
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 311</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 394</li><li><a href="KIWIConfigWriterFactory.html">KIWIConfigWriterFactory</a> : 94</li><li><a href="KIWIContainerBuilder.html">KIWIContainerBuilder</a> : 324</li><li><a href="KIWIContainerBuilder.html">KIWIContainerBuilder</a> : 396</li><li><a href="KIWIContainerBuilder.html">KIWIContainerBuilder</a> : 629</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 570</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1313</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1356</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1994</li><li><a href="KIWIImage.html">KIWIImage</a> : 3302</li><li><a href="KIWIImage.html">KIWIImage</a> : 3465</li><li><a href="KIWIImage.html">KIWIImage</a> : 4084</li><li><a href="KIWIImage.html">KIWIImage</a> : 4711</li><li><a href="KIWIImageBuilderBase.html">KIWIImageBuilderBase</a> : 322</li><li><a href="KIWIImageBuildFactory.html">KIWIImageBuildFactory</a> : 99</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 136</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 159</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 233</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 784</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1603</li><li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 104</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 234</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 372</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 310</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 388</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 425</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 469</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 555</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 666</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 864</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 1032</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 1098</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 1352</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 1421</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 1478</li><li><a href="KIWIXML.html">KIWIXML</a> : 4112</li><li><a href="KIWIXML.html">KIWIXML</a> : 5606</li><li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 564</li><li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 780</li><li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 791</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 841</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 311</li><li><a href="KIWIBoot.html">KIWIBoot</a> : 394</li><li><a href="KIWIConfigWriterFactory.html">KIWIConfigWriterFactory</a> : 94</li><li><a href="KIWIContainerBuilder.html">KIWIContainerBuilder</a> : 324</li><li><a href="KIWIContainerBuilder.html">KIWIContainerBuilder</a> : 396</li><li><a href="KIWIContainerBuilder.html">KIWIContainerBuilder</a> : 629</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 570</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1313</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1356</li><li><a href="KIWIGlobals.html">KIWIGlobals</a> : 1994</li><li><a href="KIWIImage.html">KIWIImage</a> : 3302</li><li><a href="KIWIImage.html">KIWIImage</a> : 3465</li><li><a href="KIWIImage.html">KIWIImage</a> : 4084</li><li><a href="KIWIImage.html">KIWIImage</a> : 4711</li><li><a href="KIWIImageBuilderBase.html">KIWIImageBuilderBase</a> : 322</li><li><a href="KIWIImageBuildFactory.html">KIWIImageBuildFactory</a> : 99</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 136</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 159</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 233</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 784</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 1603</li><li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 104</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 234</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 372</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 310</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 388</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 425</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 469</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 555</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 666</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 864</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 1032</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 1098</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 1352</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 1421</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 1478</li><li><a href="KIWIXML.html">KIWIXML</a> : 4113</li><li><a href="KIWIXML.html">KIWIXML</a> : 5607</li><li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 564</li><li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 780</li><li><a href="KIWIXMLInfo.html">KIWIXMLInfo</a> : 791</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 855</li></ul>
 <a name="getVGA"><h2>getVGA</h2></a>
 <p>
      Return the vga settings for the kernel command line
 <p>
-Defined on line: 784
+Defined on line: 798
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 312</li><li><a href="KIWIImage.html">KIWIImage</a> : 2044</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 2099</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 386</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1014</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 312</li><li><a href="KIWIImage.html">KIWIImage</a> : 2044</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 2099</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 386</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1032</li></ul>
 <a name="getVHDFixedTag"><h2>getVHDFixedTag</h2></a>
 <p>
      Return the VHD fixed tag for a fixed-vhd formated image
 <p>
-Defined on line: 795
+Defined on line: 809
 <p>
 Called in
 <ul>
-<li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 119</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1018</li></ul>
+<li><a href="KIWIImageFormat.html">KIWIImageFormat</a> : 119</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1036</li></ul>
 <a name="getVolID"><h2>getVolID</h2></a>
 <p>
      Return the volume ID for an ISO image
 <p>
-Defined on line: 806
+Defined on line: 820
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 313</li><li><a href="KIWIImage.html">KIWIImage</a> : 2260</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1022</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 313</li><li><a href="KIWIImage.html">KIWIImage</a> : 2260</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1040</li></ul>
 <a name="getXMLElement"><h2>getXMLElement</h2></a>
 <p>
      Return an XML Element representing the object's data
 <p>
-Defined on line: 835
+Defined on line: 849
 <a name="getZFSOptions"><h2>getZFSOptions</h2></a>
 <p>
      Return the ZFS filesystem pool options
 <p>
-Defined on line: 481
+Defined on line: 495
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 7152</li><li><a href="KIWIImage.html">KIWIImage</a> : 4448</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 926</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 7154</li><li><a href="KIWIImage.html">KIWIImage</a> : 4448</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 944</li></ul>
+<a name="getZiplTargetType"><h2>getZiplTargetType</h2></a>
+<p>
+     Return the configured zypl target type
+<p>
+Defined on line: 303
+<p>
+Called in
+<ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 5960</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 874</li></ul>
 <a name="isSizeAdditive"><h2>isSizeAdditive</h2></a>
 <p>
      Return indication whether the size for this type is additive or not
 <p>
-Defined on line: 817
+Defined on line: 831
 <p>
 Called in
 <ul>
-<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 697</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 748</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1004</li></ul>
+<li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 711</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 762</li><li><a href="KIWIXMLTypeData.html">KIWIXMLTypeData</a> : 1022</li></ul>
 <a name="new"><h2>new</h2></a>
 <p>
      Create the KIWIXMLTypeData object
@@ -729,18 +750,19 @@ Called in
          vga                    = ''
          vhdfixedtag            = ''
          volid                  = ''
+         zipl_targettype        = ''
      }
 <p>
 Defined on line: 50
 <p>
 Called in
 <ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 3988</li></ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 3989</li></ul>
 <a name="setBootImageDescript"><h2>setBootImageDescript</h2></a>
 <p>
      Set the configuration for the boot image description
 <p>
-Defined on line: 1033
+Defined on line: 1051
 <p>
 Called in
 <ul>
@@ -749,7 +771,7 @@ Called in
 <p>
      Set the option configuration for the boot filesystem
 <p>
-Defined on line: 1054
+Defined on line: 1072
 <p>
 Called in
 <ul>
@@ -758,16 +780,16 @@ Called in
 <p>
      Set the configuration for the bootkernel
 <p>
-Defined on line: 1070
+Defined on line: 1088
 <p>
 Called in
 <ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 2075</li><li><a href="KIWIXML.html">KIWIXML</a> : 5619</li><li><a href="KIWIXML.html">KIWIXML</a> : 5623</li></ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 2075</li><li><a href="KIWIXML.html">KIWIXML</a> : 5620</li><li><a href="KIWIXML.html">KIWIXML</a> : 5624</li></ul>
 <a name="setBootLoader"><h2>setBootLoader</h2></a>
 <p>
      Set the configuration for the  bootloader
 <p>
-Defined on line: 1091
+Defined on line: 1109
 <p>
 Called in
 <ul>
@@ -776,26 +798,26 @@ Called in
 <p>
      Set the configuration for the use of a bootpartition
 <p>
-Defined on line: 1128
+Defined on line: 1162
 <a name="setBootPartitionSize"><h2>setBootPartitionSize</h2></a>
 <p>
      Set the configuration for the  bootpartition size
 <p>
-Defined on line: 1107
+Defined on line: 1141
 <a name="setBootProfile"><h2>setBootProfile</h2></a>
 <p>
      Set the configuration for the bootprofile
 <p>
-Defined on line: 1145
+Defined on line: 1179
 <p>
 Called in
 <ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 2093</li><li><a href="KIWIXML.html">KIWIXML</a> : 5612</li><li><a href="KIWIXML.html">KIWIXML</a> : 5615</li></ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 2093</li><li><a href="KIWIXML.html">KIWIXML</a> : 5613</li><li><a href="KIWIXML.html">KIWIXML</a> : 5616</li></ul>
 <a name="setBootTimeout"><h2>setBootTimeout</h2></a>
 <p>
      Set the configuration for the  boot timeout
 <p>
-Defined on line: 1166
+Defined on line: 1200
 <p>
 Called in
 <ul>
@@ -804,22 +826,22 @@ Called in
 <p>
      Set the configuration for the pre built boot image check
 <p>
-Defined on line: 1187
+Defined on line: 1221
 <a name="setCompressed"><h2>setCompressed</h2></a>
 <p>
      Set the configuration for compressed image generation
 <p>
-Defined on line: 1204
+Defined on line: 1238
 <a name="setContainerName"><h2>setContainerName</h2></a>
 <p>
      Set the container name
 <p>
-Defined on line: 1221
+Defined on line: 1255
 <a name="setDevicePersistent"><h2>setDevicePersistent</h2></a>
 <p>
      Set the configuration for the device persistency method
 <p>
-Defined on line: 1249
+Defined on line: 1283
 <p>
 Called in
 <ul>
@@ -828,17 +850,17 @@ Called in
 <p>
      Set the path to the script to modify the boot configuration
 <p>
-Defined on line: 1265
+Defined on line: 1299
 <a name="setEditBootInstall"><h2>setEditBootInstall</h2></a>
 <p>
      Set the path to the script to modify the boot configuration
 <p>
-Defined on line: 1286
+Defined on line: 1320
 <a name="setFSMountOptions"><h2>setFSMountOptions</h2></a>
 <p>
      Set the file system mount options
 <p>
-Defined on line: 1368
+Defined on line: 1402
 <p>
 Called in
 <ul>
@@ -847,22 +869,22 @@ Called in
 <p>
      Set the value for the fscheck flag
 <p>
-Defined on line: 1410
+Defined on line: 1444
 <a name="setFSReadOnly"><h2>setFSReadOnly</h2></a>
 <p>
      Set the filesystem for read only access
 <p>
-Defined on line: 1427
+Defined on line: 1461
 <a name="setFSReadWrite"><h2>setFSReadWrite</h2></a>
 <p>
      Set the filesystem for read write access
 <p>
-Defined on line: 1443
+Defined on line: 1477
 <a name="setFilesystem"><h2>setFilesystem</h2></a>
 <p>
      Set the configuration for the  filesystem
 <p>
-Defined on line: 1307
+Defined on line: 1341
 <p>
 Called in
 <ul>
@@ -871,7 +893,7 @@ Called in
 <p>
      Set the configuration for the firmware type
 <p>
-Defined on line: 1603
+Defined on line: 1637
 <p>
 Called in
 <ul>
@@ -880,22 +902,22 @@ Called in
 <p>
      Set the configuration for the fags setting
 <p>
-Defined on line: 1323
+Defined on line: 1357
 <a name="setFormat"><h2>setFormat</h2></a>
 <p>
      Set the format for the virtual image
 <p>
-Defined on line: 1339
+Defined on line: 1373
 <a name="setFormatOptions"><h2>setFormatOptions</h2></a>
 <p>
      Set format options for the virtual image format
 <p>
-Defined on line: 1355
+Defined on line: 1389
 <a name="setHybrid"><h2>setHybrid</h2></a>
 <p>
      Set the flag value to indicate a hybrid image
 <p>
-Defined on line: 1459
+Defined on line: 1493
 <p>
 Called in
 <ul>
@@ -905,7 +927,7 @@ Called in
      Set the flag value indicating whether or not persistent storage
      is included in the hybrid image
 <p>
-Defined on line: 1476
+Defined on line: 1510
 <p>
 Called in
 <ul>
@@ -914,7 +936,7 @@ Called in
 <p>
      Set the option configuration for the  for the initial boot selection
 <p>
-Defined on line: 1494
+Defined on line: 1528
 <p>
 Called in
 <ul>
@@ -924,19 +946,19 @@ Called in
      Set the value indicating whether or not an ISO image should be
      created as install media
 <p>
-Defined on line: 1528
+Defined on line: 1562
 <a name="setInstallPXE"><h2>setInstallPXE</h2></a>
 <p>
      Set the value indicating whether or not PXE
      data files should be created for installation
 <p>
-Defined on line: 1564
+Defined on line: 1598
 <a name="setInstallProvideFailsafe"><h2>setInstallProvideFailsafe</h2></a>
 <p>
      Set the value indicating whether the boot menu should have a
      failsfe entry or not
 <p>
-Defined on line: 1510
+Defined on line: 1544
 <p>
 Called in
 <ul>
@@ -946,12 +968,12 @@ Called in
      Set the value indicating whether or not an USB stick image
      should be created for installation
 <p>
-Defined on line: 1546
+Defined on line: 1580
 <a name="setKernelCmdOpts"><h2>setKernelCmdOpts</h2></a>
 <p>
      Set the configuration for the  kernel command line options
 <p>
-Defined on line: 1582
+Defined on line: 1616
 <p>
 Called in
 <ul>
@@ -960,28 +982,28 @@ Called in
 <p>
      Set the configuration for the luks target distribution
 <p>
-Defined on line: 1642
+Defined on line: 1676
 <a name="setLuksPass"><h2>setLuksPass</h2></a>
 <p>
      Set the configuration for the luks password for the filesystem encryption
 <p>
-Defined on line: 1621
+Defined on line: 1655
 <a name="setMDRaid"><h2>setMDRaid</h2></a>
 <p>
      Set software raid type
 <p>
-Defined on line: 1663
+Defined on line: 1697
 <a name="setPrimary"><h2>setPrimary</h2></a>
 <p>
      Set the flag indicating if this type is marked default
 <p>
-Defined on line: 1679
+Defined on line: 1713
 <a name="setRAMOnly"><h2>setRAMOnly</h2></a>
 <p>
      Set the flag indicating whether overlay file system writes
      take place in RAM only
 <p>
-Defined on line: 1696
+Defined on line: 1730
 <p>
 Called in
 <ul>
@@ -990,27 +1012,27 @@ Called in
 <p>
      Set the systemsize for this type
 <p>
-Defined on line: 1714
+Defined on line: 1748
 <a name="setSizeAdditive"><h2>setSizeAdditive</h2></a>
 <p>
      Set the flag indicating whether the size is additive or not
 <p>
-Defined on line: 1735
+Defined on line: 1769
 <a name="setSizeUnit"><h2>setSizeUnit</h2></a>
 <p>
      Set the systemsize unit of measure for this type
 <p>
-Defined on line: 1752
+Defined on line: 1786
 <a name="setTypeName"><h2>setTypeName</h2></a>
 <p>
      Set the image type
 <p>
-Defined on line: 1769
+Defined on line: 1803
 <a name="setVGA"><h2>setVGA</h2></a>
 <p>
      Set the vga settings for the kernel command line
 <p>
-Defined on line: 1786
+Defined on line: 1820
 <p>
 Called in
 <ul>
@@ -1019,14 +1041,19 @@ Called in
 <p>
      Set the VHD tag for a fixed-vhd formated image
 <p>
-Defined on line: 1807
+Defined on line: 1841
 <a name="setVolID"><h2>setVolID</h2></a>
 <p>
      Set the volume ID for an ISO image
 <p>
-Defined on line: 1828
+Defined on line: 1862
 <a name="setZFSOptions"><h2>setZFSOptions</h2></a>
 <p>
      Set the ZFS pool options
 <p>
-Defined on line: 1389
+Defined on line: 1423
+<a name="setZiplTargetType"><h2>setZiplTargetType</h2></a>
+<p>
+     Set the configuration for the zipl target type
+<p>
+Defined on line: 1125

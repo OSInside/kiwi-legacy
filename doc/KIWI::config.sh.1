@@ -2,12 +2,12 @@
 .\"     Title: kiwi::config.sh
 .\"    Author: Marcus Schäfer <ms (AT) suse.de>
 .\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: Created: 01/28/2015
+.\"      Date: Created: 02/02/2015
 .\"    Manual: KIWI Manualpage
 .\"    Source: KIWI 7.02
 .\"  Language: English
 .\"
-.TH "KIWI::CONFIG\&.SH" "1" "Created: 01/28/2015" "KIWI 7\&.02" "KIWI Manualpage"
+.TH "KIWI::CONFIG\&.SH" "1" "Created: 02/02/2015" "KIWI 7\&.02" "KIWI Manualpage"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -28,21 +28,18 @@
 .\" * MAIN CONTENT STARTS HERE *
 .\" -----------------------------------------------------------------
 .SH "NAME"
-KIWI::config.sh \- Configuration File for KIWI image description
+KIWI::config.sh \- Customization File for KIWI image description
 .SH "DESCRIPTION"
 .PP
 The KIWI image description allows to have an optional
 config\&.sh
-script in place\&. This script should be designed to take over control of adding the image operating system configuration\&. Configuration in that sense means stuff like activating services, creating configuration files, prepare an environment for a firstboot workflow, etc\&. What you shouldn\*(Aqt do in
-config\&.sh
-is breaking your systems integrity by for example removing packages or pieces of software\&. Something like that can be done in
-images\&.sh\&. The
+bash script in place\&. It can be used for changes appropriate for all images to be created from a given unpacked image (since config\&.sh runs prior to create step) Basically the script should be designed to take over control of adding the image operating system configuration\&. Configuration in that sense means all tasks which runs once in an os installation process like activating services, creating configuration files, prepare an environment for a firstboot workflow, etc\&. The
 config\&.sh
 script is called
 \fIafter\fR
-the user and groups have been set up\&. If there are SUSE Linux related YaST XML information, these are validated before
+the following kiwi built in configuration tasks: User/Groups, copy of overlay root tree and setup of autoyast If
 config\&.sh
-is called too\&. If you exit config\&.sh with an exit code != 0 kiwi will exit with an error too\&.
+exits with an exit code != 0 the kiwi process will exit with an error too\&.
 .PP
 \fBExample\ \&1.\ \&Template for config.sh\fR
 .sp

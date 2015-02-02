@@ -2,12 +2,12 @@
 .\"     Title: kiwi::images.sh
 .\"    Author: Marcus Schäfer <ms (AT) suse.de>
 .\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: Created: 01/28/2015
+.\"      Date: Created: 02/02/2015
 .\"    Manual: KIWI Manualpage
 .\"    Source: KIWI 7.02
 .\"  Language: English
 .\"
-.TH "KIWI::IMAGES\&.SH" "1" "Created: 01/28/2015" "KIWI 7\&.02" "KIWI Manualpage"
+.TH "KIWI::IMAGES\&.SH" "1" "Created: 02/02/2015" "KIWI 7\&.02" "KIWI Manualpage"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -28,20 +28,14 @@
 .\" * MAIN CONTENT STARTS HERE *
 .\" -----------------------------------------------------------------
 .SH "NAME"
-KIWI::images.sh \- Configuration File for KIWI image description
+KIWI::images.sh \- Customization File for KIWI image description
 .SH "DESCRIPTION"
 .PP
 The KIWI image description allows to have an optional
 images\&.sh
-script in place\&. This script is called at the beginning of the KIWI create step\&. It is allowed to remove software there to shrink down the size of the image\&. Most often
+bash script in place\&. It can be used for changes appropriate for certain images/image types on case\-by\-case basis (since it runs at beginning of create step) Basically the script should be designed to take over control of handling image type specific tasks\&. For example if building the oem type requires some additional package or config it can be handled in images\&.sh\&. Please keep in mind there is only one unpacked root tree the script operates in\&. This means all changes are permanent and will not be automatically restored\&. It is also the script authors tasks to check if changes done before do not interfere in a negative way if another image type is created from the same unpacked image root tree If
 images\&.sh
-is used for boot images because they needs to be small\&. As
-images\&.sh
-is called in the create step you should be aware to design the script in a way that it can be called multiple times without shooting itself into its knee\&. As KIWI allows to create different image types from one previously prepared tree one needs to take into account that
-images\&.sh
-can be called more than one time\&. If you exit
-images\&.sh
-with an exit code != 0 KIWI will exit with an error too\&.
+exitswith an exit code != 0 the kiwi process will exit with an error too\&.
 .PP
 \fBExample\ \&1.\ \&Template for images.sh\fR
 .sp
