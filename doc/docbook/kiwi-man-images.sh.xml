@@ -29,22 +29,29 @@
   </refmeta>
   <refnamediv>
     <refname>KIWI::images.sh</refname>
-    <refpurpose>Configuration File for KIWI image description</refpurpose>
+    <refpurpose>Customization File for KIWI image description</refpurpose>
   </refnamediv>
 
   <refsect1 id="kiwi.images.description">
     <title>Description</title>
     <para>
-      The KIWI image description allows to have an optional <filename>images.sh</filename> script
-      in place. This script is called at the beginning of the KIWI create step.
-      It is allowed to remove software there to shrink down the size of the
-      image. Most often <filename>images.sh</filename> is used for boot images because they needs
-      to be small. As <filename>images.sh</filename> is called in the create step you should be
-      aware to design the script in a way that it can be called multiple times
-      without shooting itself into its knee. As KIWI allows to create different
-      image types from one previously prepared tree one needs to take into account
-      that <filename>images.sh</filename> can be called more than one time. If you exit <filename>images.sh</filename>
-      with an exit code != 0 KIWI will exit with an error too.
+      The KIWI image description allows to have an optional
+      <filename>images.sh</filename> bash script in place. It can be
+      used for changes appropriate for certain images/image types on
+      case-by-case basis (since it runs at beginning of create step)
+
+      Basically the script should be designed to take over control of
+      handling image type specific tasks. For example if building the
+      oem type requires some additional package or config it can be
+      handled in images.sh. Please keep in mind there is only one
+      unpacked root tree the script operates in. This means all
+      changes are permanent and will not be automatically restored.
+      It is also the script authors tasks to check if changes done
+      before do not interfere in a negative way if another image type
+      is created from the same unpacked image root tree
+
+      If <filename>images.sh</filename> exitswith an exit code != 0
+      the kiwi process will exit with an error too.
     </para>
   <example>
     <title>Template for images.sh</title>
