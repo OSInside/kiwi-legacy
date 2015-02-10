@@ -1293,13 +1293,13 @@ sub writeVHDTag {
     # /.../
     # Azure service uses a tag injected into the disk
     # image to identify the OS. The tag is 512B long,
-    # starting with a GUID, and is placed at a 16K offset
+    # starting with a GUID, and is placed at a 64K offset
     # from the start of the disk image.
     #
     # +------------------------------+
     # | jump       | GUID(16B)000... |
     # +------------------------------|
-    # | 16K offset | TAG (512B)      |
+    # | 64K offset | TAG (512B)      |
     # +------------+-----------------+
     #
     # Fixed-format VHD
@@ -1340,10 +1340,10 @@ sub writeVHDTag {
         return;
     }
     #==========================================
-    # seek to 16k offset and zero out 512 byte
+    # seek to 64k offset and zero out 512 byte
     #------------------------------------------
     sysread ($null_fh,$buffer, 512); close ($null_fh);
-    seek $FD,16384,0;
+    seek $FD,65536,0;
     $done = syswrite ($FD,$buffer);
     if ((! $done) || ($done != 512)) {
         $kiwi -> failed ();
@@ -1358,9 +1358,9 @@ sub writeVHDTag {
         return;
     }
     #==========================================
-    # seek back to 16k offset
+    # seek back to 64k offset
     #------------------------------------------
-    seek $FD,16384,0;
+    seek $FD,65536,0;
     #==========================================
     # write 16 bytes GUID
     #------------------------------------------
