@@ -109,6 +109,7 @@
         <package name="xfsprogs"/>
     </packages>
     <packages type="bootstrap">
+        <package name="kbd"/>
         <package name="atftp"/>
         <package name="bc"/>
         <package name="busybox"/>

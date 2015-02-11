@@ -79,6 +79,7 @@
         <source path="obs://openSUSE:/Factory:/ARM/standard"/>
     </repository>
     <packages type="bootstrap">
+        <package name="kbd"/>
         <package name="atftp"/>
         <package name="bc"/>
         <package name="bind-libs"/>

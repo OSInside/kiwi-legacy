@@ -105,6 +105,7 @@
         <package name="kernel-rt-base"/>
     </packages>
     <packages type="bootstrap">
+        <package name="kbd"/>
         <package name="adaptec-firmware"/>
         <package name="atftp"/>
         <package name="bc"/>
@@ -153,6 +154,7 @@
     </packages>
     <packages type="bootstrap" profiles="custom"><!-- empty custom section to allow bootincluding custom kernel --></packages>
     <packages type="bootstrap">
+        <package name="kbd"/>
         <package name="diffutils"/>
         <package name="filesystem"/>
         <package name="glibc"/>
