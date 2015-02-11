@@ -314,6 +314,34 @@ sub setupScreenCall {
 }
 
 #==========================================
+# setupDeletePackages
+#------------------------------------------
+sub setupDeletePackages {
+    # ...
+    # create the delete packages list from the information
+    # of the package types delete. Store the result in the
+    # object pointer
+    # ---
+    my $this   = shift;
+    my $kiwi   = $this->{kiwi};
+    my $xml    = $this->{xml};
+    #==========================================
+    # check cached result
+    #------------------------------------------
+    if (defined $this->{delete_packlist}) {
+        return @{$this->{delete_packlist}};
+    }
+    my @delete_packs;
+    my $deletePacks = $xml -> getPackagesToDelete();
+    for my $package (@{$deletePacks}) {
+        my $name = $package -> getName();
+        push @delete_packs,$name;
+    }
+    $this->{delete_packlist} = \@delete_packs;
+    return @delete_packs;
+}
+
+#==========================================
 # setupInstallPackages
 #------------------------------------------
 sub setupInstallPackages {
@@ -651,13 +679,14 @@ sub rpmLibs {
     # ...
     # try to fix rpm version incompatibility
     # ---
-    my $this     = shift;
-    my @kchroot  = @{$this->{kchroot}};
-    my @packlist = $this -> setupInstallPackages();
+    my $this       = shift;
+    my @kchroot    = @{$this->{kchroot}};
+    my @packlist   = $this -> setupInstallPackages();
+    my @deletelist = $this -> setupDeletePackages();
     #==========================================
     # cleanup baselibs
     #------------------------------------------
-    if (@packlist) {
+    if ((@packlist) || (@deletelist)) {
         if (! $this -> cleanupRPMDatabase()) {
             return;
         }
