@@ -22,6 +22,7 @@ export BOOTABLE_FLAG="$(echo -ne '\x80')"
 export ELOG_FILE=/var/log/boot.kiwi
 export TRANSFER_ERRORS_FILE=/tmp/transfer.errors
 export UFONT=/usr/share/fbiterm/fonts/b16.pcf.gz
+export CONSOLE_FONT=/usr/share/kbd/consolefonts/default8x16.gz
 export HYBRID_PERSISTENT_FS=btrfs
 export HYBRID_PERSISTENT_OPTS=""
 export HYBRID_PERSISTENT_ID=83
@@ -7787,6 +7788,10 @@ function bootImage {
     local reboot=no
     local option=${kernel_cmdline[@]}
     #======================================
+    # Set active console to default font
+    #--------------------------------------
+    setupConsoleFont
+    #======================================
     # check for init kernel option
     #--------------------------------------
     if [ -z "$init" ];then
@@ -10343,6 +10348,12 @@ function setupTTY {
             test -e $tty || mknod -m 0660 $tty c 4 $minor
         fi
     fi
+}
+#======================================
+# setupConsoleFont
+#--------------------------------------
+function setupConsoleFont {
+    setfont $CONSOLE_FONT
 }
 #======================================
 # setupConsole
