@@ -102,6 +102,7 @@
         <package name="kernel-rt-base"/>
     </packages>
     <packages type="bootstrap">
+        <package name="kbd"/>
         <package name="bc"/>
         <package name="bind-libs"/>
         <package name="bind-utils"/>
@@ -143,6 +144,7 @@
     </packages>
     <packages type="bootstrap" profiles="custom"><!-- empty custom section to allow bootincluding custom kernel --></packages>
     <packages type="bootstrap">
+        <package name="kbd"/>
         <package name="diffutils"/>
         <package name="filesystem"/>
         <package name="glibc"/>

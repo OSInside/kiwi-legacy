@@ -105,6 +105,7 @@
     </packages>
     <packages type="image" profiles="custom"><!-- empty custom section to allow bootincluding custom kernel --></packages>
     <packages type="bootstrap">
+        <package name="kbd"/>
         <package name="gptfdisk"/>
         <package name="adaptec-firmware"/>
         <package name="atftp"/>
