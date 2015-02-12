@@ -101,8 +101,6 @@
         <package name="netcfg"/>
         <package name="nfs-client"/>
         <package name="parted"/>
-        <package name="plymouth"/>
-        <package name="plymouth-scripts"/>
         <package name="tar"/>
         <package name="xfsprogs"/>
         <package name="s390-tools"/>

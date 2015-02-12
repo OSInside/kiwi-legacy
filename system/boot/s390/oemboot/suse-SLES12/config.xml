@@ -120,8 +120,6 @@
         <package name="netcfg"/>
         <package name="parted"/>
         <package name="pciutils"/>
-        <package name="plymouth"/>
-        <package name="plymouth-scripts"/>
         <package name="squashfs"/>
         <package name="sysconfig"/>
         <package name="sysfsutils"/>
