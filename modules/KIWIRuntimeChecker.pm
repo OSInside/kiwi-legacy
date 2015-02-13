@@ -1555,7 +1555,9 @@ sub __checkCorrectRootFSPermissons {
         my $group_name = getgrgid($gid);
         if (($uid != 0) || ($gid != 0)) {
             $msg = "Image tree check for $path ";
-            $msg.= "returned owner/group name '$user_name/$group_name' ";
+            if (defined($user_name) && defined($group_name)) {
+                $msg.= "returned owner/group name '$user_name/$group_name' ";
+            }
             $msg.= "with owner/group IDs '$uid/$gid'. ";
             $msg.= "Expected 'root/root with 0/0 IDs'";
             $kiwi -> error ($msg);
