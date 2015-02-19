@@ -2058,6 +2058,19 @@ At the moment grub, zipl and sys|extlinux are supported</a:documentation>
         </choice>
       </attribute>
     </define>
+    <define name="k.type.zipl_targettype.attribute">
+      <attribute name="zipl_targettype">
+        <a:documentation>The device type of the disk zipl should boot. On zFCP
+devices use SCSI, on DASD devices use CDL or LDL on
+emulated DASD devices use FBA</a:documentation>
+        <choice>
+          <value>CDL</value>
+          <value>LDL</value>
+          <value>FBA</value>
+          <value>SCSI</value>
+        </choice>
+      </attribute>
+    </define>
     <define name="k.type.bootpartsize.attribute">
       <attribute name="bootpartsize">
         <a:documentation>For images with a separate boot partition this attribute
@@ -2408,6 +2421,9 @@ into the master block. There is space for 32 characters.</a:documentation>
         </optional>
         <optional>
           <ref name="k.type.bootloader.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.type.zipl_targettype.attribute"/>
         </optional>
         <optional>
           <ref name="k.type.bootpartsize.attribute"/>

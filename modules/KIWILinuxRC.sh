@@ -3988,9 +3988,10 @@ function searchBusIDBootDevice {
 	# device is set online and the biosBootDevice variable
 	# is set to this device for further processing
 	# ----
-	local deviceID=0
 	local dpath=/dev/disk/by-path
 	local ipl_type=$(cat /sys/firmware/ipl/ipl_type)
+    local deviceID=$(cat /sys/firmware/ipl/device)
+    local dev_type=$(cat /sys/bus/ccw/devices/$deviceID/devtype)
 	local wwpn
 	local slun
 	#======================================
@@ -4007,24 +4008,33 @@ function searchBusIDBootDevice {
 	#======================================
 	# determine device type: dasd or zfcp
 	#--------------------------------------
-	if [ -z "$ipl_type" ];then
+    if [ -z "$deviceID" ];then
 		systemException \
-			"Can't find IPL type" \
+            "Can't find IPL device" \
 		"reboot"
 	fi
 	if [ "$ipl_type" = "fcp" ];then
+        # plain FCP device 512b blocksize
 		haveZFCP=1
 	elif [ "$ipl_type" = "ccw" ];then
-		haveDASD=1
+        if [[ "$dev_type" =~ "3390" ]];then
+            # plain DASD device 4k blocksize
+            haveDASD=1
+        elif [[ "$dev_type" =~ "9336" ]];then
+            # emulated DASD device 512b blocksize, handled as FCP device
+            # but don't configure host and disk as required for plain
+            # FCP devices
+            haveZFCP=1
+        else
+            systemException \
+                "Unknown Device type: $dev_type" \
+            "reboot"
+        fi
 	else
 		systemException \
 			"Unknown IPL type: $ipl_type" \
 		"reboot"
 	fi
-	#======================================
-	# store device bus / host id
-	#--------------------------------------
-	deviceID=$(cat /sys/firmware/ipl/device)
 	#======================================
 	# check if we can find the device
 	#--------------------------------------
@@ -4034,16 +4044,23 @@ function searchBusIDBootDevice {
 		"reboot"
 	fi
 	#======================================
-	# DASD
+    # DASD real in CDL / LDL mode
 	#--------------------------------------
 	if [ $haveDASD -eq 1 ];then
 		dasd_configure $deviceID 1 0
 		biosBootDevice="$dpath/ccw-$deviceID"
 	fi
 	#======================================
-	# ZFCP
+    # DASD emulated in FBA mode
+    #--------------------------------------
+    if [ $haveZFCP -eq 1 ] && [ "$ipl_type" = "ccw" ];then
+        dasd_configure $deviceID 1 0
+        biosBootDevice="$dpath/ccw-$deviceID"
+    fi
+    #======================================
+    # ZFCP real in SCSI mode
 	#--------------------------------------
-	if [ $haveZFCP -eq 1 ];then
+    if [ $haveZFCP -eq 1 ] && [ "$ipl_type" = "fcp" ];then
 		wwpn=$(cat /sys/firmware/ipl/wwpn)
 		slun=$(cat /sys/firmware/ipl/lun)
 		zfcp_host_configure $deviceID 1
@@ -8261,7 +8278,7 @@ function callPartitioner {
 # createPartitionerInput
 #--------------------------------------
 function createPartitionerInput {
-	if echo $imageDiskDevice | grep -q 'dev\/dasd';then
+    if isDASDDevice; then
 		PARTITIONER=fdasd
 	fi
 	if [ $PARTITIONER = "fdasd" ];then
@@ -9917,7 +9934,7 @@ function resetBootBind {
 	umount $bprefix/boot
 	mv /$bootdir/boot /$bootdir/tmp
 	mv /$bootdir/tmp/* /$bootdir
-	rmdir /$bootdir/tmp
+    rm -rf /$bootdir/tmp
 	umount /$bootdir
 	rmdir /$bootdir
 	#======================================

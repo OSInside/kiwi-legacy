@@ -1565,6 +1565,13 @@ div {
 		attribute bootloader {
 			"extlinux" | "grub" | "grub2" | "syslinux" | "zipl" | "yaboot" | "uboot"
 		}
+    k.type.zipl_targettype.attribute =
+       ## The device type of the disk zipl should boot. On zFCP
+       ## devices use SCSI, on DASD devices use CDL or LDL on
+       ## emulated DASD devices use FBA
+       attribute zipl_targettype {
+           "CDL" | "LDL" | "FBA" | "SCSI"
+       }
 	k.type.bootpartsize.attribute =
 		## For images with a separate boot partition this attribute
 		## specifies the size in MB. If not set the min bootpart
@@ -1758,6 +1765,7 @@ div {
 		k.type.firmware.attribute? &
 		k.type.bootkernel.attribute? &
 		k.type.bootloader.attribute? &
+        k.type.zipl_targettype.attribute? &
 		k.type.bootpartsize.attribute? &
 		k.type.bootprofile.attribute? &
 		k.type.boottimeout.attribute? &

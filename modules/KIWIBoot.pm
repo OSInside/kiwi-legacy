@@ -5576,7 +5576,6 @@ sub installBootLoader {
 			);
 			$result= $? >> 8;
 			if ($result != 0) {
-				$kiwi -> failed ();
 				$kiwi -> error  (
 					"Couldn't install master boot code: $status"
 				);
@@ -5790,8 +5789,8 @@ sub installBootLoader {
 	# Zipl
 	#------------------------------------------
 	if ($loader eq "zipl") {
-		$kiwi -> info ("Installing zipl on device: $diskname");
-		my $offset;
+		$kiwi -> info ("Installing zipl on device: $diskname\n");
+        my $offset;
 		my $haveRealDevice = 1;
 		if (! -b $diskname) {
 			#==========================================
@@ -5810,7 +5809,6 @@ sub installBootLoader {
 		# mount boot device...
 		#------------------------------------------
 		if (! KIWIGlobals -> instance() -> mount ($bootdev, '/mnt')) {
-			$kiwi -> failed ();
 			$kiwi -> error  ("Can't mount boot partition: $status");
 			$kiwi -> failed ();
 			$this -> cleanStack ();
@@ -5819,60 +5817,91 @@ sub installBootLoader {
 		my $mount = "/mnt";
 		my $config = "$mount/boot/zipl.conf";
 		if (! $haveRealDevice) {
-			#==========================================
-			# rewrite zipl.conf with additional params
-			#------------------------------------------
-			my $readzconf = FileHandle -> new();
-			if (! $readzconf -> open ($config)) {
-				$kiwi -> failed ();
-				$kiwi -> error  ("Can't open config file for reading: $!");
-				$kiwi -> failed ();
-				qxx ("umount $mount 2>&1");
-				$this -> cleanStack ();
-				return;
-			}
-			my @data = <$readzconf>;
-			$readzconf -> close();
-			my $zconffd = FileHandle -> new();
-			if (! $zconffd -> open (">$config")) {
-				$kiwi -> failed ();
-				$kiwi -> error  ("Can't open config file for writing: $!");
-				$kiwi -> failed ();
-				qxx ("umount $mount 2>&1");
-				$this -> cleanStack ();
-				return;
-			}
-			$kiwi -> loginfo ("zipl.conf target values:\n");
-			foreach my $line (@data) {
-				print $zconffd $line;
-				if ($line =~ /^:menu/) {
-					$kiwi -> loginfo ("targetbase = $this->{loop}\n");
-					$kiwi -> loginfo ("targetbase = SCSI\n");
-					$kiwi -> loginfo ("targetblocksize = 512\n");
-					$kiwi -> loginfo ("targetoffset = $offset\n");
-					print $zconffd "\t"."targetbase = $this->{loop}"."\n";
-					print $zconffd "\t"."targettype = SCSI"."\n";
-					print $zconffd "\t"."targetblocksize = 512"."\n";
-					print $zconffd "\t"."targetoffset = $offset"."\n";
-				}
-			}
-			$zconffd -> close();
+            #==========================================
+            # get physical blocksize of target
+            #------------------------------------------
+            my $bsize = KIWIQX::qxx (
+                "blockdev --getpbsz $this->{loop} 2>&1"
+            );
+            my $result = $? >> 8;
+            if ($result != 0) {
+                $kiwi -> error  (
+                    "Can't get block size for device $this->{loop}: $bsize"
+                );
+                $kiwi -> failed ();
+                KIWIQX::qxx ("umount $mount 2>&1");
+                $this -> cleanStack ();
+                return;
+            }
+            chomp $bsize;
+            #==========================================
+            # set target type
+            #------------------------------------------
+            my $type = $xml -> getImageType() -> getZiplTargetType();
+            if (! $type) {
+                if ($bsize == 4096) {
+                    # we assume the target is a 4k dasd device in LDL mode
+                    # this could be wrong, there are also CDL dasd devices
+                    $type = 'LDL';
+                } else {
+                    # we assume the target is a 512b scsi device in SCSI mode
+                    # this could be wrong, thre are also emulated dasd devices
+                    # using 512b blocksize in FBA mode
+                    $type = 'SCSI';
+                }
+            }
+            #==========================================
+            # setup zipl caller options in zipl.conf
+            #------------------------------------------
+            my $readzconf = FileHandle -> new();
+            if (! $readzconf -> open ($config)) {
+                $kiwi -> error  ("Can't open config file for reading: $!");
+                $kiwi -> failed ();
+                KIWIQX::qxx ("umount $mount 2>&1");
+                $this -> cleanStack ();
+                return;
+            }
+            my @data = <$readzconf>;
+            $readzconf -> close();
+            my $zconffd = FileHandle -> new();
+            if (! $zconffd -> open (">$config")) {
+                $kiwi -> error  ("Can't open config file for writing: $!");
+                $kiwi -> failed ();
+                KIWIQX::qxx ("umount $mount 2>&1");
+                $this -> cleanStack ();
+                return;
+            }
+            foreach my $line (@data) {
+                print $zconffd $line;
+                if ($line =~ /^:menu/) {
+                    $kiwi -> info ("--> targetbase = $this->{loop}\n");
+                    $kiwi -> info ("--> targettype = $type\n");
+                    $kiwi -> info ("--> targetblocksize = $bsize\n");
+                    $kiwi -> info ("--> targetoffset = $offset\n");
+                    print $zconffd "\t"."targetbase = $this->{loop}"."\n";
+                    print $zconffd "\t"."targettype = $type"."\n";
+                    print $zconffd "\t"."targetblocksize = $bsize"."\n";
+                    print $zconffd "\t"."targetoffset = $offset"."\n";
+               }
+            }
+            $zconffd -> close();
 		}
 		#==========================================
 		# call zipl...
 		#------------------------------------------
-		$status = qxx ("cd $mount && zipl -c $config 2>&1");
-		$result = $? >> 8;
-		if ($result != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Couldn't install zipl on $diskname: $status");
-			$kiwi -> failed ();
-			qxx ("umount $mount 2>&1");
-			$this -> cleanStack ();
-			return;
-		}
-		qxx ("umount $mount 2>&1");
-		$kiwi -> done();
+        $status = KIWIQX::qxx (
+            "cd $mount && zipl -V -c $config -m menu 2>&1"
+        );
+        $result = $? >> 8;
+        if ($result != 0) {
+            $kiwi -> error  ("Couldn't install zipl on $diskname: $status");
+            $kiwi -> failed ();
+            KIWIQX::qxx ("umount $mount 2>&1");
+            $this -> cleanStack ();
+            return;
+        }
+        $kiwi -> loginfo($status);
+        KIWIQX::qxx ("umount $mount 2>&1");
 		#==========================================
 		# clean loop maps
 		#------------------------------------------
