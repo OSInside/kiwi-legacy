@@ -233,23 +233,18 @@ sub executeDir {
         );
         return 1;
     }
-    if ((-x "/usr/bin/extract-appdata-icons") &&
-        (-s "$targetdir/appdata.xml")
-    ) {
-        $cmd = "/usr/bin/extract-appdata-icons "
-            . "$targetdir/appdata.xml $targetdir";
-        $call = $this -> callCmd($cmd);
-        $status = $call->[0];
-        if($status) {
+    if (-x "/usr/bin/openSUSE-appstream-process") {
+        foreach my $p (@{$paths}) {
+            $cmd = "/usr/bin/openSUSE-appstream-process";
+            $cmd .= " $p";
+            $cmd .= " $targetdir";
+            $call = $this -> callCmd($cmd);
+            $status = $call->[0];
             my $out = join("\n",@{$call->[1]});
-            $this->logMsg("E",
+            $this->logMsg("I",
                 "Called <$cmd> exit status: <$status> output: $out"
             );
-            return 1;
-        }
-        if($this->{m_compress} =~ m{yes}i) {
-            system("gzip", "--rsyncable", "$targetdir/appdata.xml");
-        }
+        };
     }
     if($this->{m_compress} =~ m{yes}i) {
         foreach my $pfile(glob("$targetdir/packages*")) {
@@ -306,44 +301,18 @@ sub createRepositoryMetadata {
             );
             return 0;
         }
-        my $newtargetdir = "$p/$datadir/repodata";
-        if ((-x "/usr/bin/extract-appdata-icons") && 
-            (-s "$newtargetdir/appdata.xml")
-        ) {
-            $cmd = "/usr/bin/extract-appdata-icons "
-                . "$newtargetdir/appdata.xml $newtargetdir";
+        if (-x "/usr/bin/openSUSE-appstream-process")
+        {
+            $cmd = "/usr/bin/openSUSE-appstream-process";
+            $cmd .= " $p/$datadir";
+            $cmd .= " $p/$datadir/repodata";
+
             $call = $this -> callCmd($cmd);
             $status = $call->[0];
-            if($status) {
-                my $out = join("\n",@{$call->[1]});
-                $this->logMsg("E",
-                    "Called $cmd exit status: <$status> output: $out"
-                );
-                return 1;
-            }
-            if($this->{m_compress} =~ m{yes}i) {
-                system("gzip", "--rsyncable", "$newtargetdir/appdata.xml");
-            }
-        }
-        if ((-x "/usr/bin/extract-appdata-icons") &&
-            (-s "$targetdir/appdata.xml")
-        ) {
-            $newtargetdir = "$p/$datadir/repodata";
-            system("cp $targetdir/appdata.xml $newtargetdir/appdata.xml");
-            $cmd = "/usr/bin/extract-appdata-icons "
-                . "$newtargetdir/appdata.xml $newtargetdir";
-            $call = $this -> callCmd($cmd);
-            $status = $call->[0];
-            if($status) {
-                my $out = join("\n",@{$call->[1]});
-                $this->logMsg("E",
-                    "Called $cmd exit status: <$status> output: $out"
-                );
-                return 1;
-            }
-            if($this->{m_compress} =~ m{yes}i) {
-                system("gzip", "--rsyncable", "$newtargetdir/appdata.xml");
-            }
+            my $out = join("\n",@{$call->[1]});
+            $this->logMsg("I",
+                "Called $cmd exit status: <$status> output: $out"
+            );
         }
         if ( -f "/usr/bin/add_product_susedata" ) {
             my $kwdfile = abs_path(
