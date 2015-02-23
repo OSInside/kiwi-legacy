@@ -1147,7 +1147,6 @@ sub downloadFile {
     my $proxy;
     my $user;
     my $pass;
-    my $lwp = "/dev/shm/lwp-download";
     #==========================================
     # Check parameters
     #------------------------------------------
@@ -1221,6 +1220,15 @@ sub downloadFile {
             $pass=$2;
         }
     }
+    #==========================================
+    # Create lwp-download callback
+    #------------------------------------------
+    my $lwp = KIWIQX::qxx ("mktemp -qt kiwi-lwp-download-XXXXXX 2>&1");
+    my $code = $? >> 8; chomp $lwp;
+    if ($code != 0) {
+        $kiwi->loginfo("Couldn't create tmp file: $lwp: $!");
+        return;
+    }
     my $LWP = FileHandle -> new();
     if (! $LWP -> open (">$lwp")) {
         $kiwi->loginfo("downloadFile::Failed to create $lwp: $!");
@@ -1238,6 +1246,8 @@ sub downloadFile {
     my $lwpload = $locator -> getExecPath ('lwp-download');
     if (! $lwpload) {
         $kiwi->loginfo("downloadFile::Can't find lwp-download");
+        $LWP -> close();
+        unlink $lwp;
         return;
     }
     print $LWP $lwpload.' "$1" "$2"'."\n";
@@ -1252,8 +1262,9 @@ sub downloadFile {
     KIWIQX::qxx ("chmod a+w $lwp 2>&1");
     $dest = $dirname."/".$basename;
     my $data = KIWIQX::qxx ("$lwp $url $dest 2>&1");
-    my $code = $? >> 8;
+    $code = $? >> 8;
     if ($code == 0) {
+        unlink $lwp;
         return $url;
     }
     if ($url =~ /(^.*\/)(.*)/) {
@@ -1266,6 +1277,7 @@ sub downloadFile {
             $response = $browser  -> request ( $request );
         };
         if ($@) {
+            unlink $lwp;
             return;
         }
         my $content  = $response -> content ();
@@ -1280,14 +1292,18 @@ sub downloadFile {
                 $data = KIWIQX::qxx ("$lwp $url $dest 2>&1");
                 $code = $? >> 8;
                 if ($code == 0) {
+                    unlink $lwp;
                     return $url;
                 }
             }
         }
+        unlink $lwp;
         return;
     } else {
+        unlink $lwp;
         return;
     }
+    unlink $lwp;
     return $url;
 }
 
