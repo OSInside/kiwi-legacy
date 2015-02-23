@@ -303,7 +303,7 @@ sub _makecpiohead {
     #        magic ino
     my $h = "07070100000000";
     # mode                S_IFREG
-    $h .= sprintf("%08x", 0100000 | $s->[2]&0777);
+    $h .= sprintf("%08x", oct(100000) | $s->[2]&oct(777));
     #      uid     gid     nlink
     $h .= "000000000000000000000001";
     $h .= sprintf("%08x%08x", $s->[9], $s->[7]);
@@ -333,7 +333,7 @@ sub updateInitRDNET {
 
     my $linuxrc = "defaultrepo=$repoloc\n";
 
-    my ($cpio, $pad) = _makecpiohead('./etc/linuxrc.d/10_repo', [0, 0, 0644, 1, 0, 0, 0, length($linuxrc), 0, 0, 0]);
+    my ($cpio, $pad) = _makecpiohead('./etc/linuxrc.d/10_repo', [0, 0, oct(644), 1, 0, 0, 0, length($linuxrc), 0, 0, 0]);
     $cpio .= $linuxrc;
     $cpio .= $pad if $pad;
     $cpio .= _makecpiohead();
@@ -356,6 +356,7 @@ sub updateInitRDNET {
         print $fh $cpio;
         $fh -> close();
     }
+    return;
 }
 
 sub find_cb {
