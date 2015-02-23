@@ -2662,19 +2662,42 @@ sub setupBootDisk {
             return;
         }
         $kiwi -> done();
-        if (($haveDiskDevice) && (! $this->{gdata}->{StudioNode})) {
-            #==========================================
-            # fill disk device with zero bytes
-            #------------------------------------------
-            $kiwi -> info ("Filling target device with zero bytes...");
-            KIWIQX::qxx ("dd if=/dev/zero of=$loopdir/abc 2>&1");
-            KIWIQX::qxx ("rm -f $loopdir/abc");
-            $kiwi -> done();
-        }
         #==========================================
         # Umount system image partition
         #------------------------------------------
         KIWIGlobals -> instance() -> umount();
+    }
+    #==========================================
+    # Run zerofree if present and extX rootfs
+    #------------------------------------------
+    # zerofree replaces any block of an extX filesystem marked as free
+    # and containing something different than a zero with a zero byte.
+    # Later on that results in better compression results of an image
+    # containing this filesystem
+    my $blktype = KIWIQX::qxx("blkid $root -s TYPE -o value");
+    chomp $blktype;
+    if ($blktype) {
+        my $zero_free = $locator -> getExecPath ("zerofree");
+        if (($zero_free) && ($blktype =~ /^ext[234]/)) {
+            $kiwi -> info (
+                "Scanning $blktype free blocks and replace them by zero..."
+            );
+            my $status = KIWIQX::qxx ("$zero_free $root 2>&1");
+            my $result = $? >> 8;
+            if ($result != 0) {
+                $kiwi -> failed();
+                $kiwi -> error ("zerofree failed with: $status");
+                $kiwi -> failed();
+                $this -> cleanStack ();
+                return;
+            }
+            $kiwi -> done();
+        } else {
+            $kiwi -> warning(
+                "No free blocks analyzer available for $blktype"
+            );
+            $kiwi -> skipped();
+        }
     }
     #==========================================
     # create read/write filesystem if needed
