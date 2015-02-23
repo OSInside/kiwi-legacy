@@ -1,5 +1,5 @@
 ################################################################
-# Copyright (c) 2014 SUSE
+# Copyright (c) 2014, 2015 SUSE LLC
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -142,6 +142,8 @@ sub execute {
         $this->removeMediaCheck($isolxfiles[0]);
     }
 
+    $this -> updateInitRDNET($repoloc);
+
     my @gfxbootfiles;
     find(
         sub { find_cb($this, '.*/gfxboot\.cfg$', \@gfxbootfiles) },
@@ -155,7 +157,6 @@ sub execute {
         $this->logMsg("W", $msg);
         return $retval;
     }
-    $this -> updateEFIGrubConfig($repoloc);
     $retval = $this -> updateGraphicsBootConfig (
         \@gfxbootfiles, $repoloc, $srv, $path
     );
@@ -294,38 +295,67 @@ sub updateGraphicsBootConfig {
     return $retval;
 }
 
-sub updateEFIGrubConfig {
-    my $this = shift;
-    my $repoloc = shift;
-    my $grubcfg = $this->collect()
-        ->basesubdirs()->{1} . "/EFI/BOOT/grub.cfg";
-    if (! -f $grubcfg ) {
-        $this->logMsg("I", "no grub.cfg at <$grubcfg>");
-        return;
+# borrowed from obs with permission from mls@suse.de to license as
+# GPLv2+
+sub _makecpiohead {
+    my ($name, $s) = @_;
+    return "07070100000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000b00000000TRAILER!!!\0\0\0\0" if !$s;
+    #        magic ino
+    my $h = "07070100000000";
+    # mode                S_IFREG
+    $h .= sprintf("%08x", 0100000 | $s->[2]&0777);
+    #      uid     gid     nlink
+    $h .= "000000000000000000000001";
+    $h .= sprintf("%08x%08x", $s->[9], $s->[7]);
+    $h .= "00000000000000000000000000000000";
+    $h .= sprintf("%08x", length($name) + 1);
+    $h .= "00000000$name\0";
+    $h .= substr("\0\0\0\0", (length($h) & 3)) if length($h) & 3;
+    my $pad = '';
+    $pad = substr("\0\0\0\0", ($s->[7] & 3)) if $s->[7] & 3;
+    return ($h, $pad);
+}
+
+# append a config snippet to initrd that instructs linuxrc to use
+# download.opensuse.org
+# https://bugzilla.opensuse.org/show_bug.cgi?id=916175
+sub updateInitRDNET {
+    my ($this, $repoloc) = @_;
+
+    $this -> logMsg("I", "prepare initrd for NET iso");
+
+    my $zipper = KIWIGlobals -> instance() -> getKiwiConfig() -> {IrdZipperCommand};
+
+    # FIXME: looks like IrdZipperCommand is not configured correctly
+    # in openSUSE product files to match installation-images so
+    # hardcode for now
+    $zipper = "xz --check=crc32";
+
+    my $linuxrc = "defaultrepo=$repoloc\n";
+
+    my ($cpio, $pad) = _makecpiohead('./etc/linuxrc.d/10_repo', [0, 0, 0644, 1, 0, 0, 0, length($linuxrc), 0, 0, 0]);
+    $cpio .= $linuxrc;
+    $cpio .= $pad if $pad;
+    $cpio .= _makecpiohead();
+
+    my @initrdfiles;
+    find(
+        sub { find_cb($this, '.*/initrd$', \@initrdfiles) },
+        $this->handler()->collect()->basedir()
+    );
+
+    $this -> logMsg("E", "no initrds found!") unless @initrdfiles;
+
+    for my $initrd (@initrdfiles) {
+        $this -> logMsg("I", "updating $initrd with $repoloc");
+        my $fh  = FileHandle -> new();
+        if (! $fh -> open("|$zipper -c >> $initrd")) {
+        #if (! $fh -> open(">$initrd.append")) {
+            croak "Cant launch $zipper for $initrd: $!";
+        }
+        print $fh $cpio;
+        $fh -> close();
     }
-    $this->logMsg("I", "editing <$grubcfg>");
-    my $IN  = FileHandle -> new();
-    my $OUT = FileHandle -> new();
-    if (! $IN -> open($grubcfg)) {
-        croak "Cant open file for reading $grubcfg: $!";
-    }
-    if (! $OUT -> open(">$grubcfg.new")) {
-        croak "Cant open file for writing $grubcfg.new: $!";
-    }
-    while(<$IN>) {
-        my $line = $_;
-        chomp $line;
-        $this->logMsg("I", "-$line");
-        $line =~
-            s,(linuxefi /boot/x86_64/loader/linux),$1 install=$repoloc,x;
-        $this->logMsg("I", "+$line");
-        print $OUT "$line\n";
-    }
-    $OUT -> close();
-    $IN  -> close(); 
-    $this -> callCmd("diff -u $grubcfg $grubcfg.new");
-    rename("$grubcfg.new", $grubcfg);
-    return $this;
 }
 
 sub find_cb {
