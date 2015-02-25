@@ -4,7 +4,7 @@
     <description type="system">
         <author>Marcus Schäfer</author>
         <contact>ms@novell.com</contact>
-        <specification>openSUSE 12.3 terminal</specification>
+        <specification>openSUSE 12.3 terminal. Please note this a netboot only appliance. The kernel and many other parts are actively deleted in the images.sh script to keep it small. If you use this description for another use case make sure no important data is deleted</specification>
     </description>
     <preferences>
         <type image="pxe" filesystem="clicfs" boot="netboot/suse-12.3">
