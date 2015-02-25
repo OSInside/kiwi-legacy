@@ -5114,6 +5114,13 @@ sub setupBootLoaderConfiguration {
         #==========================================
         # General zipl setup
         #------------------------------------------
+        # Note:
+        # The initrd will be loaded at offset address 0x4000000 (64MB)
+        # This means the kernel must not be bigger than 64MB otherwise it
+        # will overwrite the initrd. The reason for the static address
+        # is for compatibility with zipl and kernel versions which were
+        # not able to handle the initrd at variing adresses e.g sle11
+        # ----
         my $title_standard;
         my $title_failsafe;
         my $bootTimeout = 200;
