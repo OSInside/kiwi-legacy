@@ -291,8 +291,8 @@ sub __bundleExtension {
     if (! $base) {
         $base = $this->{imagebase};
     }
-    if ($suffix =~ /raw/) {
-        # compress this bundle using xz
+    if ($suffix =~ /raw|vhdfixed/) {
+        # compress raw (no format) and vhdfixed format using xz
         $data = KIWIQX::qxx (
             "xz -kc $source/$base.$suffix >$tmpdir/$base-$bnr.$suffix.xz 2>&1"
         );
