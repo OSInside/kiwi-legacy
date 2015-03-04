@@ -430,13 +430,13 @@ sub __checkContainerHasLXC {
         push @{$pckgs}, @{$xml -> getBootstrapPackages()};
         for my $pckg (@{$pckgs}) {
             my $pname = $pckg -> getName();
-            if ($pname =~ /^lxc/smx) {
+            if ($pname =~ /^lxc|^systemd/smx) {
                 return 1;
             }
         }
         my $kiwi = $this->{kiwi};
-        my $msg = 'Attempting to build container, but no lxc package included '
-            . 'in image.';
+        my $msg = 'Attempting to build container, neither systemd nor the '
+            . 'lxc package is included in the image.';
         $kiwi -> error ( $msg );
         $kiwi -> failed ();
         return;
