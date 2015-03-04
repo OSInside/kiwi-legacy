@@ -373,12 +373,12 @@ sub __checkSelectedBootLoaderIncluded {
     my $xml  = $this->{xml};
     my $kiwi = $this->{kiwi};
     my %loaderPackages = (
-        'grub'     => 'grub',
-        'grub2'    => 'grub2',
-        'extlinux' => 'syslinux',
-        'syslinux' => 'syslinux',
-        'zipl'     => 's390-tools',
-        'uboot'    => 'u-boot-tools'
+        'grub'     => ['grub'],
+        'grub2'    => ['grub2', 'grub2-x86_64-efi'],
+        'extlinux' => ['syslinux'],
+        'syslinux' => ['syslinux'],
+        'zipl'     => ['s390-tools'],
+        'uboot'    => ['u-boot-tools']
     );
     my $msg;
     my $type = $xml  -> getImageType();
@@ -393,20 +393,22 @@ sub __checkSelectedBootLoaderIncluded {
     if (! $bootloader) {
         $bootloader = 'grub';
     }
-    my $loaderPackage = $loaderPackages{$bootloader};
-    if (! $loaderPackage) {
+    my $loaderPackage_list = $loaderPackages{$bootloader};
+    if (! $loaderPackage_list) {
         return 1;
     }
     my $pckgs = $xml -> getPackages();
     push @{$pckgs}, @{$xml -> getBootstrapPackages()};
     for my $pckg (@{$pckgs}) {
         my $pname = $pckg -> getName();
-        if ($pname eq $loaderPackage) {
-            return 1;
+        foreach my $loaderPackage (@{$loaderPackage_list}) {
+            if ($pname eq $loaderPackage) {
+                return 1;
+            }
         }
     }
-    $msg = "Selected bootloader is $bootloader, but required ";
-    $msg.= "package $loaderPackage is not included in image.";
+    $msg = "Selected bootloader is $bootloader, but the required ";
+    $msg.= "package(s) @{$loaderPackage_list} are not included in the image.";
     $kiwi -> error ( $msg );
     $kiwi -> failed ();
     return;
