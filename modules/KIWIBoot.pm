@@ -5520,11 +5520,6 @@ sub installBootLoader {
             $grubtool = $locator -> getExecPath ('grub2-install');
             $grubarch = "powerpc-ieee1275";
         }
-        if (! $grubtool) {
-            $kiwi -> error  ("Mandatory $grubtool not found");
-            $kiwi -> failed ();
-            return;
-        }
         #==========================================
         # Mount boot partition
         #------------------------------------------
@@ -5597,6 +5592,11 @@ sub installBootLoader {
             }
         }
         if ($loaderTarget) {
+            if (! $grubtool) {
+                $kiwi -> error  ("Mandatory $grubtool not found");
+                $kiwi -> failed ();
+                return;
+            }
             $kiwi -> info ("Installing grub2:\n");
             $kiwi -> info ("--> $targetMessage: $loaderTarget\n");
             $status = KIWIQX::qxx (
