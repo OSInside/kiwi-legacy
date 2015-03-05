@@ -240,8 +240,8 @@ sub test_containerPackMissing {
     my $checker = KIWIRuntimeChecker -> new($cmd, $xml);
     $res = $checker -> __checkContainerHasLXC();
     my $msg = $kiwi -> getMessage();
-    my $expected = 'Attempting to build container, but no lxc package '
-        . 'included in image.';
+    my $expected = 'Attempting to build container, neither systemd nor the '
+        . 'lxc package is included in the image.';
     $this -> assert_str_equals($expected, $msg);
     my $msgT = $kiwi -> getMessageType();
     $this -> assert_str_equals('error', $msgT);
