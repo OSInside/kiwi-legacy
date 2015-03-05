@@ -4979,7 +4979,7 @@ function setupNetworkDHCLIENT {
     # assign DHCP IP address by using the dhclient tool
     # ----
     local IFS=$IFS_ORIG
-    local dhclient_opts=" -4 -1 -q -timeout 20"
+    local dhclient_opts=" -4 -1 -q"
     mkdir -p /var/lib/dhclient
     mkdir -p /var/run
     for try_iface in ${dev_list[*]}; do
