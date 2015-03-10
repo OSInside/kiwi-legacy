@@ -1726,6 +1726,7 @@ sub __addPackagesToBootXML {
     my $bootArchives = $systemXML -> getBootIncludeArchives();
     my $bootAddPacks = $systemXML -> getBootIncludePackages();
     my $bootDelPacks = $systemXML -> getBootDeletePackages();
+    my $systemDelPacks = $systemXML -> getPackagesToDelete();
     my @addPacks     = ();
     if (@{$bootArchives}) {
         $kiwi -> info ("Boot including archive(s) [bootstrap]:\n");
@@ -1753,14 +1754,6 @@ sub __addPackagesToBootXML {
             }
         }
         $bootXML -> addBootstrapPackages ($bootAddPacks);
-    }
-    if (@{$bootDelPacks}) {
-        $kiwi -> info ("Boot included package(s) marked for deletion:\n");
-        for my $package (@{$bootDelPacks}) {
-            my $name = $package -> getName();
-            $kiwi -> info ("--> $name\n");
-        }
-        $bootXML -> addPackagesToDelete ($bootDelPacks);
     }
     my $deletePackages = $bootXML -> getPackagesToDelete();
     if (($deletePackages) && (@addPacks)) {
@@ -1791,6 +1784,24 @@ sub __addPackagesToBootXML {
             }
             $bootXML -> setPackagesToDelete (\@resultDeletePackages);
         }
+    }
+    if ($systemDelPacks) {
+        # check if there are packages marked as bootdelete in the delete
+        # section and add them to the bootDelPacks list
+        for my $package (@{$systemDelPacks}) {
+            my $bootdelete = $package -> getBootDelete();
+            if (($bootdelete) && ($bootdelete eq 'true')) {
+                push @{$bootDelPacks}, $package
+            }
+        }
+    }
+    if (@{$bootDelPacks}) {
+        $kiwi -> info ("Boot included package(s) marked for deletion:\n");
+        for my $package (@{$bootDelPacks}) {
+            my $name = $package -> getName();
+            $kiwi -> info ("--> $name\n");
+        }
+        $bootXML -> addPackagesToDelete ($bootDelPacks);
     }
     return $this;
 }
