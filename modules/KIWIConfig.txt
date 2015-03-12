@@ -152,6 +152,7 @@
 		<file name="modinfo"/>
 		<file name="modprobe"/>
 		<file name="mount"/>
+        <file name="mountpoint"/>
 		<file name="mount.nfs"/>
 		<file name="mount.nfs4"/>
 		<file name="mount.zfs"/>

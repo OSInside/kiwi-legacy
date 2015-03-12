@@ -121,7 +121,7 @@ if [ "$LOCAL_BOOT" = "no" ] && [ ! -z "$OEM_RECOVERY" ];then
         label=$(blkid $jdev -s LABEL -o value)
         if [ "$label" = "EFI" ];then
             mkdir -p /boot/efi
-            if ! mount $jdev /boot/efi;then
+            if ! mountpoint -q /boot/efi && ! mount $jdev /boot/efi;then
                 systemException "Failed to mount EFI boot partition" "reboot"
             fi
         fi
