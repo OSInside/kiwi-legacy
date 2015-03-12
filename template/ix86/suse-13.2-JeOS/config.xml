@@ -148,10 +148,8 @@
         other release packages
 -->
         <package name="openSUSE-release"/>
-        <package name="dhcpcd" bootinclude="true"/>
     </packages>
     <packages type="delete">
         <package name="kernel-debug"/>
-        <package name="wicked" bootdelete="true"/>
     </packages>
 </image>
