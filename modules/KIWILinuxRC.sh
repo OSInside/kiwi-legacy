@@ -3849,8 +3849,8 @@ function USBStickDevice {
                 continue
             fi
             isremovable=$description/removable
-            storageID=`echo $description | cut -f1 -d: | xargs basename`
-            devicebID=`basename $description | cut -f2 -d:`
+            storageID=$(echo $description | cut -f1 -d: | xargs basename)
+            devicebID=$(basename $description | cut -f2 -d:)
             if [ $devicebID = "block" ];then
                 devicebID=`ls -1 $description`
                 isremovable=$description/$devicebID/removable
@@ -5736,7 +5736,7 @@ function kernelList {
         fi
         unset kernel
         unset initrd
-        kname=`basename $i`
+        kname=$(basename "$i")
         if [ "$kname" = $krunning ];then
             continue
         fi
@@ -7480,7 +7480,7 @@ function getDiskID {
                 continue
             fi
             local dev=$(readlink $i)
-            dev=/dev/$(basename $dev)
+            dev=/dev/$(basename "$dev")
             if [ $dev = $device ];then
                 echo $i
                 return
@@ -7498,7 +7498,7 @@ function getDiskID {
             continue
         fi
         local dev=$(readlink $i)
-        dev=/dev/$(basename $dev)
+        dev=/dev/$(basename "$dev")
         if [ $dev = $device ];then
             echo $i
             return
@@ -8243,7 +8243,7 @@ function luksOpen {
     # no map name set, build it from device
     #--------------------------------------
     if [ -z "$name" ];then
-        name=luks_$(basename $ldev)
+        name=luks_$(basename "$ldev")
     fi
     #======================================
     # luks map already exists, return
@@ -8328,7 +8328,7 @@ function luksClose {
     # close all luks* map names
     #--------------------------------------
     for i in /dev/mapper/luks*;do
-        name=$(basename $i)
+        name=$(basename "$i")
         cryptsetup luksClose $name
     done
 }
