@@ -103,6 +103,16 @@ if [ "$LOCAL_BOOT" = "no" ] && [ ! -z "$OEM_RECOVERY" ];then
 		systemException "Failed to tar up recovery boot-1.tgz" "reboot"
 	fi
 	Echo "Store recovery boot files phase 2)..."
+    if [ ! -z "$kiwi_JumpPart" ];then
+        jdev=$(ddn $imageDiskDevice $kiwi_JumpPart)
+        label=$(blkid $jdev -s LABEL -o value)
+        if [ "$label" = "EFI" ];then
+            mkdir -p /boot/efi
+            if ! mount $jdev /boot/efi;then
+                systemException "Failed to mount EFI boot partition" "reboot"
+            fi
+        fi
+    fi
 	backupBootFiles=""
 	for i in $(find /boot -type f); do
 		if ! echo $i | grep -q -E "\.sys";then
@@ -113,6 +123,7 @@ if [ "$LOCAL_BOOT" = "no" ] && [ ! -z "$OEM_RECOVERY" ];then
 		systemException "Failed to tar up recovery boot-2.tgz" "reboot"
 	fi
 	umount /reco-save
+    umount /boot/efi &>/dev/null
 	rmdir /reco-save
 fi
 

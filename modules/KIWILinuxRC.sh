@@ -1891,6 +1891,13 @@ function setupBootLoaderGrub2Recovery {
 			set bgimg=/boot/grub2/themes/openSUSE/background.png
 			background_image -m stretch \$bgimg
 		fi
+        if [ \$grub_platform = "efi" ]; then
+            set linux=linuxefi
+            set initrd=initrdefi
+        else
+            set linux=linux
+            set initrd=initrd
+        fi
 		set timeout=30
 	EOF
 	if xenServer $kernel $mountPrefix;then
@@ -1922,17 +1929,17 @@ function setupBootLoaderGrub2Recovery {
 			set root='hd0,$recoid'
 			echo Loading $kernel...
 			set gfxpayload=keep
-			linux /boot/$kernel $cmdline showopts
+            \$linux /boot/$kernel $cmdline showopts
 			echo Loading $initrd...
-			initrd /boot/$initrd
+			\$initrd /boot/$initrd
 		}
 		menuentry 'Restore Factory System' --class opensuse --class os {
 			set root='hd0,$recoid'
 			echo Loading $kernel...
 			set gfxpayload=keep
-			linux /boot/$kernel $cmdline RESTORE=1 showopts
+			\$linux /boot/$kernel $cmdline RESTORE=1 showopts
 			echo Loading $initrd...
-			initrd /boot/$initrd
+			\$initrd /boot/$initrd
 		}
 		EOF
 	fi
@@ -2758,9 +2765,9 @@ function setupBootLoaderGrub2 {
 		(hd0) $diskByID
 	EOF
 	#======================================
-	# activate secure boot if required
+	# Use linuxefi/initrdefi if needed
 	#--------------------------------------
-	if [ "$kiwi_firmware" = "uefi" ];then
+    if [ "$kiwi_firmware" = "uefi" ] || [ "$kiwi_firmware" = "efi" ];then
 		echo "GRUB_USE_LINUXEFI=true"  >> $inst_default_grub
 		echo "GRUB_USE_INITRDEFI=true" >> $inst_default_grub
 	fi
