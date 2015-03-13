@@ -978,7 +978,9 @@ function installBootLoaderGrub2 {
 	# check for elilo compat mode
 	#--------------------------------------
 	if [ $isEFI -eq 1 ] && [ -e $product ] && [ -e $elilo_efi ];then
-		product=$(readlink $product)
+        local product=$(readlink $product)
+        local vendor=SuSE
+        local efipath=/boot/efi/EFI
 		if [[ "$product" =~ "SUSE_SLE" ]];then
 			#======================================
 			# write elilo.conf
@@ -992,7 +994,7 @@ function installBootLoaderGrub2 {
 				# Modified by YaST2.
 				timeout = $timeout
 				##YaST - boot_efilabel = "SUSE Linux Enterprise Server 11"
-				vendor-directory = BOOT
+				vendor-directory = $vendor
 				secure-boot = on
 				prompt
 				image  = /boot/vmlinuz
@@ -1000,9 +1002,13 @@ function installBootLoaderGrub2 {
 				initrd = /boot/initrd
 				label  = linux
 				append = "$GRUB_CMDLINE_LINUX_DEFAULT"
-				description = Linux
+				description = "$kiwi_oemtitle"
 				root = $(getDiskID $imageRootDevice)
 			EOF
+            #====================================================
+            # copy vendor directory
+            #----------------------------------------------------
+            cp -a $efipath/BOOT $efipath/$vendor
 			#======================================
 			# update sysconfig/bootloader
 			#--------------------------------------
@@ -1022,6 +1028,12 @@ function installBootLoaderGrub2 {
 			# title for this system
 			# ----
 			elilo --refresh-EBM -vv
+            #====================================================
+            # create versionized kernel/initrd
+            #----------------------------------------------------
+            local kversion=$(uname -r)
+            cp -a $efipath/$vendor/vmlinuz $efipath/$vendor/vmlinuz-$kversion
+            cp -a $efipath/$vendor/initrd $efipath/$vendor/initrd-$kversion
 			#======================================
 			# return early for elilo case
 			#--------------------------------------
