@@ -614,6 +614,13 @@ sub generateBuildImageName {
     }
     my $name = $xml -> getImageName();
     my $iver = $xml -> getPreferences() -> getVersion();
+    my $type = $xml -> getImageType();
+    my $imageType = $type -> getTypeName();
+    if ($imageType eq 'docker') {
+        $extension = '-docker';
+    } elsif ($imageType eq 'lxc') {
+        $extension = '-lxc';
+    }
     if (defined $extension) {
         $name = $name.$extension.$arch.$separator.$iver;
     } else {

@@ -296,6 +296,11 @@ sub __bundleExtension {
         $data = KIWIQX::qxx (
             "xz -kc $source/$base.$suffix >$tmpdir/$base-$bnr.$suffix.xz 2>&1"
         );
+    } elsif ($suffix eq 'docker') {
+        # docker is an xz compressed tarball
+        $data = KIWIQX::qxx (
+            "cp $source/$base.tar.xz $tmpdir/$base-$bnr.tar.xz 2>&1"
+        );
     } else {
         # default bundle handling is a copy
         $data = KIWIQX::qxx (
