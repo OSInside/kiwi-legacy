@@ -164,6 +164,9 @@ sub createChecks {
     if (! $this -> __hasBootDescription()) {
         return;
     }
+    if (! $this -> __hasContainerName()) {
+        return;
+    }
     return 1;
 }
 
@@ -224,6 +227,9 @@ sub prepareChecks {
         return;
     }
     if (! $this -> __hasBootDescription()) {
+        return;
+    }
+    if (! $this -> __hasContainerName()) {
         return;
     }
     return 1;
@@ -1230,6 +1236,37 @@ sub __hasValidArchives {
         }
     }
     return 1;
+}
+
+#==========================================
+# __hasContainerName
+#------------------------------------------
+sub __hasContainerName {
+    # ...
+    # if the image type is docker or lxc a container name
+    # must be specified
+    # ---
+    my $this = shift;
+    my $kiwi = $this->{kiwi};
+    my $xml  = $this->{xml};
+    my $bldType = $xml -> getImageType();
+    if (! $bldType) {
+        # Nothing to check
+        return 1;
+    }
+    my $imgType = $bldType -> getTypeName();
+    if (($imgType ne 'docker') && ($imgType ne 'lxc')) {
+        # Nothing to check
+        return 1;
+    }
+    my $container = $bldType -> getContainerName();
+    if ($container) {
+        # Everything ok
+        return 1;
+    }
+    $kiwi -> error("No container name specified for $imgType build");
+    $kiwi -> failed();
+    return;
 }
 
 #==========================================
