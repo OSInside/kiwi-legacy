@@ -3252,7 +3252,7 @@ function updateRootDeviceFstab {
         for i in $(cat /.profile | grep -E 'kiwi_LVM_|kiwi_allFreeVolume');do
             variable=$(echo $i|cut -f1 -d=)
             volume=$(echo $i| cut -f3- -d_ | cut -f1 -d=)
-            content=$(eval echo \$$variable)
+            content=$(echo $i|cut -f2 -d= | tr -d \' | tr -d \")
             volpath=$(echo $content | cut -f3 -d:)
             if [ -z "$volpath" ];then
                 volpath=$volume
@@ -6560,7 +6560,7 @@ function mountSystemStandard {
         for i in $(cat /.profile | grep -E 'kiwi_LVM_|kiwi_allFreeVolume');do
             variable=$(echo $i|cut -f1 -d=)
             volume=$(echo $i| cut -f3- -d_ | cut -f1 -d=)
-            content=$(eval echo \$$variable)
+            content=$(echo $i|cut -f2 -d= | tr -d \' | tr -d \")
             volpath=$(echo $content | cut -f3 -d:)
             if [ -z "$volpath" ];then
                 volpath=$volume
@@ -7759,7 +7759,7 @@ function cleanImage {
     for i in $(cat /.profile | grep -E 'kiwi_LVM_|kiwi_allFreeVolume');do
         variable=$(echo $i|cut -f1 -d=)
         volume=$(echo $i| cut -f3- -d_ | cut -f1 -d=)
-        content=$(eval echo \$$variable)
+        content=$(echo $i|cut -f2 -d= | tr -d \' | tr -d \")
         volpath=$(echo $content | cut -f3 -d:)
         if [ -z "$volpath" ];then
             volpath=$volume
@@ -9394,7 +9394,7 @@ function restoreBtrfsSubVolumes {
     for i in $(cat /.profile | grep -E 'kiwi_LVM_|kiwi_allFreeVolume');do
         variable=$(echo $i|cut -f1 -d=)
         volume=$(echo $i| cut -f3- -d_ | cut -f1 -d=)
-        content=$(eval echo \$$variable)
+        content=$(echo $i|cut -f2 -d= | tr -d \' | tr -d \")
         volpath=$(echo $content | cut -f3 -d:)
         if [ -z "$volpath" ];then
             volpath=$volume
