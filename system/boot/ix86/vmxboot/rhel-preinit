@@ -76,22 +76,17 @@ fi
 setupConsole
 
 #======================================
-# 9) create origin snapshot if possible
-#--------------------------------------
-createOriginSnapshot
-
-#======================================
-# 10) update auth config 
+# 9) update auth config 
 #--------------------------------------
 authconfig --updateall
 
 #======================================
-# 11) Run user script
+# 10) Run user script
 #--------------------------------------
 runHook preCallInit
 
 #======================================
-# 12) kill udev
+# 11) kill udev
 #--------------------------------------
 udevSystemStop
 umountSystemFilesystems

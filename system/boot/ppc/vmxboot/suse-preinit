@@ -76,17 +76,12 @@ fi
 setupConsole
 
 #======================================
-# 9) create origin snapshot if possible
-#--------------------------------------
-createOriginSnapshot
-
-#======================================
-# 10) Run user script
+# 9) Run user script
 #--------------------------------------
 runHook preCallInit
 
 #======================================
-# 11) kill udev
+# 10) kill udev
 #--------------------------------------
 udevSystemStop
 umountSystemFilesystems

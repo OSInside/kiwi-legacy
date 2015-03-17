@@ -158,17 +158,12 @@ if loadNetworkCardS390 "0.0.0191";then
 fi
 
 #======================================
-# 12) create origin snapshot if possible
-#--------------------------------------
-createOriginSnapshot
-
-#======================================
-# 13) Run user script
+# 12) Run user script
 #--------------------------------------
 runHook preCallInit
 
 #======================================
-# 14) kill udev
+# 13) kill udev
 #--------------------------------------
 udevSystemStop
 umountSystemFilesystems

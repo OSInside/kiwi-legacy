@@ -10670,29 +10670,6 @@ function setupKernelLinks {
     fi
 }
 #======================================
-# createOriginSnapshot
-#--------------------------------------
-function createOriginSnapshot {
-    # /.../
-    # create a snapshot origin which allows to keep
-    # track of any changes happened during the live
-    # time of the image. This origin snapshot requires
-    # the use of the btrfs filesystem
-    # ----
-    local IFS=$IFS_ORIG
-    if [ ! "$FSTYPE" = "btrfs" ];then
-        return
-    fi
-    if ! lookup btrfs &>/dev/null;then
-        echo "Can't find btrfs tools, creation of origin snapshot skipped !"
-        return
-    fi
-    for vol in $(btrfs subvolume list / | grep / | cut -f2 -d /);do
-        btrfs subvolume snapshot -r /$vol /origin_$vol
-    done
-    btrfs subvolume snapshot -r / /origin
-}
-#======================================
 # activateBootPartition
 #--------------------------------------
 function activateBootPartition {
