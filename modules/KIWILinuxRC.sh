@@ -240,7 +240,7 @@ function importFile {
     sed -i -e s"#'\+#'\\\\''#g" /tmp/srcme
     # add '...' quoting to values
     sed -i -e s"#\(^[a-zA-Z0-9_]\+\)=\(.*\)#$prefix\1='\2'#" /tmp/srcme
-    source /tmp/srcme
+    source /tmp/srcme &>/dev/null
     while read line;do
         key=$(echo "$line" | cut -d '=' -f1)
         eval "export $key"
