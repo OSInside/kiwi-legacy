@@ -9389,6 +9389,7 @@ function restoreBtrfsSubVolumes {
     local volpath
     local mpoint
     local mppath
+    local volbase
     btrfs subvolume create $root/@ || return
     for i in $(cat /.profile | grep -E 'kiwi_LVM_|kiwi_allFreeVolume');do
         variable=$(echo $i|cut -f1 -d=)
@@ -9400,6 +9401,10 @@ function restoreBtrfsSubVolumes {
         fi
         volpath=$(echo $volpath | cut -f4 -d/ | cut -c3-)
         mpoint=$(echo $volpath | tr -d LV | tr _ /)
+        volbase="$root/@/$(dirname $mpoint)"
+        if [ ! -d $volbase ];then
+            mkdir -p $volbase
+        fi
         btrfs subvolume create $root/@/$mpoint || return
     done
 }
