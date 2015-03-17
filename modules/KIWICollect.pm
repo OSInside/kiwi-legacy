@@ -118,10 +118,6 @@ sub new {
         m_fdebugpacks  => [],
         m_debug        => undef,
         m_rmlists      => undef,
-        m_appdata      => undef,
-        m_appdata_seen => undef,
-        m_appdata_base => undef,
-        m_appdata_type => undef,
         m_reportLog    => {},
     };
 
@@ -934,48 +930,6 @@ sub getMetafileList {
 }
 
 #==========================================
-# addAppdata
-#------------------------------------------
-sub addAppdata {
-    my $this = shift;
-    my $packPointer = shift;
-    return unless $packPointer->{'appdata'};
-    $this->logMsg('I', "taking $packPointer->{'appdata'}");
-    my $XML = FileHandle -> new();
-    $XML -> open ($packPointer->{'appdata'});
-    my $xml  = XML::LibXML -> new();
-    eval { $xml -> parse_fh ( $XML ); };
-    if ($@) {
-        $this->logMsg('W', "ignoring broken appdata file");
-        $XML -> close();
-        return;
-    }
-    $XML->seek(0, 0);
-    my $appdata = '';
-    while ( <$XML> ) {
-        next if m,<\?xml,;
-        if (m,<((applications|components)[^\>\n]*)>,s) {
-            if (!$this->{m_appdata_type} ||
-                ($2 eq 'components' &&
-                 $this->{m_appdata_type} eq 'applications')) {
-                $this->{m_appdata_base} = $1;
-                $this->{m_appdata_type} = $2;
-            }
-        }
-        next if m,^\s*</?(?:applications|components),;
-        $appdata .= $_;
-    }
-    $XML -> close();
-    my $appdata_md5 = Digest::MD5::md5_hex($appdata);
-    $this->{m_appdata_seen} ||= {};
-    if (!$this->{m_appdata_seen}->{$appdata_md5}) {
-        $this->{m_appdata} .= $appdata;
-        $this->{m_appdata_seen}->{$appdata_md5} = 1;
-    }
-    return;
-}
-
-#==========================================
 # addDebugPackage
 #------------------------------------------
 sub addDebugPackage {
@@ -1301,25 +1255,6 @@ sub setupPackageFiles {
 }
 
 #==========================================
-# writeAppdata
-#------------------------------------------
-sub writeAppdata {
-    my $this = shift;
-    my $dir = shift;
-    $this->logMsg('I', "write appdata to $dir\n");
-    my $XML = FileHandle -> new();
-    my $appdata_type = $this->{m_appdata_type} || 'applications';
-    my $appdata_base = $this->{m_appdata_base } || $appdata_type;
-    $XML -> open (">$dir/appdata.xml") or die("$dir/appdata.xml: $!\n");
-    print $XML "<?xml version='1.0' ?>\n";
-    print $XML "<$appdata_base>\n";
-    print $XML $this->{m_appdata};
-    print $XML "</$appdata_type>\n";
-    $XML -> close ();
-    return $this;
-}
-
-#==========================================
 # collectPackages
 #------------------------------------------
 sub collectPackages {
@@ -1421,16 +1356,6 @@ sub collectPackages {
         my $msg = '[collectPackages] executing metafile scripts failed!';
         $this->logMsg('E', $msg);
         return 1;
-    }
-    my $descrdir = $this->{m_proddata}->getInfo("DESCRDIR");
-    if ($descrdir && $this->{m_appdata}) {
-        $this->writeAppdata("$this->{m_basesubdir}->{1}/$descrdir");
-    }
-    my $datadir = $this->{m_proddata}->getInfo("DATADIR");
-    if ( defined($this->{m_proddata}->getVar("CREATE_REPOMD"))
-        && $this->{m_proddata}->getVar("CREATE_REPOMD") eq "true"
-        && $this->{m_appdata}) {
-        $this->writeAppdata("$this->{m_basesubdir}->{1}/$datadir/repodata");
     }
     my @packagelist = sort(keys(%{$this->{m_metaPacks}}));
     if($this->unpackMetapackages(@packagelist) != 0) {
@@ -1933,15 +1858,6 @@ sub lookUpAllPackages {
                     $package->{'repo'} = $this->{m_repos}->{$r};
                     $package->{'localfile'} = $uri;
                     $package->{'disturl'} = $flags{'DISTURL'}[0];
-                    if ($flags{'SOURCERPM'}) {
-                        my $appdata = $uri;
-                        # Old appdata location before OBS 2.5
-                        $appdata =~ s,[^/]*$,$name-appdata.xml,;
-                        $package->{'appdata'} = $appdata if (-s $appdata);
-                        # New appdata location since OBS 2.5.0
-                        $appdata =~ s,[^/]*$,../appdata/$name-appdata.xml,;
-                        $package->{'appdata'} = $appdata if (-s $appdata);
-                    }
                     $package->{'epoch'} = $flags{'EPOCH'}[0];
                     $package->{'version'} = $flags{'VERSION'}[0];
                     $package->{'release'} = $flags{'RELEASE'}[0];
