@@ -243,7 +243,7 @@ function importFile {
     source /tmp/srcme &>/dev/null
     while read line;do
         key=$(echo "$line" | cut -d '=' -f1)
-        eval "export $key"
+        eval "export $key" &>/dev/null
     done < /tmp/srcme
     if [ ! -z "$ERROR_INTERRUPT" ];then
         Echo -e "$ERROR_INTERRUPT"
