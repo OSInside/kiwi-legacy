@@ -721,12 +721,10 @@ sub __disableServices {
         }
         for my $srvPath (@services) {
             my $name = basename($srvPath);
-            my $data = KIWIQX::qxx (
-                "$croot $targetDir ln -sf /dev/null $srvPath 2>&1"
-            );
+            my $data = KIWIQX::qxx ("ln -sf /dev/null $srvPath 2>&1");
             my $code = $? >> 8;
             if ($code != 0) {
-                $kiwi -> error ("--> Could not disable service: $name");
+                $kiwi -> error ("--> Could not disable service: $name: $data");
                 $kiwi -> failed();
                 return;
             } else {
