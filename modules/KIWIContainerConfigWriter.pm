@@ -96,10 +96,10 @@ sub p_writeConfigFile {
                 . 'bind,ro 0 0' . "\n";
         }
     }
-    $config .= "\n" . '#When the host system has lxc >= 0.8.0 uncoment '
-        . 'the following line' . "\n"
-        . '#lxc.autodev=1' . "\n"
+    $config .= "\n"
+        . 'lxc.autodev=1' . "\n"
         . 'lxc.tty = 4' . "\n"
+        . 'lxc.kmsg = 0' . "\n"
         . 'lxc.pts = 1024' . "\n";
     my $name =  $xml -> getImageType() -> getContainerName();
     $config .= 'lxc.rootfs = /var/lib/lxc/' . $name . '/rootfs' . "\n";

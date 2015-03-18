@@ -329,10 +329,9 @@ sub test_p_writeConfigFile {
         . 'lxc.mount.entry = /etc/resolv.conf '
         . '/var/lib/lxc/testCont/rootfs/etc/resolv.conf none '
         . 'bind,ro 0 0' . "\n\n"
-        . '#When the host system has lxc >= 0.8.0 uncoment the '
-        . 'following line' . "\n"
-        . '#lxc.autodev=1' . "\n"
+        . 'lxc.autodev=1' . "\n"
         . 'lxc.tty = 4' . "\n"
+        . 'lxc.kmsg = 0' . "\n"
         . 'lxc.pts = 1024' . "\n"
         . 'lxc.rootfs = /var/lib/lxc/mycontainer/rootfs' . "\n"
         . 'lxc.mount = /etc/lxc/mycontainer/fstab' . "\n\n"

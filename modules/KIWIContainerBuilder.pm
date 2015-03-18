@@ -18,6 +18,7 @@ package KIWIContainerBuilder;
 #------------------------------------------
 use strict;
 use warnings;
+use File::Basename;
 
 #==========================================
 # Base class
@@ -699,12 +700,11 @@ sub __disableServices {
     my $croot = $locator -> getExecPath('chroot');
     if ($sysctl) {
         my @srvs = qw (
-            device-mapper
-            journal
-            kbd
-            timedated
-            swap
-            udev
+            device-mapper.service
+            kbd.service
+            swap.service
+            udev.service
+            proc-sys-fs-binfmt_misc.automount
         );
         my @locations = (
             '/lib/systemd/system/',
@@ -713,19 +713,17 @@ sub __disableServices {
         my @services;
         for my $srv (@srvs) {
             for my $loc (@locations) {
-                push @services, glob "$targetDir/$loc/*$srv*.ser*";
+                my $service = $targetDir.'/'.$loc.'/'.$srv;
+                if (-e $service) {
+                    push @services, $service
+                }
             }
         }
         for my $srvPath (@services) {
-            if (-l $srvPath) {
-                # only real service files can be disabled
-                next;
-            }
-            my @parts = split /\//smx, $srvPath;
-            my $name = $parts[-1];
-            my $cmd = "$croot $targetDir "
-                . "$sysctl disable $name";
-            my $data = KIWIQX::qxx ($cmd);
+            my $name = basename($srvPath);
+            my $data = KIWIQX::qxx (
+                "$croot $targetDir ln -sf /dev/null $srvPath 2>&1"
+            );
             my $code = $? >> 8;
             if ($code != 0) {
                 $kiwi -> error ("--> Could not disable service: $name");
