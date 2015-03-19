@@ -231,11 +231,13 @@ Requires:       createrepo
 Requires:       inst-source-utils
 Requires:       kiwi-instsource-plugin
 Requires:       kiwi = %{version}
+Requires:       cdrkit-cdrtools-compat
+Requires:       genisoimage
+%ifarch %ix86 x86_64
+Requires:       syslinux
+%endif
 License:        GPL-2.0
 Group:          System/Management
-%if 0%{?suse_version} > 1120
-BuildArch:      noarch
-%endif
 
 %description -n kiwi-instsource
 This package contains modules used for installation source creation.
