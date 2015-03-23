@@ -1221,7 +1221,6 @@ sub setupPackageFiles {
                             }
                         }
                     }
-                    $this->addAppdata($packPointer);
                     # package processed, jump to the next arch or package
                     next ARCH;
                 }
