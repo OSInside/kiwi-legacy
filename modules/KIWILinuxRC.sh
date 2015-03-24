@@ -1139,6 +1139,12 @@ description = "$kiwi_oemtitle"
 root = $(getDiskID $imageRootDevice)
 EOF
             #====================================================
+            # setup kernel symlinks
+            #----------------------------------------------------
+            local kversion=$(uname -r)
+            ln -sf /boot/vmlinuz-$kversion /boot/vmlinuz
+            ln -sf /boot/initrd-$kversion /boot/initrd
+            #====================================================
             # copy vendor directory
             #----------------------------------------------------
             cp -a $efipath/BOOT $efipath/$vendor
@@ -1164,7 +1170,6 @@ EOF
             #====================================================
             # create versionized kernel/initrd
             #----------------------------------------------------
-            local kversion=$(uname -r)
             cp -a $efipath/$vendor/vmlinuz $efipath/$vendor/vmlinuz-$kversion
             cp -a $efipath/$vendor/initrd $efipath/$vendor/initrd-$kversion
             #======================================
