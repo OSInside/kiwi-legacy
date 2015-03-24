@@ -686,6 +686,7 @@ function OEMRepart {
         if ! mke2fs -F -T ext3 -q -L recovery $imageRecoveryDevice 1>&2;then
             systemException "Failed to create Recovery fs" "reboot"
         fi
+        export reco_uuid=$(blkid -o value -s UUID -t LABEL=recovery)
     fi
     #======================================
     # Setup recovery contents

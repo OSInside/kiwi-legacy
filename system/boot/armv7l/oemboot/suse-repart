@@ -670,10 +670,6 @@ function OEMRepart {
             if ! mkswap $imageSwapDevice 1>&2;then
                 systemException "Failed to create swap signature" "reboot"
             fi
-            Echo "Activating swap space on $imageSwapDevice"
-            if ! swapon $imageSwapDevice 1>&2;then
-                Echo "Warning: Could not activate swap on $imageSwapDevice" 
-            fi
         fi
     fi
     #======================================
@@ -689,6 +685,7 @@ function OEMRepart {
         if ! mke2fs -F -T ext3 -q -L recovery $imageRecoveryDevice 1>&2;then
             systemException "Failed to create Recovery fs" "reboot"
         fi
+        export reco_uuid=$(blkid -o value -s UUID -t LABEL=recovery)
     fi
     #======================================
     # Setup recovery contents

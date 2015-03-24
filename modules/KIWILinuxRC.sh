@@ -1351,7 +1351,7 @@ cat > /etc/grub.d/40_custom << DONE
 #!/bin/bash
 cat << EOF
 menuentry 'Recovery' --class os {
-    set root='hd0,$recoid'
+    search --no-floppy --fs-uuid --set=root $reco_uuid
     configfile /boot/grub2/grub.cfg
 }
 EOF
@@ -2000,7 +2000,7 @@ insmod vbe
 insmod vga
 insmod gzio
 set default=0
-set root='hd0,$recoid'
+search --no-floppy --fs-uuid --set=root $reco_uuid
 set font=/boot/unicode.pf2
 if loadfont \$font ;then
     set gfxmode=auto
@@ -2032,7 +2032,7 @@ EOF
     if xenServer $kernel $mountPrefix;then
 cat >> $conf << EOF
 menuentry 'Recover/Repair System' --class os {
-    set root='hd0,$recoid'
+    search --no-floppy --fs-uuid --set=root $reco_uuid
     echo Loading Xen...
     multiboot /boot/xen.gz dummy
     echo Loading $kernel...
@@ -2042,7 +2042,7 @@ menuentry 'Recover/Repair System' --class os {
     module /boot/$initrd dummy
 }
 menuentry 'Restore Factory System' --class os {
-    set root='hd0,$recoid'
+    search --no-floppy --fs-uuid --set=root $reco_uuid
     echo Loading Xen...
     multiboot /boot/xen.gz dummy
     echo Loading $kernel...
@@ -2055,7 +2055,7 @@ EOF
     else
 cat >> $conf << EOF
 menuentry 'Recover/Repair System' --class os {
-    set root='hd0,$recoid'
+    search --no-floppy --fs-uuid --set=root $reco_uuid
     echo Loading $kernel...
     set gfxpayload=keep
     \$linux /boot/$kernel $cmdline showopts
@@ -2063,7 +2063,7 @@ menuentry 'Recover/Repair System' --class os {
     \$initrd /boot/$initrd
 }
 menuentry 'Restore Factory System' --class os {
-    set root='hd0,$recoid'
+    search --no-floppy --fs-uuid --set=root $reco_uuid
     echo Loading $kernel...
     set gfxpayload=keep
     \$linux /boot/$kernel $cmdline RESTORE=1 showopts
