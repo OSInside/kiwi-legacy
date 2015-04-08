@@ -90,10 +90,10 @@ function OEMFindPartitions {
             Echo "Searched in range: $rids"
             continue
         fi
-        probeFileSystem $device
-        if [ ! -z "$FSTYPE" ] && [ ! "$FSTYPE" = "unknown" ];then
+        local fsuuid=$(blkid $device -s UUID -o value)
+        if [ ! -z "$fsuuid" ];then
             Echo "Partition $device with $ID $partid and size $mbsize skipped"
-            Echo "Partition contains a filesystem"
+            Echo "Partition contains the filesystem UUID: $fsuuid"
             continue
         fi
         if [ -z "$OEMPartitions" ];then
