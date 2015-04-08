@@ -1788,7 +1788,10 @@ div {
         ## about the possible values can be found by calling
         ## hwinfo --framebuffer or in /usr/src/linux/Documentation/fb/vesafb.txt
         attribute vga { text }
-    k.type.vhd-fixed-tag.attribute =
+    k.type.gcelicense.attribute =
+        ## Specifies the license tag in a GCE format
+        attribute gcelicense { text }
+    k.type.vhdfixedtag.attribute =
         ## Specifies the GUID in a fixed format VHD
         attribute vhdfixedtag { vhd-tag-type }
     k.type.volid.attribute =
@@ -1821,7 +1824,7 @@ div {
         k.type.fsreadonly.attribute? &
         k.type.fsreadwrite.attribute? &
         k.type.fsmountoptions.attribute? &
-        k.type.zfsoptions.attribute? &
+        k.type.gcelicense.attribute? &
         k.type.hybrid.attribute? &
         k.type.hybridpersistent.attribute? &
         k.type.image.attribute &
@@ -1837,8 +1840,9 @@ div {
         k.type.primary.attribute? &
         k.type.ramonly.attribute? &
         k.type.vga.attribute? &
-        k.type.vhd-fixed-tag.attribute? &
-        k.type.volid.attribute?
+        k.type.vhdfixedtag.attribute? &
+        k.type.volid.attribute? &
+        k.type.zfsoptions.attribute?
     k.type =
         ## The Image Type of the Logical Extend
         element type { 
