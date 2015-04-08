@@ -20,7 +20,6 @@
         <profile name="xenk" description="KERNEL: Xen kernel/mboot.c32"/>
         <profile name="pae" description="KERNEL: pae kernel"/>
         <profile name="ec2k" description="KERNEL: EC2 kernel"/>
-        <profile name="rt" description="KERNEL: RealTime kernel"/>
         <profile name="custom" description="KERNEL: specified by bootinclude in system XML"/>
     </profiles>
     <drivers>
@@ -96,10 +95,6 @@
     <packages type="bootstrap" profiles="ec2k">
         <package name="kernel-ec2"/>
         <package name="kernel-ec2-base"/>
-    </packages>
-    <packages type="bootstrap" profiles="rt">
-        <package name="kernel-rt"/>
-        <package name="kernel-rt-base"/>
     </packages>
     <packages type="bootstrap">
         <package name="kbd"/>

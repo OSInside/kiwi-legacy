@@ -19,7 +19,6 @@
         <profile name="std" description="KERNEL: Default"/>
         <profile name="xenk" description="KERNEL: Xen kernel/mboot.c32"/>
         <profile name="pae" description="KERNEL: pae kernel"/>
-        <profile name="rt" description="KERNEL: RealTime kernel"/>
         <profile name="custom" description="KERNEL: specified by bootinclude in system XML"/>
     </profiles>
     <drivers profiles="xen">
@@ -147,10 +146,6 @@
         <package name="kernel-pae-base" arch="i686"/>
         <package name="kernel-pae" arch="i586"/>
         <package name="kernel-pae-base" arch="i586"/>
-    </packages>
-    <packages type="bootstrap" profiles="rt">
-        <package name="kernel-rt"/>
-        <package name="kernel-rt-base"/>
     </packages>
     <packages type="bootstrap" profiles="xenk">
         <package name="kernel-xen"/>
