@@ -77,6 +77,7 @@ sub new {
     #     fsnocheck              = ''
     #     fsreadonly             = ''
     #     fsreadwrite            = ''
+    #     gcelicense             = ''
     #     hybrid                 = ''
     #     hybridpersistent       = ''
     #     image                  = ''
@@ -144,6 +145,7 @@ sub new {
         fsnocheck
         fsreadonly
         fsreadwrite
+        gcelicense
         hybrid
         hybridpersistent
         image
@@ -211,7 +213,7 @@ sub new {
     $this->{format}                 = $init->{format};
     $this->{formatoptions}          = $init->{formatoptions};
     $this->{fsmountoptions}         = $init->{fsmountoptions};
-    $this->{zfsoptions}             = $init->{zfsoptions};
+    $this->{gcelicense}             = $init->{gcelicense};
     $this->{fsreadonly}             = $init->{fsreadonly};
     $this->{fsreadwrite}            = $init->{fsreadwrite};
     $this->{image}                  = $init->{image};
@@ -226,6 +228,7 @@ sub new {
     $this->{vga}                    = $init->{vga};
     $this->{vhdfixedtag}            = $init->{vhdfixedtag};
     $this->{volid}                  = $init->{volid};
+    $this->{zfsoptions}             = $init->{zfsoptions};
     # Set default values
     if (! $init->{bootloader} ) {
         $this->{bootloader} = 'grub';
@@ -815,6 +818,17 @@ sub getVHDFixedTag {
 }
 
 #==========================================
+# getGCELicense
+#------------------------------------------
+sub getGCELicense {
+    # ...
+    # Return the GCE license information for a gce formated image
+    # ---
+    my $this = shift;
+    return $this->{gcelicense};
+}
+
+#==========================================
 # getVolID
 #------------------------------------------
 sub getVolID {
@@ -1035,13 +1049,16 @@ sub getXMLElement {
     }
     my $vhdfixedtag = $this -> getVHDFixedTag();
     if ($vhdfixedtag) {
-        $element -> setAttribute('vhdfixedtag',$vhdfixedtag);
+        $element -> setAttribute('vhdfixedtag', $vhdfixedtag);
+    }
+    my $gcelicense = $this -> getGCELicense();
+    if ($gcelicense) {
+        $element -> setAttribute('gcelicense', $gcelicense);
     }
     my $volid = $this -> getVolID();
     if ($volid) {
         $element -> setAttribute('volid', $volid);
     }
-
     return $element;
 }
 
@@ -1853,6 +1870,27 @@ sub setVHDFixedTag {
         return;
     }
     $this->{vhdfixedtag} = $guid;
+    return $this;
+}
+
+#==========================================
+# setGCELicense
+#------------------------------------------
+sub setGCELicense {
+    # ...
+    # Set the GCE license information for a gce formated image
+    # ---
+    my $this = shift;
+    my $license = shift;
+    if (! $license ) {
+        my $kiwi = $this->{kiwi};
+        my $msg = 'setGCELicense: no license tag given, retaining '
+            . 'current data.';
+        $kiwi -> error($msg);
+        $kiwi -> failed();
+        return;
+    }
+    $this->{gcelicense} = $license;
     return $this;
 }
 

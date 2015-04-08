@@ -1759,6 +1759,27 @@ sub test_getVHDFixedTag {
 }
 
 #==========================================
+# test_getGCELicense
+#------------------------------------------
+sub test_getGCELicense {
+    # ...
+    # Test the getGCELicense method
+    # ---
+    my $this = shift;
+    my $kiwi = $this -> {kiwi};
+    my $typeDataObj = $this -> __getTypeObj();
+    my $tag = $typeDataObj -> getGCELicense();
+    my $msg = $kiwi -> getMessage();
+    $this -> assert_str_equals('No messages set', $msg);
+    my $msgT = $kiwi -> getMessageType();
+    $this -> assert_str_equals('none', $msgT);
+    my $state = $kiwi -> getState();
+    $this -> assert_str_equals('No state set', $state);
+    $this -> assert_str_equals('0815', $tag);
+    return;
+}
+
+#==========================================
 # test_getVGA
 #------------------------------------------
 sub test_getVGA {
@@ -1907,6 +1928,7 @@ sub test_getXMLElement{
         . 'ramonly="true" '
         . 'vga="0x344" '
         . 'vhdfixedtag="12345678" '
+        . 'gcelicense="0815" '
         . 'volid="myImg">'
         . '<size additive="true" unit="M">16384</size>'
         . '</type>';
@@ -5091,6 +5113,35 @@ sub test_setVHDFixedTag {
 }
 
 #==========================================
+# test_setGCELicense
+#------------------------------------------
+sub test_setGCELicense {
+    # ...
+    # Test the setGCELicense method
+    # ---
+    my $this = shift;
+    my $kiwi = $this -> {kiwi};
+    my $typeDataObj = $this -> __getTypeObj();
+    $typeDataObj = $typeDataObj -> setGCELicense('foo');
+    my $msg = $kiwi -> getMessage();
+    $this -> assert_str_equals('No messages set', $msg);
+    my $msgT = $kiwi -> getMessageType();
+    $this -> assert_str_equals('none', $msgT);
+    my $state = $kiwi -> getState();
+    $this -> assert_str_equals('No state set', $state);
+    $this -> assert_not_null($typeDataObj);
+    my $tag = $typeDataObj -> getGCELicense();
+    $msg = $kiwi -> getMessage();
+    $this -> assert_str_equals('No messages set', $msg);
+    $msgT = $kiwi -> getMessageType(); 
+    $this -> assert_str_equals('none', $msgT);
+    $state = $kiwi -> getState();
+    $this -> assert_str_equals('No state set', $state);
+    $this -> assert_str_equals('foo', $tag);
+    return;
+}
+
+#==========================================
 # test_setVHDFixedTagNoArg
 #------------------------------------------
 sub test_setVHDFixedTagNoArg {
@@ -5118,6 +5169,37 @@ sub test_setVHDFixedTagNoArg {
     $state = $kiwi -> getState();
     $this -> assert_str_equals('No state set', $state);
     $this -> assert_str_equals('12345678', $tag);
+    return;
+}
+
+#==========================================
+# test_setGCELicense
+#------------------------------------------
+sub test_setGCELicenseNoArg {
+    # ...
+    # Test the setGCELicense method with no argument
+    # ---
+    my $this = shift;
+    my $kiwi = $this -> {kiwi};
+    my $typeDataObj = $this -> __getTypeObj();
+    my $res = $typeDataObj -> setGCELicense();
+    my $msg = $kiwi -> getMessage();
+    my $expected = 'setGCELicense: no license tag given, '
+        . 'retaining current data.';
+    $this -> assert_str_equals($expected, $msg);
+    my $msgT = $kiwi -> getMessageType();
+    $this -> assert_str_equals('error', $msgT);
+    my $state = $kiwi -> getState();
+    $this -> assert_str_equals('failed', $state);
+    $this -> assert_null($res);
+    my $tag = $typeDataObj -> getGCELicense();
+    $msg = $kiwi -> getMessage();
+    $this -> assert_str_equals('No messages set', $msg);
+    $msgT = $kiwi -> getMessageType();
+    $this -> assert_str_equals('none', $msgT);
+    $state = $kiwi -> getState();
+    $this -> assert_str_equals('No state set', $state);
+    $this -> assert_str_equals('0815', $tag);
     return;
 }
 
@@ -5219,6 +5301,7 @@ sub __getTypeObj {
                 fsnocheck              => 'true',
                 fsreadonly             => 'ext3',
                 fsreadwrite            => 'xfs',
+                gcelicense             => '0815',
                 hybrid                 => 'true',
                 hybridpersistent       => 'true',
                 image                  => 'oem',
