@@ -2455,7 +2455,12 @@ about the possible values can be found by calling
 hwinfo --framebuffer or in /usr/src/linux/Documentation/fb/vesafb.txt</a:documentation>
       </attribute>
     </define>
-    <define name="k.type.vhd-fixed-tag.attribute">
+    <define name="k.type.gcelicense.attribute">
+      <attribute name="gcelicense">
+        <a:documentation>Specifies the license tag in a GCE format</a:documentation>
+      </attribute>
+    </define>
+    <define name="k.type.vhdfixedtag.attribute">
       <attribute name="vhdfixedtag">
         <a:documentation>Specifies the GUID in a fixed format VHD</a:documentation>
         <ref name="vhd-tag-type"/>
@@ -2543,7 +2548,7 @@ into the master block. There is space for 32 characters.</a:documentation>
           <ref name="k.type.fsmountoptions.attribute"/>
         </optional>
         <optional>
-          <ref name="k.type.zfsoptions.attribute"/>
+          <ref name="k.type.gcelicense.attribute"/>
         </optional>
         <optional>
           <ref name="k.type.hybrid.attribute"/>
@@ -2589,10 +2594,13 @@ into the master block. There is space for 32 characters.</a:documentation>
           <ref name="k.type.vga.attribute"/>
         </optional>
         <optional>
-          <ref name="k.type.vhd-fixed-tag.attribute"/>
+          <ref name="k.type.vhdfixedtag.attribute"/>
         </optional>
         <optional>
           <ref name="k.type.volid.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.type.zfsoptions.attribute"/>
         </optional>
       </interleave>
     </define>

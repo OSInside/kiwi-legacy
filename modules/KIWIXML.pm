@@ -3888,7 +3888,7 @@ sub __genTypeHash {
         'format',
         'formatoptions',
         'fsmountoptions',
-        'zfsoptions',
+        'gcelicense',
         'fsnocheck',
         'fsreadonly',
         'fsreadwrite',
@@ -3908,6 +3908,7 @@ sub __genTypeHash {
         'vga',
         'vhdfixedtag',
         'volid',
+        'zfsoptions',
         'zipl_targettype'
     );
     #==========================================
