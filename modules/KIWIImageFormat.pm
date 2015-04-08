@@ -118,6 +118,10 @@ sub new {
     #------------------------------------------
     my $guid = $type -> getVHDFixedTag();
     #==========================================
+    # check for license tag in gce format
+    #------------------------------------------
+    my $gcelicense = $type -> getGCELicense();
+    #==========================================
     # get boot profile
     #------------------------------------------
     my $bootp = $type -> getBootProfile();
@@ -138,6 +142,7 @@ sub new {
     $this->{image}   = $image;
     $this->{bootp}   = $bootp;
     $this->{guid}    = $guid;
+    $this->{gcelicense} = $gcelicense;
     $this->{imgtype} = $imgtype;
     $this->{targetDevice} = $tdev;
     return $this;
@@ -233,9 +238,9 @@ sub createMachineConfiguration {
     my $xml    = $this->{xml};
     my $bootp  = $this->{bootp};
     my $vconf  = $this->{vmdata};
-    if ((! $vconf) || ($format =~ /qcow2|raw|vagrant/)) {
-        # a machine configuration doesn't make sense with these
-        # formats requested. Thus we can silently return here
+    if ((! $vconf) || (($format) && ($format =~ /qcow2|raw|vagrant|gce|vhd/))) {
+        # a machine configuration is not supported with these formats.
+        # Thus we can silently return here
         return;
     }
     my $xend;
@@ -547,6 +552,7 @@ sub createGoogleComputeEngine {
     my $source = $this->{image};
     my $type   = $this->{type};
     my $xml    = $this->{xml};
+    my $license= $this->{gcelicense};
     my $target = $source;
     my $src_dirname = dirname $source;
     my $gce_source = $src_dirname."/disk.raw";
@@ -555,9 +561,8 @@ sub createGoogleComputeEngine {
     my $status;
     my $result;
     my $dist;
-    $kiwi -> info ("Creating Google Compute Engine image...");
+    $kiwi -> info ("Creating Google Compute Engine image\n");
     if (! $boot) {
-        $kiwi -> failed ();
         $kiwi -> error  ("Couldn't find boot image information");
         $kiwi -> failed ();
         return;
@@ -566,7 +571,6 @@ sub createGoogleComputeEngine {
         $dist = $1;
         $dist = lc $dist;
     } else {
-        $kiwi -> failed ();
         $kiwi -> error  (
             "Failed to extract distribution from boot attribute: $boot"
         );
@@ -576,20 +580,49 @@ sub createGoogleComputeEngine {
     $target = $dist."-guest-gce-".$version.".tar.gz";
     $status = KIWIQX::qxx ("mv $source $gce_source 2>&1");
     $result = $? >> 8;
-    if ($result == 0) {
-        $status = KIWIQX::qxx (
-            "cd $src_dirname && tar --format=gnu -cSzf $target disk.raw 2>&1"
-        );
-        $result = $? >> 8;
+    my @content= ('disk.raw');
+    if ($result != 0) {
+        $kiwi -> error  ("Failed to prepare source image: $status");
+        $kiwi -> failed ();
+        return;
     }
+    if ($license) {
+        $kiwi -> info("--> Including license information: $license");
+        my $json_fd = FileHandle -> new();
+        my $json_meta = $src_dirname."/manifest.json";
+        my $json_ref = JSON->new->allow_nonref;
+        my %json_data;
+        $json_data{licenses} = [ $license ];
+        $json_ref -> pretty;
+        my $json_text = $json_ref ->encode( \%json_data );
+        if (! $json_fd -> open (">$json_meta")) {
+            $kiwi -> failed ();
+            $kiwi -> error  (
+                "Couldn't create $json_meta file: $!"
+            );
+            $kiwi -> failed ();
+            return;
+        }
+        print $json_fd $json_text;
+        $json_fd -> close();
+        push @content, 'manifest.json';
+        $kiwi -> done();
+    }
+    $kiwi -> info("--> Creating GNU tar archive");
+    $status = KIWIQX::qxx (
+        "cd $src_dirname && tar --format=gnu -cSzf $target @content 2>&1"
+    );
+    $result = $? >> 8;
+    # reset source name back to original name
     KIWIQX::qxx ("mv $gce_source $source 2>&1");
+    KIWIQX::qxx ("rm -f $src_dirname/manifest.json 2>&1");
     if ($result != 0) {
         $kiwi -> failed ();
         $kiwi -> error  ("Couldn't create gce image: $status");
         $kiwi -> failed ();
         return;
     }
-    $kiwi -> done ();
+    $kiwi -> done();
     return $src_dirname."/".$target;
 }
 
