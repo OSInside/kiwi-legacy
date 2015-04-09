@@ -75,7 +75,7 @@ function OEMFindPartitions {
             req_psize=$(echo $i | cut -f1 -d:)
             req_label=$(echo $i | cut -f2 -d:)
             req_partid=$(echo $i | cut -f3 -d:)
-            if [ $partid = $req_partid ] && [ $req_psize -le $mbsize ];then
+            if [ $partid = $req_partid ] && [ $mbsize -gt $req_psize ];then
                 if [ -z "$labels" ];then
                     labels=$req_label
                 else
@@ -422,12 +422,13 @@ function OEMInstall {
                     echo "* $partname partition requires at least $psize MB" \
                         >> $info
                     if [ ! $imageTableType = "gpt" ];then
-                        echo "  Partition MBR Type: 0x$partid" >> $info
+                        echo "  Partition Type (parted): 0x$partid" >> $info
+                    else
+                        echo "  Partition Type (gdisk): $partid" >> $info
                     fi
                 done
-                cat $info
                 systemException \
-                    "Use parted to setup the partition table" \
+                    "Partition setup required, for details call: cat $info" \
                 "shell"
                 continue
             fi
