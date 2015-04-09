@@ -95,6 +95,7 @@ Requires:       util-linux
 %if 0%{?suse_version}
 # SUSE specific requires
 %if 0%{?suse_version} >= 1210
+Requires:       gptfdisk
 Requires:       libsolv-tools
 Requires:       perl-solv
 %else
