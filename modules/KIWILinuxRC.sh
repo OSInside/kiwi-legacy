@@ -4566,7 +4566,7 @@ function searchSwapSpace {
     diskdevs=`echo $diskdevs | sed -e "s@(.*)@@"`
     for diskdev in $diskdevs;do
         for disknr in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15;do
-            id=`partitionID $diskdev $disknr`
+            id=$(partitionID $diskdev $disknr)
             if [ "$id" = "82" ];then
                 echo $diskdev$disknr
                 return
@@ -5625,8 +5625,10 @@ function fdasdGetPartitionID {
 function partedGetPartitionID {
     # /.../
     # prints the partition ID for the given device and number
-    # map ID's if GPT table according to kiwi set partition
-    # names
+    # In case of a GPT map to the GUID code from the sgdisk
+    # utility. If sgdisk is not available map to the kiwi
+    # fdisk compatible hex id's which uses ee for any kind
+    # of unknown GPT partition entry
     # ----
     local IFS=$IFS_ORIG
     local parted=$(parted -m -s $1 print | grep -v Warning:)
@@ -5645,7 +5647,10 @@ function partedGetPartitionID {
             sed -e 's@[,; ]@@g' | tr -d 0
     else
         local name=$(parted -m -s $1 print | grep ^$2: | cut -f6 -d:)
-        if [ $name = "lxroot" ];then
+        if lookup sgdisk &>/dev/null;then
+            # map to short gdisk code
+            echo $(sgdisk -p $1 | grep -E "^   $2") | cut -f6 -d ' '
+        elif [ $name = "lxroot" ];then
             # map lxroot to MBR type 83 (linux)
             echo 83
         elif [ $name = "lxswap" ];then
