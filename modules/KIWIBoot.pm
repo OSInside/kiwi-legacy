@@ -2256,6 +2256,7 @@ sub setupBootDisk {
         #------------------------------------------
         my $pnr = 0;    # partition number start for increment
         my $active = 1; # default active partition (bios)
+        my @linux_parts = (); # linux partition numbers
         if ($needBiosP) {
             $pnr++;
             push @commands,"n","p:legacy",$pnr,".","+".$this->{legacysize}."M";
@@ -2287,15 +2288,18 @@ sub setupBootDisk {
         if (! $type->{lvm}) {
             if ($needRoP) {
                 $pnr++;
+                push @linux_parts, $pnr;
                 push @commands,"n","p:lxroot",$pnr,".","+".$syszip."M";
                 push @commands,"t",$pnr,$rootid;
                 $this->{partids}{readonly} = $pnr;
                 $this->{partids}{root}     = $pnr;
                 $pnr++;
+                push @linux_parts, $pnr;
                 push @commands,"n","p:lxrw",$pnr,".",".";
                 $this->{partids}{readwrite} = $pnr;
             } else {
                 $pnr++;
+                push @linux_parts, $pnr;
                 push @commands,"n","p:lxroot",$pnr,".",".";
                 $this->{partids}{root} = $pnr;
                 if (! $needBootP) {
@@ -2326,6 +2330,9 @@ sub setupBootDisk {
             $this -> cleanStack ();
             return;
         }
+        #==========================================
+        # Set bios boot flag if requested
+        #------------------------------------------
         if ($needBiosP) {
             $status = KIWIQX::qxx (
                 "parted $this->{loop} set 1 bios_grub on 2>&1"
@@ -2336,6 +2343,33 @@ sub setupBootDisk {
                 $kiwi -> failed ();
                 $this -> cleanStack ();
                 return;
+            }
+        }
+        #==========================================
+        # Update linux partition ID for GPT table
+        #------------------------------------------
+        if (($this->{ptype}) && ($this->{ptype} eq 'gpt')) {
+            my $sgdisk = $locator -> getExecPath ("sgdisk");
+            if (! $sgdisk) {
+                $kiwi -> warning(
+                    "sgdisk tool not found, GPT partition code stays untouched"
+                );
+                $kiwi -> skipped()
+            } else {
+                foreach my $part (@linux_parts) {
+                    $status = KIWIQX::qxx (
+                        "sgdisk -t $part:8300 $this->{loop} 2>&1"
+                    );
+                    $result = $? >> 8;
+                    if ($result != 0) {
+                        $kiwi -> error  (
+                            "Couldn't set Linux code to part:$part: $status"
+                        );
+                        $kiwi -> failed ();
+                        $this -> cleanStack ();
+                        return;
+                    }
+                }
             }
         }
         if ((! $haveDiskDevice ) || ($haveDiskDevice =~ /nbd|aoe/)) {
@@ -6473,8 +6507,8 @@ sub setStoragePartition {
         /^parted/  && do {
             my $p_cmd = ();
             $this -> resetGeometry();
-            my $ptype = $this -> getGeometry ($device);
-            if (! $ptype) {
+            $this->{ptype} = $this -> getGeometry ($device);
+            if (! $this->{ptype}) {
                 return;
             }
             for (my $count=0;$count<@commands;$count++) {
@@ -6484,7 +6518,7 @@ sub setStoragePartition {
                 if ($cmd eq "n") {
                     my $name = $commands[$count+1];
                     my $size = $commands[$count+4];
-                    if ($ptype ne 'gpt') {
+                    if ($this->{ptype} ne 'gpt') {
                         $name = 'primary';
                     } else {
                         $name =~ s/^p://;
@@ -6496,7 +6530,7 @@ sub setStoragePartition {
                         "$partitioner -s $device unit s $p_cmd 2>&1"
                     );
                 }
-                if (($cmd eq "t") && ($ptype eq 'msdos')) {
+                if (($cmd eq "t") && ($this->{ptype} eq 'msdos')) {
                     my $index= $commands[$count+1];
                     my $type = $commands[$count+2];
                     if ($type eq '82') {
