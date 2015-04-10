@@ -91,6 +91,7 @@ fi
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "no" ] && [ ! -z "$OEM_RECOVERY" ];then
     Echo "Setting up recovery configuration archive..."
+    runHook preRecoverySetup
     mkdir -p /reco-save
     if ! mount $imageRecoveryDevice /reco-save >/dev/null;then
         systemException "Failed to mount recovery device" "reboot"
@@ -134,6 +135,7 @@ if [ "$LOCAL_BOOT" = "no" ] && [ ! -z "$OEM_RECOVERY" ];then
     if ! tar -czf /reco-save/boot-2.tgz $backupBootFiles;then
         systemException "Failed to tar up recovery boot-2.tgz" "reboot"
     fi
+    runHook postRecoverySetup
     umount /reco-save
     umount /boot/efi &>/dev/null
     rmdir /reco-save

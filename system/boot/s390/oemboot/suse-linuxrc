@@ -363,6 +363,7 @@ if [ ! -z "$KIWI_RECOVERY" ];then
     #======================================
     # 16.1) mount recovery partition
     #--------------------------------------
+    runHook preRecovery
     mkdir -p /reco-save
     if ! mount -o ro $imageRecoveryDevice /reco-save >/dev/null;then
         systemException "Failed to mount recovery device" "reboot"
@@ -613,15 +614,19 @@ if [ ! -z "$KIWI_RECOVERY" ];then
         umount $jdev
     fi
     #======================================
-    # 16.8) umount recovery 
+    # 16.8) run post revovery hook
+    #--------------------------------------
+    runHook postRecovery
+    #======================================
+    # 16.9) umount recovery
     #--------------------------------------
     umount $imageRecoveryDevice
     #======================================
-    # 16.9) import oem config file
+    # 16.10) import oem config file
     #--------------------------------------
     importFile < $OEM_PARTITION_CONFIG
     #======================================
-    # 16.10) write oem-trigger
+    # 16.11) write oem-trigger
     #--------------------------------------
     TDIR=/mnt/var/cache/recovery
     TOEM=oem-trigger
