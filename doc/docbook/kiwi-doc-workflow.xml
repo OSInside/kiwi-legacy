@@ -621,13 +621,39 @@
             <formalpara>
             <title>preCallInit</title>
             <para>
-      This hook is called in before the initialization process,
+            This hook is called before the initialization process,
             init or systemd, is started. At call time the root filesystem
             has already been moved to /. The hook exists only for the
             <emphasis>oem</emphasis> and <emphasis>vmx</emphasis> image types.
             </para>
             </formalpara>
         </listitem>   
+
+        <listitem>
+            <formalpara>
+            <title>preRecovery|postRecovery</title>
+            <para>
+            This hook is called before and after the recovery code is
+            processed. At call time of preRecovery the recovery partition is
+            not yet mounted. At call time of postRecovery the recovery partition
+            is still mounted on <emphasis>/reco-save</emphasis>.
+            The hook exists only for the <emphasis>oem</emphasis> image type.
+            </para>
+            </formalpara>
+        </listitem>
+
+        <listitem>
+            <formalpara>
+            <title>preRecoverySetup|postRecoverySetup</title>
+            <para>
+            This hook is called before and after the recovery setup is
+            processed. At call time of preRecoverySetup the recovery partition
+            is not yet mounted. At call time of postRecoverySetup the recovery
+            partition is still mounted on <emphasis>/reco-save</emphasis>.
+            The hook exists only for the <emphasis>oem</emphasis> image type.
+            </para>
+            </formalpara>
+        </listitem>
 
         <listitem>
             <formalpara>
