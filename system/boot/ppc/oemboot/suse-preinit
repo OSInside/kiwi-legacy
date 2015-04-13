@@ -86,6 +86,13 @@ if [ "$LOCAL_BOOT" = "no" ] && [ ! -z "$OEM_RECOVERY" ];then
     Echo "Installing boot loader into recovery partition"
     setupBootLoaderRecovery / /reco-save OEM
     installBootLoaderRecovery
+    Echo "Store recovery UUIDs..."
+    if ! blkid $imageRootDevice -s UUID -o value > /reco-save/root.uuid;then
+        systemException "Failed to set rootfs UUID" "reboot"
+    fi
+    if ! blkid $imageBootDevice -s UUID -o value > /reco-save/boot.uuid;then
+        systemException "Failed to set bootfs UUID" "reboot"
+    fi
     Echo "Store recovery boot files phase 1)..."
     backupBootFiles=""
     for i in \

@@ -400,7 +400,7 @@ if [ ! -z "$KIWI_RECOVERY" ];then
         if [ ! -z "$RESTORE" ];then
             getText "Clean sweep..." > /progress
             export FSTYPE=$(cat /reco-save/recovery.tar.filesystem)
-            createFilesystem $imageRootDevice
+            createFilesystem $imageRootDevice "" $(cat /reco-save/root.uuid)
             if ! mountSystem $imageRootDevice;then
                 Echo "Failed to mount root filesystem"
                 exit 1
@@ -572,7 +572,7 @@ if [ ! -z "$KIWI_RECOVERY" ];then
             imageBootDevice=$(echo $imageBootDevice | cut -f1 -d:)
             rm -rf /mnt/boot
             probeFileSystem $imageBootDevice
-            createFilesystem $imageBootDevice
+            createFilesystem $imageBootDevice "" $(cat /reco-save/boot.uuid)
             mkdir -p /mnt/$imageBootMountP
             mount $imageBootDevice /mnt/$imageBootMountP
             pushd /mnt/$imageBootMountP >/dev/null
@@ -598,23 +598,10 @@ if [ ! -z "$KIWI_RECOVERY" ];then
         systemException "Failed to restore boot configuration" "reboot"
     fi
     if [ ! -z "$kiwi_JumpPart" ];then
-        # the kiwi generated bootx64.efi uses a built in root setup which
-        # does not match the new filesystem uuid in factory restore mode
-        # therefore we have to use the generic grub2 provided efi image.
-        #
-        # It's still an open question if the factory restore code should
-        # restore filesystems with the exact same uuid as before.
-        # Currently we don't store uuid information which makes this
-        # step necessary
-        if ! cp /usr/lib64/efi/grub.efi /mnt/boot/efi/EFI/BOOT/bootx64.efi;then
-            systemException \
-                "Failed to restore standard grub2 efi image"\
-            "reboot"
-        fi
         umount $jdev
     fi
     #======================================
-    # 16.8) run post revovery hook
+    # 16.8) run post recovery hook
     #--------------------------------------
     runHook postRecovery
     #======================================

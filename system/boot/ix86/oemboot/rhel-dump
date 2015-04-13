@@ -900,7 +900,7 @@ function OEMInstall {
     # Check for bootwait request
     #--------------------------------------
     if [ ! -z "$OEM_BOOTWAIT" ];then
-                if [ "$OEMInstallType" = "CD" ];then
+        if [ "$OEMInstallType" = "CD" ];then
             TEXT_DUMP=$TEXT_CDPULL
         else
             TEXT_DUMP=$TEXT_USBPULL

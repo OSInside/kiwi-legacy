@@ -1123,6 +1123,12 @@ function installBootLoaderGrub2 {
         local efipath=/boot/efi/EFI
         if [[ "$product" =~ "SUSE_SLE" ]];then
             #======================================
+            # check for bootloader displayname
+            #--------------------------------------
+            if [ -z "$kiwi_oemtitle" ] && [ ! -z "$kiwi_displayname" ];then
+                kiwi_oemtitle=$kiwi_displayname
+            fi
+            #======================================
             # write elilo.conf
             #--------------------------------------
             . /etc/default/grub
@@ -1152,9 +1158,9 @@ EOF
             ln -sf /boot/vmlinuz-$kversion /boot/vmlinuz
             ln -sf /boot/initrd-$kversion /boot/initrd
             #====================================================
-            # copy vendor directory
+            # create vendor directory
             #----------------------------------------------------
-            cp -a $efipath/BOOT $efipath/$vendor
+            mkdir -p $efipath/$vendor
             #======================================
             # update sysconfig/bootloader
             #--------------------------------------
@@ -1179,6 +1185,10 @@ EOF
             #----------------------------------------------------
             cp -a $efipath/$vendor/vmlinuz $efipath/$vendor/vmlinuz-$kversion
             cp -a $efipath/$vendor/initrd $efipath/$vendor/initrd-$kversion
+            #====================================================
+            # sync vendor directory with standard boot path
+            #----------------------------------------------------
+            cp -a $efipath/$vendor/* $efipath/BOOT
             #======================================
             # return early for elilo case
             #--------------------------------------
@@ -1273,18 +1283,18 @@ function installBootLoaderSyslinuxRecovery {
     if [ -e $syslmbr ];then
         if [ $loader = "syslinux" ];then
             if ! syslinux $imageRecoveryDevice;then
-                Echo "Failed to install boot loader"
+                Echo "Failed to install recovery boot loader"
                 return 1
             fi
         else
             if ! extlinux --install /reco-save/boot/syslinux;then
-                Echo "Failed to install boot loader"
+                Echo "Failed to install recovery boot loader"
                 return 1
             fi
         fi
     else
         Echo "Image doesn't have syslinux (mbr.bin) installed"
-        Echo "Can't install boot loader"
+        Echo "Can't install recovery boot loader"
         return 1
     fi
     return 0
@@ -1307,13 +1317,13 @@ function installBootLoaderGrubRecovery {
     echo "quit"          >> $input
     if lookup grub &>/dev/null;then
         if ! grub --batch < $input 1>&2;then
-            Echo "Failed to install boot loader"
+            Echo "Failed to install recovery boot loader"
             return 1
         fi
         rm -f $input
     else
         Echo "Image doesn't have grub installed"
-        Echo "Can't install boot loader"
+        Echo "Can't install recovery boot loader"
         return 1
     fi
     return 0
@@ -1338,7 +1348,7 @@ function installBootLoaderGrub2Recovery {
     #--------------------------------------
     if ! lookup $confTool &>/dev/null;then
         Echo "Image doesn't have grub2 installed"
-        Echo "Can't install boot loader"
+        Echo "Can't install recovery boot loader"
         return 1
     fi
     #======================================
@@ -1347,7 +1357,7 @@ function installBootLoaderGrub2Recovery {
     # this allows a bios to directly jump there, e.g with a function key
     grub2-bios-setup -f -d $bios_grub $imageRecoveryDevice 1>&2
     if [ ! $? = 0 ];then
-        Echo "Failed to install boot loader"
+        Echo "Failed to install recovery boot loader"
     fi
     #======================================
     # create custom recovery entry
@@ -1366,7 +1376,7 @@ DONE
     #--------------------------------------
     $confTool > $confFile_grub
     if [ ! $? = 0 ];then
-        Echo "Failed to create grub2 boot configuration"
+        Echo "Failed to create recovery grub2 boot configuration"
         return 1
     fi
     if [ ! -z "$kiwi_JumpPart" ];then
@@ -9360,26 +9370,44 @@ function createFilesystem {
     local IFS=$IFS_ORIG
     local deviceCreate=$1
     local blocks=$2
-    if [ "$FSTYPE" = "reiserfs" ];then
-        mkreiserfs -f $deviceCreate $blocks 1>&2
-    elif [ "$FSTYPE" = "ext2" ];then
-        mkfs.ext2 -F $deviceCreate $blocks 1>&2
-    elif [ "$FSTYPE" = "ext3" ];then
-        mkfs.ext3 -F $deviceCreate $blocks 1>&2
-    elif [ "$FSTYPE" = "ext4" ];then
-        mkfs.ext4 -F $deviceCreate $blocks 1>&2
+    local uuid=$3
+    local opts
+    if [[ "$FSTYPE" =~ ext ]];then
+        opts="-F"
+        if [ ! -z "$uuid" ];then
+            opts="$opts -U $uuid"
+        fi
+    elif [ "$FSTYPE" = "reiserfs" ];then
+        opts="-f"
+        if [ ! -z "$uuid" ];then
+            opts="$opts -d $uuid"
+        fi
     elif [ "$FSTYPE" = "btrfs" ];then
+        opts="-f"
+        if [ ! -z "$uuid" ];then
+            opts="$opts -U $uuid"
+        fi
         if [ ! -z "$blocks" ];then
             local bytes=$((blocks * 4096))
-            mkfs.btrfs -f -b $bytes $deviceCreate
-        else
-            mkfs.btrfs -f $deviceCreate
+            opts="$opts -b $bytes"
         fi
+    fi
+    if [ "$FSTYPE" = "reiserfs" ];then
+        mkreiserfs $opts $deviceCreate $blocks 1>&2
+    elif [ "$FSTYPE" = "ext2" ];then
+        mkfs.ext2 $opts $deviceCreate $blocks 1>&2
+    elif [ "$FSTYPE" = "ext3" ];then
+        mkfs.ext3 $opts $deviceCreate $blocks 1>&2
+    elif [ "$FSTYPE" = "ext4" ];then
+        mkfs.ext4 $opts $deviceCreate $blocks 1>&2
+    elif [ "$FSTYPE" = "btrfs" ];then
+        mkfs.btrfs $opts $deviceCreate
     elif [ "$FSTYPE" = "xfs" ];then
         mkfs.xfs -f $deviceCreate
+        xfs_admin -U $uuid $deviceCreate
     else
         # use ext3 by default
-        mkfs.ext3 -F $deviceCreate $blocks 1>&2
+        mkfs.ext3 $opts $deviceCreate $blocks 1>&2
     fi
     if [ ! $? = 0 ];then
         systemException \
