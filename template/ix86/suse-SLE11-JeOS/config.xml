@@ -103,16 +103,34 @@
         <user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
     </users>
     <repository type="rpm-md" alias="SLES11">
-        <source path="http://smt.suse.de/repo/$RCE/SLE11-SDK-SP3-Pool/sle-11-x86_64?credentials=NCCcredentials"/>
+        <source path="http://download.suse.de/ibs/SUSE:/SLE-11:/GA/standard/"/>
     </repository>
-    <repository type="rpm-md" alias="SLES11-Updates">
-        <source path="http://smt.suse.de/repo/$RCE/SLE11-SDK-SP3-Updates/sle-11-x86_64?credentials=NCCcredentials"/>
+    <repository type="rpm-md" alias="SLES11-Update">
+        <source path="http://download.suse.de/ibs/SUSE:/SLE-11:/Update/standard/"/>
     </repository>
-    <repository type="rpm-md" alias="SLES11-Pool">
-        <source path="http://smt.suse.de/repo/$RCE/SLES11-SP3-Pool/sle-11-x86_64?credentials=NCCcredentials"/>
+    <repository type="rpm-md" alias="SLES11-SP1">
+        <source path="http://download.suse.de/ibs/SUSE:/SLE-11-SP1:/GA/standard/"/>
     </repository>
-    <repository type="rpm-md" alias="SLES11-PoolUpdates">
-        <source path="http://smt.suse.de/repo/$RCE/SLES11-SP3-Updates/sle-11-x86_64?credentials=NCCcredentials"/>
+    <repository type="rpm-md" alias="SLES11-SP1-Update">
+        <source path="http://download.suse.de/ibs/SUSE:/SLE-11-SP1:/Update/standard/"/>
+    </repository>
+    <repository type="rpm-md" alias="SLES11-SP2">
+        <source path="http://download.suse.de/ibs/SUSE:/SLE-11-SP2:/GA/standard/"/>
+    </repository>
+    <repository type="rpm-md" alias="SLES11-SP2-Update">
+        <source path="http://download.suse.de/ibs/SUSE:/SLE-11-SP2:/Update/standard/"/>
+    </repository>
+    <repository type="rpm-md" alias="SLES11-SP3">
+        <source path="http://download.suse.de/ibs/SUSE:/SLE-11-SP3:/GA/standard/"/>
+    </repository>
+    <repository type="rpm-md" alias="SLES11-SP3-Update">
+        <source path="http://download.suse.de/ibs/SUSE:/SLE-11-SP3:/Update/standard/"/>
+    </repository>
+    <repository type="rpm-md" alias="SLES11-SP4">
+        <source path="http://download.suse.de/ibs/SUSE:/SLE-11-SP4:/GA/standard/"/>
+    </repository>
+    <repository type="rpm-md" alias="SLES11-SP4-Update">
+        <source path="http://download.suse.de/ibs/SUSE:/SLE-11-SP4:/Update/standard/"/>
     </repository>
     <packages type="image">
         <package name="sles-release"/>
