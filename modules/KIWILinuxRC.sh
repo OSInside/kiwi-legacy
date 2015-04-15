@@ -1117,6 +1117,7 @@ function installBootLoaderGrub2 {
     #======================================
     # check for elilo compat mode
     #--------------------------------------
+    export elilo_compat=0
     if [ $isEFI -eq 1 ] && [ -e $product ] && [ -e $elilo_efi ];then
         local product=$(readlink $product)
         local vendor=SuSE
@@ -1189,6 +1190,10 @@ EOF
             # sync vendor directory with standard boot path
             #----------------------------------------------------
             cp -a $efipath/$vendor/* $efipath/BOOT
+            #======================================
+            # set flag to indicate elilo is used
+            #--------------------------------------
+            elilo_compat=1
             #======================================
             # return early for elilo case
             #--------------------------------------
@@ -1343,6 +1348,22 @@ function installBootLoaderGrub2Recovery {
     local confFile_uefi=/boot/efi/EFI/BOOT/grub.cfg
     local confFile_grub=$confFile_grub_bios
     local bios_grub=/reco-save/boot/grub2/i386-pc
+    #======================================
+    # check for elilo compat mode
+    #--------------------------------------
+    if [ "$elilo_compat" -eq 1 ];then
+        # Append recovery entry to elilo written grub.cfg
+        local vendor=SuSE
+        local efipath=/boot/efi/EFI
+cat >> $efipath/$vendor/grub.cfg << DONE
+menuentry 'Recovery' --class os {
+    search --no-floppy --fs-uuid --set=root $reco_uuid
+    configfile /boot/grub2/grub.cfg
+}
+DONE
+        cp -a $efipath/$vendor/grub.cfg $efipath/BOOT
+        return 0
+    fi
     #======================================
     # check tool status
     #--------------------------------------
