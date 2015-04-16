@@ -146,7 +146,6 @@
         <package name="multipath-tools"/>
         <package name="xfsprogs"/>
         <package name="xz"/>
-        <package name="gptfdisk"/>
     </packages>
     <packages type="bootstrap" profiles="custom"><!-- empty custom section to allow bootincluding custom kernel --></packages>
     <packages type="bootstrap">

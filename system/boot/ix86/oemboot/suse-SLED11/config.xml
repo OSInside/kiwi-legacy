@@ -136,7 +136,6 @@
         <package name="tar"/>
         <package name="util-linux"/>
         <package name="xz"/>
-        <package name="gptfdisk"/>
     </packages>
     <packages type="bootstrap" profiles="custom"><!-- empty custom section to allow bootincluding custom kernel --></packages>
     <packages type="bootstrap">
