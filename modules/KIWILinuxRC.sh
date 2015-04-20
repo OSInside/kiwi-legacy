@@ -1174,6 +1174,17 @@ EOF
             # copy boot files to /boot/efi
             # ----
             elilo -vv
+            #====================================================
+            # Append recovery entry to elilo written grub.cfg
+            #----------------------------------------------------
+            if [ "$kiwi_oemrecovery" = "true" ];then
+cat >> $efipath/$vendor/grub.cfg << EOF
+menuentry 'Recovery' --class os {
+    search --no-floppy --fs-uuid --set=root $reco_uuid
+    configfile /boot/grub2/grub.cfg
+}
+EOF
+            fi
             #======================================
             # write efi variable to NvRam
             #--------------------------------------
@@ -1369,17 +1380,10 @@ function installBootLoaderGrub2Recovery {
     # check for elilo compat mode
     #--------------------------------------
     if [ "$elilo_compat" -eq 1 ];then
-        # Append recovery entry to elilo written grub.cfg
-        local vendor=SuSE
-        local efipath=/boot/efi/EFI
-cat >> $efipath/$vendor/grub.cfg << DONE
-menuentry 'Recovery' --class os {
-    search --no-floppy --fs-uuid --set=root $reco_uuid
-    configfile /boot/grub2/grub.cfg
-}
-DONE
-        cp -a $efipath/$vendor/grub.cfg $efipath/BOOT
-        mountpoint -q /boot/efi && umount /boot/efi
+        # the recovery menu entry has been appended already
+        # as part of the regular installBootLoaderGrub2. This is
+        # done to ensure the entry is recreated after a recovery
+        # run because elilo doesn't support that
         return 0
     fi
     #======================================
