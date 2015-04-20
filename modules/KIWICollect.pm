@@ -1091,24 +1091,28 @@ sub setupPackageFiles
                 $this->logMsg('I', $msg);
             }
             my $fb_available = 0;
-              FA:
+            FA:
             for my $arch(@fallbacklist) {
                 if ($this->{m_debug} >= 5) {
                     $this->logMsg('I', "    check architecture $arch ");
                 }
-                # sort keys 1st by repository order and secondary by architecture priority
+                # sort keys 1st by repository order and secondary
+                # by architecture priority
                 PACKKEY:
                 for my $packKey( sort {
                         $poolPackages->{$a}->{priority}
                         <=> $poolPackages->{$b}->{priority}
-                        || indexOfArray($poolPackages->{$a}->{arch}, \@fallbacklist)
-                        <=> indexOfArray($poolPackages->{$b}->{arch}, \@fallbacklist)
+                        || indexOfArray(
+                            $poolPackages->{$a}->{arch}, \@fallbacklist
+                        )
+                        <=> indexOfArray(
+                            $poolPackages->{$b}->{arch}, \@fallbacklist
+                        )
                     } keys(%{$poolPackages})
                 ) {
                     if ($this->{m_debug} >= 5) {
-                        $this->logMsg('I', "    check $packKey ");
+                        $this->logMsg('I', "  check $packKey ");
                     }
-
                     my $packPointer = $poolPackages->{$packKey};
                     if ( $packPointer->{arch} ne $arch ) {
                         if ($this->{m_debug} >= 4) {
@@ -1120,8 +1124,8 @@ sub setupPackageFiles
                     }
                     if ($nofallback==0
                         && $mode != 2
-                        && $this->{m_archlist}->arch($arch))
-                    {
+                        && $this->{m_archlist}->arch($arch)
+                    ) {
                         my $follow =
                             $this->{m_archlist}->arch($arch)->follower();
                         if( defined $follow ) {
@@ -1132,21 +1136,25 @@ sub setupPackageFiles
                             }
                         }
                     }
-                    if ( scalar(keys %{$packOptions->{requireVersion}}) > 0
-                         && ! defined( $packOptions->{requireVersion}->
-                               {$packPointer->{version}
+                    if ( scalar(keys %{$packOptions->{requireVersionArch}}) > 0
+                        && ! defined( $packOptions->{requireVersionArch}->{
+                                $packPointer->{version}
                                 . "-"
-                                . $packPointer->{release}} ) )
-                    {
+                                . $packPointer->{release}
+                                . "."
+                                . $packPointer->{arch}})
+                    ) {
                         if ($this->{m_debug} >= 4) {
                             my $msg = "     => package "
                                 . $packName
                                 . '-'
                                 . $packPointer->{version}
-                            . '-'
+                                . '-'
                                 . $packPointer->{release}
-                            ." not available for arch $arch in "
-                                . "repo $packKey in this version";
+                                . '.'
+                                . $packPointer->{arch}
+                                ." not available in "
+                                . "repo $packKey in this version and arch";
                             $this->logMsg('D', $msg);
                         }
                         next PACKKEY;
@@ -1155,28 +1163,28 @@ sub setupPackageFiles
                     my $medium = $packOptions->{'medium'} || 1;
                     $packOptions->{$requestedArch}->{'newfile'} =
                         "$packName-"
-                        . $packPointer->{'version'}
-                        . '-'
-                        . $packPointer->{'release'}
-                        . ".$packPointer->{'arch'}.rpm";
+                            . $packPointer->{'version'}
+                            . '-'
+                            . $packPointer->{'release'}
+                            . ".$packPointer->{'arch'}.rpm";
                     $packOptions->{$requestedArch}->{'newpath'} =
                         "$this->{m_basesubdir}->{$medium}"
-                        . "/$base_on_cd/$packPointer->{'arch'}";
+                            . "/$base_on_cd/$packPointer->{'arch'}";
                     # check for target directory:
                     if (! $this->{m_dirlist}->
-                       {"$packOptions->{$requestedArch}->{'newpath'}"}
+                        {"$packOptions->{$requestedArch}->{'newpath'}"}
                     ) {
                         $this->{m_dirlist}->
-                        {"$packOptions->{$requestedArch}->{'newpath'}"} = 1;
+                            {"$packOptions->{$requestedArch}->{'newpath'}"} = 1;
                         $this->createDirectoryStructure();
                     }
                     # link it:
-                    my $item = $packOptions->{$requestedArch}->{'newpath'}."/$packOptions->{$requestedArch}->{'newfile'}";
+                    my $item = $packOptions->{$requestedArch}->{'newpath'}
+                        . "/$packOptions->{$requestedArch}->{'newfile'}";
                     if ((! -e  $item) && (! link (
-                            $packPointer->{'localfile'},
-                            "$packOptions->{$requestedArch}->{'newpath'}"
-                            . "/$packOptions->{$requestedArch}->{'newfile'}"
-                            ))
+                        $packPointer->{'localfile'},
+                        "$packOptions->{$requestedArch}->{'newpath'}"
+                            . "/$packOptions->{$requestedArch}->{'newfile'}"))
                     ) {
                         my $msg = "  linking file $packPointer->{'localfile'} "
                             . "to $packOptions->{$requestedArch}->{'newpath'}/"
@@ -1191,9 +1199,8 @@ sub setupPackageFiles
                             $packName, $packPointer, $medium, $lnkTarget
                         );
                         if ($this->{m_debug} >= 4) {
-                            my $lnkTarget = $packOptions->{$requestedArch}->
-                            {'newpath'};
-                            my $msg = "  linked file $packPointer->{'localfile'}"
+                            my $msg =
+                                "    linked file $packPointer->{'localfile'}"
                                 . " to $lnkTarget";
                             $this->logMsg('I', $msg);
                         }
@@ -1213,24 +1220,24 @@ sub setupPackageFiles
                             my $srcname = $packPointer->{sourcepackage};
                             # this strips everything, except main name
                             $srcname =~ s/-[^-]*-[^-]*\.rpm$//;
-
-                            if ( $this->{m_srcmedium} > 0 )
-                            {
+                            if ( $this->{m_srcmedium} > 0 ) {
                                 my $srcarch = $packPointer->{sourcepackage};
                                 $srcarch =~ s{.*\.(.*)\.rpm$}{$1};
-                                if (!$this->{m_sourcePacks}->{$srcname}) {
-                                    # FIXME: add forcerepo here
+                                if ($this->{m_sourcePacks}->{$srcname}) {
+                                    # we may have src and nosrc variations of same package
+                                    $this->{m_sourcePacks}->{$srcname}->{'onlyarch'} .= ",$srcarch";
+                                } else {
                                     $this->{m_sourcePacks}->{$srcname} = {
                                         'medium' => $this->{m_srcmedium},
                                         'arch' => $srcarch,
                                         'onlyarch' => $srcarch
                                     };
                                 }
-                                # get version-release string
+                                # get a version-release.arch key
                                 $packPointer->{sourcepackage} =~
-                                    m/.*-([^-]*-[^-]*)\.[^\.]*\.rpm/;
+                                    m/.*-([^-]*-[^-]*\.[^\.]*)\.rpm/;
                                 $this->{m_sourcePacks}->{$srcname}->
-                                {'requireVersion'}->{ $1 } = 1;
+                                    {'requireVersionArch'}->{ $1 } = 1;
                             }
                             if ( $this->{m_debugmedium} > 0 ) {
                                 # Add debug packages, we do not know,
@@ -1246,20 +1253,21 @@ sub setupPackageFiles
                                 }
                                 $this->addDebugPackage(
                                     $srcname."-debuginfo".$suffix,
-                                    $arch, $packPointer);
+                                    $arch, $packPointer
+                                );
                                 $this->addDebugPackage(
                                     $srcname."-debugsource", $arch,
-                                    $packPointer);
+                                    $packPointer
+                                );
                                 $this->addDebugPackage(
                                     $basename."-debuginfo".$suffix,
-                                    $arch, $packPointer)
-                                    unless $srcname eq $basename;
+                                    $arch, $packPointer
+                                ) unless $srcname eq $basename;
                             }
                         }
                     }
                     $this->addAppdata($packPointer);
-
-                    # package processed, jump to the next request arch or package
+                    # package processed, jump to the next arch or package
                     next ARCH;
                 }
                 if ($this->{m_debug} >= 4) {
@@ -1267,14 +1275,14 @@ sub setupPackageFiles
                         . "arch $arch in any repo";
                     $this->logMsg('W', $msg);
                 }
-            } # /@fallbackarch
+            }
             if ($this->{m_debug} >= 1) {
                 my $msg = "    => package $packName not available for "
                     . "$requestedArch nor its fallbacks";
                 $this->logMsg('W', $msg);
             }
             push @missingPackages, $packName;
-        } # /@archs
+        }
     }
     # Ignore missing packages on debug media, they may really not exist
     if ($mode != 3 && @missingPackages > 0) {
