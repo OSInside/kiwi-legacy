@@ -1197,6 +1197,7 @@ EOF
             #======================================
             # return early for elilo case
             #--------------------------------------
+            mountpoint -q /boot/efi && umount /boot/efi
             return 0
         fi
     fi
@@ -1348,6 +1349,22 @@ function installBootLoaderGrub2Recovery {
     local confFile_uefi=/boot/efi/EFI/BOOT/grub.cfg
     local confFile_grub=$confFile_grub_bios
     local bios_grub=/reco-save/boot/grub2/i386-pc
+    local isEFI=0
+    #======================================
+    # check for EFI and mount EFI partition
+    #--------------------------------------
+    if [ ! -z "$kiwi_JumpPart" ];then
+        local jdev=$(ddn $imageDiskDevice $kiwi_JumpPart)
+        local label=$(blkid $jdev -s LABEL -o value)
+        if [ "$label" = "EFI" ];then
+            mkdir -p /boot/efi
+            if ! mount $jdev /boot/efi;then
+                Echo "Failed to mount EFI boot partition"
+                return 1
+            fi
+            isEFI=1
+        fi
+    fi
     #======================================
     # check for elilo compat mode
     #--------------------------------------
@@ -1362,6 +1379,7 @@ menuentry 'Recovery' --class os {
 }
 DONE
         cp -a $efipath/$vendor/grub.cfg $efipath/BOOT
+        mountpoint -q /boot/efi && umount /boot/efi
         return 0
     fi
     #======================================
@@ -1370,6 +1388,7 @@ DONE
     if ! lookup $confTool &>/dev/null;then
         Echo "Image doesn't have grub2 installed"
         Echo "Can't install recovery boot loader"
+        mountpoint -q /boot/efi && umount /boot/efi
         return 1
     fi
     #======================================
@@ -1398,20 +1417,13 @@ DONE
     $confTool > $confFile_grub
     if [ ! $? = 0 ];then
         Echo "Failed to create recovery grub2 boot configuration"
+        mountpoint -q /boot/efi && umount /boot/efi
         return 1
     fi
-    if [ ! -z "$kiwi_JumpPart" ];then
-        local jdev=$(ddn $imageDiskDevice $kiwi_JumpPart)
-        local label=$(blkid $jdev -s LABEL -o value)
-        if [ "$label" = "EFI" ];then
-            if mount $jdev /boot/efi;then
-                if [ -e $confFile_uefi ];then
-                    cp $confFile_grub $confFile_uefi
-                    umount /boot/efi
-                fi
-            fi
-        fi
+    if [ $isEFI -eq 1 ] && [ -e $confFile_uefi ];then
+        cp $confFile_grub $confFile_uefi
     fi
+    mountpoint -q /boot/efi && umount /boot/efi
     return 0
 }
 #======================================
