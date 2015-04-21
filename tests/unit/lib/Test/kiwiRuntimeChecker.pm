@@ -253,6 +253,31 @@ sub test_containerPackMissing {
 }
 
 #==========================================
+# test_checkDeprecatedFilesystem
+#------------------------------------------
+sub test_checkDeprecatedFilesystem {
+    # ...
+    # Test that use of clic or clicfs cause an obsoletion warning
+    # ---
+    my $this = shift;
+    my $kiwi = $this -> {kiwi};
+    my $cmd = $this -> __getCommandLineObj();
+    my $configDir = $this -> {dataDir} . '/liveIsoImg/clic';
+    my $res = $cmd -> setConfigDir ($configDir);
+    my $xml = $this -> __getXMLObj( $configDir );
+    my $checker = KIWIRuntimeChecker -> new($cmd, $xml);
+    $res = $checker -> __checkDeprecatedFilesystem();
+    my $msg = $kiwi -> getMessage();
+    my $expected = 'The use of clicfs is obsolete, consider using overlayfs';
+    $this -> assert_str_equals($expected, $msg);
+    my $msgT = $kiwi -> getMessageType();
+    $this -> assert_str_equals('warning', $msgT);
+    my $state = $kiwi -> getState();
+    $this -> assert_str_equals('oops', $state);
+    return;
+}
+
+#==========================================
 # test_duplicateRepoAliasConflict
 #------------------------------------------
 sub test_duplicateRepoAliasConflict {

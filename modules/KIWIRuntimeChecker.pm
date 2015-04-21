@@ -178,6 +178,9 @@ sub prepareChecks {
     # Runtime checks specific to the prepare step
     # ---
     my $this = shift;
+    if (! $this -> __checkDeprecatedFilesystem()) {
+        return;
+    }
     if (! $this -> __checkYaSTenvironment()) {
         return;
     }
@@ -1438,6 +1441,30 @@ sub __checkNoBootPartitionValid {
         $kiwi -> error($msg);
         $kiwi -> failed();
         return;
+    }
+    return 1;
+}
+
+#==========================================
+# __checkDeprecatedFilesystem
+#------------------------------------------
+sub __checkDeprecatedFilesystem {
+    my $this = shift;
+    my $kiwi = $this->{kiwi};
+    my $xml = $this->{xml};
+    my $bldType = $xml -> getImageType();
+    if (! $bldType) {
+        return 1;
+    }
+    my $filesystem = $bldType -> getFilesystem();
+    my $flag = $bldType -> getFlags();
+    if (($filesystem && $filesystem eq 'clicfs') ||
+        ($flag && $flag eq 'clic')) {
+        $kiwi -> warning(
+            "The use of clicfs is obsolete, consider using overlayfs"
+        );
+        $kiwi -> oops();
+        return 1;
     }
     return 1;
 }
