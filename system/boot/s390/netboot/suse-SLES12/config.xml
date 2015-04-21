@@ -81,7 +81,6 @@
         <package name="kernel-default"/>
     </packages>
     <packages type="image" profiles="default">
-        <package name="adaptec-firmware"/>
         <package name="atftp"/>
         <package name="bc"/>
         <package name="bind-libs"/>
@@ -93,7 +92,6 @@
         <package name="dmraid"/>
         <package name="hwinfo"/>
         <package name="iputils"/>
-        <package name="kernel-firmware"/>
         <package name="kiwi-tools"/>
         <package name="lvm2"/>
         <package name="make"/>
