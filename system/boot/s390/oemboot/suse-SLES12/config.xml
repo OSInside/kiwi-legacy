@@ -87,7 +87,6 @@
     <packages type="image" profiles="custom"><!-- empty custom section to allow bootincluding custom kernel --></packages>
     <packages type="bootstrap">
         <package name="kbd"/>
-        <package name="adaptec-firmware"/>
         <package name="atftp"/>
         <package name="bc"/>
         <package name="bind-libs"/>
@@ -108,7 +107,6 @@
         <package name="gettext-runtime"/>
         <package name="hwinfo"/>
         <package name="iputils"/>
-        <package name="kernel-firmware"/>
         <package name="kexec-tools"/>
         <package name="kiwi-tools"/>
         <package name="kpartx"/>
