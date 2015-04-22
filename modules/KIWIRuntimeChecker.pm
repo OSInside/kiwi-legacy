@@ -22,6 +22,7 @@ package KIWIRuntimeChecker;
 #------------------------------------------
 use strict;
 use warnings;
+use Env;
 
 #==========================================
 # Base class
@@ -107,6 +108,9 @@ sub createChecks {
     # Runtime checks specific to the create step
     # ---
     my $this = shift;
+    if (! $this -> __checkMountDependencies()) {
+        return;
+    }
     if (! $this -> __checkCorrectRootFSPermissons()) {
         return;
     }
@@ -178,6 +182,9 @@ sub prepareChecks {
     # Runtime checks specific to the prepare step
     # ---
     my $this = shift;
+    if (! $this -> __checkMountDependencies()) {
+        return;
+    }
     if (! $this -> __checkDeprecatedFilesystem()) {
         return;
     }
@@ -1467,6 +1474,43 @@ sub __checkDeprecatedFilesystem {
         return 1;
     }
     return 1;
+}
+
+#==========================================
+# __checkMountDependencies
+#------------------------------------------
+sub __checkMountDependencies {
+    my $this = shift;
+    my $kiwi = $this->{kiwi};
+    my $msg;
+    if ($ENV{KIWI_IGNORE_OLD_MOUNTS}) {
+        return 1;
+    }
+    my $kiwi_mount_references = KIWIQX::qxx (
+        "grep -il kiwi /proc/[1-9]*/task/*/mounts|cut -d/ -f3|sort -u 2>&1"
+    );
+    if (! $kiwi_mount_references) {
+        return 1;
+    }
+    my @kiwi_mount_references = split(/\n/, $kiwi_mount_references);
+    my $details = KIWIQX::qxx ("ps -o pid,cmd @kiwi_mount_references");
+    $msg = "It appears there are processes which are holding onto\n";
+    $msg.= "mounts created by a previous run:\n";
+    $msg.= "\n";
+    $msg.= $details;
+    $msg.= "\n";
+    $msg.= "This could cause kiwi to fail, or even worse, if you are\n";
+    $msg.= "building on tmpfs, it could totally freeze or crash your\n";
+    $msg.= "machine.\n";
+    $msg.= "\n";
+    $msg.= "Please first clean up these old mounts, or export:\n";
+    $msg.= "\n";
+    $msg.= "KIWI_IGNORE_OLD_MOUNTS=yes\n";
+    $msg.= "\n";
+    $msg.= "and re-run.\n";
+    $kiwi->error($msg);
+    $kiwi->failed();
+    return;
 }
 
 #==========================================
