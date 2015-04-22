@@ -72,11 +72,11 @@
     </repository>
     <packages type="image">
 <!--
-        new pattern system seems still not functional in 13.2
+        new pattern system works only with zypper from 13.2
 
         <namedCollection name="base"/>
 
-        using pattern package directly instead
+        using pattern package directly instead to stay compatible
 -->
         <package name="patterns-openSUSE-base"/>
         <package name="plymouth-branding-openSUSE" bootinclude="true"/>
