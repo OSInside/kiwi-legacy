@@ -34,7 +34,7 @@
     </repository>
     <packages type="image">
         <namedCollection name="Minimal"/>
-        <product name="SUSE_SLES"/>
+        <product name="SLES"/>
         <package name="cmsfs"/>
         <package name="kernel-default"/>
         <package name="iputils"/>
