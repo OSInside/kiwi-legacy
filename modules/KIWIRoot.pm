@@ -263,7 +263,7 @@ sub new {
         $useRoot,$selfRoot,$cmdL
     );
     if ( ! defined $root ) {
-        $kiwi -> error ("Couldn't create root directory: $!");
+        $kiwi -> error ("Couldn't create root directory");
         $kiwi -> failed ();
         $this -> cleanMount();
         return;

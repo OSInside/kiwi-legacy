@@ -157,7 +157,7 @@ sub test_prepImg_noRootTgt {
     my $info = $kiwi -> getInfoMessage();
     my $expectedIMsg = "Description provides no MD5 hash, check\n"
         . "Reading image description [Prepare]...\n"
-        . 'Checking for default root in XML data...';
+        . "Checking for default root in XML data\n";
     $this -> assert_str_equals($expectedIMsg, $info);
     my $expectedEMsg = 'No target directory set for the unpacked image tree.';
     my $msg = $kiwi -> getMessage();

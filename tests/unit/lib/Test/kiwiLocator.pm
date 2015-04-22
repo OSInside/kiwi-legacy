@@ -139,7 +139,7 @@ sub test_createTmpDirSpecifiedDirOK {
     mkdir "$tmpDir/kiwi";
     my $newTmpDir = $locator -> createTmpDirectory( undef, $tmpDir, $cmdL);
     my $msg = $kiwi -> getMessage();
-    my $expected = "Removing old root directory '$tmpDir'";
+    my $expected = "Removing old root directory '$tmpDir'\n";
     $this -> assert_str_equals($expected, $msg);
     my $msgT = $kiwi -> getMessageType();
     $this -> assert_str_equals('info', $msgT);

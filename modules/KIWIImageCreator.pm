@@ -537,7 +537,7 @@ sub prepareImage {
     # Verify we have a prepare target directory
     #------------------------------------------
     if (! $rootTgtDir) {
-        $kiwi -> info ("Checking for default root in XML data...");
+        $kiwi -> info ("Checking for default root in XML data\n");
         my $rootTgt;
         my $pref = $xml -> getPreferences();
         if ($pref) {

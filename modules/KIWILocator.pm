@@ -67,13 +67,12 @@ sub createTmpDirectory {
             $root = $selfRoot;
             rmdir $root;
             if ( -e $root && -d $root && $forceRoot ) {
-                $kiwi -> info ("Removing old root directory '$root'");
+                $kiwi -> info ("Removing old root directory '$root'\n");
                 my $status = KIWIQX::qxx (
                     "cat /proc/mounts | grep '$root' 2>&1"
                 );
                 my $result = $? >> 8;
                 if ($result == 0) {
-                    $kiwi -> failed();
                     $kiwi -> error  ("Found active mount points in '$root'");
                     $kiwi -> failed();
                     return;
@@ -84,8 +83,8 @@ sub createTmpDirectory {
             if (mkdir $root) {
                 $rootError = 0;
             } else {
-                $kiwi -> failed();
-                $kiwi -> error ("Couldn't mkdir '$root': $!");
+                my $error = $!;
+                $kiwi -> error ("Couldn't mkdir '$root': $error");
                 $kiwi -> failed();
             }
         }
