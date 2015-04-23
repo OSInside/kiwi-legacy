@@ -64,6 +64,18 @@ sub getKiwiConfig {
 }
 
 #==========================================
+# getKiwiConfigEntry
+#------------------------------------------
+sub getKiwiConfigEntry {
+    # ...
+    # Return a hash of all the KIWI configuration data
+    # ---
+    my $this = shift;
+    my $key  = shift;
+    return $this->{data}->{$key};
+}
+
+#==========================================
 # setKiwiConfigData
 #------------------------------------------
 sub setKiwiConfigData {

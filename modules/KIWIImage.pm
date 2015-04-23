@@ -2,7 +2,7 @@
 # FILE          : KIWIImage.pm
 #----------------
 # PROJECT       : openSUSE Build-Service
-# COPYRIGHT     : (c) 2006 SUSE LINUX Products GmbH, Germany
+# COPYRIGHT     : (c) 2015 SUSE LINUX Products GmbH, Germany
 #               :
 # AUTHOR        : Marcus Schaefer <ms@suse.de>
 #               :
@@ -4685,6 +4685,31 @@ sub updateMD5File {
         $kiwi -> done();
     }
     return $this;
+}
+
+#==========================================
+# getNumInodes
+#------------------------------------------
+sub getNumInodes {
+    # ...
+    # Return the number of inodes used for the unpacked image tree
+    # ---
+    my $this = shift;
+    my $unpackedTree = $this->{imageTree};
+    my $iCnt = KIWIQX::qxx ("find $unpackedTree | wc -l");
+    chomp $iCnt;
+    return $iCnt;
+}
+
+#==========================================
+# getInstalledSize
+#------------------------------------------
+sub getInstalledSize {
+    # ...
+    # Return the size of the unpacked image tree in Bytes
+    # ---
+    my $this = shift;
+    return KIWIGlobals -> instance() -> dsize ($this->{imageTree});
 }
 
 #==========================================
