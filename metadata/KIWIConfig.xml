@@ -26,6 +26,8 @@
     locations except for the ones listed here
     -->
     <strip type="tools">
+        <file name="reset"/>
+        <file name="tset"/>
         <file name="setfont"/>
         <file name="lvmetad"/>
         <file name="loadkeys"/>
