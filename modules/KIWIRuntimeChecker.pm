@@ -1729,7 +1729,7 @@ sub __here_format {
     my $this = shift;
     my $message = shift;
     $message =~ s/\n/ /g;
-    $message =~ s/ {4}+//g;
+    $message =~ s/ {4}//g;
     $message.= "\n";
     return $message;
 }
