@@ -982,21 +982,6 @@ sub createImage {
     #------------------------------------------
     if (! $status) {
         SWITCH: for ($typeName) {
-            /^ext2/     && do {
-                $status = $image -> createImageEXT2 ( $targetDevice );
-                $checkFormat = 1;
-                last SWITCH;
-            };
-            /^ext3/     && do {
-                $status = $image -> createImageEXT3 ( $targetDevice );
-                $checkFormat = 1;
-                last SWITCH;
-            };
-            /^ext4/     && do {
-                $status = $image -> createImageEXT4 ( $targetDevice );
-                $checkFormat = 1;
-                last SWITCH;
-            };
             /^reiserfs/ && do {
                 $status = $image -> createImageReiserFS ( $targetDevice );
                 $checkFormat = 1;

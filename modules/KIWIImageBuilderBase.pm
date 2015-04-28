@@ -142,6 +142,34 @@ sub p_addCreatedFile {
 }
 
 #==========================================
+# p_copyUnpackedTreeContent
+#------------------------------------------
+sub p_copyUnpackedTreeContent {
+    # ...
+    # Copy the unpacked image tree content to the given target directory
+    # ---
+    my $this      = shift;
+    my $targetDir = shift;
+    my $cmdL = $this->{cmdL};
+    my $kiwi = $this->{kiwi};
+    my $locator = $this->{locator};
+    $kiwi -> info('Copy unpacked image tree');
+    my $origin = $cmdL -> getConfigDir();
+    my $rsync = $locator -> getExecPath('rsync');
+    my $cmd = "$rsync -aHXA --one-file-system $origin/ $targetDir 2>&1";
+    my $data = KIWIQX::qxx ($cmd);
+    my $code = $? >> 8;
+    if ($code != 0) {
+        $kiwi -> failed();
+        $kiwi -> error('Could not copy the unpacked image tree data');
+        $kiwi -> failed();
+        return;
+    }
+    $kiwi -> done();
+    return 1;
+}
+
+#==========================================
 # p_createBuildDir
 #------------------------------------------
 sub p_createBuildDir {

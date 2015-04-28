@@ -31,6 +31,9 @@ use base qw /Exporter/;
 #------------------------------------------
 use KIWICommandLine;
 use KIWIContainerBuilder;
+use KIWIExt2Builder;
+use KIWIExt3Builder;
+use KIWIExt4Builder;
 use KIWILog;
 use KIWITarArchiveBuilder;
 use KIWIXML;
@@ -98,6 +101,18 @@ sub getImageBuilder {
     my $xml  = $this->{xml};
     my $typeName = $xml -> getImageType() -> getTypeName();
     SWITCH: for ($typeName) {
+        /^ext2/smx && do {
+            my $builder = KIWIExt2Builder -> new($xml, $cmdL, $unPImg);
+            return $builder;
+        };
+        /^ext3/smx && do {
+            my $builder = KIWIExt3Builder -> new($xml, $cmdL, $unPImg);
+            return $builder;
+        };
+        /^ext4/smx && do {
+            my $builder = KIWIExt4Builder -> new($xml, $cmdL, $unPImg);
+            return $builder;
+        };
         /^lxc|^docker/smx && do {
             my $builder = KIWIContainerBuilder -> new($xml, $cmdL, $unPImg);
             return $builder;
