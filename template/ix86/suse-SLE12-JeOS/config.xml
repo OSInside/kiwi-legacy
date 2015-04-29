@@ -72,7 +72,14 @@
         <source path="http://download.suse.de/ibs/SUSE:/SLE-12:/GA/standard/"/>
     </repository>
     <packages type="image">
+<!--
+        new pattern system works only with zypper from 13.2
+
         <namedCollection name="Minimal"/>
+
+        using pattern package directly instead to stay compatible
+-->
+        <package name="patterns-sles-Minimal"/>
         <package name="plymouth-branding-SLE" bootinclude="true"/>
         <package name="grub2-branding-SLE" bootinclude="true"/>
         <package name="iputils"/>
