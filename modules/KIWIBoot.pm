@@ -6895,9 +6895,13 @@ sub setVolumeGroup {
     $this->{cleanupStack} = \@cStack;
     $kiwi -> info ("--> Creating logical volumes\n");
     if (($syszip) || ($haveSplit)) {
-        $status = KIWIQX::qxx ("lvcreate -L $syszip -n LVComp $VGroup 2>&1");
+        $status = KIWIQX::qxx (
+            "lvcreate --noudevsync -L $syszip -n LVComp $VGroup 2>&1"
+        );
         $result = $? >> 8;
-        $status.= KIWIQX::qxx ("lvcreate -l +100%FREE -n LVRoot $VGroup 2>&1");
+        $status.= KIWIQX::qxx (
+            "lvcreate --noudevsync -l +100%FREE -n LVRoot $VGroup 2>&1"
+        );
         $result+= $? >> 8;
         if ($result != 0) {
             $kiwi -> error  ("Logical volume(s) setup failed: $status");
@@ -6934,7 +6938,7 @@ sub setVolumeGroup {
                     }
                     $ihash{$lvdev} = $inodes;
                     $status = KIWIQX::qxx (
-                        "lvcreate -L $lvsize -n $lvname $VGroup 2>&1"
+                        "lvcreate --noudevsync -L $lvsize -n $lvname $VGroup 2>&1"
                     );
                     $result = $? >> 8;
                     if ($result != 0) {
@@ -6948,11 +6952,11 @@ sub setVolumeGroup {
             if (($lvmparts{'@root'}) && ($lvmparts{'@root'}->[3])) {
                 my $rootsize = $lvmparts{'@root'}->[3];
                 $status = KIWIQX::qxx (
-                    "lvcreate -L $rootsize -n LVRoot $VGroup 2>&1"
+                    "lvcreate --noudevsync -L $rootsize -n LVRoot $VGroup 2>&1"
                 );
             } else {
                 $status = KIWIQX::qxx (
-                    "lvcreate -l +100%FREE -n LVRoot $VGroup 2>&1"
+                    "lvcreate --noudevsync -l +100%FREE -n LVRoot $VGroup 2>&1"
                 );
             }
             $result = $? >> 8;
