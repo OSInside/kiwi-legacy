@@ -37,6 +37,7 @@ use base qw /Exporter/;
 # KIWI Modules
 #------------------------------------------
 use KIWIGlobals;
+use KIWIGlobals;
 use KIWILocator;
 use KIWILog;
 use KIWIIsoLinux;
@@ -420,7 +421,7 @@ sub new {
     #==========================================
     # find system architecture
     #------------------------------------------
-    my $arch = KIWIQX::qxx ("uname -m"); chomp $arch;
+    my $arch = KIWIGlobals -> instance() -> getArch();
     if (defined $xml) {
         #==========================================
         # check framebuffer vga value
@@ -4420,12 +4421,14 @@ sub setupBootLoaderConfiguration {
         }
         print $FD 'set prefix=($root)/boot/grub2'."\n";
         # print $FD "set debug=all\n";
-        print $FD 'if [ $grub_platform = "efi" ]; then'."\n";
-        print $FD '    set linux=linuxefi'."\n";
-        print $FD '    set initrd=initrdefi'."\n";
-        print $FD 'else'."\n";
-        print $FD '    set linux=linux'."\n";
-        print $FD '    set initrd=initrd'."\n";
+        print $FD 'set linux=linux'."\n";
+        print $FD 'set initrd=initrd'."\n";
+        print $FD 'if [ "${grub_cpu}" = "x86_64" ] || ';
+        print $FD '[ "${grub_cpu}" = "i386" ]; then'."\n";
+        print $FD '    if [ $grub_platform = "efi" ]; then'."\n";
+        print $FD '        set linux=linuxefi'."\n";
+        print $FD '        set initrd=initrdefi'."\n";
+        print $FD '    fi'."\n";
         print $FD 'fi'."\n";
         print $FD "set default=$defaultBootNr\n";
         print $FD "set font=/boot/unicode.pf2"."\n";
@@ -4462,7 +4465,7 @@ sub setupBootLoaderConfiguration {
         print $FD "set timeout=$bootTimeout\n";
         if ($topic =~ /^KIWI (CD|USB)/) {
             my $dev = $1 eq 'CD' ? '(cd)' : '(hd0,0)';
-            my $arch = KIWIGlobals -> instance() -> getArch();
+            my $arch = $this->{arch};
             print $FD 'menuentry "Boot from Hard Disk"';
             print $FD ' --class opensuse --class os {'."\n";
             if (($firmware eq "efi") || ($firmware eq "uefi")) {
@@ -4586,7 +4589,7 @@ sub setupBootLoaderConfiguration {
             print $FD "set timeout=$bootTimeout\n";
             if ($topic =~ /^KIWI (CD|USB)/) {
                 my $dev = $1 eq 'CD' ? '(cd)' : '(hd0,0)';
-                my $arch = KIWIGlobals -> instance() -> getArch();
+                my $arch = $this->{arch};
                 print $FD 'menuentry "Boot from Hard Disk"';
                 print $FD ' --class opensuse --class os {'."\n";
                 if (($firmware eq "efi") || ($firmware eq "uefi")) {
