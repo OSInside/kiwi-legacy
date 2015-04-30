@@ -34,9 +34,6 @@
                 <vmdisk id="0" controller="ide"/>
                 <vmnic driver="e1000" interface="0" mode="bridged"/>
             </machine>
-            <systemdisk name="systemVG">
-                <volume name="home" freespace="500M"/>
-            </systemdisk>
         </type>
         <type image="oem" boot="oemboot/rhel-07.0" filesystem="ext3" installiso="true" bootloader="grub2">
             <oemconfig>
