@@ -2089,7 +2089,7 @@ menuentry 'Recover/Repair System' --class os {
     multiboot /boot/xen.gz dummy
     echo Loading $kernel...
     set gfxpayload=keep
-    module /boot/$kernel dummy $cmdline showopts
+    module /boot/$kernel dummy $cmdline $kiwi_cmdline showopts
     echo Loading $initrd...
     module /boot/$initrd dummy
 }
@@ -2099,7 +2099,7 @@ menuentry 'Restore Factory System' --class os {
     multiboot /boot/xen.gz dummy
     echo Loading $kernel...
     set gfxpayload=keep
-    module /boot/$kernel dummy $cmdline RESTORE=1 showopts
+    module /boot/$kernel dummy $cmdline $kiwi_cmdline RESTORE=1 showopts
     echo Loading $initrd...
     module /boot/$initrd dummy
 }
@@ -2110,7 +2110,7 @@ menuentry 'Recover/Repair System' --class os {
     search --no-floppy --fs-uuid --set=root $reco_uuid
     echo Loading $kernel...
     set gfxpayload=keep
-    \$linux /boot/$kernel $cmdline showopts
+    \$linux /boot/$kernel $cmdline $kiwi_cmdline showopts
     echo Loading $initrd...
     \$initrd /boot/$initrd
 }
@@ -2118,7 +2118,7 @@ menuentry 'Restore Factory System' --class os {
     search --no-floppy --fs-uuid --set=root $reco_uuid
     echo Loading $kernel...
     set gfxpayload=keep
-    \$linux /boot/$kernel $cmdline RESTORE=1 showopts
+    \$linux /boot/$kernel $cmdline $kiwi_cmdline RESTORE=1 showopts
     echo Loading $initrd...
     \$initrd /boot/$initrd
 }
