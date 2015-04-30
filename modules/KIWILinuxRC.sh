@@ -1140,7 +1140,7 @@ function installBootLoaderGrub2 {
 cat > /etc/elilo.conf << EOF
 # Modified by YaST2.
 timeout = $timeout
-##YaST - boot_efilabel = "SUSE Linux Enterprise Server 11"
+##YaST - boot_efilabel = "$kiwi_oemtitle"
 vendor-directory = $vendor
 secure-boot = on
 prompt
