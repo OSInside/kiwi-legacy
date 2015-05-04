@@ -2988,6 +2988,12 @@ EOF
         echo "GRUB_TIMEOUT=\"$kiwi_boot_timeout\"" >> $inst_default_grub
     fi
     #======================================
+    # enable rollback capability
+    #--------------------------------------
+    if [ "$FSTYPE" = "btrfs" ];then
+        echo "SUSE_BTRFS_SNAPSHOT_BOOTING=true" >> $inst_default_grub
+    fi
+    #======================================
     # create sysconfig/bootloader
     #--------------------------------------
     mkdir -p $destsPrefix/etc/sysconfig
@@ -3266,7 +3272,7 @@ function updateRootDeviceFstab {
     local prefix=$1
     local rdev=$2
     local nfstab=$prefix/etc/fstab
-    local diskByID=`getDiskID $rdev`
+    local diskByID=$(getDiskID $rdev)
     local opts=defaults
     #======================================
     # check for custom options
@@ -3278,8 +3284,8 @@ function updateRootDeviceFstab {
     # check for NFSROOT
     #--------------------------------------
     if [ ! -z "$NFSROOT" ];then
-        local server=`echo $rdev | cut -f3 -d" "`
-        local option=`echo $rdev | cut -f2 -d" "`
+        local server=$(echo $rdev | cut -f3 -d" ")
+        local option=$(echo $rdev | cut -f2 -d" ")
         echo "$server / nfs $option 0 0" >> $nfstab
         return
     fi
@@ -3319,6 +3325,11 @@ function updateRootDeviceFstab {
             then
                 echo "$mppath /$mpoint $FSTYPE $opts 1 2" >> $nfstab
             fi
+        done
+    elif [ "$FSTYPE" = "btrfs" ];then
+        local fsuuid=$(blkid $rdev -s UUID -o value)
+        for subvol in $(btrfs subvolume list /mnt |grep -v @ |cut -f9 -d' ');do
+            echo "UUID=$fsuuid /$subvol btrfs subvol=@/$subvol 0 0" >> $nfstab
         done
     fi
 }
