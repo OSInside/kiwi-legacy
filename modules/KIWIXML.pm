@@ -3005,6 +3005,8 @@ sub __createOEMConfig {
         $this -> __getChildNodeTextValue($config, 'oem-boot-title');
     $oemConfig{oem_bootwait}             =
         $this -> __getChildNodeTextValue($config, 'oem-bootwait');
+    $oemConfig{oem_device_filter}        =
+        $this -> __getChildNodeTextValue($config, 'oem-device-filter');
     $oemConfig{oem_inplace_recovery}     =
         $this -> __getChildNodeTextValue($config, 'oem-inplace-recovery');
     $oemConfig{oem_kiwi_initrd}          =

@@ -599,6 +599,29 @@ div {
 }
 
 #==========================================
+# common element <oem-device-filter>
+#
+div {
+    k.oem-device-filter.content = text
+    k.oem-device-filter.attlist = empty
+    k.oem-device-filter =
+        ## For oemboot driven images: filter install devices by given
+        ## regular expression. The expression is handled by the bash regexp
+        ## operator
+        [
+        db:para [
+            "For oemboot driven images: filter install devices by given"~
+            "regular expression. The expression is handled by the bash"~
+            "regexp operator"
+        ]
+        ]
+        element oem-device-filter {
+            k.oem-device-filter.attlist,
+            k.oem-device-filter.content
+        }
+}
+
+#==========================================
 # common element <oem-inplace-recovery>
 #
 div {
@@ -2536,11 +2559,12 @@ div {
         element oemconfig {
             k.oemconfig.attlist &
             k.oem-ataraid-scan? &
-            k.oem-multipath-scan? &
             k.oem-boot-title? &
             k.oem-bootwait? &
+            k.oem-device-filter? &
             k.oem-inplace-recovery? &
             k.oem-kiwi-initrd? &
+            k.oem-multipath-scan? &
             k.oem-partition-install? &
             k.oem-reboot? &
             k.oem-reboot-interactive? &

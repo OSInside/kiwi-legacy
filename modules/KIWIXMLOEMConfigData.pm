@@ -48,6 +48,7 @@ sub new {
     #    oen_multipath_scan       = ''
     #    oem_boot_title           = ''
     #    oem_bootwait             = ''
+    #    oem_device_filter        = ''
     #    oem_inplace_recovery     = ''
     #    oem_kiwi_initrd          = ''
     #    oem_partition_install    = ''
@@ -86,6 +87,7 @@ sub new {
         oem_multipath_scan
         oem_boot_title
         oem_bootwait
+        oem_device_filter
         oem_inplace_recovery
         oem_kiwi_initrd
         oem_partition_install
@@ -138,6 +140,7 @@ sub new {
             return;
         }
         $this -> p_initializeBoolMembers($init);
+        $this->{oem_device_filter} = $init->{oem_device_filter};
         $this->{oem_boot_title}    = $init->{oem_boot_title};
         $this->{oem_recoveryID}    = $init->{oem_recoveryID};
         $this->{oem_recoveryPartSize} = $init->{oem_recoveryPartSize};
@@ -209,6 +212,17 @@ sub getBootwait {
     # ---
     my $this = shift;
     return $this->{oem_bootwait};
+}
+
+#==========================================
+# getDeviceFilter
+#------------------------------------------
+sub getDeviceFilter {
+    # ...
+    # Return the setting for the oem-device-filter configuration
+    # ---
+    my $this = shift;
+    return $this->{oem_device_filter};
 }
 
 #==========================================
@@ -444,6 +458,12 @@ sub getXMLElement {
         text      => $this -> getBootTitle ()
     );
     $element = $this -> p_addElement(\%initBootT);
+    my %initDeviceFilter = (
+        parent    => $element,
+        childName => 'oem-device-filter',
+        text      => $this -> getDeviceFilter ()
+    );
+    $element = $this -> p_addElement(\%initDeviceFilter);
     my %initBootW = (
         parent    => $element,
         childName => 'oem-bootwait',
@@ -648,6 +668,26 @@ sub setBootwait {
         delete $this->{oem_reboot_interactive};
         delete $this->{oem_shutdown};
         delete $this->{oem_shutdown_interactive};
+    }
+    return $this;
+}
+
+#==========================================
+# setDeviceFilter
+#------------------------------------------
+sub setDeviceFilter {
+    # ...
+    # Set the oem_device_filter attribute, if called with no argument the
+    # attribute is erased
+    # ---
+    my $this = shift;
+    my $val  = shift;
+    if (! $val) {
+        if ($this->{oem_device_filter}) {
+            delete $this->{oem_device_filter};
+        }
+    } else {
+        $this->{oem_device_filter} = $val;
     }
     return $this;
 }

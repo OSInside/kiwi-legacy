@@ -104,6 +104,7 @@ sub new {
         kiwi_oemskipverify
         kiwi_oemswap
         kiwi_oemswapMB
+        kiwi_oemdevicefilter
         kiwi_oemtitle
         kiwi_oemunattended
         kiwi_oemunattended_id
@@ -619,6 +620,7 @@ sub __updateXMLOEMConfig {
         $oem{kiwi_oemrootMB}             = $oemconf -> getSystemSize();
         $oem{kiwi_oemswap}               = $oemconf -> getSwap();
         $oem{kiwi_oempartition_install}  = $oemconf -> getPartitionInstall();
+        $oem{kiwi_oemdevicefilter}       = $oemconf -> getDeviceFilter();
         $oem{kiwi_oemtitle}              = $oemconf -> getBootTitle();
         $oem{kiwi_oemkboot}              = $oemconf -> getKiwiInitrd();
         $oem{kiwi_oemreboot}             = $oemconf -> getReboot();
@@ -666,6 +668,13 @@ sub __updateXMLOEMConfig {
                 'kiwi_oemtitle',$this -> __quote ($oem{kiwi_oemtitle})
             );
         }
+        if ($oem{kiwi_oemdevicefilter}) {
+            $this-> addEntry(
+                'kiwi_oemdevicefilter',
+                $this -> __quote ($oem{kiwi_oemdevicefilter})
+            );
+        }
+        delete $oem{kiwi_oemdevicefilter};
         delete $oem{kiwi_oemtitle};
         delete $oem{kiwi_oemswap};
         delete $oem{kiwi_oemswapMB};

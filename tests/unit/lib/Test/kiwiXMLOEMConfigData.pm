@@ -398,6 +398,36 @@ sub test_getBootwait {
 }
 
 #==========================================
+# test_getDeviceFilter
+#------------------------------------------
+sub test_getDeviceFilter {
+    # ...
+    # Test the getDeviceFilter method
+    # ---
+    my $this = shift;
+    my $kiwi = $this->{kiwi};
+    my $init = $this -> __getBaseInitHash();
+    my $confDataObj = KIWIXMLOEMConfigData -> new($init);
+    my $msg = $kiwi -> getMessage();
+    $this -> assert_str_equals('No messages set', $msg);
+    my $msgT = $kiwi -> getMessageType();
+    $this -> assert_str_equals('none', $msgT);
+    my $state = $kiwi -> getState();
+    $this -> assert_str_equals('No state set', $state);
+    # Test this condition last to get potential error messages
+    $this -> assert_not_null($confDataObj);
+    my $filter = $confDataObj -> getDeviceFilter();
+    $msg = $kiwi -> getMessage();
+    $this -> assert_str_equals('No messages set', $msg);
+    $msgT = $kiwi -> getMessageType();
+    $this -> assert_str_equals('none', $msgT);
+    $state = $kiwi -> getState();
+    $this -> assert_str_equals('No state set', $state);
+    $this -> assert_str_equals('foo', $filter);
+    return;
+}
+
+#==========================================
 # test_getInplaceRecovery
 #------------------------------------------
 sub test_getInplaceRecovery {
@@ -1004,6 +1034,7 @@ sub test_getXMLElement{
         . '<oem-ataraid-scan>true</oem-ataraid-scan>'
         . '<oem-multipath-scan>true</oem-multipath-scan>'
         . '<oem-boot-title>test build</oem-boot-title>'
+        . '<oem-device-filter>foo</oem-device-filter>'
         . '<oem-inplace-recovery>true</oem-inplace-recovery>'
         . '<oem-kiwi-initrd>false</oem-kiwi-initrd>'
         . '<oem-partition-install>false</oem-partition-install>'
@@ -1294,6 +1325,38 @@ sub test_setBootwait {
     $this -> assert_str_equals('No messages set', $msg);
     $msgT = $kiwi -> getMessageType();
     $this -> assert_str_equals('none', $msgT);
+    $state = $kiwi -> getState();
+    $this -> assert_str_equals('No state set', $state);
+    return;
+}
+
+#==========================================
+# test_setDeviceFilter
+#------------------------------------------
+sub test_setDeviceFilter {
+    # ...
+    # Test the setDeviceFilter method
+    # ---
+    my $this = shift;
+    my $kiwi = $this->{kiwi};
+    my $confDataObj = KIWIXMLOEMConfigData -> new();
+    $confDataObj = $confDataObj -> setDeviceFilter('/dev/ram*|foo');
+    my $msg = $kiwi -> getMessage();
+    $this -> assert_str_equals('No messages set', $msg);
+    my $msgT = $kiwi -> getMessageType();
+    $this -> assert_str_equals('none', $msgT);
+    my $state = $kiwi -> getState();
+    $this -> assert_str_equals('No state set', $state);
+    # Test this condition last to get potential error messages
+    $this -> assert_not_null($confDataObj);
+    my $filter = $confDataObj -> getDeviceFilter();
+    $msg = $kiwi -> getMessage();
+    $this -> assert_str_equals('No messages set', $msg);
+    $msgT = $kiwi -> getMessageType();
+    $this -> assert_str_equals('none', $msgT);
+    $state = $kiwi -> getState();
+    $this -> assert_str_equals('No state set', $state);
+    $this -> assert_str_equals('/dev/ram*|foo', $filter);
     $state = $kiwi -> getState();
     $this -> assert_str_equals('No state set', $state);
     return;
@@ -3107,6 +3170,7 @@ sub __getBaseInitHash {
     my $this = shift;
     my %init = (
         oem_ataraid_scan          => 'true',
+        oem_device_filter         => 'foo',
         oem_multipath_scan        => 'true',
         oem_boot_title            => 'test build',
         oem_inplace_recovery      => 'true',

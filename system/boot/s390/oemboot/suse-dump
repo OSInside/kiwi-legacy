@@ -231,6 +231,15 @@ function OEMInstall {
             Echo "Can't find serial device identifier for $i... skipped"
             continue
         fi
+        #======================================
+        # Does it survive the filter rule
+        #--------------------------------------
+        if [ ! -z "$kiwi_oemdevicefilter" ];then
+            if [[ $i =~ $kiwi_oemdevicefilter ]];then
+                Echo "$i filtered out by rule: $kiwi_oemdevicefilter"
+                continue
+            fi
+        fi
         deviceDisks_new="$deviceDisks_new $i"
     done
     #======================================

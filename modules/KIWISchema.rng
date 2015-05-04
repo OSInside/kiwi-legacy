@@ -832,6 +832,29 @@ of the OEM image.</db:para>
   </div>
   <!--
     ==========================================
+    common element <oem-device-filter>
+    
+  -->
+  <div>
+    <define name="k.oem-device-filter.content">
+      <text/>
+    </define>
+    <define name="k.oem-device-filter.attlist">
+      <empty/>
+    </define>
+    <define name="k.oem-device-filter">
+      <element name="oem-device-filter">
+        <a:documentation>For oemboot driven images: filter install devices by given
+regular expression. The expression is handled by the bash regexp
+operator</a:documentation>
+        <db:para>For oemboot driven images: filter install devices by givenregular expression. The expression is handled by the bashregexp operator</db:para>
+        <ref name="k.oem-device-filter.attlist"/>
+        <ref name="k.oem-device-filter.content"/>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
     common element <oem-inplace-recovery>
     
   -->
@@ -3605,19 +3628,22 @@ and setup the system disk</db:para>
             <ref name="k.oem-ataraid-scan"/>
           </optional>
           <optional>
-            <ref name="k.oem-multipath-scan"/>
-          </optional>
-          <optional>
             <ref name="k.oem-boot-title"/>
           </optional>
           <optional>
             <ref name="k.oem-bootwait"/>
           </optional>
           <optional>
+            <ref name="k.oem-device-filter"/>
+          </optional>
+          <optional>
             <ref name="k.oem-inplace-recovery"/>
           </optional>
           <optional>
             <ref name="k.oem-kiwi-initrd"/>
+          </optional>
+          <optional>
+            <ref name="k.oem-multipath-scan"/>
           </optional>
           <optional>
             <ref name="k.oem-partition-install"/>
