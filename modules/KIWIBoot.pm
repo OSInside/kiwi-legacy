@@ -6373,7 +6373,10 @@ sub setStoragePartition {
             if (! $FD-> open("|$partitioner -f $device &> $tmpdir/fdasd.log")) {
                 return;
             }
+            # confirm creating new vtoc table for empty disk
             print $FD "y\n";
+            # confirm creating new label for empty disk
+            print $FD "\n";
             foreach my $cmd (@commands) {
                 if ($cmd =~ /[ntwq]$/) {
                     $action = $cmd;
