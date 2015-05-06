@@ -3382,7 +3382,7 @@ sub __createSystemDiskData {
         }
         $name =~ s/^\///;
         if ($name
-         =~ /^(image|proc|sys|dev|boot|mnt|lib|bin|sbin|etc|lost\+found)/sxm
+         =~ /^(image|proc|sys|dev|boot|mnt|lib|bin|sbin|etc|lost\+found)$/sxm
         ) {
             $kiwi -> error($msg);
             $kiwi -> failed();
