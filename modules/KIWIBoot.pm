@@ -4423,7 +4423,7 @@ sub setupBootLoaderConfiguration {
         # print $FD "set debug=all\n";
         print $FD 'set linux=linux'."\n";
         print $FD 'set initrd=initrd'."\n";
-        print $FD 'if [ "${grub_cpu}" = "x86_64" ] || ';
+        print $FD 'if [ "${grub_cpu}" = "x86_64" ] or ';
         print $FD '[ "${grub_cpu}" = "i386" ]; then'."\n";
         print $FD '    if [ $grub_platform = "efi" ]; then'."\n";
         print $FD '        set linux=linuxefi'."\n";
