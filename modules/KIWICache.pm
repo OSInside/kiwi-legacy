@@ -81,7 +81,11 @@ sub new {
         return;
     }
     if ((! defined $cdir) || (! -d $cdir)) {
-        $msg.= 'no valid cache directory specified';
+        if (! -d $cdir) {
+            $msg.= "cache directory $cdir does not exist";
+        } else {
+            $msg.= 'no valid cache directory specified';
+        }
         $kiwi -> error ($msg);
         $kiwi -> failed();
         return;
