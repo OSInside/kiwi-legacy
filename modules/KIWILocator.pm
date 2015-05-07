@@ -78,7 +78,6 @@ sub createTmpDirectory {
                     return;
                 }
                 KIWIQX::qxx ("rm -R $root");
-                $kiwi -> done();
             }
             if (mkdir $root) {
                 $rootError = 0;
@@ -402,7 +401,7 @@ sub _new_instance {
     # Store object data
     #------------------------------------------
     $this->{configName}  = 'config.xml';
-    $this->{defCacheDir} = '/var/cache/kiwi/image';
+    $this->{defCacheDir} = '/var/cache/kiwi-images';
     $this->{kiwi}        = KIWILog -> instance();
     return $this;
 }

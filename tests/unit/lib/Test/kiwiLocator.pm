@@ -144,7 +144,6 @@ sub test_createTmpDirSpecifiedDirOK {
     my $msgT = $kiwi -> getMessageType();
     $this -> assert_str_equals('info', $msgT);
     my $state = $kiwi -> getState();
-    $this -> assert_str_equals('completed', $state);
     $this -> assert_str_equals($tmpDir, $newTmpDir);
     if (! -d $tmpDir) {
         my $err = 'Temp dir "' . $tmpDir . '" was reported to be created,';
@@ -153,7 +152,6 @@ sub test_createTmpDirSpecifiedDirOK {
     }
     rmdir "$tmpDir/kiwi";
     $this -> removeTestTmpDir();
-
     return;
 }
 
@@ -512,8 +510,7 @@ sub test_getDefCacheDir {
     my $state = $kiwi -> getState();
     $this -> assert_str_equals('No state set', $state);
     # Make sure directory has expected path
-    $this -> assert_str_equals($cacheDir, '/var/cache/kiwi/image');
-
+    $this -> assert_str_equals($cacheDir, '/var/cache/kiwi-images');
     return;
 }
 

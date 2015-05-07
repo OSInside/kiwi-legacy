@@ -684,6 +684,7 @@ touch kiwi.loader
 %endif
 
 mkdir -p $RPM_BUILD_ROOT/var/cache/kiwi
+mkdir -p $RPM_BUILD_ROOT/var/cache/kiwi-images
 
 test -f $RPM_BUILD_ROOT/srv/tftpboot/pxelinux.0 && \
     echo /srv/tftpboot/pxelinux.0 > kiwi.loader
@@ -770,6 +771,7 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{_datadir}/kiwi
 %dir %{_datadir}/kiwi/image
 %dir /var/cache/kiwi
+%dir /var/cache/kiwi-images
 %doc %{_mandir}/man1/kiwi.1.gz
 %doc %{_mandir}/man1/KIWI::images.sh.1.gz
 %doc %{_mandir}/man1/KIWI::config.sh.1.gz
