@@ -1551,6 +1551,9 @@ sub __selectCache {
     my $cacheData = $configDir."/image/kiwi-root.cache";
     my $kiwi = $this -> {kiwi};
     my $cmdL = $this -> {cmdL};
+    if ($cmdL->getOperationMode("initCache")) {
+        return;
+    }
     if ( ! $this -> {cacheDir}) {
         return;
     }
