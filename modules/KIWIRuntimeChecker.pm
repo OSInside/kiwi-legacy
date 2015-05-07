@@ -108,6 +108,9 @@ sub createChecks {
     # Runtime checks specific to the create step
     # ---
     my $this = shift;
+    if (! $this -> __checkTargetLocation()) {
+        return;
+    }
     if (! $this -> __checkMountDependencies()) {
         return;
     }
@@ -182,6 +185,9 @@ sub prepareChecks {
     # Runtime checks specific to the prepare step
     # ---
     my $this = shift;
+    if (! $this -> __checkTargetLocation()) {
+        return;
+    }
     if (! $this -> __checkMountDependencies()) {
         return;
     }
@@ -830,6 +836,37 @@ sub __checkRepoAliasUnique {
             return;
         }
         $aliasUsed{$alias} = 1;
+    }
+    return 1;
+}
+
+#==========================================
+# __checkTargetLocation
+#------------------------------------------
+sub __checkTargetLocation {
+    # ...
+    # Any given target directory must be outside of /var/cache/kiwi
+    # to avoid busy mount because kiwi bind mounts the cache directory
+    # into the image root tree to access host caching information
+    # ---
+    my $this = shift;
+    my $kiwi = $this -> {kiwi};
+    my $cmdL = $this -> {cmdArgs};
+    my $forbidden = quotemeta('/var/cache/kiwi/');
+    my @check_locations = (
+        $cmdL->getCacheDir(),
+        $cmdL->getRootTargetDir(),
+        $cmdL->getImageTargetDir()
+    );
+    foreach my $dir (@check_locations) {
+        next if ! $dir;
+        if ($dir =~ /$forbidden/) {
+            $kiwi -> error (
+                "target '$dir' not allowed below kiwi's shared cache"
+            );
+            $kiwi -> failed();
+            return;
+        }
     }
     return 1;
 }
