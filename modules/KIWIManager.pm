@@ -396,9 +396,11 @@ sub setupArchives {
     # install the given tar archives into the
     # root system
     # ---
-    my @tars    = @_;
-    my $this    = shift @tars;
-    my $idesc   = shift @tars;
+    my @args  = @_;
+    my $this  = shift @args;
+    my $idesc = shift @args;
+    my @tars  = @{$args[0]};
+    my @boot_include_tars = @{$args[1]};
     my $kiwi    = $this->{kiwi};
     my $chroot  = $this->{chroot};
     my @kchroot = @{$this->{kchroot}};
@@ -451,10 +453,14 @@ sub setupArchives {
     print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;done\n";
     print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
     print $fd "trap clean INT TERM\n";
+    if (@boot_include_tars) {
+        print $fd "for i in @boot_include_tars;do\n";
+        print $fd "   tar -tf $idesc/\$i";
+        print $fd ' | grep -v /$ ';
+        print $fd ">> $root/bootincluded_archives.filelist\n";
+        print $fd "done\n";
+    }
     print $fd "for i in @tars;do\n";
-    print $fd "   tar -tf $idesc/\$i";
-    print $fd ' | grep -v /$ ';
-    print $fd ">> $root/bootincluded_archives.filelist\n";
     print $fd "   if ! tar -C $root -xvf $idesc/\$i;then\n";
     print $fd "       ECODE=\$?\n";
     print $fd "       echo \$ECODE > $screenCall.exit\n";

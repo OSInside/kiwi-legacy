@@ -879,16 +879,24 @@ sub installArchives {
     # get image archive list
     #------------------------------------------
     my @archives;
+    my @bootinclude_archives;
     my $archiveList = $xml -> getArchives();
     for my $archive (@{$archiveList}) {
         my $name = $archive -> getName();
         push @archives, $name;
     }
+    my $archiveListBootInclude = $xml -> getBootIncludeArchives();
+    for my $archive (@{$archiveListBootInclude}) {
+        my $name = $archive -> getName();
+        push @bootinclude_archives, $name;
+    }
     #==========================================
     # Install raw data archives
     #------------------------------------------
     $manager -> switchToLocal();
-    if (! $manager -> setupArchives($idesc,@archives)) {
+    if (! $manager -> setupArchives(
+        $idesc, \@archives, \@bootinclude_archives)
+    ) {
         return;
     }
     #==========================================
