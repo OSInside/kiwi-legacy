@@ -27,7 +27,7 @@ Url:            http://github.com/openSUSE/kiwi
 Name:           kiwi
 License:        GPL-2.0
 Group:          System/Management
-Version:        7.02.44
+Version:        7.02.45
 Provides:       kiwi-schema = 6.2
 Provides:       kiwi-image:lxc
 Provides:       kiwi-image:tbz
