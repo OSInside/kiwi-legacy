@@ -1645,6 +1645,11 @@ sub __prepareTree {
         $kiwi -> failed ();
         return;
     }
+    if (! $root -> installArchives ($systemTree, 'bootstrap')) {
+        $kiwi -> error ("Base archive installation failed");
+        $kiwi -> failed ();
+        return;
+    }
     #==========================================
     # Install root system
     #------------------------------------------
@@ -1654,7 +1659,7 @@ sub __prepareTree {
         return;
     }
     if (! $root -> installArchives ($systemTree)) {
-        $kiwi -> error ("Archive installation failed");
+        $kiwi -> error ("Image archive installation failed");
         $kiwi -> failed ();
         return;
     }

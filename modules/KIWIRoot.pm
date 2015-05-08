@@ -868,6 +868,7 @@ sub installArchives {
     # ---
     my $this = shift;
     my $idesc= shift;
+    my $type = shift;
     my $kiwi = $this->{kiwi};
     my $xml  = $this->{xml};
     my $root = $this->{root};
@@ -880,15 +881,28 @@ sub installArchives {
     #------------------------------------------
     my @archives;
     my @bootinclude_archives;
-    my $archiveList = $xml -> getArchives();
-    for my $archive (@{$archiveList}) {
-        my $name = $archive -> getName();
-        push @archives, $name;
-    }
-    my $archiveListBootInclude = $xml -> getBootIncludeArchives();
-    for my $archive (@{$archiveListBootInclude}) {
-        my $name = $archive -> getName();
-        push @bootinclude_archives, $name;
+    if (($type) && ($type eq 'bootstrap')) {
+        my $archiveList = $xml -> getBootStrapArchives();
+        for my $archive (@{$archiveList}) {
+            my $name = $archive -> getName();
+            push @archives, $name;
+        }
+        my $archiveListBootInclude = $xml -> getBootIncludeBootStrapArchives();
+        for my $archive (@{$archiveListBootInclude}) {
+            my $name = $archive -> getName();
+            push @bootinclude_archives, $name;
+        }
+    } else {
+        my $archiveList = $xml -> getArchives();
+        for my $archive (@{$archiveList}) {
+            my $name = $archive -> getName();
+            push @archives, $name;
+        }
+        my $archiveListBootInclude = $xml -> getBootIncludeArchives();
+        for my $archive (@{$archiveListBootInclude}) {
+            my $name = $archive -> getName();
+            push @bootinclude_archives, $name;
+        }
     }
     #==========================================
     # Install raw data archives

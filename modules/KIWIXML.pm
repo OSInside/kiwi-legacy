@@ -1275,6 +1275,22 @@ sub getArchives {
 }
 
 #==========================================
+# getBootStrapArchives
+#------------------------------------------
+sub getBootStrapArchives {
+    # ...
+    # Return an array ref containing ArchiveData objects
+    # ---
+    my $this = shift;
+    my $archives = $this -> __getInstallData('bootStrapArchives');
+    if ($archives) {
+        my $bInclArchives = $this -> getBootIncludeBootStrapArchives();
+        push @{$archives}, @{$bInclArchives};
+    }
+    return $archives;
+}
+
+#==========================================
 # getPackagesToIgnore
 #------------------------------------------
 sub getPackagesToIgnore {
@@ -1308,6 +1324,17 @@ sub getBootIncludeArchives {
     # ---
     my $this = shift;
     return $this -> __getInstallData('bootArchives');
+}
+
+#==========================================
+# getBootIncludeBootStrapArchives
+#------------------------------------------
+sub getBootIncludeBootStrapArchives {
+    # ...
+    # Return an array ref containing ArchiveData objects
+    # ---
+    my $this = shift;
+    return $this -> __getInstallData('bootStrapBootArchives');
 }
 
 #==========================================
@@ -2501,6 +2528,8 @@ sub writeXML {
     my @collectData = qw (
         archives
         bootArchives
+        bootStrapArchives
+        bootStrapBootArchives
         pkgsCollect
         bootPkgsCollect
         products
@@ -2775,6 +2804,10 @@ sub __collectPackagesData {
         $this -> __collectXMLListData('archives', $imgT);
     my $bootArchives   =
         $this -> __collectXMLListData('bootArchives', $imgT);
+    my $bootStrapArchives =
+        $this -> __collectXMLListData('bootStrapArchives', $imgT);
+    my $bootStrapBootArchives =
+        $this -> __collectXMLListData('bootStrapBootArchives', $imgT);
     my $pkgCollect     =
         $this -> __collectXMLListData('pkgsCollect', $imgT);
     my $bootPkgCollect =
@@ -2789,6 +2822,8 @@ sub __collectPackagesData {
         $this -> __collectXMLListData('bootDelPkgs', $imgT);
     my @mergeItems = (
         $bootArchives,
+        $bootStrapArchives,
+        $bootStrapBootArchives,
         $pkgCollect,
         $bootPkgCollect,
         $products,
@@ -4490,10 +4525,18 @@ sub __populateArchiveInfo {
                 );
                 my $archiveObj = KIWIXMLPackageArchiveData -> new(\%archData);
                 my $accessID;
-                if ($bootIncl && $bootIncl eq 'true') {
-                    $accessID = 'bootArchives';
+                if ($type eq 'bootstrap') {
+                    if ($bootIncl && $bootIncl eq 'true') {
+                        $accessID = 'bootStrapBootArchives';
+                    } else {
+                        $accessID = 'bootStrapArchives';
+                    }
                 } else {
-                    $accessID = 'archives';
+                    if ($bootIncl && $bootIncl eq 'true') {
+                        $accessID = 'bootArchives';
+                    } else {
+                        $accessID = 'archives';
+                    }
                 }
                 my %storeData = (
                     accessID => $accessID,
