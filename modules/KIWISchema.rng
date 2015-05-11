@@ -2364,6 +2364,7 @@ to keep data persistent over a reboot</a:documentation>
       <attribute name="image">
         <a:documentation>Specifies the image type</a:documentation>
         <choice>
+          <value>aci</value>
           <value>btrfs</value>
           <value>clicfs</value>
           <value>cpio</value>
@@ -3899,6 +3900,7 @@ virtual machine when running the image.</db:para>
     <define name="k.packages.type.attribute">
       <attribute name="type">
         <choice>
+          <value>aci</value>
           <value>bootstrap</value>
           <value>delete</value>
           <value>docker</value>

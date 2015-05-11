@@ -2356,6 +2356,7 @@ sub __isValidImage {
         return;
     }
     my %supported = map { ($_ => 1) } qw(
+        aci
         btrfs
         clicfs
         cpio

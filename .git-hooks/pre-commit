@@ -14,6 +14,8 @@ my $result = GetOptions(
 
 # The known Perl modules
 my @kiwiModules = qw (
+    kiwiACIConfigWriter.pm
+    KIWIACIConfigWriter.pm
     KIWIAnalyseReport.pm
     KIWIAnalyseSoftware.pm
     KIWIAnalyseSystem.pm
@@ -157,6 +159,7 @@ my @kiwiModules = qw (
     KIWIXMLValidator.pm
     kiwiXMLVMachineData.pm
     KIWIXMLVMachineData.pm
+    KTACIConfigWriter.t
     KTCommandLine.t
     KTConfigWriterFactory.t
     KTContainerBuilder.t
@@ -210,6 +213,8 @@ my @kiwiModules = qw (
 
 # List of modules not clean to level 1 (brutal) of perlcritic
 my @notClean1 = qw (
+    kiwiACIConfigWriter.pm
+    KIWIACIConfigWriter.pm
     KIWIResult.pm
     KIWIArchList.pm
     KIWIArch.pm
@@ -305,6 +310,7 @@ my @notClean1 = qw (
     KIWIXMLUserData.pm
     KIWIXMLVMachineData.pm
     KIWIXMLValidator.pm
+    KTACIConfigWriter.t
     KTCommandLine.t
     KTConfigWriterFactory.t
     KTContainerBuilder.t
@@ -406,6 +412,8 @@ my @notClean1 = qw (
 
 # List of modules not clean to level 2 (cruel) of perlcritic
 my @notClean2 = qw (
+    kiwiACIConfigWriter.pm
+    KIWIACIConfigWriter.pm
     KIWIResult.pm
     KIWIArchList.pm
     KIWIArch.pm
@@ -479,6 +487,8 @@ my @notClean2 = qw (
 
 # List of modules not clean to level 3 (harsh) of perlcritic
 my @notClean3 = qw (
+    kiwiACIConfigWriter.pm
+    KIWIACIConfigWriter.pm
     KIWIResult.pm
     KIWIArchList.pm
     KIWIBoot.pm

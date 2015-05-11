@@ -141,6 +141,9 @@ sub buildRelease {
     if ($type eq 'product') {
         $kiwi -> info ("--> Calling product bundler\n");
         $result = $this -> __bundleProduct();
+    } elsif ($type eq 'aci') {
+        $kiwi -> info ("--> Calling aci bundler\n");
+        $result = $this -> __bundleACI();
     } elsif ($type eq 'docker') {
         $kiwi -> info ("--> Calling docker bundler\n");
         $result = $this -> __bundleDocker();
@@ -340,6 +343,14 @@ sub __bundleProduct {
         return $this -> __sign_with_sha256sum();
     }
     return;
+}
+
+#==========================================
+# __bundleACI
+#------------------------------------------
+sub __bundleACI {
+    my $this = shift;
+    return $this -> __bundleExtension ('aci');
 }
 
 #==========================================

@@ -1,0 +1,25 @@
+KIWI Image Description Example
+==============================
+* A ACI[1] is a tarball containing the root file system of the container and manifest.
+
+How to build this Example
+==============================
+
+    kiwi -p /usr/share/doc/packages/kiwi/examples/suse-13.1/suse-aci-container \
+         --root /tmp/mycontainer
+
+    kiwi --create /tmp/mycontainer --type aci -d /tmp/mycontainer-result
+
+How to sign the container
+=======================================
+
+    gpg --no-default-keyring --armor \
+        --secret-keyring ./rkt.sec --keyring ./rkt.pub \
+        --output suse-13.1-aci-guest-1.0.0-linux-x86_64.aci.asc \
+        --detach-sig suse-13.1-aci-guest-1.0.0-linux-x86_64.aci
+
+Login Details
+==============================
+* Though you are not going to need it, the user root password is 'linux'.
+
+[1] https://github.com/appc/spec/blob/master/SPEC.md

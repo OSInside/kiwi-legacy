@@ -113,7 +113,7 @@ sub getImageBuilder {
             my $builder = KIWIExt4Builder -> new($xml, $cmdL, $unPImg);
             return $builder;
         };
-        /^lxc|^docker/smx && do {
+        /^lxc|^docker|^aci/smx && do {
             my $builder = KIWIContainerBuilder -> new($xml, $cmdL, $unPImg);
             return $builder;
         };

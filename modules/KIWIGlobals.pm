@@ -620,7 +620,6 @@ sub generateBuildImageName {
     return if ! $uname_exec;
     my $arch = KIWIQX::qxx ("$uname_exec -m");
     chomp ( $arch );
-    $arch = ".$arch";
     if (! defined $separator) {
         $separator = "-";
     }
@@ -628,11 +627,15 @@ sub generateBuildImageName {
     my $iver = $xml -> getPreferences() -> getVersion();
     my $type = $xml -> getImageType();
     my $imageType = $type -> getTypeName();
-    if ($imageType eq 'docker') {
+    if ($imageType eq 'aci') {
+        $name = $name.'-'.$iver.'-linux-'.$arch;
+        return $name
+    } elsif ($imageType eq 'docker') {
         $extension = '-docker';
     } elsif ($imageType eq 'lxc') {
         $extension = '-lxc';
     }
+    $arch = ".$arch";
     if (defined $extension) {
         $name = $name.$extension.$arch.$separator.$iver;
     } else {

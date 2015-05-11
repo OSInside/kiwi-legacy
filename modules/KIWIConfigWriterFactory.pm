@@ -28,6 +28,7 @@ use base qw /Exporter/;
 #==========================================
 # KIWIModules
 #------------------------------------------
+use KIWIACIConfigWriter;
 use KIWIContainerConfigWriter;
 use KIWILog;
 use KIWIXML;
@@ -98,6 +99,10 @@ sub getConfigWriter {
             if (($writer) && ($typeName eq 'docker')) {
                 $writer -> setConfigFileName('default.conf');
             }
+            return $writer;
+        };
+        /^aci/smx && do {
+            my $writer = KIWIACIConfigWriter -> new($xml, $confDir);
             return $writer;
         };
         /^vmx/smx && do {
