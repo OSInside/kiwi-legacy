@@ -537,6 +537,7 @@ sub __generateDiskCtrlCfgSection {
         my $msg = '--> No disk disktype set, using "scsi"';
         $kiwi -> warning($msg);
         $kiwi -> notset();
+        $vmConfig -> setSystemDiskType('scsi');
         $diskType = 'scsi';
     }
     my $rType;
@@ -973,18 +974,20 @@ sub __getSystemData {
             . 'xmlns/ovf/diskformat/s390.linuxfile.exustar.gz',
     );
     my $guest = $vmdata -> getGuestOS();
+    my $msg;
     if (! $guest) {
         # There is a default in the vmdata for suse, should never
         # reach this code. But we need to have it in case the default
-        #is removed
-        my $msg = 'No guest OS specified using generic Linux setup';
-        $kiwi -> info ($msg);
+        # is removed
+        $msg = '--> No guest OS specified using generic Linux setup';
+        $kiwi -> warning ($msg);
+        $kiwi -> skipped();
         $guest = 'unknown';
     }
     if (! $osTypDescrpt{$guest}) {
-        my $msg = "\nUnknown guest OS setting '$guest' using "
-                . 'generic Linux setup';
-        $kiwi -> info ($msg);
+        $msg = "--> Unknown guest OS '$guest' using generic Linux setup";
+        $kiwi -> warning ($msg);
+        $kiwi -> skipped();
         $guest = 'unknown';
     }
     $sysSettings{ostype} = $osTypDescrpt{$guest};
@@ -992,7 +995,7 @@ sub __getSystemData {
 
     my $ovfType = $this -> {ovfType};
     if (! $ovfTypeID{$ovfType}) {
-        my $msg = 'Unknown ovf type specified';
+        $msg = '--> Unknown ovf type specified';
         $kiwi -> error($msg);
         $kiwi -> failed();
         return;

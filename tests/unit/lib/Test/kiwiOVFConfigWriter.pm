@@ -503,13 +503,15 @@ sub test_vmwareWriteGenericGuestOS {
     # Create a fake vmdk
     system "dd if=/dev/urandom of=$cfgTgtDir/$vmdkName bs=1k count=10 2>&1";
     my $res = $writer -> writeConfigFile();
-    my $msg = $kiwi -> getMessage();
     my $cfgFile = "$cfgTgtDir/$cfgName";
-    my $expected = "Write OVF configuration file\n--> $cfgFile\n"
-    . "\nUnknown guest OS setting 'oel-64' using generic Linux setup";
+    my $msg = $kiwi -> getInfoMessage();
+    my $expected = "Write OVF configuration file\n--> $cfgFile\n";
+    $this -> assert_str_equals($expected, $msg);
+    $msg = $kiwi -> getMessage();
+    $expected = "--> Unknown guest OS 'oel-64' using generic Linux setup";
     $this -> assert_str_equals($expected, $msg);
     my $msgT = $kiwi -> getMessageType();
-    $this -> assert_str_equals('info', $msgT);
+    $this -> assert_str_equals('warning', $msgT);
     my $state = $kiwi -> getState();
     $this -> assert_not_null($res);
     $this -> assert_file_exists($cfgFile);

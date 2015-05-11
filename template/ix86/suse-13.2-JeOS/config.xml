@@ -46,11 +46,11 @@
         </type>
     </preferences>
     <preferences profiles="vmxFlavour">
-        <type image="vmx" filesystem="ext3" boot="vmxboot/suse-13.2" format="vmdk" bootloader="grub2" kernelcmdline="splash" bootpartition="false" firmware="efi">
-            <systemdisk name="systemVG"/>
-            <machine memory="512" guestOS="suse" HWversion="4">
-                <vmdisk id="0" controller="ide"/>
-                <vmnic driver="e1000" interface="0" mode="bridged"/>
+        <type image="vmx" filesystem="ext3" boot="vmxboot/suse-13.2" format="ova" bootloader="grub2" kernelcmdline="splash" firmware="efi">
+            <machine memory="4096" guestOS="sles12-64" HWversion="7" arch="x86_64" ovftype="vmware">
+                 <vmdisk controller="lsilogic" id="0" diskmode="streamOptimized"/>
+                 <vmdvd  controller="ide" id="0"/>
+                 <vmnic driver="vmxnet3" interface="0" mode="bridged"/>
             </machine>
         </type>
         <type image="oem" filesystem="ext3" boot="oemboot/suse-13.2" installiso="true" bootloader="grub2" kernelcmdline="splash" firmware="efi">

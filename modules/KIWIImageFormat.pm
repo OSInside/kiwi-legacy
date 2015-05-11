@@ -1210,12 +1210,13 @@ sub createOVFConfiguration {
         my $diskmode = $vmdata -> getSystemDiskMode();
         my $status;
         if ($ovftool) {
-            my $options;
+            my $options = "--overwrite";
             if ($diskmode) {
                 $options = " --diskMode=$diskmode";
             }
+            my $call = "ovftool $options $ovabasis.ovf $ovapath";
             $status = KIWIQX::qxx (
-                "cd $ovfdir && ovftool $options $ovabasis.ovf $ovapath 2>&1"
+                "rm -f $ovapath && cd $ovfdir && $call 2>&1"
             );
         } else {
             my $files = "$ovabasis.ovf $ovabasis.mf $ovabasis.vmdk";
@@ -1231,9 +1232,11 @@ sub createOVFConfiguration {
         }
         if ($ovftool) {
             $kiwi -> info (
-                "Replacing qemu's vmdk file with version from generated OVA"
+                "Replacing qemu's vmdk file with version from generated OVA\n"
             );
-            KIWIQX::qxx ("rm -f $ovabasis.vmdk $ovfdir/$ovabasis.vmdk");
+            KIWIQX::qxx (
+                "rm -f $destdir/$ovabasis.vmdk $ovfdir/$ovabasis.vmdk"
+            );
             my $extract = "$ovabasis-disk1.vmdk";
             $status = KIWIQX::qxx (
                 "tar -h -C $ovfdir -xf $destdir/$ovaimage $extract 2>&1"
@@ -1241,7 +1244,7 @@ sub createOVFConfiguration {
             $result = $? >> 8;
             if ($result == 0) {
                 $status = KIWIQX::qxx (
-                    "mv $ovfdir/$extract $ovabasis.vmdk 2>&1"
+                    "mv $ovfdir/$extract $destdir/$ovabasis.vmdk 2>&1"
                 );
                 $result = $? >> 8;
             }
@@ -1251,7 +1254,7 @@ sub createOVFConfiguration {
                 return;
             }
             $kiwi -> info (
-                "Replacing kiwi's ovf file with version from generated OVA"
+                "Replacing kiwi's ovf file with version from generated OVA\n"
             );
             KIWIQX::qxx ("rm -f $ovfdir/$ovabasis.ovf $ovfdir/$ovabasis.mf");
             $extract = "$ovabasis.ovf";
