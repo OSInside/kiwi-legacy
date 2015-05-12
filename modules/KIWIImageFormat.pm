@@ -593,7 +593,6 @@ sub createGoogleComputeEngine {
         my $json_ref = JSON->new->allow_nonref;
         my %json_data;
         $json_data{licenses} = [ $license ];
-        $json_ref -> pretty;
         my $json_text = $json_ref ->encode( \%json_data );
         if (! $json_fd -> open (">$json_meta")) {
             $kiwi -> failed ();
