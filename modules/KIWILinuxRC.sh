@@ -711,7 +711,10 @@ function udevSystemStop {
         umountProc=1
     fi
     if [ -x $udevadmExec ];then
-        $udevadmExec control --exit
+        # ignore error messages here, because if the process is not
+        # stopped properly here, it will be killed the hard way a few
+        # lines down
+        $udevadmExec control --exit &>/dev/null
     fi
     if [ -z "$UDEVD_PID" ];then
         . /iprocs
