@@ -132,17 +132,38 @@ Source4:        %{name}-find-boot-requires.sh
 # build root path
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 
-# find out about the name scheme of the local system for -requieres packages
+# find out about the name scheme of the local system for
+# the buildservice needed -requires packages. In terms of
+# problems with this magic ask adrian@suse.de for details
 %if 0%{?suse_version}
+%define mysystems %(echo `export VER=%{suse_version}; echo "suse-${VER:0:2}.${VER:2:1}"`)
+# redefine for the SLE11 case if no sles_version exists
+# SLE11: NOTE: this works only because openSUSE 11.1 is out of scope
+%if %suse_version == 1110
+%define mysystems suse-SLES11 suse-SLED11
+%endif
+%endif
+# SLES with sles_version macro
 %if 0%{?sles_version}
+%ifarch %ix86 x86_64
 %define mysystems suse-SLES%{sles_version} suse-SLED%{sles_version}
 %else
-%define mysystems %(echo `export VER=%{suse_version}; echo "suse-${VER:0:2}.${VER:2:1}"`)
+%define mysystems suse-SLES%{sles_version}
 %endif
 %endif
-%if 0%{?rhel_version}
-%define mysystems %(echo `VER=%{rhel_version} echo "rhel-0${VER:0:1}.${VER:1:2}"`)
+# RHEL
+%if 0%{?rhel_version} == 600
+%define mysystems rhel-06.0
 %endif
+%if 0%{?rhel_version} == 700
+%define mysystems rhel-07.0
+%endif
+# CentOS
+%if 0%{?centos_version} == 600
+# use the rhel templates for CentOS 6
+%define mysystems rhel-06.0
+%endif
+
 # find out about my arch name, could be done also via symlinks
 %define myarch %{_target_cpu}
 %ifarch armv7l armv7hl
