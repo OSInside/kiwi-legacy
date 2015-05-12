@@ -319,6 +319,9 @@ function systemException {
         ttydev=/mnt/$ttydev
     fi
     hideSplash
+    if [ $enablePlymouth -eq 1 ]; then
+        plymouth quit
+    fi
     if [ $what = "reboot" ];then
         if cat /proc/cmdline 2>/dev/null | grep -qi "kiwidebug=1";then
             what="shell"
@@ -340,16 +343,12 @@ function systemException {
         read
     ;;
     "shell")
-        Echo "shellException: providing shell..."
         if [ ! -z "$DROPBEAR_PID" ] && [ ! -z "$IPADDR" ];then
             Echo "You can connect via ssh to this system"
             Echo "ssh root@${IPADDR}"
         fi
-        if ! setctsid $ttydev /bin/true;then
-            /bin/bash -i
-        else
-            setctsid $ttydev /bin/bash -i
-        fi
+        echo reset > /root/.bashrc
+        setctsid $ttydev sulogin -e $ttydev
     ;;
     "user_reboot")
         Echo "reboot triggered by user"
