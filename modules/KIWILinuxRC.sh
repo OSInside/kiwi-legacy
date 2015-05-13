@@ -315,12 +315,17 @@ function systemException {
     local what=$2
     local nuldev=/dev/null
     local ttydev=$ELOG_EXCEPTION
-    if [ ! -e $nuldev ];then
-        nuldev=/mnt/$nuldev
-    fi
-    if [ ! -e $ttydev ];then
-        ttydev=/mnt/$ttydev
-    fi
+    local prefix=/mnt
+    for dev in $nuldev $prefix/$nuldev; do
+        if [ -e $dev ];then
+            nuldev=$dev; break
+        fi
+    done
+    for dev in $ttydev $prefix/$ttydev; do
+        if [ -e $dev ];then
+            ttydev=$dev; break
+        fi
+    done
     hideSplash
     if [ $enablePlymouth -eq 1 ]; then
         plymouth quit
@@ -1653,9 +1658,9 @@ function setupBootLoader {
 function setupBootThemes {
     local IFS=$IFS_ORIG
     local destprefix=$1
-    local srcprefix=$2
-    if [ -z "$srcprefix" ];then
-        srcprefix=/mnt
+    local prefix=$2
+    if [ -z "$prefix" ];then
+        prefix=/mnt
     fi
     #======================================
     # Splash theme setup
@@ -1665,7 +1670,7 @@ function setupBootThemes {
         #======================================
         # gfxboot default setup
         #--------------------------------------
-        local orig_bootsplash=$srcprefix/etc/sysconfig/bootsplash
+        local orig_bootsplash=$prefix/etc/sysconfig/bootsplash
         local inst_bootsplash=$destprefix/etc/sysconfig/bootsplash
         mkdir -p $destprefix/etc/sysconfig
         touch $inst_bootsplash
@@ -1687,7 +1692,7 @@ function setupBootThemes {
         # plymouth splash
         #--------------------------------------
         if lookup plymouthd &>/dev/null;then
-            local orig_plymouthconf=$srcprefix/etc/plymouth/plymouth.conf
+            local orig_plymouthconf=$prefix/etc/plymouth/plymouth.conf
             local inst_plymouthconf=$destprefix/etc/plymouth/plymouth.conf
             mkdir -p $destprefix/etc/plymouth
             touch $inst_plymouthconf
@@ -3330,7 +3335,7 @@ function updateRootDeviceFstab {
         done
     elif [ "$FSTYPE" = "btrfs" ];then
         local fsuuid=$(blkid $rdev -s UUID -o value)
-        for subvol in $(btrfs subvolume list /mnt |grep -v @ |cut -f9 -d' ');do
+        for subvol in $(btrfs subvol list $prefix |grep -v @ |cut -f9 -d' ');do
             echo "UUID=$fsuuid /$subvol btrfs subvol=@/$subvol 0 0" >> $nfstab
         done
     fi
@@ -3364,7 +3369,7 @@ function updateBootDeviceFstab {
     #======================================
     # Store boot entry
     #--------------------------------------
-    if [ -e /mnt/$mount ];then
+    if [ -e $prefix/$mount ];then
         local diskByID=$(getDiskID $sdev)
         if [ ! -z "$FSTYPE" ];then
             FSTYPE_SAVE=$FSTYPE
@@ -3403,7 +3408,7 @@ function updateOtherDeviceFstab {
     # ----
     local IFS=$IFS_ORIG
     local prefix=$1
-    local sysroot=$2
+    local prefix=$2
     local nfstab=$prefix/etc/fstab
     local index=0
     local field=0
@@ -3411,8 +3416,8 @@ function updateOtherDeviceFstab {
     local device
     local diskByID
     local IFS=","
-    if [ -z "$sysroot" ];then
-        sysroot=/mnt
+    if [ -z "$prefix" ];then
+        prefix=/mnt
     fi
     for i in $PART;do
         field=0
@@ -3437,8 +3442,8 @@ function updateOtherDeviceFstab {
             fi
             probeFileSystem $device
             if [ ! "$FSTYPE" = "luks" ] && [ ! "$FSTYPE" = "unknown" ];then
-                if [ ! -d $sysroot/$partMount ];then
-                    mkdir -p $sysroot/$partMount
+                if [ ! -d $prefix/$partMount ];then
+                    mkdir -p $prefix/$partMount
                 fi
                 diskByID=$(getDiskID $device)
                 echo "$diskByID $partMount $FSTYPE defaults 0 0" >> $nfstab
@@ -3457,14 +3462,14 @@ function setupKernelModules {
     # ----
     local IFS=$IFS_ORIG
     local destprefix=$1
-    local srcprefix=$2
-    if [ -z "$srcprefix" ];then
-        srcprefix=/mnt
+    local prefix=$2
+    if [ -z "$prefix" ];then
+        prefix=/mnt
     fi
-    local sysimg_ktempl=$srcprefix/var/adm/fillup-templates/sysconfig.kernel
-    local sysimg_syskernel=$srcprefix/etc/sysconfig/kernel
+    local sysimg_ktempl=$prefix/var/adm/fillup-templates/sysconfig.kernel
+    local sysimg_syskernel=$prefix/etc/sysconfig/kernel
     local syskernel=$destprefix/etc/sysconfig/kernel
-    local newstyle_mkinitrd=$srcprefix/lib/mkinitrd/scripts/boot-usb.sh
+    local newstyle_mkinitrd=$prefix/lib/mkinitrd/scripts/boot-usb.sh
     local key
     local val
     mkdir -p $destprefix/etc/sysconfig
@@ -3901,6 +3906,7 @@ function USBStickDevice {
     local IFS=$IFS_ORIG
     stickFound=0
     local mode=$1
+    local prefix=/mnt
     #======================================
     # search for USB removable devices
     #--------------------------------------
@@ -3948,7 +3954,7 @@ function USBStickDevice {
                 stickDevice=$(ddn $device 1)
                 for devnr in 1 2;do
                     dev=$(ddn $stickRoot $devnr)
-                    if ! kiwiMount "$dev" "/mnt" "-o ro";then
+                    if ! kiwiMount "$dev" "$prefix" "-o ro";then
                         continue
                     fi
                     if [ "$mode" = "install" ];then
@@ -3957,8 +3963,8 @@ function USBStickDevice {
                         # created with kiwi
                         # ----
                         if \
-                            [ ! -e /mnt/config.isoclient ] && \
-                            [ ! -e /mnt/config.usbclient ]
+                            [ ! -e $prefix/config.isoclient ] && \
+                            [ ! -e $prefix/config.usbclient ]
                         then
                             umountSystem
                             continue
@@ -3969,8 +3975,8 @@ function USBStickDevice {
                         # with kernel/initrd for later kexec
                         # ----
                         if \
-                            [ ! -e /mnt/linux.kexec ] && \
-                            [ ! -e /mnt/initrd.kexec ]
+                            [ ! -e $prefix/linux.kexec ] && \
+                            [ ! -e $prefix/initrd.kexec ]
                         then
                             umountSystem
                             continue
@@ -3980,7 +3986,7 @@ function USBStickDevice {
                         # USB stick search for Linux system tree
                         # created with kiwi
                         # ----
-                        if [ ! -e /mnt/etc/ImageVersion ]; then
+                        if [ ! -e $prefix/etc/ImageVersion ]; then
                             umountSystem
                             continue
                         fi
@@ -5559,6 +5565,7 @@ function updateNeeded {
     local imageServer
     local imageBlkSize
     local imageZipped
+    local prefix=/mnt
     #======================================
     # Global variables
     #--------------------------------------
@@ -5580,7 +5587,7 @@ function updateNeeded {
         esac
         done
         atversion="$imageName-$imageVersion"
-        versionFile="/mnt/etc/ImageVersion-$atversion"
+        versionFile="$prefix/etc/ImageVersion-$atversion"
         IFS=" "
         if [ -f "$versionFile" ];then
             read installed sum2 < $versionFile
@@ -6179,6 +6186,7 @@ function mountSystemSeedBtrFS {
     local loopf=$1
     local rwDevice=`echo $UNIONFS_CONFIG | cut -d , -f 1`
     local roDevice=`echo $UNIONFS_CONFIG | cut -d , -f 2`
+    local prefix=/mnt
     #======================================
     # check read/only device location
     #--------------------------------------
@@ -6198,7 +6206,7 @@ function mountSystemSeedBtrFS {
         #======================================
         # btrfs exported via NFS
         #--------------------------------------
-        if ! kiwiMount "$roDevice" "/mnt" "" $loopf;then
+        if ! kiwiMount "$roDevice" "$prefix" "" $loopf;then
             Echo "Failed to mount NFS filesystem"
             return 1
         fi
@@ -6209,7 +6217,7 @@ function mountSystemSeedBtrFS {
         if [ -z "$loopf" ];then
             loopf=$roDevice
         fi
-        if ! mount -o loop,$kiwi_fsmountoptions $loopf /mnt; then
+        if ! mount -o loop,$kiwi_fsmountoptions $loopf $prefix; then
             Echo "Failed to mount btrfs filesystem"
             return 1
         fi
@@ -6217,11 +6225,11 @@ function mountSystemSeedBtrFS {
     #======================================
     # add seed device
     #--------------------------------------
-    if ! btrfs device add $rwDevice /mnt; then
+    if ! btrfs device add $rwDevice $prefix; then
         Echo "Failed to attach btrfs seed device"
         return 1
     fi
-    if ! mount -o remount,rw /mnt; then
+    if ! mount -o remount,rw $prefix; then
         Echo "Failed to remount read-write"
         return 1
     fi
@@ -6238,6 +6246,7 @@ function mountSystemUnionFS {
     local rwDevice=`echo $UNIONFS_CONFIG | cut -d , -f 1`
     local roDevice=`echo $UNIONFS_CONFIG | cut -d , -f 2`
     local unionFST=`echo $UNIONFS_CONFIG | cut -d , -f 3`
+    local prefix=/mnt
     #======================================
     # load fuse module
     #--------------------------------------
@@ -6297,7 +6306,7 @@ function mountSystemUnionFS {
         # setup overlayfs mount
         #--------------------------------------
         local opts="rw,lowerdir=$roDir,upperdir=$rwDir"
-        if ! mount -t overlayfs -o $opts overlayfs /mnt;then
+        if ! mount -t overlayfs -o $opts overlayfs $prefix;then
             # overlayfs in version >= v22 behaves differently
             # + renamed from overlayfs to overlay
             # + requires a workdir to become mounted
@@ -6306,7 +6315,7 @@ function mountSystemUnionFS {
             mkdir -p $rwDir/work
             mkdir -p $rwDir/rw
             opts="rw,lowerdir=$roDir,upperdir=$rwDir/rw,workdir=$rwDir/work"
-            if ! mount -t overlay -o $opts overlay /mnt;then
+            if ! mount -t overlay -o $opts overlay $prefix;then
                 Echo "Failed to mount root via overlayfs"
                 return 1
             fi
@@ -6316,7 +6325,7 @@ function mountSystemUnionFS {
         # setup fuse union mount
         #--------------------------------------
         local opts="cow,max_files=65000,allow_other,use_ino,suid,dev,nonempty"
-        if ! unionfs -o $opts $rwDir=RW:$roDir=RO /mnt;then
+        if ! unionfs -o $opts $rwDir=RW:$roDir=RO $prefix;then
             Echo "Failed to mount root via unionfs"
             return 1
         fi
@@ -6341,6 +6350,7 @@ function mountSystemClicFS {
     local haveMByte
     local wantCowFS
     local size
+    local prefix=/mnt
     #======================================
     # load fuse module
     #--------------------------------------
@@ -6457,7 +6467,7 @@ function mountSystemClicFS {
         resize2fs $roDir/fsdata.ext4 $size"s"
     fi
     mount -o loop,noatime,nodiratime,errors=remount-ro,barrier=0 \
-        $roDir/fsdata.ext4 /mnt
+        $roDir/fsdata.ext4 $prefix
     if [ ! $? = 0 ];then
         Echo "Failed to mount ext3 clic container"
         return 1
@@ -6482,6 +6492,7 @@ function mountSystemCombined {
     local haveKByte
     local haveMByte
     local needMByte
+    local prefix=/mnt
     if [ -e "$HYBRID_RW" ];then
         rwDevice=$HYBRID_RW
     elif [ "$haveLuks" = "yes" ]; then
@@ -6501,7 +6512,7 @@ function mountSystemCombined {
         return 1
     fi
     # /.../
-    # mount a tmpfs as /mnt which will become the root fs (/) later on
+    # mount a tmpfs which will become the root fs (/) later on
     # and extract the rootfs tarball with the RAM data and the read-only
     # and read-write links into the tmpfs.
     # ----
@@ -6540,36 +6551,36 @@ function mountSystemCombined {
     # mount tmpfs, reserve max $splitroot_size for the rootfs data
     # ----
     options="size=${splitroot_size}M,nr_inodes=$inode_nr"
-    if ! mount -t tmpfs tmpfs -o $options /mnt;then
+    if ! mount -t tmpfs tmpfs -o $options $prefix;then
         systemException \
             "Failed to mount root tmpfs" \
         "reboot"
     fi
-    cd /mnt && tar xf $rootfs >/dev/null && cd /
+    cd $prefix && tar xf $rootfs >/dev/null && cd /
     # /.../
     # check for a read-write data file and put it on the read-write
     # device or to the root tmpfs
     # ---
     if [ -e ${loopf}-read-write ];then
-        local target=/mnt
+        local target=$prefix
         if [ -e "$HYBRID_RW" ];then
-            mkdir -p /mnt/read-write
-            kiwiMount "$rwDevice" "/mnt/read-write"
-            target=/mnt/read-write
+            mkdir -p $prefix/read-write
+            kiwiMount "$rwDevice" "$prefix/read-write"
+            target=$prefix/read-write
         fi
-        mkdir -p /mnt-tmp
-        if ! mount -o loop ${loopf}-read-write /mnt-tmp;then
+        mkdir -p $prefix-tmp
+        if ! mount -o loop ${loopf}-read-write $prefix-tmp;then
             systemException \
                 "Failed to mount read-write data file" \
             "reboot"
         fi
-        pushd /mnt-tmp &>/dev/null
+        pushd $prefix-tmp &>/dev/null
         for item in *;do
             if [ -L /$target/$item ];then
                 rm -f /$target/$item
             fi
             if [ ! -e /$target/$item ];then
-                if ! cp -a /mnt-tmp/$item $target;then
+                if ! cp -a $prefix-tmp/$item $target;then
                     systemException \
                         "Failed to copy $item to $target" \
                     "reboot"
@@ -6578,31 +6589,29 @@ function mountSystemCombined {
         done
         popd &>/dev/null
         if [ -e "$HYBRID_RW" ];then
-            umount /mnt/read-write
+            umount $prefix/read-write
         fi
-        umount /mnt-tmp
-        rmdir /mnt-tmp
+        umount $prefix-tmp
+        rmdir $prefix-tmp
     fi
     # /.../
-    # create a /mnt/read-only mount point and move the /read-only
-    # mount into the /mnt root tree. After that remove the /read-only
-    # directory and create a link to /mnt/read-only instead
-    # /read-only -> /mnt/read-only
+    # create a read-only mount point and move the /read-only
+    # mount into the root tree. After that remove the read-only
+    # directory and create a link to read-only instead
     # ----
-    mkdir /mnt/read-only >/dev/null
-    mount --move /read-only /mnt/read-only >/dev/null
+    mkdir $prefix/read-only >/dev/null
+    mount --move /read-only $prefix/read-only >/dev/null
     rm -rf /read-only >/dev/null
-    ln -s /mnt/read-only /read-only >/dev/null || return 1
+    ln -s $prefix/read-only /read-only >/dev/null || return 1
     if ! echo $rwDevice | grep -q loop;then
         if partitionSize $rwDevice &>/dev/null;then
             # /.../
-            # mount the read-write partition to /mnt/read-write and create
-            # a link to it: /read-write -> /mnt/read-write 
+            # mount the read-write partition to read-write and create a link
             # ----
-            mkdir -p /mnt/read-write >/dev/null
-            kiwiMount "$rwDevice" "/mnt/read-write"
+            mkdir -p $prefix/read-write >/dev/null
+            kiwiMount "$rwDevice" "$prefix/read-write"
             rm -rf /read-write >/dev/null
-            ln -s /mnt/read-write /read-write >/dev/null
+            ln -s $prefix/read-write /read-write >/dev/null
         fi
     fi
 }
@@ -6618,13 +6627,14 @@ function mountSystemStandard {
     local volpath
     local mpoint
     local mppath
+    local prefix=/mnt
     if [ ! -z $FSTYPE ]          && 
          [ ! $FSTYPE = "unknown" ] && 
          [ ! $FSTYPE = "auto" ]
     then
-        kiwiMount "$mountDevice" "/mnt"
+        kiwiMount "$mountDevice" "$prefix"
     else
-        mount $mountDevice /mnt >/dev/null
+        mount $mountDevice $prefix >/dev/null
     fi
     if [ "$haveLVM" = "yes" ];then
         for i in $(cat /.profile | grep -E 'kiwi_LVM_|kiwi_allFreeVolume');do
@@ -6642,8 +6652,8 @@ function mountSystemStandard {
                 [ ! $volume = "LVComp" ] && \
                 [ ! $volume = "LVSwap" ]
             then
-                mkdir -p /mnt/$mpoint
-                kiwiMount "/dev/$kiwi_lvmgroup/$volume" "/mnt/$mpoint"
+                mkdir -p $prefix/$mpoint
+                kiwiMount "/dev/$kiwi_lvmgroup/$volume" "$prefix/$mpoint"
             fi
         done
     fi
@@ -7477,16 +7487,17 @@ function importBranding {
     # to the system to allow to use them persistently
     # ----
     local IFS=$IFS_ORIG
+    local prefix=/mnt
     if [ -f /image/loader/message ];then
-        if ! canWrite /mnt/boot;then
+        if ! canWrite $prefix/boot;then
             Echo "Can't write to boot, import of boot message skipped"
         else
-            mv /image/loader/message /mnt/boot
+            mv /image/loader/message $prefix/boot
         fi
     fi
     if [ -f /image/loader/branding/logo.mng ];then
-    if [ -d /mnt/etc/bootsplash/themes ];then
-        for theme in /mnt/etc/bootsplash/themes/*;do
+    if [ -d $prefix/etc/bootsplash/themes ];then
+        for theme in $prefix/etc/bootsplash/themes/*;do
             if [ -d $theme/images ];then
                 if ! canWrite $theme;then
                     Echo "Can't write to $theme, import of boot theme skipped"
@@ -7512,7 +7523,8 @@ function validateRootTree {
     # some sanity checks are made here
     # ----
     local IFS=$IFS_ORIG
-    if [ ! -x /mnt/sbin/init -a ! -L /mnt/sbin/init ];then
+    local prefix=/mnt
+    if [ ! -x $prefix/sbin/init -a ! -L $prefix/sbin/init ];then
         systemException "/sbin/init no such file or not executable" "reboot"
     fi
 }
@@ -7635,17 +7647,18 @@ function setupConfigFiles {
     local IFS=$IFS_ORIG
     local file
     local dir
+    local prefix=/mnt
     cd /config
     find . -type f | while read file;do
         dir=$(dirname $file)
-        if [ ! -d /mnt/$dir ];then
-            mkdir -p /mnt/$dir
+        if [ ! -d $prefix/$dir ];then
+            mkdir -p $prefix/$dir
         fi
-        if ! canWrite /mnt/$dir;then
+        if ! canWrite $prefix/$dir;then
             Echo "Can't write to $dir, read-only filesystem... skipped"
             continue
         fi
-        cp $file /mnt/$file
+        cp $file $prefix/$file
     done
     cd /
     rm -rf /config
@@ -7661,6 +7674,7 @@ function activateImage {
     # new tree to be the new root (/) 
     # ----
     local IFS=$IFS_ORIG
+    local prefix=/mnt
     #======================================
     # setup image name
     #--------------------------------------
@@ -7686,13 +7700,13 @@ function activateImage {
     local xiDir=xino
     if [ -z "$NFSROOT" ];then
         if [ -d $roDir ];then
-            mkdir -p /mnt/$roDir && mount --move /$roDir /mnt/$roDir
+            mkdir -p $prefix/$roDir && mount --move /$roDir $prefix/$roDir
         fi
         if [ -d $rwDir ];then
-            mkdir -p /mnt/$rwDir && mount --move /$rwDir /mnt/$rwDir
+            mkdir -p $prefix/$rwDir && mount --move /$rwDir $prefix/$rwDir
         fi
         if [ -d $xiDir ];then
-            mkdir -p /mnt/$xiDir && mount --move /$xiDir /mnt/$xiDir
+            mkdir -p $prefix/$xiDir && mount --move /$xiDir $prefix/$xiDir
         fi
     fi
     #======================================
@@ -7700,62 +7714,62 @@ function activateImage {
     #--------------------------------------
     local cdDir=/livecd
     if [ -d $cdDir ];then
-        mkdir -p /mnt/$cdDir && mount --move /$cdDir /mnt/$cdDir
+        mkdir -p $prefix/$cdDir && mount --move /$cdDir $prefix/$cdDir
         if [ -d /cow ];then
-            mkdir -p /mnt/cow && mount --move /cow /mnt/cow
+            mkdir -p $prefix/cow && mount --move /cow $prefix/cow
         fi
         if [ -d /isofrom ];then
-            mkdir -p /mnt/isofrom && mount --move /isofrom /mnt/isofrom
+            mkdir -p $prefix/isofrom && mount --move /isofrom $prefix/isofrom
         fi
     fi
     #======================================
     # create dbus machine id
     #--------------------------------------
     if lookup dbus-uuidgen &>/dev/null;then
-        dbus-uuidgen > /mnt/var/lib/dbus/machine-id
+        dbus-uuidgen > $prefix/var/lib/dbus/machine-id
     fi
     #======================================
     # move device nodes
     #--------------------------------------
     Echo "Activating Image: [$name]"
     udevPending
-    mkdir -p /mnt/run
-    mkdir -p /mnt/dev
-    mkdir -p /mnt/var/run
-    mount --move /dev /mnt/dev
+    mkdir -p $prefix/run
+    mkdir -p $prefix/dev
+    mkdir -p $prefix/var/run
+    mount --move /dev $prefix/dev
     if [[ ! $kiwi_iname =~ SLE.11 ]];then
-        mount --move /run /mnt/run
-        mount --move /var/run /mnt/var/run
+        mount --move /run $prefix/run
+        mount --move /var/run $prefix/var/run
     fi
     udevKill
     #======================================
     # run preinit stage
     #--------------------------------------
     Echo "Preparing preinit phase..."
-    if ! cp /usr/bin/utimer /mnt;then
+    if ! cp /usr/bin/utimer $prefix;then
         systemException "Failed to copy: utimer" "reboot"
     fi
-    if ! cp /iprocs /mnt;then
+    if ! cp /iprocs $prefix;then
         systemException "Failed to copy: iprocs" "reboot"
     fi
-    if ! cp /preinit /mnt;then
+    if ! cp /preinit $prefix;then
         systemException "Failed to copy: preinit" "reboot"
     fi
-    if ! cp /include /mnt;then
+    if ! cp /include $prefix;then
         systemException "Failed to copy: include" "reboot"
     fi
     local killall5=$(lookup killall5)
-    if [ ! -e /mnt/$killall5 ]; then
-        touch /mnt/killall5.from-initrd
+    if [ ! -e $prefix/$killall5 ]; then
+        touch $prefix/killall5.from-initrd
     fi
-    if ! cp -f -a $killall5 /mnt/$killall5;then
+    if ! cp -f -a $killall5 $prefix/$killall5;then
         systemException "Failed to copy: killall5" "reboot"
     fi
     local pidof=$(lookup pidof)
-    if [ ! -e /mnt/$pidof ];then
-        touch /mnt/pidof.from-initrd
+    if [ ! -e $prefix/$pidof ];then
+        touch $prefix/pidof.from-initrd
     fi
-    if ! cp -f -a $pidof /mnt/$pidof;then
+    if ! cp -f -a $pidof $prefix/$pidof;then
         systemException "Failed to copy: pidof" "reboot"
     fi
 }
@@ -7869,6 +7883,7 @@ function bootImage {
     local IFS=$IFS_ORIG
     local reboot=no
     local option=${kernel_cmdline[@]}
+    local prefix=/mnt
     #======================================
     # Set active console to default font
     #--------------------------------------
@@ -7877,7 +7892,7 @@ function bootImage {
     # check for init kernel option
     #--------------------------------------
     if [ -z "$init" ];then
-        if [ -e /mnt/bin/systemd ];then
+        if [ -e $prefix/bin/systemd ];then
             export init=/bin/systemd
         else
             export init=/sbin/init
@@ -7911,27 +7926,27 @@ function bootImage {
     # run resetBootBind
     #--------------------------------------
     if [ -z "$NETBOOT_ONLY" ];then
-        resetBootBind /mnt
+        resetBootBind $prefix
     fi
     #======================================
     # setup warpclock for local time setup
     #--------------------------------------
     local warpclock=/lib/mkinitrd/bin/warpclock
-    if [ -e /mnt/etc/localtime ] && [ -x $warpclock ];then
-        cp /mnt/etc/localtime /etc
-        if [ -e /mnt/etc/adjtime ];then
-            cp /mnt/etc/adjtime /etc
+    if [ -e $prefix/etc/localtime ] && [ -x $warpclock ];then
+        cp $prefix/etc/localtime /etc
+        if [ -e $prefix/etc/adjtime ];then
+            cp $prefix/etc/adjtime /etc
             while read line;do
                 if test "$line" = LOCAL
             then
-                $warpclock > /mnt/dev/shm/warpclock
+                $warpclock > $prefix/dev/shm/warpclock
             fi
             done < /etc/adjtime
-        elif [ -e /mnt/etc/sysconfig/clock ];then
-            cp /mnt/etc/sysconfig/clock /etc
+        elif [ -e $prefix/etc/sysconfig/clock ];then
+            cp $prefix/etc/sysconfig/clock /etc
             . /etc/clock
             case "$HWCLOCK" in
-                *-l*) $warpclock > /mnt/dev/shm/warpclock
+                *-l*) $warpclock > $prefix/dev/shm/warpclock
             esac
         fi
     fi
@@ -7943,16 +7958,16 @@ function bootImage {
     #======================================
     # copy boot log file into system image
     #--------------------------------------
-    mkdir -p /mnt/var/log
-    rm -f /mnt/boot/mbrid
-    if [ -e /mnt/dev/shm/initrd.msg ];then
-        cp -f /mnt/dev/shm/initrd.msg /mnt/var/log/boot.msg
+    mkdir -p $prefix/var/log
+    rm -f $prefix/boot/mbrid
+    if [ -e $prefix/dev/shm/initrd.msg ];then
+        cp -f $prefix/dev/shm/initrd.msg $prefix/var/log/boot.msg
     fi
     if [ -e $ELOG_FILE ];then
-        cp -f $ELOG_FILE /mnt/$ELOG_FILE
+        cp -f $ELOG_FILE $prefix/$ELOG_FILE
     fi
-    if [ ! -d /mnt/var/log/ConsoleKit ];then
-        mkdir -p /mnt/var/log/ConsoleKit
+    if [ ! -d $prefix/var/log/ConsoleKit ];then
+        mkdir -p $prefix/var/log/ConsoleKit
     fi
     #======================================
     # umount proc
@@ -7962,20 +7977,20 @@ function bootImage {
     #======================================
     # copy initrd to /run/initramfs
     #--------------------------------------
-    mkdir -p /mnt/run/initramfs
+    mkdir -p $prefix/run/initramfs
     match='mnt|lost\+found|dev|boot|tmp|run|proc|sys|read-only|read-write'
     for dir in /*;do
         if [[ $dir =~ $match ]]; then
-            mkdir -p /mnt/run/initramfs/$dir
+            mkdir -p $prefix/run/initramfs/$dir
             continue
         fi
-        cp -a $dir /mnt/run/initramfs
+        cp -a $dir $prefix/run/initramfs
     done
     if [ "$FSTYPE" = "zfs" ];then
         #======================================
         # setup shutdown script
         #--------------------------------------
-        local halt=/mnt/run/initramfs/shutdown
+        local halt=$prefix/run/initramfs/shutdown
 cat > $halt << EOF
 #!/bin/sh
 # if systemd is used this script is called after all
@@ -8013,25 +8028,25 @@ EOF
     #======================================
     # run preinit and cleanImage
     #--------------------------------------
-    chroot /mnt /bin/bash -c \
+    chroot $prefix /bin/bash -c \
         "/preinit"
-    chroot /mnt /bin/bash -c \
+    chroot $prefix /bin/bash -c \
         ". /include ; exec 2>>$ELOG_FILE ; set -x ; cleanImage"
-    cd /mnt
+    cd $prefix
     #======================================
     # tell logging the new root fs
     #--------------------------------------
-    exec 2>>/mnt/$ELOG_FILE
+    exec 2>>$prefix/$ELOG_FILE
     set -x
     #======================================
     # tell plymouth the new root fs
     #--------------------------------------
     if lookup plymouthd &>/dev/null;then
-        plymouth update-root-fs --new-root-dir=/mnt
+        plymouth update-root-fs --new-root-dir=$prefix
         #======================================
         # stop if not installed in system image
         #--------------------------------------
-        if [ ! -e /mnt/usr/bin/plymouth ];then
+        if [ ! -e $prefix/usr/bin/plymouth ];then
             plymouth quit
         fi
     fi
@@ -8142,20 +8157,18 @@ function setupUnionFS {
 function canWrite {
     # /.../
     # check if we can write to the given location
-    # If no location is given the function test
-    # for write permissions in /mnt.
     # returns zero on success.
     # ---
     local IFS=$IFS_ORIG
-    local dest=$1
-    if [ -z "$dest" ];then
-        dest=/mnt
+    local prefix=$1
+    if [ -z "$prefix" ];then
+        prefix=/mnt
     fi
-    if [ ! -d $dest ];then
+    if [ ! -d $prefix ];then
         return 1
     fi
-    if touch $dest/can-write &>/dev/null;then
-        rm $dest/can-write
+    if touch $prefix/can-write &>/dev/null;then
+        rm $prefix/can-write
         return 0
     fi
     return 1
@@ -9257,6 +9270,7 @@ function reloadKernel {
     # and initrd is loaded via kexec.
     # ----
     local IFS=$IFS_ORIG
+    local prefix=/mnt
     #======================================
     # check proc/cmdline
     #--------------------------------------
@@ -9290,13 +9304,13 @@ function reloadKernel {
     #======================================
     # mount stick
     #--------------------------------------
-    if ! mount -o ro $stickDevice /mnt;then
+    if ! mount -o ro $stickDevice $prefix;then
         systemException "Failed to mount hotfix stick" "reboot"
     fi
     #======================================
     # load kernel
     #--------------------------------------
-    kexec -l /mnt/linux.kexec --initrd=/mnt/initrd.kexec \
+    kexec -l $prefix/linux.kexec --initrd=$prefix/initrd.kexec \
         --append="$(cat /proc/cmdline | sed -e s"@hotfix=1@@")"
     if [ ! $? = 0 ];then
         systemException "Failed to load hotfix kernel" "reboot"
@@ -9316,9 +9330,9 @@ function resizeFilesystem {
     local ramdisk=0
     local resize_fs
     local check
-    local mnt=/mnt-resize
+    local mpoint=/fs-resize
     udevPending
-    mkdir -p $mnt
+    mkdir -p $mpoint
     if echo $deviceResize | grep -qi "/dev/ram";then
         ramdisk=1
     fi
@@ -9347,16 +9361,17 @@ function resizeFilesystem {
             resize_fs="resize2fs -f $deviceResize"
         fi
     elif [ "$FSTYPE" = "btrfs" ];then
-        resize_fs="mount $deviceResize $mnt &&"
+        resize_fs="mount $deviceResize $mpoint &&"
         if lookup btrfs &>/dev/null;then
-            resize_fs="$resize_fs btrfs filesystem resize max $mnt;umount $mnt"
+            resize_fs="$resize_fs btrfs filesystem resize max $mpoint"
+            resize_fs="$resize_fs;umount $mpoint"
         else
-            resize_fs="$resize_fs btrfsctl -r max $mnt;umount $mnt"
+            resize_fs="$resize_fs btrfsctl -r max $mpoint;umount $mpoint"
         fi
         check="btrfsck $deviceResize"
     elif [ "$FSTYPE" = "xfs" ];then
-        resize_fs="mount $deviceResize $mnt &&"
-        resize_fs="$resize_fs xfs_growfs $mnt;umount $mnt"
+        resize_fs="mount $deviceResize $mpoint &&"
+        resize_fs="$resize_fs xfs_growfs $mpoint;umount $mpoint"
         check="xfs_repair -n $deviceResize"
     elif [ "$FSTYPE" = "zfs" ];then
         local device=$(getDiskID $deviceResize)
@@ -10189,6 +10204,7 @@ function setupBootPartitionPXE {
     local FSTYPE_SAVE=$FSTYPE
     local mpoint=boot_bind
     unset NETBOOT_ONLY
+    local prefix=/mnt
     #======================================
     # Don't operate with unknown root part
     #--------------------------------------
@@ -10275,7 +10291,7 @@ function setupBootPartitionPXE {
     #--------------------------------------
     mkdir -p /$mpoint
     mount $imageBootDevice /$mpoint
-    cp -a /mnt/boot /$mpoint
+    cp -a $prefix/boot /$mpoint
     if [ -e /boot.tgz ];then
         tar -xf /boot.tgz -C /$mpoint
     fi
@@ -10289,13 +10305,13 @@ function setupBootPartitionPXE {
     # installed in preinit.
     # ---
     if ! isFSTypeReadOnly;then
-        rm -rf /mnt/boot
-        mkdir  /mnt/boot
+        rm -rf $prefix/boot
+        mkdir $prefix/boot
     fi
-    mkdir /mnt/$mpoint
-    mount $imageBootDevice /mnt/$mpoint
+    mkdir $prefix/$mpoint
+    mount $imageBootDevice $prefix/$mpoint
     mount --bind \
-        /mnt/$mpoint/boot /mnt/boot
+        $prefix/$mpoint/boot $prefix/boot
 }
 #======================================
 # setupBootPartition
@@ -10310,6 +10326,7 @@ function setupBootPartition {
     local FSTYPE_SAVE=$FSTYPE
     local fs_type=undef
     local BID=1
+    local prefix=/mnt
     #======================================
     # Check for partition IDs meta data
     #--------------------------------------
@@ -10350,7 +10367,7 @@ function setupBootPartition {
     #--------------------------------------
     mkdir -p /$mpoint
     mount $imageBootDevice /$mpoint
-    cp -a /mnt/boot /$mpoint
+    cp -a $prefix/boot /$mpoint
     if [ -e /boot.tgz ];then
         tar -xf /boot.tgz -C /$mpoint
     fi
@@ -10364,13 +10381,13 @@ function setupBootPartition {
     # installed in preinit.
     # ---
     if ! isFSTypeReadOnly;then
-        rm -rf /mnt/boot
-        mkdir  /mnt/boot
+        rm -rf $prefix/boot
+        mkdir $prefix/boot
     fi
-    mkdir /mnt/$mpoint
-    mount $imageBootDevice /mnt/$mpoint
+    mkdir $prefix/$mpoint
+    mount $imageBootDevice $prefix/$mpoint
     mount --bind \
-        /mnt/$mpoint/boot /mnt/boot
+        $prefix/$mpoint/boot $prefix/boot
 }
 #======================================
 # isVirtioDevice
@@ -10685,19 +10702,20 @@ function setupKernelLinks {
     # according to the different boot-up situations
     # ----
     local IFS=$IFS_ORIG
+    local prefix=/mnt
     #======================================
     # mount boot partition if required
     #--------------------------------------
     local mountCalled=no
     if [ -e "$imageBootDevice" ] && blkid $imageBootDevice;then
-        if kiwiMount $imageBootDevice "/mnt";then
+        if kiwiMount $imageBootDevice "$prefix";then
             mountCalled=yes
         fi
     fi
     #======================================
     # Change to boot directory
     #--------------------------------------
-    pushd /mnt/boot >/dev/null
+    pushd $prefix/boot >/dev/null
     #======================================
     # remove garbage if possible 
     #--------------------------------------
@@ -10758,7 +10776,7 @@ function setupKernelLinks {
     #--------------------------------------
     popd >/dev/null
     if [ "$mountCalled" = "yes" ];then
-        umount /mnt
+        umount $prefix
     fi
 }
 #======================================
