@@ -9470,6 +9470,10 @@ function createFilesystem {
     elif [ "$FSTYPE" = "ext4" ];then
         mkfs.ext4 $opts $deviceCreate $blocks 1>&2
     elif [ "$FSTYPE" = "btrfs" ];then
+        # delete potentially existing btrfs on the device because even
+        # with the force option enabled mkfs.btrfs refuses to create a
+        # filesystem if the existing metadata contains the same UUID
+        dd if=/dev/zero of=$deviceCreate bs=1M count=1
         mkfs.btrfs $opts $deviceCreate
     elif [ "$FSTYPE" = "xfs" ];then
         mkfs.xfs -f $deviceCreate
