@@ -9502,6 +9502,8 @@ function restoreBtrfsSubVolumes {
     local mppath
     local volbase
     btrfs subvolume create $root/@ || return
+    local rootid=$(btrfs subvolume list $root | cut -f2 -d ' ')
+    btrfs subvolume set-default $rootid $root || return
     for i in $(cat /.profile | grep -E 'kiwi_LVM_|kiwi_allFreeVolume');do
         variable=$(echo $i|cut -f1 -d=)
         volume=$(echo $i| cut -f3- -d_ | cut -f1 -d=)
@@ -9518,6 +9520,7 @@ function restoreBtrfsSubVolumes {
         fi
         btrfs subvolume create $root/@/$mpoint || return
     done
+    umount $root && mount $imageRootDevice $root
 }
 #======================================
 # restoreLVMMetadata

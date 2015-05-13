@@ -583,6 +583,7 @@ if [ ! -z "$KIWI_RECOVERY" ];then
     Echo "Restoring boot configuration archive part (2)..."
     if [ ! -z "$kiwi_JumpPart" ];then
         jdev=$(ddn $imageDiskDevice $kiwi_JumpPart)
+        umount $jdev &>/dev/null
         if ! mkdosfs -F16 -I -n 'EFI' $jdev;then
             systemException "Failed to create EFI fat filesystem" "reboot"
         fi
