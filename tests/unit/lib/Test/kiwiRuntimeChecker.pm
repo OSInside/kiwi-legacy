@@ -1020,6 +1020,35 @@ sub test_systemDiskDataSizeTooSmall {
 }
 
 #==========================================
+# test_checkVMConfigExist
+#------------------------------------------
+sub test_checkVMConfigExist {
+    # ...
+    # Test that a missing machine section generates an error for
+    # requested ova format
+    #
+    my $this = shift;
+    my $kiwi = $this -> {kiwi};
+    my $cmd = $this -> __getCommandLineObj();
+    my $configDir = $this -> {dataDir} . '/ovaSetup';
+    $cmd -> setConfigDir ($configDir);
+    my $xml = $this -> __getXMLObj( $configDir );
+    my $checker = KIWIRuntimeChecker -> new($cmd, $xml);
+    my $res = $checker -> __checkVMConfigExist();
+    my $msg = $kiwi -> getMessage();
+    my $expected = 'machine configuration is required for ova format';
+    $this -> assert_str_equals($expected, $msg);
+    my $msgT = $kiwi -> getMessageType();
+    $this -> assert_str_equals('error', $msgT);
+    my $state = $kiwi -> getState();
+    $this -> assert_str_equals('failed', $state);
+    # Test this condition last to get potential error messages
+    $this -> assert_null($res);
+    $this -> removeTestTmpDir();
+    return;
+}
+
+#==========================================
 # test_systemDiskDataVolTooSmall
 #------------------------------------------
 sub test_systemDiskDataVolTooSmall {

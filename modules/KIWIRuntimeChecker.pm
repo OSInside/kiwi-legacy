@@ -108,6 +108,9 @@ sub createChecks {
     # Runtime checks specific to the create step
     # ---
     my $this = shift;
+    if (! $this -> __checkVMConfigExist()) {
+        return;
+    }
     if (! $this -> __checkTargetLocation()) {
         return;
     }
@@ -185,6 +188,9 @@ sub prepareChecks {
     # Runtime checks specific to the prepare step
     # ---
     my $this = shift;
+    if (! $this -> __checkVMConfigExist()) {
+        return;
+    }
     if (! $this -> __checkTargetLocation()) {
         return;
     }
@@ -1059,6 +1065,35 @@ sub __checkVMConverterExist {
             "--> will create a tar archive alternatively\n"
         );
         return 1;
+    }
+    return 1;
+}
+
+#==========================================
+# __checkVMConfigExist
+#------------------------------------------
+sub __checkVMConfigExist {
+    # ...
+    # Check that a machine config exists for some formats
+    # ---
+    my $this = shift;
+    my $kiwi = $this->{kiwi};
+    my $xml  = $this->{xml};
+    my $bldType = $xml -> getImageType();
+    if (! $bldType) {
+        return 1;
+    }
+    my $format = $bldType -> getFormat();
+    if ((! $format) || ($format !~ /ova|ovf/)) {
+        return 1;
+    }
+    my $vmConfig = $xml -> getVMachineConfig();
+    if (! $vmConfig) {
+        $kiwi -> error (
+            "machine configuration is required for $format format"
+        );
+        $kiwi -> failed();
+        return;
     }
     return 1;
 }
