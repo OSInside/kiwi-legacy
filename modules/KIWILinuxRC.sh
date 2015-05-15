@@ -3276,9 +3276,10 @@ function updateRootDeviceFstab {
     # add one line to the fstab file for the root device
     # ----
     local IFS=$IFS_ORIG
-    local prefix=$1
+    local prefix=/mnt
+    local config_tmp=$1
     local rdev=$2
-    local nfstab=$prefix/etc/fstab
+    local nfstab=$config_tmp/etc/fstab
     local diskByID=$(getDiskID $rdev)
     local opts=defaults
     #======================================
