@@ -1337,7 +1337,7 @@ sub __hasContainerName {
         return 1;
     }
     my $imgType = $bldType -> getTypeName();
-    if (($imgType ne 'docker') && ($imgType ne 'lxc')) {
+    if (($imgType ne 'docker') && ($imgType ne 'lxc') && ($imgType ne 'aci')) {
         # Nothing to check
         return 1;
     }
@@ -1369,6 +1369,7 @@ sub __haveValidTypeString {
     my $cmdL = $this->{cmdArgs};
     my $type = $cmdL -> getBuildType();
     my @allowedTypes = qw (
+        aci
         btrfs
         clicfs
         cpio

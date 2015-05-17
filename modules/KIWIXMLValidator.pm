@@ -1224,7 +1224,7 @@ sub __checkTypeConfigConsist {
     # relevant inside the initrd
     # ----
     my %typeChildDeps = (
-        'machine'       => 'image:cpio,lxc,docker,oem,vmx,split',
+        'machine'       => 'image:cpio,aci,lxc,docker,oem,vmx,split',
         'oemconfig'     => 'image:cpio,oem,split',
         'vagrantconfig' => 'image:vmx',
         'pxedeploy'     => 'image:cpio,pxe',

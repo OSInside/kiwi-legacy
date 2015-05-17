@@ -327,6 +327,8 @@ sub __createContainerBundle {
     $kiwi -> info('Creating container tarball...');
     if ($imageType eq 'docker') {
         $extension = '-docker';
+    } elsif ($imageType eq 'aci') {
+        $extension = '';
     }
     my $baseBuildDir = $this -> getBaseBuildDirectory();
     my $origin = $baseBuildDir
@@ -336,7 +338,11 @@ sub __createContainerBundle {
     my $imgFlName = $globals -> generateBuildImageName(
         $xml, '-', $extension
     );
-    $imgFlName .= '.tar.xz';
+    if ($imageType eq 'aci') {
+        $imgFlName .= '.aci';
+    } else {
+        $imgFlName .= '.tar.xz';
+    }
     my $tar = $locator -> getExecPath('tar');
     if (! $tar) {
         $kiwi -> failed();
@@ -404,6 +410,8 @@ sub __createContainerConfigDir {
             return;
         }
         $dirPath .= '/'.$containerName;
+    } elsif ($imageType eq 'aci') {
+        $dirPath = './';
     }
     my $path = $this -> __createWorkingDir($dirPath);
     $kiwi -> info ("--> $dirPath");
@@ -640,6 +648,8 @@ sub __createTargetRootTree {
             return;
         }
         $dirPath .= $containerName . '/rootfs';
+    } elsif ($imageType eq 'aci') {
+        $dirPath = 'rootfs';
     }
     my $path = $this -> __createWorkingDir($dirPath);
     if (! $path) {
