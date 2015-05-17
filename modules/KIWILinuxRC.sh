@@ -3363,10 +3363,11 @@ function updateBootDeviceFstab {
     # add temporary bind mounted boot entry to fstab
     # ----
     local IFS=$IFS_ORIG
-    local prefix=$1
+    local config_tmp=$1
     local sdev=$2
-    local nfstab=$prefix/etc/fstab
+    local nfstab=$config_tmp/etc/fstab
     local mount=boot_bind
+    local prefix=/mnt
     #======================================
     # Store boot entry
     #--------------------------------------
