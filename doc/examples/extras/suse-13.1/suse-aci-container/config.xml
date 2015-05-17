@@ -7,8 +7,7 @@
         <specification>openSUSE 13.1 ACI container</specification>
     </description>
     <preferences>
-        <type image="aci" container="os131">
-        </type>
+        <type image="aci" container="os131"/>
         <version>1.0.0</version>
         <packagemanager>zypper</packagemanager>
         <rpm-check-signatures>false</rpm-check-signatures>
