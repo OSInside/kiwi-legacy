@@ -1131,6 +1131,12 @@ function installBootLoaderGrub2 {
         local efipath=/boot/efi/EFI
         if [[ "$product" =~ "SUSE_SLE" ]];then
             #======================================
+            # check for recovery uuid
+            #--------------------------------------
+            if [ -z "$reco_uuid" ]; then
+                reco_uuid=$(blkid -o value -s UUID -t LABEL=recovery)
+            fi
+            #======================================
             # check for bootloader displayname
             #--------------------------------------
             if [ -z "$kiwi_oemtitle" ] && [ ! -z "$kiwi_displayname" ];then
