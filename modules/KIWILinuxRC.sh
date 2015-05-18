@@ -1141,8 +1141,8 @@ function installBootLoaderGrub2 {
             #--------------------------------------
             . /etc/default/grub
             local timeout=10
-            if [ ! -z "$KIWI_BOOT_TIMEOUT" ];then
-                timeout=$KIWI_BOOT_TIMEOUT
+            if [ ! -z "$kiwi_boot_timeout" ];then
+                timeout=$kiwi_boot_timeout
             fi
 cat > /etc/elilo.conf << EOF
 # Modified by YaST2.
