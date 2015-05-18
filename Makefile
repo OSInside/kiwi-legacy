@@ -225,7 +225,7 @@ valid: modules/KIWISchema.rng
 		test -f xsl/master.xsl && \
 			xsltproc -o $$i.new xsl/master.xsl $$i && mv $$i.new $$i;\
 		echo $$i;\
-		./kiwi --check-config $$i || exit 1;\
+		KIWI_IGNORE_OLD_MOUNTS=1 ./kiwi --check-config $$i || exit 1;\
 	done
 
 test:
