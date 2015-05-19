@@ -153,9 +153,9 @@ function OEMRepartStandard {
     # write new partition table
     #--------------------------------------
     if [ -z "$DONT_PARTITION" ];then
-        pID=1
-        bootParam=1
-        rootParam=1
+        pID=$kiwi_RootPart
+        bootParam=$kiwi_BootPart
+        rootParam=$pID
         recoParam=no
         swapParam=no
         cowpParam=no
@@ -163,13 +163,6 @@ function OEMRepartStandard {
         # close open device mappings
         #--------------------------------------
         luksClose
-        #======================================
-        # clean/backup boot partition
-        #--------------------------------------
-        if [ "$kiwi_RootPart" ];then
-            pID=$kiwi_RootPart
-            rootParam=$pID
-        fi
         #======================================
         # count partitions to be created
         #--------------------------------------
