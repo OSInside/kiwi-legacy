@@ -170,6 +170,20 @@ function suseInsertService {
 }
 
 #======================================
+# suseService
+#--------------------------------------
+function suseService {
+    # function kept for compatibility
+    service_name=$1
+    service_state=$2
+    if [ "$service_state" = "off" ];then
+        baseRemoveService "$service_name"
+    else
+        baseInsertService "$service_name"
+    fi
+}
+
+#======================================
 # suseActivateDefaultServices
 #--------------------------------------
 function suseActivateDefaultServices {
