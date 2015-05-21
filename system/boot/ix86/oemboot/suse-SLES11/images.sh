@@ -5,11 +5,6 @@ test -f /.profile && . /.profile
 echo "Configure image: [$kiwi_iname]..."
 
 #==========================================
-# setup config.oempartition if required
-#------------------------------------------
-baseSetupOEMPartition
-
-#==========================================
 # setup build day
 #------------------------------------------
 baseSetupBuildDay

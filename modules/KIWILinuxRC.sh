@@ -1786,7 +1786,7 @@ function setupBootLoaderSyslinuxRecovery {
     if [ -z "$fbmode" ];then
         fbmode=$DEFAULT_VGA
     fi
-    rdev_recovery=$OEM_RECOVERY
+    rdev_recovery=$imageRootDevice
     diskByID=$(getDiskID $rdev_recovery)
     if [ "$FSTYPE" = "zfs" ];then
         diskByID="ZFS=kiwipool/ROOT/system-1"
@@ -1823,7 +1823,7 @@ function setupBootLoaderSyslinuxRecovery {
     #======================================
     # create recovery entry
     #--------------------------------------
-    if [ ! -z "$OEM_RECOVERY" ];then
+    if [ ! -z "$kiwi_oemrecovery" ];then
         #======================================
         # Reboot
         #--------------------------------------
@@ -1897,7 +1897,7 @@ function setupBootLoaderGrubRecovery {
         fbmode=$DEFAULT_VGA
     fi
     gdev_recovery="(hd0,$gdevreco)"
-    rdev_recovery=$OEM_RECOVERY
+    rdev_recovery=$imageRootDevice
     diskByID=$(getDiskID $rdev_recovery)
     if [ "$FSTYPE" = "zfs" ];then
         diskByID="ZFS=kiwipool/ROOT/system-1"
@@ -1918,7 +1918,7 @@ function setupBootLoaderGrubRecovery {
     #======================================
     # create recovery entry
     #--------------------------------------
-    if [ ! -z "$OEM_RECOVERY" ];then
+    if [ ! -z "$kiwi_oemrecovery" ];then
         #======================================
         # Make the cancel option default
         #--------------------------------------
@@ -2013,7 +2013,7 @@ function setupBootLoaderGrub2Recovery {
     #======================================
     # setup ID device names
     #--------------------------------------
-    local rootByID=$(getDiskID $OEM_RECOVERY)
+    local rootByID=$(getDiskID $imageRootDevice)
     local diskByID=$(getDiskID $imageDiskDevice)
     if [ "$FSTYPE" = "zfs" ];then
         rootByID="ZFS=kiwipool/ROOT/system-1"
@@ -2021,7 +2021,7 @@ function setupBootLoaderGrub2Recovery {
     #======================================
     # operate only in recovery mode
     #--------------------------------------
-    if [ -z "$OEM_RECOVERY" ];then
+    if [ -z "$kiwi_oemrecovery" ];then
         return
     fi
     #======================================
@@ -2321,7 +2321,7 @@ function setupBootLoaderS390 {
     #======================================
     # create recovery entry
     #--------------------------------------
-    if [ ! -z "$OEM_RECOVERY" ];then
+    if [ ! -z "$kiwi_oemrecovery" ];then
         systemException \
             "*** zipl: recovery chain loading not implemented ***" \
         "reboot"
@@ -2364,7 +2364,7 @@ function setupBootLoaderSyslinux {
     local initrd=""
     local title=""
     local fbmode=$vga
-    if [ ! -z "$OEM_RECOVERY" ];then
+    if [ ! -z "$kiwi_oemrecovery" ];then
         local gdevreco=$recoid
     fi
     if [ -z "$fbmode" ];then
@@ -2526,7 +2526,7 @@ function setupBootLoaderSyslinux {
     #======================================
     # create recovery entry
     #--------------------------------------
-    if [ ! -z "$OEM_RECOVERY" ];then
+    if [ ! -z "$kiwi_oemrecovery" ];then
         echo "label Recovery"                             >> $conf
         echo "kernel chain"                               >> $conf
         echo "append hd0 $gdevreco"                       >> $conf
@@ -2579,7 +2579,7 @@ function setupBootLoaderGrub {
     local title=""
     local rdisk=""
     local fbmode=$vga
-    if [ ! -z "$OEM_RECOVERY" ];then
+    if [ ! -z "$kiwi_oemrecovery" ];then
         local gdevreco=$((recoid - 1))
     fi
     if [ -z "$fbmode" ];then
@@ -2765,7 +2765,7 @@ function setupBootLoaderGrub {
     #======================================
     # create recovery entry
     #--------------------------------------
-    if [ ! -z "$OEM_RECOVERY" ];then
+    if [ ! -z "$kiwi_oemrecovery" ];then
         echo "title Recovery"                             >> $menu
         echo " rootnoverify (hd0,$gdevreco)"              >> $menu
         echo " chainloader +1"                            >> $menu
@@ -3204,7 +3204,7 @@ function setupBootLoaderYaboot {
     #======================================
     # create recovery entry
     #--------------------------------------
-    if [ ! -z "$OEM_RECOVERY" ];then
+    if [ ! -z "$kiwi_oemrecovery" ];then
         systemException \
             "*** lilo: recovery chain loading not implemented ***" \
         "reboot"
@@ -7919,16 +7919,16 @@ function bootImage {
     #--------------------------------------
     if [ "$LOCAL_BOOT" = "no" ];then
         if [ -z "$KIWI_RECOVERY" ];then
-            if [ ! -z "$OEM_REBOOT" ] || [ ! -z "$REBOOT_IMAGE" ];then
+            if [ ! -z "$kiwi_oemreboot" ] || [ ! -z "$REBOOT_IMAGE" ];then
                 reboot=yes
             fi
-            if [ ! -z "$OEM_REBOOT_INTERACTIVE" ];then
+            if [ ! -z "$kiwi_oemrebootinteractive" ];then
                 rebootinter=yes
             fi
-            if [ ! -z "$OEM_SHUTDOWN" ];then
+            if [ ! -z "$kiwi_oemshutdown" ];then
                 shutdown=yes
             fi
-            if [ ! -z "$OEM_SHUTDOWN_INTERACTIVE" ];then
+            if [ ! -z "$kiwi_oemshutdowninteractive" ];then
                 shutdowninter=yes
             fi
         fi
@@ -10743,7 +10743,7 @@ function setupKernelLinks {
     #======================================
     # setup if overlay filesystem is used
     #--------------------------------------
-    if  [ "$OEM_KIWI_INITRD" = "true" ] || \
+    if  [ "$kiwi_oemkboot" = "true" ] || \
         [ "$PXE_KIWI_INITRD" = "yes" ] || \
         isFSTypeReadOnly
     then

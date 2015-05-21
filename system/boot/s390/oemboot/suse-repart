@@ -28,33 +28,33 @@ function OEMRepartInit {
     #--------------------------------------
     mem_size=`grep MemTotal: /proc/meminfo | tr -dc '[0-9]'`
     swapsize=$(( $mem_size *2 / 1024 ))
-    if [ ! -z "$OEM_SWAPSIZE" ];then
-        swapsize=$OEM_SWAPSIZE
+    if [ ! -z "$kiwi_oemswapMB" ];then
+        swapsize=$kiwi_oemswapMB
     fi
-    if [ ! -z "$OEM_WITHOUTSWAP" ];then
+    if [ ! "$kiwi_oemswap" = "true" ];then
         swapsize=0
     fi
     #======================================
     # initialize recovery partition size
     #--------------------------------------
     recoMByte=0
-    if [ ! -z "$OEM_RECOVERY" ];then
+    if [ ! -z "$kiwi_oemrecovery" ];then
         if [ ! -f /recovery.partition.size ];then
             systemException "Can't find recovery part size info" "reboot"
         fi
         recoMByte=$(cat /recovery.partition.size)
-        if [ ! -z "$OEM_RECOVERY_PART_SIZE" ];then
-            if [ $OEM_RECOVERY_PART_SIZE -lt $recoMByte ];then
+        if [ ! -z "$kiwi_oemrecoveryPartSize" ];then
+            if [ $kiwi_oemrecoveryPartSize -lt $recoMByte ];then
                 Echo "Warning: Specified recovery partition size too small !"
-                Echo "need $recoMByte MB got $OEM_RECOVERY_PART_SIZE MB"
+                Echo "need $recoMByte MB got $kiwi_oemrecoveryPartSize MB"
                 Echo "specified value will be ignored"
             else
-                recoMByte=$OEM_RECOVERY_PART_SIZE
+                recoMByte=$kiwi_oemrecoveryPartSize
             fi
         fi
         recoID=83
-        if [ ! -z "$OEM_RECOVERY_ID" ];then
-            recoID=$OEM_RECOVERY_ID
+        if [ ! -z "$kiwi_oemrecoveryID" ];then
+            recoID=$kiwi_oemrecoveryID
         fi
     fi
     export input=/part.input
@@ -87,7 +87,7 @@ function OEMRepartStandard {
     local diskRootMBytes=$(($(partitionSize $imageRootDevice) / 1024))
     local diskRSysMBytes
     local minAddMBytes
-    if [ -z "$OEM_SYSTEMSIZE" ];then
+    if [ -z "$kiwi_oemrootMB" ];then
         diskRSysMBytes=$((
             diskRootMBytes + diskFreeMBytes - swapsize - recoMByte
         ))
@@ -95,9 +95,9 @@ function OEMRepartStandard {
             swapsize + recoMByte
         ))
     else
-        diskRSysMBytes=$OEM_SYSTEMSIZE
+        diskRSysMBytes=$kiwi_oemrootMB
         minAddMBytes=$((
-            swapsize + recoMByte + OEM_SYSTEMSIZE - diskRootMBytes
+            swapsize + recoMByte + kiwi_oemrootMB - diskRootMBytes
         ))
     fi
     if [ $minAddMBytes -lt 5 ];then
@@ -106,8 +106,8 @@ function OEMRepartStandard {
     #======================================
     # 1) check repart operation
     #--------------------------------------
-    if [ ! -z "$OEM_SYSTEMSIZE" ];then
-        if [ $OEM_SYSTEMSIZE -lt $diskRootMBytes ];then
+    if [ ! -z "$kiwi_oemrootMB" ];then
+        if [ $kiwi_oemrootMB -lt $diskRootMBytes ];then
             # /.../
             # specified oem-systemsize is smaller than root partition
             # ----
@@ -115,7 +115,7 @@ function OEMRepartStandard {
             Echo "Disk won't be re-partitioned !"
             echo
             Echo -b "Current Root partition: $diskRootMBytes MB"
-            Echo -b "==> Requested size: $OEM_SYSTEMSIZE MB"
+            Echo -b "==> Requested size: $kiwi_oemrootMB MB"
             echo
             disableOEMParameters
             disableRepart
@@ -133,8 +133,8 @@ function OEMRepartStandard {
         Echo "Disk won't be re-partitioned !"
         echo
         Echo -b "Minimum required additional size: $minAddMBytes MB:"
-        if [ ! -z "$OEM_SYSTEMSIZE" ];then
-            local share=$((OEM_SYSTEMSIZE - diskRootMBytes))
+        if [ ! -z "$kiwi_oemrootMB" ];then
+            local share=$((kiwi_oemrootMB - diskRootMBytes))
             Echo -b "==> Root's share is: $share MB"
         fi
         if [ $swapsize -gt 0 ];then
@@ -166,10 +166,10 @@ function OEMRepartStandard {
         #======================================
         # count partitions to be created
         #--------------------------------------
-        if [ -z "$OEM_WITHOUTSWAP" ];then
+        if [ "$kiwi_oemswap" = "true" ];then
             newparts=$((newparts + 1))
         fi
-        if [ ! -z "$OEM_RECOVERY" ];then
+        if [ ! -z "$kiwi_oemrecovery" ];then
             newparts=$((newparts + 1))
         fi
         #======================================
@@ -177,7 +177,7 @@ function OEMRepartStandard {
         #--------------------------------------
         deactivateMDRaid
         partsize=+"$diskRSysMBytes"M
-        if [ -z "$OEM_SYSTEMSIZE" ] && [ $newparts -eq 0 ];then
+        if [ -z "$kiwi_oemrootMB" ] && [ $newparts -eq 0 ];then
             partsize=.
         fi
         createPartitionerInput \
@@ -185,23 +185,21 @@ function OEMRepartStandard {
         #======================================
         # add swap partition
         #--------------------------------------
-        if [ -z "$OEM_WITHOUTSWAP" ];then
+        if [ "$kiwi_oemswap" = "true" ];then
             pID=$((pID + 1))
             partsize=+"$swapsize"M
-            if [ -z "$OEM_SYSTEMSIZE" ] && [ $newparts -eq 1 ];then
+            if [ -z "$kiwi_oemrootMB" ] && [ $newparts -eq 1 ];then
                 partsize=.
             fi
             createPartitionerInput \
                 n p:lxswap $pID . $partsize t $pID 82
             newparts=$((newparts - 1))
             swapParam=$pID
-        else
-            OEM_WITHOUTSWAP=1
         fi
         #======================================
         # add recovery partition
         #--------------------------------------
-        if [ ! -z "$OEM_RECOVERY" ];then
+        if [ ! -z "$kiwi_oemrecovery" ];then
             pID=$((pID + 1))
             partsize=+"$recoMByte"M
             createPartitionerInput \
@@ -209,7 +207,7 @@ function OEMRepartStandard {
             newparts=$((newparts - 1))
             recoParam=$pID
         else
-            unset OEM_RECOVERY
+            unset kiwi_oemrecovery
         fi
         #======================================
         # setup new device names
@@ -243,7 +241,7 @@ function OEMRepartSplit {
     #====================================== 
     # no recovery support in union mode
     #--------------------------------------
-    unset OEM_RECOVERY
+    unset kiwi_oemrecovery
     #======================================
     # check for boot partition
     #--------------------------------------
@@ -264,15 +262,15 @@ function OEMRepartSplit {
         local diskRootMBytes=$(($(partitionSize $imageRWDevice) / 1024))
         local diskRSysMBytes
         local minAddMBytes
-        if [ -z "$OEM_SYSTEMSIZE" ];then
+        if [ -z "$kiwi_oemrootMB" ];then
             diskRSysMBytes=$((
                 diskRootMBytes + diskFreeMBytes - swapsize
             ))
             minAddMBytes=$swapsize
         else
-            diskRSysMBytes=$OEM_SYSTEMSIZE
+            diskRSysMBytes=$kiwi_oemrootMB
             minAddMBytes=$((
-                swapsize + OEM_SYSTEMSIZE - diskRootMBytes
+                swapsize + kiwi_oemrootMB - diskRootMBytes
             ))
         fi
         if [ $minAddMBytes -lt 5 ];then
@@ -281,8 +279,8 @@ function OEMRepartSplit {
         #======================================
         # 1) check repart operation
         #--------------------------------------
-        if [ ! -z "$OEM_SYSTEMSIZE" ];then
-            if [ $OEM_SYSTEMSIZE -lt $diskRootMBytes ];then
+        if [ ! -z "$kiwi_oemrootMB" ];then
+            if [ $kiwi_oemrootMB -lt $diskRootMBytes ];then
                 # /.../
                 # specified oem-systemsize is smaller than RW partition
                 # ----
@@ -290,7 +288,7 @@ function OEMRepartSplit {
                 Echo "Disk won't be re-partitioned !"
                 echo
                 Echo -b "Current RW partition: $diskRootMBytes MB"
-                Echo -b "==> Requested size: $OEM_SYSTEMSIZE MB"
+                Echo -b "==> Requested size: $kiwi_oemrootMB MB"
                 echo
                 disableOEMParameters
                 disableRepart
@@ -308,8 +306,8 @@ function OEMRepartSplit {
             Echo "Disk won't be re-partitioned !"
             echo
             Echo -b "Minimum required additional size: $minAddMBytes MB:"
-            if [ ! -z "$OEM_SYSTEMSIZE" ];then
-                local share=$((OEM_SYSTEMSIZE - diskRootMBytes))
+            if [ ! -z "$kiwi_oemrootMB" ];then
+                local share=$((kiwi_oemrootMB - diskRootMBytes))
                 Echo -b "==> Root's share is: $share MB"
             fi
             if [ $swapsize -gt 0 ];then
@@ -339,14 +337,14 @@ function OEMRepartSplit {
         #======================================
         # count partitions to be created
         #--------------------------------------
-        if [ -z "$OEM_WITHOUTSWAP" ];then
+        if [ "$kiwi_oemswap" = "true" ];then
             newparts=$((newparts + 1))
         fi
         #======================================
         # repart cow partition
         #--------------------------------------
         partsize=+"$diskRSysMBytes"M
-        if [ -z "$OEM_SYSTEMSIZE" ] && [ $newparts -eq 0 ];then
+        if [ -z "$kiwi_oemrootMB" ] && [ $newparts -eq 0 ];then
             partsize=.
         fi
         createPartitionerInput \
@@ -354,13 +352,11 @@ function OEMRepartSplit {
         #======================================
         # add swap partition
         #--------------------------------------
-        if [ ! $swapsize = 0 ];then
+        if [ "$kiwi_oemswap" = "true" ];then
             pID=$((pID + 1))
             createPartitionerInput \
                 n p:lxswap $pID . +"$swapsize"M t $pID 82
             swapParam=$pID
-        else
-            OEM_WITHOUTSWAP=1
         fi
         #======================================
         # setup new device names
@@ -397,7 +393,7 @@ function OEMRepartLVM {
     local diskRootMBytes=$(($(partitionSize $LVMdevice) / 1024))
     local diskRSysMBytes
     local minAddMBytes
-    if [ -z "$OEM_SYSTEMSIZE" ];then
+    if [ -z "$kiwi_oemrootMB" ];then
         diskRSysMBytes=$((
             diskRootMBytes + diskFreeMBytes - recoMByte
         ))
@@ -406,10 +402,10 @@ function OEMRepartLVM {
         ))
     else
         diskRSysMBytes=$((
-            OEM_SYSTEMSIZE + swapsize
+            kiwi_oemrootMB + swapsize
         ))
         minAddMBytes=$((
-            swapsize + recoMByte + OEM_SYSTEMSIZE - diskRootMBytes
+            swapsize + recoMByte + kiwi_oemrootMB - diskRootMBytes
         ))
     fi
     if [ $minAddMBytes -lt 5 ];then
@@ -418,8 +414,8 @@ function OEMRepartLVM {
     #======================================
     # 1) check repart operation
     #--------------------------------------
-    if [ ! -z "$OEM_SYSTEMSIZE" ];then
-        if [ $OEM_SYSTEMSIZE -lt $diskRootMBytes ];then
+    if [ ! -z "$kiwi_oemrootMB" ];then
+        if [ $kiwi_oemrootMB -lt $diskRootMBytes ];then
             # /.../
             # specified oem-systemsize is smaller than root partition
             # ----
@@ -427,7 +423,7 @@ function OEMRepartLVM {
             Echo "Disk won't be re-partitioned !"
             echo
             Echo -b "Current Root partition: $diskRootMBytes MB"
-            Echo -b "==> Requested size: $OEM_SYSTEMSIZE MB"
+            Echo -b "==> Requested size: $kiwi_oemrootMB MB"
             echo
             disableOEMParameters
             disableRepart
@@ -445,8 +441,8 @@ function OEMRepartLVM {
         Echo "Disk won't be re-partitioned !"
         echo
         Echo -b "Minimum required additional size: $minAddMBytes MB:"
-        if [ ! -z "$OEM_SYSTEMSIZE" ];then
-            local share=$((OEM_SYSTEMSIZE - diskRootMBytes))
+        if [ ! -z "$kiwi_oemrootMB" ];then
+            local share=$((kiwi_oemrootMB - diskRootMBytes))
             Echo -b "==> Root's share is: $share MB"
         fi
         if [ $swapsize -gt 0 ];then
@@ -484,7 +480,7 @@ function OEMRepartLVM {
         # resize LVM partition
         #--------------------------------------
         partsize=+"$diskRSysMBytes"M
-        if [ $recoMByte -eq 0 ] && [ -z "$OEM_SYSTEMSIZE" ];then
+        if [ $recoMByte -eq 0 ] && [ -z "$kiwi_oemrootMB" ];then
             partsize=.
         fi
         createPartitionerInput \
@@ -493,14 +489,14 @@ function OEMRepartLVM {
         #======================================
         # add recovery partition
         #--------------------------------------
-        if [ ! -z "$OEM_RECOVERY" ];then
+        if [ ! -z "$kiwi_oemrecovery" ];then
             pID=$((pID + 1))
             partsize=+"$recoMByte"M
             createPartitionerInput \
                 u y n p:lxrecovery $pID . $partsize t $pID $recoID
             recoParam=$pID
         else
-            unset OEM_RECOVERY
+            unset kiwi_oemrecovery
         fi
         #======================================
         # setup new device names
@@ -531,7 +527,7 @@ function OEMRepartLVM {
         #======================================
         # Add LVSwap if requested.
         #--------------------------------------
-        if [ -z "$OEM_WITHOUTSWAP" ];then
+        if [ "$kiwi_oemswap" = "true" ];then
             lvcreate --size $swapsize"M" -n LVSwap $kiwi_lvmgroup
             swapParam=yes
         fi
@@ -564,7 +560,7 @@ function OEMPartitionInstall {
     #======================================
     # no recovery support for part install
     #--------------------------------------
-    unset OEM_RECOVERY
+    unset kiwi_oemrecovery
     #======================================
     # check for LVM, resize to full space
     #--------------------------------------
@@ -616,7 +612,7 @@ function OEMRepart {
     # check for luks extension
     #--------------------------------------
     if [ "$haveLuks" = "yes" ];then
-        unset  OEM_RECOVERY
+        unset kiwi_oemrecovery
     fi
     #======================================
     # Initialize
@@ -625,7 +621,7 @@ function OEMRepart {
     #======================================
     # Do the repartitioning
     #--------------------------------------
-    if [ ! -z "$OEM_PARTITION_INSTALL" ];then
+    if [ ! -z "$kiwi_oempartition_install" ];then
         OEMPartitionInstall
     elif [ ! -z "$haveLVM" ];then
         OEMRepartLVM
@@ -669,7 +665,7 @@ function OEMRepart {
     #======================================
     # Create recovery file system
     #--------------------------------------
-    if [ -z "$DONT_PARTITION" ] && [ ! -z "$OEM_RECOVERY" ];then
+    if [ -z "$DONT_PARTITION" ] && [ ! -z "$kiwi_oemrecovery" ];then
         Echo "Creating Recovery filesystem on $imageRecoveryDevice"
         if ! waitForStorageDevice $imageRecoveryDevice &>/dev/null;then
             systemException \
@@ -684,7 +680,7 @@ function OEMRepart {
     #======================================
     # Setup recovery contents
     #--------------------------------------
-    if [ -z "$DONT_PARTITION" ] && [ ! -z "$OEM_RECOVERY" ];then
+    if [ -z "$DONT_PARTITION" ] && [ ! -z "$kiwi_oemrecovery" ];then
         Echo "Setting up recovery archive..."
         mkdir -p /reco-root
         if ! mount $imageRootDevice /reco-root >/dev/null;then
@@ -920,9 +916,9 @@ function createLuksMaps {
 # disableOEMParameters
 #--------------------------------------
 function disableOEMParameters {
-    export OEM_WITHOUTSWAP=1
-    unset OEM_RECOVERY
-    unset OEM_SYSTEMSIZE
+    export kiwi_oemswap=false
+    unset kiwi_oemrecovery
+    unset kiwi_oemrootMB
 }
 
 #======================================

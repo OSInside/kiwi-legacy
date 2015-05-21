@@ -138,7 +138,7 @@ function OEMInstall {
     #======================================
     # Check for install mode combination
     #--------------------------------------
-    if [ ! -z "$OEM_PARTITION_INSTALL" ] && [ ! -z "$pxe" ];then
+    if [ ! -z "$kiwi_oempartition_install" ] && [ ! -z "$pxe" ];then
         systemException \
             "Partition install via remote interface is not supported" \
         "reboot"
@@ -193,13 +193,13 @@ function OEMInstall {
     #======================================
     # Add optional dmraid device(s)
     #--------------------------------------
-    if [ -z "$DISABLE_OEM_ATARAID_SCAN" ];then
+    if [ ! "$kiwi_oemataraid_scan" = "false" ];then
         identifyDMRaid
     fi
     #======================================
     # Add optional multipath device(s)
     #--------------------------------------
-    if [ -z "$DISABLE_OEM_MULTIPATH_SCAN" ];then
+    if [ ! "$kiwi_oemmultipath_scan" = "false" ];then
         identifyMultipath
     fi
     #======================================
@@ -345,7 +345,7 @@ function OEMInstall {
     #======================================
     # Search, ask for the install partition
     #--------------------------------------
-    if [ ! -z "$OEM_PARTITION_INSTALL" ];then
+    if [ ! -z "$kiwi_oempartition_install" ];then
         #======================================
         # Loop mount disk image file
         #--------------------------------------
@@ -560,7 +560,7 @@ function OEMInstall {
         # partition install mode
         # ----
         export DONT_PARTITION=1
-        unset  OEM_RECOVERY
+        unset  kiwi_oemrecovery
         if [ -z "$bID" ];then
             bID=$rID
         fi
@@ -576,7 +576,7 @@ function OEMInstall {
     #======================================
     # Checks and MD5 sums...
     #--------------------------------------
-    if [ -z "$OEM_PARTITION_INSTALL" ];then
+    if [ -z "$kiwi_oempartition_install" ];then
         #======================================
         # Check MBR ID's...
         #--------------------------------------
@@ -626,7 +626,7 @@ function OEMInstall {
     Echo "Entering installation mode for disk: $items"
     if [ -z "$kiwi_oemunattended" ];then
         inst_info=$items
-        if [ -z "$OEM_PARTITION_INSTALL" ];then
+        if [ -z "$kiwi_oempartition_install" ];then
             inst_info=$(basename $items)
         fi
         TEXT_INST=$(
@@ -654,7 +654,7 @@ function OEMInstall {
         #--------------------------------------
         Source=${instItems[$instIndex]}
         Target=${instPaths[$instIndex]}
-        if [ -z "$OEM_PARTITION_INSTALL" ];then
+        if [ -z "$kiwi_oempartition_install" ];then
             if ! read sum1 blocks blocksize zblocks zblocksize < $imageMD5;then
                 systemException \
                     "Reading of $imageMD5 failed" \
@@ -694,7 +694,7 @@ function OEMInstall {
         if [ -z "$pxe" ];then
             dump="cat $Source"
             if [ -x /usr/bin/dcounter ];then
-                if [ ! -z "$OEM_PARTITION_INSTALL" ];then
+                if [ ! -z "$kiwi_oempartition_install" ];then
                     progressP=$(echo $Source | cut -f5 -dp)
                     progressBaseName="$(basename $OEMRootImage) [p$progressP]"
                 else
@@ -704,7 +704,7 @@ function OEMInstall {
                 dump="$dump | dcounter -s $needMByte -l \"$TEXT_LOAD \""
             fi
             Echo "Loading $Source [$Target] "
-            if [ -x /usr/bin/dcounter ] && [ -z "$OEM_SILENTINSTALL" ];then
+            if [ -x /usr/bin/dcounter ] && [ -z "$kiwi_oemsilentinstall" ];then
                 test -e /progress || mkfifo /progress
                 Echo "Calling: eval $dump 2>/progress|dd bs=32k of=$Target"
                 errorLogStop
@@ -756,18 +756,18 @@ function OEMInstall {
     #======================================
     # Clear loops if required
     #--------------------------------------
-    if [ ! -z "$OEM_PARTITION_INSTALL" ];then
+    if [ ! -z "$kiwi_oempartition_install" ];then
         dmsetup remove_all
         losetup -d /dev/$loop
     fi
     #======================================
     # Check the md5sum of the raw disk
     #--------------------------------------
-    if [ -z "$OEM_PARTITION_INSTALL" ] && [ -z "$OEM_SKIPVERIFY" ];then
+    if [ -z "$kiwi_oempartition_install" ] && [ -z "$kiwi_oemskipverify" ];then
         Echo "Install complete, checking data..."
         verifyBytes=$((blocks * blocksize))
         verifyMByte=$((verifyBytes / 1048576))
-        if [ -x /usr/bin/dcounter ] && [ -z "$OEM_SILENTVERIFY" ];then
+        if [ -x /usr/bin/dcounter ] && [ -z "$kiwi_oemsilentverify" ];then
             test -e /progress || mkfifo /progress
             TEXT_VERIFY=$(getText "Verifying %1" $(basename $imageDevice))
             echo "$TEXT_VERIFY ( 0% )" > /progress &
@@ -821,7 +821,7 @@ function OEMInstall {
     #======================================
     # Reread partition table
     #--------------------------------------
-    if [ -z "$OEM_PARTITION_INSTALL" ];then
+    if [ -z "$kiwi_oempartition_install" ];then
         blockdev --rereadpt $imageDevice
         if echo $imageDevice | grep -q "^\/dev\/ram";then
             kpartx -sa $imageDevice
@@ -842,7 +842,7 @@ function OEMInstall {
     #======================================
     # create recovery archive if requested
     #--------------------------------------
-    if [ ! -z "$OEM_RECOVERY_INPLACE" ];then
+    if [ ! -z "$kiwi_oemrecoveryInPlace" ];then
         setupInitialDeviceNames
         if ! mountSystem $imageRootDevice;then
             systemException "Failed to mount root filesystem" "reboot"
@@ -908,7 +908,7 @@ function OEMInstall {
     #======================================
     # Check for bootwait request
     #--------------------------------------
-    if [ ! -z "$OEM_BOOTWAIT" ];then
+    if [ ! -z "$kiwi_oembootwait" ];then
         if [ "$OEMInstallType" = "CD" ];then
             TEXT_DUMP=$TEXT_CDPULL
         else

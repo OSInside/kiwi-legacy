@@ -53,7 +53,7 @@ createFramebufferDevices
 #--------------------------------------
 if \
     [ -z "$UNIONFS_CONFIG" ] && [ -z "$COMBINED_IMAGE" ] && \
-    [ ! "$OEM_KIWI_INITRD" = "true" ]
+    [ ! "$kiwi_oemkboot" = "true" ]
 then
     #======================================
     # use distro initrd tool
@@ -76,7 +76,7 @@ fi
 #======================================
 # 8) copy recovery related files
 #--------------------------------------
-if [ "$LOCAL_BOOT" = "no" ] && [ ! -z "$OEM_RECOVERY" ];then
+if [ "$LOCAL_BOOT" = "no" ] && [ ! -z "$kiwi_oemrecovery" ];then
     Echo "Setting up recovery configuration archive..."
     runHook preRecoverySetup
     mkdir -p /reco-save
