@@ -1109,6 +1109,36 @@ sub test_setAtaRaidScanNoArg {
 }
 
 #==========================================
+# test_setVmcpParmFile
+#------------------------------------------
+sub test_setVmcpParmFile {
+    # ...
+    # Test the setVmcpParmFile method
+    # ---
+    my $this = shift;
+    my $kiwi = $this->{kiwi};
+    my $confDataObj = KIWIXMLOEMConfigData -> new();
+    $confDataObj = $confDataObj -> setVmcpParmFile('foo');
+    my $msg = $kiwi -> getMessage();
+    $this -> assert_str_equals('No messages set', $msg);
+    my $msgT = $kiwi -> getMessageType();
+    $this -> assert_str_equals('none', $msgT);
+    my $state = $kiwi -> getState();
+    $this -> assert_str_equals('No state set', $state);
+    # Test this condition last to get potential error messages
+    $this -> assert_not_null($confDataObj);
+    my $parmfile = $confDataObj -> getVmcpParmFile();
+    $msg = $kiwi -> getMessage();
+    $this -> assert_str_equals('No messages set', $msg);
+    $msgT = $kiwi -> getMessageType();
+    $this -> assert_str_equals('none', $msgT);
+    $state = $kiwi -> getState();
+    $this -> assert_str_equals('No state set', $state);
+    $this -> assert_str_equals('foo', $parmfile);
+    return;
+}
+
+#==========================================
 # test_setMultipathScan
 #------------------------------------------
 sub test_setMultipathScan {

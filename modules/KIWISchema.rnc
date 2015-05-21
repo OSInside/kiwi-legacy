@@ -905,6 +905,29 @@ div {
 }
 
 #==========================================
+# common element <oem-vmcp-parmfile>
+#
+div {
+    k.oem-vmcp-parmfile.content = text
+    k.oem-vmcp-parmfile.attlist = empty
+    k.oem-vmcp-parmfile =
+        ## For oemboot driven images: provide the name of a parmfile
+        ## which is loaded via cmsfscat on s390 systems. Default value
+        ## is set to: PARM-S11
+        [
+        db:para [
+            "For oemboot driven images: provide the name of a parmfile "~
+            "which is loaded via cmsfscat on s390 systems. Default value "~
+            "is set to: PARM-S11"
+        ]
+        ]
+        element oem-vmcp-parmfile {
+            k.oem-vmcp-parmfile.attlist,
+            k.oem-vmcp-parmfile.content
+        }
+}
+
+#==========================================
 # common element <oem-multipath-scan>
 #
 div {
@@ -2541,6 +2564,7 @@ div {
             k.oem-bootwait? &
             k.oem-inplace-recovery? &
             k.oem-kiwi-initrd? &
+            k.oem-vmcp-parmfile? &
             k.oem-partition-install? &
             k.oem-reboot? &
             k.oem-reboot-interactive? &

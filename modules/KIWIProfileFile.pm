@@ -85,6 +85,7 @@ sub new {
         kiwi_lvm
         kiwi_lvmgroup
         kiwi_oemataraid_scan
+        kiwi_oemvmcp_parmfile
         kiwi_oemmultipath_scan
         kiwi_oembootwait
         kiwi_oemkboot
@@ -614,6 +615,7 @@ sub __updateXMLOEMConfig {
     my %oem;
     if ($oemconf) {
         $oem{kiwi_oemataraid_scan}       = $oemconf -> getAtaRaidScan();
+        $oem{kiwi_oemvmcp_parmfile}      = $oemconf -> getVmcpParmFile();
         $oem{kiwi_oemmultipath_scan}     = $oemconf -> getMultipathScan();
         $oem{kiwi_oemswapMB}             = $oemconf -> getSwapSize();
         $oem{kiwi_oemrootMB}             = $oemconf -> getSystemSize();
@@ -666,6 +668,13 @@ sub __updateXMLOEMConfig {
                 'kiwi_oemtitle',$this -> __quote ($oem{kiwi_oemtitle})
             );
         }
+        if ($oem{kiwi_oemvmcp_parmfile}) {
+            $this-> addEntry(
+                'kiwi_oemvmcp_parmfile',
+                $this -> __quote ($oem{kiwi_oemvmcp_parmfile})
+            );
+        }
+        delete $oem{kiwi_oemvmcp_parmfile};
         delete $oem{kiwi_oemtitle};
         delete $oem{kiwi_oemswap};
         delete $oem{kiwi_oemswapMB};
