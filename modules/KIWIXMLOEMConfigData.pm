@@ -45,6 +45,7 @@ sub new {
     #
     # this = {
     #    oem_ataraid_scan         = ''
+    #    oem_vmcp_parmfile        = ''
     #    oen_multipath_scan       = ''
     #    oem_boot_title           = ''
     #    oem_bootwait             = ''
@@ -84,6 +85,7 @@ sub new {
     #------------------------------------------
     my %keywords = map { ($_ => 1) } qw(
         oem_ataraid_scan
+        oem_vmcp_parmfile
         oem_multipath_scan
         oem_boot_title
         oem_bootwait
@@ -140,6 +142,7 @@ sub new {
             return;
         }
         $this -> p_initializeBoolMembers($init);
+        $this->{oem_vmcp_parmfile} = $init->{oem_vmcp_parmfile};
         $this->{oem_device_filter} = $init->{oem_device_filter};
         $this->{oem_boot_title}    = $init->{oem_boot_title};
         $this->{oem_recoveryID}    = $init->{oem_recoveryID};
@@ -179,6 +182,17 @@ sub getAtaRaidScan {
     # ---
     my $this = shift;
     return $this->{oem_ataraid_scan};
+}
+
+#==========================================
+# getVmcpParmFile
+#------------------------------------------
+sub getVmcpParmFile {
+    # ...
+    # Return the setting for the oem-vmcp-parmfile configuration
+    #
+    my $this = shift;
+    return $this->{oem_vmcp_parmfile};
 }
 
 #==========================================
@@ -446,6 +460,12 @@ sub getXMLElement {
         text      => $this -> getAtaRaidScan ()
     );
     $element = $this -> p_addElement(\%initAtaRaidScan);
+    my %initVmcpParmFile = (
+        parent    => $element,
+        childName => 'oem-vmcp-parmfile',
+        text      => $this -> getVmcpParmFile ()
+    );
+    $element = $this -> p_addElement(\%initVmcpParmFile);
     my %initMultipathScan = (
         parent    => $element,
         childName => 'oem-multipath-scan',
@@ -604,6 +624,26 @@ sub setAtaRaidScan {
         caller => 'setAtaRaidScan'
     );
     return $this -> p_setBooleanValue(\%settings);
+}
+
+#==========================================
+# setVmcpParmFile
+#------------------------------------------
+sub setVmcpParmFile {
+    # ...
+    # Set the oem_vmcp_parmfile attribute, if called with no argument the
+    # attribute is erased.
+    # ---
+    my $this = shift;
+    my $val  = shift;
+    if (! $val) {
+        if ($this->{oem_vmcp_parmfile}) {
+            delete $this->{oem_vmcp_parmfile};
+        }
+    } else {
+        $this->{oem_vmcp_parmfile} = $val;
+    }
+    return $this;
 }
 
 #==========================================

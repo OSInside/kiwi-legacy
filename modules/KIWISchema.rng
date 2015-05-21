@@ -1168,6 +1168,29 @@ true/false (default is true)</a:documentation>
   </div>
   <!--
     ==========================================
+    common element <oem-vmcp-parmfile>
+    
+  -->
+  <div>
+    <define name="k.oem-vmcp-parmfile.content">
+      <text/>
+    </define>
+    <define name="k.oem-vmcp-parmfile.attlist">
+      <empty/>
+    </define>
+    <define name="k.oem-vmcp-parmfile">
+      <element name="oem-vmcp-parmfile">
+        <a:documentation>For oemboot driven images: provide the name of a parmfile
+which is loaded via cmsfscat on s390 systems. Default value
+is set to: PARM-S11</a:documentation>
+        <db:para>For oemboot driven images: provide the name of a parmfile which is loaded via cmsfscat on s390 systems. Default value is set to: PARM-S11</db:para>
+        <ref name="k.oem-vmcp-parmfile.attlist"/>
+        <ref name="k.oem-vmcp-parmfile.content"/>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
     common element <oem-multipath-scan>
     
   -->
@@ -3645,6 +3668,9 @@ and setup the system disk</db:para>
           </optional>
           <optional>
             <ref name="k.oem-multipath-scan"/>
+          </optional>
+          <optional>
+            <ref name="k.oem-vmcp-parmfile"/>
           </optional>
           <optional>
             <ref name="k.oem-partition-install"/>

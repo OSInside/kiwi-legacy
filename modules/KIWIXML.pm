@@ -3034,6 +3034,8 @@ sub __createOEMConfig {
     my %oemConfig;
     $oemConfig{oem_ataraid_scan}         =
         $this -> __getChildNodeTextValue($config, 'oem-ataraid-scan');
+    $oemConfig{oem_vmcp_parmfile}        =
+        $this -> __getChildNodeTextValue($config, 'oem-vmcp-parmfile');
     $oemConfig{oem_multipath_scan}         =
         $this -> __getChildNodeTextValue($config, 'oem-multipath-scan');
     $oemConfig{oem_boot_title}           =

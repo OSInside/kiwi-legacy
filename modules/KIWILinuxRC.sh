@@ -4765,6 +4765,10 @@ function loadNetworkCardS390 {
     local host=$1
     local skip="/etc/deactivate_s390_network_config_from_dasd"
     local hostdev=/dev/disk/by-path/ccw-${host}
+    local parmfile_name=PARM-S11
+    if [ ! -z "$kiwi_oemvmcp_parmfile" ];then
+        parmfile_name=$kiwi_oemvmcp_parmfile
+    fi
     Echo "Trying parm file lookup on DASD id: ${host}"
     #======================================
     # check if we got stopped
@@ -4803,8 +4807,8 @@ function loadNetworkCardS390 {
     #======================================
     # load parm file using cmsfscat
     #--------------------------------------
-    Echo "Loading configuration file <UID>.PARM-S11 from ${host}..."
-    local parmfile="$(vmcp query userid | cut -d ' ' -f 1).PARM-S11"
+    Echo "Loading configuration file <UID>.${parmfile_name} from ${host}..."
+    local parmfile="$(vmcp query userid | cut -d ' ' -f 1).$parmfile_name"
     if ! cmsfscat -d $hostdev -a "$parmfile" > /tmp/"$parmfile";then
         Echo "Can't create /tmp/${parmfile} on DASD id: ${host}"
         return 1
