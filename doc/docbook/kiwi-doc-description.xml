@@ -830,14 +830,7 @@
             <para>By default, the oemboot process will create or modify
               a swap, and <filename>/</filename> partition. It is possible to
               influence the behavior by the <filename>oem-*</filename>
-              elements explained below. KIWI uses this information to
-              create the file <filename>/config.oempartition</filename>
-              as part of the automatically created oemboot boot image.
-              The format of the file is a simple
-                <literal>key=value</literal> format and created by the
-                <command>KIWIConfig.sh</command> function named
-                <function>baseSetupOEMPartition</function>. </para>
-
+              elements explained below.</para>
             <screen>&lt;oemconfig&gt;
    &lt;oem-systemsize&gt;2000&lt;/oem-systemsize&gt;
    &lt;oem-... &gt; 
@@ -855,8 +848,7 @@
                       <sgmltag>oem-boot-title</sgmltag> element allows
                     you to set a custom name for the grub menu entry.
                     This value is represented by the
-                      <varname>OEM_BOOT_TITLE</varname> variable in
-                      <filename>config.oempartition</filename>. </para>
+                      <varname>kiwi_oemtitle</varname> variable in the initrd</para>
                 </listitem>
               </varlistentry>
               <varlistentry>
@@ -868,8 +860,7 @@
                     priot to  continuing the boot process after the oem image
                     has been dumped to the designated storage device (default
                     value is false). This value is represented by the
-                    <varname>OEM_BOOTWAIT</varname> variable in
-                    <filename>config.oempartition</filename>. </para>
+                    <varname>kiwi_oembootwait</varname> variable in the initrd</para>
                 </listitem>
               </varlistentry>
               <varlistentry>
@@ -880,8 +871,7 @@
                   <para>Specify if the recovery archive is stored as part of
                     the image or if the archive is to be created at the time
                     the image is deployed to the target storage device.
-                    <varname>OEM_RECOVERY_INPLACE</varname> variable in
-                    <filename>config.oempartition</filename>. </para>
+                    <varname>kiwi_oemrecoveryInPlace</varname> variable in the initrd</para>
                 </listitem>
               </varlistentry>
               <varlistentry>
@@ -899,8 +889,7 @@
                     detect the storage location during every boot. This
                     detection process is part of the oemboot boot image.
                     This value is represented by the
-                    <varname>OEM_KIWI_INITRD</varname> variable in
-                    <filename>config.oempartition</filename>. </para>
+                    <varname>kiwi_oemkboot</varname> variable in the initrd</para>
                 </listitem>
               </varlistentry>
               <varlistentry>
@@ -917,8 +906,7 @@
                       the partition table, such as
                       <sgmltag class="element">oem-swap</sgmltag> are ignored.
                       This value is represented by the
-                      <varname>OEM_PARTITION_INSTALL</varname> variable in
-                      <filename>config.oempartition</filename>. </para>
+                      <varname>kiwi_oempartition_install</varname> variable in the initrd</para>
                 </listitem>
               </varlistentry>
               <varlistentry>
@@ -929,9 +917,8 @@
                   <para>Specify if the system is to be rebooted after
                     the oem image has been deployed to the designated
                     storage device (default value is false). This value
-                    is represented by the <varname>OEM_REBOOT</varname>
-                    variable in
-                    <filename>config.oempartition</filename>. </para>
+                    is represented by the <varname>kiwi_oemreboot</varname>
+                    variable in the initrd</para>
                 </listitem>
               </varlistentry>
               <varlistentry>
@@ -945,8 +932,7 @@
                     reboot a message is posted and must be acknowledged
                     by the user in order for the system to reboot. This value
                     is represented by the
-                    <varname>OEM_REBOOT_INTERACTIVE</varname> variable in
-                    <filename>config.oempartition</filename>. </para>
+                    <varname>kiwi_oemrebootinteractive</varname> variable in the initrd</para>
                 </listitem>
               </varlistentry>
               <varlistentry>
@@ -967,9 +953,8 @@
                       class="directory">/home</filename> partition or in
                     the <filename class="directory">/home</filename>
                     directory is not affected by the recovery process.
-                    This value is represented by the OEM_RECOVERY
-                    variable in
-                    <filename>config.oempartition</filename>. </para>
+                    This value is represented by the kiwi_oemrecovery
+                    variable in the initrd</para>
                 </listitem>
               </varlistentry>
               <varlistentry>
@@ -980,8 +965,7 @@
                   <para>Specify the partition type for the recovery
                     partition. The default is to create a Linux
                     partition (id = 83). This value is represented by
-                    the <varname>OEM_RECOVERY_ID</varname> variable in
-                      <filename>config.oempartition</filename>. </para>
+                    the <varname>kiwi_oemrecoveryID</varname> variable in the initrd</para>
                 </listitem>
               </varlistentry>
               <varlistentry>
@@ -992,9 +976,8 @@
                   <para>Specify if the system should boot in silent mode
                     after the oem image has been deployed to the designated
                     storage device (default value is false). This value
-                    is represented by the <varname>OEM_SILENTBOOT</varname>
-                    variable in
-                    <filename>config.oempartition</filename>. </para>
+                    is represented by the <varname>kiwi_oemsilentboot</varname>
+                    variable in the initrd</para>
                 </listitem>
               </varlistentry>
               <varlistentry>
@@ -1005,9 +988,8 @@
                   <para>Specify if the system is to be powered down after
                     the oem image has been deployed to the designated
                     storage device (default value is false). This value
-                    is represented by the <varname>OEM_SHUTDOWN</varname>
-                    variable in
-                    <filename>config.oempartition</filename>. </para>
+                    is represented by the <varname>kiwi_oemshutdown</varname>
+                    variable in the initrd</para>
                 </listitem>
               </varlistentry>
               <varlistentry>
@@ -1021,8 +1003,7 @@
                     shutdown a message is posted and must be acknowledged
                     by the user in order for the system to power off. This
                     value is represented by the
-                    <varname>OEM_SHUTDOWN_INTERACTIVE</varname> variable in
-                    <filename>config.oempartition</filename>. </para>
+                    <varname>kiwi_oemshutdowninteractive</varname> variable in the initrd</para>
                 </listitem>
               </varlistentry>
               <varlistentry>
@@ -1033,8 +1014,7 @@
                   <para>Specify if a swap partition should be created.
                     The creation of a swap partition is the default
                     behavior. This value is represented by the
-                      <varname>OEM_WITHOUTSWAP</varname> variable in
-                      <filename>config.oempartition</filename>. </para>
+                      <varname>kiwi_oemswap</varname> variable in the initrd</para>
                 </listitem>
               </varlistentry>
               <varlistentry>
@@ -1049,8 +1029,7 @@
                     partition and create a swap partition equal to two
                     times the RAM installed on the system at initial
                     boot time. This value is represented by the
-                      <varname>OEM_SWAPSIZE</varname> variable in
-                      <filename>config.oempartition</filename>.</para>
+                      <varname>kiwi_oemswapMB</varname> variable in the initrd</para>
                 </listitem>
               </varlistentry>
               <varlistentry>
@@ -1073,9 +1052,8 @@
           freespace for each volume must be smaller or equal
           to the size specified with the
           <sgmltag class="element">oem-systemsize</sgmltag>.
-                    This value is represented by the variable
-                      <varname>OEM_SYSTEMSIZE</varname> in
-                      <filename>config.oempartition</filename>.</para>
+          This value is represented by the variable
+          <varname>kiwi_oemrootMB</varname> in the initrd</para>
                 </listitem>
               </varlistentry>
               <varlistentry>
@@ -1087,8 +1065,7 @@
                       occurs automatically without requiering user
                       interaction. If multiple possible target devices are
                       discovered the image is deployed to the first device.
-                      <varname>OEM_UNATTENDED</varname> in
-                      <filename>config.oempartition</filename>. </para>
+                      <varname>kiwi_oemunattended</varname> in the initrd</para>
                 </listitem>
               </varlistentry>
             </variablelist>
