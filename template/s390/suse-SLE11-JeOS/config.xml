@@ -12,6 +12,7 @@
         <bootsplash-theme>SLES</bootsplash-theme>
         <bootloader-theme>SLES</bootloader-theme>
         <rpm-excludedocs>true</rpm-excludedocs>
+        <rpm-check-signatures>false</rpm-check-signatures>
         <locale>en_US</locale>
         <keytable>us.map.gz</keytable>
         <timezone>Europe/Berlin</timezone>

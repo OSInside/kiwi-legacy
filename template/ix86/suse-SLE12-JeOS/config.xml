@@ -22,6 +22,7 @@
         <timezone>Europe/Berlin</timezone>
         <hwclock>utc</hwclock>
         <rpm-excludedocs>true</rpm-excludedocs>
+        <rpm-check-signatures>false</rpm-check-signatures>
     </preferences>
     <preferences profiles="ec2Flavour">
         <type image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES12" bootprofile="ec2" bootkernel="ec2k" bootloader="grub2" kernelcmdline="xencons=xvc0 console=xvc0 multipath=off splash" firmware="ec2"/>
