@@ -33,7 +33,9 @@
 <li><a href="#__checkSelectedBootLoaderIncluded">__checkSelectedBootLoaderIncluded</a></li>
 <li><a href="#__checkSwapRecommended">__checkSwapRecommended</a></li>
 <li><a href="#__checkSystemDiskData">__checkSystemDiskData</a></li>
+<li><a href="#__checkTargetLocation">__checkTargetLocation</a></li>
 <li><a href="#__checkUsersConsistent">__checkUsersConsistent</a></li>
+<li><a href="#__checkVMConfigExist">__checkVMConfigExist</a></li>
 <li><a href="#__checkVMControllerCapable">__checkVMControllerCapable</a></li>
 <li><a href="#__checkVMConverterExist">__checkVMConverterExist</a></li>
 <li><a href="#__checkVMdiskmodeCapable">__checkVMdiskmodeCapable</a></li>
@@ -44,73 +46,102 @@
 <li><a href="#__hasValidArchives">__hasValidArchives</a></li>
 <li><a href="#__hasValidLVMName">__hasValidLVMName</a></li>
 <li><a href="#__haveValidTypeString">__haveValidTypeString</a></li>
+<li><a href="#__here_format">__here_format</a></li>
 <li><a href="#__isFsToolAvailable">__isFsToolAvailable</a></li>
 <li><a href="#__isoHybridCapable">__isoHybridCapable</a></li>
+<li><a href="#__read_pids">__read_pids</a></li>
 </ul>
 <hr>
+<a name="createChecks"><h2>createChecks</h2></a>
+<p>
+     Runtime checks specific to the create step
+<p>
+Defined on line: 106
+<p>
+Called in
+<ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 766</li></ul>
+<a name="new"><h2>new</h2></a>
+<p>
+     Create the RuntimChecker object
+<p>
+Defined on line: 61
+<p>
+Called in
+<ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 467</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 533</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 742</li></ul>
+<a name="prepareChecks"><h2>prepareChecks</h2></a>
+<p>
+     Runtime checks specific to the prepare step
+<p>
+Defined on line: 186
+<p>
+Called in
+<ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 475</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 563</li></ul>
 <a name="__checkContainerHasLXC"><h2>__checkContainerHasLXC</h2></a>
 <p>
      A container build must include the lxc package
 <p>
-Defined on line: 423
+Defined on line: 445
 <p>
 Called in
 <ul>
-<li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 113</li></ul>
+<li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 123</li></ul>
 <a name="__checkCorrectRootFSPermissons"><h2>__checkCorrectRootFSPermissons</h2></a>
 <p>
 Missing<p>
-Defined on line: 1572
+Defined on line: 1742
 <p>
 Called in
 <ul>
-<li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 110</li></ul>
+<li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 120</li></ul>
 <a name="__checkFilesystemTool"><h2>__checkFilesystemTool</h2></a>
 <p>
      Check that the build system has the necessary file
      system tools installed for the requested build.
 <p>
-Defined on line: 551
+Defined on line: 573
 <p>
 Called in
 <ul>
-<li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 128</li></ul>
+<li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 138</li></ul>
 <a name="__checkHaveTypeToBuild"><h2>__checkHaveTypeToBuild</h2></a>
 <p>
 Missing<p>
-Defined on line: 642
+Defined on line: 664
 <p>
 Called in
 <ul>
-<li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 125</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 193</li></ul>
+<li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 135</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 215</li></ul>
 <a name="__checkLVMoemSizeSettings"><h2>__checkLVMoemSizeSettings</h2></a>
 <p>
      Verify that the specified LVM size requirements do not
      exceed the specified OEM system size if specified
 <p>
-Defined on line: 456
+Defined on line: 478
 <p>
 Called in
 <ul>
-<li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 152</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 196</li></ul>
+<li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 162</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 218</li></ul>
 <a name="__checkOEMsizeSettingSufficient"><h2>__checkOEMsizeSettingSufficient</h2></a>
 <p>
      Verify that the image fits within the specified size
 <p>
-Defined on line: 657
+Defined on line: 679
 <p>
 Called in
 <ul>
-<li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 131</li></ul>
+<li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 141</li></ul>
 <a name="__checkPackageManagerExists"><h2>__checkPackageManagerExists</h2></a>
 <p>
      Check that the specified package manager exists
 <p>
-Defined on line: 705
+Defined on line: 727
 <p>
 Called in
 <ul>
-<li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 134</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 199</li></ul>
+<li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 144</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 221</li></ul>
 <a name="__checkPatternTypeAttrValueConsistent"><h2>__checkPatternTypeAttrValueConsistent</h2></a>
 <p>
      Check that the use of the patternType attribute for the <packages>
@@ -119,40 +150,40 @@ Called in
      or if the configuration contains a <packages> element without a
      profile attribute there is nothing to do.
 <p>
-Defined on line: 748
+Defined on line: 770
 <p>
 Called in
 <ul>
-<li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 202</li></ul>
+<li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 224</li></ul>
 <a name="__checkProfileConsistent"><h2>__checkProfileConsistent</h2></a>
 <p>
      Check if the selected profiles exists
 <p>
-Defined on line: 729
+Defined on line: 751
 <p>
 Called in
 <ul>
-<li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 119</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 190</li></ul>
+<li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 129</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 212</li></ul>
 <a name="__checkRepoAliasUnique"><h2>__checkRepoAliasUnique</h2></a>
 <p>
      Verify that the repo alias is unique across the currently active repos
 <p>
-Defined on line: 801
+Defined on line: 823
 <p>
 Called in
 <ul>
-<li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 205</li></ul>
+<li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 227</li></ul>
 <a name="__checkRootRecycleCapability"><h2>__checkRootRecycleCapability</h2></a>
 <p>
      Check the root tree if --recycle-root is set. In that case
      it's not allowed to use a root tree which is based on
      an image cache
 <p>
-Defined on line: 830
+Defined on line: 883
 <p>
 Called in
 <ul>
-<li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 208</li></ul>
+<li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 230</li></ul>
 <a name="__checkSelectedBootLoaderIncluded"><h2>__checkSelectedBootLoaderIncluded</h2></a>
 <p>
      check if the selected bootloader will also be installed into
@@ -163,80 +194,100 @@ Called in
      might complain unnecessarily. In such a case add the package
      in question and remove it in config.sh again.
 <p>
-Defined on line: 368
+Defined on line: 390
 <p>
 Called in
 <ul>
-<li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 116</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 184</li></ul>
+<li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 126</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 206</li></ul>
 <a name="__checkSwapRecommended"><h2>__checkSwapRecommended</h2></a>
 <p>
 Missing<p>
-Defined on line: 293
+Defined on line: 315
 <a name="__checkSystemDiskData"><h2>__checkSystemDiskData</h2></a>
 <p>
 Missing<p>
-Defined on line: 856
+Defined on line: 909
 <p>
 Called in
 <ul>
-<li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 155</li></ul>
+<li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 165</li></ul>
+<a name="__checkTargetLocation"><h2>__checkTargetLocation</h2></a>
+<p>
+     Any given target directory must be outside of /var/cache/kiwi
+     to avoid busy mount because kiwi bind mounts the cache directory
+     into the image root tree to access host caching information
+<p>
+Defined on line: 852
+<p>
+Called in
+<ul>
+<li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 114</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 194</li></ul>
 <a name="__checkUsersConsistent"><h2>__checkUsersConsistent</h2></a>
 <p>
      User definitions may conflict in different profiles in the
      static definition. However, at build time only profiles with
      non conflicting user definitions may be selected.
 <p>
-Defined on line: 965
+Defined on line: 1018
 <p>
 Called in
 <ul>
-<li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 211</li></ul>
+<li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 233</li></ul>
+<a name="__checkVMConfigExist"><h2>__checkVMConfigExist</h2></a>
+<p>
+     Check that a machine config exists for some formats
+<p>
+Defined on line: 1075
+<p>
+Called in
+<ul>
+<li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 111</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 191</li></ul>
 <a name="__checkVMControllerCapable"><h2>__checkVMControllerCapable</h2></a>
 <p>
      If a VM image is being built and the specified vmdisk controller,
      then the qemu-img command on the system must support this option.
 <p>
-Defined on line: 1022
+Defined on line: 1104
 <p>
 Called in
 <ul>
-<li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 140</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 220</li></ul>
+<li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 150</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 242</li></ul>
 <a name="__checkVMConverterExist"><h2>__checkVMConverterExist</h2></a>
 <p>
      Check that the preferred converter exists
 <p>
-Defined on line: 983
+Defined on line: 1036
 <p>
 Called in
 <ul>
-<li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 137</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 217</li></ul>
+<li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 147</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 239</li></ul>
 <a name="__checkVMdiskmodeCapable"><h2>__checkVMdiskmodeCapable</h2></a>
 <p>
      qemu-img command must support specified diskmode
 <p>
-Defined on line: 1090
+Defined on line: 1172
 <p>
 Called in
 <ul>
-<li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 143</li></ul>
+<li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 153</li></ul>
 <a name="__checkYaSTenvironment"><h2>__checkYaSTenvironment</h2></a>
 <p>
 Missing<p>
-Defined on line: 244
+Defined on line: 266
 <p>
 Called in
 <ul>
-<li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 181</li></ul>
+<li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 203</li></ul>
 <a name="__hasBootDescription"><h2>__hasBootDescription</h2></a>
 <p>
      Check if the boot description exists according
      to the selected image type
 <p>
-Defined on line: 1378
+Defined on line: 1461
 <p>
 Called in
 <ul>
-<li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 164</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 229</li></ul>
+<li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 174</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 251</li></ul>
 <a name="__hasBootLoaderTools"><h2>__hasBootLoaderTools</h2></a>
 <p>
      Check if the system will work if the use of
@@ -273,45 +324,130 @@ Called in
 }
 
 ==========================================
+ __checkDeprecatedFilesystem
+------------------------------------------
+    my $this = shift;
+    my $kiwi = $this->{kiwi};
+    my $xml = $this->{xml};
+    my $bldType = $xml -> getImageType();
+    if (! $bldType) {
+        return 1;
+    }
+    my $filesystem = $bldType -> getFilesystem();
+    my $flag = $bldType -> getFlags();
+    if (($filesystem && $filesystem eq 'clicfs') ||
+        ($flag && $flag eq 'clic')) {
+        $kiwi -> warning(
+            "The use of clicfs is obsolete, consider using overlayfs"
+        );
+        $kiwi -> oops();
+        return 1;
+    }
+    return 1;
+}
+
+==========================================
+ __checkMountDependencies
+------------------------------------------
+    my $this = shift;
+    my $kiwi = $this->{kiwi};
+    my $msg;
+    if ($ENV{KIWI_IGNORE_OLD_MOUNTS}) {
+        return 1;
+    }
+    my %proc_result;
+    foreach my $pid ($this->__read_pids('/proc')) {
+        foreach my $task_pid ($this->__read_pids("/proc/$pid/task")) {
+            my $TASK_MOUNTS = FileHandle->new();
+            if ($TASK_MOUNTS->open("/proc/$pid/task/$task_pid/mounts")) {
+                while (my $line = <$TASK_MOUNTS>) {
+                     The search expression to indicate this mount belongs to
+                     some kiwi process is not 100% reliable, but so far the
+                     only solution I could come up with
+                    if ($line =~ /kiwi/) {
+                        $proc_result{$task_pid} = 1;
+                    }
+                }
+                $TASK_MOUNTS->close();
+            }
+        }
+    }
+    my @kiwi_mount_references = sort keys %proc_result;
+    if (! @kiwi_mount_references) {
+        return 1;
+    }
+
+    $msg = <<'    END_MESSAGE';
+    It appears there are processes which are holding onto
+    mounts created by a previous run
+    END_MESSAGE
+    $kiwi->error($this->__here_format($msg));
+
+    my $PS = FileHandle->new();
+    if ($PS->open("pstree -p|")) {
+        while (my $line = <$PS>) {
+            foreach my $ref_pid (@kiwi_mount_references) {
+                if ($line =~ /\($ref_pid\)/) {
+                    $kiwi->note($line);
+                    last;
+                }
+            }
+        }
+        $PS -> close();
+    }
+    $kiwi->note("\n");
+
+    $msg = <<'    END_MESSAGE';
+    This could cause kiwi to fail, or even worse, if you are
+    building on tmpfs, it could totally freeze or crash your
+    machine. Please first clean up these old mounts, or export
+    'KIWI_IGNORE_OLD_MOUNTS=yes' and re-run
+    END_MESSAGE
+    $kiwi->error($this->__here_format($msg));
+
+    return;
+}
+
+==========================================
  __hasBootLoaderTools
 ------------------------------------------
      Check if the selected bootloader can be installed
 <p>
-Defined on line: 1448
+Defined on line: 1618
 <p>
 Called in
 <ul>
-<li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 158</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 223</li></ul>
+<li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 168</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 245</li></ul>
 <a name="__hasContainerName"><h2>__hasContainerName</h2></a>
 <p>
      if the image type is docker or lxc a container name
      must be specified
 <p>
-Defined on line: 1244
+Defined on line: 1326
 <p>
 Called in
 <ul>
-<li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 167</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 232</li></ul>
+<li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 177</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 254</li></ul>
 <a name="__hasValidArchives"><h2>__hasValidArchives</h2></a>
 <p>
      check if the optional given archives doesn't
      include bogus files
 <p>
-Defined on line: 1193
+Defined on line: 1275
 <p>
 Called in
 <ul>
-<li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 214</li></ul>
+<li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 236</li></ul>
 <a name="__hasValidLVMName"><h2>__hasValidLVMName</h2></a>
 <p>
      check if the optional LVM group name doesn't
      exist on the build host
 <p>
-Defined on line: 1147
+Defined on line: 1229
 <p>
 Called in
 <ul>
-<li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 146</li></ul>
+<li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 156</li></ul>
 <a name="__haveValidTypeString"><h2>__haveValidTypeString</h2></a>
 <p>
      if the commandline data set contains buildtype
@@ -321,55 +457,46 @@ Called in
      using prepare + create in one call by the --build
      option
 <p>
-Defined on line: 1275
+Defined on line: 1357
 <p>
 Called in
 <ul>
-<li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 122</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 187</li></ul>
+<li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 132</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 209</li></ul>
+<a name="__here_format"><h2>__here_format</h2></a>
+<p>
+     message text formatter for result of here documents
+<p>
+Defined on line: 1798
+<p>
+Called in
+<ul>
+<li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 1588</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 1610</li></ul>
 <a name="__isFsToolAvailable"><h2>__isFsToolAvailable</h2></a>
 <p>
      Find the tool for a given filesystem name
 <p>
-Defined on line: 1333
+Defined on line: 1416
 <p>
 Called in
 <ul>
-<li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 571</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 591</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 594</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 597</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 619</li></ul>
+<li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 593</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 613</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 616</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 619</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 641</li></ul>
 <a name="__isoHybridCapable"><h2>__isoHybridCapable</h2></a>
 <p>
      If an ISO image is being built check that if an iso hybrid is
      requested, the platform is capable. Check if the uefi capability
      exists if isohybrid is allowed on given platform.
 <p>
-Defined on line: 1503
+Defined on line: 1673
 <p>
 Called in
 <ul>
-<li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 149</li></ul>
-<a name="createChecks"><h2>createChecks</h2></a>
+<li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 159</li></ul>
+<a name="__read_pids"><h2>__read_pids</h2></a>
 <p>
-     Runtime checks specific to the create step
+     proc data help method, to read process ID entries
 <p>
-Defined on line: 105
-<p>
-Called in
-<ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 766</li></ul>
-<a name="new"><h2>new</h2></a>
-<p>
-     Create the RuntimChecker object
-<p>
-Defined on line: 60
+Defined on line: 1778
 <p>
 Called in
 <ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 467</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 533</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 742</li></ul>
-<a name="prepareChecks"><h2>prepareChecks</h2></a>
-<p>
-     Runtime checks specific to the prepare step
-<p>
-Defined on line: 176
-<p>
-Called in
-<ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 475</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 563</li></ul>
+<li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 1563</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 1564</li></ul>

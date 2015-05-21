@@ -16,6 +16,7 @@
 <li><a href="#getChecksumExtension">getChecksumExtension</a></li>
 <li><a href="#new">new</a></li>
 <li><a href="#p_addCreatedFile">p_addCreatedFile</a></li>
+<li><a href="#p_copyUnpackedTreeContent">p_copyUnpackedTreeContent</a></li>
 <li><a href="#p_createBuildDir">p_createBuildDir</a></li>
 <li><a href="#p_createChecksumFiles">p_createChecksumFiles</a></li>
 <li><a href="#p_generateChecksum">p_generateChecksum</a></li>
@@ -30,6 +31,16 @@
 <li><a href="#__generateBuildDirName">__generateBuildDirName</a></li>
 </ul>
 <hr>
+<a name="__generateBuildDirName"><h2>__generateBuildDirName</h2></a>
+<p>
+     Construct the name of the work directory for the ImageBuilder to
+     do its work
+<p>
+Defined on line: 341
+<p>
+Called in
+<ul>
+<li><a href="KIWIImageBuilderBase.html">KIWIImageBuilderBase</a> : 87</li></ul>
 <a name="getBaseBuildDirectory"><h2>getBaseBuildDirectory</h2></a>
 <p>
      Return the path to the build directory that each builder should use to
@@ -39,7 +50,7 @@ Defined on line: 94
 <p>
 Called in
 <ul>
-<li><a href="KIWIContainerBuilder.html">KIWIContainerBuilder</a> : 268</li><li><a href="KIWIContainerBuilder.html">KIWIContainerBuilder</a> : 331</li><li><a href="KIWIContainerBuilder.html">KIWIContainerBuilder</a> : 665</li><li><a href="KIWIImageBuilderBase.html">KIWIImageBuilderBase</a> : 152</li><li><a href="KIWIImageBuilderBase.html">KIWIImageBuilderBase</a> : 173</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 977</li><li><a href="KIWITarArchiveBuilder.html">KIWITarArchiveBuilder</a> : 117</li></ul>
+<li><a href="KIWIContainerBuilder.html">KIWIContainerBuilder</a> : 268</li><li><a href="KIWIContainerBuilder.html">KIWIContainerBuilder</a> : 333</li><li><a href="KIWIContainerBuilder.html">KIWIContainerBuilder</a> : 675</li><li><a href="KIWIFilesystemBuilderBase.html">KIWIFilesystemBuilderBase</a> : 256</li><li><a href="KIWIImageBuilderBase.html">KIWIImageBuilderBase</a> : 180</li><li><a href="KIWIImageBuilderBase.html">KIWIImageBuilderBase</a> : 201</li><li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 977</li><li><a href="KIWITarArchiveBuilder.html">KIWITarArchiveBuilder</a> : 117</li></ul>
 <a name="getChecksumExtension"><h2>getChecksumExtension</h2></a>
 <p>
      Return the file name extension that indicates the checksum
@@ -49,7 +60,7 @@ Defined on line: 106
 <p>
 Called in
 <ul>
-<li><a href="KIWIImageBuilderBase.html">KIWIImageBuilderBase</a> : 171</li></ul>
+<li><a href="KIWIImageBuilderBase.html">KIWIImageBuilderBase</a> : 199</li></ul>
 <a name="new"><h2>new</h2></a>
 <p>
      Create the KIWIImageBuilder object
@@ -63,73 +74,72 @@ Defined on line: 121
 <p>
 Called in
 <ul>
-<li><a href="KIWIContainerBuilder.html">KIWIContainerBuilder</a> : 374</li><li><a href="KIWITarArchiveBuilder.html">KIWITarArchiveBuilder</a> : 134</li></ul>
-<a name="p_createBuildDir"><h2>p_createBuildDir</h2></a>
+<li><a href="KIWIContainerBuilder.html">KIWIContainerBuilder</a> : 380</li><li><a href="KIWIFilesystemBuilderBase.html">KIWIFilesystemBuilderBase</a> : 279</li><li><a href="KIWITarArchiveBuilder.html">KIWITarArchiveBuilder</a> : 134</li></ul>
+<a name="p_copyUnpackedTreeContent"><h2>p_copyUnpackedTreeContent</h2></a>
 <p>
-     Create a directory for the ImageBuilder to do its work
+     Copy the unpacked image tree content to the given target directory
 <p>
 Defined on line: 147
 <p>
 Called in
 <ul>
-<li><a href="KIWITarArchiveBuilder.html">KIWITarArchiveBuilder</a> : 73</li></ul>
+<li><a href="KIWIExtBuilderBase.html">KIWIExtBuilderBase</a> : 194</li></ul>
+<a name="p_createBuildDir"><h2>p_createBuildDir</h2></a>
+<p>
+     Create a directory for the ImageBuilder to do its work
+<p>
+Defined on line: 175
+<p>
+Called in
+<ul>
+<li><a href="KIWIExtBuilderBase.html">KIWIExtBuilderBase</a> : 149</li><li><a href="KIWITarArchiveBuilder.html">KIWITarArchiveBuilder</a> : 73</li></ul>
 <a name="p_createChecksumFiles"><h2>p_createChecksumFiles</h2></a>
 <p>
      Create a checksum file for the container
 <p>
-Defined on line: 165
+Defined on line: 193
 <p>
 Called in
 <ul>
-<li><a href="KIWIContainerBuilder.html">KIWIContainerBuilder</a> : 152</li><li><a href="KIWITarArchiveBuilder.html">KIWITarArchiveBuilder</a> : 94</li></ul>
+<li><a href="KIWIContainerBuilder.html">KIWIContainerBuilder</a> : 152</li><li><a href="KIWIExtBuilderBase.html">KIWIExtBuilderBase</a> : 209</li><li><a href="KIWITarArchiveBuilder.html">KIWITarArchiveBuilder</a> : 94</li></ul>
 <a name="p_generateChecksum"><h2>p_generateChecksum</h2></a>
 <p>
      Create a checksum for the given file
 <p>
-Defined on line: 204
+Defined on line: 232
 <p>
 Called in
 <ul>
-<li><a href="KIWIImageBuilderBase.html">KIWIImageBuilderBase</a> : 176</li></ul>
+<li><a href="KIWIImageBuilderBase.html">KIWIImageBuilderBase</a> : 204</li></ul>
 <a name="p_getBaseWorkingDir"><h2>p_getBaseWorkingDir</h2></a>
 <p>
      Return the name of the base working directory
 <p>
-Defined on line: 246
+Defined on line: 274
 <p>
 Called in
 <ul>
-<li><a href="KIWIContainerBuilder.html">KIWIContainerBuilder</a> : 265</li><li><a href="KIWIContainerBuilder.html">KIWIContainerBuilder</a> : 334</li><li><a href="KIWIContainerBuilder.html">KIWIContainerBuilder</a> : 666</li></ul>
+<li><a href="KIWIContainerBuilder.html">KIWIContainerBuilder</a> : 265</li><li><a href="KIWIContainerBuilder.html">KIWIContainerBuilder</a> : 336</li><li><a href="KIWIContainerBuilder.html">KIWIContainerBuilder</a> : 676</li></ul>
 <a name="p_getCreatedFiles"><h2>p_getCreatedFiles</h2></a>
 <p>
          Return an array ref containing names added with p_addCreatedFiles
 <p>
-Defined on line: 257
+Defined on line: 285
 <p>
 Called in
 <ul>
-<li><a href="KIWIContainerBuilder.html">KIWIContainerBuilder</a> : 163</li><li><a href="KIWITarArchiveBuilder.html">KIWITarArchiveBuilder</a> : 98</li></ul>
+<li><a href="KIWIContainerBuilder.html">KIWIContainerBuilder</a> : 163</li><li><a href="KIWIExtBuilderBase.html">KIWIExtBuilderBase</a> : 216</li><li><a href="KIWITarArchiveBuilder.html">KIWITarArchiveBuilder</a> : 98</li></ul>
 <a name="p_runUserImageScript"><h2>p_runUserImageScript</h2></a>
 <p>
      Execute the images.sh script on the unpacked image tree
 <p>
-Defined on line: 268
+Defined on line: 296
 <p>
 Called in
 <ul>
-<li><a href="KIWIContainerBuilder.html">KIWIContainerBuilder</a> : 82</li><li><a href="KIWITarArchiveBuilder.html">KIWITarArchiveBuilder</a> : 80</li></ul>
+<li><a href="KIWIContainerBuilder.html">KIWIContainerBuilder</a> : 82</li><li><a href="KIWIExtBuilderBase.html">KIWIExtBuilderBase</a> : 156</li><li><a href="KIWITarArchiveBuilder.html">KIWITarArchiveBuilder</a> : 80</li></ul>
 <a name="p_writeConfigFile"><h2>p_writeConfigFile</h2></a>
 <p>
      Write the config file for this image to the given directory
 <p>
-Defined on line: 279
-<a name="__generateBuildDirName"><h2>__generateBuildDirName</h2></a>
-<p>
-     Construct the name of the work directory for the ImageBuilder to
-     do its work
-<p>
-Defined on line: 313
-<p>
-Called in
-<ul>
-<li><a href="KIWIImageBuilderBase.html">KIWIImageBuilderBase</a> : 87</li></ul>
+Defined on line: 307

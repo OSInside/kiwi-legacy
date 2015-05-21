@@ -16,6 +16,7 @@
 <li><a href="#getBootTitle">getBootTitle</a></li>
 <li><a href="#getBootwait">getBootwait</a></li>
 <li><a href="#getDataReport">getDataReport</a></li>
+<li><a href="#getDeviceFilter">getDeviceFilter</a></li>
 <li><a href="#getInplaceRecovery">getInplaceRecovery</a></li>
 <li><a href="#getKiwiInitrd">getKiwiInitrd</a></li>
 <li><a href="#getMultipathScan">getMultipathScan</a></li>
@@ -41,6 +42,7 @@
 <li><a href="#setAtaRaidScan">setAtaRaidScan</a></li>
 <li><a href="#setBootTitle">setBootTitle</a></li>
 <li><a href="#setBootwait">setBootwait</a></li>
+<li><a href="#setDeviceFilter">setDeviceFilter</a></li>
 <li><a href="#setInplaceRecovery">setInplaceRecovery</a></li>
 <li><a href="#setKiwiInitrd">setKiwiInitrd</a></li>
 <li><a href="#setMultipathScan">setMultipathScan</a></li>
@@ -61,6 +63,7 @@
 <li><a href="#setSystemSize">setSystemSize</a></li>
 <li><a href="#setUnattended">setUnattended</a></li>
 <li><a href="#setUnattendedID">setUnattendedID</a></li>
+<li><a href="#setVmcpParmFile">setVmcpParmFile</a></li>
 </ul>
 <h2>Private methods</h2>
 <p>
@@ -72,271 +75,244 @@
 <li><a href="#__noConflictingSettingVerify">__noConflictingSettingVerify</a></li>
 </ul>
 <hr>
-<a name="__isInitConsistent"><h2>__isInitConsistent</h2></a>
-<p>
-     Verify initialization consistency and validity requirements
-<p>
-Defined on line: 1097
-<p>
-Called in
-<ul>
-<li><a href="KIWIXMLOEMConfigData.html">KIWIXMLOEMConfigData</a> : 137</li></ul>
-<a name="__noConflictingSettingPostInst"><h2>__noConflictingSettingPostInst</h2></a>
-<p>
-     Verify that the post install option settings to not conflict
-<p>
-Defined on line: 1124
-<p>
-Called in
-<ul>
-<li><a href="KIWIXMLOEMConfigData.html">KIWIXMLOEMConfigData</a> : 1106</li></ul>
-<a name="__noConflictingSettingSwap"><h2>__noConflictingSettingSwap</h2></a>
-<p>
-     Verify that the swap settings (swap and swapsize) do not conflict
-<p>
-Defined on line: 1154
-<p>
-Called in
-<ul>
-<li><a href="KIWIXMLOEMConfigData.html">KIWIXMLOEMConfigData</a> : 1109</li></ul>
-<a name="__noConflictingSettingUnattended"><h2>__noConflictingSettingUnattended</h2></a>
-<p>
-     Verify that the settings for unattended install do not conflict
-<p>
-Defined on line: 1176
-<p>
-Called in
-<ul>
-<li><a href="KIWIXMLOEMConfigData.html">KIWIXMLOEMConfigData</a> : 1112</li></ul>
-<a name="__noConflictingSettingVerify"><h2>__noConflictingSettingVerify</h2></a>
-<p>
-     Verify that the settings for image verification do not conflict
-<p>
-Defined on line: 1199
-<p>
-Called in
-<ul>
-<li><a href="KIWIXMLOEMConfigData.html">KIWIXMLOEMConfigData</a> : 1115</li></ul>
 <a name="getAtaRaidScan"><h2>getAtaRaidScan</h2></a>
 <p>
      Return the setting for the oem-ataraid-scan configuration
 <p>
-Defined on line: 173
+Defined on line: 179
 <p>
 Called in
 <ul>
-<li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 616</li><li><a href="KIWIXMLOEMConfigData.html">KIWIXMLOEMConfigData</a> : 432</li></ul>
+<li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 618</li><li><a href="KIWIXMLOEMConfigData.html">KIWIXMLOEMConfigData</a> : 460</li></ul>
 <a name="getBootTitle"><h2>getBootTitle</h2></a>
 <p>
      Return the setting for the oem-boot-title configuration
 <p>
-Defined on line: 195
+Defined on line: 212
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 2085</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 622</li><li><a href="KIWIXMLOEMConfigData.html">KIWIXMLOEMConfigData</a> : 444</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 2086</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 626</li><li><a href="KIWIXMLOEMConfigData.html">KIWIXMLOEMConfigData</a> : 478</li></ul>
 <a name="getBootwait"><h2>getBootwait</h2></a>
 <p>
      Return the setting for the oem-bootwait configuration
 <p>
-Defined on line: 206
+Defined on line: 223
 <p>
 Called in
 <ul>
-<li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 632</li><li><a href="KIWIXMLOEMConfigData.html">KIWIXMLOEMConfigData</a> : 450</li></ul>
+<li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 636</li><li><a href="KIWIXMLOEMConfigData.html">KIWIXMLOEMConfigData</a> : 490</li></ul>
 <a name="getDataReport"><h2>getDataReport</h2></a>
 <p>
      return a hash with OEM keys set to a value
 <p>
-Defined on line: 154
+Defined on line: 160
 <p>
 Called in
 <ul>
-<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 2138</li></ul>
+<li><a href="KIWIImageCreator.html">KIWIImageCreator</a> : 2131</li></ul>
+<a name="getDeviceFilter"><h2>getDeviceFilter</h2></a>
+<p>
+     Return the setting for the oem-device-filter configuration
+<p>
+Defined on line: 234
+<p>
+Called in
+<ul>
+<li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 625</li><li><a href="KIWIXMLOEMConfigData.html">KIWIXMLOEMConfigData</a> : 484</li></ul>
 <a name="getInplaceRecovery"><h2>getInplaceRecovery</h2></a>
 <p>
      Return the setting for the oem-inplace-recovery configuration
 <p>
-Defined on line: 217
+Defined on line: 245
 <p>
 Called in
 <ul>
-<li><a href="KIWIBoot.html">KIWIBoot</a> : 2104</li><li><a href="KIWIConfigure.html">KIWIConfigure</a> : 595</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 638</li><li><a href="KIWIXMLOEMConfigData.html">KIWIXMLOEMConfigData</a> : 456</li></ul>
+<li><a href="KIWIBoot.html">KIWIBoot</a> : 2105</li><li><a href="KIWIConfigure.html">KIWIConfigure</a> : 595</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 642</li><li><a href="KIWIXMLOEMConfigData.html">KIWIXMLOEMConfigData</a> : 496</li></ul>
 <a name="getKiwiInitrd"><h2>getKiwiInitrd</h2></a>
 <p>
      Return the setting for the oem-kiwi-initrd configuration
 <p>
-Defined on line: 228
+Defined on line: 256
 <p>
 Called in
 <ul>
-<li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 623</li><li><a href="KIWIXMLOEMConfigData.html">KIWIXMLOEMConfigData</a> : 462</li></ul>
+<li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 627</li><li><a href="KIWIXMLOEMConfigData.html">KIWIXMLOEMConfigData</a> : 502</li></ul>
 <a name="getMultipathScan"><h2>getMultipathScan</h2></a>
 <p>
+     Return the setting for the oem-vmcp-parmfile configuration
+    
+    my $this = shift;
+    return $this->{oem_vmcp_parmfile};
+}
+
+==========================================
+ getMultipathScan
+------------------------------------------
      Return the setting for the oem-multipath-scan configuration
 <p>
-Defined on line: 184
+Defined on line: 201
 <p>
 Called in
 <ul>
-<li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 617</li><li><a href="KIWIXMLOEMConfigData.html">KIWIXMLOEMConfigData</a> : 438</li></ul>
+<li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 620</li><li><a href="KIWIXMLOEMConfigData.html">KIWIXMLOEMConfigData</a> : 472</li></ul>
 <a name="getPartitionInstall"><h2>getPartitionInstall</h2></a>
 <p>
      Return the setting for the oem-partition-install configuration
 <p>
-Defined on line: 239
+Defined on line: 267
 <p>
 Called in
 <ul>
-<li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 621</li><li><a href="KIWIXMLOEMConfigData.html">KIWIXMLOEMConfigData</a> : 468</li></ul>
+<li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 624</li><li><a href="KIWIXMLOEMConfigData.html">KIWIXMLOEMConfigData</a> : 508</li></ul>
 <a name="getReboot"><h2>getReboot</h2></a>
 <p>
      Return the setting for the oem-reboot configuration
 <p>
-Defined on line: 250
+Defined on line: 278
 <p>
 Called in
 <ul>
-<li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 624</li><li><a href="KIWIXMLOEMConfigData.html">KIWIXMLOEMConfigData</a> : 474</li></ul>
+<li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 628</li><li><a href="KIWIXMLOEMConfigData.html">KIWIXMLOEMConfigData</a> : 514</li></ul>
 <a name="getRebootInteractive"><h2>getRebootInteractive</h2></a>
 <p>
      Return the setting for the oem-reboot-interactive configuration
 <p>
-Defined on line: 261
+Defined on line: 289
 <p>
 Called in
 <ul>
-<li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 625</li><li><a href="KIWIXMLOEMConfigData.html">KIWIXMLOEMConfigData</a> : 480</li></ul>
+<li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 629</li><li><a href="KIWIXMLOEMConfigData.html">KIWIXMLOEMConfigData</a> : 520</li></ul>
 <a name="getRecovery"><h2>getRecovery</h2></a>
 <p>
      Return the setting for the oem-recovery configuration
 <p>
-Defined on line: 272
+Defined on line: 300
 <p>
 Called in
 <ul>
-<li><a href="KIWIConfigure.html">KIWIConfigure</a> : 594</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 635</li><li><a href="KIWIXMLOEMConfigData.html">KIWIXMLOEMConfigData</a> : 486</li></ul>
+<li><a href="KIWIConfigure.html">KIWIConfigure</a> : 594</li><li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 639</li><li><a href="KIWIXMLOEMConfigData.html">KIWIXMLOEMConfigData</a> : 526</li></ul>
 <a name="getRecoveryID"><h2>getRecoveryID</h2></a>
 <p>
      Return the setting for the oem-recoveryID configuration
 <p>
-Defined on line: 283
+Defined on line: 311
 <p>
 Called in
 <ul>
-<li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 636</li><li><a href="KIWIXMLOEMConfigData.html">KIWIXMLOEMConfigData</a> : 492</li></ul>
+<li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 640</li><li><a href="KIWIXMLOEMConfigData.html">KIWIXMLOEMConfigData</a> : 532</li></ul>
 <a name="getRecoveryPartSize"><h2>getRecoveryPartSize</h2></a>
 <p>
 Missing<p>
-Defined on line: 294
+Defined on line: 322
 <p>
 Called in
 <ul>
-<li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 637</li><li><a href="KIWIXMLOEMConfigData.html">KIWIXMLOEMConfigData</a> : 495</li><li><a href="KIWIXMLOEMConfigData.html">KIWIXMLOEMConfigData</a> : 499</li></ul>
+<li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 641</li><li><a href="KIWIXMLOEMConfigData.html">KIWIXMLOEMConfigData</a> : 535</li><li><a href="KIWIXMLOEMConfigData.html">KIWIXMLOEMConfigData</a> : 539</li></ul>
 <a name="getShutdown"><h2>getShutdown</h2></a>
 <p>
      Return the setting for the oem-shutdown configuration
 <p>
-Defined on line: 302
+Defined on line: 330
 <p>
 Called in
 <ul>
-<li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 626</li><li><a href="KIWIXMLOEMConfigData.html">KIWIXMLOEMConfigData</a> : 505</li></ul>
+<li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 630</li><li><a href="KIWIXMLOEMConfigData.html">KIWIXMLOEMConfigData</a> : 545</li></ul>
 <a name="getShutdownInteractive"><h2>getShutdownInteractive</h2></a>
 <p>
      Return the setting for the oem-shutdown-interactive configuration
 <p>
-Defined on line: 313
+Defined on line: 341
 <p>
 Called in
 <ul>
-<li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 627</li><li><a href="KIWIXMLOEMConfigData.html">KIWIXMLOEMConfigData</a> : 511</li></ul>
+<li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 631</li><li><a href="KIWIXMLOEMConfigData.html">KIWIXMLOEMConfigData</a> : 551</li></ul>
 <a name="getSilentBoot"><h2>getSilentBoot</h2></a>
 <p>
      Return the setting for the oem-silent-boot configuration
 <p>
-Defined on line: 324
+Defined on line: 352
 <p>
 Called in
 <ul>
-<li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 628</li><li><a href="KIWIXMLOEMConfigData.html">KIWIXMLOEMConfigData</a> : 517</li></ul>
+<li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 632</li><li><a href="KIWIXMLOEMConfigData.html">KIWIXMLOEMConfigData</a> : 557</li></ul>
 <a name="getSilentInstall"><h2>getSilentInstall</h2></a>
 <p>
      Return the setting for the oem-silent-install configuration
 <p>
-Defined on line: 335
+Defined on line: 363
 <p>
 Called in
 <ul>
-<li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 629</li><li><a href="KIWIXMLOEMConfigData.html">KIWIXMLOEMConfigData</a> : 523</li></ul>
+<li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 633</li><li><a href="KIWIXMLOEMConfigData.html">KIWIXMLOEMConfigData</a> : 563</li></ul>
 <a name="getSilentVerify"><h2>getSilentVerify</h2></a>
 <p>
      Return the setting for the oem-silent-verify configuration
 <p>
-Defined on line: 346
+Defined on line: 374
 <p>
 Called in
 <ul>
-<li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 630</li><li><a href="KIWIXMLOEMConfigData.html">KIWIXMLOEMConfigData</a> : 529</li></ul>
+<li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 634</li><li><a href="KIWIXMLOEMConfigData.html">KIWIXMLOEMConfigData</a> : 569</li></ul>
 <a name="getSkipVerify"><h2>getSkipVerify</h2></a>
 <p>
      Return the setting for the oem-skip-verify configuration
 <p>
-Defined on line: 357
+Defined on line: 385
 <p>
 Called in
 <ul>
-<li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 631</li><li><a href="KIWIXMLOEMConfigData.html">KIWIXMLOEMConfigData</a> : 535</li></ul>
+<li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 635</li><li><a href="KIWIXMLOEMConfigData.html">KIWIXMLOEMConfigData</a> : 575</li></ul>
 <a name="getSwap"><h2>getSwap</h2></a>
 <p>
      Return the setting for the oem-swap configuration
 <p>
-Defined on line: 368
+Defined on line: 396
 <p>
 Called in
 <ul>
-<li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 620</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 342</li><li><a href="KIWIXMLOEMConfigData.html">KIWIXMLOEMConfigData</a> : 541</li></ul>
+<li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 623</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 364</li><li><a href="KIWIXMLOEMConfigData.html">KIWIXMLOEMConfigData</a> : 581</li></ul>
 <a name="getSwapSize"><h2>getSwapSize</h2></a>
 <p>
      Return the setting for the oem-swapsize configuration
 <p>
-Defined on line: 379
+Defined on line: 407
 <p>
 Called in
 <ul>
-<li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 618</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 344</li><li><a href="KIWIXMLOEMConfigData.html">KIWIXMLOEMConfigData</a> : 547</li></ul>
+<li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 621</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 366</li><li><a href="KIWIXMLOEMConfigData.html">KIWIXMLOEMConfigData</a> : 587</li></ul>
 <a name="getSystemSize"><h2>getSystemSize</h2></a>
 <p>
      Return the setting for the oem-systemsize configuration
 <p>
-Defined on line: 390
+Defined on line: 418
 <p>
 Called in
 <ul>
-<li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 619</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 343</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 536</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 685</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 941</li><li><a href="KIWIXMLOEMConfigData.html">KIWIXMLOEMConfigData</a> : 553</li></ul>
+<li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 622</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 365</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 558</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 707</li><li><a href="KIWIRuntimeChecker.html">KIWIRuntimeChecker</a> : 994</li><li><a href="KIWIXMLOEMConfigData.html">KIWIXMLOEMConfigData</a> : 593</li></ul>
 <a name="getUnattended"><h2>getUnattended</h2></a>
 <p>
      Return the setting for the oem-unattended configuration
 <p>
-Defined on line: 401
+Defined on line: 429
 <p>
 Called in
 <ul>
-<li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 633</li><li><a href="KIWIXMLOEMConfigData.html">KIWIXMLOEMConfigData</a> : 559</li></ul>
+<li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 637</li><li><a href="KIWIXMLOEMConfigData.html">KIWIXMLOEMConfigData</a> : 599</li></ul>
 <a name="getUnattendedID"><h2>getUnattendedID</h2></a>
 <p>
      Return the setting for the oem-unattended-id configuration
 <p>
-Defined on line: 412
+Defined on line: 440
 <p>
 Called in
 <ul>
-<li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 634</li><li><a href="KIWIXMLOEMConfigData.html">KIWIXMLOEMConfigData</a> : 565</li></ul>
+<li><a href="KIWIProfileFile.html">KIWIProfileFile</a> : 638</li><li><a href="KIWIXMLOEMConfigData.html">KIWIXMLOEMConfigData</a> : 605</li></ul>
 <a name="getXMLElement"><h2>getXMLElement</h2></a>
 <p>
      Return an XML Element representing the object's data
 <p>
-Defined on line: 423
+Defined on line: 451
 <a name="new"><h2>new</h2></a>
 <p>
      Create the KIWIXMLOEMConfigData object
@@ -345,9 +321,11 @@ Defined on line: 423
     
      this = {
         oem_ataraid_scan         = ''
+        oem_vmcp_parmfile        = ''
         oen_multipath_scan       = ''
         oem_boot_title           = ''
         oem_bootwait             = ''
+        oem_device_filter        = ''
         oem_inplace_recovery     = ''
         oem_kiwi_initrd          = ''
         oem_partition_install    = ''
@@ -373,129 +351,135 @@ Defined on line: 40
 <p>
 Called in
 <ul>
-<li><a href="KIWIXML.html">KIWIXML</a> : 3046</li></ul>
+<li><a href="KIWIXML.html">KIWIXML</a> : 3085</li></ul>
 <a name="setAtaRaidScan"><h2>setAtaRaidScan</h2></a>
 <p>
      Set the oem_ataraid_scan attribute, if called with no argument the
      value is set to false.
 <p>
-Defined on line: 574
+Defined on line: 614
 <a name="setBootTitle"><h2>setBootTitle</h2></a>
 <p>
      Set the oem_boot_title attribute, if called with no argument the
      attribute is erased
 <p>
-Defined on line: 610
+Defined on line: 670
 <a name="setBootwait"><h2>setBootwait</h2></a>
 <p>
      Set the oem_bootwait attribute, if called with no argument the
      value is set to false. If called with an argument all other potentially
      conflicting settings are set to false
 <p>
-Defined on line: 630
+Defined on line: 690
+<a name="setDeviceFilter"><h2>setDeviceFilter</h2></a>
+<p>
+     Set the oem_device_filter attribute, if called with no argument the
+     attribute is erased
+<p>
+Defined on line: 718
 <a name="setInplaceRecovery"><h2>setInplaceRecovery</h2></a>
 <p>
      Set the oem_inplace_recovery attribute, if called with no argument the
      value is set to false.
 <p>
-Defined on line: 658
+Defined on line: 738
 <a name="setKiwiInitrd"><h2>setKiwiInitrd</h2></a>
 <p>
      Set the oem_kiwi_initrd attribute, if called with no argument is given the
      value is set to false.
 <p>
-Defined on line: 676
+Defined on line: 756
 <a name="setMultipathScan"><h2>setMultipathScan</h2></a>
 <p>
      Set the oem_multipath_scan attribute, if called with no argument the
      value is set to false.
 <p>
-Defined on line: 592
+Defined on line: 652
 <a name="setPartitionInstall"><h2>setPartitionInstall</h2></a>
 <p>
      Set the oem_partition_install attribute, if called with no argument is given the
      value is set to false.
 <p>
-Defined on line: 694
+Defined on line: 774
 <a name="setReboot"><h2>setReboot</h2></a>
 <p>
      Set the reboot attribute, if called with no argument the
      value is set to false. If called with an argument all other potentially
      conflicting settings are set to false
 <p>
-Defined on line: 712
+Defined on line: 792
 <a name="setRebootInteractive"><h2>setRebootInteractive</h2></a>
 <p>
      Set the oem_reboot_interactive attribute, if called with no argument the
      value is set to false. If called with an argument all other potentially
      conflicting settings are set to false
 <p>
-Defined on line: 740
+Defined on line: 820
 <a name="setRecovery"><h2>setRecovery</h2></a>
 <p>
      Set the recovery attribute, if called with no argument the
      value is set to false.
 <p>
-Defined on line: 770
+Defined on line: 850
 <a name="setRecoveryID"><h2>setRecoveryID</h2></a>
 <p>
      Set the recoveryID attribute, if called with no argument the
      attribute is removed
 <p>
-Defined on line: 788
+Defined on line: 868
 <a name="setRecoveryPartSize"><h2>setRecoveryPartSize</h2></a>
 <p>
      Set the recovery partition size attribute, if called
      with no argument the attribute is removed.
      Argument is expected to be a string or numeric value
 <p>
-Defined on line: 815
+Defined on line: 895
 <a name="setShutdown"><h2>setShutdown</h2></a>
 <p>
      Set the shutdown attribute, if called with no argument the
      value is set to false. If called with an argument all other potentially
      conflicting settings are set to false
 <p>
-Defined on line: 844
+Defined on line: 924
 <a name="setShutdownInteractive"><h2>setShutdownInteractive</h2></a>
 <p>
      Set the oem_shutdown_interactive attribute, if called with no argument the
      value is set to false. If called with an argument all other potentially
      conflicting settings are set to false
 <p>
-Defined on line: 872
+Defined on line: 952
 <a name="setSilentBoot"><h2>setSilentBoot</h2></a>
 <p>
      Set the oem_silent_boot attribute, if called with no argument the
      value is set to false.
 <p>
-Defined on line: 901
+Defined on line: 981
 <a name="setSilentInstall"><h2>setSilentInstall</h2></a>
 <p>
      Set the oem_silent_install attribute, if called with no argument the
      value is set to false.
 <p>
-Defined on line: 919
+Defined on line: 999
 <a name="setSilentVerify"><h2>setSilentVerify</h2></a>
 <p>
      Set the oem_silent_verify attribute, if called with no argument the
      value is set to false. If called with an argument all other potentially
      conflicting settings are set to false
 <p>
-Defined on line: 937
+Defined on line: 1017
 <a name="setSkipVerify"><h2>setSkipVerify</h2></a>
 <p>
      Set the oem_skip_verify attribute, if called with no argument the
      value is set to false. If called with an argument all other potentially
      conflicting settings are set to false
 <p>
-Defined on line: 962
+Defined on line: 1042
 <a name="setSwap"><h2>setSwap</h2></a>
 <p>
      Set the swap attribute, if called with no argument the
      value is set to false and the swapsize attribute is removed
 <p>
-Defined on line: 987
+Defined on line: 1067
 <p>
 Called in
 <ul>
@@ -505,22 +489,73 @@ Called in
      Set the oem_swapsize attribute, if called with no argument the
      attribute is removed and the swap attribute is set to false
 <p>
-Defined on line: 1011
+Defined on line: 1091
 <a name="setSystemSize"><h2>setSystemSize</h2></a>
 <p>
      Set the oem_systemsize attribute, if called with no argument the
      attribute is removed
 <p>
-Defined on line: 1031
+Defined on line: 1111
 <a name="setUnattended"><h2>setUnattended</h2></a>
 <p>
      Set the unattended attribute, if called with no argument the
      value is set to false the oem_unattended_id attribute is removed
 <p>
-Defined on line: 1049
+Defined on line: 1129
 <a name="setUnattendedID"><h2>setUnattendedID</h2></a>
 <p>
      Set the oem_unattended_id attribute, if called with no argument the
      attribute is removed and the unattended attribute is set to false.
 <p>
-Defined on line: 1075
+Defined on line: 1155
+<a name="setVmcpParmFile"><h2>setVmcpParmFile</h2></a>
+<p>
+     Set the oem_vmcp_parmfile attribute, if called with no argument the
+     attribute is erased.
+<p>
+Defined on line: 632
+<a name="__isInitConsistent"><h2>__isInitConsistent</h2></a>
+<p>
+     Verify initialization consistency and validity requirements
+<p>
+Defined on line: 1177
+<p>
+Called in
+<ul>
+<li><a href="KIWIXMLOEMConfigData.html">KIWIXMLOEMConfigData</a> : 141</li></ul>
+<a name="__noConflictingSettingPostInst"><h2>__noConflictingSettingPostInst</h2></a>
+<p>
+     Verify that the post install option settings to not conflict
+<p>
+Defined on line: 1204
+<p>
+Called in
+<ul>
+<li><a href="KIWIXMLOEMConfigData.html">KIWIXMLOEMConfigData</a> : 1186</li></ul>
+<a name="__noConflictingSettingSwap"><h2>__noConflictingSettingSwap</h2></a>
+<p>
+     Verify that the swap settings (swap and swapsize) do not conflict
+<p>
+Defined on line: 1234
+<p>
+Called in
+<ul>
+<li><a href="KIWIXMLOEMConfigData.html">KIWIXMLOEMConfigData</a> : 1189</li></ul>
+<a name="__noConflictingSettingUnattended"><h2>__noConflictingSettingUnattended</h2></a>
+<p>
+     Verify that the settings for unattended install do not conflict
+<p>
+Defined on line: 1256
+<p>
+Called in
+<ul>
+<li><a href="KIWIXMLOEMConfigData.html">KIWIXMLOEMConfigData</a> : 1192</li></ul>
+<a name="__noConflictingSettingVerify"><h2>__noConflictingSettingVerify</h2></a>
+<p>
+     Verify that the settings for image verification do not conflict
+<p>
+Defined on line: 1279
+<p>
+Called in
+<ul>
+<li><a href="KIWIXMLOEMConfigData.html">KIWIXMLOEMConfigData</a> : 1195</li></ul>
