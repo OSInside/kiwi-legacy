@@ -4782,14 +4782,13 @@ function loadNetworkCardS390 {
         return 1
     fi
     #======================================
-    # check for required modules
+    # check for required kernel support
     #--------------------------------------
-    if ! lsmod | grep -q vmcp;then
-        if ! modprobe vmcp;then
-            Echo "Failed to load required module vmcp"
-            return 1
-        fi
-    fi
+    # If loading vmcp fails we assume the support for it has been
+    # compiled into the kernel. If this is not the case we will run
+    # into an exception on 'vmcp query' which is the intended way
+    # to handle the error condition
+    modprobe vmcp &>/dev/null
     #======================================
     # bring host online
     #--------------------------------------
