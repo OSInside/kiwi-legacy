@@ -29,6 +29,7 @@ License:        GPL-2.0
 Group:          System/Management
 Version:        7.02.50
 Provides:       kiwi-schema = 6.2
+Provides:       kiwi-image:aci
 Provides:       kiwi-image:lxc
 Provides:       kiwi-image:tbz
 Provides:       kiwi:%{_mandir}/man1/kiwi.1.gz
