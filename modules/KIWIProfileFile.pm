@@ -110,6 +110,7 @@ sub new {
         kiwi_oemunattended_id
         kiwi_profiles
         kiwi_ramonly
+        kiwi_target_blocksize
         kiwi_revision
         kiwi_showlicense
         kiwi_splash_theme
@@ -376,6 +377,7 @@ sub __updateXMLType {
     $data{kiwi_hybrid}           = $type -> getHybrid();
     $data{kiwi_hybridpersistent} = $type -> getHybridPersistent();
     $data{kiwi_ramonly}          = $type -> getRAMOnly();
+    $data{kiwi_target_blocksize} = $type -> getTargetBlockSize();
     $data{kiwi_cmdline}          = $type -> getKernelCmdOpts();
     $data{kiwi_firmware}         = $type -> getFirmwareType();
     $data{kiwi_bootloader}       = $type -> getBootLoader();

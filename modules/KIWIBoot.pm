@@ -1354,7 +1354,7 @@ sub setupInstallStick {
     # Copy boot data on first partition
     #------------------------------------------
     $kiwi -> info ("Installing boot data to disk");
-    if (! KIWIGlobals -> instance() -> mount ($boot, $loopdir)) {
+    if (! KIWIGlobals -> instance() -> mount ($boot, $loopdir, undef, $xml)) {
         $kiwi -> failed ();
         $kiwi -> error  ("Couldn't mount boot partition: $status");
         $kiwi -> failed ();
@@ -1420,7 +1420,7 @@ sub setupInstallStick {
         $kiwi -> info ("Installing image data to disk");
         if (! KIWIGlobals
             -> instance()
-            -> mount ($data, $loopdir)) {
+            -> mount ($data, $loopdir, undef, $xml)) {
             $kiwi -> failed ();
             $kiwi -> error  ("Couldn't mount data partition: $status");
             $kiwi -> failed ();
@@ -2571,7 +2571,8 @@ sub setupBootDisk {
         #------------------------------------------
         if (! KIWIGlobals
             -> instance()
-            -> mount ($root,$loopdir,$type->{fsmountoptions})) {
+            -> mount ($root, $loopdir, $type->{fsmountoptions}, $xml
+        )) {
             $this -> cleanStack ();
             return;
         }
@@ -2788,7 +2789,7 @@ sub setupBootDisk {
     #==========================================
     # Mount boot space on this disk
     #------------------------------------------
-    if (! KIWIGlobals -> instance() -> mount ($boot, $loopdir)) {
+    if (! KIWIGlobals -> instance() -> mount ($boot, $loopdir, undef, $xml)) {
         $kiwi -> failed ();
         $kiwi -> error  ("Couldn't mount image boot device: $boot");
         $kiwi -> failed ();
@@ -2805,7 +2806,9 @@ sub setupBootDisk {
         }
         my $jump = $deviceMap{jump};
         KIWIQX::qxx ("mkdir -p $loopdir/$subdir");
-        if (! KIWIGlobals -> instance() -> mount ($jump, "$loopdir/$subdir")) {
+        if (! KIWIGlobals -> instance() -> mount (
+            $jump, "$loopdir/$subdir", undef, $xml
+        )) {
             $kiwi -> failed ();
             $kiwi -> error  ("Couldn't mount image jump device: $boot");
             $kiwi -> failed ();
@@ -5523,7 +5526,9 @@ sub installBootLoader {
         #==========================================
         # Mount boot partition
         #------------------------------------------
-        if (! KIWIGlobals -> instance() -> mount ($bootdev, $mount)) {
+        if (! KIWIGlobals -> instance() -> mount (
+            $bootdev, $mount, undef, $xml
+        )) {
             $kiwi -> error ("Couldn't mount boot partition: $bootdev");
             $kiwi -> failed ();
             return;
@@ -5852,7 +5857,9 @@ sub installBootLoader {
             $result = $? >> 8;
         } else {
             $kiwi -> info ("Installing extlinux on device: $bootdev");
-            if (KIWIGlobals -> instance() -> mount ($bootdev, $mount)) {
+            if (KIWIGlobals -> instance() -> mount (
+                $bootdev, $mount, undef, $xml
+            )) {
                 $status = KIWIQX::qxx (
                     "extlinux --install $mount/boot/syslinux 2>&1"
                 );
@@ -5909,7 +5916,9 @@ sub installBootLoader {
         #==========================================
         # mount boot device...
         #------------------------------------------
-        if (! KIWIGlobals -> instance() -> mount ($bootdev, $mount)) {
+        if (! KIWIGlobals -> instance() -> mount (
+            $bootdev, $mount, undef, $xml
+        )) {
             $kiwi -> error  ("Can't mount boot partition: $status");
             $kiwi -> failed ();
             $this -> cleanStack ();
@@ -6087,47 +6096,15 @@ sub bindDiskDevice {
     my $system = shift;
     my $kiwi   = $this->{kiwi};
     my @cStack = @{$this->{cleanupStack}};
+    my $global = KIWIGlobals -> instance();
     my $status;
     my $result;
-    my $loop;
     #==========================================
     # bind file to loop device
     #------------------------------------------
-    $status = KIWIQX::qxx (
-        "/sbin/losetup -f --show $system 2>/dev/null"
-    );
-    $result = $? >> 8;
-    chomp $status;
-    if ($result != 0) {
-        # /.../
-        # first losetup call has failed, try to find free loop
-        # device manually even though it's most likely that this
-        # search will fail too. The following is only useful for
-        # older version of losetup which doesn't understand the
-        # option combination -f --show
-        # ----
-        my $loopfound = 0;
-        for (my $id=0;$id<=7;$id++) {
-            $status.= KIWIQX::qxx ( "/sbin/losetup /dev/loop$id $system 2>&1" );
-            $result = $? >> 8;
-            if ($result == 0) {
-                $loopfound = 1;
-                $loop = "/dev/loop".$id;
-                $this->{loop} = $loop;
-                push @cStack,"losetup -d $loop";
-                $this->{cleanupStack} = \@cStack;
-                last;
-            }
-        }
-        if (! $loopfound) {
-            $kiwi -> loginfo ("Failed binding loop device: $status");
-            return;
-        }
-        return $this;
-    }
-    $loop = $status;
+    my $loop = $global -> loop_setup($system, $this->{xml});
     $this->{loop} = $loop;
-    push @cStack,"losetup -d $loop";
+    push @cStack, $global -> loop_delete_command($loop);
     $this->{cleanupStack} = \@cStack;
     return $this;
 }

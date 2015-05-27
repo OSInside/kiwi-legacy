@@ -144,6 +144,87 @@ sub isDisk {
 }
 
 #==========================================
+# loop_setup
+#------------------------------------------
+sub loop_setup {
+    # /.../
+    # implements a generic losetup method for different block sizes
+    # ---
+    my $this = shift;
+    my $source = shift;
+    my $xml = shift;
+    my $kiwi = $this->{kiwi};
+    my $locator = KIWILocator -> instance();
+    my $losetup_exec = $locator -> getExecPath("losetup");
+    if (! $losetup_exec) {
+        $kiwi -> error("losetup not found on build system");
+        $kiwi -> failed();
+        return;
+    }
+    my $result = KIWIQX::qxx (
+        "$losetup_exec -f --show $source 2>&1"
+    );
+    my $status = $? >> 8;
+    if ($status != 0) {
+        $kiwi -> error("Couldn't loop bind file $source: $status");
+        $kiwi -> failed();
+        return;
+    }
+    chomp $result;
+    if ($xml) {
+        my $bldType = $xml -> getImageType();
+        my $blocksize = $bldType -> getTargetBlockSize();
+        if (($blocksize) && ($blocksize > 512)) {
+            # Once there is a loop driver with custom block size setup
+            # available check here for a configured target_blocksize and
+            # apply the value to the loop
+        }
+    }
+    return $result;
+}
+
+#==========================================
+# loop_delete
+#------------------------------------------
+sub loop_delete {
+    # /.../
+    # implements a generic loop deletion method
+    # ---
+    my $this = shift;
+    my $loop = shift;
+    my $kiwi = $this->{kiwi};
+    my $locator = KIWILocator -> instance();
+    my $losetup_exec = $locator -> getExecPath("losetup");
+    if (! $losetup_exec) {
+        $kiwi -> error("losetup not found on build system");
+        $kiwi -> failed();
+        return;
+    }
+    my $result = KIWIQX::qxx (
+        "$losetup_exec -d $loop 2>&1"
+    );
+    my $status = $? >> 8;
+    if ($status != 0) {
+        $kiwi -> error("Couldn't delete loop $loop: $status");
+        $kiwi -> failed();
+        return;
+    }
+    return $this;
+}
+
+#==========================================
+# loop_delete_command
+#------------------------------------------
+sub loop_delete_command {
+    # /.../
+    # implements a generic loop deletion command creation method
+    # ---
+    my $this = shift;
+    my $loop = shift;
+    return "losetup -d $loop"
+}
+
+#==========================================
 # mount
 #------------------------------------------
 sub mount {
@@ -155,6 +236,7 @@ sub mount {
     my $source = shift;
     my $dest   = shift;
     my $opts   = shift;
+    my $xml    = shift;
     my $kiwi   = $this->{kiwi};
     my $salt   = int (rand(20));
     my $cipher = $this->{data}->{LuksCipher};
@@ -208,21 +290,12 @@ sub mount {
                 }
                 $source = $pdev;
             } else {
-                $status = KIWIQX::qxx (
-                    "/sbin/losetup -f --show $source 2>/dev/null"
-                );
-                chomp $status;
-                $result = $? >> 8;
-                if ($result != 0) {
-                    $kiwi -> error  (
-                        "Couldn't loop bind disk file: $status"
-                    );
-                    $kiwi -> failed ();
+                my $loop = $this -> loop_setup($source, $xml);
+                if (! $loop) {
                     $this -> umount();
                     return;
                 }
-                my $loop = $status;
-                push @UmountStack,"losetup -d $loop";
+                push @UmountStack, $this -> loop_delete_command($loop);
                 $this->{UmountStack} = \@UmountStack;
                 $status = KIWIQX::qxx ("kpartx -sa $loop 2>&1");
                 $result = $? >> 8;
@@ -283,19 +356,12 @@ sub mount {
     #------------------------------------------
     if ($type eq "luks") {
         if (-f $source) {
-            $status = KIWIQX::qxx (
-                "/sbin/losetup -f --show $source 2>/dev/null"
-            );
-            chomp $status;
-            $result = $? >> 8;
-            if ($result != 0) {
-                $kiwi -> error  ("Couldn't loop bind logical extend: $status");
-                $kiwi -> failed ();
+            $source = $this -> loop_setup($source, $xml);
+            if (! $source) {
                 $this -> umount();
                 return;
             }
-            $source = $status;
-            push @UmountStack,"losetup -d $source";
+            push @UmountStack, $this -> loop_delete_command($source);
             $this->{UmountStack} = \@UmountStack;
         }
         if ($cipher) {

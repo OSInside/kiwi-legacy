@@ -4004,7 +4004,7 @@ function searchImageISODevice {
                 "Failed to mount ISO storage device !" \
             "reboot"
         fi
-        biosBootDevice=$(losetup -f --show /isofrom/$isofrom_system)
+        biosBootDevice=$(loop_setup /isofrom/$isofrom_system)
         if [ ! $? = 0 ];then
             systemException \
                 "Failed to loop setup ISO system !" \
@@ -5996,7 +5996,7 @@ function kiwiMount {
     # decide for a mount method
     #--------------------------------------
     if [ ! -z "$lop" ];then
-        src=$(losetup -f --show $lop)
+        src=$(loop_setup $lop)
         if [ ! -e $src ]; then
             return 1
         fi
@@ -8666,7 +8666,7 @@ function createCustomHybridPersistent {
     #======================================
     # loop setup cow space
     #--------------------------------------
-    kiwi_cowdevice=$(losetup -f --show /cow/$kiwi_cowsystem)
+    kiwi_cowdevice=$(loop_setup /cow/$kiwi_cowsystem)
     if [ ! -e $kiwi_cowdevice ];then
         systemException \
             "Failed to loop setup cow file !" \
@@ -10761,6 +10761,32 @@ function backupGPT {
     local device=$1
     local pcount=$2
     dd if=$device bs=1 count=$(((128 * pcount) + 1024))
+}
+#======================================
+# loop_setup
+#--------------------------------------
+function loop_setup {
+    local IFS=$IFS_ORIG
+    local target=$1
+    local loop=$(losetup -f --show $target)
+    if [ ! -e "$loop" ];then
+        return 1
+    fi
+    if [ "0$kiwi_target_blocksize" -gt 512 ];then
+        # Once there is a loop driver with custom block size setup
+        # available check here for a configured target_blocksize and
+        # apply the value to the loop
+        :
+    fi
+    echo $loop
+}
+#======================================
+# loop_delete
+#--------------------------------------
+function loop_delete {
+    local IFS=$IFS_ORIG
+    local target=$1
+    losetup -d $target
 }
 #======================================
 # initialize

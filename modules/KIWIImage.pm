@@ -3698,12 +3698,8 @@ sub setupEncoding {
         return;
     }
     if (! $device) {
-        $data = KIWIQX::qxx ("/sbin/losetup -f --show $out 2>/dev/null");
-        $code = $? >> 8;
-        chomp $data;
-        if ($code != 0) {
-            $kiwi -> error  ("Couldn't loop bind logical extend: $data");
-            $kiwi -> failed ();
+        $data = KIWIGlobals -> instance() -> loop_setup($out, $this->{xml});
+        if (! $data) {
             return;
         }
     } else {
@@ -4890,7 +4886,7 @@ sub cleanLuks {
     }
     if ($loop) {
         foreach my $ldev (@{$loop}) {
-            KIWIQX::qxx ("losetup -d $ldev 2>&1");
+            KIWIGlobals -> instance() -> loop_delete($ldev);
         }
     }
     return;

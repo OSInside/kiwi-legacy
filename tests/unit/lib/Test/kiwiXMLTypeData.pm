@@ -933,6 +933,27 @@ sub test_getZiplTargetType {
 }
 
 #==========================================
+# test_getTargetBlockSize
+#------------------------------------------
+sub test_getTargetBlockSize {
+    # ...
+    # Test the getTargetBlockSize method
+    # ---
+    my $this = shift;
+    my $kiwi = $this -> {kiwi};
+    my $typeDataObj = $this -> __getTypeObj();
+    my $blocksize = $typeDataObj -> getTargetBlockSize();
+    my $msg = $kiwi -> getMessage();
+    $this -> assert_str_equals('No messages set', $msg);
+    my $msgT = $kiwi -> getMessageType();
+    $this -> assert_str_equals('none', $msgT);
+    my $state = $kiwi -> getState();
+    $this -> assert_str_equals('No state set', $state);
+    $this -> assert_str_equals('4096', $blocksize);
+    return;
+}
+
+#==========================================
 # test_getBootLoaderDefault
 #------------------------------------------
 sub test_getBootLoaderDefault {
@@ -1893,6 +1914,7 @@ sub test_getXMLElement{
         . 'bootfilesystem="fat32" '
         . 'bootkernel="xenk" '
         . 'bootloader="grub2" '
+        . 'target_blocksize="4096" '
         . 'zipl_targettype="FBA" '
         . 'bootpartsize="512" '
         . 'bootpartition="true" '
@@ -2171,6 +2193,35 @@ sub test_setZiplTargetType {
     $state = $kiwi -> getState();
     $this -> assert_str_equals('No state set', $state);
     $this -> assert_str_equals('CDL', $bootL);
+    return;
+}
+
+#==========================================
+# test_setTargetBlockSize
+#------------------------------------------
+sub test_setTargetBlockSize {
+    # ...
+    # Test the setTargetBlockSize method
+    # ---
+    my $this = shift;
+    my $kiwi = $this -> {kiwi};
+    my $typeDataObj = $this -> __getTypeObj();
+    $typeDataObj = $typeDataObj -> setTargetBlockSize('512');
+    my $msg = $kiwi -> getMessage();
+    $this -> assert_str_equals('No messages set', $msg);
+    my $msgT = $kiwi -> getMessageType();
+    $this -> assert_str_equals('none', $msgT);
+    my $state = $kiwi -> getState();
+    $this -> assert_str_equals('No state set', $state);
+    $this -> assert_not_null($typeDataObj);
+    my $blocksize = $typeDataObj -> getTargetBlockSize();
+    $msg = $kiwi -> getMessage();
+    $this -> assert_str_equals('No messages set', $msg);
+    $msgT = $kiwi -> getMessageType();
+    $this -> assert_str_equals('none', $msgT);
+    $state = $kiwi -> getState();
+    $this -> assert_str_equals('No state set', $state);
+    $this -> assert_str_equals('512', $blocksize);
     return;
 }
 
@@ -5282,6 +5333,7 @@ sub __getTypeObj {
                 bootkernel             => 'xenk',
                 bootloader             => 'grub2',
                 zipl_targettype        => 'FBA',
+                target_blocksize       => '4096',
                 bootpartition          => 'true',
                 bootpartsize           => '512',
                 bootprofile            => 'std',
