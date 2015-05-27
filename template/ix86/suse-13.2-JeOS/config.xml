@@ -48,7 +48,7 @@
     </preferences>
     <preferences profiles="vmxFlavour">
         <type image="vmx" filesystem="ext3" boot="vmxboot/suse-13.2" format="ova" bootloader="grub2" kernelcmdline="splash" firmware="efi">
-            <machine memory="4096" guestOS="sles12-64" HWversion="7" arch="x86_64" ovftype="vmware">
+            <machine memory="4096" guestOS="sles-64" HWversion="7" arch="x86_64" ovftype="vmware">
                 <vmdisk controller="lsilogic" id="0" diskmode="streamOptimized"/>
                 <vmdvd controller="ide" id="0"/>
                 <vmnic driver="vmxnet3" interface="0" mode="bridged"/>
