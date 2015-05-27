@@ -108,6 +108,9 @@ sub createChecks {
     # Runtime checks specific to the create step
     # ---
     my $this = shift;
+    if (! $this -> __checkBootPartitionOverlaySystem()) {
+        return;
+    }
     if (! $this -> __checkVMConfigExist()) {
         return;
     }
@@ -188,6 +191,9 @@ sub prepareChecks {
     # Runtime checks specific to the prepare step
     # ---
     my $this = shift;
+    if (! $this -> __checkBootPartitionOverlaySystem()) {
+        return;
+    }
     if (! $this -> __checkVMConfigExist()) {
         return;
     }
@@ -1523,6 +1529,40 @@ sub __checkNoBootPartitionValid {
         return;
     }
     return 1;
+}
+
+#==========================================
+# __checkBootPartitionOverlaySystem
+#------------------------------------------
+sub __checkBootPartitionOverlaySystem {
+    # ...
+    # Check the boot partition setup for overlay systems
+    #
+    my $this = shift;
+    my $kiwi = $this->{kiwi};
+    my $locator = $this->{locator};
+    my $xml = $this->{xml};
+    my $bldType = $xml -> getImageType();
+    if (! $bldType) {
+        return 1;
+    }
+    my $typename = $bldType -> getTypeName();
+    my $bootpartition = $bldType -> getBootPartition();
+    my $filesystem = $bldType -> getFilesystem();
+    if ((! $bootpartition) || ($bootpartition eq "true")) {
+        return 1;
+    }
+    if ($filesystem !~ /overlayfs|clicfs/) {
+        return 1;
+    }
+    my $msg = "The system is explicitly configured to work as root overlay ";
+    $msg.= "system without a boot partition for the $filesystem filesystem. ";
+    $msg.= "However the the boot location must be writable and can't be ";
+    $msg.= "part of the read only root filesystem. Please delete the ";
+    $msg.= "bootpartition attribute from your $typename build type";
+    $kiwi -> error($msg);
+    $kiwi -> failed();
+    return;
 }
 
 #==========================================
