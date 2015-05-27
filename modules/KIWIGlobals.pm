@@ -166,6 +166,7 @@ sub loop_setup {
     # ---
     my $this = shift;
     my $source = shift;
+    my $xml = shift;
     my $kiwi = $this->{kiwi};
     my $locator = KIWILocator -> instance();
     my $losetup_exec = $locator -> getExecPath("losetup");
@@ -184,6 +185,12 @@ sub loop_setup {
         return;
     }
     chomp $result;
+    if ($xml) {
+        my $bldType = $xml -> getImageType();
+        # Once there is a loop driver with custom block size setup
+        # available check here for a configured target_blocksize and
+        # apply the value to the loop
+    }
     return $result;
 }
 
@@ -240,6 +247,7 @@ sub mount {
     my $source = shift;
     my $dest   = shift;
     my $opts   = shift;
+    my $xml    = shift;
     my $kiwi   = $this->{kiwi};
     my $salt   = int (rand(20));
     my $cipher = $this->{data}->{LuksCipher};
@@ -293,7 +301,7 @@ sub mount {
                 }
                 $source = $pdev;
             } else {
-                my $loop = $this -> loop_setup($source);
+                my $loop = $this -> loop_setup($source, $xml);
                 if (! $loop) {
                     $this -> umount();
                     return;
@@ -359,7 +367,7 @@ sub mount {
     #------------------------------------------
     if ($type eq "luks") {
         if (-f $source) {
-            $source = $this -> loop_setup($source);
+            $source = $this -> loop_setup($source, $xml);
             if (! $source) {
                 $this -> umount();
                 return;

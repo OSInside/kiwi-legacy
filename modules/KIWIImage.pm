@@ -3697,7 +3697,7 @@ sub setupEncoding {
         return;
     }
     if (! $device) {
-        $data = KIWIGlobals -> instance() -> loop_setup($out);
+        $data = KIWIGlobals -> instance() -> loop_setup($out, $this->{xml});
         if (! $data) {
             return;
         }

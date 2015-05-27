@@ -277,7 +277,7 @@ sub p_getBlockDevice {
         return;
     }
     $this -> p_addCreatedFile($imgName);
-    $device = $global -> loop_setup($imgPath);
+    $device = $global -> loop_setup($imgPath, $xml);
     if (! $device) {
         return;
     }
