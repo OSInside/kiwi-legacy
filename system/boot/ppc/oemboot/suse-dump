@@ -351,16 +351,7 @@ function OEMInstall {
         #--------------------------------------
         info=/tmp/partinfo
         wmrc=/wmrc
-        loop=$(losetup -f --show $imageName)
-        if [ $? != 0 ];then
-            # /.../
-            # old version of losetup doesn't know about
-            # the --find option therefore we set a fixed
-            # loop device name and setup this
-            # ----
-            loop=/dev/loop1
-            losetup $loop $imageName
-        fi
+        loop=$(loop_setup -f --show $imageName)
         loop=$(echo $loop | sed -e s@^/dev/@@)
         if ! kpartx -sa /dev/$loop;then
             systemException \
@@ -758,7 +749,7 @@ function OEMInstall {
     #--------------------------------------
     if [ ! -z "$kiwi_oempartition_install" ];then
         dmsetup remove_all
-        losetup -d /dev/$loop
+        loop_delete /dev/$loop
     fi
     #======================================
     # Check the md5sum of the raw disk

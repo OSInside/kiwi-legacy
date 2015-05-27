@@ -277,19 +277,8 @@ sub p_getBlockDevice {
         return;
     }
     $this -> p_addCreatedFile($imgName);
-    my $losetup = $locator -> getExecPath('losetup');
-    if (! $losetup) {
-        my $msg = 'Could not locate loop setup tool, losetup';
-        $kiwi -> error($msg);
-        $kiwi -> failed ();
-        return;
-    }
-    $device = KIWIQX::qxx("$losetup -f --show $imgPath 2>&1");
-    chomp $device;
-    $code = $? >> 8;
-    if ($code != 0) {
-        $kiwi -> error  ("Couldn't loop bind logical extend: $device");
-        $kiwi -> failed ();
+    $device = $global -> loop_setup($imgPath);
+    if (! $device) {
         return;
     }
     return $device;
@@ -449,9 +438,8 @@ sub p_umount {
     my $umount = $locator -> getExecPath('umount');
     if (! $umount) {
         my $msg = 'Could not find umount command. Your system is in an '
-          . 'inconsistent state, as root us "mount" and "losetup" commands '
-          . 'To determine the extra mounts created by kiwi. Check for '
-          . $mntPnt;
+          . 'inconsistent state. To determine the extra mounts created by '
+          . "kiwi. Check for $mntPnt";
         $kiwi -> error($msg);
         $kiwi -> failed();
         return;

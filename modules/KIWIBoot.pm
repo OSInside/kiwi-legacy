@@ -6174,47 +6174,15 @@ sub bindDiskDevice {
     my $system = shift;
     my $kiwi   = $this->{kiwi};
     my @cStack = @{$this->{cleanupStack}};
+    my $global = KIWIGlobals -> instance();
     my $status;
     my $result;
-    my $loop;
     #==========================================
     # bind file to loop device
     #------------------------------------------
-    $status = KIWIQX::qxx (
-        "/sbin/losetup -f --show $system 2>/dev/null"
-    );
-    $result = $? >> 8;
-    chomp $status;
-    if ($result != 0) {
-        # /.../
-        # first losetup call has failed, try to find free loop
-        # device manually even though it's most likely that this
-        # search will fail too. The following is only useful for
-        # older version of losetup which doesn't understand the
-        # option combination -f --show
-        # ----
-        my $loopfound = 0;
-        for (my $id=0;$id<=7;$id++) {
-            $status.= KIWIQX::qxx ( "/sbin/losetup /dev/loop$id $system 2>&1" );
-            $result = $? >> 8;
-            if ($result == 0) {
-                $loopfound = 1;
-                $loop = "/dev/loop".$id;
-                $this->{loop} = $loop;
-                push @cStack,"losetup -d $loop";
-                $this->{cleanupStack} = \@cStack;
-                last;
-            }
-        }
-        if (! $loopfound) {
-            $kiwi -> loginfo ("Failed binding loop device: $status");
-            return;
-        }
-        return $this;
-    }
-    $loop = $status;
+    my $loop = $global -> loop_setup($system);
     $this->{loop} = $loop;
-    push @cStack,"losetup -d $loop";
+    push @cStack, $global -> loop_delete_command($loop);
     $this->{cleanupStack} = \@cStack;
     return $this;
 }
