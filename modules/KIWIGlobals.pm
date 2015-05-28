@@ -187,9 +187,12 @@ sub loop_setup {
     chomp $result;
     if ($xml) {
         my $bldType = $xml -> getImageType();
-        # Once there is a loop driver with custom block size setup
-        # available check here for a configured target_blocksize and
-        # apply the value to the loop
+        my $blocksize = $bldType -> getTargetBlockSize();
+        if (($blocksize) && ($blocksize > 512)) {
+            # Once there is a loop driver with custom block size setup
+            # available check here for a configured target_blocksize and
+            # apply the value to the loop
+        }
     }
     return $result;
 }

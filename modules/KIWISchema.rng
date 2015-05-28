@@ -2130,7 +2130,7 @@ information is passed as add-profile option</a:documentation>
     </define>
     <define name="k.type.bootloader.attribute">
       <attribute name="bootloader">
-        <a:documentation>Specifies the bootloader used for booting the image."
+        <a:documentation>Specifies the bootloader used for booting the image.
 At the moment grub, zipl and sys|extlinux are supported</a:documentation>
         <choice>
           <value>extlinux</value>
@@ -2142,6 +2142,16 @@ At the moment grub, zipl and sys|extlinux are supported</a:documentation>
           <value>uboot</value>
           <value>berryboot</value>
         </choice>
+      </attribute>
+    </define>
+    <define name="k.type.target_blocksize">
+      <attribute name="target_blocksize">
+        <a:documentation>Specifies the image blocksize in bytes which has to match
+the logical (SSZ) blocksize of the target storage device.
+By default 512 byte is used which works on many disks
+However 4096 byte disks are coming. You can check the
+desired target by calling: blockdev --report device</a:documentation>
+        <data type="nonNegativeInteger"/>
       </attribute>
     </define>
     <define name="k.type.zipl_targettype.attribute">
@@ -2636,6 +2646,9 @@ into the master block. There is space for 32 characters.</a:documentation>
         </optional>
         <optional>
           <ref name="k.type.ramonly.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.type.target_blocksize"/>
         </optional>
         <optional>
           <ref name="k.type.vga.attribute"/>

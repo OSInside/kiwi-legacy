@@ -1630,12 +1630,19 @@ div {
         ## information is passed as add-profile option
         attribute bootkernel { text }
     k.type.bootloader.attribute =
-        ## Specifies the bootloader used for booting the image."
+        ## Specifies the bootloader used for booting the image.
         ## At the moment grub, zipl and sys|extlinux are supported
         attribute bootloader {
             "extlinux" | "grub" | "grub2" | "syslinux" |
             "zipl" | "yaboot" | "uboot" | "berryboot"
         }
+    k.type.target_blocksize =
+        ## Specifies the image blocksize in bytes which has to match
+        ## the logical (SSZ) blocksize of the target storage device.
+        ## By default 512 byte is used which works on many disks
+        ## However 4096 byte disks are coming. You can check the
+        ## desired target by calling: blockdev --report device
+        attribute target_blocksize { xsd:nonNegativeInteger }
     k.type.zipl_targettype.attribute =
        ## The device type of the disk zipl should boot. On zFCP
        ## devices use SCSI, on DASD devices use CDL or LDL on
@@ -1885,6 +1892,7 @@ div {
         k.type.mdraid.attribute? &
         k.type.primary.attribute? &
         k.type.ramonly.attribute? &
+        k.type.target_blocksize? &
         k.type.vga.attribute? &
         k.type.vhdfixedtag.attribute? &
         k.type.volid.attribute? &

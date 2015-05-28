@@ -3945,6 +3945,7 @@ sub __genTypeHash {
         'luks',
         'luksOS',
         'ramonly',
+        'target_blocksize',
         'mdraid',
         'vga',
         'vhdfixedtag',

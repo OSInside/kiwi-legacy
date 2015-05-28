@@ -10909,7 +10909,17 @@ function backupGPT {
 function loop_setup {
     local IFS=$IFS_ORIG
     local target=$1
-    losetup -f --show $target
+    local loop=$(losetup -f --show $target)
+    if [ ! -e "$loop" ];then
+        return 1
+    fi
+    if [ "0$kiwi_target_blocksize" -gt 512 ];then
+        # Once there is a loop driver with custom block size setup
+        # available check here for a configured target_blocksize and
+        # apply the value to the loop
+        :
+    fi
+    echo $loop
 }
 #======================================
 # loop_delete

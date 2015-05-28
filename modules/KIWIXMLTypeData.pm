@@ -95,6 +95,7 @@ sub new {
     #     size                   = ''
     #     sizeadd                = ''
     #     sizeunit               = ''
+    #     target_blocksize       = ''
     #     vga                    = ''
     #     vhdfixedtag            = ''
     #     volid                  = ''
@@ -163,6 +164,7 @@ sub new {
         size
         sizeadd
         sizeunit
+        target_blocksize
         vga
         vhdfixedtag
         volid
@@ -228,6 +230,7 @@ sub new {
     $this->{vga}                    = $init->{vga};
     $this->{vhdfixedtag}            = $init->{vhdfixedtag};
     $this->{volid}                  = $init->{volid};
+    $this->{target_blocksize}       = $init->{target_blocksize};
     $this->{zfsoptions}             = $init->{zfsoptions};
     # Set default values
     if (! $init->{bootloader} ) {
@@ -309,6 +312,17 @@ sub getZiplTargetType {
     # ---
     my $this = shift;
     return $this->{zipl_targettype};
+}
+
+#==========================================
+# getTargetBlockSize
+#------------------------------------------
+sub getTargetBlockSize {
+    # ...
+    # Return the configured target blocksize
+    # ---
+    my $this = shift;
+    return $this->{target_blocksize};
 }
 
 #==========================================
@@ -885,6 +899,10 @@ sub getXMLElement {
             $element -> setAttribute('bootloader', $loader);
         }
     }
+    my $target_blocksize = $this -> getTargetBlockSize();
+    if ($target_blocksize) {
+        $element -> setAttribute('target_blocksize', $target_blocksize);
+    }
     my $zipl_targettype = $this -> getZiplTargetType();
     if ($zipl_targettype) {
         $element -> setAttribute('zipl_targettype', $zipl_targettype);
@@ -1149,6 +1167,27 @@ sub setZiplTargetType {
         return;
     }
     $this->{zipl_targettype} = $zipl_type;
+    return $this;
+}
+
+#==========================================
+# setTargetBlockSize
+#------------------------------------------
+sub setTargetBlockSize {
+    # ...
+    # Set the configuration for the target blocksize
+    # ---
+    my $this  = shift;
+    my $target_blocksize = shift;
+    if (! $target_blocksize ) {
+        my $kiwi = $this->{kiwi};
+        my $msg = 'setTargetBlockSize: no blocksize given, retaining current '
+            . 'data.';
+        $kiwi -> error($msg);
+        $kiwi -> failed();
+        return;
+    }
+    $this->{target_blocksize} = $target_blocksize;
     return $this;
 }
 
