@@ -1142,6 +1142,7 @@ sub createOVFConfiguration {
     my $ovfdir = $this->{ovfdir};
     my $format = $this->{format};
     my $base   = basename $this->{image};
+    my $destdir= dirname $this->{image};
     my $ovf;
     my $vmdk;
     #==========================================
@@ -1199,7 +1200,6 @@ sub createOVFConfiguration {
         #==========================================
         # create OVA tarball
         #------------------------------------------
-        my $destdir  = dirname $this->{image};
         my $ovaimage = basename $ovfdir;
         $ovaimage =~ s/\.ovf$/\.ova/;
         my $ovabasis = $ovaimage;
@@ -1241,17 +1241,14 @@ sub createOVFConfiguration {
                 "tar -h -C $ovfdir -xf $destdir/$ovaimage $extract 2>&1"
             );
             $result = $? >> 8;
-            if ($result == 0) {
-                $status = KIWIQX::qxx (
-                    "mv $ovfdir/$extract $destdir/$ovabasis.vmdk 2>&1"
-                );
-                $result = $? >> 8;
-            }
             if ($result != 0) {
                 $kiwi -> error  ("Couldn't unpack vmdk file: $status");
                 $kiwi -> failed ();
                 return;
             }
+            KIWIQX::qxx (
+                "mv $ovfdir/$ovabasis-disk1.vmdk $ovfdir/$ovabasis.vmdk"
+            );
             $kiwi -> info (
                 "Replacing kiwi's ovf file with version from generated OVA\n"
             );
@@ -1262,12 +1259,15 @@ sub createOVFConfiguration {
             );
             $result = $? >> 8;
             if ($result != 0) {
-                $kiwi -> error  ("Couldn't unpack ovf and mf file: $status");
+                $kiwi -> error  ("Couldn't unpack ovf file: $status");
                 $kiwi -> failed ();
                 return;
             }
         }
     }
+    KIWIQX::qxx ("mv $ovfdir $ovfdir.tmp");
+    KIWIQX::qxx ("mv -f $ovfdir.tmp/* $destdir");
+    KIWIQX::qxx ("rmdir $ovfdir.tmp");
     return $ovf;
 }
 
