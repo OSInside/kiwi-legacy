@@ -3681,7 +3681,7 @@ sub setupBootLoaderStages {
             return;
         }
         my $bootpath = '/boot';
-        if ($typeinfo->{filesystem} eq 'btrfs') {
+        if (($typeinfo->{filesystem} eq 'btrfs') && ($type ne 'iso')) {
             $bootpath = '/@/boot';
         }
         if ($uuid) {
@@ -4359,7 +4359,7 @@ sub setupBootLoaderConfiguration {
         my $ascii = 'ascii.pf2';
         my $fodir = '/boot/grub2/themes/';
         my $bootpath = '/boot';
-        if ($type->{filesystem} eq 'btrfs') {
+        if (($type->{filesystem} eq 'btrfs') && (! $iso)) {
             $bootpath = '/@/boot';
             $fodir = '/@/boot/grub2/themes/';
         }
