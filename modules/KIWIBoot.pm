@@ -3680,13 +3680,17 @@ sub setupBootLoaderStages {
             $kiwi -> failed ();
             return;
         }
+        my $bootpath = '/boot';
+        if ($typeinfo->{filesystem} eq 'btrfs') {
+            $bootpath = '/@/boot';
+        }
         if ($uuid) {
             print $bpfd "search --fs-uuid --set=root $uuid";
         } else {
-            print $bpfd "search --file --set=root /boot/$this->{mbrid}";
+            print $bpfd "search --file --set=root $bootpath/$this->{mbrid}";
         }
         print $bpfd "\n";
-        print $bpfd 'set prefix=($root)/boot/grub2'."\n";
+        print $bpfd 'set prefix=($root)'.$bootpath.'/grub2'."\n";
         $bpfd -> close();
         #==========================================
         # Get Grub2 stage and theming files
@@ -4354,6 +4358,11 @@ sub setupBootLoaderConfiguration {
         my $theme = $xml -> getPreferences() -> getBootLoaderTheme();
         my $ascii = 'ascii.pf2';
         my $fodir = '/boot/grub2/themes/';
+        my $bootpath = '/boot';
+        if ($type->{filesystem} eq 'btrfs') {
+            $bootpath = '/@/boot';
+            $fodir = '/@/boot/grub2/themes/';
+        }
         my @fonts = (
             "DejaVuSans-Bold14.pf2",
             "DejaVuSans10.pf2",
@@ -4420,9 +4429,9 @@ sub setupBootLoaderConfiguration {
         if ($uuid) {
             print $FD "search --fs-uuid --set=root $uuid"."\n";
         } else {
-            print $FD "search --file --set=root /boot/$this->{mbrid}"."\n";
+            print $FD "search --file --set=root $bootpath/$this->{mbrid}"."\n";
         }
-        print $FD 'set prefix=($root)/boot/grub2'."\n";
+        print $FD 'set prefix=($root)'.$bootpath.'/grub2'."\n";
         # print $FD "set debug=all\n";
         print $FD 'set linux=linux'."\n";
         print $FD 'set initrd=initrd'."\n";
@@ -4434,7 +4443,7 @@ sub setupBootLoaderConfiguration {
         print $FD '    fi'."\n";
         print $FD 'fi'."\n";
         print $FD "set default=$defaultBootNr\n";
-        print $FD "set font=/boot/unicode.pf2"."\n";
+        print $FD "set font=$bootpath/unicode.pf2"."\n";
         # setup to use boot graphics. If this is unwanted
         # you can disable it with the following alternative
         # console setup
@@ -4486,7 +4495,7 @@ sub setupBootLoaderConfiguration {
                 if ($dev eq '(cd)') {
                     print $FD "\t".'chainloader +1'."\n";
                 } else {
-                    print $FD "\t".'chainloader /boot/grub2/bootnext'."\n";
+                    print $FD "\t"."chainloader $bootpath/grub2/bootnext"."\n";
                     my $bootnext = $this -> addBootNext (
                         "$tmpdir/boot/grub2/bootnext", hex $this->{mbrid}
                     );
@@ -4514,51 +4523,51 @@ sub setupBootLoaderConfiguration {
             if ($iso) {
                 print $FD "\t"."echo Loading linux...\n";
                 print $FD "\t"."set gfxpayload=$gfx"."\n";
-                print $FD "\t".'$linux /boot/linux';
+                print $FD "\t".'$linux '.$bootpath.'/linux';
                 print $FD ' ramdisk_size=512000 ramdisk_blocksize=4096';
                 print $FD " cdinst=1";
             } elsif (($topic=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
                 print $FD "\t"."echo Loading linux.vmx...\n";
                 print $FD "\t"."set gfxpayload=$gfx"."\n";
-                print $FD "\t".'$linux /boot/linux.vmx';
+                print $FD "\t".'$linux '.$bootpath.'/linux.vmx';
             } else {
                 print $FD "\t"."echo Loading linux...\n";
                 print $FD "\t"."set gfxpayload=$gfx"."\n";
-                print $FD "\t".'$linux /boot/linux';
+                print $FD "\t".'$linux '.$bootpath.'/linux';
             }
             print $FD $cmdline;
             if ($iso) {
                 print $FD "\t"."echo Loading initrd...\n";
-                print $FD "\t".'$initrd /boot/initrd'."\n";
+                print $FD "\t".'$initrd '.$bootpath.'/initrd'."\n";
             } elsif (($topic=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
                 print $FD "\t"."echo Loading initrd.vmx...\n";
-                print $FD "\t".'$initrd /boot/initrd.vmx'."\n";
+                print $FD "\t".'$initrd '.$bootpath.'/initrd.vmx'."\n";
             } else {
                 print $FD "\t"."echo Loading initrd...\n";
-                print $FD "\t".'$initrd /boot/initrd'."\n";
+                print $FD "\t".'$initrd '.$bootpath.'/initrd'."\n";
             }
             print $FD "}\n";
         } else {
             if ($iso) {
                 print $FD "\t"."echo Loading Xen\n";
-                print $FD "\t"."multiboot /boot/xen.gz dummy\n";
+                print $FD "\t"."multiboot $bootpath/xen.gz dummy\n";
                 print $FD "\t"."echo Loading linux...\n";
                 print $FD "\t"."set gfxpayload=$gfx"."\n";
-                print $FD "\t"."module /boot/linux dummy";
+                print $FD "\t"."module $bootpath/linux dummy";
                 print $FD ' ramdisk_size=512000 ramdisk_blocksize=4096';
                 print $FD " cdinst=1";
             } elsif (($topic=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
                 print $FD "\t"."echo Loading Xen\n";
-                print $FD "\t"."multiboot /boot/xen.gz dummy\n";
+                print $FD "\t"."multiboot $bootpath/xen.gz dummy\n";
                 print $FD "\t"."echo Loading linux.vmx...\n";
                 print $FD "\t"."set gfxpayload=$gfx"."\n";
-                print $FD "\t".'module /boot/linux.vmx dummy';
+                print $FD "\t"."module $bootpath/linux.vmx dummy";
             } else {
-                print $FD 'set prefix=($root)/boot/grub2'."\n";
+                print $FD 'set prefix=($root)'.$bootpath.'/grub2'."\n";
             }
             # print $FD "set debug=all\n";
             print $FD "set default=$defaultBootNr\n";
-            print $FD "set font=/boot/unicode.pf2"."\n";
+            print $FD "set font=$bootpath/unicode.pf2"."\n";
             # setup to use boot graphics. If this is unwanted
             # you can disable it with the following alternative
             # console setup
@@ -4612,7 +4621,7 @@ sub setupBootLoaderConfiguration {
                     if ($dev eq '(cd)') {
                         print $FD "\t".'chainloader +1'."\n";
                     } else {
-                        print $FD "\t".'chainloader /boot/grub2/bootnext'."\n";
+                        print $FD "\t"."chainloader $bootpath/grub2/bootnext\n";
                         my $bootnext = $this -> addBootNext (
                             "$tmpdir/boot/grub2/bootnext", hex $this->{mbrid}
                         );
@@ -4630,7 +4639,7 @@ sub setupBootLoaderConfiguration {
                 $title = $this -> quoteLabel ("Install $label");
             } else {
                 print $FD "\t"."echo Loading initrd...\n";
-                print $FD "\t"."module /boot/initrd dummy\n";
+                print $FD "\t"."module $bootpath/initrd dummy\n";
             }
             print $FD "}\n";
         }
@@ -4645,7 +4654,7 @@ sub setupBootLoaderConfiguration {
                 if ($iso) {
                     print $FD "\t"."echo Loading linux...\n";
                     print $FD "\t"."set gfxpayload=$gfx"."\n";
-                    print $FD "\t".'$linux /boot/linux';
+                    print $FD "\t".'$linux '.$bootpath.'/linux';
                     print $FD ' ramdisk_size=512000 ramdisk_blocksize=4096';
                     print $FD " cdinst=1";
                 } elsif (
@@ -4654,35 +4663,35 @@ sub setupBootLoaderConfiguration {
                 ) {
                     print $FD "\t"."echo Loading linux.vmx...\n";
                     print $FD "\t"."set gfxpayload=$gfx"."\n";
-                    print $FD "\t".'$linux /boot/linux.vmx';
+                    print $FD "\t".'$linux '.$bootpath.'/linux.vmx';
                 } else {
                     print $FD "\t"."echo Loading linux...\n";
                     print $FD "\t"."set gfxpayload=$gfx"."\n";
-                    print $FD "\t".'$linux /boot/linux';
+                    print $FD "\t".'$linux '.$bootpath.'/linux';
                 }
                 print $FD " @failsafe";
                 print $FD $cmdline;
                 if ($iso) {
                     print $FD "\t"."echo Loading initrd...\n";
-                    print $FD "\t".'$initrd /boot/initrd'."\n";
+                    print $FD "\t".'$initrd '.$bootpath.'/initrd'."\n";
                 } elsif (
                     ($topic=~ /^KIWI USB/) ||
                     ($imgtype=~ /vmx|oem|split/)
                 ) {
                     print $FD "\t"."echo Loading initrd.vmx...\n";
-                    print $FD "\t".'$initrd /boot/initrd.vmx'."\n";
+                    print $FD "\t".'$initrd '.$bootpath.'/initrd.vmx'."\n";
                 } else {
                     print $FD "\t"."echo Loading initrd...\n";
-                    print $FD "\t".'$initrd /boot/initrd'."\n";
+                    print $FD "\t".'$initrd '.$bootpath.'/initrd'."\n";
                 }
                 print $FD "}\n";
             } else {
                 if ($iso) {
                     print $FD "\t"."echo Loading Xen\n";
-                    print $FD "\t"."multiboot /boot/xen.gz dummy\n";
+                    print $FD "\t"."multiboot $bootpath/xen.gz dummy\n";
                     print $FD "\t"."echo Loading linux...\n";
                     print $FD "\t"."set gfxpayload=$gfx"."\n";
-                    print $FD "\t"."module /boot/linux dummy";
+                    print $FD "\t"."module $bootpath/linux dummy";
                     print $FD ' ramdisk_size=512000 ramdisk_blocksize=4096';
                     print $FD " cdinst=1";
                 } elsif (
@@ -4690,31 +4699,31 @@ sub setupBootLoaderConfiguration {
                     ($imgtype=~ /vmx|oem|split/)
                 ) {
                     print $FD "\t"."echo Loading Xen\n";
-                    print $FD "\t"."multiboot /boot/xen.gz dummy\n";
+                    print $FD "\t"."multiboot $bootpath/xen.gz dummy\n";
                     print $FD "\t"."echo Loading linux.vmx...\n";
                     print $FD "\t"."set gfxpayload=$gfx"."\n";
-                    print $FD "\t".'module /boot/linux.vmx dummy';
+                    print $FD "\t"."module $bootpath/linux.vmx dummy";
                 } else {
                     print $FD "\t"."echo Loading Xen\n";
-                    print $FD "\t"."multiboot /boot/xen.gz dummy\n";
+                    print $FD "\t"."multiboot $bootpath/xen.gz dummy\n";
                     print $FD "\t"."echo Loading linux...\n";
                     print $FD "\t"."set gfxpayload=$gfx"."\n";
-                    print $FD "\t".'module /boot/linux dummy';
+                    print $FD "\t"."module $bootpath/linux dummy";
                 }
                 print $FD " @failsafe";
                 print $FD $cmdline;
                 if ($iso) {
                     print $FD "\t"."echo Loading initrd...\n";
-                    print $FD "\t"."module /boot/initrd dummy\n";
+                    print $FD "\t"."module $bootpath/initrd dummy\n";
                 } elsif (
                     ($topic=~ /^KIWI USB/) ||
                     ($imgtype=~ /vmx|oem|split/)
                 ) {
                     print $FD "\t"."echo Loading initrd.vmx...\n";
-                    print $FD "\t"."module /boot/initrd.vmx dummy\n";
+                    print $FD "\t"."module $bootpath/initrd.vmx dummy\n";
                 } else {
                     print $FD "\t"."echo Loading initrd...\n";
-                    print $FD "\t"."module /boot/initrd dummy\n";
+                    print $FD "\t"."module $bootpath/initrd dummy\n";
                 }
                 print $FD "}\n";
             }
