@@ -10914,11 +10914,10 @@ function loop_setup {
         return 1
     fi
     if [ "0$kiwi_target_blocksize" -gt 512 ];then
-        local loop_name=$(echo $loop | cut -f3 -d '/')
-        local loop_sys_config=/sys/block/$loop_name/loop/blocksize;
-        if [ -e $loop_sys_config ];then
-            echo $kiwi_target_blocksize > $loop_sys_config
-        fi
+        # Once there is a loop driver with custom block size setup
+        # available check here for a configured target_blocksize and
+        # apply the value to the loop
+        :
     fi
     echo $loop
 }

@@ -189,39 +189,9 @@ sub loop_setup {
         my $bldType = $xml -> getImageType();
         my $blocksize = $bldType -> getTargetBlockSize();
         if (($blocksize) && ($blocksize > 512)) {
-            my $loop_name = $result;
-            $loop_name =~ s/\/dev\///;
-            my $loop_sys_config = "/sys/block/$loop_name/loop/blocksize";
-            if (-e $loop_sys_config) {
-                my $loop_fd = FileHandle -> new();
-                if (! $loop_fd -> open (">$loop_sys_config")) {
-                    $kiwi -> error(
-                        "Can't open $loop_sys_config for writing $!"
-                    );
-                    return;
-                }
-                print $loop_fd $blocksize;
-                $loop_fd -> close();
-                if (! $loop_fd -> open ($loop_sys_config)) {
-                    $kiwi -> error(
-                        "Can't open $loop_sys_config for reading $!"
-                    );
-                    return;
-                }
-                my $cur_block_size = <$loop_fd>;
-                chomp $cur_block_size;
-                $loop_fd -> close();
-                if ("$blocksize" ne "$cur_block_size") {
-                    my $msg;
-                    $msg = "Requested $blocksize bytes loop blocksize, ";
-                    $msg.= "but got $cur_block_size bytes";
-                    $kiwi -> error($msg);
-                    return;
-                }
-                $kiwi -> loginfo(
-                    "$result: block size set to $blocksize bytes"
-                );
-            }
+            # Once there is a loop driver with custom block size setup
+            # available check here for a configured target_blocksize and
+            # apply the value to the loop
         }
     }
     return $result;
