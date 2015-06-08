@@ -1266,12 +1266,7 @@ sub getArchives {
     # Return an array ref containing ArchiveData objects
     # ---
     my $this = shift;
-    my $archives = $this -> __getInstallData('archives');
-    if ($archives) {
-        my $bInclArchives = $this -> getBootIncludeArchives();
-        push @{$archives}, @{$bInclArchives};
-    }
-    return $archives;
+    return $this -> __getInstallData('archives');
 }
 
 #==========================================
@@ -1282,12 +1277,7 @@ sub getBootStrapArchives {
     # Return an array ref containing ArchiveData objects
     # ---
     my $this = shift;
-    my $archives = $this -> __getInstallData('bootStrapArchives');
-    if ($archives) {
-        my $bInclArchives = $this -> getBootIncludeBootStrapArchives();
-        push @{$archives}, @{$bInclArchives};
-    }
-    return $archives;
+    return $this -> __getInstallData('bootStrapArchives');
 }
 
 #==========================================

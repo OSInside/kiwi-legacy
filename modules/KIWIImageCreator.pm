@@ -1716,7 +1716,15 @@ sub __addPackagesToBootXML {
     my $kiwi = $this->{kiwi};
     my $systemXML = shift;
     my $bootXML   = shift;
-    my $bootArchives = $systemXML -> getBootIncludeArchives();
+    my $bootArchives = [];
+    my $systemBootArchives = $systemXML -> getBootIncludeArchives();
+    if ($systemBootArchives) {
+        push @{$bootArchives}, @{$systemBootArchives};
+    }
+    my $boostrapBootArchives = $systemXML -> getBootIncludeBootStrapArchives();
+    if ($boostrapBootArchives) {
+        push @{$bootArchives}, @{$boostrapBootArchives};
+    }
     my $bootAddPacks = $systemXML -> getBootIncludePackages();
     my $bootDelPacks = $systemXML -> getBootDeletePackages();
     my $systemDelPacks = $systemXML -> getPackagesToDelete();

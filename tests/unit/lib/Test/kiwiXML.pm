@@ -3803,7 +3803,6 @@ sub test_getArchives {
     }
     my @expected = qw(
         myImageStuff.tgz
-        myInitStuff.tar
         myOEMstuffProf.tar.bz2
     );
     $this -> assert_array_equal(\@expected, \@archiveNames);
@@ -3851,7 +3850,6 @@ sub test_getArchivesUseProf {
     my @expected = qw(
         myAppArch.tgz
         myImageStuff.tgz
-        myInitStuff.tar
         myOEMstuffProf.tar.bz2
     );
     $this -> assert_array_equal(\@expected, \@archiveNames);
