@@ -3327,10 +3327,9 @@ function updateRootDeviceFstab {
             content=$(echo $i|cut -f2 -d= | tr -d \' | tr -d \")
             volpath=$(echo $content | cut -f3 -d:)
             if [ -z "$volpath" ];then
-                volpath=$volume
+                volpath=$(echo $volume | tr _ /)
             fi
-            volpath=$(echo $volpath | cut -f4 -d/ | cut -c3-)
-            mpoint=$(echo $volpath | tr -d LV | tr _ /)
+            mpoint=$(echo $volpath | sed -e s@^LV@@)
             mppath="/dev/$kiwi_lvmgroup/$volume"
             if \
                 [ ! $volume = "LVRoot" ] && \
@@ -6654,10 +6653,9 @@ function mountSystemStandard {
             content=$(echo $i|cut -f2 -d= | tr -d \' | tr -d \")
             volpath=$(echo $content | cut -f3 -d:)
             if [ -z "$volpath" ];then
-                volpath=$volume
+                volpath=$(echo $volume | tr _ /)
             fi
-            volpath=$(echo $volpath | cut -f4 -d/ | cut -c3-)
-            mpoint=$(echo $volpath | tr -d LV | tr _ /)
+            mpoint=$(echo $volpath | sed -e s@^LV@@)
             if \
                 [ ! $volume = "LVRoot" ] && \
                 [ ! $volume = "LVComp" ] && \
@@ -7857,10 +7855,9 @@ function cleanImage {
         content=$(echo $i|cut -f2 -d= | tr -d \' | tr -d \")
         volpath=$(echo $content | cut -f3 -d:)
         if [ -z "$volpath" ];then
-            volpath=$volume
+            volpath=$(echo $volume | tr _ /)
         fi
-        volpath=$(echo $volpath | cut -f4 -d/ | cut -c3-)
-        mpoint=$(echo $volpath | tr -d LV | tr _ /)
+        mpoint=$(echo $volpath | sed -e s@^LV@@)
         if \
             [ ! $volume = "LVRoot" ] && \
             [ ! $volume = "LVComp" ] && \
@@ -9521,10 +9518,9 @@ function restoreBtrfsSubVolumes {
         content=$(echo $i|cut -f2 -d= | tr -d \' | tr -d \")
         volpath=$(echo $content | cut -f3 -d:)
         if [ -z "$volpath" ];then
-            volpath=$volume
+            volpath=$(echo $volume | tr _ /)
         fi
-        volpath=$(echo $volpath | cut -f4 -d/ | cut -c3-)
-        mpoint=$(echo $volpath | tr -d LV | tr _ /)
+        mpoint=$(echo $volpath | sed -e s@^LV@@)
         volbase="$root/@/$(dirname $mpoint)"
         if [ ! -d $volbase ];then
             mkdir -p $volbase

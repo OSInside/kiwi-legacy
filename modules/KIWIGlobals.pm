@@ -938,7 +938,7 @@ sub setupZFSPoolVolumes {
         #------------------------------------------
         foreach my $name (keys %{$vols}) {
             next if $name eq '@root';
-            my $pname  = $name; $pname =~ s/_/\//g;
+            my $pname = $vols->{$name}->[4];
             $pname =~ s/^\///;
             $pname =~ s/\s*$//;
             push @paths,$pname;
@@ -1000,7 +1000,7 @@ sub setupBTRFSSubVolumes {
         #------------------------------------------
         foreach my $name (keys %{$vols}) {
             next if $name eq '@root';
-            my $pname  = $name; $pname =~ s/_/\//g;
+            my $pname = $vols->{$name}->[4];
             $pname =~ s/^\///;
             $pname =~ s/\s*$//;
             push @paths,$pname;

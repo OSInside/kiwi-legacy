@@ -1813,7 +1813,7 @@ sub setupBootDisk {
                 #==========================================
                 # check directory per volume
                 #------------------------------------------
-                my $pname  = $vol; $pname =~ s/_/\//g;
+                my $pname = $lvmparts{$vol}->[4];
                 if (! -d "$system/$pname") {
                     $kiwi -> info (
                         "Creating volume mount point $system/$pname"

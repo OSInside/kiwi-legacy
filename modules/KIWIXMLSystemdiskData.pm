@@ -288,6 +288,7 @@ sub getVolumes {
             my $mount= $this -> getVolumeMountPoint ($id);
             my $free = $this -> getVolumeFreespace ($id);
             my $size = $this -> getVolumeSize ($id);
+            my $xmlname = $name;
             my $haveAbsolute;
             my $usedValue;
             if ($size) {
@@ -319,18 +320,29 @@ sub getVolumes {
             if ($name eq q{/}) {
                 next;
             }
+            # The constructed volume name is based on '_' as separator for
+            # the '/' path hierarchy used in .profile. If the your path
+            # contains '_' as part of a directory name you are forced to
+            # specify a mountpoint attribute in the <volume> setup.
+            # An appropriate runtime check proves this condition
             $name =~ s/^\///sxm;
             $name =~ s/\//_/gsxm;
             if ($mount) {
                 # if a mountpoint is set the following applies:
                 # --> volume path is $mount
                 # --> volume name is $name
-                $lvmparts{$mount} = [ $usedValue,$haveAbsolute,$name ];
+                # --> fourth element is placeholder for real vol size
+                $lvmparts{$mount} = [
+                    $usedValue, $haveAbsolute, $name, undef, $mount
+                ];
             } else {
                 # if no mountpoint is set the following applies:
                 # --> volume path is $name
                 # --> volume name is $name
-                $lvmparts{$name} = [ $usedValue,$haveAbsolute ];
+                # --> fourth element is placeholder for real vol size
+                $lvmparts{$name} = [
+                    $usedValue, $haveAbsolute, undef, undef, $xmlname
+                ];
             }
         }
     }

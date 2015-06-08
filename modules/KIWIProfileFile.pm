@@ -556,8 +556,6 @@ sub __updateXMLSystemDisk {
                 if (! $absolute) {
                     $attrname = "freespace";
                 }
-                $vol =~ s/^\///sxm;
-                $vol =~ s/\//_/gsxm;
                 $vol = 'LV'.$vol;
                 if ($vol eq 'LV@root') {
                     if ($attrval ne 'all') {

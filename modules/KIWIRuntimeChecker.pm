@@ -955,7 +955,6 @@ sub __checkSystemDiskData {
                 if ($mount) {
                     $path = $mount;
                 }
-                $path =~ s/_/\//g;
                 if ($name eq '@root') {
                     $rootsize = KIWIGlobals -> instance() -> dsize ($tree);
                     $rootsize = sprintf ("%.f",$rootsize / $MEGABYTE);
