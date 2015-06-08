@@ -165,6 +165,9 @@ sub createChecks {
     if (! $this -> __checkLVMoemSizeSettings()) {
         return;
     }
+    if (! $this -> __checkVolumeSetup()) {
+        return;
+    }
     if (! $this -> __checkSystemDiskData()) {
         return;
     }
@@ -191,6 +194,9 @@ sub prepareChecks {
     # Runtime checks specific to the prepare step
     # ---
     my $this = shift;
+    if (! $this -> __checkVolumeSetup()) {
+        return;
+    }
     if (! $this -> __checkBootPartitionOverlaySystem()) {
         return;
     }
@@ -910,6 +916,78 @@ sub __checkRootRecycleCapability {
 }
 
 #==========================================
+# __checkVolumeSetup
+#------------------------------------------
+sub __checkVolumeSetup {
+    my $this    = shift;
+    my $kiwi    = $this -> {kiwi};
+    my $xml     = $this -> {xml};
+    my $type    = $xml  -> getImageType();
+    my $sysDisk = $xml  -> getSystemDiskConfig();
+    my $bootpartition = $type -> getBootPartition();
+    my $msg;
+    #==========================================
+    # No type information
+    #------------------------------------------
+    if (! $type) {
+        return 1;
+    }
+    #==========================================
+    # Perform the test only with a systemdisk
+    #------------------------------------------
+    if (! $sysDisk) {
+        return 1;
+    }
+    #==========================================
+    # Perform the test only with volumes
+    #------------------------------------------
+    my $volIDs = $sysDisk -> getVolumeIDs();
+    if (! $volIDs) {
+        return 1;
+    }
+    #==========================================
+    # run volume validation tests
+    #------------------------------------------
+    for my $id (@{$volIDs}) {
+        my $name = $sysDisk -> getVolumeName($id);
+        my $mount= $sysDisk -> getVolumeMountPoint($id);
+        my $path = $name;
+        if ($mount) {
+            $path = $mount;
+        }
+        if (($name =~ /_/) && (! $mount)) {
+            $msg = "Volume path $name contains internal field ";
+            $msg.= "separator character: '_'. Please specify the path ";
+            $msg.= "via the mountpoint attribute for this volume";
+            $kiwi -> error ($msg);
+            $kiwi -> failed();
+            return;
+        }
+        $path =~ s/^\/+//;
+        if ($path =~ /^boot\//) {
+            if (! $bootpartition) {
+                $msg = "Volume path $path is a boot volume, but there ";
+                $msg.= "is no explicit statement to disable the use ";
+                $msg.= "of an extra boot partition. Please set ";
+                $msg.= "bootpartition='false' in the <type> section";
+                $kiwi -> error ($msg);
+                $kiwi -> failed();
+                return;
+            } elsif ($bootpartition eq "true") {
+                $msg = "Volume path $path is a boot volume, but the ";
+                $msg.= "use of an extra boot partition is enabled ";
+                $msg.= "Please set bootpartition='false' in the ";
+                $msg.= "<type> section";
+                $kiwi -> error ($msg);
+                $kiwi -> failed();
+                return;
+            }
+        }
+    }
+    return 1;
+}
+
+#==========================================
 # __checkSystemDiskData
 #------------------------------------------
 sub __checkSystemDiskData {
@@ -947,14 +1025,6 @@ sub __checkSystemDiskData {
             for my $id (@{$volIDs}) {
                 my $name = $sysDisk -> getVolumeName ($id);
                 my $mount= $sysDisk -> getVolumeMountPoint($id);
-                if (($name =~ /_/) && (! $mount)) {
-                    $msg = "Volume path $name contains internal field ";
-                    $msg.= "separator character: '_'. Please specify the path via the ";
-                    $msg.= "mountpoint attribute for this volume";
-                    $kiwi -> error ($msg);
-                    $kiwi -> failed();
-                    return;
-                }
                 my $size = $sysDisk -> getVolumeSize ($id);
                 my $freeSpace = $sysDisk -> getVolumeFreespace ($id);
                 my $lvsize = 0;
