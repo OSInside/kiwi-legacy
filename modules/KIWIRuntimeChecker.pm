@@ -947,6 +947,14 @@ sub __checkSystemDiskData {
             for my $id (@{$volIDs}) {
                 my $name = $sysDisk -> getVolumeName ($id);
                 my $mount= $sysDisk -> getVolumeMountPoint($id);
+                if (($name =~ /_/) && (! $mount)) {
+                    $msg = "Volume path $name contains internal field ";
+                    $msg.= "separator character: '_'. Please specify the path via the ";
+                    $msg.= "mountpoint attribute for this volume";
+                    $kiwi -> error ($msg);
+                    $kiwi -> failed();
+                    return;
+                }
                 my $size = $sysDisk -> getVolumeSize ($id);
                 my $freeSpace = $sysDisk -> getVolumeFreespace ($id);
                 my $lvsize = 0;
