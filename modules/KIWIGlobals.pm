@@ -68,7 +68,7 @@ sub getKiwiConfig {
 #------------------------------------------
 sub getKiwiConfigEntry {
     # ...
-    # Return a hash of all the KIWI configuration data
+    # Return a the value for a specific config key
     # ---
     my $this = shift;
     my $key  = shift;
@@ -188,7 +188,8 @@ sub loop_setup {
     if ($xml) {
         my $bldType = $xml -> getImageType();
         my $blocksize = $bldType -> getTargetBlockSize();
-        if (($blocksize) && ($blocksize > 512)) {
+        my $default_blocksize = $this -> getKiwiConfigEntry('DiskSectorSize');
+        if (($blocksize) && ($blocksize != $default_blocksize)) {
             # Once there is a loop driver with custom block size setup
             # available check here for a configured target_blocksize and
             # apply the value to the loop
@@ -435,7 +436,8 @@ sub mount {
                 $result = $? >> 8;
             }
         } elsif ($type eq "clicfs") {
-            $status = KIWIQX::qxx ("clicfs -m 512 $source $dest 2>&1");
+            my $clic_memory = 1024; # 1G ram for write operations
+            $status = KIWIQX::qxx ("clicfs -m $clic_memory $source $dest 2>&1");
             $result = $? >> 8;
             if ($result == 0) {
                 $status = KIWIQX::qxx ("resize2fs $dest/fsdata.ext4 2>&1");

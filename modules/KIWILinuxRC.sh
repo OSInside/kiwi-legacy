@@ -10909,7 +10909,7 @@ function loop_setup {
     if [ ! -e "$loop" ];then
         return 1
     fi
-    if [ "0$kiwi_target_blocksize" -gt 512 ];then
+    if [ ! -z "$kiwi_target_blocksize" ];then
         # Once there is a loop driver with custom block size setup
         # available check here for a configured target_blocksize and
         # apply the value to the loop
