@@ -5930,7 +5930,7 @@ sub installBootLoader {
             # get physical blocksize of target
             #------------------------------------------
             my $bsize = KIWIQX::qxx (
-                "blockdev --getpbsz $this->{loop} 2>&1"
+                "blockdev --getss $this->{loop} 2>&1"
             );
             my $result = $? >> 8;
             if ($result != 0) {
