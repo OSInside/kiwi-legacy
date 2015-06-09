@@ -1228,11 +1228,11 @@ sub setupPackageFiles
                                     'onlyarch' => $srcarch
                                 };
                             }
-                            # get a version-release.arch key
+                            # get a version-release key
                             $packPointer->{sourcepackage} =~
-                                m/.*-([^-]*-[^-]*\.[^\.]*)\.rpm/;
+                                m/.*-([^-]*-[^-]*)\.[^\.]*\.rpm/;
                             $this->{m_sourcePacks}->{$srcname}->
-                                {'requireVersionArch'}->{ $1 } = 1;
+                                {'requireVersion'}->{$1} = 1;
                         }
                         if ( $this->{m_debugmedium} > 0 ) {
                             # Add debug packages, we do not know,
