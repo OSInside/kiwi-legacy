@@ -4251,7 +4251,11 @@ sub setupBootLoaderConfiguration {
     if ($type->{cmdline}) {
         $cmdline  = $type->{cmdline};
     }
-    if ($firmware eq 'ec2') {
+    if ($cmdline =~ /root=(.*)/) {
+        $kiwi -> info (
+            "Kernel root device set to $1 via custom cmdline\n"
+        );
+    } elsif ($firmware eq 'ec2') {
         # /.../
         # EC2 requires to specifiy the root device in the bootloader
         # configuration. EC2 extracts this information via pygrub and
@@ -4261,9 +4265,11 @@ sub setupBootLoaderConfiguration {
         # appears as /dev/sda1. Thus this value is set as fixed
         # kernel commandline parameter
         # ----
+        $kiwi -> info (
+            "Kernel root device set to /dev/sda1 via $firmware firmware\n"
+        );
         $cmdline .= " root=/dev/sda1";
-    }
-    if ($firmware eq 'ec2hvm') {
+    } elsif ($firmware eq 'ec2hvm') {
         # /.../
         # Similar to the firmware type 'ec2', EC2 needs in case of HVM
         # (hardware-assisted virtual machine) instances the root device to be
@@ -4277,6 +4283,9 @@ sub setupBootLoaderConfiguration {
         # During the second reboot, /dev/sda will be removed from the system
         # and therefore such an instance won't come up.
         # ----
+        $kiwi -> info (
+            "Kernel root device set to /dev/hda1 via $firmware firmware\n"
+        );
         $cmdline .= " root=/dev/hda1";
     }
     if ($topic =~ /^KIWI (CD|USB) Boot/) {
