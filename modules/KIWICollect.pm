@@ -945,8 +945,8 @@ sub addDebugPackage {
             'onlyarch' => $arch
         };
     }
-    $this->{m_debugPacks}->{$packname}->{'requireVersionArch'}->
-    { "$packPointer->{'version'}-$packPointer->{'release'}.$arch" } = 1;
+    $this->{m_debugPacks}->{$packname}->{'requireVersion'}->
+    { "$packPointer->{'version'}-$packPointer->{'release'}" } = 1;
     return;
 }
 
