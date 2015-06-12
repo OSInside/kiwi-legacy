@@ -893,12 +893,12 @@ sub installArchives {
             push @bootinclude_archives, $name;
         }
     } else {
-        my $archiveList = $xml -> getArchives();
+        my $archiveList = $xml -> getImageArchives();
         for my $archive (@{$archiveList}) {
             my $name = $archive -> getName();
             push @archives, $name;
         }
-        my $archiveListBootInclude = $xml -> getBootIncludeArchives();
+        my $archiveListBootInclude = $xml -> getBootIncludeImageArchives();
         for my $archive (@{$archiveListBootInclude}) {
             my $name = $archive -> getName();
             push @bootinclude_archives, $name;

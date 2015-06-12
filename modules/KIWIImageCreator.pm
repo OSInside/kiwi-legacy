@@ -1717,7 +1717,7 @@ sub __addPackagesToBootXML {
     my $systemXML = shift;
     my $bootXML   = shift;
     my $bootArchives = [];
-    my $systemBootArchives = $systemXML -> getBootIncludeArchives();
+    my $systemBootArchives = $systemXML -> getBootIncludeImageArchives();
     if ($systemBootArchives) {
         push @{$bootArchives}, @{$systemBootArchives};
     }

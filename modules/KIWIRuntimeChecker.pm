@@ -1365,21 +1365,13 @@ sub __hasValidArchives {
     my $xml  = $this->{xml};
     my $cmdL = $this->{cmdArgs};
     my $archives = [];
-    my $systemArchives = $xml -> getArchives();
-    my $systemBinclArchives = $xml -> getBootIncludeArchives();
+    my $imageArchives = $xml -> getImageArchives();
     my $bootstrapArchives = $xml -> getBootStrapArchives();
-    my $bootstrapBinclArchives = $xml -> getBootIncludeBootStrapArchives();
-    if ($systemArchives) {
-        push @{$archives}, @{$systemArchives};
-    }
-    if ($systemBinclArchives) {
-        push @{$archives}, @{$systemBinclArchives};
+    if ($imageArchives) {
+        push @{$archives}, @{$imageArchives};
     }
     if ($bootstrapArchives) {
         push @{$archives}, @{$bootstrapArchives};
-    }
-    if ($bootstrapBinclArchives) {
-        push @{$archives}, @{$bootstrapBinclArchives};
     }
     my $desc = $cmdL-> getConfigDir();
     if (! $desc) {

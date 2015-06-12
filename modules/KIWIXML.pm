@@ -1259,11 +1259,12 @@ sub getActiveProfileNames {
 }
 
 #==========================================
-# getArchives
+# getImageArchives
 #------------------------------------------
-sub getArchives {
+sub getImageArchives {
     # ...
     # Return an array ref containing ArchiveData objects
+    # which contains all archives from the image typed packages sections
     # ---
     my $this = shift;
     return $this -> __getInstallData('archives');
@@ -1275,6 +1276,7 @@ sub getArchives {
 sub getBootStrapArchives {
     # ...
     # Return an array ref containing ArchiveData objects
+    # which contains all archives from the bootstrap packages section
     # ---
     my $this = shift;
     return $this -> __getInstallData('bootStrapArchives');
@@ -1306,11 +1308,13 @@ sub getBootDeletePackages {
 }
 
 #==========================================
-# getBootIncludeArchives
+# getBootIncludeImageArchives
 #------------------------------------------
-sub getBootIncludeArchives {
+sub getBootIncludeImageArchives {
     # ...
     # Return an array ref containing ArchiveData objects
+    # which contains all archives from the image types packages section(s)
+    # marked as bootinclude
     # ---
     my $this = shift;
     return $this -> __getInstallData('bootArchives');
@@ -1322,6 +1326,8 @@ sub getBootIncludeArchives {
 sub getBootIncludeBootStrapArchives {
     # ...
     # Return an array ref containing ArchiveData objects
+    # which contains all archives from the bootstrap packages section
+    # marked as bootinclude
     # ---
     my $this = shift;
     return $this -> __getInstallData('bootStrapBootArchives');
@@ -4519,17 +4525,9 @@ sub __populateArchiveInfo {
                 my $archiveObj = KIWIXMLPackageArchiveData -> new(\%archData);
                 my $accessID;
                 if ($type eq 'bootstrap') {
-                    if ($bootIncl && $bootIncl eq 'true') {
-                        $accessID = 'bootStrapBootArchives';
-                    } else {
-                        $accessID = 'bootStrapArchives';
-                    }
+                    $accessID = 'bootStrapArchives';
                 } else {
-                    if ($bootIncl && $bootIncl eq 'true') {
-                        $accessID = 'bootArchives';
-                    } else {
-                        $accessID = 'archives';
-                    }
+                    $accessID = 'archives';
                 }
                 my %storeData = (
                     accessID => $accessID,
@@ -4540,6 +4538,26 @@ sub __populateArchiveInfo {
                 );
                 if (! $this -> __storeInstallData(\%storeData)) {
                     return;
+                }
+                if ($bootIncl && $bootIncl eq 'true') {
+                    my $bootArchiveObj = KIWIXMLPackageArchiveData -> new(
+                        \%archData
+                    );
+                    if ($type eq 'bootstrap') {
+                        $accessID = 'bootStrapBootArchives';
+                    } else {
+                        $accessID = 'bootArchives';
+                    }
+                    my %storeBootData = (
+                        accessID => $accessID,
+                        arch     => $arch,
+                        dataObj  => $bootArchiveObj,
+                        profName => $prof,
+                        type     => $type
+                    );
+                    if (! $this -> __storeInstallData(\%storeBootData)) {
+                        return;
+                    }
                 }
             }
         }

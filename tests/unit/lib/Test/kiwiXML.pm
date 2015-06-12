@@ -111,7 +111,7 @@ sub test_addArchives {
     $this -> assert_str_equals('none', $msgT);
     $state = $kiwi -> getState();
     $this -> assert_str_equals('No state set', $state);
-    my $archives = $xml -> getArchives();
+    my $archives = $xml -> getImageArchives();
     my @archiveNames;
     for my $archive (@{$archives}) {
         push @archiveNames, $archive -> getName();
@@ -292,7 +292,7 @@ sub test_addArchivesToSpecProf {
     my $state = $kiwi -> getState();
     $this -> assert_str_equals('No state set', $state);
     # Verify that the default has not changed
-    my $archives = $xml -> getArchives();
+    my $archives = $xml -> getImageArchives();
     my @archiveNames;
     for my $archive (@{$archives}) {
         push @archiveNames, $archive -> getName();
@@ -303,7 +303,7 @@ sub test_addArchivesToSpecProf {
     $xml = $xml -> setSelectionProfileNames(\@useProf);
     # Clear the log
     $state = $kiwi -> getState();
-    $archives = $xml -> getArchives();
+    $archives = $xml -> getImageArchives();
     my @profArchiveNames;
     for my $archive (@{$archives}) {
         push @profArchiveNames, $archive -> getName();
@@ -354,7 +354,7 @@ sub test_addArchivesToSpecType {
     my $state = $kiwi -> getState();
     $this -> assert_str_equals('No state set', $state);
     # Verify that the default has not changed
-    my $archives = $xml -> getArchives();
+    my $archives = $xml -> getImageArchives();
     my @archiveNames;
     for my $archive (@{$archives}) {
         push @archiveNames, $archive -> getName();
@@ -366,7 +366,7 @@ sub test_addArchivesToSpecType {
     $xml = $xml -> setSelectionProfileNames(\@useProf);
     # Clear the log
     $state = $kiwi -> getState();
-    $archives = $xml -> getArchives();
+    $archives = $xml -> getImageArchives();
     my @profArchiveNames;
     for my $archive (@{$archives}) {
         push @profArchiveNames, $archive -> getName();
@@ -374,7 +374,7 @@ sub test_addArchivesToSpecType {
     $this -> assert_array_equal(\@expected, \@profArchiveNames);
     # Change the build type and now we should get the added archives
     $xml = $xml -> setBuildType('iso');
-    $archives = $xml -> getArchives();
+    $archives = $xml -> getImageArchives();
     my @typeArchiveNames;
     for my $archive (@{$archives}) {
         push @typeArchiveNames, $archive -> getName();
@@ -3774,11 +3774,11 @@ sub test_getActiveProfileNames {
 }
 
 #==========================================
-# test_getArchives
+# test_getImageArchives
 #------------------------------------------
-sub test_getArchives {
+sub test_getImageArchives {
     # ...
-    # Verify proper return of getArchives method
+    # Verify proper return of getImageArchives method
     # ---
     if ($ENV{KIWI_NO_NET} && $ENV{KIWI_NO_NET} == 1) {
         return; # skip the test if there is no network connection
@@ -3789,7 +3789,7 @@ sub test_getArchives {
     my $xml = KIWIXML -> new(
         $confDir, undef, undef,$this->{cmdL}
     );
-    my $archives = $xml -> getArchives();
+    my $archives = $xml -> getImageArchives();
     my $msg = $kiwi -> getMessage();
     $this -> assert_str_equals('No messages set', $msg);
     my $msgT = $kiwi -> getMessageType();
@@ -3803,6 +3803,7 @@ sub test_getArchives {
     }
     my @expected = qw(
         myImageStuff.tgz
+        myInitStuff.tar
         myOEMstuffProf.tar.bz2
     );
     $this -> assert_array_equal(\@expected, \@archiveNames);
@@ -3810,11 +3811,11 @@ sub test_getArchives {
 }
 
 #==========================================
-# test_getArchivesUseProf
+# test_getImageArchivesUseProf
 #------------------------------------------
-sub test_getArchivesUseProf {
+sub test_getImageArchivesUseProf {
     # ...
-    # Verify proper return of getArchives method with a selected build
+    # Verify proper return of getImageArchives method with a selected build
     # profile
     # ---
     if ($ENV{KIWI_NO_NET} && $ENV{KIWI_NO_NET} == 1) {
@@ -3835,7 +3836,7 @@ sub test_getArchivesUseProf {
     $this -> assert_str_equals('info', $msgT);
     my $state = $kiwi -> getState();
     $this -> assert_str_equals('completed', $state);
-    my $archives = $xml -> getArchives();
+    my $archives = $xml -> getImageArchives();
     $msg = $kiwi -> getMessage();
     $this -> assert_str_equals('No messages set', $msg);
     $msgT = $kiwi -> getMessageType();
@@ -3850,6 +3851,7 @@ sub test_getArchivesUseProf {
     my @expected = qw(
         myAppArch.tgz
         myImageStuff.tgz
+        myInitStuff.tar
         myOEMstuffProf.tar.bz2
     );
     $this -> assert_array_equal(\@expected, \@archiveNames);
@@ -3889,11 +3891,11 @@ sub test_getBootDeletePackages {
 }
 
 #==========================================
-# test_getBootIncludeArchives
+# test_getBootIncludeImageArchives
 #------------------------------------------
-sub test_getBootIncludeArchives {
+sub test_getBootIncludeImageArchives {
     # ...
-    # Verify proper return of getArchives method
+    # Verify proper return of getImageArchives method
     # ---
     if ($ENV{KIWI_NO_NET} && $ENV{KIWI_NO_NET} == 1) {
         return; # skip the test if there is no network connection
@@ -3904,7 +3906,7 @@ sub test_getBootIncludeArchives {
     my $xml = KIWIXML -> new(
         $confDir, undef, undef,$this->{cmdL}
     );
-    my $archives = $xml -> getBootIncludeArchives();
+    my $archives = $xml -> getBootIncludeImageArchives();
     my $msg = $kiwi -> getMessage();
     $this -> assert_str_equals('No messages set', $msg);
     my $msgT = $kiwi -> getMessageType();
