@@ -68,39 +68,6 @@
       </listitem>
     </varlistentry>
     <varlistentry>
-      <term><filename>config-yast-firstboot.xml</filename></term>
-      <listitem>
-        <para> Configuration file for the control of the YaST firstboot
-          service. Similar to the AutoYaST approach, YaST also provides
-          a boot time service called firstboot. Unfortunately there is
-          no GUI available to setup the firstboot, but good
-          documentation in
-            <filename>/usr/share/doc/packages/yast2-firstboot</filename>.
-          Once you have created such a firstboot file in your image
-          description directory, KIWI will process the file and setup
-          your image as follows: </para>
-        <orderedlist>
-          <listitem>
-            <para>KIWI enables the firstboot service. </para>
-          </listitem>
-          <listitem>
-            <para>While booting the image, YaST is started in firstboot
-              mode. </para>
-          </listitem>
-          <listitem>
-            <para>The firstboot service handles the instructions listed
-              in the <filename>fileconfig-yast-firstboot.xml</filename>.
-            </para>
-          </listitem>
-          <listitem>
-            <para>If the process finished successfully, the environment
-              is cleaned and firstboot will not be called at next
-              reboot.</para>
-          </listitem>
-        </orderedlist>
-      </listitem>
-    </varlistentry>
-    <varlistentry>
       <term><filename>config-yast-autoyast.xml</filename></term>
       <listitem>
         <para> Configuration file which has been created by AutoYaST. To
@@ -178,7 +145,7 @@
 
     <sect2 id="sec.description.image">
       <title><sgmltag>image</sgmltag> Element</title>
-      <screen>&lt;image schemaversion="5.2" name="iname"
+      <screen>&lt;image schemaversion="6.2" name="iname"
   displayname="text" 
   kiwirevision="number" 
   id="10 digit number"&gt;
@@ -290,10 +257,9 @@
   &lt;version&gt;1.1.2&lt;/version&gt;
   &lt;packagemanager&gt;zypper&lt;/packagemanager&gt;
   &lt;type image="name" ...&gt;
-    &lt;ec2config|systemdisk|oemconfig|pxedeploy|size|split|machine&gt;
+    &lt;machine|oemconfig|pxedeploy|size|split|systemdisk|vagrantconfig&gt;
   &lt;/type&gt; 
 &lt;/preferences&gt;</screen>
-
 
       <para>The mandatory <sgmltag>preferences</sgmltag> section
         contains information about the supported image type(s), the used
@@ -359,9 +325,9 @@
       <variablelist>
         <varlistentry>
           <term><sgmltag class="attribute">image</sgmltag>="<sgmltag
-              class="attvalue">lxc</sgmltag>"</term>
+              class="attvalue">lxc|docker</sgmltag>"</term>
           <listitem>
-            <para>Use the lxc image type to build a linux container image
+            <para>Use the lxc or docker image type to build a linux container image
               For additional information refer to the <xref linkend="chap.lxc"/>
               chapter.</para>
           </listitem>
@@ -392,9 +358,6 @@
                  </listitem>
                  <listitem>
           <para>xfs</para>
-                 </listitem>
-                 <listitem>
-          <para>reiserfs</para>
                  </listitem>
               </itemizedlist>
           </listitem>
@@ -455,15 +418,6 @@
               be set to the following values with the effects described
               below:</para>
             <variablelist>
-              <varlistentry>
-                <term><sgmltag class="attvalue">clic</sgmltag></term>
-                <listitem>
-                  <para>Creates a fuse based compressed read-only
-                    filesystem which allows write operations into a cow
-                    file. If the iso is bigger than 4G you can use the
-          clic_udf flag instead</para>
-                </listitem>
-              </varlistentry>
               <varlistentry>
                 <term><sgmltag class="attvalue">seed</sgmltag></term>
                 <listitem>
@@ -601,27 +555,6 @@
           </listitem>
         </varlistentry>
       </variablelist>
-
-      <para>All of the mentioned types can specify the <sgmltag
-          class="attribute">boot</sgmltag> attribute which tells KIWI to
-        call itself to build the requested boot image (initrd). It is
-        possible to tell KIWI to check for an already built boot image
-        which is a so called <emphasis>prebuilt boot image</emphasis>.
-        To activate searching for an appropriate prebuilt boot image the
-        type section also provides the attribute <sgmltag
-          class="attribute">checkprebuilt</sgmltag>="<sgmltag
-          class="attvalue">true|false</sgmltag>". If specified KIWI will
-        search for a prebuilt boot image in a directory named
-          <filename>/usr/share/kiwi/image/*boot/*-prebuilt</filename>.
-        Example: If the <sgmltag class="attribute">boot</sgmltag>
-        attribute was set to <sgmltag class="attvalue"
-          >isoboot/suse-10.3</sgmltag> and <sgmltag class="attribute"
-          >checkprebuilt</sgmltag> is set to <sgmltag class="attvalue"
-          >true</sgmltag> KIWI will search the prebuilt boot image in
-          <filename>/usr/share/kiwi/image/isoboot/suse-10.3-prebuilt</filename>.
-        The directory KIWI searches for the prebuilt boot images can
-        also be specified at the commandline with the
-          <option>--prebuiltbootimage</option> parameter. </para>
 
       <para>Within the type section, there could be other optional
     attributes which are either universally valid or can be used
@@ -774,19 +707,6 @@
         given type. The following lists the supported child elements: </para>
 
       <variablelist>
-        <varlistentry>
-          <term><sgmltag>ec2config</sgmltag></term>
-          <listitem>
-            <para>The optional ec2config block is used to specify
-              information relevant only to AWS EC2 images. The following
-              information can be provided: </para>
-            <screen>&lt;ec2config&gt;
-  &lt;ec2accountnr&gt; Your AWS account number &lt;/ec2accountnr&gt; 
-  &lt;ec2certfile&gt; Path to the AWS cert-*.pem file &lt;/ec2certfile&gt;
-  &lt;ec2privatekeyfile&gt; Path to the AWS pk-*.pem file &lt;/ec2privatekeyfile&gt;
-&lt;/ec2config&gt;</screen>
-          </listitem>
-        </varlistentry>
         <varlistentry>
           <term><sgmltag>systemdisk</sgmltag></term>
           <listitem>
@@ -1559,13 +1479,15 @@
         supported repository types for each package manager:</para>
 
       <table id="tab.description.supported-types">
-        <title>Supported Types for zypper and smart</title>
-        <tgroup cols="3">
+        <title>Supported package manager repo types</title>
+        <tgroup cols="5">
           <thead>
             <row>
               <entry>Type</entry>
-              <entry>smart Support</entry>
-              <entry>zypper Support</entry>
+              <entry>smart</entry>
+              <entry>zypper</entry>
+              <entry>apt</entry>
+              <entry>yum</entry>
             </row>
           </thead>
           <tbody>
@@ -1573,56 +1495,29 @@
               <entry>apt-deb</entry>
               <entry>yes</entry>
               <entry>no</entry>
-            </row>
-            <row>
-              <entry>apt-rpm</entry>
               <entry>yes</entry>
               <entry>no</entry>
-            </row>
-            <row>
-              <entry>deb-dir</entry>
-              <entry>yes</entry>
-              <entry>no</entry>
-            </row>
-            <row>
-              <entry>mirrors</entry>
-              <entry>yes</entry>
-              <entry>no</entry>
-            </row>
-            <row>
-              <entry>red-carpet</entry>
-              <entry>yes</entry>
-              <entry>yes</entry>
             </row>
             <row>
               <entry>rpm-dir</entry>
               <entry>yes</entry>
               <entry>yes</entry>
+              <entry>no</entry>
+              <entry>no</entry>
             </row>
             <row>
               <entry>rpm-md</entry>
               <entry>yes</entry>
               <entry>yes</entry>
-            </row>
-            <row>
-              <entry>slack-site</entry>
-              <entry>yes</entry>
               <entry>no</entry>
-            </row>
-            <row>
-              <entry>up2date-mirrors</entry>
               <entry>yes</entry>
-              <entry>no</entry>
-            </row>
-            <row>
-              <entry>urpmi</entry>
-              <entry>yes</entry>
-              <entry>no</entry>
             </row>
             <row>
               <entry>yast2</entry>
               <entry>yes</entry>
               <entry>yes</entry>
+              <entry>no</entry>
+              <entry>no</entry>
             </row>
           </tbody>
         </tgroup>
@@ -1865,13 +1760,9 @@
               attribute of the <sgmltag class="element">package</sgmltag>
               element. This is shown in the example below:
 
-              <screen>
-                &lt;packages type="bootstrap"&gt;
-                   ...
-                   &lt;package name="cifs-utils" bootinclude="true"/&gt;
-                &lt;/packages&gt;
-              </screen>
-            </para>
+<screen>&lt;packages type="bootstrap"&gt;
+  &lt;package name="cifs-utils" bootinclude="true"/&gt;
+  &lt;/packages&gt;</screen></para>
           </listitem>
         </varlistentry>
         <varlistentry>
@@ -1970,13 +1861,6 @@
           </listitem>
         </varlistentry>
         <varlistentry>
-          <term><sgmltag class="attvalue">usb</sgmltag></term>
-          <listitem>
-            <para>Image packages, a list of additional packages to be
-              installed when building a USB image.</para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
           <term><sgmltag class="attvalue">vmx</sgmltag></term>
           <listitem>
             <para>Image packages, a list of additional packages to be
@@ -1998,9 +1882,10 @@
             class="element">namedCollection</sgmltag> element is a
           representation of a predefined list of packages. Specifying a
           pattern will install all packages listed in the named pattern to be
-          installed in the image. Support for patterns is SUSE-specific, 
-          and available with openSUSE 10.1 or later. The optional <sgmltag
-            class="attribute">patternType</sgmltag> attribute on the 
+          installed in the image. Support for patterns is distribution specific
+          and available with SLES, openSUSE, CentOS and RHEL. The
+          optional <sgmltag class="attribute">patternType</sgmltag> attribute
+          on the 
           <sgmltag class="element">packages</sgmltag> element allows you to
           control the installation of dependent packages in the image.
           You may assigne one of the following values to the
@@ -2063,25 +1948,6 @@
           systems architecture (<command>uname</command>
           <option>-m</option>) matches one of the specified values of
           the arch attribute. </para>
-      </sect3>
-
-      <sect3 id="sec.description.image-type-specific-packages">
-        <title>Image Type Specific Packages</title>
-        <para> If a package is only required for a specific type of
-          image and replaces another package you can use the replaces
-          attribute to tell KIWI to install the package by replacing
-          another one. For example you can specify the kernel package in
-          the <sgmltag class="attribute">type</sgmltag>="<sgmltag
-            class="attvalue">image</sgmltag>" section as </para>
-
-        <screen>&lt;package name="kernel-default" replaces="kernel-xen"/&gt;</screen>
-
-        <para>and in the type="xen" section as </para>
-
-        <screen>&lt;package name="kernel-xen"  replaces="kernel-default"/&gt; </screen>
-
-        <para>The result is the xen kernel if you request a xen image
-          and the default kernel in any other case. </para>
       </sect3>
 
       <sect3 id="sec.description.packages.to.become.included">

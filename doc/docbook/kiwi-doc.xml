@@ -42,18 +42,6 @@
         <email>rjschwei@suse.com</email>
       </othercredit>
     </authorgroup>
-  <!--
-    <revhistory>
-      <revision>
-        <revnumber>KIWI V4.58</revnumber>
-        <date>2010-08-31</date>
-        <authorinitials>toms</authorinitials>
-        <revdescription>
-          <para>First migration to DocBook</para>
-        </revdescription>
-      </revision>
-    </revhistory>
-  -->
     
     <xi:include href="kiwi-doc-license.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
     
