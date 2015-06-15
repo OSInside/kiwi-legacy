@@ -84,22 +84,22 @@
     configuration changes or enhancements, for example an image should
     have replaced its browser with another better browser or a new
     service like apache should be enabled. In principle it’s possible to
-    do all those changes manually within the physical extend but
+    do all those changes manually within the unpacked image root tree but
     concerning maintenance this would be a nightmare. Why, because it
     will leave the system in an unversioned condition. Nobody knows what
     has changed since the very first preparation of this image. So in
     short:</para>
   <indexterm>
       <primary>KIWI</primary>
-      <secondary>physical extends</secondary>
+      <secondary>unpacked image</secondary>
     </indexterm>
   <blockquote>
-    <para>Don’t modify physical extends manually!</para>
+    <para>Don’t modify the unpacked image root tree manually!</para>
   </blockquote>
   <para>Changes to the image configuration should be done within the
     image description. The image description itself should be part of a
-    versioning system like subversion. All changes can be tracked down
+    versioning system like git. All changes can be tracked down
     then and maybe more important can be assigned to product tags and
     branches. As a consequence an image must be prepared from scratch
-    and the old physical extend could be removed. </para>
+    and the old unpacked image root tree could be removed. </para>
 </chapter>
