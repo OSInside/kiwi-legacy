@@ -48,8 +48,7 @@
         <para>Use a virtualization system to test the image directly.
           Testing an iso can be done with any full virtual system for
           example:</para>
-<screen><command>cd</command> /tmp/myiso-result
-<command>qemu</command> -cdrom LimeJeOS-SLE12.x86_64-1.13.1.iso</screen>
+<screen><command>qemu</command> -cdrom /tmp/myiso-result/LimeJeOS-SLE12.x86_64-1.13.1.iso</screen>
       </listitem>
     </itemizedlist>
   </sect1>
