@@ -10,6 +10,8 @@
         <profile name="xenFlavour" description="VMX with Xen kernel"/>
         <profile name="ec2Flavour" description="VMX with EC2/Xen kernel"/>
         <profile name="vmxFlavour" description="VMX with default kernel" import="true"/>
+        <profile name="docker" description="docker image"/>
+        <profile name="vagrant" description="vagrant base box for libvirt"/>
     </profiles>
     <preferences>
         <type image="iso" primary="true" boot="isoboot/suse-SLES12" flags="overlay" hybrid="true" firmware="efi" kernelcmdline="splash"/>
@@ -23,6 +25,15 @@
         <hwclock>utc</hwclock>
         <rpm-excludedocs>true</rpm-excludedocs>
         <rpm-check-signatures>false</rpm-check-signatures>
+    </preferences>
+    <preferences profiles="vagrant">
+        <type image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES12" format="vagrant" bootloader="grub2" kernelcmdline="nomodeset" boottimeout="2">
+            <vagrantconfig provider="libvirt" virtualsize="16"/>
+            <size unit="G">10</size>
+        </type>
+    </preferences>
+    <preferences profiles="docker">
+        <type image="docker" container="system"/>
     </preferences>
     <preferences profiles="ec2Flavour">
         <type image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES12" bootprofile="ec2" bootkernel="ec2k" bootloader="grub2" kernelcmdline="xencons=xvc0 console=xvc0 multipath=off splash" firmware="ec2"/>
@@ -63,6 +74,9 @@
             </machine>
         </type>
     </preferences>
+    <users group='vagrant' profiles="vagrant">
+        <user name='vagrant' password='vh4vw1N4alxKQ' home='/home/vagrant'/>
+    </users>
     <users group="root">
         <user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
     </users>
