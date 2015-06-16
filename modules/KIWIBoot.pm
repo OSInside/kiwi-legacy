@@ -468,6 +468,13 @@ sub new {
         if ($preferences) {
             $ptool = $preferences -> getPartitioner();
         }
+        my $type = $xml -> getImageType();
+        if ($type) {
+            my $zipl_target = $type -> getZiplTargetType();
+            if (($zipl_target) && ($zipl_target =~ /LDL|CDL/)) {
+                $ptool = 'fdasd';
+            }
+        }
     }
     if ($cmdL -> getPartitioner()) {
         # commandline specified partitioner overwrites all
