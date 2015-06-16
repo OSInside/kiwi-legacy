@@ -10905,15 +10905,13 @@ function backupGPT {
 function loop_setup {
     local IFS=$IFS_ORIG
     local target=$1
-    local loop=$(losetup -f --show $target)
+    local logical_sector_size
+    if [ ! -z "$kiwi_target_blocksize" ];then
+        logical_sector_size="-L $kiwi_target_blocksize"
+    fi
+    local loop=$(losetup $logical_sector_size -f --show $target)
     if [ ! -e "$loop" ];then
         return 1
-    fi
-    if [ ! -z "$kiwi_target_blocksize" ];then
-        # Once there is a loop driver with custom block size setup
-        # available check here for a configured target_blocksize and
-        # apply the value to the loop
-        :
     fi
     echo $loop
 }

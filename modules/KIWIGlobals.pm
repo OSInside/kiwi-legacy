@@ -170,13 +170,22 @@ sub loop_setup {
     my $kiwi = $this->{kiwi};
     my $locator = KIWILocator -> instance();
     my $losetup_exec = $locator -> getExecPath("losetup");
+    my $logical_sector_size = '';
     if (! $losetup_exec) {
         $kiwi -> error("losetup not found on build system");
         $kiwi -> failed();
         return;
     }
+    if ($xml) {
+        my $bldType = $xml -> getImageType();
+        my $blocksize = $bldType -> getTargetBlockSize();
+        my $default_blocksize = $this -> getKiwiConfigEntry('DiskSectorSize');
+        if (($blocksize) && ($blocksize != $default_blocksize)) {
+            $logical_sector_size = "-L $blocksize";
+        }
+    }
     my $result = KIWIQX::qxx (
-        "$losetup_exec -f --show $source 2>&1"
+        "$losetup_exec $logical_sector_size -f --show $source 2>&1"
     );
     my $status = $? >> 8;
     if ($status != 0) {
@@ -185,16 +194,6 @@ sub loop_setup {
         return;
     }
     chomp $result;
-    if ($xml) {
-        my $bldType = $xml -> getImageType();
-        my $blocksize = $bldType -> getTargetBlockSize();
-        my $default_blocksize = $this -> getKiwiConfigEntry('DiskSectorSize');
-        if (($blocksize) && ($blocksize != $default_blocksize)) {
-            # Once there is a loop driver with custom block size setup
-            # available check here for a configured target_blocksize and
-            # apply the value to the loop
-        }
-    }
     return $result;
 }
 
