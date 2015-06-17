@@ -7334,13 +7334,21 @@ sub diskOffset {
     my $status;
     if ($tool eq 'fdasd') {
         my $loop = $global -> loop_setup($disk, $this->{xml});
-        $status = KIWIQX::qxx(
-            "fdasd -f -s -p $loop | head -n 1 | tr -s ' ' | cut -f3 -d ' '"
+        my $track_blocks = KIWIQX::qxx(
+            "fdasd -f -p $loop | grep 'blocks per track' | cut -f2 -d:"
         );
-        $global -> loop_delete($loop);
         $result = $? >> 8;
-        chomp $status;
-        $offset = $status;
+        chomp $track_blocks;
+        my $start_tracks = 0;
+        if ($result == 0) {
+            $start_tracks = KIWIQX::qxx(
+                "fdasd -f -s -p $loop | head -n 1 | tr -s ' ' | cut -f3 -d ' '"
+            );
+            $result = $? >> 8;
+            chomp $start_tracks;
+        }
+        $global -> loop_delete($loop);
+        $offset = int($track_blocks) * int($start_tracks);
     } else {
         $status = KIWIQX::qxx(
             "parted -m $disk unit s print 2>&1"
