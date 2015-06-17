@@ -27,6 +27,7 @@ use File::Basename;
 use File::Spec;
 use Math::BigFloat;
 use Config::IniFiles;
+use Scalar::Util 'looks_like_number';
 
 #==========================================
 # Base class
@@ -4258,7 +4259,7 @@ sub setupBootLoaderConfiguration {
     if ($type->{cmdline}) {
         $cmdline  = $type->{cmdline};
     }
-    if ($cmdline =~ /root=(.*)/) {
+    if (($cmdline) && ($cmdline =~ /root=(.*)/)) {
         $kiwi -> info (
             "Kernel root device set to $1 via custom cmdline\n"
         );
@@ -6047,6 +6048,7 @@ sub installBootLoader {
                     'DiskSectorSize'
                 );
             }
+            my $chs = $this -> diskCHS($diskname);
             my $type = $xml -> getImageType() -> getZiplTargetType();
             if (! $type) {
                 if ($bsize == 4096) {
@@ -6088,10 +6090,12 @@ sub installBootLoader {
                     $kiwi -> info ("--> targettype = $type\n");
                     $kiwi -> info ("--> targetblocksize = $bsize\n");
                     $kiwi -> info ("--> targetoffset = $offset\n");
+                    $kiwi -> info ("--> targetgeometry = $chs\n");
                     print $zconffd "\t"."targetbase = $this->{loop}"."\n";
                     print $zconffd "\t"."targettype = $type"."\n";
                     print $zconffd "\t"."targetblocksize = $bsize"."\n";
                     print $zconffd "\t"."targetoffset = $offset"."\n";
+                    print $zconffd "\t"."targetgeometry = $chs"."\n";
                }
             }
             $zconffd -> close();
@@ -7324,13 +7328,16 @@ sub diskOffset {
     my $disk = shift;
     my $kiwi = $this->{kiwi};
     my $tool = $this->{ptool};
+    my $global = KIWIGlobals -> instance();
     my $offset;
     my $result;
     my $status;
     if ($tool eq 'fdasd') {
+        my $loop = $global -> loop_setup($disk, $this->{xml});
         $status = KIWIQX::qxx(
-            "fdasd -f -s -p $disk | tr -s ' ' | cut -f2 -d ' '"
+            "fdasd -f -s -p $loop | head -n 1 | tr -s ' ' | cut -f3 -d ' '"
         );
+        $global -> loop_delete($loop);
         $result = $? >> 8;
         chomp $status;
         $offset = $status;
@@ -7355,16 +7362,64 @@ sub diskOffset {
         $kiwi -> failed();
         return;
     }
-    if ((! defined $offset) || ($offset <= 0)) {
-        if (! defined $offset) {
-            $kiwi -> error ("empty partition offset: $status");
-        } else {
-            $kiwi -> error ("bogus partition offset: $offset");
-        }
+    if (! $offset) {
+        $kiwi -> error ("empty partition offset: $status");
+        $kiwi -> failed();
+        return;
+    } elsif (! looks_like_number($offset)) {
+        $kiwi -> error ("bogus partition offset: $offset");
         $kiwi -> failed();
         return;
     }
     return $offset;
+}
+
+#==========================================
+# diskCHS
+#------------------------------------------
+sub diskCHS {
+    my $this = shift;
+    my $disk = shift;
+    my $kiwi = $this->{kiwi};
+    my $tool = $this->{ptool};
+    my $global = KIWIGlobals -> instance();
+    my $cylinders;
+    my $tracks;
+    my $blocks;
+    my $result;
+    if ($tool ne 'fdasd') {
+        $kiwi -> error ("CHS retrieval only implemented for fdasd");
+        $kiwi -> failed();
+        return;
+    }
+    my $loop = $global -> loop_setup($disk, $this->{xml});
+    $cylinders = KIWIQX::qxx(
+        "fdasd -f -p $loop | grep cylinders | cut -f2 -d:"
+    );
+    $result = $? >> 8;
+    chomp $cylinders;
+    if ($result == 0) {
+        $tracks = KIWIQX::qxx(
+            "fdasd -f -p $loop | grep 'tracks per cylinder' | cut -f2 -d:"
+        );
+        $result = $? >> 8;
+        chomp $tracks;
+    }
+    if ($result == 0) {
+        $blocks = KIWIQX::qxx(
+            "fdasd -f -p $loop | grep 'blocks per track' | cut -f2 -d:"
+        );
+        $result = $? >> 8;
+        chomp $blocks;
+    }
+    $global -> loop_delete($loop);
+    if ($result != 0) {
+        $kiwi -> error ("Failed to obtain CHS geometry");
+        $kiwi -> failed();
+        return;
+    }
+    return sprintf "%d,%d,%d",
+        int($cylinders), int($tracks), int($blocks);
 }
 
 #==========================================
