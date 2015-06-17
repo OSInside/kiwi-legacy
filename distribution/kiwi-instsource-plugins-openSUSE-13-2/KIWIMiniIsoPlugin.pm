@@ -103,7 +103,7 @@ sub execute {
     }
     if ($ismini !~ m{mini}i) {
         $this->logMsg("I",
-            "Nothing to for for media type <$ismini>"
+            "Nothing to do for media type <$ismini>"
         );
         return $retval;
     }
