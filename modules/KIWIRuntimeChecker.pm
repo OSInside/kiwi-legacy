@@ -426,7 +426,7 @@ sub __checkSelectedBootLoaderIncluded {
         return 1;
     }
     my $name = $type -> getTypeName();
-    if ($name !~ /oem|vmx|pxe/) {
+    if ($name !~ /oem|vmx/) {
         return 1;
     }
     my $bootloader = $type -> getBootLoader();

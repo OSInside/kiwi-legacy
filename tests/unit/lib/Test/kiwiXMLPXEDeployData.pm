@@ -558,7 +558,7 @@ sub test_createUnionFSConfig {
     $pxeDataObj = $pxeDataObj -> createUnionFSConfig(
         '/dev/sdc1',
         '/dev/sdc2',
-        'clicfs'
+        'overlayfs'
     );
     my $msg = $kiwi -> getMessage();
     $this -> assert_str_equals('No messages set', $msg);
@@ -590,7 +590,7 @@ sub test_createUnionFSConfig {
     $this -> assert_str_equals('none', $msgT);
      $state = $kiwi -> getState();
     $this -> assert_str_equals('No state set', $state);
-    $this -> assert_str_equals('clicfs', $unionType);
+    $this -> assert_str_equals('overlayfs', $unionType);
     return;
 }
 
@@ -607,7 +607,7 @@ sub test_createUnionFSConfigOverwrite {
     $pxeDataObj = $pxeDataObj -> createUnionFSConfig(
         '/dev/sdc1',
         '/dev/sdc2',
-        'clicfs'
+        'overlayfs'
     );
     my $msg = $kiwi -> getMessage();
     my $expected = 'createUnionFSConfig: overwriting existing union fs '
@@ -641,7 +641,7 @@ sub test_createUnionFSConfigOverwrite {
     $this -> assert_str_equals('none', $msgT);
      $state = $kiwi -> getState();
     $this -> assert_str_equals('No state set', $state);
-    $this -> assert_str_equals('clicfs', $unionType);
+    $this -> assert_str_equals('overlayfs', $unionType);
     return;
 }
 
@@ -660,7 +660,7 @@ sub test_createUnionFSConfigInvalidType {
                                                 'aufs'
                                                 );
     my $msg = $kiwi -> getMessage();
-    my $expected = 'createUnionFSConfig: unionType argument must be "clicfs".';
+    my $expected = 'createUnionFSConfig: unionType argument must be "overlayfs".';
     $this -> assert_str_equals($expected, $msg);
     my $msgT = $kiwi -> getMessageType();
     $this -> assert_str_equals('error', $msgT);
@@ -868,7 +868,7 @@ sub test_ctor_initImproperUnionType {
     my $pxeDataObj = KIWIXMLPXEDeployData -> new(\%init);
     my $msg = $kiwi -> getMessage();
     my $expected =  'Type specified for union fs is not supported, only '
-        . '"clicfs" is supported';
+        . '"overlayfs" is supported';
     $this -> assert_str_equals($expected, $msg);
     my $msgT = $kiwi -> getMessageType();
     $this -> assert_str_equals('error', $msgT);
@@ -958,7 +958,7 @@ sub test_ctor_initIncompleteUnionRWNoRO {
     my $kiwi = $this -> {kiwi};
     my %init = (
                 unionRW   => '/dev/sdb2',
-                unionType => 'clicfs'
+                unionType => 'overlayfs'
             );
     my $pxeDataObj = KIWIXMLPXEDeployData -> new(\%init);
     my $msg = $kiwi -> getMessage();
@@ -1014,7 +1014,7 @@ sub test_ctor_initIncompleteUnionRONoRW {
     my $kiwi = $this -> {kiwi};
     my %init = (
                 unionRO   => '/dev/sdb1',
-                unionType => 'clicfs'
+                unionType => 'overlayfs'
             );
     my $pxeDataObj = KIWIXMLPXEDeployData -> new(\%init);
     my $msg = $kiwi -> getMessage();
@@ -1042,7 +1042,7 @@ sub test_ctor_initIncompleteUnionTypeNoRO {
     my $kiwi = $this -> {kiwi};
     my %init = (
                 unionRW   => '/dev/sdb2',
-                unionType => 'clicfs'
+                unionType => 'overlayfs'
             );
     my $pxeDataObj = KIWIXMLPXEDeployData -> new(\%init);
     my $msg = $kiwi -> getMessage();
@@ -1070,7 +1070,7 @@ sub test_ctor_initIncompleteUnionTypeNoRW {
     my $kiwi = $this -> {kiwi};
     my %init = (
                 unionRO   => '/dev/sdb1',
-                unionType => 'clicfs'
+                unionType => 'overlayfs'
             );
     my $pxeDataObj = KIWIXMLPXEDeployData -> new(\%init);
     my $msg = $kiwi -> getMessage();
@@ -1146,7 +1146,7 @@ sub test_ctor_initIncompleteUnionOnlyType {
     # ---
     my $this = shift;
     my $kiwi = $this -> {kiwi};
-    my %init = ( unionType => 'clicfs' );
+    my %init = ( unionType => 'overlayfs' );
     my $pxeDataObj = KIWIXMLPXEDeployData -> new(\%init);
     my $msg = $kiwi -> getMessage();
     my $expected =  'Incomplete initialization hash "unionRO", '
@@ -1340,7 +1340,7 @@ sub test_defaultUnionType {
     $this -> assert_str_equals('none', $msgT);
     $state = $kiwi -> getState();
     $this -> assert_str_equals('No state set', $state);
-    $this -> assert_str_equals('clicfs', $unionType);
+    $this -> assert_str_equals('overlayfs', $unionType);
     return;
 }
 
@@ -2096,7 +2096,7 @@ sub test_getUnionType {
     $this -> assert_str_equals('none', $msgT);
     my $state = $kiwi -> getState();
     $this -> assert_str_equals('No state set', $state);
-    $this -> assert_str_equals('clicfs', $unionType);
+    $this -> assert_str_equals('overlayfs', $unionType);
     return;
 }
 
@@ -2129,7 +2129,7 @@ sub test_getXMLElement{
         . '<partition mountpoint="/home" number="2" size="50G" type="0x83"/>'
         . '</partitions>'
         . '<timeout>45</timeout>'
-        . '<union ro="/dev/sdb1" rw="/dev/sdb2" type="clicfs"/>'
+        . '<union ro="/dev/sdb1" rw="/dev/sdb2" type="overlayfs"/>'
         . '</pxedeploy>';
     $this -> assert_str_equals($expected, $xmlstr);
     return;
@@ -3129,7 +3129,7 @@ sub __getPXEDeployObj {
                 timeout      => '45',
                 unionRO      => '/dev/sdb1',
                 unionRW      => '/dev/sdb2',
-                unionType    => 'clicfs'
+                unionType    => 'overlayfs'
             );
     my $pxeDataObj = KIWIXMLPXEDeployData -> new(\%init);
     my $msg = $kiwi -> getMessage();

@@ -5181,7 +5181,7 @@ sub test_getPXEConfig {
     $this -> assert_str_equals('20', $timeout);
     $this -> assert_str_equals('/dev/sda2', $unionRO);
     $this -> assert_str_equals('/dev/sda3', $unionRW);
-    $this -> assert_str_equals('clicfs', $unionT);
+    $this -> assert_str_equals('overlayfs', $unionT);
     return;
 }
 

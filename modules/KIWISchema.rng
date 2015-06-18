@@ -2712,7 +2712,7 @@ into the master block. There is space for 32 characters.</a:documentation>
     </define>
     <define name="k.union.type.attribute">
       <attribute name="type">
-        <value>clicfs</value>
+        <value>overlayfs</value>
       </attribute>
     </define>
     <define name="k.union.attlist">

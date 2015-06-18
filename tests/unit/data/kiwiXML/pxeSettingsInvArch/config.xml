@@ -7,7 +7,7 @@
         <specification>Test configuration to verify PXE settings are stored and returned properly in the XML object</specification>
     </description>
     <preferences>
-        <type image="pxe" filesystem="clicfs" boot="netboot/suse-12.1" installiso="true">
+        <type image="pxe" filesystem="overlayfs" boot="netboot/suse-12.1" installiso="true">
             <pxedeploy server="192.168.100.2" blocksize="4096">
                 <configuration arch="x86_64,i686,armv95,ppc64,ppc" dest="target" source="installSource"/>
                 <initrd>/pxeSetup/specialInitrd</initrd>
@@ -18,7 +18,7 @@
                     <partition type="L" number="3" target="false"/>
                 </partitions>
                 <timeout>20</timeout>
-                <union ro="/dev/sda2" rw="/dev/sda3" type="clicfs"/>
+                <union ro="/dev/sda2" rw="/dev/sda3" type="overlayfs"/>
             </pxedeploy>
         </type>
         <version>0.0.1</version>

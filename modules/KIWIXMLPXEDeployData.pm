@@ -132,7 +132,7 @@ sub new {
         $this->{server} = '192.168.1.1';
     }
     if (! $this->{unionType} ) {
-        $this->{unionType} = "clicfs";
+        $this->{unionType} = "overlayfs";
     }
     if ($this->{partitions}) {
         $this -> __applyPartitionDefaultSettings();
@@ -240,8 +240,8 @@ sub createUnionFSConfig {
         $kiwi -> failed();
         return;
     }
-    if ($unionType ne 'clicfs') {
-        my $msg = 'createUnionFSConfig: unionType argument must be "clicfs".';
+    if ($unionType ne 'overlayfs') {
+        my $msg = 'createUnionFSConfig: unionType argument must be "overlayfs".';
         $kiwi -> error($msg);
         $kiwi -> failed();
         return;
@@ -945,9 +945,9 @@ sub __isUnionConfigValid {
         }
     }
     if ($init->{unionType}) {
-        if ($init->{unionType} ne 'clicfs') {
+        if ($init->{unionType} ne 'overlayfs') {
             my $msg = 'Type specified for union fs is not supported, only '
-                . '"clicfs" is supported';
+                . '"overlayfs" is supported';
             $kiwi -> error($msg);
             $kiwi -> failed();
             return;
