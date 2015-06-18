@@ -6090,12 +6090,14 @@ sub installBootLoader {
                     $kiwi -> info ("--> targettype = $type\n");
                     $kiwi -> info ("--> targetblocksize = $bsize\n");
                     $kiwi -> info ("--> targetoffset = $offset\n");
-                    $kiwi -> info ("--> targetgeometry = $chs\n");
                     print $zconffd "\t"."targetbase = $this->{loop}"."\n";
                     print $zconffd "\t"."targettype = $type"."\n";
                     print $zconffd "\t"."targetblocksize = $bsize"."\n";
                     print $zconffd "\t"."targetoffset = $offset"."\n";
-                    print $zconffd "\t"."targetgeometry = $chs"."\n";
+                    if ($type =~ /CDL|LDL/) {
+                        $kiwi -> info ("--> targetgeometry = $chs\n");
+                        print $zconffd "\t"."targetgeometry = $chs"."\n";
+                    }
                }
             }
             $zconffd -> close();
