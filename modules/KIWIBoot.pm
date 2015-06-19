@@ -4580,80 +4580,19 @@ sub setupBootLoaderConfiguration {
                 print $FD "\t"."set gfxpayload=$gfx"."\n";
                 print $FD "\t"."module $bootpath/linux.vmx dummy";
             } else {
-                print $FD 'set prefix=($root)'.$bootpath.'/grub2'."\n";
+                print $FD "\t"."echo Loading Xen\n";
+                print $FD "\t"."multiboot $bootpath/xen.gz dummy\n";
+                print $FD "\t"."echo Loading linux...\n";
+                print $FD "\t"."set gfxpayload=$gfx"."\n";
+                print $FD "\t"."module $bootpath/linux dummy";
             }
-            # print $FD "set debug=all\n";
-            print $FD "set default=$defaultBootNr\n";
-            print $FD "set font=$bootpath/unicode.pf2"."\n";
-            # setup to use boot graphics. If this is unwanted
-            # you can disable it with the following alternative
-            # console setup
-            #
-            # print $FD "\t".'terminal_input console'."\n";
-            # print $FD "\t".'terminal_output console'."\n";
-            #
-            print $FD 'if loadfont $font ;then'."\n";
-            print $FD "\t"."set gfxmode=$gfx"."\n";
-            print $FD "\t".'terminal_input gfxterm'."\n";
-            print $FD "\t".'if terminal_output gfxterm;then true;else'."\n";
-            print $FD "\t\t".'terminal gfxterm'."\n";
-            print $FD "\t".'fi'."\n";
-            print $FD 'fi'."\n";
-            print $FD 'if loadfont '.$fodir.$theme.'/'.$ascii.';then'."\n";
-            foreach my $font (@fonts) {
-                print $FD "\t".'loadfont '.$fodir.$theme.'/'.$font."\n";
-            }
-            print $FD "\t".'set theme='.$fodir.$theme.'/theme.txt'."\n";
-            print $FD "\t".'background_image -m stretch ';
-            print $FD $fodir.$theme.'/background.png'."\n";
-            print $FD 'fi'."\n";
-            # ----
-            my $bootTimeout = 10;
-            if (defined $type->{boottimeout}) {
-                $bootTimeout = $type->{boottimeout};
-            }
-            if ($type->{fastboot}) {
-                $bootTimeout = 0;
-            }
-            print $FD "set timeout=$bootTimeout\n";
-            if ($topic =~ /^KIWI (CD|USB)/) {
-                my $dev = $1 eq 'CD' ? '(cd)' : '(hd0,0)';
-                my $arch = $this->{arch};
-                print $FD 'menuentry "Boot from Hard Disk"';
-                print $FD ' --class opensuse --class os {'."\n";
-                if (($firmware eq "efi") || ($firmware eq "uefi")) {
-                    print $FD "\t"."set root='hd0,1'"."\n";
-                    my $prefix = '(${root})/EFI/BOOT';
-                    if ($arch eq 'x86_64') {
-                        print $FD "\t"."chainloader $prefix/bootx64.efi"."\n";
-                    } elsif ($arch =~ /i.86/) {
-                        print $FD "\t"."chainloader $prefix/bootx32.efi"."\n";
-                    } elsif (($arch eq 'aarch64') || ($arch eq 'arm64')) {
-                        print $FD "\t"."chainloader $prefix/bootaa64.efi"."\n";
-                    } elsif ($arch =~ /arm/) {
-                        print $FD "\t"."chainloader $prefix/bootarm.efi"."\n";
-                    }
-                } else {
-                    print $FD "\t"."set root='hd0'"."\n";
-                    if ($dev eq '(cd)') {
-                        print $FD "\t".'chainloader +1'."\n";
-                    } else {
-                        print $FD "\t"."chainloader $bootpath/grub2/bootnext\n";
-                        my $bootnext = $this -> addBootNext (
-                            "$tmpdir/boot/grub2/bootnext", hex $this->{mbrid}
-                        );
-                        if (! defined $bootnext) {
-                            $kiwi -> failed ();
-                            $kiwi -> error  ("Failed to write bootnext\n");
-                            $kiwi -> failed ();
-                            $FD -> close();
-                            return;
-                        }
-                    }
-                    print $FD "\t".'boot'."\n";
-                }
-                print $FD '}'."\n";
-                $title = $this -> quoteLabel ("Install $label");
+            print $FD $cmdline;
+            if ($iso) {
+                print $FD "\t"."echo Loading initrd...\n";
+                print $FD "\t"."module $bootpath/initrd dummy\n";
+            } elsif (($topic=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
+                print $FD "\t"."echo Loading initrd...\n";
+                print $FD "\t"."module $bootpath/initrd.vmx dummy\n";
             } else {
                 print $FD "\t"."echo Loading initrd...\n";
                 print $FD "\t"."module $bootpath/initrd dummy\n";
