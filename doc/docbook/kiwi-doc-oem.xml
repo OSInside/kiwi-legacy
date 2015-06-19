@@ -3,7 +3,7 @@
                          "http://www.docbook.org/xml/4.5/docbookx.dtd">
 
 <chapter id="chap.oem">
-  <title>OEM Image—Preload Systems</title>
+  <title>OEM Image / Preload Systems</title>
   <indexterm>
     <primary>KIWI</primary>
     <secondary>OEM image</secondary>
@@ -18,47 +18,41 @@
   <para>
    An OEM image is a virtual disk image representing all partitions
    and bootloader information in the same fashion it exists on a
-   physical disk. The image format matches the format of the VMX image
-   type. All flavors discussed previously for the VMX image type apply
-   to the OEM image type.
+   physical disk. All flavors discussed previously for the VMX
+   image type apply also to the OEM image type. The image format matches
+   the format of the VMX image type, however an OEM image can do more.
+   It is able to expand itself to a custom disk geometry and kiwi can
+   create installation images which embeds the OEM image for deployment
+   from CD/DVD/Stick and over the network via PXE.
   </para>
   <indexterm>
-    <primary>Windows</primary>
+    <primary>Installation</primary>
   </indexterm>
   <indexterm>
-    <primary>USB stick</primary>
-  </indexterm>  
+    <primary>USB Stick</primary>
+  </indexterm>
+  <indexterm>
+    <primary>DVD</primary>
+  </indexterm>
   <para>
    The basic idea behind an OEM image is to provide the virtual
    disk data for OEM vendors to support easy deployment of the system
-   to physical storage media. The deployment can be performed from any
-   OS including Windows as long as a tool to dump data onto a disk
-   device exists and is used. The OEM image type may also be used to
-   deploy an image on a USB stick. A USB stick is simply a removable
-   physical storage device.
+   to physical storage media.
   </para>
   <sect1 id="sec.oem.building">
-  <title>Building the suse-oem-preload Example</title>
+  <title>Building an OEM System with Installation DVD</title>
   <para>
-   The OEM example provided with KIWI is based on recent
-   openSUSE releases, one example configuration per release, and
-   includes the default and x11 patterns. The image type is a split
-   type utilizing the distributions default filesystem format for
-   the read-write partition and the
-   <systemitem class="filesystem">squashfs</systemitem> filesystem
-   for the read-only partition. Using the additional
-   <sgmltag class="attribute">installiso</sgmltag> attribute creates
-   an installable ISO image. When booting from the ISO image the
-   OEM disk image will be deployed to the storage media on the booting
-   machine (after confirmation by the user).
+   This example is based on SLES version 12. The image creation process
+   actually creates two images. The OEM disk image and an Installation
+   ISO image which contains the OEM disk image. As a user I can decide
+   to take the OEM disk image and dump it with some tool on the disk of
+   the target system or boot the target system from the ISO image
+   and run through an image deployment process which could also be
+   configured to run without user interaction.
   </para>
 
-<screen><command>cd</command> /usr/share/doc/packages/kiwi/examples
-==> select the example directory for the desired distribution change into it
-<command>cd</command> suse-...
-<command>kiwi</command> --build ./suse-oem-preload -d /tmp/myoem-result --type split</screen>
-
-    </sect1>
+<screen><command>kiwi</command> --build suse-SLE12-JeOS -d /tmp/myoem-result --type oem</screen>
+  </sect1>
 
   <sect1 id="sec.oem.using">
     <title>Using the Image</title>
@@ -84,15 +78,14 @@
     </para>
 
 <screen><command>cd</command> /tmp/myoem-result 
-<command>qemu</command> suse-*-oem-preload.*.raw</screen>
+<command>qemu</command> LimeJeOS-SLE12.x86_64-1.13.1.raw</screen>
 
     <para>or using the <command>dd</command> command you can dump the
       image onto a test hard disk or USB stick and upon reboot select
       the appropriate device as the boot device in the BIOS: </para>
 
 <screen><command>cd</command> /tmp/myoem-result 
-<command>dd</command> if=suse-*-oem-preload.*.raw<!-- 
---> of=/dev/<replaceable>device</replaceable> bs=32k</screen>
+<command>dd</command> if=LimeJeOS-SLE12.x86_64-1.13.1.raw of=/dev/<replaceable>device</replaceable></screen>
 
     <para>
      Note, when testing an oem image using the virtual disk image,
@@ -111,8 +104,7 @@
 
 <screen><command>cd</command> /tmp/myoem-result 
 <command>qemu-img</command> create /tmp/mydisk 20G 
-<command>qemu</command> -hda /tmp/mydisk<!-- 
---> -cdrom suse-*-oem-preload.*.iso -boot d</screen>
+<command>qemu</command> -hda /tmp/mydisk -cdrom LimeJeOS-SLE12.x86_64-1.13.1.iso -boot d</screen>
 
   </sect1>
 
@@ -139,10 +131,17 @@
      the ISO or USB installation image format respectively. </para>
     <itemizedlist>
       <listitem>
-        <screen>&lt;type image="name" ... installiso="true"/&gt;</screen>
+        <screen>&lt;type image="name" ... installiso="true" hybrid="true"/&gt;</screen>
         <para>Creates a <filename class="extension">.iso</filename> file
           which can be burned onto a CD or a DVD. This represents an
-          installation CD/DVD </para>
+          installation CD/DVD. You might have noticed the
+          <emphasis>hybrid</emphasis> attribute. This turns the ISO into a
+          hybrid media which let look the ISO like an ISO and a disk.
+          Therefore it's possible to dump the ISO on for example an USB Stick.
+          If your bios is not confused about the hybrid setup kiwi did with
+          the ISO, the stick will boot like a disk. If it does not work
+          use the installstick media as explained below.
+        </para>
       </listitem>
       <listitem>
         <screen>&lt;type image="name" ... installstick="true"/&gt;</screen>
@@ -201,59 +200,12 @@
 
     <sect2 id="sec.oem.partitioning">
       <title>Influencing the OEM Partitioning</title>
-      <para>By default the oemboot process will create/modify a swap,
-          <filename>/home</filename> and <filename>/</filename>
-        partition. It is possible to influence the behavior with the
+      <para>By default the oemboot process will create a swap and an optional
+          recovery partition, and will expand all other partitions according
+          to the setup in the kiwi configuration and the underlaying disk
+          geometry. It is possible to influence the behavior with the
           <sgmltag>oem-*</sgmltag> elements. See <xref
           linkend="chap.description"/> for details. </para>
-    </sect2>
-
-    <sect2 id="sec.oem.lvm">
-      <title>LVM Support</title>
-      <indexterm>
-        <primary>KIWI</primary>
-        <secondary>LVM support</secondary>
-      </indexterm>
-      <indexterm>
-        <primary>LVM support</primary>
-      </indexterm>
-      <indexterm>
-        <primary>lvmgroup</primary>
-      </indexterm>
-      <indexterm>
-        <primary>systemdisk</primary>
-      </indexterm>
-      <indexterm>
-        <primary>filesystem</primary>
-      </indexterm>
-      <para>
-        KIWI also provides support for LVM (Logical Volume Management). In this
-mode the disk partition table will include one lvm partition and one standard
-ext2 boot partition. KIWI creates the kiwiVG volume group, unless the <sgmltag
-class="attribute">lvmgroup</sgmltag> attribute has been set, and adds logical
-volumes to the group based on the configuration given by the <sgmltag
-class="element">systemdisk</sgmltag> block for this type. The filesystem for
-the volume group is determined by the <sgmltag
-class="attribute">filesystem</sgmltag> attribute of the type element.
-      </para>
-      <para>
-        After booting the system the user has full control over the volume group and
-        is free to change (resize/increase) the group and the volumes inside. Support
-        for LVM has been added for all disk based image types. This includes the vmx
-        and oem image types. In order to use LVM the existence of a
-        <sgmltag class="element" >systemdisk</sgmltag> section is required.
-        The <sgmltag class="element">systemdisk</sgmltag> specification may be empty.
-        An empty <sgmltag class="element">systemdisk</sgmltag> specification triggers the creation of
->one LVM root volume with the default <emphasis>kiwiVG</emphasis> name.
-      </para>
-
-      <screen><command>kiwi</command> --create /tmp/myoem --type split<!-- 
-      --> -d /tmp/myoem-result --lvm</screen>
-
-      <para>With the <sgmltag>systemdisk</sgmltag> section you
-        can specify to have one or more top level directories in a
-        separate volume. See <xref linkend="chap.description"/> for a
-        detailed explanation. </para>
     </sect2>
 
     <sect2 id="sec.oem.partition-based-installation">
@@ -282,27 +234,23 @@ class="attribute">filesystem</sgmltag> attribute of the type element.
         <listitem>
           <para>
            The bootloader will be setup to boot the installed system.
-           There is no multiboot setup. The user is expected to implement the setup of a
-           multiboot bootloader.
+           There is no multiboot setup. The user is expected to implement
+           the setup of a multiboot bootloader.
           </para>
         </listitem>
         <listitem>
           <para>The oem options for system, swap and home doesn’t have
             any effect if the installation happens in predefined
-            partitions. </para>
+            partitions. In this mode kiwi will not create additional
+            partitions.
+          </para>
         </listitem>
         <listitem>
           <para>There is no support for remote (PXE) OEM installation
-            because KIWI has to loop mount the disk image in order to
-            access the partitions which can’t be done remotely. </para>
-        </listitem>
-        <listitem>
-          <para>The raw disk image is stored uncompressed on the install
-            media. This is because KIWI needs to loop mount the disk
-            image which it can’t do if the file is only available as
-            compressed version. This means the install media in this
-            mode will be approximately double the size of a standard
-            install media. </para>
+            because KIWI has to loop mount the disk image and need to
+            address specific regions inside of the image. These block
+            operations are not implemented for remote access
+          </para>
         </listitem>
       </itemizedlist>
 
