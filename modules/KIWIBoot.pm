@@ -4498,7 +4498,7 @@ sub setupBootLoaderConfiguration {
             print $FD 'menuentry "Boot from Hard Disk"';
             print $FD ' --class opensuse --class os {'."\n";
             if (($firmware eq "efi") || ($firmware eq "uefi")) {
-                print $FD "\t"."set root='hd0,1'"."\n";
+                print $FD "\t"."search --set=root --label EFI"."\n";
                 my $prefix = '(${root})/EFI/BOOT';
                 if ($arch eq 'x86_64') {
                     print $FD "\t"."chainloader $prefix/bootx64.efi"."\n";
