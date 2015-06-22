@@ -5728,19 +5728,19 @@ function partedGetPartitionID {
         if lookup sgdisk &>/dev/null;then
             # map to short gdisk code
             echo $(sgdisk -p $1 | grep -E "^   $2") | cut -f6 -d ' '
-        elif [ $name = "lxroot" ];then
+        elif [ "$name" = "lxroot" ];then
             # map lxroot to MBR type 83 (linux)
             echo 83
-        elif [ $name = "lxswap" ];then
+        elif [ "$name" = "lxswap" ];then
             # map lxswap to MBR type 82 (linux swap)
             echo 82
-        elif [ $name = "lxlvm" ];then
+        elif [ "$name" = "lxlvm" ];then
             # map lxlvm to MBR type 8e (linux LVM)
             echo 8e
-        elif [ $name = "UEFI" ];then
+        elif [ "$name" = "UEFI" ];then
             # map UEFI to MBR type 6 (fat 16)
             echo 6
-        elif [ $name = "legacy" ];then
+        elif [ "$name" = "legacy" ];then
             # map bios grub legacy partition to MBR type ef (EFI)
             echo ef
         else
