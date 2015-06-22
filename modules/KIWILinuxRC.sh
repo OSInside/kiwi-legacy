@@ -32,6 +32,7 @@ export bootLoaderOK=0
 export enablePlymouth=1
 export IFS_ORIG=$IFS
 export MEDIACHECK_OK_TIMER=5
+export partitionerWriteStatus=0
 
 #======================================
 # lookup
@@ -8841,6 +8842,12 @@ function createHybridPersistent {
     #======================================
     # check partition device node
     #--------------------------------------
+    if [ $partitionerWriteStatus != 0 ];then
+        Echo "Partition creation failed for device $device"
+        Echo "Persistent writing deactivated"
+        unset kiwi_hybridpersistent
+        return
+    fi
     if ! waitForStorageDevice $(ddn $device $pID);then
         Echo "Partition $pID on $device doesn't appear... fatal !"
         Echo "Persistent writing deactivated"
@@ -8874,7 +8881,8 @@ function callPartitioner {
         echo "w" >> $input
         echo "q" >> $input
         fdasd $imageDiskDevice < $input 1>&2
-        if test $? != 0; then
+        export partitionerWriteStatus=$?
+        if test $partitionerWriteStatus != 0; then
             systemException "Failed to create partition table" "reboot"
         fi
         udevPending
@@ -8990,13 +8998,14 @@ function partedWrite {
     if [ $PARTED_HAVE_ALIGN -eq 1 ];then
         opts="-a cyl"
     fi
-    if ! parted $opts -m -s $device unit cyl $cmds;then
+    parted $opts -m -s $device unit cyl $cmds
+    export partitionerWriteStatus=$?
+    if [ $partitionerWriteStatus != 0 ];then
         if [ ! -z "$kiwi_hybridpersistent" ];then
             # /.../
-            # in case of a iso hybrid table don't stop with
-            # a reboot exception in case of an error. The error
-            # in this case will cause the deactivation of the
-            # persistent writing
+            # in case of a iso hybrid table don't stop with a fatal reboot
+            # exception on error. In this case we want to proceed with the
+            # boot process but deactivate the persistent write feature
             # ----
             return 1
         fi
