@@ -5766,12 +5766,17 @@ sub installBootLoader {
         # Install grub in batch mode
         #------------------------------------------
         my $grub;
+        my $image_grub;
         if ($haveTree) {
-            # Use image root system grub
+            # Try to use image root system grub
             $grub = $locator -> getExecPath ('grub', $system);
-        } else {
-            # Use host system grub
+        }
+        if (! $grub) {
+            # Use host system grub if not found in system tree
             $grub = $locator -> getExecPath ('grub');
+        } else {
+            # Found grub in image, use it
+            $image_grub = 1;
         }
         if (! $grub) {
             $kiwi -> failed ();
@@ -5788,7 +5793,7 @@ sub installBootLoader {
             return;
         }
         my $gopts = "--device-map $dmfile --no-floppy --batch";
-        if ($haveTree) {
+        if ($image_grub) {
             # Use image root system grub
             my $basedir_disk = dirname ($diskname);
             my $basedir_tmp  = $tmpdir;
