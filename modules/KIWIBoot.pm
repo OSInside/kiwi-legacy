@@ -7651,10 +7651,9 @@ sub __updateCustomDiskSize {
     my $reqMBytes = int ($reqBytes / 1048576);
     if ($reqMBytes < $this->{vmmbyte}) {
         $kiwi -> warning (
-            "given disk size is smaller than calculated size"
+            "given disk size is smaller than calculated size, using it anyhow"
         );
-        $kiwi -> skipped ();
-        return $this;
+        $kiwi -> oops ();
     }
     #==========================================
     # Create vmsize MB string and vmmbyte value
