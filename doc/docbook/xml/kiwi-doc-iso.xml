@@ -211,9 +211,9 @@
         partition for custom data. The data partition is a fat partition
         also recognized by the Windows operating system. In order to
         create such a Windows friendly stick one has to pass the option
-          <option>--fat-storage &lt;size-in-MB&gt;</option>.
+          <option>--fat-storage &lt;size-in-MB&gt;</option>.</para>
         <screen><command>kiwi</command> --create ... --fat-storage 500</screen>
-        If this option is set kiwi will use the syslinux bootloader for
+        <para>If this option is set kiwi will use the syslinux bootloader for
         the image as well as the first partition as fat partition of the
         specified size. The live OS itself will live in a LVM which
         allows easy manipulation of the logical root volume. For further
@@ -232,9 +232,8 @@
           let all write actions perfom in RAM only. kiwi provides the
           type attribute ramonly for this purpose. So in order to create
           a read-only oem stick with compressed root filesystem the
-          following type section is required:
+          following type section is required:</para>
           <screen>&lt;type image="oem" filesystem="overlayfs" ramonly="true"/&gt;</screen>
-        </para>
     </sect3>
   </sect2>
   </sect1>

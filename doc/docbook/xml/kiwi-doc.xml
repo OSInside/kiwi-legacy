@@ -44,12 +44,16 @@
     </authorgroup>
     
     <xi:include href="kiwi-doc-license.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
-    
+<!--    
     <mediaobject role="cover">
       <imageobject role="html">
         <imagedata fileref="cover.png"/>
       </imageobject>
+      <imageobject role="fo">
+        <imagedata fileref="cover.svg"/>
+      </imageobject>
     </mediaobject>
+-->
   </bookinfo>
   <part>
     <title>Concepts and Basics</title>

@@ -48,14 +48,8 @@
           <para>Edit the file
             <filename>/etc/sysconfig/atftpd</filename>. Set or modify
             the following variables: </para>
-          <itemizedlist>
-            <listitem>
-<screen>ATFTPD_OPTIONS="--daemon --no-multicast"</screen>
-            </listitem>
-            <listitem>
-<screen>ATFTPD_DIRECTORY="/srv/tftpboot"</screen>
-            </listitem>
-          </itemizedlist>
+	    <screen>ATFTPD_OPTIONS="--daemon --no-multicast"
+ATFTPD_DIRECTORY="/srv/tftpboot"</screen>
         </step>
         <step>
           <para>Run <systemitem class="service">atftpd</systemitem> by
@@ -828,23 +822,32 @@ UNIONFS_CONFIG=tmpfs,/dev/sda2,overlayfs</screen>
             them on boot. If the boot fails it should be clear that the reason
             is not the exported device.
       </para>
-      <itemizedlist>
-        <listitem><para>NFSROOT</para>
+      <variablelist>
+       <varlistentry>
+        <term><envar>NFSROOT</envar></term>
+	<listitem>
 <screen>PART='5;S;x,x;L;x'
 NFSROOT="192.168.100.2;/srv/kiwi-read-only-path"
 UNIONFS_CONFIG=/dev/sda2,nfs,overlayfs</screen>
         </listitem>
-        <listitem><para>AOEROOT</para>
+       </varlistentry>
+       <varlistentry>
+        <term><envar>AOEROOT</envar></term>
+	<listitem>
 <screen>PART='5;S;x,x;L;x'
 AOEROOT=/dev/etherd/e0.1,/dev/sda2
 UNIONFS_CONFIG=/dev/sda2,aoe,overlayfs</screen>
                 </listitem>
-        <listitem><para>NBDROOT</para>
+       </varlistentry>
+       <varlistentry>
+        <term><envar>NBDROOT</envar></term>
+	<listitem>
 <screen>PART='5;S;x,x;L;x'
 NBDROOT=192.168.100.7;root1;/dev/nbd0;;;;/dev/sda2
 UNIONFS_CONFIG=/dev/sda2,nbd,overlayfs</screen>
                 </listitem>
-      </itemizedlist>
+       </varlistentry>
+      </variablelist>
         </sect3>
     <sect3 id="sec.pxe.union.remote.ram">
       <title>Mount from Remote, Write to RAM</title>
@@ -852,20 +855,29 @@ UNIONFS_CONFIG=/dev/sda2,nbd,overlayfs</screen>
                 <primary>union image</primary>
                 <secondary>remote-ram</secondary>
             </indexterm>
-      <itemizedlist>
-                <listitem><para>NFSROOT</para>
+       <variablelist>
+	<varlistentry>
+                <term><envar>NFSROOT</envar></term>
+<listitem>
 <screen>NFSROOT="192.168.100.2;/srv/kiwi-read-only-path"
 UNIONFS_CONFIG=tmpfs,nfs,overlayfs</screen>
                 </listitem>
-                <listitem><para>AOEROOT</para>
+	</varlistentry>
+	<varlistentry>
+	 <term><envar>AOEROOT</envar></term>
+	 <listitem>
 <screen>AOEROOT=/dev/etherd/e0.1
 UNIONFS_CONFIG=tmpfs,aoe,overlayfs</screen>
                 </listitem>
-                <listitem><para>NBDROOT</para>
+	</varlistentry>
+	<varlistentry>
+                <term><envar>NBDROOT</envar></term>
+		<listitem>
 <screen>NBDROOT=192.168.100.7;root1;/dev/nbd0
 UNIONFS_CONFIG=tmpfs,nbd,overlayfs</screen>
                 </listitem>
-            </itemizedlist>
+	</varlistentry>
+       </variablelist>
         </sect3>
     <sect3 id="sec.pxe.union.remote.remote">
       <title>Mount from Remote, Write to Remote</title>
@@ -873,20 +885,29 @@ UNIONFS_CONFIG=tmpfs,nbd,overlayfs</screen>
                 <primary>union image</primary>
                 <secondary>remote-remote</secondary>
             </indexterm>
-      <itemizedlist>
-                <listitem><para>NFSROOT</para>
+	    <variablelist>
+	     <varlistentry>
+                <term><envar>NFSROOT</envar></term>
+		<listitem>
 <screen>NFSROOT="192.168.100.2;/srv/kiwi-read-only-path"
 UNIONFS_CONFIG=/srv/kiwi-read-write-path,nfs,overlayfs</screen>
                 </listitem>
-                <listitem><para>AOEROOT</para>
+	     </varlistentry>
+	     <varlistentry>
+	      <term><envar>AOEROOT</envar></term>
+	      <listitem>
 <screen>AOEROOT=/dev/etherd/e0.1,/dev/etherd/e1.1
 UNIONFS_CONFIG=aoe,aoe,overlayfs</screen>
                 </listitem>
-                <listitem><para>NBDROOT</para>
+	     </varlistentry>
+	     <varlistentry>
+                <term><envar>NBDROOT</envar></term>
+		<listitem>
 <screen>NBDROOT=192.168.100.7;root1;/dev/nbd0;swap1;/dev/nbd1;write1;/dev/nbd2
 UNIONFS_CONFIG=nbd,nbd,overlayfs</screen>
                 </listitem>
-            </itemizedlist>
+	     </varlistentry>
+	    </variablelist>
         </sect3>
     </sect2>
 

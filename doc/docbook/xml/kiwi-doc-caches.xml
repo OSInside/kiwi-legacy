@@ -22,8 +22,11 @@
     <figure id="fig.imagecachingarch">
       <title>Image Caching Architecture</title>
       <mediaobject>
-        <imageobject>
-          <imagedata fileref="images/cache.png"/><!-- width="50%" -->
+        <imageobject role="fo">
+          <imagedata fileref="cache.svg" format="SVG"/><!-- width="50%" -->
+        </imageobject>
+        <imageobject role="html">
+          <imagedata fileref="cache.png" format="PNG"/><!-- width="50%" -->
         </imageobject>
       </mediaobject>
     </figure>
