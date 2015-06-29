@@ -49,10 +49,12 @@
          A required attribute. The name of the volume.
          If mountpoint is not specified the name specifies
          a path which will be created by kiwi if it does not exist
-         inside the root directory. kiwi also makes sure that
-         the volumes are created in the correct order of the
-         filesystem hierarchy. The special attribute
-         <emphasis>@root</emphasis> can be used to control the
+         inside the root directory. However if the name contains the
+         kiwi internal path field separator '<emphasis>_</emphasis>',
+         it's required to specify the path in an additional mountpoint
+         attribute. KIWI also makes sure that the volumes are created
+         in the correct order of the filesystem hierarchy. The special
+         attribute <emphasis>@root</emphasis> can be used to control the
          size of the root volume
         </para>
       </listitem>
@@ -148,19 +150,6 @@ used as MB by default but you can add "M" and/or "G" as postfix.
         a namespace. The overall size is shared across the entire
         filesystem and the size of an entity can be controlled by
         a btrfs quota which is not applied by kiwi at the moment
-        </para>
-      </listitem>
-    </varlistentry>
-
-    <varlistentry>
-      <term>No mountpoint required</term>
-      <listitem>
-        <para>
-        A btrfs subvolume doesn't have to be mounted. The optional attribute
-        <sgmltag class="attribute">mountpoint</sgmltag> of the
-        <sgmltag class="element">volume</sgmltag> element would therefore be
-        used as the subvolume name. According to that it's recommended to
-        specify only the <sgmltag class="attribute">name</sgmltag> attribute
         </para>
       </listitem>
     </varlistentry>

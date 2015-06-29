@@ -75,10 +75,6 @@
     <xi:include href="kiwi-doc-lvmsupport.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
     <xi:include href="kiwi-doc-lukssupport.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
  </part>
- <part>
-    <title>Examples and Best Practices</title>
-    <xi:include href="kiwi-doc-startcooking.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
- </part>
     <xi:include href="kiwi-doc-appendix.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
  
   <index/>
