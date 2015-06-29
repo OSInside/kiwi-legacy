@@ -71,7 +71,6 @@
     <xi:include href="kiwi-doc-pxe.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
     <xi:include href="kiwi-doc-oem.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
     <xi:include href="kiwi-doc-xen.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
-    <xi:include href="kiwi-doc-ec2.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
     <xi:include href="kiwi-doc-raidsupport.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
     <xi:include href="kiwi-doc-lvmsupport.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
     <xi:include href="kiwi-doc-lukssupport.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
