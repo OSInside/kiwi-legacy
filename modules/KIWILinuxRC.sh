@@ -9466,13 +9466,9 @@ function createFilesystem {
         fi
     elif [ "$FSTYPE" = "btrfs" ];then
         opts="-f"
-        # Unfortunately mkfs.btrfs does not support the option -U in the
-        # version we have in SLES11 SP3. Thus support for this will be
-        # turned on after SLES11 SP4 will be released
-        #
-        # if [ ! -z "$uuid" ];then
-        #    opts="$opts -U $uuid"
-        # fi
+        if [ ! -z "$uuid" ];then
+            opts="$opts -U $uuid"
+        fi
         if [ ! -z "$blocks" ];then
             local bytes=$((blocks * 4096))
             opts="$opts -b $bytes"
