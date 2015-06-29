@@ -3,7 +3,7 @@
                          "http://www.docbook.org/xml/4.5/docbookx.dtd">
 
 <chapter id="chap.pxe">
-  <title>PXE Image—Thin Clients</title>
+  <title>PXE Image / Thin Clients</title>
   <indexterm>
     <primary>KIWI</primary>
     <secondary>PXE image</secondary>
@@ -114,19 +114,15 @@ subnet 192.168.100.0 netmask 255.255.255.0 {
     </sect2>
   </sect1>
   <sect1 id="sec.pxe.building">
-    <title>Building the suse-pxe-client Example</title>
-    <para>The example provided with KIWI is based on openSUSE and
-      creates an image for a Wyse VX0 terminal with a 128MB flash card
-      and 512MB of RAM. The image makes use of the <systemitem
-        class="filesystem">squashfs</systemitem> compressed
-      filesystem and its root tree is deployed as clicfs based
-      overlay system. </para>
+    <title>Building a PXE filesystem JeOS</title>
+    <para>This example is based on SLES version 12. It creates a
+    compressed root filesystem image which is deployed as overlayfs
+    based union system. Please kiwi also supports deployment of
+    oem disk images via PXE. This is different from the filesystem
+    deployment method. For details refer to to the OEM
+    chapter <xref linkend="chap.oem"/></para>
 
-<screen><command>cd</command> /usr/share/doc/packages/kiwi/examples
-==> select the example directory for the desired distribution change into it
-<command>cd</command> suse-...
-<command>kiwi</command> --build ./suse-pxe-client -d /tmp/mypxe-result --type pxe</screen>
-
+<screen><command>kiwi</command> --build suse-SLE12-JeOS --add-profile netboot --type pxe -d /tmp/mypxe-result</screen>
   </sect1>
 
   <sect1 id="sec.pxe.using">
@@ -142,14 +138,17 @@ subnet 192.168.100.0 netmask 255.255.255.0 {
       </step>
       <step>
         <para>Copy of the boot and kernel image:</para>
-<screen><command>cp</command> initrd-netboot-suse-*.splash.gz \
+<screen><command>cp</command> initrd-netboot-suse-SLES12.x86_64-2.1.1.gz \
   /srv/tftpboot/boot/initrd
-<command>cp</command> initrd-netboot-suse-*.kernel \
+<command>cp</command> initrd-netboot-suse-SLES12.x86_64-2.1.1.kernel \
   /srv/tftpboot/boot/linux</screen>
       </step>
       <step>
         <para>Copy of the system image and md5 sum:</para>
-<screen><command>cp</command> suse-*-pxe-client.* /srv/tftpboot/image</screen>
+<screen><command>cp</command> LimeJeOS-SLE12.x86_64-1.13.1 \
+  /srv/tftpboot/image
+<command>cp</command> LimeJeOS-SLE12.x86_64-1.13.1.md5 \
+  /srv/tftpboot/image</screen>
       </step>
       <step>
         <para>Copy of the image boot configuration. Normally the boot
@@ -157,7 +156,7 @@ subnet 192.168.100.0 netmask 255.255.255.0 {
           to obtain the MAC address of this client. If the boot
           configuration should be used globally, copy the KIWI generated
           file as <filename>config.default</filename>: </para>
-<screen><command>cp</command> suse-*-pxe-client.*.config \
+<screen><command>cp</command> LimeJeOS-SLE12.x86_64-1.13.1.config \
   /srv/tftpboot/KIWI/config.<replaceable>MAC</replaceable></screen>
       </step>
       <step>
@@ -173,7 +172,7 @@ subnet 192.168.100.0 netmask 255.255.255.0 {
 
 LABEL KIWI-Boot
     kernel boot/linux
-    append initrd=boot/initrd vga=0x314
+    append initrd=boot/initrd
     IPAPPEND 1
 
 LABEL Local-Boot
@@ -314,7 +313,7 @@ DISK=device</screen>
         configuration files are missing on the client or, if md5sum hash
         is supplied ([hash]), when different. To achieve this, list of
         CONF files (and VENDOR_CONF) files is kept on the client in
-        the <filename>/etc/KIWI/InstalledConfigFiles</filename> backup file, and
+        the <filename>/etc/KIWI/InstalledConfigFiles</filename> file, and
               is compared to the CONF data gathered from the config.MAC and also
         from other configuration files, e.g. config.group, if supplied.
               Configuration files selected for comparison are those with
@@ -332,9 +331,9 @@ DISK=device</screen>
         <colspec colwidth="1*"/>
         <thead>
           <row>
-            <entry>cfg file in CONF,VENDOR_CONF</entry>
-            <entry>cfg file in InstalledConfigFiles backup</entry>
-            <entry>action</entry>
+            <entry>File from CONF,VENDOR_CONF</entry>
+            <entry>File from InstalledConfigFiles</entry>
+            <entry>Action</entry>
           </row>
         </thead>
         <tbody>
@@ -514,18 +513,18 @@ PART='5;S;x,2000;83;/'</screen>
           <term><varname>UNIONFS_CONFIG</varname></term>
           <listitem>
             <para>For netboot images there is the
-              possibility to use clicfs as container filesystem
+              possibility to use overlayfs as container filesystem
               in combination with a compressed system image. The
               recommended compressed filesystem type for the system
-              image is <emphasis role="bold">clicfs</emphasis>.
+              image is <emphasis role="bold">overlayfs</emphasis>.
             </para>
-<screen>UNIONFS_CONFIG=/dev/sda2,/dev/sda3,clicfs</screen>
+<screen>UNIONFS_CONFIG=/dev/sda2,/dev/sda3,overlayfs</screen>
             <para>In this example the first device <filename
                 class="devicefile">/dev/sda2</filename> represents the
               read/write filesystem and the second device <filename
                 class="devicefile">/dev/sda3</filename> represents the
-              compressed system image filesystem. The container
-              filesystem clicfs is then used to cover the read/write layer
+              compressed system image filesystem. The union filesystem
+              overlayfs is then used to cover the read/write layer
               with the read-only device to one read/write filesystem. If
               a file on the read-only device is going to be written the
               changes inodes are part of the read/write filesystem.
@@ -537,7 +536,7 @@ PART='5;S;x,2000;83;/'</screen>
 <screen>DISK=/dev/sda
 IMAGE='/dev/sda3;image/myImage;1.1.1;192.168.1.1;4096'
 PART='200;S;x,300;L;/,x;L;x'
-UNIONFS_CONFIG=/dev/sda2,/dev/sda3,clicfs</screen>
+UNIONFS_CONFIG=/dev/sda2,/dev/sda3,overlayfs</screen>
 
             <para>As the second element of the PART list must define the
               root partition it’s absolutely important that the first
@@ -638,7 +637,7 @@ NBD-Write-Export-Name;/dev/NBD-Write-Device</screen>
 
             <para> KIWI is now able to mount and use the specified AoE
               device as the remote root filesystem. In case of a
-              compressed read-only image with <systemitem class="filesystem">clicfs</systemitem>, the
+              compressed read-only image with <systemitem class="filesystem">overlayfs</systemitem>, the
               AOEROOT variable can also contain a device for the write
               actions: </para>
 
@@ -707,7 +706,7 @@ NBD-Write-Export-Name;/dev/NBD-Write-Device</screen>
     </sect2>
 
     <sect2 id="sec.pxe.another-user">
-      <title>User another than tftp as Download Protocol</title>
+      <title>Use Different Download Protocol</title>
       <para>By default all downloads controlled by the KIWI linuxrc code
         are performed by an atftp call and therefore uses the tftp
         protocol. With PXE the download protocol is fixed and thus you
@@ -782,24 +781,16 @@ NBD-Write-Export-Name;/dev/NBD-Write-Device</screen>
         <secondary>union image</secondary>
       </indexterm>
       <para>As used in the suse-pxe-client example it is possible to
-        make use of the clicfs overlay filesystem to combine
+        make use of the union filesystem; overlayfs, to combine
         two filesystems into one. In case of thin clients there is often
         the need for a compressed filesystem due to space limitations.
         Unfortunately all common compressed filesystems provides only
         read-only access. Combining a read-only filesystem with a
         read-write filesystem is a solution for this problem. In order
-        to use a compressed root filesystem based on clicfs make sure your
+        to use a compressed root filesystem based on squashfs make sure your
         <filename>config.xml</filename>’s filesystem attribute
-    contains <systemitem class="filesystem">clicfs</systemitem>.
-    As an alternative to clicfs kiwi also supports the fuse
-        based unionfs utility. In contrast to clicfs which writes
-    a block list on the write device, unionfs points all write operations
-    into another filesystem which allows to mount and watch this
-    location separately. In order
-        to use a compressed root filesystem based on unionfs make sure your
-    <filename>config.xml</filename>’s filesystem attribute
-    contains <systemitem class="filesystem">squashfs</systemitem>.
-    Below find examples for the different union modes.</para>
+        contains <systemitem class="filesystem">squashfs</systemitem>.
+      </para>
 
     <sect3 id="sec.pxe.union.local.local">
       <title>Download to Local Storage, Write to Local Storage</title>
@@ -810,7 +801,7 @@ NBD-Write-Export-Name;/dev/NBD-Write-Device</screen>
 <screen>DISK=/dev/sda
 PART='5;S;x,400;L;/,x;L;x'
 IMAGE='/dev/sda2;suse-##.#-pxe-client.i386;1.2.8;192.168.100.2;4096'
-UNIONFS_CONFIG=/dev/sda3,/dev/sda2,unionfs
+UNIONFS_CONFIG=/dev/sda3,/dev/sda2,overlayfs
 KIWI_INITRD=/boot/initrd</screen>
     </sect3>
     <sect3 id="sec.pxe.union.local.ram">
@@ -822,7 +813,7 @@ KIWI_INITRD=/boot/initrd</screen>
 <screen>DISK=/dev/sda
 PART='5;S;x,400;L;/'
 IMAGE='/dev/sda2;suse-##.#-pxe-client.i386;1.2.8;192.168.100.2;4096'
-UNIONFS_CONFIG=tmpfs,/dev/sda2,unionfs</screen>
+UNIONFS_CONFIG=tmpfs,/dev/sda2,overlayfs</screen>
         </sect3>
     <sect3 id="sec.pxe.union.remote.local">
       <title>Mount from Remote, Write to Local Storage</title>
@@ -841,17 +832,17 @@ UNIONFS_CONFIG=tmpfs,/dev/sda2,unionfs</screen>
         <listitem><para>NFSROOT</para>
 <screen>PART='5;S;x,x;L;x'
 NFSROOT="192.168.100.2;/srv/kiwi-read-only-path"
-UNIONFS_CONFIG=/dev/sda2,nfs,unionfs</screen>
+UNIONFS_CONFIG=/dev/sda2,nfs,overlayfs</screen>
         </listitem>
         <listitem><para>AOEROOT</para>
 <screen>PART='5;S;x,x;L;x'
 AOEROOT=/dev/etherd/e0.1,/dev/sda2
-UNIONFS_CONFIG=/dev/sda2,aoe,unionfs</screen>
+UNIONFS_CONFIG=/dev/sda2,aoe,overlayfs</screen>
                 </listitem>
         <listitem><para>NBDROOT</para>
 <screen>PART='5;S;x,x;L;x'
 NBDROOT=192.168.100.7;root1;/dev/nbd0;;;;/dev/sda2
-UNIONFS_CONFIG=/dev/sda2,nbd,unionfs</screen>
+UNIONFS_CONFIG=/dev/sda2,nbd,overlayfs</screen>
                 </listitem>
       </itemizedlist>
         </sect3>
@@ -864,15 +855,15 @@ UNIONFS_CONFIG=/dev/sda2,nbd,unionfs</screen>
       <itemizedlist>
                 <listitem><para>NFSROOT</para>
 <screen>NFSROOT="192.168.100.2;/srv/kiwi-read-only-path"
-UNIONFS_CONFIG=tmpfs,nfs,unionfs</screen>
+UNIONFS_CONFIG=tmpfs,nfs,overlayfs</screen>
                 </listitem>
                 <listitem><para>AOEROOT</para>
 <screen>AOEROOT=/dev/etherd/e0.1
-UNIONFS_CONFIG=tmpfs,aoe,unionfs</screen>
+UNIONFS_CONFIG=tmpfs,aoe,overlayfs</screen>
                 </listitem>
                 <listitem><para>NBDROOT</para>
 <screen>NBDROOT=192.168.100.7;root1;/dev/nbd0
-UNIONFS_CONFIG=tmpfs,nbd,unionfs</screen>
+UNIONFS_CONFIG=tmpfs,nbd,overlayfs</screen>
                 </listitem>
             </itemizedlist>
         </sect3>
@@ -885,15 +876,15 @@ UNIONFS_CONFIG=tmpfs,nbd,unionfs</screen>
       <itemizedlist>
                 <listitem><para>NFSROOT</para>
 <screen>NFSROOT="192.168.100.2;/srv/kiwi-read-only-path"
-UNIONFS_CONFIG=/srv/kiwi-read-write-path,nfs,unionfs</screen>
+UNIONFS_CONFIG=/srv/kiwi-read-write-path,nfs,overlayfs</screen>
                 </listitem>
                 <listitem><para>AOEROOT</para>
 <screen>AOEROOT=/dev/etherd/e0.1,/dev/etherd/e1.1
-UNIONFS_CONFIG=aoe,aoe,unionfs</screen>
+UNIONFS_CONFIG=aoe,aoe,overlayfs</screen>
                 </listitem>
                 <listitem><para>NBDROOT</para>
 <screen>NBDROOT=192.168.100.7;root1;/dev/nbd0;swap1;/dev/nbd1;write1;/dev/nbd2
-UNIONFS_CONFIG=nbd,nbd,unionfs</screen>
+UNIONFS_CONFIG=nbd,nbd,overlayfs</screen>
                 </listitem>
             </itemizedlist>
         </sect3>
@@ -1270,7 +1261,7 @@ KIWI_KERNEL=/boot/linux
 DISK=/dev/sda
 PART='5;S;x,769;L;/,x;L;x'
 IMAGE='/dev/sda2;exmaple-kiosk-opensuse-##.#-pxe-client.i686;0.0.1;192.168.1.2;4096'
-UNIONFS_CONFIG=/dev/sda3,/dev/sda2,clicfs
+UNIONFS_CONFIG=/dev/sda3,/dev/sda2,overlayfs
 CONF='prefs.js;/home/kioskuser/.mozilla/firefox/07xvl1ty.default/prefs.js;192.168.1.2;4096,xorg.conf;/etc/X11/xorg.conf;192.168.1.2;4096'
 RELOAD_IMAGE=yes
 RELOAD_CONFIG=yes

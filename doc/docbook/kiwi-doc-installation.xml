@@ -28,72 +28,32 @@
     <para>Adding repositories to your system can be accomplished using the
       YaST interface or the <command>zypper ar</command> command.</para>
       
-    <sect2 id="sec.installation.distropckgs">
-      <title>Distribution Provided Packages</title>
+    <sect2 id="sec.installation.reops">
+      <title>Package Repositories</title>
       <para>The simplest and most straight forward way to install KIWI is
-        to use the packages that are part of the SUSE distribution you are
-        running. In openSUSE the kiwi packages are part of the "standard"
-        distribution and in SUSE Linux Enterprise kiwi packages are available
-        in the SDK channel.</para>
+        to use the packages that are provided in the Virtualization:Appliances
+        project on the web here: <filename>http://download.opensuse.org/repositories/Virtualization:/Appliances/</filename></para>
     </sect2>
-
-    <sect2 id="sec.installation.studioversion">
-      <title>Packages used by SUSE Studio</title>
-      <para>If you use SUSE Studio to set up your configuration and then export
-        it to build locally on your machine you want to make sure to use the
-        same version of KIWI that SUSE Studio uses to build images. This
-        version of KIWI which most often differs from the version released
-        with a given distribution is available from the openSUSE Build
-        Service. The repository you want to add to your system is
-        <filename>http://download.opensuse.org/repositories/home:/ctso/<!--
-        --><replaceable>DISTRO</replaceable></filename>.</para>
-  
-      <para>Once you have the repository added to your system you can search
-        for the kiwi packages and install them as described above.</para>
-    </sect2>
-
-    <sect2 id="sec.installation.develreleases">
-      <title>Packages for Development Releases</title>
-      <para>KIWI is under active development and changes almost on a daily
-        basis. The development code is generally released once a week on
-        Friday. Sometimes the development releases contain new bugs that break
-        existing builds. Therefore, this is not necessarily the best release
-        stream to track if you are looking for critical on time builds of
-        already configured appliances. However, tracking this stream provides
-        a great opportunity for you to help in detecting such bugs and by
-        reporting them on the mailing list you can help the developers. Any
-        regression fixes are generally released as soon as they are completed.
-        Thus, there is no need to wait until the next scheduled release on a
-        Friday. If you add the <filename>http://download.opensuse.org/<!--
-          -->repositories/Virtualization:/Appliances/<!--
-          --><replaceable>DISTRO</replaceable></filename> repository to
-       your system you can track the development release.</para>
-  
-      <para>Once you have the repository added to your system you can search
-        for the kiwi packages and install them as described above.</para>
-    </sect2>
-
   </sect1>
 
   <sect1 id="sec.installation.fromsource">
-    <title>Installing from Source</title>
+    <title>Running from Source</title>
     <para>KIWI is developed and maintained in a git repository on GitHub.
       You can clone the source code using the following command.</para>
 
     <screen><command>git</command> clone <!--
        -->https://github.com/openSUSE/kiwi.git</screen>
 
-    <para>Before installing from source you want to verify that all the
+    <para>Before running from source you want to verify that all the
       dependencies are satisfied. The best way to accomplish this is to
       install all packages listed as <emphasis>BuildRequires</emphasis>
       in the <filename>.spec</filename> file found in the
       <filename>rpm</filename> directory. Once all dependent packages are
       installed change your working directory to the
-      <filename>kiwi</filename> directory and build and install from
-      source.</para>
+      <filename>kiwi</filename> directory and run kiwi as follows:
+      </para>
 
-    <screen><command>make</command>
-<command>make</command> install</screen>
+    <screen><command>./kiwi</command></screen>
 
     <para>The KIWI self tests are executed using:</para>
 

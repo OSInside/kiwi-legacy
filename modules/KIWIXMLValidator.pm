@@ -997,7 +997,7 @@ sub __checkPreferencesDefinition {
         if (! $profName) {
             $numProfilesAttr++;
         } else {
-            if (grep { /$profName/x } @usedProfs) {
+            if (grep { /^$profName$/x } @usedProfs) {
                 my $msg = 'Only one <preferences> element may reference a '
                 . "given profile. $profName referenced multiple times.";
                 $kiwi -> error ($msg);

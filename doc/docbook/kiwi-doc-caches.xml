@@ -30,8 +30,10 @@
 
     <para>
       Before one can use a cache it needs to be created. A cache can be
-      created from any standard kiwi image description. That means you can
-      simply use one of the template descriptions and create a cache from
+      created from any standard kiwi image description, including boot image
+      descriptions. That means you can
+      simply use one of the template or *boot descriptions and create a
+      cache from
       it. But it might be more clever to create image descriptions for the
       purpose of caching. Such descriptions could represent a set of patterns
       for example. The less special a cache is the more often it can be re-used
@@ -51,35 +53,27 @@
     <title>Example</title>
     <para>
       Let's say we know that we want to build some images of type 'vmx'
-      and based on the openSUSE 12.2 JeOS image description. In order to
+      and based on the SLES 12 JeOS image description. In order to
       create image caches for the system and the boot image the following
       steps needs to be done:
     </para>
     <procedure>
       <step>
-        <para>Copy the base image descriptions used in the build:</para>
-        <screen><command>cp</command> -a /usr/share/kiwi/image/vmxboot/suse-12.2 /tmp/boot-cache
-<command>cp</command> -a /usr/share/kiwi/image/suse-12.2-JeOS /tmp/image-cache</screen>
+        <para>Build the boot image (initrd) cache:</para>
+        <screen><command>kiwi</command> --init-cache /usr/share/kiwi/image/vmxboot/suse-SLES12</screen>
       </step>
       <step>
-        <para>Modify boot-cache and image-cache to contain the package
-          manager. This is required for the later use of the
-          caches.</para>
-        <screen>&lt;package name="zypper"/&gt;</screen>
-      </step>
-      <step>
-        <para>Build the caches:</para>
-        <screen><command>kiwi</command> --init-cache /tmp/image-cache
-<command>kiwi</command> --init-cache /tmp/boot-cache</screen>
+        <para>Build the JeOS image cache:</para>
+        <screen><command>kiwi</command> --init-cache /usr/share/kiwi/image/suse-SLE12-JeOS/</screen>
       </step>
     </procedure>
     <para> By default those caches will be created in
-        <filename>/var/cache/kiwi/image</filename>. To run a build which
+      <filename>/var/cache/kiwi-images</filename>. To run a build which
       makes use of the cache the following command is used: </para>
-      <screen><command>kiwi</command> --build suse-12.2-JeOS -d /tmp/myimage --type vmx \
-     --cache /var/cache/kiwi/image</screen>
+      <screen><command>kiwi</command> --build suse-SLE12-JeOS -d /tmp/myimage --type vmx \
+     --cache /var/cache/kiwi-images</screen>
       <para>
-      This call is about 50% faster compared to the creation without a
+      This call speeds up the build a lot compared to the creation without a
       cache. It's important to understand that a cache based build will
       create a root tree which contains only the differences 
       compared to the used cache. Thus at any time you want

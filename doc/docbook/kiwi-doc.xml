@@ -42,18 +42,6 @@
         <email>rjschwei@suse.com</email>
       </othercredit>
     </authorgroup>
-  <!--
-    <revhistory>
-      <revision>
-        <revnumber>KIWI V4.58</revnumber>
-        <date>2010-08-31</date>
-        <authorinitials>toms</authorinitials>
-        <revdescription>
-          <para>First migration to DocBook</para>
-        </revdescription>
-      </revision>
-    </revhistory>
-  -->
     
     <xi:include href="kiwi-doc-license.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
     
@@ -76,7 +64,6 @@
     <title>Usecases</title>
     <xi:include href="kiwi-doc-maintenance.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
     <xi:include href="kiwi-doc-migrate.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
-    <xi:include href="kiwi-doc-source.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
     <xi:include href="kiwi-doc-iso.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
     <xi:include href="kiwi-doc-vmx.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
     <xi:include href="kiwi-doc-lxc.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
@@ -84,14 +71,9 @@
     <xi:include href="kiwi-doc-pxe.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
     <xi:include href="kiwi-doc-oem.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
     <xi:include href="kiwi-doc-xen.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
-    <xi:include href="kiwi-doc-ec2.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
     <xi:include href="kiwi-doc-raidsupport.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
     <xi:include href="kiwi-doc-lvmsupport.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
     <xi:include href="kiwi-doc-lukssupport.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
- </part>
- <part>
-    <title>Examples and Best Practices</title>
-    <xi:include href="kiwi-doc-startcooking.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
  </part>
     <xi:include href="kiwi-doc-appendix.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
  

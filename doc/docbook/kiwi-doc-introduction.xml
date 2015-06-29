@@ -32,14 +32,15 @@
     number of supported image formats. The details of the image creation
     process are explained in the <xref linkend="chap.workflow"/> chapter. The
     image format of the image produced by KIWI is defined within a
-    configuration file named <filename>config.xml</filename> as described in
+    configuration file named <filename>config.xml</filename>
+    or <filename>*.kiwi</filename> as described in
     <xref linkend="chap.description"/>.</para>
       <para>Note that not all elements and attributes that may be used in
     the KIWI <filename>config.xml</filename> configuration file are listed
     or described in this document. The complete schema documentation
     can be accessed on the web at
     <ulink url="http://doc.opensuse.org/projects/kiwi/schema-doc/"/>, latest
-    version, or on you local system using the <filename>
+    version, or on your local system using the <filename>
     file:///usr/share/doc/packages/kiwi/schema/kiwi.html</filename> path
     as the URL in the browser.</para>
   </sect1>
@@ -59,9 +60,5 @@
     <command>kiwi --create</command> for the second step. For user convenience
     KIWI also has the <option>--build</option> that combines the
     <emphasis>prepare</emphasis> and <emphasis>create</emphasis> steps.</para>
-      <para>Additional introductory information can also be found on the web at
-        <ulink
-          url="http://en.opensuse.org/SDB:KIWI_Cookbook_Start_Cooking"/>.
-     </para>
   </sect1>
 </chapter>

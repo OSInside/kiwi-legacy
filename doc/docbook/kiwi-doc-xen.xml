@@ -3,7 +3,7 @@
                          "http://www.docbook.org/xml/4.5/docbookx.dtd">
 
 <chapter id="chap.xen">
-  <title>Xen Image—Paravirtual Systems</title>
+  <title>Xen Para- and Full virtual Images</title>
   <indexterm>
     <primary>KIWI</primary>
     <secondary>XEN image</secondary>
@@ -29,55 +29,102 @@
     logs into dom0 in order to start any further guest operating
     systems, called <quote>domain 0</quote> (domU) in Xen terminology. </para>
   <para>A Xen image is a virtual disk like a vmx but with the xen kernel
-    installed. In order to run it a Xen dom0 server needs to run. Xen
-    images in KIWI makes use of the PVGrub method supported by current
-    Xen versions. Xen extracts the kernel and initrd from the virtual
-    disk as well as the grub configuration and displays the menu which
-    allows emulation of the Grub console </para>
-  
-  <sect1 id="sec.xen.building">
-    <title>Building the suse-xen-guest Example</title>
-    <para>The latest example provided with KIWI is based on openSUSE
-      and includes the base pattern. </para>
+    installed for dom0 or para virtual guest images. For full virtual
+    guest images any kernel e.g kernel-default can be used together
+    with a xen kernel modules packages which must be available for
+    the used kernel</para>
+  <para>
+    In order to run it a Xen dom0 server needs to run. A xen guest
+    is booting via a surrounded boot infrastructure. For paravirtual
+    images pyGrub or pvGrub can be used, while for HVM an extra hvmloader
+    is used. Xen extracts information to boot from the given image
+    and boots the guest. Depending on what type of guest is booted also
+    the bootloader configuration could be read. Thus this put some
+    constraints on the configuration which are addressed by kiwi</para>
+ 
+  <sect1 id="sec.xen.dom0.building">
+    <title>Building a Dom0</title>
+    <para>This example is based on SLES version 12. The example provides a
+      xenFlavour profile which builds a dom0 image for the oem image type
+      as follows</para>
+   
+<screen><command>kiwi</command> --build suse-SLE12-JeOS -d /tmp/myoem-result --type oem \
+     --add-profile xenFlavour</screen>
+  </sect1>
+ 
+  <sect1 id="sec.xen.dom0.using">
+    <title>Using the Dom0 Image</title>
+    <para>Basically the dom0 represents the most privileged layer with access
+      to the hardware. It is possible to run such an image inside of a full
+      virtual system like Qemu but this is not recommended. First and foremost
+      because the performance suffers from doing so and secondly because
+      kernel-xen is not officially supported to work within a stack of
+      hypervisors. For testing however it's ok to just run this oem image
+      in Qemu as follows:</para>
 
-    <screen><command>cd</command> /usr/share/doc/packages/kiwi/examples cd suse-...
-<command>kiwi</command> --prepare ./suse-xen-guest --root /tmp/myxen</screen>
+<screen><command>cd</command> /tmp/myoem-result
+<command>qemu-img</command> create mydom0 10g
+<command>qemu</command> -cdrom LimeJeOS-SLE12.x86_64-1.13.1.install.iso -hda mydom0 -boot d</screen>
 
-    <screen><command>kiwi</command> --create /tmp/myxen --type vmx -d /tmp/myxen-result</screen>
+    <para>
+      Once installed <emphasis>mydom0</emphasis> is a Xen dom0 from which
+      other xen guests can be started</para>
+  </sect1>
+
+  <sect1 id="sec.xen.domU.pv.building">
+    <title>Building a Para Virtual Xen Guest</title>
+    <para>This example is based on SLES version 12. The example makes again
+      use of the xenFlavour profile but builds a simple vmx image. The
+      result is a disk image with kernel-xen prepared for paravirtual boot
+      via grub2. In order to boot such a guest a pvGrub or pyGrub
+      machine configuration supporting grub2 must be provided</para>
+      
+<screen><command>kiwi</command> --build suse-SLE12-JeOS -d /tmp/myvmx-result --type vmx \
+     --add-profile xenFlavour</screen>
+  </sect1>
+
+  <sect1 id="sec.xen.domU.hvm.building">
+    <title>Building a Full Virtual Xen Guest</title>
+    <para>This example is based on SLES version 12. In contrast to the
+      paravirtual guest image this example builds a simple vmx image
+      including the standard kernel plus some xen required kernel modules.
+      In order to boot such a guest a hvmloader machine configuration
+      must be provided</para>
+
+<screen><command>kiwi</command> --build suse-SLE12-JeOS -d /tmp/myvmx-result --type vmx \
+     --add-profile xenFlavourHVM</screen>
   </sect1>
 
   <sect1 id="sec.xen.using">
-    <title>Using the Image</title>
+    <title>Using the Guest Images</title>
     <para>In order to run a domain U the Xen tool <command>xm</command>
-      needs to be called in conjunction with the KIWI generated domainU
-      configuration file </para>
+      needs to be called in conjunction with a domain U
+      configuration file like the following example:</para>
 
-    <screen><command>xm</command> create -c /tmp/myxen-result/
-        the-file-with-suffix.xenconfig    </screen>
-  </sect1>
+<screen><command>xm</command> create -c config-file</screen>
+   
+    <para>
+      For paravirtual guest images KIWI supports
+      the creation of the configuration file according to information
+      given in the KIWI <filename>config.xml</filename></para>
 
-  <sect1 id="sec.xen.flavours">
-    <title>Flavours</title>
-    <para>With KIWI you can provide the information required to create a
-      guest configuration as part of the <filename>config.xml</filename> file. Additionally
-      you can group special packages which you may only need in this
-      para virtual environment with a profile. </para>
+<screen>&lt;machine memory="512" domain="domU"&gt;
+    &lt;vmdisk id="0" device="/dev/xvda" controller="ide"/&gt;
+    &lt;vmnic interface=""/&gt;
+&lt;/machine&gt;</screen>
 
-    <screen>&lt;packages type="image" profiles="xenFlavour"&gt;
-  &lt;package name="kernel-xen" replaces="kernel-ec2"/&gt;
-&lt;/packages&gt;
-&lt;type ....&gt; 
-  &lt;machine memory="512" domain="domU"&gt; 
-    &lt;vmdisk ... device="/dev/xvda"/&gt;
-  &lt;/machine&gt;
-&lt;/type&gt; </screen>
+    <para>
+      If this information exists kiwi creates a file with the
+      extension <filename>.xenconfig</filename></para>
 
-    <para>If this information is present KIWI will create a Xen domain U
-      configuration with 512 MB of RAM and expects the disk at <filename
-        class="devicefile">/dev/xvda</filename>. Additional information
-      to setup the Xen guest machine properties are explained in the
-      machine section. The KIWI Xen domain U configuration is stored in
-      the file <filename>/tmp/myxen-result/suse-##.#-xen-guest.####-#.#.#.xenconfig</filename>.</para>
-
+    <para>
+      Please note that not all possible configuration options are
+      supported with KIWI xen config file creator. For hvm images
+      there is currently no support to create the configuration from
+      kiwi. However tools like <emphasis>virt-manager</emphasis>
+      support you with setting up the machine configuration.</para>
+    <para>
+      More details how to configure the guest image with Xen is
+      provided on <ulink url="http://www.xenproject.org/help/documentation.html"/></para>
   </sect1>
 </chapter>

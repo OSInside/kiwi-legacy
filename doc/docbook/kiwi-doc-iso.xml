@@ -3,7 +3,7 @@
                          "http://www.docbook.org/xml/4.5/docbookx.dtd">
 
 <chapter id="chap.iso">
-  <title>ISO Image—Live Systems</title>
+  <title>ISO Image / Live System</title>
   <indexterm>
     <primary>KIWI</primary>
     <secondary>ISO image</secondary>
@@ -20,22 +20,16 @@
     with the restriction that you can’t write data on it. So as soon as
     the media is plugged into the computer, the machine is able to boot
     from that media. After some time one can login to the system and
-    work with it like on any other system. All write actions takes place
-    in RAM space and therefore all changes will be lost as soon as the
-    computer shuts down. </para>
+    work with it like on any other system. By default All write actions
+    takes place in RAM space and therefore all changes will be lost
+    as soon as the computer shuts down.</para>
 
   <sect1 id="sec.iso.building">
-    <title>Building the suse-live-iso Example</title>
+    <title>Building a live JeOS</title>
 
-    <para>
-    This example is based on openSUSE and includes the KDE desktop.
-  </para>
+    <para>This example is based on SLES version 12.</para>
 
-<screen><command>cd</command> /usr/share/doc/packages/kiwi/examples
-==> select the example directory for the desired distribution change into it
-<command>cd</command> suse-...  
-<command>kiwi</command> --build ./suse-live-iso -d /tmp/myiso-result --type iso</screen>
-
+<screen><command>kiwi</command> --build suse-SLE12-JeOS -d /tmp/myiso-result --type iso</screen>
   </sect1>
 
   <sect1 id="sec.iso.using">
@@ -53,11 +47,8 @@
       <listitem>
         <para>Use a virtualization system to test the image directly.
           Testing an iso can be done with any full virtual system for
-          example: </para>
-
-<screen><command>cd</command> /tmp/myiso-result
-<command>qemu</command> -cdrom ./suse-*-live-iso.*.iso</screen>
-
+          example:</para>
+<screen><command>qemu</command> -cdrom /tmp/myiso-result/LimeJeOS-SLE12.x86_64-1.13.1.iso</screen>
       </listitem>
     </itemizedlist>
   </sect1>
@@ -66,15 +57,16 @@
     <title>Flavours</title>
     <para>
     KIWI supports different filesystems and boot methods along
-    with the ISO image type. The provided example by default uses a
-    <systemitem class="filesystem">clicfs</systemitem> compressed
-    root filesystem. clicfs is a fuse user space filesystem which
-    reads in data from a compressed image and writes data into a
-    cow file which can exist in RAM or in persistent area on a disk.
-    The result is a full writable live-system. The flags attribute
-    in <filename>config.xml</filename> exists to be able to have the
-    following alternative solutions:
-  </para>
+    with the ISO image type. The provided example by default uses an
+    <systemitem class="filesystem">overlayfs</systemitem> based compressed
+    root filesystem. overlayfs allows to combine two filesystems into
+    one. The root filesystem exists as compressed squashfs filesystem
+    and all write operations are redirected in RAM or in a persistent
+    area on a disk. The result is a full writable live-system.
+
+    The flags attribute in <filename>config.xml</filename> exists to be
+    able to have the following alternative solutions:
+    </para>
     <variablelist>
       <varlistentry>
         <term><sgmltag class="attribute">flags</sgmltag>="<sgmltag
@@ -87,16 +79,15 @@
             section below for details. </para>
         </listitem>
       </varlistentry>
+
       <varlistentry>
         <term><sgmltag class="attribute">flags</sgmltag>="<sgmltag
-            class="attvalue">clic|clic_udf</sgmltag>"</term>
+            class="attvalue">seed</sgmltag>"</term>
         <listitem>
-          <para> Creates a FUSE based <systemitem class="filesystem"
-              >clicfs</systemitem> image and allows write operations
-            into a cow file. In case of an ISO the write happens into a
-            ramdisk. If clic_udf is specified the the iso is created
-      with an udf filesystem and thus this allows to create
-      live systems bigger than 4G</para>
+          <para> Creates a <systemitem class="filesystem"
+              >btrfs</systemitem> image and allows write operations
+            into a cow (seed) file. In case of an ISO the seed device is created
+            on a ramdisk.</para>
         </listitem>
       </varlistentry>
       <varlistentry>
@@ -235,14 +226,14 @@
         <primary>KIWI</primary>
         <secondary>compressed root</secondary>
       </indexterm>
-    <para> If a compressed filesystem type like clicfs is used for the
+    <para> If a compressed filesystem type like overlayfs is used for the
           image root directory it's also possible to allow persistent
           writing on the USB stick or alternatively disallow that and
           let all write actions perfom in RAM only. kiwi provides the
           type attribute ramonly for this purpose. So in order to create
           a read-only oem stick with compressed root filesystem the
           following type section is required:
-          <screen>&lt;type image="oem" filesystem="clicfs" ramonly="true" .../&gt;</screen>
+          <screen>&lt;type image="oem" filesystem="overlayfs" ramonly="true"/&gt;</screen>
         </para>
     </sect3>
   </sect2>

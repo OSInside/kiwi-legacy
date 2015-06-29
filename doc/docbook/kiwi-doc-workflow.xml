@@ -11,7 +11,7 @@
   
   <sect1 id="sec.workflow.introduction">
     <title>Introduction</title>
-      <para>KIWI creates images in a two step process, as mentioned previously.
+    <para>KIWI creates images in a two step process, as mentioned previously.
     The first step, the <emphasis>prepare</emphasis> operation, generates a
     so called <emphasis>unpacked image</emphasis> tree (directory) using
     the information provided in the <filename>config.xml</filename>
@@ -20,14 +20,10 @@
     image to be created by KIWI. The second step, the
     <emphasis>create</emphasis> operation, creates the
     <emphasis>packed image</emphasis> or <emphasis>image</emphasis> in the
-    specified format based on the unpacked image, information provided in the
-    <filename>config.xml</filename> and the <emphasis>boot image</emphasis>
-    description specified in the <filename>config.xml</filename> file.
-    Generally the KIWI provided boot image description is sufficient to meet
-    the needs of the image to be created. KIWI also supports the use of
-    custom boot images.
-    <!--insert xref to install chapter here, when we have it--> </para>
-
+    specified format based on the unpacked image and the information
+    provided in the <filename>config.xml</filename> stored inside of the
+    unpacked image below the <filename>image/</filename> directory.
+    </para>
 
     <figure id="fig.imagecreationarch">
       <title>Image Creation Architecture</title>
@@ -42,11 +38,10 @@
           </imageobject>
           <calloutlist>
             <callout arearefs="co.imagecreationarch.root">
-              <para>Encapsulated system reachable via chroot</para>
+              <para>Encapsulated system as directory/files tree</para>
             </callout>
             <callout arearefs="co.imagecreationarch.kernel">
-              <para>Encapsulated system reachable via kernel
-                filesystem/extension drivers</para>
+              <para>Encapsulated system as image file</para>
             </callout>
           </calloutlist>
         </imageobjectco>
@@ -96,7 +91,7 @@
     <emphasis>configuration directory (tree)</emphasis>.</para>
   </sect1>
   
-  <sect1 id="sec.workflow.bootprocess">
+  <sect1 id="sec.workflow.buildprocess">
     <title>Build Process</title>
     <indexterm>
       <primary>KIWI</primary>
@@ -119,7 +114,8 @@
     package manager specified with the
     <sgmltag class="element">packagemanager</sgmltag> element in the
     <filename>config.xml</filename> file. KIWI supports the
-    <emphasis>smart</emphasis> and <emphasis>zypper</emphasis> package
+    <emphasis>smart</emphasis>, <emphasis>zypper</emphasis>,
+    <emphasis>yum</emphasis> and <emphasis>apt</emphasis> package
     managers. The prepare step executes the following major stages: </para>
 
   <itemizedlist>
@@ -346,71 +342,79 @@
   </itemizedlist>
 
   <para>Detailed information, including step by step instructions about using
-    the <command>kiwi</command> command and building specific images, as
-    well as the configuration of the supported image types is provided
-    later.</para>
+  the <command>kiwi</command> command and building specific images, as
+  well as the configuration of the supported image types is provided
+  later.</para>
+  </sect1>
 
-  <para>Most Linux systems use a special boot image to control
-    the system boot process after the system firmware, BIOS or UEFI,
-    hands control of the hardware to the operating system. This boot image
-    is called the <emphasis>initrd</emphasis>. The Linux kernel loads the
-    initrd, a compressed cpio initial ramdisk, into RAM and executes
-    <emphasis>init</emphasis> or, if present, <emphasis>linuxrc</emphasis>.
-    KIWI creates the boot image as part of the <emphasis>create</emphasis>
-    step in the image build process. Each image type has a specialized
-    image description that describes the boot image. Common functionality is
-    shared between the boot images through a set of functions. The boot image
-    descriptions follow the same principles as the system image descriptions
-    and are provided by KIWI. The boot image descriptions provided by KIWI
-    cover almost all use cases and it should not be necessary for the majority
-    of KIWI users to implement their own boot descriptions.</para>
+  <sect1 id="sec.workflow.bootprocess">
+    <title>Boot Process</title>
+    <indexterm>
+      <primary>KIWI</primary>
+      <secondary>boot process</secondary>
+    </indexterm>
 
-  <figure id="fig.workflow.imagedescriptions">
-    <title>Image Descriptions</title>
-    <!-- The coordinates in the coords attribute are just dummy
-         values
-      -->
-    <mediaobjectco>
-      <imageobjectco>
-        <areaspec>
-          <area coords="100 100" id="co.workflow.imagedescriptions.desc"/>
-          <area coords="200 200" id="co.workflow.imagedescriptions.desccreated"/>
-        </areaspec>
-        <imageobject>
-          <imagedata fileref="images/activation.png"/><!-- width="50%" -->
-        </imageobject>
-        <calloutlist>
-          <callout arearefs="co.workflow.imagedescriptions.desc">
-            <para>Boot image descriptions are provided by KIWI, use is
-              recommended but not required</para>
-          </callout>
-          <callout arearefs="co.workflow.imagedescriptions.desccreated">
-            <para>The system image description is created by the KIWI user,
-              or a KIWI provided template may be used</para>
-          </callout>
-        </calloutlist>
-      </imageobjectco>
-    </mediaobjectco>
-  </figure>
+    <para>Most Linux systems use a special boot image to control
+      the system boot process after the system firmware, BIOS or UEFI,
+      hands control of the hardware to the operating system. This boot image
+      is called the <emphasis>initrd</emphasis>. The Linux kernel loads the
+      initrd, a compressed cpio initial ramdisk, into RAM and executes
+      <emphasis>init</emphasis> or, if present, <emphasis>linuxrc</emphasis>.
+      KIWI creates the boot image automatically depending on the image type 
+      as part of the <emphasis>create</emphasis>
+      step in the image build process. Each image type has a specialized
+      image description that describes the boot image. Common functionality is
+      shared between the boot images through a set of functions. The boot image
+      descriptions follow the same principles as the system image descriptions
+      and are provided by KIWI. The boot image descriptions provided by KIWI
+      cover almost all use cases and it should not be necessary for the majority
+      of KIWI users to implement their own boot descriptions.</para>
+
+    <figure id="fig.workflow.imagedescriptions">
+      <title>Image Descriptions</title>
+      <!-- The coordinates in the coords attribute are just dummy
+           values
+        -->
+      <mediaobjectco>
+        <imageobjectco>
+          <areaspec>
+            <area coords="100 100" id="co.workflow.imagedescriptions.desc"/>
+            <area coords="200 200" id="co.workflow.imagedescriptions.desccreated"/>
+          </areaspec>
+          <imageobject>
+            <imagedata fileref="images/activation.png"/><!-- width="50%" -->
+          </imageobject>
+          <calloutlist>
+            <callout arearefs="co.workflow.imagedescriptions.desc">
+              <para>Boot image descriptions are provided by KIWI, use is
+                recommended but not required</para>
+            </callout>
+            <callout arearefs="co.workflow.imagedescriptions.desccreated">
+              <para>The system image description is created by the KIWI user,
+                or a KIWI provided template may be used</para>
+            </callout>
+          </calloutlist>
+        </imageobjectco>
+      </mediaobjectco>
+    </figure>
 
 
-  <para>The boot image descriptions are stored in the
+    <para>The boot image descriptions are stored in the
     <filename class="directory">/usr/share/kiwi/image/*boot</filename>
     directories. KIWI selects the boot image to build based on the value of
     the <sgmltag class="attribute">boot</sgmltag> attribute of the
     <sgmltag class="element">type</sgmltag> element. The attribute value is
     expected in the general form of <emphasis>
     <replaceable>boottype</replaceable>/<replaceable>distribution</replaceable>
-    </emphasis>. For example to select the OEM boot image for openSUSE
-    version 12.1 the value of the <sgmltag class="attribute">boot</sgmltag>
-    attribute should be <sgmltag class="attvalue">oemboot/suse-12.1</sgmltag>.
+    </emphasis>. For example to select the OEM boot image for SLES
+    version 12 the value of the <sgmltag class="attribute">boot</sgmltag>
+    attribute should be <sgmltag class="attvalue">oemboot/suse-SLES12</sgmltag>.
     The boot image description only represent the initrd and as such serves
     a limited purpose. The system image description created by the person
     building the image is ultimately the image that runs on the target system.
     Boot image descriptions are complete and consistent descriptions that
     allow you to build the boot image outside of the system image build
-    process. The resulting boot image can be stored and re-used as described
-    in the <xref linkend="sec.workflow.prebuiltbootimage"/> section.</para>
+    process.</para>
   </sect1>
 
   <sect1 id="sec.hooks">
@@ -474,8 +478,7 @@
 &lt;/packages&gt;</screen>
           The concept of including an archive in the boot image follows
           the same concepts described for the system image previously.
-          The setting in the system image description will have no
-          effect if a pre-built boot image is being used. In order to
+          In order to
           use an archive in a pre-built boot image the archive must be
           part of the boot image description in which case it is not
           necessary to set the <sgmltag class="attribute"
@@ -865,75 +868,6 @@
             </formalpara>
         </listitem>
   </itemizedlist>
-  </sect1>
-
-  
-  <sect1 id="sec.workflow.prebuiltbootimage">
-    <title>Using Pre-built Boot Images</title>
-    <indexterm>
-      <primary>KIWI</primary>
-      <secondary>pre-built boot images</secondary>
-    </indexterm>
-    <indexterm>
-      <primary>pre-built boot images</primary>
-    </indexterm>
-    <para>During the create step of the KIWI image building process kiwi,
-      creates the so called boot image, as described previously, based on
-      the specified boot image description in the
-      <filename>config.xml</filename> configuration file. This creation
-      process takes time and can be short circuited by using pre-built
-      boot images.</para>
-    <para>As described earlier, the KIWI provided boot images can be found
-      in the
-      <filename class="directory">/usr/share/kiwi/image/*boot</filename>
-      directories. Located within the
-      <filename class="directory">*boot</filename> directories are boot
-      image description trees named for the applicable distribution. For
-      example the <filename class="directory">oemboot/suse-SLES11</filename>
-      directory is the boot image description for an OEM image for
-      SUSE Linux Enterprise Server 11. The boot image configuration trees
-      are complete image descriptions, very similar in nature to the system
-      image descriptions created most commonly for image building, that kiwi
-      uses to create the boot image during the system image creation process.
-      Therefore, it is possible to build these boot images outside of the
-      system image build process. The result of a build of one of the boot
-      image descriptions is a pre-built boot image that can be used in many
-      image builds for the same distribution and type. The following commands
-      show the creation of a pre-built boot image for openSUSE 12.1 for the OEM
-      image type.</para>
-
-      <screen><command>kiwi</command> <!--
-        -->--prepare /usr/share/kiwi/image/oemboot/suse-12.1 <!--
-        -->--root /tmp/oem121_initunpacked</screen>
-
-      <screen><command>kiwi</command> <!--
-        -->--create /tmp/oem121_initunpacked <!--
-        -->-d /mystore/kiwiprebuiltboot</screen>
-
-      <para>The commands above result in the creation of the OEM boot image
-        for openSUSE 12.1 in the directory
-        <filename>/mystore/kiwiprebuiltboot</filename>. This boot image can
-        readily be used by any kiwi build for an openSUSE 12.1 OEM image.
-        Using the pre-built image requires that the value of the
-        <sgmltag class="attribute">checkprebuilt</sgmltag> attribute of the
-        <sgmltag class="element">type</sgmltag> element be set to
-        <sgmltag class="attvalue">true</sgmltag> and that the location of
-        the boot image is provided with the 
-        <option>--prebuiltbootimage</option> command line argument, or
-        the <sgmltag class="element">defaultprebuilt</sgmltag> element in
-        the <filename>config.xml</filename> file.</para>
-      
-    <para>Using pre-built boot images has the advantage that the boot image
-      does not have to be re-created every time a specific image type for
-      a given distribution is rebuilt. Additionally, this process provides a
-      convenient way to maintain customized boot images. One disadvantage to
-      the use of pre-built images is that it is not possible to integrate the
-      latest updates of tools that are part of the initrd in the image as
-      the pre-built boot image will contain only the latest versions available
-      in the specified repositories on the build date. However, in most cases
-      this does not represent a concern/issue as the initrd in the image
-      generally gets replaced once the image is deployed.
-    </para>
   </sect1>
 
   <sect1 id="sec.workflow.bootparameters">

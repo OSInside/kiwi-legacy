@@ -86,8 +86,8 @@
       data tree is handled and how clean the system was when the
       analysis was started. Those data which should become part of
       the image description needs to be moved from the
-      <filename>/tmp/worksation/custom</filename> directory
-      to the <filename>/tmp/worksation/root</filename> directory</para>
+      <filename>/var/cache/kiwi/describe/worksation/custom</filename> directory
+      to the <filename>/var/cache/kiwi/describe/worksation/root</filename> directory</para>
   </sect1>
 
   <sect1 id="sec.migrate.checklist">
@@ -142,7 +142,7 @@
       version of the OEM image. If you burn the ISO on a DVD you can use
       that DVD to install your cloned image on another computer. </para>
 
-    <screen><command>kiwi</command> --build /tmp/workstation -d /tmp/myResult</screen>
+    <screen><command>kiwi</command> --build /var/cache/kiwi/describe/workstation -d /tmp/myResult</screen>
 
     <para>If everything worked well you can test the created OEM image
       in any full virtual operating system environment like Qemu or

@@ -86,25 +86,21 @@
         <screen>baseSetupPlainTextGITRepository</screen>
       </step>
       <step>
-        <para>Prepare the preliminary version of your new appliance by
-          calling <command>kiwi</command>
-          <option>--prepare</option>
-        </para>
-      </step>
-      <step>
         <para>Decide for a testing environment. In my opinion a real
           hardware based test machine which allows to boot from USB is a
-          good and fast approach.
+          good and fast approach. All template images provided by us
+          contains an hybrid iso type setup which is suitable for this
+          environment.
         </para>
-<screen>&lt;type image="iso" boot="isoboot/suse-..." flags="clic" hybrid="true"/&gt;</screen>
       </step>
       <step>
-        <para>Create the preliminary live stick image of your new
-          appliance by calling <command>kiwi</command>
-          <option>--create</option>… After successful creation of the
+        <para>Build the live stick appliance by calling
+          <screen><command>kiwi</command><option>--build template-name</option></screen>
+          After successful creation of the
           image files find an USB stick which is able to store your
           appliance and plug it into a free USB port on your image build
-          machine. The deployment can be performed from any
+          machine. The deployment of the generated hybrid iso file can be
+          performed from any
           OS including Windows as long as a tool to dump data onto a disk
           device exists and is used.
         </para>

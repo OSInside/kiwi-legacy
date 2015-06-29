@@ -3,7 +3,7 @@
                          "http://www.docbook.org/xml/4.5/docbookx.dtd">
 
 <chapter id="chap.vagrant">
-  <title>Building vagrant boxes</title>
+  <title>Vagrant boxes</title>
   <indexterm>
     <primary>KIWI</primary>
     <secondary>container</secondary>
@@ -19,82 +19,54 @@
 
   <para>
     <ulink url="http://vagrantup.com">Vagrant</ulink>
-    is a nice framework to implement consistent testing work environments based on virtualisation technologies. In order to run a system vagrant needs so called boxes. A box is a tarball containing a virtual disk image and some metadata. If you need customized boxes you need to create them somehow. There is e.g.
+    is a nice framework to implement consistent processing/testing work
+    environments based on virtualisation technologies. In order to run
+    a system vagrant needs so called boxes. A box is a tarball containing
+    a virtual disk image and some metadata. If you need customized boxes
+    you need to create them somehow. There is e.g.
     <ulink url="https://github.com/jedi4ever/veewee">veewee</ulink>
     which builds boxes based on
     <literal>autoyast</literal>
     , and Vagrant itself provides
     <ulink url="http://packer.io">Packer</ulink>
-    . Both tools are based on the official distribution media (DVDs). If such media does not exist for reasons like the distro is still under development or you want to use a collection of your own repositories, the kiwi way of building images might be helpful. In addition you can use the kiwi image description as source for the
+    . Both tools are based on the official distribution media (DVDs). If
+    such media does not exist for reasons like the distro is still under
+    development or you want to use a collection of your own repositories,
+    the kiwi way of building images is helpful. In addition you can use the
+    kiwi image description as source for the
     <ulink url="http://openbuildservice.org/">Open Build Service</ulink>
-    which then allows building and maintaining boxes in the Build Service as a plus.
+    which then allows building and maintaining boxes in the Build Service
+    as a plus.
   </para>
-  <sect1 id="preparation">
-    <title>Preparation</title>
-    <para>
-      kiwi provides an
-      <ulink url="https://github.com/openSUSE/kiwi/tree/master/doc/examples/extras/suse-13.1">example
-      vagrant box template for openSUSE 13.1</ulink>
-      and
-      <ulink url="https://github.com/openSUSE/kiwi/tree/master/doc/examples/extras/suse-SLES11">SLES11
-      SP3</ulink>
-      as part of the
-      <literal>kiwi-doc</literal>
-      package
-    </para>
-    <programlisting>
- $ zypper install kiwi-doc
-</programlisting>
-    <para>
-      See also the
-      <ulink url="http://doc.opensuse.org/projects/kiwi/schema-doc/kiwi_xsd.html">XML
-      schema documentation</ulink>
-      , in particular the sections on the
-      <ulink url="http://doc.opensuse.org/projects/kiwi/schema-doc/kiwi_xsd.html#vagrantconfig">
-        <literal>&lt;vagrantconfig&gt;</literal>
-      </ulink>
-      and
-      <ulink url="http://doc.opensuse.org/projects/kiwi/schema-doc/kiwi_xsd.html#machine">
-        <literal>&lt;machine&gt;</literal>
-      </ulink>
-      elements.
-    </para>
-  </sect1>
-  <sect1 id="let-us-build-the-example-template">
-    <title>Let us build the example template</title>
-    <para>
-      Once installed you can just build the vagrant box as follows
-    </para>
-    <programlisting>
- $ cd /usr/share/doc/packages/kiwi/examples/extras
 
- $ kiwi --build suse-13.1/suse-vagrant-box -d /tmp/my-box
+  <sect1 id="sec.vagrant.building">
+    <title>Building a Base Box</title>
+    <para>This example is based on SLES version 12.</para>
+    <programlisting>
+ $ kiwi --build suse-SLE12-JeOS --add-profile vagrant --type vmx -d /tmp/my-box
 </programlisting>
+
+
   </sect1>
-  <sect1 id="some-words-on-the-result">
-    <title>Some words on the result</title>
+  <sect1 id="sec.vagrant.box.details">
+    <title>Box Configuration Details</title>
     <para>
-      As result below
-      <literal>/tmp/my-box</literal>
-      you will find among other files the
-      <literal>.box</literal>
-      and the
-      <literal>.json</literal>
+      The result in <literal>/tmp/my-box</literal> provides among other
+      files the <literal>.box</literal> and the <literal>.json</literal>
       files which are needed in order to add and run the box in vagrant. The
-      <literal>.box</literal>
-      file is a tarball containing the actual virtual disk image for the selected virtualisation provider which is in our case a
-      <literal>.qcow2</literal>
-      image for use with
-      <literal>libvirt</literal>
-      and some metadata which mostly duplicates the information from the
-      <literal>.json</literal>
+      <literal>.box</literal> file is a tarball containing the actual virtual
+      disk image for the selected virtualisation provider which is in our
+      case a <literal>.qcow2</literal> image for use with
+      <literal>libvirt</literal> and some metadata which mostly duplicates
+      the information from the <literal>.json</literal>
       file to have it packaged in one place too.
     </para>
     <para>
       The actual system inside of the virtual disk has to fulfill
       <ulink url="http://docs.vagrantup.com/v2/boxes/base.html">some
       requirements which are documented on the vagrant pages</ulink>
-      . The kiwi template description already cared for this requirements which were:
+      . The kiwi template description already cared for this
+      requirements which were:
     </para>
     <itemizedlist>
       <listitem>
@@ -151,36 +123,24 @@
         </para>
       </listitem>
     </itemizedlist>
-    <para>
-      If you need further adaptions or you are interested in how exactly the image description looks like just go to
-      <ulink url="https://github.com/openSUSE/kiwi/tree/master/doc/examples/extras/suse-13.1/suse-vagrant-box">
-        <literal>/usr/share/doc/packages/kiwi/examples/extras/suse-13.1/suse-vagrant-box</literal>
-      </ulink>
-      or
-      <ulink url="https://github.com/openSUSE/kiwi/tree/master/doc/examples/extras/suse-SLES11/suse-vagrant-box">
-        <literal>/usr/share/doc/packages/kiwi/examples/extras/suse-SLES11/suse-vagrant-box</literal>
-      </ulink>
-      and take a look at the
-      <literal>config.xml</literal>
-      and the overlay root tree below the root/ directory
-    </para>
   </sect1>
-  <sect1 id="test-the-box">
-    <title>Test the box</title>
+  <sect1 id="sec.vagrant.box.using">
+    <title>Using the box</title>
     <para>
-      This requires a correct vagrant installation on your machine including a running
-      <literal>libvirtd</literal>
+      This requires a correct vagrant installation on your machine including
+      a running <literal>libvirtd</literal>
       and an up and running libvirt default network.
     </para>
     <para>
-      In order to add the box this can be done in two ways. First the traditional way by just using the
+      In order to add the box this can be done in two ways. First the
+      traditional way by just using the
       <literal>.box</literal>
       file and providing a name at the commandline:
     </para>
     <programlisting>
  $ cd /tmp/my-box
 
- $ vagrant box add my-box VagrantBox-openSUSE-13.1.x86_64-1.13.1.box
+ $ vagrant box add my-box LimeJeOS-SLE12.x86_64-1.13.1.libvirt.box
 </programlisting>
     <para>
       Or secondly if you want the box to have metadata similar to the
@@ -190,7 +150,7 @@
     <programlisting>
  $ cd /tmp/my-box
 
- $ vagrant box add VagrantBox-openSUSE-13.1.x86_64-1.13.1.json
+ $ vagrant box add LimeJeOS-SLE12.x86_64-1.13.1.libvirt.json
 </programlisting>
     <para>
       With either method, you can now boot the box:
@@ -204,15 +164,19 @@
 
  $ vagrant ssh
 
- This is the Lime-JeOS 13.1 vagrant box.
- Have a lot of fun...
+ This is the Lime-JeOS SLE12 Linux System...
  vagrant@linux:~&gt;
 </programlisting>
   </sect1>
-  <sect1 id="references">
-    <title>References</title>
+  <sect1 id="sec.vagrant.docker">
+    <title>Vagrant with Docker</title>
     <para>
-      http://docs.vagrantup.com
+      While it is required to build a specific disk image format for the
+      libvirt, VMware or VirtualBox providers in vagrant, a docker base box
+      would just be a tarball whose contents must match the vagrant box
+      requirements listed above. Therefore building a docker base box for
+      vagrant in kiwi is not different from just building a docker image
+      as described in <xref linkend="chap.lxc"/>
     </para>
   </sect1>
 </chapter>

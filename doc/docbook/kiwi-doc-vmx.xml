@@ -3,7 +3,7 @@
                          "http://www.docbook.org/xml/4.5/docbookx.dtd">
 
 <chapter id="chap.vmx">
-  <title>VMX Image—Virtual Disks</title>
+  <title>VMX Image / Virtual Disks</title>
   <indexterm>
     <primary>KIWI</primary>
     <secondary>VMX image</secondary>
@@ -19,22 +19,22 @@
     virtualization systems like Qemu or VMware. The image is a file
     containing the system represented by the configured packages in
     <filename>config.xml</filename> as well as partition data and bootloader
-    information. The size of this virtual disk can be specified by using the size element
+    information. The size of this virtual disk can be specified by using
+    the size element
     in the <filename>config.xml</filename> file or by adding the
-      <option>--bootvm-disksize</option> command line argument. </para>
+      <option>--bootvm-disksize</option> command line argument.
+    The virtual disk cannot expand to a different disk geometry.
+    Be aware if you dump/copy the disk with another disk geometry,
+    please refer to the <xref linkend="chap.oem"/> for additional details.
+  </para>
   
   <sect1 id="sec.vmx.building">
-    <title>Building the suse-vm-guest Example</title>
-    <para> The vm-guest example provided with KIWI is based on recent
-      openSUSE releases, one example configuration per release. The
-      example uses base pattern and the virtual disk is formatted using
-      the distribution default filesystem. </para>
+    <title>Building a JeOS disk</title>
+    <para>This example is based on SLES version 12. The
+      JeOS system is based on the sles-Minimal pattern
+    </para>
 
-    <screen><command>cd</command> /usr/share/doc/packages/kiwi/examples 
-<command>cd</command> suse-...
-<command>kiwi</command> --prepare ./suse-vm-guest --root /tmp/myvm </screen>
-
-    <screen><command>kiwi</command> --create /tmp/myvm --type vmx -d /tmp/myvm-result</screen>
+    <screen><command>kiwi</command> --build suse-SLE12-JeOS -d /tmp/myvm-result --type vmx</screen>
   </sect1>
 
   <sect1 id="sec.vmx.using">
@@ -46,8 +46,7 @@
       virtual disk formats. Using the QEMU virtualization environment
       test the created image with the following command: </para>
 
-    <screen><command>cd</command> /tmp/myvm-result 
-<command>qemu</command> suse-##.#-vm-guest.i686-1.1.2.raw -m 256 </screen>
+    <screen><command>qemu</command> /tmp/myvm-result/LimeJeOS-SLE12.x86_64-1.13.1.raw -m 1024 </screen>
   </sect1>
   
   <sect1 id="sec.vmx.flavours">
@@ -90,16 +89,28 @@
             <entry>Disk format for VMware</entry>
           </row>
           <row>
-            <entry>vhd</entry>
+            <entry>vhd|vhd-fixed</entry>
             <entry>Disk format for Microsoft HyperV</entry>
           </row>
           <row>
-            <entry>ovf</entry>
+            <entry>ovf|ova</entry>
             <entry>Open Virtual Format requires VMware's ovftool</entry>
           </row>
           <row>
             <entry>qcow2</entry>
             <entry>QEMU virtual disk format</entry>
+          </row>
+          <row>
+            <entry>vdi</entry>
+            <entry>Disk format for VirtualBox</entry>
+          </row>
+          <row>
+            <entry>vagrant</entry>
+            <entry>Vagrant Box Format</entry>
+          </row>
+          <row>
+            <entry>gce</entry>
+            <entry>Google Cloud Format</entry>
           </row>
         </tbody>
       </tgroup>      
@@ -118,24 +129,20 @@
         This file includes information about the hardware to be
         represented to the guest image by the VMware virtualization
         environment as well as specification of resources such as
-        memory. </para>
+        memory.</para>
 
       <para>Within the <filename>config.xml</filename> file it is
         possible to specify the VMware configuration settings. In
         addition it is possible to include selected packages in the
         created image that are specific to the VM image generation. The
-        following <filename>config.xml</filename> snippet provides
-        general guidance on the elements in
-          <filename>config.xml</filename>. </para>
+        following <emphasis>machine</emphasis> section snippet provides
+        general guidance on the VMware guest config which is defined
+        below the <emphasis>type</emphasis> section in the
+        <filename>config.xml</filename>.</para>
 
-      <screen>&lt;packages type="vmx"&gt; 
-   <sgmltag class="sgmlcomment"> packages you need in VMware only </sgmltag>
-&lt;/packages&gt; 
-&lt;type......&gt;
-  &lt;machine memory="512"&gt; 
+      <screen>&lt;machine memory="512"&gt; 
     &lt;vmdisk controller="ide" id="0"/&gt; 
-  &lt;/machine&gt; 
-&lt;/type&gt;</screen>
+&lt;/machine&gt;</screen>
 
       <para>Given the specification above KIWI will create a VMware
         guest configuration specifying the availability of 512&nbsp;MB
@@ -148,7 +155,7 @@
         file has the <filename class="extension">.vmx</filename>
         extension as shown in the example below. </para>
 
-      <screen>/tmp/myvm-result/suse-##.#-vm-guest.i686-1.1.2.vmx</screen>
+      <screen>/tmp/myvm-result/LimeJeOS-SLE12.x86_64-1.13.1.vmx</screen>
 
       <para>Using the <sgmltag class="attribute"
           >format</sgmltag>="<sgmltag class="attvalue">vmdk</sgmltag>"
@@ -157,15 +164,6 @@
           class="extension">.vmdk</filename> file) and the required
         VMware guest configuration (<filename class="extension"
           >.vmx</filename>) file. </para>
-
-      <para>In addition it is possible to create an image for the Xen
-        virtualization framework. By adding the <sgmltag
-          class="attribute">bootprofile</sgmltag> and <sgmltag
-          class="attribute">bootkernel</sgmltag> attributes to the
-          <sgmltag class="starttag">type</sgmltag> start tag with values
-        of <sgmltag class="attvalue">xen</sgmltag> and <sgmltag
-          class="attvalue">xenboot</sgmltag>, respectively. Please refer
-        to the <xref linkend="chap.xen"/> for additional details.</para>
     </sect2>
 
     <sect2 id="sec.vmx.lvm">
@@ -174,27 +172,37 @@
         <primary>KIWI</primary>
         <secondary>LVM support</secondary>
       </indexterm>
-      <para>KIWI also provides support for LVM (Logical Volume
-        Management). In this mode the disk partition table will include
-        one lvm partition and one standard <systemitem
-          class="filesystem">ext2</systemitem> boot partition. KIWI
-        creates the kiwiVG volume group and adds logical volumes as they
-        are needed and configured according to the image type and
-        filesystem. After boot of the system the user has full control
-        over the volume group and is free to change/resize/increase the
-        group and the volumes inside. Support for LVM has been added for
-        all image types which are disk based. This includes vmx, oem and
-        usb. In order to use LVM for the vmx type just add the
-          <option>--lvm</option> option as part of the KIWI create step
+      <para>
+        Support for LVM has been added for all image types which are
+        disk based. In order to use LVM for the vmx type just add the
+        <option>--lvm</option> option as part of the KIWI create/build step
         or add the attribute lvm="true" as part of the type section in
-        your <filename>config.xml</filename> file. </para>
+        your <filename>config.xml</filename> file. When using modern
+        filesystems like btrfs, zfs kiwi also supports using their native
+        volume management system. For more information how to setup
+        custom partitions/volumes,
+        see <xref linkend="chap.partitions"/> for a detailed explanation.
+      </para>
+    </sect2>
 
-      <screen><command>kiwi</command> --create /tmp/myvm --type vmx<!--
-       --> -d /tmp/myvm-result --lvm </screen>
-
-      <para>With the optional systemdisk section you can set one or more
-        top level directories into a separate volume. See <xref
-          linkend="chap.description"/> for a detailed explanation.
+    <sect2 id="sec.vmx.bootpartition">
+      <title>Extra Boot Partition</title>
+      <indexterm>
+        <primary>KIWI</primary>
+        <secondary>boot partition</secondary>
+      </indexterm>
+      <para>
+        By default kiwi decides itself for using an extra boot partition or not.
+        This basically depends on the selected root filesystem and the
+        capabilities of the bootloader to directly read data from it. By
+        default kiwi will choose the save default even if the bootloader is
+        able to read from e.g btrfs directly the default is still to use
+        a simple ext filesystem for the /boot data. However it's possible
+        to specify what kiwi should do with the two attributes
+        <sgmltag class="attribute">bootpartition</sgmltag>="<sgmltag class="attvalue">true|false</sgmltag>" and
+        <sgmltag class="attribute">bootfilesystem</sgmltag>="<sgmltag class="attvalue">ext2|ext3|ext4|fat32|fat16</sgmltag>".
+        A runtime check at build time will prove if the combination of
+        attributes is technically possible.
       </para>
     </sect2>
   </sect1>

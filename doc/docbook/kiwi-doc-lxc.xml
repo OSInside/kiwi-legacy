@@ -13,6 +13,10 @@
     <secondary>lxc</secondary>
   </indexterm>
   <indexterm>
+    <primary>container</primary>
+    <secondary>docker</secondary>
+  </indexterm>
+  <indexterm>
     <primary>Container image</primary>
     <secondary>lxc image</secondary>
   </indexterm>
@@ -61,49 +65,35 @@
     Docker on its homepage at <ulink url="http://www.docker.io"/>.
   </para>
 
-  <para>To use Docker with KIWI, take into account the following issues:</para>
-  
-  <itemizedlist>
-    <listitem>
-      <para>Change the image type in the <sgmltag>type</sgmltag> element of
-        the <sgmltag class="attribute">image</sgmltag> attribute from 
-        <sgmltag class="attvalue">lxc</sgmltag>
-        to <sgmltag class="attvalue">docker</sgmltag>:</para>
-      <screen>&lt;type image="docker">...&lt;/type></screen>
-    </listitem>
-    <listitem>
-      <para>NEVER unpack the Docker tarball! If you unpack the tarball it
-      will overwrite data on the host system.
-      Use the <command>docker</command> command instead.
-      </para>
-    </listitem>
-  </itemizedlist>
-  
+  <para>When building a docker image with kiwi <emphasis>never</emphasis>
+    unpack the Docker tarball! If you unpack the tarball it
+    will overwrite data on the host system.
+    Use the <command>docker</command> command instead.
+  </para>
+
   <sect1 id="sec.lxc.building">
-    <title>Building the suse-lxc-guest Example</title>
-    <para>The lxc-guest example provided with KIWI is based on recent
-      openSUSE releases, one example configuration per release. The example
-      provides a very minimal system.</para>
+    <title>Building a docker image</title>
+    <para>This example is based on SLES version 12</para>
 
-    <screen><command>cd</command> /usr/share/doc/packages/kiwi/examples 
-<command>cd</command> suse-...
-<command>kiwi</command> --prepare ./suse-lxc-guest --root /tmp/mylxc </screen>
-
-    <screen><command>kiwi</command> --create /tmp/mylxc --type lxc -d /tmp/mylxc-result</screen>
+    <screen><command>kiwi</command> --build suse-SLE12-JeOS --add-profile docker --type docker -d /tmp/my-container</screen>
   </sect1>
 
   <sect1 id="sec.lxc.using">
     <title>Using the Image</title>
     <para>The created container is packaged in a tarball in the destination
-      directory, <filename class="directory">mylxc-result</filename>
-      in the example above. Move this tarball to the root level (/) of
-      the host machine and unpack it. The following commands assume that
-      the image build machine is also the host machine.</para>
+      directory, <filename class="directory">my-container</filename>
+      and named <filename>LimeJeOS-SLE12-docker.x86_64-1.13.1.tar.xz</filename>
+      In order to use this image with docker it must be imported via the
+      <command>docker</command> command. The following requires to have
+      docker installed and dockerd running.
+    </para>
 
-      <screen><command>cp</command> /tmp/mylxc-result/suse-##.#-lxc-guest-lxc.*-1.0.0.tbz /
-<command>cd</command> /
-<command>tar -xjf</command> suse-##.#-lxc-guest-lxc.*-1.0.0.tbz
-<command>lxc-start</command> -n os### -f /etc/lxc/os###/config </screen>
+      <screen><command>cd</command> /tmp/my-container
+<command>cat</command> LimeJeOS-SLE12-docker.x86_64-1.13.1.tar.xz |\
+<command>docker</command> import - sle12-jeos:new</screen>
+
+     <para>Once imported, a container instance can be started as follows:</para>
+     <screen><command>docker</command> run --privileged=true -t -i sle12-jeos:new /bin/bash</screen>
   </sect1>
 
   <sect1 id="sec.lxc.details">
@@ -112,8 +102,7 @@
       package. The container represents the user space that runs on top
       of the kernel of the container host system.</para>
     <para>The container itself must contain the Linux user space container
-      tools and thus the <emphasis>lxc</emphasis> package must
-      be included in the container image.
+      tools.
     </para>
     <para>Configure the network configuration for the container using the
       <sgmltag class="element">vmnic</sgmltag> element.
@@ -121,7 +110,7 @@
       attribute indicates the network mode, <emphasis>veth</emphasis>
       by default. While it is possible to configure multiple network
       interfaces in the <filename>config.xml</filename> file, the written
-      conteiner configuration will only reflect the information configured
+      container configuration will only reflect the information configured
       for the first <sgmltag class="element">vmnic</sgmltag>
       element found in the <filename>config.xml</filename> file. The
       configuration for the container expects that the host has a configured
@@ -134,6 +123,4 @@
       security  model. The device access permissions may be modified by
       editing the <filename>config</filename> file for the container.</para>
   </sect1>
-
-
 </chapter>
