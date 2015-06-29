@@ -8,7 +8,7 @@
     </description>
     <profiles>
         <profile name="xenFlavour" description="VMX with Xen kernel"/>
-        <profile name="ec2Flavour" description="VMX with EC2/Xen kernel"/>
+        <profile name="xenFlavourHVM" description="VMX with default kernel plus xen modules"/>
         <profile name="vmxFlavour" description="VMX with default kernel" import="true"/>
         <profile name="docker" description="docker image"/>
         <profile name="vagrant" description="vagrant base box for libvirt"/>
@@ -48,8 +48,9 @@
     <preferences profiles="docker">
         <type image="docker" container="system"/>
     </preferences>
-    <preferences profiles="ec2Flavour">
-        <type image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES12" bootprofile="ec2" bootkernel="ec2k" bootloader="grub2" kernelcmdline="xencons=xvc0 console=xvc0 multipath=off splash" firmware="ec2"/>
+    <preferences profiles="xenFlavourHVM">
+        <type image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES12" bootloader="grub2" kernelcmdline="splash">
+        </type>
     </preferences>
     <preferences profiles="xenFlavour">
         <type image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES12" bootprofile="xen" bootkernel="xenk" bootloader="grub2" kernelcmdline="splash">
@@ -141,23 +142,31 @@
     <packages type="iso">
         <package name="gfxboot-branding-SLE" bootinclude="true" bootdelete="true"/>
     </packages>
-    <packages type="image" profiles="ec2Flavour">
-        <package name="kernel-ec2" replaces="kernel-default"/>
-        <package name="kernel-ec2" replaces="kernel-xen"/>
+    <packages type="image" profiles="xenFlavourHVM">
+        <package name="kernel-default" replaces="kernel-xen"/>
+        <package name="grub2-x86_64-xen" bootinclude="true"/>
+        <package name="xen-kmp-default" bootinclude="true"/>
+        <package name="xen-libs" arch="x86_64" replaces=""/>
+        <package name="xen-tools-domU" arch="x86_64" replaces=""/>
         <package name="xen-tools" arch="x86_64" replaces=""/>
         <package name="xen" arch="x86_64" replaces=""/>
+        <package name="gfxboot-branding-SLE" bootinclude="true" bootdelete="true"/>
     </packages>
     <packages type="image" profiles="xenFlavour">
         <package name="kernel-xen" replaces="kernel-default"/>
-        <package name="kernel-xen" replaces="kernel-ec2"/>
+        <package name="kernel-xen" replaces="xen-kmp-default"/>
+        <package name="xen-libs" arch="x86_64" replaces=""/>
+        <package name="xen-tools-domU" arch="x86_64" replaces=""/>
         <package name="xen-tools" arch="x86_64" replaces=""/>
         <package name="xen" arch="x86_64" replaces=""/>
         <package name="gfxboot-branding-SLE" bootinclude="true" bootdelete="true"/>
     </packages>
     <packages type="image" profiles="vmxFlavour">
         <package name="kernel-default" replaces="kernel-xen"/>
-        <package name="kernel-default" replaces="kernel-ec2"/>
+        <package name="kernel-default" replaces="xen-kmp-default"/>
+        <package name="kernel-default" replaces="xen-libs"/>
         <package name="kernel-default" replaces="xen-tools"/>
+        <package name="kernel-default" replaces="xen-tools-domU"/>
         <package name="kernel-default" replaces="xen"/>
         <package name="gfxboot-branding-SLE" bootinclude="true" bootdelete="true"/>
     </packages>
