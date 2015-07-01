@@ -49,8 +49,7 @@
         <type image="docker" container="system"/>
     </preferences>
     <preferences profiles="xenFlavourHVM">
-        <type image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES12" bootloader="grub2" kernelcmdline="splash">
-        </type>
+        <type image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES12" bootloader="grub2" kernelcmdline="splash"/>
     </preferences>
     <preferences profiles="xenFlavour">
         <type image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES12" bootprofile="xen" bootkernel="xenk" bootloader="grub2" kernelcmdline="splash">
@@ -88,8 +87,8 @@
             </machine>
         </type>
     </preferences>
-    <users group='vagrant' profiles="vagrant">
-        <user name='vagrant' password='vh4vw1N4alxKQ' home='/home/vagrant'/>
+    <users group="vagrant" profiles="vagrant">
+        <user name="vagrant" password="vh4vw1N4alxKQ" home="/home/vagrant"/>
     </users>
     <users group="root">
         <user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>

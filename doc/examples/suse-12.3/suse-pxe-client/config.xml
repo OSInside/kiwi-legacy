@@ -7,14 +7,14 @@
         <specification>openSUSE 12.3 terminal. Please note this a netboot only appliance. The kernel and many other parts are actively deleted in the images.sh script to keep it small. If you use this description for another use case make sure no important data is deleted</specification>
     </description>
     <preferences>
-        <type image="pxe" filesystem="clicfs" boot="netboot/suse-12.3">
+        <type image="pxe" filesystem="overlayfs" boot="netboot/suse-12.3">
             <pxedeploy server="192.168.100.2" blocksize="4096">
                 <partitions device="/dev/sda">
                     <partition type="swap" number="1" size="5"/>
                     <partition type="L" number="2" size="image" mountpoint="/" target="true"/>
                     <partition type="L" number="3" target="false"/>
                 </partitions>
-                <union ro="/dev/sda2" rw="/dev/sda3" type="clicfs"/>
+                <union ro="/dev/sda2" rw="/dev/sda3" type="overlayfs"/>
             </pxedeploy>
         </type>
         <version>1.2.8</version>
