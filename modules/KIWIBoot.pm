@@ -3689,8 +3689,13 @@ sub setupBootLoaderStages {
             return;
         }
         my $bootpath = '/boot';
-        if (($typeinfo->{filesystem} eq 'btrfs') && ($type ne 'iso')) {
-            $bootpath = '/@/boot';
+        if (($type ne 'iso') && (! $this->{needBootP})) {
+            if (($typeinfo->{filesystem} eq 'btrfs') && ($this->{sysdisk})) {
+                my $volumes = $this->{sysdisk} -> getVolumes();
+                if (($volumes) && (keys %{$volumes} > 0)) {
+                    $bootpath = '/@/boot';
+                }
+            }
         }
         if ($uuid) {
             print $bpfd "search --fs-uuid --set=root $uuid";
@@ -4376,9 +4381,14 @@ sub setupBootLoaderConfiguration {
         my $ascii = 'ascii.pf2';
         my $fodir = '/boot/grub2/themes/';
         my $bootpath = '/boot';
-        if (($type->{filesystem} eq 'btrfs') && (! $iso)) {
-            $bootpath = '/@/boot';
-            $fodir = '/@/boot/grub2/themes/';
+        if ((! $iso) && (! $this->{needBootP})) {
+            if (($type->{filesystem} eq 'btrfs') && ($this->{sysdisk})) {
+                my $volumes = $this->{sysdisk} -> getVolumes();
+                if (($volumes) && (keys %{$volumes} > 0)) {
+                    $bootpath = '/@/boot';
+                    $fodir = '/@/boot/grub2/themes/';
+                }
+            }
         }
         my @fonts = (
             "DejaVuSans-Bold14.pf2",
