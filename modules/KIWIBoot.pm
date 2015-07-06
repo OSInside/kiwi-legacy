@@ -343,7 +343,7 @@ sub new {
         my $sizeBytes;
         my $minInodes;
         my $sizeXMLBytes = 0;
-        my $fsoverhead   = 1.2;
+        my $fsoverhead   = $type{filesystem} =~ /btrfs/ ? 1.3 : 1.2;
         my $fsopts       = $cmdL -> getFilesystemOptions();
         my $inodesize    = $fsopts -> getInodeSize();
         my $inoderatio   = $fsopts -> getInodeRatio();
