@@ -108,6 +108,9 @@ sub createChecks {
     # Runtime checks specific to the create step
     # ---
     my $this = shift;
+    if (! $this -> __checkImageIncludeApplicable()) {
+        return;
+    }
     if (! $this -> __checkBootPartitionOverlaySystem()) {
         return;
     }
@@ -194,6 +197,9 @@ sub prepareChecks {
     # Runtime checks specific to the prepare step
     # ---
     my $this = shift;
+    if (! $this -> __checkImageIncludeApplicable()) {
+        return;
+    }
     if (! $this -> __checkVolumeSetup()) {
         return;
     }
@@ -854,6 +860,38 @@ sub __checkRepoAliasUnique {
             return;
         }
         $aliasUsed{$alias} = 1;
+    }
+    return 1;
+}
+
+#==========================================
+# __checkImageIncludeApplicable
+#------------------------------------------
+sub __checkImageIncludeApplicable {
+    # ...
+    # Verify that repos marked as to be included into the image
+    # are not only internally available
+    # ---
+    my $this = shift;
+    my $xml = $this->{xml};
+    my $kiwi = $this->{kiwi};
+    my @repos = @{$xml -> getRepositories()};
+    my $msg;
+    for my $repo (@repos) {
+        my $image_include = $repo -> getImageInclude();
+        my $source_path = $repo -> getPath();
+        if ((! $image_include) || ($image_include eq 'false')) {
+            next;
+        }
+        if ($source_path =~ /^(obs|iso):/) {
+            $msg = "Including of $1 typed repos into the image "
+                 . "is currently not supported, please use standard "
+                 . "URL protocols like http|https together with "
+                 . "the imageinclude attribute";
+            $kiwi -> error ( $msg );
+            $kiwi -> failed ();
+            return;
+        }
     }
     return 1;
 }
