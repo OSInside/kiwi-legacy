@@ -1,0 +1,14 @@
+## ----------------------------
+## Doc Config File for KIWI
+## ----------------------------
+##
+
+## Basics
+MAIN="kiwi-doc.xml"
+
+## stylesheet location
+STYLEROOT="/usr/share/xml/docbook/stylesheet/suse2013"
+FALLBACK_STYLEROOT="/usr/share/xml/docbook/stylesheet/suse"
+
+## enable sourcing
+export DOCCONF=$BASH_SOURCE

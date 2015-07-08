@@ -26,28 +26,36 @@
     </para>
 
     <figure id="fig.imagecreationarch">
-      <title>Image Creation Architecture</title>
-      <mediaobjectco>
-        <imageobjectco>
-          <areaspec>
-            <area coords="100 100" id="co.imagecreationarch.root"/>
-            <area coords="200 200" id="co.imagecreationarch.kernel"/>
-          </areaspec>
-          <imageobject>
-            <imagedata fileref="images/intro.png"/><!-- width="50%" -->
-          </imageobject>
-          <calloutlist>
-            <callout arearefs="co.imagecreationarch.root">
-              <para>Encapsulated system as directory/files tree</para>
-            </callout>
-            <callout arearefs="co.imagecreationarch.kernel">
-              <para>Encapsulated system as image file</para>
-            </callout>
-          </calloutlist>
-        </imageobjectco>
-      </mediaobjectco>
+     <title>Image Creation Architecture</title>
+     <mediaobject>
+       <imageobject role="fo">
+        <imagedata fileref="intro.svg" format="SVG"/><!-- width="50%" -->
+       </imageobject>
+       <imageobject role="html">
+        <imagedata fileref="intro.png" format="PNG"/><!-- width="50%" -->
+       </imageobject>
+     </mediaobject>
     </figure>
-  
+
+    <variablelist>
+     <varlistentry>
+      <term>(1) Unpacked Image</term>
+      <listitem>
+       <para>
+	Encapsulated system reachable via chroot
+       </para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term>(2) Packed Image</term>
+      <listitem>
+       <para>
+	Encapsulated system reachable via kernel filesystem/extension drivers
+       </para>
+      </listitem>
+     </varlistentry>
+    </variablelist>
+    
   <para>Prior to building an image with KIWI it is important to understand
     the composition of an image, the general concepts of Linux,
     including the boot process, and distribution concepts such as package
@@ -306,38 +314,52 @@
 
       <figure id="fig.imagetypes">
         <title>Image Types</title>
-        <mediaobjectco>
-          <imageobjectco>
-            <areaspec>
-              <area coords="100 100" id="co.imagetypes.live"/>
-              <area coords="200 200" id="co.imagetypes.virtualdisk"/>
-              <area coords="300 300" id="co.imagetypes.oemdisk"/>
-              <area coords="400 400" id="co.imagetypes.pxe"/>
-            </areaspec>
-            <imageobject>
-              <imagedata fileref="images/types.png"/><!-- width="60%" -->
-            </imageobject>
-            <calloutlist>
-              <callout arearefs="co.imagetypes.live">
-                <para>Live Image on CD, DVD or USB stick</para>
-              </callout>
-              <callout arearefs="co.imagetypes.virtualdisk">
-                <para>Virtual system than can be used in VMware, Xen, 
-                  Amazon Cloud, KVM, etc. virtual environments. Depending
-                  on the format a guest configuration file is created.</para>
-              </callout>
-              <callout arearefs="co.imagetypes.oemdisk">
-                <para>Preload system for install media CD/DVD or USB
-                  stick</para>
-              </callout>
-              <callout arearefs="co.imagetypes.pxe">
-                <para>Network boot image. KIWI also provides the bootp
-                  environment via the package kiwi-pxeboot</para>
-              </callout>
-            </calloutlist>
-          </imageobjectco>
-        </mediaobjectco>
+        <mediaobject>
+          <imageobject role="fo">
+           <imagedata fileref="types.svg" format="SVG"/><!-- width="60%" -->
+          </imageobject>
+          <imageobject role="html">
+           <imagedata fileref="types.png" format="PNG"/><!-- width="60%" -->
+          </imageobject>
+        </mediaobject>
       </figure>
+      <variablelist>
+       <varlistentry>
+	<term>(1) Live Image</term>
+	<listitem>
+	 <para>
+	  From CD, DVD or USB stick
+	 </para>
+	</listitem>
+       </varlistentry>
+       <varlistentry>
+	<term>(2) Disk Image</term>
+	<listitem>
+	 <para>
+	  Virtual system than can be used in VMware, Xen, Amazon Cloud, KVM,
+	  etc. virtual environments. Depending on the format a guest
+	  configuration file is created.
+	 </para>
+	</listitem>
+       </varlistentry>
+       <varlistentry>
+	<term>(3) OEM Image</term>
+	<listitem>
+	 <para>
+	  Preload system for install media CD/DVD or USB stick
+	 </para>
+	</listitem>
+       </varlistentry>
+       <varlistentry>
+	<term>(4) PXE Image</term>
+	<listitem>
+	 <para>
+	  Network boot image. KIWI also provides the bootp environment via the
+	  package kiwi-pxeboot.
+	 </para>
+	</listitem>
+       </varlistentry>
+      </variablelist>
     </listitem>
   </itemizedlist>
 
@@ -370,33 +392,38 @@
       cover almost all use cases and it should not be necessary for the majority
       of KIWI users to implement their own boot descriptions.</para>
 
-    <figure id="fig.workflow.imagedescriptions">
-      <title>Image Descriptions</title>
-      <!-- The coordinates in the coords attribute are just dummy
-           values
-        -->
-      <mediaobjectco>
-        <imageobjectco>
-          <areaspec>
-            <area coords="100 100" id="co.workflow.imagedescriptions.desc"/>
-            <area coords="200 200" id="co.workflow.imagedescriptions.desccreated"/>
-          </areaspec>
-          <imageobject>
-            <imagedata fileref="images/activation.png"/><!-- width="50%" -->
-          </imageobject>
-          <calloutlist>
-            <callout arearefs="co.workflow.imagedescriptions.desc">
-              <para>Boot image descriptions are provided by KIWI, use is
-                recommended but not required</para>
-            </callout>
-            <callout arearefs="co.workflow.imagedescriptions.desccreated">
-              <para>The system image description is created by the KIWI user,
-                or a KIWI provided template may be used</para>
-            </callout>
-          </calloutlist>
-        </imageobjectco>
-      </mediaobjectco>
-    </figure>
+  <figure id="fig.workflow.imagedescriptions">
+    <title>Image Descriptions</title>
+    <mediaobject>
+     <imageobject role="fo">
+      <imagedata fileref="activation.svg" format="SVG"/><!-- width="50%" -->
+     </imageobject>
+     <imageobject role="html">
+      <imagedata fileref="activation.png" format="PNG"/><!-- width="50%" -->
+     </imageobject>
+    </mediaobject>
+  </figure>
+
+  <variablelist>
+   <varlistentry>
+    <term>(1) Boot Image</term>
+    <listitem>
+     <para>
+      Boot image descriptions are provided by KIWI, use is recommended but not
+      required.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>(2) System Image</term>
+    <listitem>
+     <para>
+      The system image description is created by the KIWI user, or a KIWI
+      provided template may be used.
+     </para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
 
 
     <para>The boot image descriptions are stored in the
@@ -445,9 +472,11 @@
           scripts in the initrd is to create an archive of a <filename
             class="directory">kiwi-hooks</filename> directory that
           contains the custom boot scripts.
+      </para>
           <screen><command>mkdir</command> kiwi-hooks
 --> place all scripts inside kiwi-hooks
 <command>tar</command> -cf kiwi-hooks.tgz kiwi-hooks/</screen>
+    <para>
           The tarball must be located at the top level of the image
           description directory, this is the same level that contains
           the <filename>config.xml</filename> file.</para>
@@ -472,11 +501,11 @@
             class="attribute">bootinclude</sgmltag> attribute of the
             <sgmltag class="element">archive</sgmltag> element to
             <sgmltag class="attvalue">true</sgmltag> in the
-            <filename>config.xml</filename> file as shown below:
+            <filename>config.xml</filename> file as shown below:</para>
           <screen>&lt;packages type="image"&gt;
   &lt;archive name="kiwi-hooks.tgz" bootinclude="true"/&gt;
 &lt;/packages&gt;</screen>
-          The concept of including an archive in the boot image follows
+          <para>The concept of including an archive in the boot image follows
           the same concepts described for the system image previously.
           In order to
           use an archive in a pre-built boot image the archive must be
@@ -692,15 +721,17 @@
   </itemizedlist>
 
   <para>The execution of hooks can be globaly deactivated by passing the
-      following variable to the kernel commandline:
-      <screen>KIWI_FORBID_HOOKS=1</screen> In addition to the hook
+      following variable to the kernel commandline:</para>
+      <screen>KIWI_FORBID_HOOKS=1</screen>
+      <para>In addition to the hook
       script itself it's also possible to run a post command after the
       hook script was called. This allows to run commands tied to a hook
       script without changing the initrd and thus provides a certain
       flexibility when writing the hook. The post command execution is
       based on variables one can pass to the kernel commandline to
       extend an existing hook script. There are the following rules for
-      the processing of these information <itemizedlist>
+      the processing of these information</para>
+ <itemizedlist>
         <listitem>
           <formalpara>
             <title>The hook must activate the command post
@@ -735,7 +766,6 @@
           </formalpara>
         </listitem>
       </itemizedlist>
-    </para>
   </sect1>
 
   <sect1 id="sec.bootcustomization">
@@ -760,12 +790,16 @@
       solutions to the most common customization needs fro the initrd
       created by kiwi.
   </para>
-  <itemizedlist>
-    <listitem>
-      <formalpara>
-      <title>
-              Why is the boot image so big and can I reduce it's size ?</title>
-      <para> KIWI includes all required tools and libraries to boot the
+  <qandaset defaultlabel="qanda">
+   <qandaentry>
+    <question>
+     <para>
+      Why is the boot image so big and can I reduce it's size ?
+     </para>
+    </question>
+    <answer>
+     <para>
+KIWI includes all required tools and libraries to boot the
             image in all circumstances in the target environment for the
             image type. If target environment is well defined it is
             possible to remove data from that is known not to be needed.
@@ -776,26 +810,34 @@
             with the <sgmltag class="attribute">type</sgmltag> attribute
             set to <sgmltag class="attvalue">delete</sgmltag>, as shown
             below.
+     </para>
             <screen>&lt;strip type="delete"/&gt;
     &lt;file name="..."/&gt;
 &lt;/strip&gt;</screen>
+    <para>
             Removing files that are needed my result in an image that
             cannot be booted. </para>
-      </formalpara>
-    </listitem>
-
-    <listitem>
-      <formalpara>
-      <title>Can drivers be added to the boot image?</title>
-      <para> KIWI uses a subset of the kernel. Should you encounter
+    </answer>
+   </qandaentry>
+   <qandaentry>
+    <question>
+     <para>
+      Can drivers be added to the boot image?
+     </para>
+    </question>
+    <answer>
+     <para>
+      KIWI uses a subset of the kernel. Should you encounter
             problems due to a missing driver that is part of the
             "standard" kernel but has not bee included by the kiwi build
             process you can add the driver by adding a <sgmltag
               class="element">drivers</sgmltag> section to the system
-            image <filename>config.xml</filename> file, as shown below.
+            image <filename>config.xml</filename> file, as shown below.</para>
+
             <screen>&lt;drivers&gt;
     &lt;file name="drivers/..."/&gt;
 &lt;/drivers&gt;</screen>
+           <para>
             If the driver is provided by a package, the package itself
             needs to be specified as part of the <sgmltag
               class="attvalue">image</sgmltag> package section and it
@@ -803,18 +845,21 @@
             of the <sgmltag class="attribute">bootinclude</sgmltag>
             attribute of the <sgmltag class="element">package</sgmltag>
             element to <sgmltag class="attvalue">true</sgmltag>, as
-            shown below.
+            shown below.</para>
             <screen>&lt;packages type="image"/&gt;
     &lt;package name="..." bootinclude="true"/&gt;
 &lt;/packages&gt;</screen>
-          </para>
-      </formalpara>
-    </listitem>
-
-    <listitem>
-            <formalpara>
-            <title>How to add missing tools/libraries?</title>
-      <para> Additional software can be added to the boot image with the
+    </answer>
+   </qandaentry>
+   <qandaentry>
+    <question>
+     <para>
+      How to add missing tools/libraries?
+     </para>
+    </question>
+    <answer>
+     <para>
+      Additional software can be added to the boot image with the
             use of the <sgmltag class="attribute">bootinclude</sgmltag>
             attribute of the <sgmltag class="element">package</sgmltag>
             element or the <sgmltag class="element">archive</sgmltag>
@@ -832,43 +877,49 @@
               >strip</sgmltag> section to the system image
               <filename>config.xml</filename> file, with the <sgmltag
               class="attribute">type</sgmltag> attribute set to <sgmltag
-              class="attvalue">tools</sgmltag>, as shown below.
+              class="attvalue">tools</sgmltag>, as shown below.</para>
             <screen>&lt;strip type="tools"/&gt;
     &lt;file name="..."/&gt;
 &lt;/strip&gt;</screen>
-            the removal/preservation of files is name base and the path
+            <para>The removal/preservation of files is name based and the path
             is immaterial. Therefore, you only have to specify the file
-            name that is to be preserved. </para>
-      </formalpara>
-        </listitem>
-
-    <listitem>
-            <formalpara>
-            <title>Is it possible to add boot code?</title>
-      <para>
-            Yes, as described in the <xref linkend="sec.hooks"/> section above,
+            name that is to be preserved.
+     </para>
+    </answer>
+   </qandaentry>
+   <qandaentry>
+    <question>
+     <para>
+      Is it possible to add boot code?
+     </para>
+    </question>
+    <answer>
+     <para>
+Yes, as described in the <xref linkend="sec.hooks"/> section above,
             KIWI supports the execution of boot code at various times for
             various image types using <emphasis>hook</emphasis> scripts.
-      </para>
-            </formalpara>
-        </listitem>
-
-    <listitem>
-            <formalpara>
-            <title>
-              Is it possible to include completely custom boot code?</title>
-      <para>
-            No. In cases where the provided hooks are insufficient and the
+     </para>
+    </answer>
+   </qandaentry>
+   <qandaentry>
+    <question>
+     <para>
+      Is it possible to include completely custom boot code?
+     </para>
+    </question>
+    <answer>
+     <para>
+      No. In cases where the provided hooks are insufficient and the
             KIWI provided boot code needs to be replaced completed it is
             necessary to create a custom boot image description. In this case,
             all parts of the boot image description must be created by the
             user. It is best to use one of the KIWI provided boot descriptions
             as a template.
-      </para>
-            </formalpara>
-        </listitem>
-  </itemizedlist>
-  </sect1>
+     </para>
+    </answer>
+   </qandaentry>
+  </qandaset>  
+</sect1>
 
   <sect1 id="sec.workflow.bootparameters">
     <title>Boot Parameters</title>
@@ -886,11 +937,12 @@
       code has been replaced, and the parameters are not recognized after
       the initial KIWI created initrd has been replaced by the "regular"
       distribution created initrd after the initial boot of the image.</para>
-    <itemizedlist>
-      <listitem>
-        <formalpara>
-          <title><parameter>kiwidebug=1</parameter></title>
-          <para>If the boot process encounters a fatal error, the
+      <variablelist>
+       <varlistentry>
+	<term><parameter>kiwidebug=1</parameter></term>
+	<listitem>
+	 <para>
+If the boot process encounters a fatal error, the
             default behavior is to reboot the system 120 seconds. The
               <quote>exception</quote> behavior is changed by setting
             the <option>kiwidebug</option> parameter. With the value of
@@ -906,11 +958,11 @@
             isoboot and vmxboot boot images there is no remote login
             support because they don't setup a network. In order to have
             dropbear installed as part of the boot image the following
-            needs to be added to the system image configuration:
+            needs to be added to the system image configuration:</para>
             <screen>&lt;packages type="image"/&gt;
     &lt;package name="dropbear" bootinclude="true"/&gt;
 &lt;/packages&gt;</screen>
-            It's required that the repo setup provides dropbear. Once
+            <para>It's required that the repo setup provides dropbear. Once
             dropbear is there the kiwi boot code will start the service.
             In order to access the boot image via ssh it's required to
             provide a public key on the pxe server in the directory:
@@ -926,18 +978,18 @@
               <filename>/srv/tftpboot/KIWI/debug_ssh.pub</filename>. on
             the pxe server. If ftp or http is used the server-root path
             is different. If a public key was found you can login as
-            follows:
-            <screen><command>ssh</command> root@&lt;ip&gt;</screen> It
+            follows:</para>
+            <screen><command>ssh</command> root@&lt;ip&gt;</screen>
+	    <para>It
             might be useful to have a copy tool like scp or rsync as
             part of the boot image as well. Adding rsync as bootincluded
             package does not increase the size of the initrd much and
-            would allow to extract e.g the kiwi boot log as follows:
+            would allow to extract e.g the kiwi boot log as follows:</para>
             <screen>RSYNC_RSH='ssh -l root'
 <command>rsync</command> -avz &lt;ip&gt;:/var/log/boot.kiwi .</screen>
-          </para>
-        </formalpara>
-      </listitem>
-    </itemizedlist>
+	</listitem>
+       </varlistentry>
+      </variablelist>
   </sect1>
 
   <sect1 id="sec.workflow.common-specific-code">

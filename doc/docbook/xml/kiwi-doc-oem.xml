@@ -279,24 +279,21 @@
     <itemizedlist>
       <listitem>
         <para> Make sure you have created an install PXE tarball along with
-            your oem image:
+            your oem image:</para>
             <screen>&lt;type image="oem" ... installpxe="true"/&gt;</screen>
-          </para>
       </listitem>
       <listitem>
         <para> unpack the created &lt;image-name&gt;.tgz file and copy the
-            initrd and kernel images over to your PXE server
+            initrd and kernel images over to your PXE server:</para>
             <screen><command>tar</command> -xf &lt;image-name&gt;.tgz
 <command>scp</command> initrd-oemboot-*.install.* pxe.server.ip:/srv/tftpboot/boot/initrd
 <command>scp</command> initrd-oemboot-*.kernel.*  pxe.server.ip:/srv/tftpboot/boot/linux</screen>
-          </para>
             </listitem>
       <listitem>
         <para> Next copy the system image and md5 sum over to to the PXE
-            boot server
+            boot server:</para>
             <screen><command>scp</command> &lt;image-file&gt;.xz  pxe.server.ip:/srv/tftpboot/image/
 <command>scp</command> &lt;image-file&gt;.md5 pxe.server.ip:/srv/tftpboot/image/</screen>
-          </para>
       </listitem>
       <listitem>
         <para> At last set the kernel commandline parameters to the append

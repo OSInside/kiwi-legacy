@@ -20,10 +20,10 @@
     <title>Image Description Directory</title>
     <mediaobject>
       <imageobject role="fo">
-        <imagedata fileref="images/description.png" width="40%"/>
+        <imagedata fileref="description.svg" width="40%" format="SVG"/>
       </imageobject>
       <imageobject role="html">
-        <imagedata fileref="images/description.png"/>
+        <imagedata fileref="description.png" width="40%" format="PNG"/>
       </imageobject>
     </mediaobject>
   </figure>
@@ -1758,11 +1758,11 @@
               must also be included in the boot image. This is accomplished
               with the <sgmltag class="attribute">bootinclude</sgmltag>
               attribute of the <sgmltag class="element">package</sgmltag>
-              element. This is shown in the example below:
+              element. This is shown in the example below:</para>
 
 <screen>&lt;packages type="bootstrap"&gt;
   &lt;package name="cifs-utils" bootinclude="true"/&gt;
-  &lt;/packages&gt;</screen></para>
+  &lt;/packages&gt;</screen>
           </listitem>
         </varlistentry>
         <varlistentry>

@@ -20,52 +20,36 @@
 
   <figure id="fig.maintain">
     <title>Image Maintenance Scenarios</title>
-    <mediaobjectco>
-      <imageobjectco>
-        <areaspec>
-          <area coords="100 100"   id="co.maintain.imagedescr"/>
-          <area coords="200 200" id="co.maintain.sourcechanges"/>
-          <area coords="300 300" id="co.maintain.plusminus1"/>
-          <area coords="400 400" id="co.maintain.imgchanges"/>
-          <area coords="500 500" id="co.maintain.plusminus2"/>
-        </areaspec>
-        <imageobject>
-          <imagedata fileref="images/maintain.png"/><!--  width="50%" -->
-        </imageobject>
-        <calloutlist>
-          <callout arearefs="co.maintain.imagedescr">
-            <para>Image Description as part of a versioning system like
-              Git, Subversion, etc. to track changes</para>
-          </callout>
-          <callout arearefs="co.maintain.sourcechanges">
-            <para>Software package source changes</para>
-          </callout>
-          <callout arearefs="co.maintain.plusminus1">
-            <para><simplelist type="inline">
-              <member>Faster, because already prepared</member>
-              <member>cannot handle image description changes</member>
-              <member>requires free space to store
-                <filename>/tmp/myOSImage</filename></member>
-            </simplelist>
-            </para>
-          </callout>
-          <callout arearefs="co.maintain.imgchanges">
-            <para>Image Description changes</para>
-          </callout>
-          <callout arearefs="co.maintain.plusminus2">
-            <para><simplelist type="inline">
-              <member>Covers all possible changes</member>
-              <member>does not require storage for prepared trees</member>
-              <member>slower, because KIWI prepare runs again</member>
-            </simplelist>
-            </para>
-          </callout>
-        </calloutlist>
-      </imageobjectco>
-    </mediaobjectco>
-    
+    <mediaobject role="fo">
+     <imageobject>
+      <imagedata fileref="maintain.svg" format="SVG" width="75%"/>
+     </imageobject>
+     <imageobject role="html">
+      <imagedata fileref="maintain.png" format="PNG"/><!--  width="50%" -->
+     </imageobject>
+    </mediaobject>
   </figure>
 
+  <simplelist>
+   <member>
+    (1) Image Description as part of a versioning system like Git, Subversion,
+    etc. to track changes
+   </member>
+   <member>
+    (2) Software package source changes
+   </member>
+   <member>
+    (3) Faster, because already prepared; cannot handle image description
+    changes; requires free space to store <filename>/tmp/myOSImage</filename>
+   </member>
+   <member>
+    (4) Image Description changes
+   </member>
+   <member>
+    (5) Covers all possible changes, does not require storage for prepared
+    trees, slower, because KIWI prepare runs again
+   </member>
+  </simplelist>
 
   <para>The picture in <xref linkend="fig.maintain"
     xrefstyle="select:label"/> shows two possible
