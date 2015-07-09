@@ -1,129 +1,137 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
                          "http://www.docbook.org/xml/4.5/docbookx.dtd">
-
 <chapter id="chap.partitions">
-  <title>KIWI Custom Partitions</title>
-  <indexterm>
-    <primary>KIWI</primary>
-    <secondary>LVM</secondary>
-  </indexterm>
-  <indexterm>
-    <primary>KIWI</primary>
-    <secondary>Btrfs</secondary>
-  </indexterm>
-  <indexterm>
-    <primary>KIWI</primary>
-    <secondary>zfs</secondary>
-  </indexterm>
+ <title>KIWI Custom Partitions</title><indexterm>
+ <primary>KIWI</primary>
+ <secondary>LVM</secondary></indexterm><indexterm>
+ <primary>KIWI</primary>
+ <secondary>Btrfs</secondary></indexterm><indexterm>
+ <primary>KIWI</primary>
+ <secondary>zfs</secondary></indexterm>
+ <para>
+  KIWI supports custom parttions only via LVM, the logical volume manager
+  for the Linux kernel, or filesystems with volume support like btrfs or
+  zfs.
+ </para>
+ <sect1 id="chap.partitions.lvm">
+  <title>Custom Partitioning via LVM</title>
+
   <para>
-   KIWI supports custom parttions only via LVM, the logical volume manager for the Linux kernel,
-   or filesystems with volume support like btrfs or zfs.
+   KIWI supports LVM, the logical volume manager for the Linux kernel that
+   manages disk drives and similar mass-storage devices. KIWI supports
+   custom parttion only via LVM or filesystems with volume support like
+   btrfs or zfs.
   </para>
-  <sect1 id="chap.partitions.lvm">
-   <title>Custom Partitioning via LVM</title>
+
   <para>
-   KIWI supports LVM, the logical volume manager for the Linux kernel
-   that manages disk drives and similar mass-storage devices. KIWI
-   supports custom parttion only via LVM or filesystems with volume
-   support like btrfs or zfs.
+   To define a LVM volume, a <sgmltag class="element">systemdisk</sgmltag>
+   element within the <sgmltag class="element">type</sgmltag> element in the
+   <filename>config.xml</filename> file must be defined. The
+   <sgmltag class="element">systemdisk</sgmltag> element has an optional
+   attribute <sgmltag class="attribute">name</sgmltag>, which specifies the
+   volume group name.
   </para>
+
   <para>
-   To define a LVM volume, a <sgmltag class="element">systemdisk</sgmltag> element
-   within the <sgmltag class="element">type</sgmltag> element in the <filename>config.xml</filename> file must be defined.
-   The <sgmltag class="element">systemdisk</sgmltag> element has an optional
-   attribute <sgmltag class="attribute">name</sgmltag>, which specifies
-   the volume group name.
+   For additional non root or swap volumes The
+   <sgmltag class="element">systemdisk</sgmltag> element can contain the
+   child element <sgmltag class="element">volume</sgmltag>, with four
+   possible attributes:
   </para>
-  <para>
-   For additional non root or swap volumes
-   The <sgmltag class="element">systemdisk</sgmltag> element can contain
-   the child element <sgmltag class="element">volume</sgmltag>, with
-   four possible attributes:
-  </para>
+
   <variablelist>
-    <varlistentry>
-      <term><sgmltag class="attribute">name</sgmltag></term>
-      <listitem>
-        <para>
-         A required attribute. The name of the volume.
-         If mountpoint is not specified the name specifies
-         a path which will be created by kiwi if it does not exist
-         inside the root directory. However if the name contains the
-         kiwi internal path field separator '<emphasis>_</emphasis>',
-         it's required to specify the path in an additional mountpoint
-         attribute. KIWI also makes sure that the volumes are created
-         in the correct order of the filesystem hierarchy. The special
-         attribute <emphasis>@root</emphasis> can be used to control the
-         size of the root volume
-        </para>
-      </listitem>
-    </varlistentry>
-    <varlistentry>
-      <term><sgmltag class="attribute">size</sgmltag></term>
-      <listitem>
-        <para>
-         An optional attribute. Absolute size of the volume. If the size value
-         is too small to store all data kiwi will exit.
-The value is used as MB by default but you can add "M" and/or "G" as postfix.
-        </para>
-      </listitem>
-    </varlistentry>
-    <varlistentry>
-      <term><sgmltag class="attribute">freespace</sgmltag></term>
-      <listitem>
-        <para>
-         An optional attribute. Free space to be added to this volume. The value is
-used as MB by default but you can add "M" and/or "G" as postfix.
-        </para>
-      </listitem>
-    </varlistentry>
-    <varlistentry>
-      <term><sgmltag class="attribute">mountpoint</sgmltag></term>
-      <listitem>
-        <para>
-         An optional attribute. The mountpoint specifies a path which has to
-         exist inside the root directory.
-        </para>
-      </listitem>
-    </varlistentry>
+   <varlistentry>
+    <term><sgmltag class="attribute">name</sgmltag>
+    </term>
+    <listitem>
+     <para>
+      A required attribute. The name of the volume. If mountpoint is not
+      specified the name specifies a path which will be created by kiwi if
+      it does not exist inside the root directory. However if the name
+      contains the kiwi internal path field separator
+      '<emphasis>_</emphasis>', it's required to specify the path in an
+      additional mountpoint attribute. KIWI also makes sure that the volumes
+      are created in the correct order of the filesystem hierarchy. The
+      special attribute <emphasis>@root</emphasis> can be used to control
+      the size of the root volume
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><sgmltag class="attribute">size</sgmltag>
+    </term>
+    <listitem>
+     <para>
+      An optional attribute. Absolute size of the volume. If the size value
+      is too small to store all data kiwi will exit. The value is used as MB
+      by default but you can add "M" and/or "G" as postfix.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><sgmltag class="attribute">freespace</sgmltag>
+    </term>
+    <listitem>
+     <para>
+      An optional attribute. Free space to be added to this volume. The
+      value is used as MB by default but you can add "M" and/or "G" as
+      postfix.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><sgmltag class="attribute">mountpoint</sgmltag>
+    </term>
+    <listitem>
+     <para>
+      An optional attribute. The mountpoint specifies a path which has to
+      exist inside the root directory.
+     </para>
+    </listitem>
+   </varlistentry>
   </variablelist>
+
   <para>
-   For example, the following example will create
-   a logical volume named LVtmp with minimal size to
-   just store what is in <filename class="directory">/tmp</filename>
-   of the image at build time. The volume is mounted to
-   <filename class="directory">/tmp</filename>:
+   For example, the following example will create a logical volume named
+   LVtmp with minimal size to just store what is in
+   <filename class="directory">/tmp</filename> of the image at build time.
+   The volume is mounted to <filename class="directory">/tmp</filename>:
   </para>
-  <screen>
+
+<screen>
   &lt;systemdisk name="vgroup-name"&gt;
       &lt;volume name="tmp"/&gt;
   &lt;/systemdisk&gt;
   </screen>
+
   <para>
    To do the same but with 200 MB of size, use:
   </para>
-  <screen>
+
+<screen>
   &lt;systemdisk name="vgroup-name"&gt;
       &lt;volume name="tmp" size="200M"/&gt;
   &lt;/systemdisk&gt;
   </screen>
+
   <para>
-    To create the logical volume named
-   'foo' >with 200 MB of free space mounted as
-   <filename class="directory">/tmp</filename>, use:
+   To create the logical volume named 'foo' >with 200 MB of free space
+   mounted as <filename class="directory">/tmp</filename>, use:
   </para>
-  <screen>
+
+<screen>
   &lt;systemdisk name="vgroup-name"&gt;
       &lt;volume name="tmp" freespace="200M" mountpoint="tmp"/&gt;
   &lt;/systemdisk&gt;
   </screen>
+
   <para>
-   There are always the volumes LVRoot and LVSwap for the
-   rootfs and the swap space. In order to influence LVRoot
-   one can use "@root" as a name:
+   There are always the volumes LVRoot and LVSwap for the rootfs and the
+   swap space. In order to influence LVRoot one can use "@root" as a name:
   </para>
-  <screen>
+
+<screen>
   &lt;systemdisk name="vgroup-name"&gt;
       &lt;volume name="@root" size="2M"/&gt;
   &lt;/systemdisk&gt;
@@ -131,30 +139,27 @@ used as MB by default but you can add "M" and/or "G" as postfix.
  </sect1>
  <sect1 id="chap.partitions.btrfs">
   <title>Custom Partitioning via Btrfs</title>
-  <para>
-   If Btrfs is used as a filesystem, the subvolume
-   management is configured via the same
-   <sgmltag class="element">systemdisk</sgmltag> element
-   as in the case of LVM. Also the same rules as explained
-   for lvm volumes applies to btrfs subvolumes with the
-   following exceptions:
-   <variablelist>
 
+  <para>
+   If Btrfs is used as a filesystem, the subvolume management is configured
+   via the same <sgmltag class="element">systemdisk</sgmltag> element as in
+   the case of LVM. Also the same rules as explained for lvm volumes applies
+   to btrfs subvolumes with the following exceptions:
+   <variablelist>
     <varlistentry>
-      <term>There is no @root volume and no size setup</term>
-      <listitem>
-        <para>
-        The btrfs filesystem is created with an initial size which can
-        be specified by the <sgmltag class="element">size</sgmltag> element
-        All subvolumes are part of the filesystem itself and managed by
-        a namespace. The overall size is shared across the entire
-        filesystem and the size of an entity can be controlled by
-        a btrfs quota which is not applied by kiwi at the moment
-        </para>
-      </listitem>
+     <term>There is no @root volume and no size setup</term>
+     <listitem>
+      <para>
+       The btrfs filesystem is created with an initial size which can be
+       specified by the <sgmltag class="element">size</sgmltag> element All
+       subvolumes are part of the filesystem itself and managed by a
+       namespace. The overall size is shared across the entire filesystem
+       and the size of an entity can be controlled by a btrfs quota which is
+       not applied by kiwi at the moment
+      </para>
+     </listitem>
     </varlistentry>
-  </variablelist>
+   </variablelist>
   </para>
  </sect1>
 </chapter>
-

@@ -1,209 +1,202 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
                          "http://www.docbook.org/xml/4.5/docbookx.dtd">
-
 <chapter id="chap.vmx">
-  <title>VMX Image / Virtual Disks</title>
-  <indexterm>
-    <primary>KIWI</primary>
-    <secondary>VMX image</secondary>
-  </indexterm>
-  <indexterm>
-    <primary>images</primary>
-    <secondary>VMX</secondary>
-  </indexterm>
-  <indexterm>
-    <primary>VMX images</primary>
-  </indexterm>
-  <para>A VMX image is a virtual disk image for use in full
-    virtualization systems like Qemu or VMware. The image is a file
-    containing the system represented by the configured packages in
-    <filename>config.xml</filename> as well as partition data and bootloader
-    information. The size of this virtual disk can be specified by using
-    the size element
-    in the <filename>config.xml</filename> file or by adding the
-      <option>--bootvm-disksize</option> command line argument.
-    The virtual disk cannot expand to a different disk geometry.
-    Be aware if you dump/copy the disk with another disk geometry,
-    please refer to the <xref linkend="chap.oem"/> for additional details.
+ <title>VMX Image / Virtual Disks</title><indexterm>
+ <primary>KIWI</primary>
+ <secondary>VMX image</secondary></indexterm><indexterm>
+ <primary>images</primary>
+ <secondary>VMX</secondary></indexterm><indexterm>
+ <primary>VMX images</primary></indexterm>
+ <para>
+  A VMX image is a virtual disk image for use in full virtualization systems
+  like Qemu or VMware. The image is a file containing the system represented
+  by the configured packages in <filename>config.xml</filename> as well as
+  partition data and bootloader information. The size of this virtual disk
+  can be specified by using the size element in the
+  <filename>config.xml</filename> file or by adding the
+  <option>--bootvm-disksize</option> command line argument. The virtual disk
+  cannot expand to a different disk geometry. Be aware if you dump/copy the
+  disk with another disk geometry, please refer to the
+  <xref linkend="chap.oem"/> for additional details.
+ </para>
+ <sect1 id="sec.vmx.building">
+  <title>Building a JeOS disk</title>
+
+  <para>
+   This example is based on SLES version 12. The JeOS system is based on the
+   sles-Minimal pattern
   </para>
-  
-  <sect1 id="sec.vmx.building">
-    <title>Building a JeOS disk</title>
-    <para>This example is based on SLES version 12. The
-      JeOS system is based on the sles-Minimal pattern
-    </para>
 
-    <screen><command>kiwi</command> --build suse-SLE12-JeOS -d /tmp/myvm-result --type vmx</screen>
-  </sect1>
+<screen><command>kiwi</command> --build suse-SLE12-JeOS -d /tmp/myvm-result --type vmx</screen>
+ </sect1>
+ <sect1 id="sec.vmx.using">
+  <title>Using the Image</title>
 
-  <sect1 id="sec.vmx.using">
-    <title>Using the Image</title>
-    <para>The generated virtual disk image serves as the hard disk of
-      the selected virtualization system (QEMU, VMware, etc.). The
-      virtual hard disk format differs across virtualization
-      environments. Some virtualization environments support multiple
-      virtual disk formats. Using the QEMU virtualization environment
-      test the created image with the following command: </para>
+  <para>
+   The generated virtual disk image serves as the hard disk of the selected
+   virtualization system (QEMU, VMware, etc.). The virtual hard disk format
+   differs across virtualization environments. Some virtualization
+   environments support multiple virtual disk formats. Using the QEMU
+   virtualization environment test the created image with the following
+   command:
+  </para>
 
-    <screen><command>qemu</command> /tmp/myvm-result/LimeJeOS-SLE12.x86_64-1.13.1.raw -m 1024 </screen>
-  </sect1>
-  
-  <sect1 id="sec.vmx.flavours">
-    <title>Flavours</title>
-    <para>KIWI always generates a file in the <filename
-        class="extension">.raw</filename> format. The .raw file is a
-      disk image with a structure equivalent to the structure of a
-      physical hard disk. Individual virtualization systems have
-      specific formats to facilitate improved I/O performance to the
-      virtual disk, represented by the image file, or additional
-      specified virtual hard disk files. KIWI will generate a specific
-      format when the format attribute of the type element is added. </para>
+<screen><command>qemu</command> /tmp/myvm-result/LimeJeOS-SLE12.x86_64-1.13.1.raw -m 1024 </screen>
+ </sect1>
+ <sect1 id="sec.vmx.flavours">
+  <title>Flavours</title>
 
-    <screen>&lt;type image="vmx"... format="name"/&gt;</screen>
+  <para>
+   KIWI always generates a file in the
+   <filename
+        class="extension">.raw</filename> format. The .raw file
+   is a disk image with a structure equivalent to the structure of a
+   physical hard disk. Individual virtualization systems have specific
+   formats to facilitate improved I/O performance to the virtual disk,
+   represented by the image file, or additional specified virtual hard disk
+   files. KIWI will generate a specific format when the format attribute of
+   the type element is added.
+  </para>
 
-    <para>The following table lists the supported virtual disk
-      formats:</para>
+<screen>&lt;type image="vmx"... format="name"/&gt;</screen>
 
-    <table id="tab.vmx.supported-disk-formats">
-      <title>Supported Virtual Disk Formats</title>
-      <indexterm>
-        <primary>KIWI</primary>
-        <secondary>virtual disk formats</secondary>
-      </indexterm>
-      <indexterm>
-        <primary>virtual disk formats</primary>
-      </indexterm>
-      <tgroup cols="2">
-        <colspec colwidth="1*"/>
-        <colspec colwidth="3*"/>
-        <thead>
-          <row>
-            <entry>Name</entry>
-            <entry>Description</entry>
-          </row>
-        </thead>
-        <tbody>
-          <row>
-            <entry>vmdk</entry>
-            <entry>Disk format for VMware</entry>
-          </row>
-          <row>
-            <entry>vhd|vhd-fixed</entry>
-            <entry>Disk format for Microsoft HyperV</entry>
-          </row>
-          <row>
-            <entry>ovf|ova</entry>
-            <entry>Open Virtual Format requires VMware's ovftool</entry>
-          </row>
-          <row>
-            <entry>qcow2</entry>
-            <entry>QEMU virtual disk format</entry>
-          </row>
-          <row>
-            <entry>vdi</entry>
-            <entry>Disk format for VirtualBox</entry>
-          </row>
-          <row>
-            <entry>vagrant</entry>
-            <entry>Vagrant Box Format</entry>
-          </row>
-          <row>
-            <entry>gce</entry>
-            <entry>Google Cloud Format</entry>
-          </row>
-        </tbody>
-      </tgroup>      
-    </table>
+  <para>
+   The following table lists the supported virtual disk formats:
+  </para>
 
-    <sect2 id="sec.vmx.vmware-support">
-      <title>VMware support</title>
-      <indexterm>
-        <primary>KIWI</primary>
-        <secondary>VMware</secondary>
-      </indexterm>
-      <indexterm>
-        <primary>VMware</primary>
-      </indexterm>
-      <para>A VMware image is accompanied by a guest configuration file.
-        This file includes information about the hardware to be
-        represented to the guest image by the VMware virtualization
-        environment as well as specification of resources such as
-        memory.</para>
+  <table id="tab.vmx.supported-disk-formats">
+   <title>Supported Virtual Disk Formats</title><indexterm>
+   <primary>KIWI</primary>
+   <secondary>virtual disk formats</secondary></indexterm><indexterm>
+   <primary>virtual disk formats</primary></indexterm>
+   <tgroup cols="2">
+    <colspec colwidth="1*"/>
+    <colspec colwidth="3*"/>
+    <thead>
+     <row>
+      <entry>Name</entry>
+      <entry>Description</entry>
+     </row>
+    </thead>
+    <tbody>
+     <row>
+      <entry>vmdk</entry>
+      <entry>Disk format for VMware</entry>
+     </row>
+     <row>
+      <entry>vhd|vhd-fixed</entry>
+      <entry>Disk format for Microsoft HyperV</entry>
+     </row>
+     <row>
+      <entry>ovf|ova</entry>
+      <entry>Open Virtual Format requires VMware's ovftool</entry>
+     </row>
+     <row>
+      <entry>qcow2</entry>
+      <entry>QEMU virtual disk format</entry>
+     </row>
+     <row>
+      <entry>vdi</entry>
+      <entry>Disk format for VirtualBox</entry>
+     </row>
+     <row>
+      <entry>vagrant</entry>
+      <entry>Vagrant Box Format</entry>
+     </row>
+     <row>
+      <entry>gce</entry>
+      <entry>Google Cloud Format</entry>
+     </row>
+    </tbody>
+   </tgroup>
+  </table>
 
-      <para>Within the <filename>config.xml</filename> file it is
-        possible to specify the VMware configuration settings. In
-        addition it is possible to include selected packages in the
-        created image that are specific to the VM image generation. The
-        following <emphasis>machine</emphasis> section snippet provides
-        general guidance on the VMware guest config which is defined
-        below the <emphasis>type</emphasis> section in the
-        <filename>config.xml</filename>.</para>
-
-      <screen>&lt;machine memory="512"&gt; 
+  <sect2 id="sec.vmx.vmware-support">
+   <title>VMware support</title><indexterm>
+   <primary>KIWI</primary>
+   <secondary>VMware</secondary></indexterm><indexterm>
+   <primary>VMware</primary></indexterm>
+   <para>
+    A VMware image is accompanied by a guest configuration file. This file
+    includes information about the hardware to be represented to the guest
+    image by the VMware virtualization environment as well as specification
+    of resources such as memory.
+   </para>
+   <para>
+    Within the <filename>config.xml</filename> file it is possible to
+    specify the VMware configuration settings. In addition it is possible to
+    include selected packages in the created image that are specific to the
+    VM image generation. The following <emphasis>machine</emphasis> section
+    snippet provides general guidance on the VMware guest config which is
+    defined below the <emphasis>type</emphasis> section in the
+    <filename>config.xml</filename>.
+   </para>
+<screen>&lt;machine memory="512"&gt; 
     &lt;vmdisk controller="ide" id="0"/&gt; 
 &lt;/machine&gt;</screen>
-
-      <para>Given the specification above KIWI will create a VMware
-        guest configuration specifying the availability of 512&nbsp;MB
-        of RAM and an IDE disk controller interface for the VM guest.
-        For additional information about the configuration settings
-        please refer to the <emphasis>machine</emphasis> section. </para>
-
-      <para>The guest configuration can be loaded through VMware user
-        interface and may be modified through the GUI. The configuration
-        file has the <filename class="extension">.vmx</filename>
-        extension as shown in the example below. </para>
-
-      <screen>/tmp/myvm-result/LimeJeOS-SLE12.x86_64-1.13.1.vmx</screen>
-
-      <para>Using the <sgmltag class="attribute"
+   <para>
+    Given the specification above KIWI will create a VMware guest
+    configuration specifying the availability of 512&nbsp;MB of RAM and an
+    IDE disk controller interface for the VM guest. For additional
+    information about the configuration settings please refer to the
+    <emphasis>machine</emphasis> section.
+   </para>
+   <para>
+    The guest configuration can be loaded through VMware user interface and
+    may be modified through the GUI. The configuration file has the
+    <filename class="extension">.vmx</filename> extension as shown in the
+    example below.
+   </para>
+<screen>/tmp/myvm-result/LimeJeOS-SLE12.x86_64-1.13.1.vmx</screen>
+   <para>
+    Using the
+    <sgmltag class="attribute"
           >format</sgmltag>="<sgmltag class="attvalue">vmdk</sgmltag>"
-        attribute of the <sgmltag class="starttag">type</sgmltag> start
-        tag will create the VMware formatted disk image (<filename
-          class="extension">.vmdk</filename> file) and the required
-        VMware guest configuration (<filename class="extension"
-          >.vmx</filename>) file. </para>
-    </sect2>
+    attribute of the <sgmltag class="starttag">type</sgmltag> start tag will
+    create the VMware formatted disk image
+    (<filename
+          class="extension">.vmdk</filename> file) and the
+    required VMware guest configuration
+    (<filename class="extension"
+          >.vmx</filename>) file.
+   </para>
+  </sect2>
 
-    <sect2 id="sec.vmx.lvm">
-      <title>LVM Support</title>
-      <indexterm>
-        <primary>KIWI</primary>
-        <secondary>LVM support</secondary>
-      </indexterm>
-      <para>
-        Support for LVM has been added for all image types which are
-        disk based. In order to use LVM for the vmx type just add the
-        <option>--lvm</option> option as part of the KIWI create/build step
-        or add the attribute lvm="true" as part of the type section in
-        your <filename>config.xml</filename> file. When using modern
-        filesystems like btrfs, zfs kiwi also supports using their native
-        volume management system. For more information how to setup
-        custom partitions/volumes,
-        see <xref linkend="chap.partitions"/> for a detailed explanation.
-      </para>
-    </sect2>
+  <sect2 id="sec.vmx.lvm">
+   <title>LVM Support</title><indexterm>
+   <primary>KIWI</primary>
+   <secondary>LVM support</secondary></indexterm>
+   <para>
+    Support for LVM has been added for all image types which are disk based.
+    In order to use LVM for the vmx type just add the <option>--lvm</option>
+    option as part of the KIWI create/build step or add the attribute
+    lvm="true" as part of the type section in your
+    <filename>config.xml</filename> file. When using modern filesystems like
+    btrfs, zfs kiwi also supports using their native volume management
+    system. For more information how to setup custom partitions/volumes, see
+    <xref linkend="chap.partitions"/> for a detailed explanation.
+   </para>
+  </sect2>
 
-    <sect2 id="sec.vmx.bootpartition">
-      <title>Extra Boot Partition</title>
-      <indexterm>
-        <primary>KIWI</primary>
-        <secondary>boot partition</secondary>
-      </indexterm>
-      <para>
-        By default kiwi decides itself for using an extra boot partition or not.
-        This basically depends on the selected root filesystem and the
-        capabilities of the bootloader to directly read data from it. By
-        default kiwi will choose the save default even if the bootloader is
-        able to read from e.g btrfs directly the default is still to use
-        a simple ext filesystem for the /boot data. However it's possible
-        to specify what kiwi should do with the two attributes
-        <sgmltag class="attribute">bootpartition</sgmltag>="<sgmltag class="attvalue">true|false</sgmltag>" and
-        <sgmltag class="attribute">bootfilesystem</sgmltag>="<sgmltag class="attvalue">ext2|ext3|ext4|fat32|fat16</sgmltag>".
-        A runtime check at build time will prove if the combination of
-        attributes is technically possible.
-      </para>
-    </sect2>
-  </sect1>
+  <sect2 id="sec.vmx.bootpartition">
+   <title>Extra Boot Partition</title><indexterm>
+   <primary>KIWI</primary>
+   <secondary>boot partition</secondary></indexterm>
+   <para>
+    By default kiwi decides itself for using an extra boot partition or not.
+    This basically depends on the selected root filesystem and the
+    capabilities of the bootloader to directly read data from it. By default
+    kiwi will choose the save default even if the bootloader is able to read
+    from e.g btrfs directly the default is still to use a simple ext
+    filesystem for the /boot data. However it's possible to specify what
+    kiwi should do with the two attributes
+    <sgmltag class="attribute">bootpartition</sgmltag>="<sgmltag class="attvalue">true|false</sgmltag>"
+    and
+    <sgmltag class="attribute">bootfilesystem</sgmltag>="<sgmltag class="attvalue">ext2|ext3|ext4|fat32|fat16</sgmltag>".
+    A runtime check at build time will prove if the combination of
+    attributes is technically possible.
+   </para>
+  </sect2>
+ </sect1>
 </chapter>

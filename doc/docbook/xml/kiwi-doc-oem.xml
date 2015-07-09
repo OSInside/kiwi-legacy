@@ -1,318 +1,318 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
                          "http://www.docbook.org/xml/4.5/docbookx.dtd">
-
 <chapter id="chap.oem">
-  <title>OEM Image / Preload Systems</title>
-  <indexterm>
-    <primary>KIWI</primary>
-    <secondary>OEM image</secondary>
-  </indexterm>
-  <indexterm>
-    <primary>images</primary>
-    <secondary>OEM</secondary>
-  </indexterm>
-  <indexterm>
-    <primary>OEM images</primary>
-  </indexterm>
-  <para>
-   An OEM image is a virtual disk image representing all partitions
-   and bootloader information in the same fashion it exists on a
-   physical disk. All flavors discussed previously for the VMX
-   image type apply also to the OEM image type. The image format matches
-   the format of the VMX image type, however an OEM image can do more.
-   It is able to expand itself to a custom disk geometry and kiwi can
-   create installation images which embeds the OEM image for deployment
-   from CD/DVD/Stick and over the network via PXE.
-  </para>
-  <indexterm>
-    <primary>Installation</primary>
-  </indexterm>
-  <indexterm>
-    <primary>USB Stick</primary>
-  </indexterm>
-  <indexterm>
-    <primary>DVD</primary>
-  </indexterm>
-  <para>
-   The basic idea behind an OEM image is to provide the virtual
-   disk data for OEM vendors to support easy deployment of the system
-   to physical storage media.
-  </para>
-  <sect1 id="sec.oem.building">
+ <title>OEM Image / Preload Systems</title><indexterm>
+ <primary>KIWI</primary>
+ <secondary>OEM image</secondary></indexterm><indexterm>
+ <primary>images</primary>
+ <secondary>OEM</secondary></indexterm><indexterm>
+ <primary>OEM images</primary></indexterm>
+ <para>
+  An OEM image is a virtual disk image representing all partitions and
+  bootloader information in the same fashion it exists on a physical disk.
+  All flavors discussed previously for the VMX image type apply also to the
+  OEM image type. The image format matches the format of the VMX image type,
+  however an OEM image can do more. It is able to expand itself to a custom
+  disk geometry and kiwi can create installation images which embeds the OEM
+  image for deployment from CD/DVD/Stick and over the network via PXE.
+ </para><indexterm>
+ <primary>Installation</primary></indexterm><indexterm>
+ <primary>USB Stick</primary></indexterm><indexterm>
+ <primary>DVD</primary></indexterm>
+ <para>
+  The basic idea behind an OEM image is to provide the virtual disk data for
+  OEM vendors to support easy deployment of the system to physical storage
+  media.
+ </para>
+ <sect1 id="sec.oem.building">
   <title>Building an OEM System with Installation DVD</title>
+
   <para>
    This example is based on SLES version 12. The image creation process
-   actually creates two images. The OEM disk image and an Installation
-   ISO image which contains the OEM disk image. As a user I can decide
-   to take the OEM disk image and dump it with some tool on the disk of
-   the target system or boot the target system from the ISO image
-   and run through an image deployment process which could also be
-   configured to run without user interaction.
+   actually creates two images. The OEM disk image and an Installation ISO
+   image which contains the OEM disk image. As a user I can decide to take
+   the OEM disk image and dump it with some tool on the disk of the target
+   system or boot the target system from the ISO image and run through an
+   image deployment process which could also be configured to run without
+   user interaction.
   </para>
 
 <screen><command>kiwi</command> --build suse-SLE12-JeOS -d /tmp/myoem-result --type oem</screen>
-  </sect1>
+ </sect1>
+ <sect1 id="sec.oem.using">
+  <title>Using the Image</title><indexterm>
 
-  <sect1 id="sec.oem.using">
-    <title>Using the Image</title>
-    <indexterm>
-      <primary>raw</primary>
-      <secondary>file name extension</secondary>
-    </indexterm>
-    <indexterm>
-      <primary>iso</primary>
-      <secondary>file name extension</secondary>
-    </indexterm>  
-    <para>
-     The virtual disk image created by KIWI with the commands shown
-     above can be tested using virtualization software such as QEMU,
-     VMware, or VirtualBox. The virtual disk is represented by the file
-     with the <filename class="extension">.raw</filename> extension,
-     whereas the file with the <filename class="extension"
-      >.iso</filename> extension represents the installation disk for
-     this oem image. The ISO image is bootable (<filename>filename.iso</filename>)
-     and can be burned to optical media. It is recommended to test the
-     image on a bare test system. The following command shows how
-     to use QEMU to test the OEM disk image (<filename>filename.raw</filename>).
-    </para>
+  <primary>raw</primary>
+
+  <secondary>file name extension</secondary></indexterm><indexterm>
+
+  <primary>iso</primary>
+
+  <secondary>file name extension</secondary></indexterm>
+
+  <para>
+   The virtual disk image created by KIWI with the commands shown above can
+   be tested using virtualization software such as QEMU, VMware, or
+   VirtualBox. The virtual disk is represented by the file with the
+   <filename class="extension">.raw</filename> extension, whereas the file
+   with the <filename class="extension"
+      >.iso</filename> extension
+   represents the installation disk for this oem image. The ISO image is
+   bootable (<filename>filename.iso</filename>) and can be burned to optical
+   media. It is recommended to test the image on a bare test system. The
+   following command shows how to use QEMU to test the OEM disk image
+   (<filename>filename.raw</filename>).
+  </para>
 
 <screen><command>cd</command> /tmp/myoem-result 
 <command>qemu</command> LimeJeOS-SLE12.x86_64-1.13.1.raw</screen>
 
-    <para>or using the <command>dd</command> command you can dump the
-      image onto a test hard disk or USB stick and upon reboot select
-      the appropriate device as the boot device in the BIOS: </para>
+  <para>
+   or using the <command>dd</command> command you can dump the image onto a
+   test hard disk or USB stick and upon reboot select the appropriate device
+   as the boot device in the BIOS:
+  </para>
 
 <screen><command>cd</command> /tmp/myoem-result 
 <command>dd</command> if=LimeJeOS-SLE12.x86_64-1.13.1.raw of=/dev/<replaceable>device</replaceable></screen>
 
-    <para>
-     Note, when testing an oem image using the virtual disk image,
-     i.e. the <filename class="extension">.raw</filename> file, the
-     geometry of the disk image is not changed and therefore retains
-     the disk geometry of the host system. This implies that the
-     re-partitioning performed for a physical disk install during the
-     oem boot workflow will be skipped.
-    </para>
-    <para>
-      You can test the installation procedure in a virtual
-      environment using the <filename class="extension">.iso</filename>
-      file. In this case the re-partitioning code in the boot image will
-      be executed. The following commands show this procedure using
-      QEMU. </para>
+  <para>
+   Note, when testing an oem image using the virtual disk image, i.e. the
+   <filename class="extension">.raw</filename> file, the geometry of the
+   disk image is not changed and therefore retains the disk geometry of the
+   host system. This implies that the re-partitioning performed for a
+   physical disk install during the oem boot workflow will be skipped.
+  </para>
+
+  <para>
+   You can test the installation procedure in a virtual environment using
+   the <filename class="extension">.iso</filename> file. In this case the
+   re-partitioning code in the boot image will be executed. The following
+   commands show this procedure using QEMU.
+  </para>
 
 <screen><command>cd</command> /tmp/myoem-result 
 <command>qemu-img</command> create /tmp/mydisk 20G 
 <command>qemu</command> -hda /tmp/mydisk -cdrom LimeJeOS-SLE12.x86_64-1.13.1.iso -boot d</screen>
+ </sect1>
+ <sect1 id="sec.oem.flavours">
+  <title>Flavours</title>
 
-  </sect1>
+  <para>
+   <indexterm>
+   <primary>installiso</primary>
+   </indexterm> <indexterm>
+   <primary>installstick</primary>
+   </indexterm> As indicated above the use of the
+   <sgmltag class="attribute" >installiso</sgmltag> and
+   <sgmltag class="attribute" >installstick</sgmltag> attributes for the oem
+   image supports the creation of an installation image. The installation
+   image can be created in two formats, one suitable for CD/DVD media and a
+   second suitable for a USB stick. The self installing image deploys the
+   oem image onto the selected storage device. The installation process is a
+   simple image dump using the <command>dd</command> command. During this
+   process the target system remains in terminal mode. The following
+   configuration snippets show the use of the
+   <sgmltag
+     class="attribute">installiso</sgmltag> and
+   <sgmltag
+     class="attribute">installstick</sgmltag> attributes to
+   create the ISO or USB installation image format respectively.
+  </para>
 
-  <sect1 id="sec.oem.flavours">
-    <title>Flavours</title>
-    <para>
-    <indexterm>
-      <primary>installiso</primary>
-    </indexterm>
-    <indexterm>
-      <primary>installstick</primary>
-    </indexterm>  
-     As indicated above the use of the <sgmltag class="attribute" >installiso</sgmltag>
-     and <sgmltag class="attribute" >installstick</sgmltag> attributes for the oem image
-     supports the creation of an installation image. The installation image can
-     be created in two formats, one suitable for CD/DVD media and a
-     second suitable for a USB stick. The self installing image deploys
-     the oem image onto the selected storage device. The installation
-     process is a simple image dump using the <command>dd</command> command.
-     During this process the target system remains in terminal mode. The
-     following configuration snippets show the use of the <sgmltag
-     class="attribute">installiso</sgmltag> and <sgmltag
-     class="attribute">installstick</sgmltag> attributes to create
-     the ISO or USB installation image format respectively. </para>
+  <variablelist>
+   <varlistentry>
+    <term>
+     <literal>&lt;type image="name" ... installiso="true"
+     hybrid="true"/&gt;</literal>
+    </term>
+    <listitem>
+     <para>
+      Creates a <filename class="extension">.iso</filename> file which can be
+      burned onto a CD or a DVD. This represents an installation CD/DVD. You
+      might have noticed the <emphasis>hybrid</emphasis> attribute. This
+      turns the ISO into a hybrid media which let look the ISO like an ISO
+      and a disk. Therefore it's possible to dump the ISO on for example an
+      USB Stick. If your bios is not confused about the hybrid setup kiwi did
+      with the ISO, the stick will boot like a disk. If it does not work use
+      the installstick media as explained below.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>
+     <literal>&lt;type image="name" ... installstick="true"/&gt;</literal>
+    </term>
+    <listitem>
+     <para>
+      Creates a <filename class="extension">.raw.install</filename> file
+      which can be dumped (<command>dd</command>) onto a USB stick. This
+      represents an installation Stick
+     </para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+
+  <sect2 id="sec.oem.installation">
+   <title>Specializing the OEM install process</title><indexterm>
+   <primary>preHWdetect.sh</primary></indexterm><indexterm>
+   <primary>postHWdetect.sh</primary></indexterm><indexterm>
+   <primary>preImageDump.sh</primary></indexterm><indexterm>
+   <primary>postImageDump.sh</primary></indexterm>
+   <para>
+    It is possible to specialize the OEM install process by providing shell
+    scripts with the following names. For more information how to pack the
+    scripts and make them work in the boot code, see the chapter
+    <xref linkend="sec.hooks"/>.
     <itemizedlist>
-      <listitem>
-        <screen>&lt;type image="name" ... installiso="true" hybrid="true"/&gt;</screen>
-        <para>Creates a <filename class="extension">.iso</filename> file
-          which can be burned onto a CD or a DVD. This represents an
-          installation CD/DVD. You might have noticed the
-          <emphasis>hybrid</emphasis> attribute. This turns the ISO into a
-          hybrid media which let look the ISO like an ISO and a disk.
-          Therefore it's possible to dump the ISO on for example an USB Stick.
-          If your bios is not confused about the hybrid setup kiwi did with
-          the ISO, the stick will boot like a disk. If it does not work
-          use the installstick media as explained below.
-        </para>
-      </listitem>
-      <listitem>
-        <screen>&lt;type image="name" ... installstick="true"/&gt;</screen>
-        <para>Creates a <filename class="extension"
-            >.raw.install</filename> file which can be dumped
-            (<command>dd</command>) onto a USB stick. This represents an
-          installation Stick </para>
-      </listitem>
-    </itemizedlist>
-
-    <sect2 id="sec.oem.installation">
-      <title>Specializing the OEM install process</title>
-    
-    <indexterm>
-      <primary>preHWdetect.sh</primary>
-    </indexterm>
-    <indexterm>
-      <primary>postHWdetect.sh</primary>
-    </indexterm>  
-    <indexterm>
-      <primary>preImageDump.sh</primary>
-    </indexterm>
-    <indexterm>
-      <primary>postImageDump.sh</primary>
-    </indexterm>  
-
-      <para>It is possible to specialize the OEM install process by providing
-          shell scripts with the following names. For more information how
-          to pack the scripts and make them work in the boot code, see
-          the chapter <xref linkend="sec.hooks"/>.
-          <itemizedlist>
-            <listitem>
-              <para><filename>preHWdetect.sh</filename>
-              This script is executed prior to the hardware scan on the
-                  target machine.</para>
-            </listitem>
-      <listitem>
-              <para><filename>postHWdetect.sh</filename>
-              This script is executed after the hardware scan on the
-                  target machine.</para>
-            </listitem>
-            <listitem>
-              <para><filename>preImageDump.sh</filename>
-              This script is executed immediately prior to the OEM
-                  image dump onto the target storage device.</para>
-            </listitem>
-            <listitem>
-              <para><filename>postImageDump.sh</filename>
-              This script is executed directly after the OEM image dump
-                  onto the target storage device once the image checksum has
-                  been successfully verified.</para>
-            </listitem>
-          </itemizedlist>
-      </para>
-    </sect2>
-
-    <sect2 id="sec.oem.partitioning">
-      <title>Influencing the OEM Partitioning</title>
-      <para>By default the oemboot process will create a swap and an optional
-          recovery partition, and will expand all other partitions according
-          to the setup in the kiwi configuration and the underlaying disk
-          geometry. It is possible to influence the behavior with the
-          <sgmltag>oem-*</sgmltag> elements. See <xref
-          linkend="chap.description"/> for details. </para>
-    </sect2>
-
-    <sect2 id="sec.oem.partition-based-installation">
-      <title>Partition Based Installation</title>
-      <indexterm>
-        <primary>config.xml</primary>
-      </indexterm>
+     <listitem>
       <para>
-       The default installation method of an OEM is dumping the
-       entire virtual disk on the selected target disk and repartition
-       the disk to the real geometry. This works but will also wipe
-       everything which was on the disk before. KIWI also supports the
-       installation into already existing partitions. This means the
-       user can setup a disk with free partitions for the KIWI OEM
-       installation process. This way already existing data will not be
-       touched. In order to activate the partition based install mode
-       the following OEM option has to be set in
-        <filename>config.xml</filename>: </para>
+       <filename>preHWdetect.sh</filename> This script is executed prior to
+       the hardware scan on the target machine.
+      </para>
+     </listitem>
+     <listitem>
+      <para>
+       <filename>postHWdetect.sh</filename> This script is executed after
+       the hardware scan on the target machine.
+      </para>
+     </listitem>
+     <listitem>
+      <para>
+       <filename>preImageDump.sh</filename> This script is executed
+       immediately prior to the OEM image dump onto the target storage
+       device.
+      </para>
+     </listitem>
+     <listitem>
+      <para>
+       <filename>postImageDump.sh</filename> This script is executed
+       directly after the OEM image dump onto the target storage device once
+       the image checksum has been successfully verified.
+      </para>
+     </listitem>
+    </itemizedlist>
+   </para>
+  </sect2>
 
-      <screen>&lt;oem-partition-install&gt;true&lt;/oem-partition-install&gt;</screen>
+  <sect2 id="sec.oem.partitioning">
+   <title>Influencing the OEM Partitioning</title>
+   <para>
+    By default the oemboot process will create a swap and an optional
+    recovery partition, and will expand all other partitions according to
+    the setup in the kiwi configuration and the underlaying disk geometry.
+    It is possible to influence the behavior with the
+    <sgmltag>oem-*</sgmltag> elements. See
+    <xref
+          linkend="chap.description"/> for details.
+   </para>
+  </sect2>
 
-      <para>Compared to the disk based install the following differences
-        should be mentioned: </para>
+  <sect2 id="sec.oem.partition-based-installation">
+   <title>Partition Based Installation</title><indexterm>
+   <primary>config.xml</primary></indexterm>
+   <para>
+    The default installation method of an OEM is dumping the entire virtual
+    disk on the selected target disk and repartition the disk to the real
+    geometry. This works but will also wipe everything which was on the disk
+    before. KIWI also supports the installation into already existing
+    partitions. This means the user can setup a disk with free partitions
+    for the KIWI OEM installation process. This way already existing data
+    will not be touched. In order to activate the partition based install
+    mode the following OEM option has to be set in
+    <filename>config.xml</filename>:
+   </para>
+<screen>&lt;oem-partition-install&gt;true&lt;/oem-partition-install&gt;</screen>
+   <para>
+    Compared to the disk based install the following differences should be
+    mentioned:
+   </para>
+   <itemizedlist>
+    <listitem>
+     <para>
+      The bootloader will be setup to boot the installed system. There is no
+      multiboot setup. The user is expected to implement the setup of a
+      multiboot bootloader.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      The oem options for system, swap and home doesn’t have any effect if
+      the installation happens in predefined partitions. In this mode kiwi
+      will not create additional partitions.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      There is no support for remote (PXE) OEM installation because KIWI has
+      to loop mount the disk image and need to address specific regions
+      inside of the image. These block operations are not implemented for
+      remote access
+     </para>
+    </listitem>
+   </itemizedlist>
+  </sect2>
 
-      <itemizedlist>
-        <listitem>
-          <para>
-           The bootloader will be setup to boot the installed system.
-           There is no multiboot setup. The user is expected to implement
-           the setup of a multiboot bootloader.
-          </para>
-        </listitem>
-        <listitem>
-          <para>The oem options for system, swap and home doesn’t have
-            any effect if the installation happens in predefined
-            partitions. In this mode kiwi will not create additional
-            partitions.
-          </para>
-        </listitem>
-        <listitem>
-          <para>There is no support for remote (PXE) OEM installation
-            because KIWI has to loop mount the disk image and need to
-            address specific regions inside of the image. These block
-            operations are not implemented for remote access
-          </para>
-        </listitem>
-      </itemizedlist>
-
-    </sect2>
-  
   <sect2 id="sec.oem.pxe-based-installation">
-    <title>Network Based Installation</title>
-      <indexterm>
-        <primary>network installation</primary>
-      </indexterm>
-      <indexterm>
-        <primary>installation</primary>
-        <secondary>network</secondary>
-      </indexterm>
-    
-    <para>
-      Instead of manually dumping the OEM image on the target device
-      or creating a KIWI install CD, USB stick, there is a third
-      method of deploying the OEM image on the target device. It's
-      possible to let the image be downloaded from a PXE boot server
-      over the network. This requires a PXE network boot server to be
-      setup properly in the first place For details how to do this
-      refer to the chapter: <xref linkend="chap.pxe"/>. If your pxe
-      server is running the following steps are required to setup the
-      install process over the network </para>
-    <itemizedlist>
-      <listitem>
-        <para> Make sure you have created an install PXE tarball along with
-            your oem image:</para>
-            <screen>&lt;type image="oem" ... installpxe="true"/&gt;</screen>
-      </listitem>
-      <listitem>
-        <para> unpack the created &lt;image-name&gt;.tgz file and copy the
-            initrd and kernel images over to your PXE server:</para>
-            <screen><command>tar</command> -xf &lt;image-name&gt;.tgz
+   <title>Network Based Installation</title><indexterm>
+   <primary>network installation</primary></indexterm><indexterm>
+   <primary>installation</primary>
+   <secondary>network</secondary></indexterm>
+   <para>
+    Instead of manually dumping the OEM image on the target device or
+    creating a KIWI install CD, USB stick, there is a third method of
+    deploying the OEM image on the target device. It's possible to let the
+    image be downloaded from a PXE boot server over the network. This
+    requires a PXE network boot server to be setup properly in the first
+    place For details how to do this refer to the chapter:
+    <xref linkend="chap.pxe"/>. If your pxe server is running the following
+    steps are required to setup the install process over the network
+   </para>
+   <procedure>
+    <step>
+     <para>
+      Make sure you have created an install PXE tarball along with your oem
+      image:
+     </para>
+     <screen>&lt;type image="oem" ... installpxe="true"/&gt;</screen>
+    </step>
+    <step>
+     <para>
+      unpack the created &lt;image-name&gt;.tgz file and copy the initrd and
+      kernel images over to your PXE server:
+     </para>
+     <screen><command>tar</command> -xf &lt;image-name&gt;.tgz
 <command>scp</command> initrd-oemboot-*.install.* pxe.server.ip:/srv/tftpboot/boot/initrd
 <command>scp</command> initrd-oemboot-*.kernel.*  pxe.server.ip:/srv/tftpboot/boot/linux</screen>
-            </listitem>
-      <listitem>
-        <para> Next copy the system image and md5 sum over to to the PXE
-            boot server:</para>
-            <screen><command>scp</command> &lt;image-file&gt;.xz  pxe.server.ip:/srv/tftpboot/image/
+    </step>
+    <step>
+     <para>
+      Next copy the system image and md5 sum over to to the PXE boot server:
+     </para>
+     <screen><command>scp</command> &lt;image-file&gt;.xz  pxe.server.ip:/srv/tftpboot/image/
 <command>scp</command> &lt;image-file&gt;.md5 pxe.server.ip:/srv/tftpboot/image/</screen>
-      </listitem>
-      <listitem>
-        <para> At last set the kernel commandline parameters to the append
-            line in your PXE configuration (for example:
-              <filename>pxelinux.cfg/default</filename>). The required
-            parameters are stored in the file
-              <filename>&lt;image-file&gt;.append</filename> from the
-            KIWI generated install tarball </para>
-        <para> Optionally the image can be stored on a FTP,HTTP server
-            specified via the <command>kiwiserver</command> and
-              <command>kiwiservertype</command> append information. In
-            this case make sure you copied the system image and md5 file
-            to the correct location on the ftp, http, etc. server. KIWI
-            searches the image at one place only which is below the
-              <filename>image/</filename> directory on the root path of
-            the specified server. initrd and linux kernel are loaded by
-            PXE thus they require a tftp server to be present. </para>
-            </listitem>
-    </itemizedlist>
+    </step>
+    <step>
+     <para>
+      At last set the kernel commandline parameters to the append line in
+      your PXE configuration (for example:
+      <filename>pxelinux.cfg/default</filename>). The required parameters
+      are stored in the file <filename>&lt;image-file&gt;.append</filename>
+      from the KIWI generated install tarball
+     </para>
+     <para>
+      Optionally the image can be stored on a FTP,HTTP server specified via
+      the <command>kiwiserver</command> and
+      <command>kiwiservertype</command> append information. In this case
+      make sure you copied the system image and md5 file to the correct
+      location on the ftp, http, etc. server. KIWI searches the image at one
+      place only which is below the <filename>image/</filename> directory on
+      the root path of the specified server. initrd and linux kernel are
+      loaded by PXE thus they require a tftp server to be present.
+     </para>
+    </step>
+   </procedure>
   </sect2>
-  </sect1>
+ </sect1>
 </chapter>

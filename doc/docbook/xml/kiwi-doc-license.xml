@@ -2,26 +2,36 @@
 <!DOCTYPE legalnotice PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
                          "http://www.docbook.org/xml/4.4/docbookx.dtd">
 <legalnotice>
-  <title>License</title>
-  <para>Permission is granted to copy, distribute and/or modify this
-    document under the terms of the GNU Free Documentation License,
-    Version 1.2 or (at your option) version 1.3; with the Invariant
-    Section being this copyright notice and license. A copy of the
-    license version 1.2 is included in the appendix entitled <quote>GNU
-      Free Documentation License</quote>.</para>
-  <para><trademark class="registered">SUSE</trademark>, <trademark
-      class="registered">openSUSE</trademark>, the <trademark
-      class="registered">openSUSE</trademark> logo, <trademark
-      class="registered">Novell</trademark>, the <trademark
-      class="registered">Novell</trademark> logo, the <trademark
-      class="registered">N</trademark> logo, are registered trademarks
-    of Novell, Inc. in the United States and other countries. <trademark
-      class="registered">Linux</trademark> is a registered trademark of
-    Linus Torvalds. All other third party trademarks are the property of
-    their respective owners.</para>
-  <para>All information found in this book has been compiled with utmost
-    attention to detail. However, this does not guarantee complete
-    accuracy. Neither Novell, Inc., SUSE Linux Products GmbH, the
-    authors, nor the translators shall be held liable for possible
-    errors or the consequences thereof.</para>
+ <title>License</title>
+ <para>
+  Permission is granted to copy, distribute and/or modify this document
+  under the terms of the GNU Free Documentation License, Version 1.2 or (at
+  your option) version 1.3; with the Invariant Section being this copyright
+  notice and license. A copy of the license version 1.2 is included in the
+  appendix entitled <quote>GNU Free Documentation License</quote>.
+ </para>
+ <para>
+  <trademark class="registered">SUSE</trademark>,
+  <trademark
+      class="registered">openSUSE</trademark>, the
+  <trademark
+      class="registered">openSUSE</trademark> logo,
+  <trademark
+      class="registered">Novell</trademark>, the
+  <trademark
+      class="registered">Novell</trademark> logo, the
+  <trademark
+      class="registered">N</trademark> logo, are registered
+  trademarks of Novell, Inc. in the United States and other countries.
+  <trademark
+      class="registered">Linux</trademark> is a registered
+  trademark of Linus Torvalds. All other third party trademarks are the
+  property of their respective owners.
+ </para>
+ <para>
+  All information found in this book has been compiled with utmost attention
+  to detail. However, this does not guarantee complete accuracy. Neither
+  Novell, Inc., SUSE Linux Products GmbH, the authors, nor the translators
+  shall be held liable for possible errors or the consequences thereof.
+ </para>
 </legalnotice>

@@ -2,61 +2,46 @@
 <!DOCTYPE refentry PUBLIC 
   "-//OASIS//DTD DocBook XML V4.4//EN"
   "http://www.docbook.org/xml/4.4/docbookx.dtd">
-
 <refentry id="ref.kiwi.config.sh">
-  <refentryinfo>
-    <indexterm>
-      <primary>manpages</primary>
-      <secondary>kiwi::config.sh</secondary>
-    </indexterm>
-    <productname>KIWI</productname>
-    <!--<productnumber></productnumber>-->
-    <date>Created: <?dbtimestamp?></date>
-    <authorgroup>
-      <author>
-        <firstname>Marcus</firstname>
-        <surname>Schäfer</surname>
-        <contrib>Developer</contrib>
-        <email>ms (AT) suse.de</email>
-      </author>
-    </authorgroup>    
-  </refentryinfo>
-  <refmeta>
-    <refentrytitle>kiwi::config.sh</refentrytitle>
-    <manvolnum>1</manvolnum>
-    <refmiscinfo class="version">_KV_</refmiscinfo>
-    <refmiscinfo class="manual">KIWI Manualpage</refmiscinfo>
-  </refmeta>
-  <refnamediv>
-    <refname>KIWI::config.sh</refname>
-    <refpurpose>Customization File for KIWI image description</refpurpose>
-  </refnamediv>
-
-  <refsect1 id="kiwi.config.description">
-    <title>Description</title>
-    <para>
-      The KIWI image description allows to have an optional
-      <filename>config.sh</filename> bash script in place. It can be
-      used for changes appropriate for all images to be created from a
-      given unpacked image (since config.sh runs prior to create step)
-
-      Basically the script should be designed to take over control of adding
-      the image operating system configuration. Configuration in that sense
-      means all tasks which runs once in an os installation process like
-      activating services, creating configuration files, prepare
-      an environment for a firstboot workflow, etc.
-
-      The <filename>config.sh</filename> script is called
-      <emphasis>after</emphasis> the following kiwi built in configuration
-      tasks: User/Groups, copy of overlay root tree and setup of autoyast
-      
-      If <filename>config.sh</filename> exits with an exit code != 0
-      the kiwi process will exit with an error too.
-    </para>
-
+ <refentryinfo><indexterm>
+  <primary>manpages</primary>
+  <secondary>kiwi::config.sh</secondary></indexterm><productname>KIWI</productname>
+<!--<productnumber></productnumber>--><date>Created: <?dbtimestamp?></date>
+  <authorgroup>
+   <author><firstname>Marcus</firstname><surname>Schäfer</surname>
+    <contrib>Developer</contrib><email>ms (AT) suse.de</email>
+   </author>
+  </authorgroup>
+ </refentryinfo>
+ <refmeta>
+  <refentrytitle>kiwi::config.sh</refentrytitle>
+  <manvolnum>1</manvolnum>
+  <refmiscinfo class="version">_KV_</refmiscinfo>
+  <refmiscinfo class="manual">KIWI Manualpage</refmiscinfo>
+ </refmeta>
+ <refnamediv>
+  <refname>KIWI::config.sh</refname><refpurpose>Customization File for KIWI image description</refpurpose>
+ </refnamediv>
+ <refsect1 id="kiwi.config.description">
+  <title>Description</title>
+  <para>
+   The KIWI image description allows to have an optional
+   <filename>config.sh</filename> bash script in place. It can be used for
+   changes appropriate for all images to be created from a given unpacked
+   image (since config.sh runs prior to create step) Basically the script
+   should be designed to take over control of adding the image operating
+   system configuration. Configuration in that sense means all tasks which
+   runs once in an os installation process like activating services,
+   creating configuration files, prepare an environment for a firstboot
+   workflow, etc. The <filename>config.sh</filename> script is called
+   <emphasis>after</emphasis> the following kiwi built in configuration
+   tasks: User/Groups, copy of overlay root tree and setup of autoyast If
+   <filename>config.sh</filename> exits with an exit code != 0 the kiwi
+   process will exit with an error too.
+  </para>
   <example>
-    <title>Template for config.sh</title>
-    <programlisting>
+   <title>Template for config.sh</title>
+<programlisting>
 #======================================
 # Functions...
 #--------------------------------------
@@ -88,456 +73,496 @@ baseCleanMount
 #--------------------------------------
 exit 0</programlisting>
   </example>
-  </refsect1>
-  
-
-  <refsect1 id="kiwi.config.functions">
-    <title>Common functions</title>
-    <para>
-      The <filename>.kconfig</filename> file allows to make use of a common
-      set of functions. Functions specific to SUSE Linux specific begin with 
-      the name <emphasis>suse</emphasis>. Functions applicable to all linux 
-      systems starts with the name <emphasis>base</emphasis>.
-      The following list describes the functions available inside the 
-      <filename>config.sh</filename> script.
-    </para>    
-  <variablelist>
-      <varlistentry>
-        <term><optional>baseCleanMount</optional></term>
-        <listitem>
-          <para>
-            Umount the system filesystems <filename>/proc</filename>, 
-            <filename>/dev/pts</filename>, and
-            <filename>/sys</filename>.
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-        <term><optional>baseDisableCtrlAltDel</optional></term>
-        <listitem>
-          <para>
-            Disable the <keycombo action="press">
-              <keycap function="control">Ctrl</keycap>
-              <keycap function="alt">Alt</keycap>
-              <keycap function="delete">Del</keycap>
-            </keycombo> key sequence setting in <filename>/etc/inittab</filename>
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-        <term><optional>baseGetPackagesForDeletion</optional></term>
-        <listitem>
-          <para>
-            Return the name(s) of packages which will be deleted
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-        <term><optional>baseGetProfilesUsed</optional></term>
-        <listitem>
-          <para>
-            Return the name(s) of profiles used to build this image
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-        <term><optional>baseSetRunlevel {value}</optional></term>
-        <listitem>
-          <para>
-             Set the default run level
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-        <term><optional>baseSetupBoot</optional></term>
-        <listitem>
-          <para>
-             Set up the linuxrc as init
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-         <term><optional>baseSetupBusyBox {-f}</optional></term>
-        <listitem>
-          <para>
-             activates busybox if installed for all links from
-             the <filename>busybox/busybox.links</filename> file&mdash;you can 
-             choose custom apps to be forced into busybox with the 
-            <option>-f</option> option as first parameter, for example: 
-          </para>
-          <screen>baseSetupBusyBox -f /bin/zcat /bin/vi</screen>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-        <term><optional>baseSetupInPlaceGITRepository</optional></term>
-        <listitem>
-          <para>
-            Create an in place git repository of the root
-            directory. This process may take some time and you
-            may expect problems with binary data handling
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-         <term><optional>baseSetupInPlaceSVNRepository {path_list}</optional></term>
-        <listitem>
-          <para>
-            Create an in place subversion repository for the
-            specified directories. A standard call could look like this
-            baseSetupInPlaceSVNRepository <filename>/etc</filename>,
-            <filename>/srv</filename>, and <filename>/var/log</filename> 
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-        <term><optional>baseSetupPlainTextGITRepository</optional></term>
-        <listitem>
-          <para>
-            Create an in place git repository of the root
-            directory containing all plain/text files.
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-        <term><optional>baseSetupUserPermissions</optional></term>
-        <listitem>
-          <para>
-            Search all home directories of all users listed in <filename>/etc/passwd</filename>
-            and change the ownership of all files to belong to the correct
-            user and group.
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-         <term><optional>baseStripAndKeep {list of info-files to keep}</optional></term>
-        <listitem>
-           <para>
-              helper function for strip* functions
-              read stdin lines of files to check for removing
-              params: files which should be keep
-          </para>
-        </listitem>
-     </varlistentry>
-      <varlistentry>
-         <term><optional>baseStripDocs {list of docu names to keep}</optional></term>
-        <listitem>
-          <para>
-             remove all documentation, except one given as parameter
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-         <term><optional>baseStripInfos {list of info-files to keep}</optional></term>
-        <listitem>
-           <para>
-             remove all info files, except one given as parameter
-          </para>
-        </listitem>
-     </varlistentry>
-      <varlistentry>
-         <term><optional>baseStripLocales {list of locales}</optional></term>
-        <listitem>
-           <para>
-             remove all locales, except one given as parameter
-          </para>
-        </listitem>
-     </varlistentry>
-      <varlistentry>
-         <term><optional>baseStripMans {list of manpages to keep}</optional></term>
-        <listitem>
-          <para>
-             remove all manual pages, except one given as parameter
-             example: baseStripMans more less
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-        <term><optional>baseStripRPM</optional></term>
-        <listitem>
-          <para>
-             remove rpms defined in <filename>config.xml</filename> in the
-             image type=delete section
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-        <term><optional>suseRemovePackagesMarkedForDeletion</optional></term>
-        <listitem>
-          <para>
-             remove rpms defined in <filename>config.xml</filename> in the
-             image type=delete section. The difference compared to baseStripRPM
-             is that the suse variant checks if the package is really installed
-             prior to passing it to rpm to uninstall it. The suse rpm exits
-             with an error exit code while there are other rpm version which
-             just ignore if an uninstall request was set on a package which
-             is not installed
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-         <term><optional>baseStripTools {list of toolpath} {list of tools}</optional></term>
-        <listitem>
-           <para>
-              helper function for suseStripInitrd function
-              params: toolpath, tools
-          </para>
-        </listitem>
-     </varlistentry>
-      <varlistentry>
-        <term><optional>baseStripUnusedLibs</optional></term>
-        <listitem>
-          <para>
-             remove libraries which are not directly linked
-             against applications in the bin directories
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-         <term><optional>baseUpdateSysConfig {filename} {variable} {value}</optional></term>
-        <listitem>
-           <para>
-             update sysconfig variable contents
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-         <term><optional>Debug {message}</optional></term>
-        <listitem>
-          <para>
-            Helper function to print a message 
-            if the variable <varname>DEBUG</varname> is set to 1
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-         <term><optional>Echo {echo commandline}</optional></term>
-        <listitem>
-          <para>
-            Helper function to print a message to the controlling terminal
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-         <term><optional>Rm {list of files}</optional></term>
-        <listitem>
-          <para>
-            Helper function to delete files and announce it to log
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-         <term><optional>Rpm {rpm commandline}</optional></term>
-        <listitem>
-          <para>
-            Helper function to the RPM function and announce it to log
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-        <term><optional>suseConfig</optional></term>
-        <listitem>
-          <para>
-            Setup keytable language, timezone and hwclock if specified in
-            <filename>config.xml</filename> and call SuSEconfig afterwards
-            SuSEconfig is only called on systems which still support it
-          </para>
-        </listitem>
-     </varlistentry>
-     <varlistentry>
-         <term><optional>suseInsertService {servicename}</optional></term>
-        <listitem>
-          <para>
-            This function calls baseInsertService and exists only
-            for compatibility reasons
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-         <term><optional>suseRemoveService {servicename}</optional></term>
-        <listitem>
-          <para>
-            This function calls baseRemoveService and exists only
-            for compatibility reasons
-          </para>
-        </listitem>
-      </varlistentry>
-
-      <varlistentry>
-         <term><optional>baseInsertService {servicename}</optional></term>
-        <listitem>
-          <para>
-            Activate the given service by using the chkconfig or systemctl
-            program. Which init system is in use is auto detected
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-         <term><optional>baseRemoveService {servicename}</optional></term>
-        <listitem>
-          <para>
-            Deactive the given service by using the chkconfig or systemctl
-            program. Which init system is in use is auto detected
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-         <term><optional>baseService {servicename} {on|off}</optional></term>
-        <listitem>
-          <para>
-            Activate/Deactivate a service by using the chkconfig or systemctl
-            program. The function requires the service name and the value
-            on or off as parameters. Which init system is in use is auto
-            detected
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-        <term><optional>suseActivateDefaultServices</optional></term>
-        <listitem>
-          <para>
-            Activates the following sysVInit services to be on by
-            default using the chkconfig program: boot.rootfsck,
-            boot.cleanup, boot.localfs, boot.localnet, boot.clock,
-            policykitd, dbus, consolekit, haldaemon, network,
-            atd, syslog, cron, kbd. And the following for
-            systemd systems: network, cron
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-        <term><optional>suseSetupProduct</optional></term>
-        <listitem>
-          <para>
-            This function creates the baseproduct link in /etc/products.d
-            pointing to the installed product
-          </para>
-        </listitem>
-     </varlistentry>
-      <varlistentry>
-        <term><optional>suseSetupProductInformation</optional></term>
-        <listitem>
-          <para>
-            This function will use zypper to search for the installed
-            product and install all product specific packages. This function
-            only makes sense if zypper is used as packagemanager
-          </para>
-        </listitem>
-     </varlistentry>
-      <varlistentry>
-         <term><optional>suseStripPackager {-a}</optional></term>
-        <listitem>
-          <para>
-             Remove smart or zypper packages and db files
-             Also remove rpm package and db if <option>-a</option> given
-          </para>
-        </listitem>
-      </varlistentry>
-     </variablelist>
-  </refsect1>
-  
-  <refsect1 id="kiwi.config.environment">
-    <title>Profile environment variables</title>
-    <para>
-      The .profile environment file contains a specific set of variables which
-      are listed below. Some of the functions above makes use of the variables.
+ </refsect1>
+ <refsect1 id="kiwi.config.functions">
+  <title>Common functions</title>
+  <para>
+   The <filename>.kconfig</filename> file allows to make use of a common set
+   of functions. Functions specific to SUSE Linux specific begin with the
+   name <emphasis>suse</emphasis>. Functions applicable to all linux systems
+   starts with the name <emphasis>base</emphasis>. The following list
+   describes the functions available inside the
+   <filename>config.sh</filename> script.
   </para>
-    <variablelist>
-      <varlistentry>
-        <term><optional>$kiwi_compressed</optional></term>
-        <listitem>
-          <para>
-      The value of the compressed attribute set in the type element
+  <variablelist>
+   <varlistentry>
+    <term><optional>baseCleanMount</optional>
+    </term>
+    <listitem>
+     <para>
+      Umount the system filesystems <filename>/proc</filename>,
+      <filename>/dev/pts</filename>, and <filename>/sys</filename>.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional>baseDisableCtrlAltDel</optional>
+    </term>
+    <listitem>
+     <para>
+      Disable the <keycombo action="press">
+      <keycap function="control">Ctrl</keycap>
+      <keycap function="alt">Alt</keycap>
+      <keycap function="delete">Del</keycap> </keycombo> key sequence
+      setting in <filename>/etc/inittab</filename>
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional>baseGetPackagesForDeletion</optional>
+    </term>
+    <listitem>
+     <para>
+      Return the name(s) of packages which will be deleted
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional>baseGetProfilesUsed</optional>
+    </term>
+    <listitem>
+     <para>
+      Return the name(s) of profiles used to build this image
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional>baseSetRunlevel {value}</optional>
+    </term>
+    <listitem>
+     <para>
+      Set the default run level
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional>baseSetupBoot</optional>
+    </term>
+    <listitem>
+     <para>
+      Set up the linuxrc as init
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional>baseSetupBusyBox {-f}</optional>
+    </term>
+    <listitem>
+     <para>
+      activates busybox if installed for all links from the
+      <filename>busybox/busybox.links</filename> file&mdash;you can choose
+      custom apps to be forced into busybox with the <option>-f</option>
+      option as first parameter, for example:
+     </para>
+<screen>baseSetupBusyBox -f /bin/zcat /bin/vi</screen>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional>baseSetupInPlaceGITRepository</optional>
+    </term>
+    <listitem>
+     <para>
+      Create an in place git repository of the root directory. This process
+      may take some time and you may expect problems with binary data
+      handling
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional>baseSetupInPlaceSVNRepository {path_list}</optional>
+    </term>
+    <listitem>
+     <para>
+      Create an in place subversion repository for the specified
+      directories. A standard call could look like this
+      baseSetupInPlaceSVNRepository <filename>/etc</filename>,
+      <filename>/srv</filename>, and <filename>/var/log</filename>
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional>baseSetupPlainTextGITRepository</optional>
+    </term>
+    <listitem>
+     <para>
+      Create an in place git repository of the root directory containing all
+      plain/text files.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional>baseSetupUserPermissions</optional>
+    </term>
+    <listitem>
+     <para>
+      Search all home directories of all users listed in
+      <filename>/etc/passwd</filename> and change the ownership of all files
+      to belong to the correct user and group.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional>baseStripAndKeep {list of info-files to keep}</optional>
+    </term>
+    <listitem>
+     <para>
+      helper function for strip* functions read stdin lines of files to
+      check for removing params: files which should be keep
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional>baseStripDocs {list of docu names to keep}</optional>
+    </term>
+    <listitem>
+     <para>
+      remove all documentation, except one given as parameter
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional>baseStripInfos {list of info-files to keep}</optional>
+    </term>
+    <listitem>
+     <para>
+      remove all info files, except one given as parameter
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional>baseStripLocales {list of locales}</optional>
+    </term>
+    <listitem>
+     <para>
+      remove all locales, except one given as parameter
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional>baseStripMans {list of manpages to keep}</optional>
+    </term>
+    <listitem>
+     <para>
+      remove all manual pages, except one given as parameter example:
+      baseStripMans more less
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional>baseStripRPM</optional>
+    </term>
+    <listitem>
+     <para>
+      remove rpms defined in <filename>config.xml</filename> in the image
+      type=delete section
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional>suseRemovePackagesMarkedForDeletion</optional>
+    </term>
+    <listitem>
+     <para>
+      remove rpms defined in <filename>config.xml</filename> in the image
+      type=delete section. The difference compared to baseStripRPM is that
+      the suse variant checks if the package is really installed prior to
+      passing it to rpm to uninstall it. The suse rpm exits with an error
+      exit code while there are other rpm version which just ignore if an
+      uninstall request was set on a package which is not installed
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional>baseStripTools {list of toolpath} {list of tools}</optional>
+    </term>
+    <listitem>
+     <para>
+      helper function for suseStripInitrd function params: toolpath, tools
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional>baseStripUnusedLibs</optional>
+    </term>
+    <listitem>
+     <para>
+      remove libraries which are not directly linked against applications in
+      the bin directories
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional>baseUpdateSysConfig {filename} {variable} {value}</optional>
+    </term>
+    <listitem>
+     <para>
+      update sysconfig variable contents
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional>Debug {message}</optional>
+    </term>
+    <listitem>
+     <para>
+      Helper function to print a message if the variable
+      <varname>DEBUG</varname> is set to 1
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional>Echo {echo commandline}</optional>
+    </term>
+    <listitem>
+     <para>
+      Helper function to print a message to the controlling terminal
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional>Rm {list of files}</optional>
+    </term>
+    <listitem>
+     <para>
+      Helper function to delete files and announce it to log
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional>Rpm {rpm commandline}</optional>
+    </term>
+    <listitem>
+     <para>
+      Helper function to the RPM function and announce it to log
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional>suseConfig</optional>
+    </term>
+    <listitem>
+     <para>
+      Setup keytable language, timezone and hwclock if specified in
+      <filename>config.xml</filename> and call SuSEconfig afterwards
+      SuSEconfig is only called on systems which still support it
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional>suseInsertService {servicename}</optional>
+    </term>
+    <listitem>
+     <para>
+      This function calls baseInsertService and exists only for
+      compatibility reasons
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional>suseRemoveService {servicename}</optional>
+    </term>
+    <listitem>
+     <para>
+      This function calls baseRemoveService and exists only for
+      compatibility reasons
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional>baseInsertService {servicename}</optional>
+    </term>
+    <listitem>
+     <para>
+      Activate the given service by using the chkconfig or systemctl
+      program. Which init system is in use is auto detected
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional>baseRemoveService {servicename}</optional>
+    </term>
+    <listitem>
+     <para>
+      Deactive the given service by using the chkconfig or systemctl
+      program. Which init system is in use is auto detected
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional>baseService {servicename} {on|off}</optional>
+    </term>
+    <listitem>
+     <para>
+      Activate/Deactivate a service by using the chkconfig or systemctl
+      program. The function requires the service name and the value on or
+      off as parameters. Which init system is in use is auto detected
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional>suseActivateDefaultServices</optional>
+    </term>
+    <listitem>
+     <para>
+      Activates the following sysVInit services to be on by default using
+      the chkconfig program: boot.rootfsck, boot.cleanup, boot.localfs,
+      boot.localnet, boot.clock, policykitd, dbus, consolekit, haldaemon,
+      network, atd, syslog, cron, kbd. And the following for systemd
+      systems: network, cron
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional>suseSetupProduct</optional>
+    </term>
+    <listitem>
+     <para>
+      This function creates the baseproduct link in /etc/products.d pointing
+      to the installed product
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional>suseSetupProductInformation</optional>
+    </term>
+    <listitem>
+     <para>
+      This function will use zypper to search for the installed product and
+      install all product specific packages. This function only makes sense
+      if zypper is used as packagemanager
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional>suseStripPackager {-a}</optional>
+    </term>
+    <listitem>
+     <para>
+      Remove smart or zypper packages and db files Also remove rpm package
+      and db if <option>-a</option> given
+     </para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+ </refsect1>
+ <refsect1 id="kiwi.config.environment">
+  <title>Profile environment variables</title>
+  <para>
+   The .profile environment file contains a specific set of variables which
+   are listed below. Some of the functions above makes use of the variables.
+  </para>
+  <variablelist>
+   <varlistentry>
+    <term><optional>$kiwi_compressed</optional>
+    </term>
+    <listitem>
+     <para>
+      The value of the compressed attribute set in the type element in
+      <filename>config.xml</filename>
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional>$kiwi_delete</optional>
+    </term>
+    <listitem>
+     <para>
+      A list of all packages which are part of the packages section with
+      <sgmltag class="attribute">type</sgmltag>="<sgmltag 
+              class="attvalue">delete</sgmltag>"
       in <filename>config.xml</filename>
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-        <term><optional>$kiwi_delete</optional></term>
-        <listitem>
-          <para>
-            A list of all packages which are part of the packages section
-            with <sgmltag class="attribute">type</sgmltag>="<sgmltag 
-              class="attvalue">delete</sgmltag>" in <filename>config.xml</filename>
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-        <term><optional>$kiwi_drivers</optional></term>
-        <listitem>
-          <para>
-            A comma separated list of the driver entries as listed in the
-            drivers section of the <filename>config.xml</filename>.
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-       <term><optional>$kiwi_iname</optional></term>
-        <listitem>
-          <para>
-            The name of the image as listed in <filename>config.xml</filename>
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-       <term><optional>$kiwi_iversion</optional></term>
-        <listitem>
-          <para>
-            The image version string major.minor.release
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-        <term><optional>$kiwi_keytable</optional></term>
-        <listitem>
-          <para>
-            The contents of the keytable setup as done in <filename>config.xml</filename>
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-        <term><optional>$kiwi_language</optional></term>
-        <listitem>
-          <para>
-            The contents of the locale setup as done in <filename>config.xml</filename>
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-        <term><optional>$kiwi_profiles</optional></term>
-        <listitem>
-          <para>
-            A list of profiles used to build this image
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-        <term><optional>$kiwi_size</optional></term>
-        <listitem>
-          <para>
-            The predefined size value for this image. This is not the computed
-            size but only the optional size value of the preferences section
-            in <filename>config.xml</filename>
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-        <term><optional>$kiwi_timezone</optional></term>
-        <listitem>
-          <para>
-            The contents of the timezone setup as done in <filename>config.xml</filename>
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-        <term><optional>$kiwi_type</optional></term>
-        <listitem>
-          <para>
-            The basic image type. Can be a simply filesystem image type of
-            ext2, ext3, reiserfs, squashfs, cpio, or one of the following complex
-            image types: iso, split, usb, vmx, oem, xen, or pxe.
-          </para>
-        </listitem>
-      </varlistentry>
-    </variablelist>
-  </refsect1>  
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional>$kiwi_drivers</optional>
+    </term>
+    <listitem>
+     <para>
+      A comma separated list of the driver entries as listed in the drivers
+      section of the <filename>config.xml</filename>.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional>$kiwi_iname</optional>
+    </term>
+    <listitem>
+     <para>
+      The name of the image as listed in <filename>config.xml</filename>
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional>$kiwi_iversion</optional>
+    </term>
+    <listitem>
+     <para>
+      The image version string major.minor.release
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional>$kiwi_keytable</optional>
+    </term>
+    <listitem>
+     <para>
+      The contents of the keytable setup as done in
+      <filename>config.xml</filename>
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional>$kiwi_language</optional>
+    </term>
+    <listitem>
+     <para>
+      The contents of the locale setup as done in
+      <filename>config.xml</filename>
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional>$kiwi_profiles</optional>
+    </term>
+    <listitem>
+     <para>
+      A list of profiles used to build this image
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional>$kiwi_size</optional>
+    </term>
+    <listitem>
+     <para>
+      The predefined size value for this image. This is not the computed
+      size but only the optional size value of the preferences section in
+      <filename>config.xml</filename>
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional>$kiwi_timezone</optional>
+    </term>
+    <listitem>
+     <para>
+      The contents of the timezone setup as done in
+      <filename>config.xml</filename>
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional>$kiwi_type</optional>
+    </term>
+    <listitem>
+     <para>
+      The basic image type. Can be a simply filesystem image type of ext2,
+      ext3, reiserfs, squashfs, cpio, or one of the following complex image
+      types: iso, split, usb, vmx, oem, xen, or pxe.
+     </para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+ </refsect1>
 </refentry>

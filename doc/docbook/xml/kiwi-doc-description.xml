@@ -1,1027 +1,1188 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
                          "http://www.docbook.org/xml/4.5/docbookx.dtd">
-
 <chapter id="chap.description">
-  <title>KIWI Image Description</title>
-  <indexterm>
-    <primary>KIWI</primary>
-    <secondary>image description</secondary>
-  </indexterm>
-  <para>In order to be able to create an image with KIWI, a so called
-    image description must be created. The image description is
-    represented by a directory which has to contain at least one file
-    named <filename>config.xml</filename> or <filename
-      class="extension">*.kiwi</filename>. A good start for such a
-    description can be found in the examples provided in
-      <filename>/usr/share/doc/packages/kiwi/examples</filename>. </para>
+ <title>KIWI Image Description</title><indexterm>
+ <primary>KIWI</primary>
+ <secondary>image description</secondary></indexterm>
+ <para>
+  In order to be able to create an image with KIWI, a so called image
+  description must be created. The image description is represented by a
+  directory which has to contain at least one file named
+  <filename>config.xml</filename> or
+  <filename
+      class="extension">*.kiwi</filename>. A good start for such
+  a description can be found in the examples provided in
+  <filename>/usr/share/doc/packages/kiwi/examples</filename>.
+ </para>
+ <figure id="fig.description.imagedescrdir">
+  <title>Image Description Directory</title>
+  <mediaobject>
+   <imageobject role="fo">
+    <imagedata fileref="description.svg" width="40%" format="SVG"/>
+   </imageobject>
+   <imageobject role="html">
+    <imagedata fileref="description.png" width="40%" format="PNG"/>
+   </imageobject>
+  </mediaobject>
+ </figure>
+ <para>
+  The following additional information is optional for the process of
+  building an image, but most often mandatory for the functionality of the
+  created operating system:
+ </para>
+ <variablelist>
+  <varlistentry>
+   <term><filename>images.sh</filename>
+   </term>
+   <listitem>
+    <para>
+     Optional configuration script while creating the packed image. This
+     script is called at the beginning of the image creation process. It is
+     designed to clean-up the image system. Affected are all the programs
+     and files only needed while the unpacked image exists.
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>config.sh</filename>
+   </term>
+   <listitem>
+    <para>
+     Optional configuration script while creating the unpacked image. This
+     script is called at the end of the installation, but
+     <emphasis>before</emphasis> the package scripts have run. It is
+     designed to configure the image system, such as the activation or
+     deactivation of certain services
+     (<systemitem
+            class="service">insserv</systemitem>). The
+     call is not made until after the switch to the image has been made with
+     chroot.
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename class="directory">root</filename>
+   </term>
+   <listitem>
+    <para>
+     Subdirectory that contains special files, directories, and scripts for
+     adapting the image environment <emphasis>after</emphasis> the
+     installation of all the image packages. The entire directory is copied
+     into the root of the image tree using <command>cp</command>
+     <option>-a</option>.
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>config-yast-autoyast.xml</filename>
+   </term>
+   <listitem>
+    <para>
+     Configuration file which has been created by AutoYaST. To be able to
+     create such an AutoYaST profile, run:
+    </para>
+<screen><command>yast2</command> autoyast</screen>
+    <para>
+     Once you have saved the information from the AutoYaST UI as
+     <filename>config-yast-autoyast.xml</filename> file in your image
+     description directory KIWI will process on the file and setup your
+     image as follows:
+    </para>
+    <orderedlist>
+     <listitem>
+      <para>
+       While booting the image YaST is started in AutoYaST mode
+       automatically
+      </para>
+     </listitem>
+     <listitem>
+      <para>
+       The AutoYaST description is parsed and the instructions are handled
+       by YaST. In other words the <emphasis>system configuration</emphasis>
+       is performed
+      </para>
+     </listitem>
+     <listitem>
+      <para>
+       If the process finished successfully the environment is cleaned and
+       AutoYaST won’t be called at next reboot.
+      </para>
+     </listitem>
+    </orderedlist>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>config-cdroot.tgz</filename>
+   </term>
+   <listitem>
+    <para>
+     Archive which is used for ISO images only. The data in the archive is
+     uncompressed and stored in the CD/DVD root directory. This archive can
+     be used, for example, to integrate a license file or information
+     directly readable from the CD or DVD.
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>config-cdroot.sh</filename>
+   </term>
+   <listitem>
+    <para>
+     Along with the <filename>config-cdroot.tgz</filename> one can provide a
+     script which allows to manipulate the extracted data.
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename class="directory">config/</filename>
+   </term>
+   <listitem>
+    <para>
+     Optional subdirectory that contains Bash scripts that are called after
+     the installation of all the image packages, primarily in order to
+     remove the parts of a package that are not needed for the operating
+     system. The name of the Bash script must resemble the package name
+     listed in the config.xml.
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+ <sect1 id="sec.description.config.xml">
+  <title>The config.xml File</title><indexterm>
 
-  <figure id="fig.description.imagedescrdir">
-    <title>Image Description Directory</title>
-    <mediaobject>
-      <imageobject role="fo">
-        <imagedata fileref="description.svg" width="40%" format="SVG"/>
-      </imageobject>
-      <imageobject role="html">
-        <imagedata fileref="description.png" width="40%" format="PNG"/>
-      </imageobject>
-    </mediaobject>
-  </figure>
+  <primary>KIWI</primary>
 
-  <para>The following additional information is optional for the process
-    of building an image, but most often mandatory for the functionality
-    of the created operating system: </para>
+  <secondary>config.xml</secondary></indexterm>
 
-  <variablelist>
-    <varlistentry>
-      <term><filename>images.sh</filename></term>
-      <listitem>
-        <para> Optional configuration script while creating the packed
-          image. This script is called at the beginning of the image
-          creation process. It is designed to clean-up the image system.
-          Affected are all the programs and files only needed while the
-          unpacked image exists. </para>
-      </listitem>
-    </varlistentry>
-    <varlistentry>
-      <term><filename>config.sh</filename></term>
-      <listitem>
-        <para>Optional configuration script while creating the unpacked
-          image. This script is called at the end of the installation,
-          but <emphasis>before</emphasis> the package scripts have run.
-          It is designed to configure the image system, such as the
-          activation or deactivation of certain services (<systemitem
-            class="service">insserv</systemitem>). The call is not made
-          until after the switch to the image has been made with chroot.
-        </para>
-      </listitem>
-    </varlistentry>
-    <varlistentry>
-      <term><filename class="directory">root</filename></term>
-      <listitem>
-        <para>Subdirectory that contains special files, directories, and
-          scripts for adapting the image environment
-            <emphasis>after</emphasis> the installation of all the image
-          packages. The entire directory is copied into the root of the
-          image tree using <command>cp</command>
-          <option>-a</option>. </para>
-      </listitem>
-    </varlistentry>
-    <varlistentry>
-      <term><filename>config-yast-autoyast.xml</filename></term>
-      <listitem>
-        <para> Configuration file which has been created by AutoYaST. To
-          be able to create such an AutoYaST profile, run: </para>
-        <screen><command>yast2</command> autoyast</screen>
-        <para>Once you have saved the information from the AutoYaST UI
-          as <filename>config-yast-autoyast.xml</filename> file in your
-          image description directory KIWI will process on the file and
-          setup your image as follows: </para>
-        <orderedlist>
-          <listitem>
-            <para>While booting the image YaST is started in AutoYaST
-              mode automatically </para>
-          </listitem>
-          <listitem>
-            <para>The AutoYaST description is parsed and the
-              instructions are handled by YaST. In other words the
-                <emphasis>system configuration</emphasis> is performed
-            </para>
-          </listitem>
-          <listitem>
-            <para>If the process finished successfully the environment
-              is cleaned and AutoYaST won’t be called at next reboot.
-            </para>
-          </listitem>
-        </orderedlist>
-      </listitem>
-    </varlistentry>
-    <varlistentry>
-      <term><filename>config-cdroot.tgz</filename></term>
-      <listitem>
-        <para> Archive which is used for ISO images only. The data in
-          the archive is uncompressed and stored in the CD/DVD root
-          directory. This archive can be used, for example, to integrate
-          a license file or information directly readable from the CD or
-          DVD. </para>
-      </listitem>
-    </varlistentry>
-    <varlistentry>
-      <term><filename>config-cdroot.sh</filename></term>
-      <listitem>
-        <para>Along with the <filename>config-cdroot.tgz</filename> one
-          can provide a script which allows to manipulate the extracted
-          data. </para>
-      </listitem>
-    </varlistentry>
-    <varlistentry>
-      <term><filename class="directory">config/</filename></term>
-      <listitem>
-        <para>Optional subdirectory that contains Bash scripts that are
-          called after the installation of all the image packages,
-          primarily in order to remove the parts of a package that are
-          not needed for the operating system. The name of the Bash
-          script must resemble the package name listed in the
-          config.xml. </para>
-      </listitem>
-    </varlistentry>
-  </variablelist>
+  <para>
+   The mandatory image definition file is divided into different sections
+   which describes information like the image name and type as well as the
+   packages and patterns the image should consist of.
+  </para>
 
-  <sect1 id="sec.description.config.xml">
-    <title>The config.xml File</title>
-    <indexterm>
-      <primary>KIWI</primary>
-      <secondary>config.xml</secondary>
-    </indexterm>
-    <para> The mandatory image definition file is divided into different
-      sections which describes information like the image name and type
-      as well as the packages and patterns the image should consist of. </para>
-    <para>The following information explains the basic structure of the
-      XML document. When KIWI is executed, the XML structure is
-      validated by the KIWI RELAX&nbsp;NG based schema. For details on
-      attributes and values please refer to the schema documentation
-      file at
-        <filename>/usr/share/doc/packages/kiwi/kiwi.rng.html</filename>. </para>
+  <para>
+   The following information explains the basic structure of the XML
+   document. When KIWI is executed, the XML structure is validated by the
+   KIWI RELAX&nbsp;NG based schema. For details on attributes and values
+   please refer to the schema documentation file at
+   <filename>/usr/share/doc/packages/kiwi/kiwi.rng.html</filename>.
+  </para>
 
-    <sect2 id="sec.description.image">
-      <title><sgmltag>image</sgmltag> Element</title>
-      <screen>&lt;image schemaversion="6.2" name="iname"
+  <sect2 id="sec.description.image">
+   <title><sgmltag>image</sgmltag> Element</title>
+<screen>&lt;image schemaversion="6.2" name="iname"
   displayname="text" 
   kiwirevision="number" 
   id="10 digit number"&gt;
   <sgmltag class="sgmlcomment"> ... </sgmltag>
 &lt;/image&gt;</screen>
-
-      <para>The image definition starts with an <sgmltag>image</sgmltag>
-        tag and requires the schema format at version 2.0. The attribute
-          <sgmltag class="attribute">name</sgmltag> specifies the name
-        of the image which is also used for the filenames created by
-        KIWI. Because we don’t want spaces in filenames the <sgmltag
-          class="attribute">name</sgmltag> attribute must not have any
-        spaces in its name. </para>
-      <para>The following optional attributes can be inserted in the
-          <sgmltag>image</sgmltag> tag: </para>
-
-      <variablelist>
-        <varlistentry>
-          <term><sgmltag class="attribute">displayname</sgmltag></term>
-          <listitem>
-            <para>Allows setup of the boot menu title for the selected
-              bootloader. So you can have <emphasis>suse-SLED-foo</emphasis>
-              as the image name but a different name as the boot display name.
-              Spaces are not allowed in the display name because it causes
-              problems for some bootloaders and kiwi did not take the effort
-              to separate the ones which can display them correctly from the
-              ones which can't</para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><sgmltag class="attribute">kiwirevision</sgmltag></term>
-          <listitem>
-            <para>specifies a KIWI git revision number which is known to
-              build a working image from this description. If the KIWI
-              git revision doesn't match the specified value, the process
-              will exit. The currently used git revision can be queried
-              by calling <command>kiwi</command>
-              <option>--version</option>. </para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><sgmltag class="attribute">id</sgmltag></term>
-          <listitem>
-            <para> sets an identification number which appears as file
-                <filename>/etc/ImageID</filename> within the image.
-            </para>
-          </listitem>
-        </varlistentry>
-      </variablelist>
-
-      <para>Inside the <sgmltag>image</sgmltag> section the following
-        mandatory and optional subelements exists. The simplest image
-        description must define the elements
-          <sgmltag>description</sgmltag>,
-        <sgmltag>preferences</sgmltag>, <sgmltag>repository</sgmltag>
-        and <sgmltag>packages</sgmltag> (at least one of <sgmltag
+   <para>
+    The image definition starts with an <sgmltag>image</sgmltag> tag and
+    requires the schema format at version 2.0. The attribute
+    <sgmltag class="attribute">name</sgmltag> specifies the name of the
+    image which is also used for the filenames created by KIWI. Because we
+    don’t want spaces in filenames the
+    <sgmltag class="attribute">name</sgmltag> attribute must not
+    have any spaces in its name.
+   </para>
+   <para>
+    The following optional attributes can be inserted in the
+    <sgmltag>image</sgmltag> tag:
+   </para>
+   <variablelist>
+    <varlistentry>
+     <term><sgmltag class="attribute">displayname</sgmltag>
+     </term>
+     <listitem>
+      <para>
+       Allows setup of the boot menu title for the selected bootloader. So
+       you can have <emphasis>suse-SLED-foo</emphasis> as the image name but
+       a different name as the boot display name. Spaces are not allowed in
+       the display name because it causes problems for some bootloaders and
+       kiwi did not take the effort to separate the ones which can display
+       them correctly from the ones which can't
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><sgmltag class="attribute">kiwirevision</sgmltag>
+     </term>
+     <listitem>
+      <para>
+       specifies a KIWI git revision number which is known to build a
+       working image from this description. If the KIWI git revision doesn't
+       match the specified value, the process will exit. The currently used
+       git revision can be queried by calling <command>kiwi</command>
+       <option>--version</option>.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><sgmltag class="attribute">id</sgmltag>
+     </term>
+     <listitem>
+      <para>
+       sets an identification number which appears as file
+       <filename>/etc/ImageID</filename> within the image.
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+   <para>
+    Inside the <sgmltag>image</sgmltag> section the following mandatory and
+    optional subelements exists. The simplest image description must define
+    the elements <sgmltag>description</sgmltag>,
+    <sgmltag>preferences</sgmltag>, <sgmltag>repository</sgmltag> and
+    <sgmltag>packages</sgmltag> (at least one of
+    <sgmltag
           class="attribute">type</sgmltag>="<sgmltag class="attvalue"
-          >bootstrap</sgmltag>"). </para>
-    </sect2>
+          >bootstrap</sgmltag>").
+   </para>
+  </sect2>
 
-    <sect2 id="sec.description.description">
-      <title><sgmltag>description</sgmltag> Element</title>
-      <screen>&lt;description type="system"&gt;
+  <sect2 id="sec.description.description">
+   <title><sgmltag>description</sgmltag> Element</title>
+<screen>&lt;description type="system"&gt;
   &lt;author&gt;an author&lt;/author&gt;
   &lt;contact&gt;mail&lt;/contact&gt;
   &lt;specification&gt;short info&lt;/specification&gt;
 &lt;/description&gt;</screen>
+   <para>
+    The mandatory <sgmltag>description</sgmltag> section contains
+    information about the creator of this image description. The attribute
+    <sgmltag class="attribute"
+          >type</sgmltag> could be either of
+    the value system which indicates this is a system image description or
+    at value boot for boot image descriptions.
+   </para>
+  </sect2>
 
-      <para>The mandatory <sgmltag>description</sgmltag> section
-        contains information about the creator of this image
-        description. The attribute <sgmltag class="attribute"
-          >type</sgmltag> could be either of the value system which
-        indicates this is a system image description or at value boot
-        for boot image descriptions. </para>
-    </sect2>
-
-    <sect2 id="sec.description.profiles">
-      <title><sgmltag>profiles</sgmltag> Element</title>
-      <screen>&lt;profiles&gt;
+  <sect2 id="sec.description.profiles">
+   <title><sgmltag>profiles</sgmltag> Element</title>
+<screen>&lt;profiles&gt;
    &lt;profile name="name" description="text"/&gt;
    <sgmltag class="sgmlcomment"> ... </sgmltag>
 &lt;/profiles&gt;</screen>
+   <para>
+    The optional <sgmltag>profiles</sgmltag> section lets you maintain one
+    image description while allowing for variation of the sections packages
+    and drivers that are included. A separate profile element must be
+    specified for each variation. The <sgmltag>profile</sgmltag> child
+    element, which has <sgmltag
+          class="attribute">name</sgmltag>
+    and <sgmltag
+          class="attribute">description</sgmltag>
+    attributes, specifies an alias name used to mark sections as belonging
+    to a profile, and a short description explaining what this profile does.
+   </para>
+   <para>
+    To mark a set of packages/drivers as belonging to a profile, simply
+    annotate them with the
+    <sgmltag class="attribute"
+          >profiles</sgmltag> attribute. It
+    is also possible to mark sections as belonging to multiple profiles by
+    separating the names in the
+    <sgmltag class="attribute">profiles</sgmltag> attribute with a comma. If
+    a <sgmltag>packages</sgmltag> or <sgmltag>drivers</sgmltag> tag does not
+    have a <sgmltag
+          class="attribute">profiles</sgmltag>
+    attribute, it is assumed to be present for all profiles.
+   </para>
+  </sect2>
 
-      <para>The optional <sgmltag>profiles</sgmltag> section lets you
-        maintain one image description while allowing for variation of
-        the sections packages and drivers that are included. A separate
-        profile element must be specified for each variation. The
-          <sgmltag>profile</sgmltag> child element, which has <sgmltag
-          class="attribute">name</sgmltag> and <sgmltag
-          class="attribute">description</sgmltag> attributes, specifies
-        an alias name used to mark sections as belonging to a profile,
-        and a short description explaining what this profile does. </para>
-
-      <para>To mark a set of packages/drivers as belonging to a profile,
-        simply annotate them with the <sgmltag class="attribute"
-          >profiles</sgmltag> attribute. It is also possible to mark
-        sections as belonging to multiple profiles by separating the
-        names in the <sgmltag class="attribute">profiles</sgmltag>
-        attribute with a comma. If a <sgmltag>packages</sgmltag> or
-          <sgmltag>drivers</sgmltag> tag does not have a <sgmltag
-          class="attribute">profiles</sgmltag> attribute, it is assumed
-        to be present for all profiles. </para>
-    </sect2>
-
-    <sect2 id="sec.description.preferences">
-      <title><sgmltag>preferences</sgmltag> Element</title>
-
-      <screen>&lt;preferences profiles="name"&gt;
+  <sect2 id="sec.description.preferences">
+   <title><sgmltag>preferences</sgmltag> Element</title>
+<screen>&lt;preferences profiles="name"&gt;
   &lt;version&gt;1.1.2&lt;/version&gt;
   &lt;packagemanager&gt;zypper&lt;/packagemanager&gt;
   &lt;type image="name" ...&gt;
     &lt;machine|oemconfig|pxedeploy|size|split|systemdisk|vagrantconfig&gt;
   &lt;/type&gt; 
 &lt;/preferences&gt;</screen>
-
-      <para>The mandatory <sgmltag>preferences</sgmltag> section
-        contains information about the supported image type(s), the used
-        package manager, the version of this image, and optional
-        attributes. The image version must be a three-part version
-        number of the format: <emphasis role="bold"
+   <para>
+    The mandatory <sgmltag>preferences</sgmltag> section contains
+    information about the supported image type(s), the used package manager,
+    the version of this image, and optional attributes. The image version
+    must be a three-part version number of the format:
+    <emphasis role="bold"
           >Major</emphasis>.<emphasis role="bold"
           >Minor</emphasis>.<emphasis role="bold">Release</emphasis>.
-        <indexterm>
-          <primary>KIWI</primary>
-          <secondary>release format</secondary>
-        </indexterm>
-        In case of changes to the image description the following rules
-        should apply: </para>
-
-      <itemizedlist>
-        <listitem>
-          <para>For smaller image modifications that do not add or
-            remove any new packages, only the release number is
-            incremented. The <filename>config.xml</filename> file
-            remains unchanged. </para>
-        </listitem>
-        <listitem>
-          <para>For image changes that involve the addition or removal
-            of packages the minor number is incremented and the release
-            number is reset. </para>
-        </listitem>
-        <listitem>
-          <para>For image changes that change the size of the image file
-            the major number is incremented. </para>
-        </listitem>
-      </itemizedlist>
-
-      <para>By default, KIWI uses the <command>zypper</command> package
-        manager but it is also possible to use the non SUSE native package
-        manager called <command>smart</command>. </para>
-
-      <para>In general the specification of one
-          <sgmltag>preferences</sgmltag> section is sufficient. However,
-        it’s possible to specify multiple <sgmltag>preferences</sgmltag>
-        sections and distinguish between the sections via the <sgmltag
-          class="attribute">profiles</sgmltag> attribute. Data may also
-        be shared between different profiles. Using profiles it is
-        possible to, for example, configure specific preferences for OEM
-        image generation. Activation of a given
-          <sgmltag>preferences</sgmltag> during image generation is
-        triggered by the use of the <option>--add-profile</option>
-        command line argument.</para>
-
-
-      <para>For each <sgmltag>preferences</sgmltag> block at least one
-          <sgmltag>type</sgmltag> element must be defined. It is
-        possible to specify multiple <sgmltag>type</sgmltag> elements in
-        any <sgmltag>preferences</sgmltag> block. To set a given
-          <sgmltag>type</sgmltag> description as the default image use
-        the boolean attribute <sgmltag class="attribute"
-          >primary</sgmltag> and set its value to <sgmltag
-          class="attvalue">true</sgmltag>. The image type to be created
-        is determined by the value of the <sgmltag class="attribute"
-          >image</sgmltag> attribute. The following list describes the
-        supported types and possible values of the image attribute: </para>
-
-      <variablelist>
-        <varlistentry>
-          <term><sgmltag class="attribute">image</sgmltag>="<sgmltag
+    <indexterm>
+    <primary>KIWI</primary>
+    <secondary>release format</secondary>
+    </indexterm> In case of changes to the image description the following
+    rules should apply:
+   </para>
+   <itemizedlist>
+    <listitem>
+     <para>
+      For smaller image modifications that do not add or remove any new
+      packages, only the release number is incremented. The
+      <filename>config.xml</filename> file remains unchanged.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      For image changes that involve the addition or removal of packages the
+      minor number is incremented and the release number is reset.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      For image changes that change the size of the image file the major
+      number is incremented.
+     </para>
+    </listitem>
+   </itemizedlist>
+   <para>
+    By default, KIWI uses the <command>zypper</command> package manager but
+    it is also possible to use the non SUSE native package manager called
+    <command>smart</command>.
+   </para>
+   <para>
+    In general the specification of one <sgmltag>preferences</sgmltag>
+    section is sufficient. However, it’s possible to specify multiple
+    <sgmltag>preferences</sgmltag> sections and distinguish between the
+    sections via the <sgmltag
+          class="attribute">profiles</sgmltag>
+    attribute. Data may also be shared between different profiles. Using
+    profiles it is possible to, for example, configure specific preferences
+    for OEM image generation. Activation of a given
+    <sgmltag>preferences</sgmltag> during image generation is triggered by
+    the use of the <option>--add-profile</option> command line argument.
+   </para>
+   <para>
+    For each <sgmltag>preferences</sgmltag> block at least one
+    <sgmltag>type</sgmltag> element must be defined. It is possible to
+    specify multiple <sgmltag>type</sgmltag> elements in any
+    <sgmltag>preferences</sgmltag> block. To set a given
+    <sgmltag>type</sgmltag> description as the default image use the boolean
+    attribute <sgmltag class="attribute"
+          >primary</sgmltag> and
+    set its value to <sgmltag
+          class="attvalue">true</sgmltag>. The
+    image type to be created is determined by the value of the
+    <sgmltag class="attribute"
+          >image</sgmltag> attribute. The
+    following list describes the supported types and possible values of the
+    image attribute:
+   </para>
+   <variablelist>
+    <varlistentry>
+     <term><sgmltag class="attribute">image</sgmltag>="<sgmltag
               class="attvalue">lxc|docker</sgmltag>"</term>
-          <listitem>
-            <para>Use the lxc or docker image type to build a linux container image
-              For additional information refer to the <xref linkend="chap.lxc"/>
-              chapter.</para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><sgmltag class="attribute">image</sgmltag>="<sgmltag
+     <listitem>
+      <para>
+       Use the lxc or docker image type to build a linux container image For
+       additional information refer to the <xref linkend="chap.lxc"/>
+       chapter.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><sgmltag class="attribute">image</sgmltag>="<sgmltag
               class="attvalue">[filesystem]</sgmltag>"</term>
-          <listitem>
-            <para>Use one of the following image types to build a plain
-              filesystem image. This will create a file containing the
-              data in the specified filesystem and you can loop mount
-              the image to view the contents e.g image="ext3":</para>
-              <itemizedlist>
-                 <listitem>
-          <para>ext2</para>
-                 </listitem>
-                 <listitem>
-          <para>ext3</para>
-                 </listitem>
-                 <listitem>
-          <para>ext4</para>
-                 </listitem>
-                 <listitem>
-          <para>btrfs</para>
-                 </listitem>
-                 <listitem>
-          <para>squashfs</para>
-                 </listitem>
-                 <listitem>
-          <para>xfs</para>
-                 </listitem>
-              </itemizedlist>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><sgmltag class="attribute">image</sgmltag>="<sgmltag
+     <listitem>
+      <para>
+       Use one of the following image types to build a plain filesystem
+       image. This will create a file containing the data in the specified
+       filesystem and you can loop mount the image to view the contents e.g
+       image="ext3":
+      </para>
+      <itemizedlist>
+       <listitem>
+        <para>
+         ext2
+        </para>
+       </listitem>
+       <listitem>
+        <para>
+         ext3
+        </para>
+       </listitem>
+       <listitem>
+        <para>
+         ext4
+        </para>
+       </listitem>
+       <listitem>
+        <para>
+         btrfs
+        </para>
+       </listitem>
+       <listitem>
+        <para>
+         squashfs
+        </para>
+       </listitem>
+       <listitem>
+        <para>
+         xfs
+        </para>
+       </listitem>
+      </itemizedlist>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><sgmltag class="attribute">image</sgmltag>="<sgmltag
               class="attvalue">tbz</sgmltag>"</term>
-          <listitem>
-            <para>Use the tbz image type to just pack the unpacked image tree
-              into a tarball.</para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><sgmltag class="attribute">image</sgmltag>="<sgmltag
+     <listitem>
+      <para>
+       Use the tbz image type to just pack the unpacked image tree into a
+       tarball.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><sgmltag class="attribute">image</sgmltag>="<sgmltag
               class="attvalue">cpio</sgmltag>"</term>
-          <listitem>
-            <para>Use the cpio image type to specify the generation of a
-              boot image (initrd). When generating a boot image, it is
-              possible to specify a specific boot profile and boot
-              kernel using the optional <sgmltag class="attribute"
+     <listitem>
+      <para>
+       Use the cpio image type to specify the generation of a boot image
+       (initrd). When generating a boot image, it is possible to specify a
+       specific boot profile and boot kernel using the optional
+       <sgmltag class="attribute"
                 >bootprofile</sgmltag>="<sgmltag class="attvalue"
-                >default</sgmltag>" and <sgmltag class="attribute"
+                >default</sgmltag>"
+       and
+       <sgmltag class="attribute"
                 >bootkernel</sgmltag>="<sgmltag class="attvalue"
-                >std</sgmltag>" attributes. </para>
-            <para>A boot image should group the various supported
-              kernels into profiles. If the user chooses not to use the
-              profiles supplied by KIWI, it is required that one profile
-              named std be created. This profile will be used if no
-              other bootkernel is specified. Further it is required to
-              create a profile named default. This profile is used when
-              no bootprofile is specified. </para>
-            <para>It is recommended that special configurations that
-              omit drivers, use special drivers and/or special packages
-              be specified as profiles. </para>
-            <para>The bootprofile and bootkernel attribute are respected
-              within the definition of a system image. Us the attribute
-              and value <sgmltag class="attribute"
+                >std</sgmltag>"
+       attributes.
+      </para>
+      <para>
+       A boot image should group the various supported kernels into
+       profiles. If the user chooses not to use the profiles supplied by
+       KIWI, it is required that one profile named std be created. This
+       profile will be used if no other bootkernel is specified. Further it
+       is required to create a profile named default. This profile is used
+       when no bootprofile is specified.
+      </para>
+      <para>
+       It is recommended that special configurations that omit drivers, use
+       special drivers and/or special packages be specified as profiles.
+      </para>
+      <para>
+       The bootprofile and bootkernel attribute are respected within the
+       definition of a system image. Us the attribute and value
+       <sgmltag class="attribute"
                 >type</sgmltag>="<sgmltag class="attvalue"
-                >system</sgmltag>" of the <sgmltag>description</sgmltag>
-              element to specify the creation of a system image. The
-              values of the bootprofile and bootkernel attributes are
-              used by KIWI when generating the boot image. </para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><sgmltag class="attribute">image</sgmltag>="<sgmltag
+                >system</sgmltag>"
+       of the <sgmltag>description</sgmltag> element to specify the creation
+       of a system image. The values of the bootprofile and bootkernel
+       attributes are used by KIWI when generating the boot image.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><sgmltag class="attribute">image</sgmltag>="<sgmltag
               class="attvalue">iso</sgmltag>"</term>
-          <listitem>
-            <para>Specify the key-value pair <sgmltag class="attribute"
+     <listitem>
+      <para>
+       Specify the key-value pair
+       <sgmltag class="attribute"
                 >image</sgmltag>="<sgmltag class="attvalue"
-                >iso</sgmltag>" to generate a live system suitable for
-              deployment on optical media (CD or DVD). Use the <sgmltag
+                >iso</sgmltag>"
+       to generate a live system suitable for deployment on optical media
+       (CD or DVD). Use the
+       <sgmltag
                 class="attribute">boot</sgmltag>="<sgmltag
-                class="attvalue">isoboot/suse-*</sgmltag>" attribute
-              when generating this image type to select the appropriate
-              boot image for optical media. In addition the optional
-                <sgmltag class="attribute">flags</sgmltag> attribute may
-              be set to the following values with the effects described
-              below:</para>
-            <variablelist>
-              <varlistentry>
-                <term><sgmltag class="attvalue">seed</sgmltag></term>
-                <listitem>
-                  <para>Creates a btrfs based compressed read-only
-                    filesystem which allows write operations into a btrfs
-                    seed device. </para>
-                </listitem>
-              </varlistentry>
-              <varlistentry>
-                <term><sgmltag class="attvalue">overlay</sgmltag></term>
-                <listitem>
-                  <para>Creates a squashfs based compressed read-only
-                    filesystem which is combined with a write space via
-                    the overlayfs filesystem. overlayfs is part of the
-                    kernel since version 3.7</para>
-                </listitem>
-              </varlistentry>
-              <varlistentry>
-                <term><sgmltag class="attvalue"
-                  >compressed</sgmltag></term>
-                <listitem>
-                  <para>Creates a split ext3 plus squashfs filesystem and
-                    combines them via a symlink system to a complete system
-                    it is recommended to specify a <sgmltag>split</sgmltag>
-                    section as a child of this type element.     
-                  </para>
-                </listitem>
-              </varlistentry>
-            </variablelist>
-            <para>If the flags attribute is not used the filesystem
-              will be squashfs compressed for /bin /boot /lib /lib64 /opt /sbin
-              and /usr. The rest of the filesystem is packed into a tmpfs
-              and linked via symbolic links 
-            </para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><sgmltag class="attribute">image</sgmltag>="<sgmltag
+                class="attvalue">isoboot/suse-*</sgmltag>"
+       attribute when generating this image type to select the appropriate
+       boot image for optical media. In addition the optional
+       <sgmltag class="attribute">flags</sgmltag> attribute may be set to
+       the following values with the effects described below:
+      </para>
+      <variablelist>
+       <varlistentry>
+        <term><sgmltag class="attvalue">seed</sgmltag>
+        </term>
+        <listitem>
+         <para>
+          Creates a btrfs based compressed read-only filesystem which allows
+          write operations into a btrfs seed device.
+         </para>
+        </listitem>
+       </varlistentry>
+       <varlistentry>
+        <term><sgmltag class="attvalue">overlay</sgmltag>
+        </term>
+        <listitem>
+         <para>
+          Creates a squashfs based compressed read-only filesystem which is
+          combined with a write space via the overlayfs filesystem.
+          overlayfs is part of the kernel since version 3.7
+         </para>
+        </listitem>
+       </varlistentry>
+       <varlistentry>
+        <term><sgmltag class="attvalue"
+                  >compressed</sgmltag>
+        </term>
+        <listitem>
+         <para>
+          Creates a split ext3 plus squashfs filesystem and combines them
+          via a symlink system to a complete system it is recommended to
+          specify a <sgmltag>split</sgmltag> section as a child of this type
+          element.
+         </para>
+        </listitem>
+       </varlistentry>
+      </variablelist>
+      <para>
+       If the flags attribute is not used the filesystem will be squashfs
+       compressed for /bin /boot /lib /lib64 /opt /sbin and /usr. The rest
+       of the filesystem is packed into a tmpfs and linked via symbolic
+       links
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><sgmltag class="attribute">image</sgmltag>="<sgmltag
               class="attvalue">oem</sgmltag>"</term>
-          <listitem>
-            <para>Use this type to create a virtual disk system suitable
-              in a preload setting. In addition specify the attributes
-                <sgmltag class="attribute">filesystem</sgmltag>, and
-                <sgmltag class="attribute">boot</sgmltag>="<sgmltag
-                class="attvalue">oemboot/suse-*</sgmltag>" to control
-              the filesystem used for the virtual and to specify the
-              proper boot image. Using the optional <sgmltag
-                class="attribute">format</sgmltag> attribute and
-              setting, the value to iso or usb will create self
-              installing images suitable for optical media or a USB
-              stick, respectively. Booting from the media will deploy
-              the OEM preload image onto the selected storage device of
-              the system. It is also possible to configure the system to
-              use logical volumes. Use the optional <sgmltag
-                class="attribute">lvm</sgmltag> attribute and specify
-              the logical volume configuration with the
-                <sgmltag>systemdisk</sgmltag> child element. The default
-              volume group name is kiwiVG. Further configuration of the
-              image is performed using the appropriate
-                <sgmltag>*config</sgmltag> child block. </para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><sgmltag class="attribute">image</sgmltag>="<sgmltag
+     <listitem>
+      <para>
+       Use this type to create a virtual disk system suitable in a preload
+       setting. In addition specify the attributes
+       <sgmltag class="attribute">filesystem</sgmltag>, and
+       <sgmltag class="attribute">boot</sgmltag>="<sgmltag
+                class="attvalue">oemboot/suse-*</sgmltag>"
+       to control the filesystem used for the virtual and to specify the
+       proper boot image. Using the optional
+       <sgmltag
+                class="attribute">format</sgmltag> attribute
+       and setting, the value to iso or usb will create self installing
+       images suitable for optical media or a USB stick, respectively.
+       Booting from the media will deploy the OEM preload image onto the
+       selected storage device of the system. It is also possible to
+       configure the system to use logical volumes. Use the optional
+       <sgmltag
+                class="attribute">lvm</sgmltag> attribute
+       and specify the logical volume configuration with the
+       <sgmltag>systemdisk</sgmltag> child element. The default volume group
+       name is kiwiVG. Further configuration of the image is performed using
+       the appropriate <sgmltag>*config</sgmltag> child block.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><sgmltag class="attribute">image</sgmltag>="<sgmltag
               class="attvalue">pxe</sgmltag>"</term>
-          <listitem>
-            <para>Creating a network boot image is supported by KIWI
-              with the image="pxe" type. When specifying the creation of
-              a network boot image use the <sgmltag class="attribute"
-                >filesystem</sgmltag> and boot="netboot/suse-*"
-              attributes to specify the filesystem of the image and the
-              proper boot image. To compress the image file set the
-                <sgmltag class="attribute">compressed</sgmltag> boolean
-              attribute to true. This setting will compress the image
-              file and has no influence on the filesystem used within
-              the image. The compression is often use to support better
-              transfer times when the pxe image is pushed to the boot
-              server over a network connection. The pxe image layout is
-              controlled by using the <sgmltag>pxedeploy</sgmltag> child
-              element. </para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><sgmltag class="attribute">image</sgmltag>="<sgmltag
+     <listitem>
+      <para>
+       Creating a network boot image is supported by KIWI with the
+       image="pxe" type. When specifying the creation of a network boot
+       image use the
+       <sgmltag class="attribute"
+                >filesystem</sgmltag> and
+       boot="netboot/suse-*" attributes to specify the filesystem of the
+       image and the proper boot image. To compress the image file set the
+       <sgmltag class="attribute">compressed</sgmltag> boolean attribute to
+       true. This setting will compress the image file and has no influence
+       on the filesystem used within the image. The compression is often use
+       to support better transfer times when the pxe image is pushed to the
+       boot server over a network connection. The pxe image layout is
+       controlled by using the <sgmltag>pxedeploy</sgmltag> child element.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><sgmltag class="attribute">image</sgmltag>="<sgmltag
               class="attvalue">split</sgmltag>"</term>
-          <listitem>
-            <para>The split image support allows the creation of an
-              image as split files. Using this technique one can assign
-              different filesystems and different read-write properties
-              to the different sections of the image. The
-                <sgmltag>oem</sgmltag>, <sgmltag>pxe</sgmltag>,
-                <sgmltag>usb</sgmltag>, and <sgmltag>vmx</sgmltag> types
-              can be created as a split system image. Use the <sgmltag
+     <listitem>
+      <para>
+       The split image support allows the creation of an image as split
+       files. Using this technique one can assign different filesystems and
+       different read-write properties to the different sections of the
+       image. The <sgmltag>oem</sgmltag>, <sgmltag>pxe</sgmltag>,
+       <sgmltag>usb</sgmltag>, and <sgmltag>vmx</sgmltag> types can be
+       created as a split system image. Use the
+       <sgmltag
                 class="attribute">boot</sgmltag>="<sgmltag
                 class="attvalue">oem|netboot|usb|vmx/suse-*</sgmltag>"
-              attribute to select the underlying type of the split
-              image. The attributes <sgmltag class="attribute"
-                >fsreadwrite</sgmltag>, <sgmltag class="attribute"
-                >fsreadonly</sgmltag> are used to control the
-              read-write properties of the filesystem specified as the
-              attributes value. Use the appropriate
-                <sgmltag>*config</sgmltag> child block to specify the
-              properties of the underlying image. For example when
-              building a OEM based split image use the
-                <sgmltag>oemconfig</sgmltag> child section. </para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><sgmltag class="attribute">image</sgmltag>="<sgmltag
-              class="attvalue">vmx</sgmltag>"</term>
-          <listitem>
-            <para>Creation of a virtual disk system is enabled with the
-              vmx value of the image attribute. Set the filesystem of
-              the virtual disk with the filesystem attribute and select
-              the appropriate boot image by setting <sgmltag
-                class="attribute">boot</sgmltag>="<sgmltag
-                class="attvalue">vmxboot/suse-*</sgmltag>" The optional
-              format attribute is used to specify one of the
-              virtualization formats supported by QEMU, such as vmdk
-              (also the VMware format) or qcow2. For the virtual disk
-              image the optional vga attribute may be used to configure
-              the kernel framebuffer device. Acceptable values can be
-              found in the Linux kernel documentation for the
-              framebuffer device (see
-                <filename>Documentation/fb/vesafb.txt</filename>). KIWI
-              also supports the selection of the bootloader for the
-              virtual disk according to the rules indicated for the USB
-              system. Last but not least the virtual disk system may
-              also be created with a LVM based layout by using the
-                <sgmltag class="attribute">lvm</sgmltag> attribute. The
-              previously indicated rules apply. Use the
-                <sgmltag>machine</sgmltag> child element to specify
-              appropriate configuration of the virtual disk system.
-            </para>
-          </listitem>
-        </varlistentry>
-      </variablelist>
-
-      <para>Within the type section, there could be other optional
-    attributes which are either universally valid or can be used
-    for different image types in the same way. The following list
-        explains these attributes: </para>
-
-    <variablelist>
-      <varlistentry>
-        <term><sgmltag class="attribute"
-          >kernelcmdline</sgmltag></term>
-        <listitem>
-          <para>Specifies additional kernel parameters.
-          The following example disables kernel messages:
-          <literal>kernelcmdline="quiet"</literal></para>
-        </listitem>
-      </varlistentry>
-            <varlistentry>
-        <term><sgmltag class="attribute"
-                    >mdraid</sgmltag></term>
-                <listitem>
-                    <para>For disk based image types, aka oem and vmx,
-          mdraid activates the creation of a software raid image.
-          The raid inside the image is created in degraded mode
-          because at creation time we only know about one disk.
-          It's in the hand of the user to add devices to the raid
-          after the image runs on the target machine. The value
-          for mdraid can be either <emphasis>mirroring</emphasis>
-          or <emphasis>striping</emphasis>, which means the raid
-          level is set to RAID1 (mirroring) or
-          RAID0 (striping).</para>
-                </listitem>
-      </varlistentry>
-    </variablelist>
-
-      <para>Within the preferences section, there are the following
-        optional elements: </para>
-
-      <variablelist>
-        <varlistentry>
-          <term><sgmltag class="attribute"
-              >showlicense</sgmltag></term>
-          <listitem>
-            <para>
-               Specifies the base name of a license file which is displayed in oem
-               images before the installation happens. It's possible to add more showlicense
-               sections to display more licenses one after the other. If no such element
-               is specified the default 'license' and 'EULA' files are searched. The
-               search algorithm will append the .txt or .locale.txt suffix to the license
-               name to form the license file name. You should make sure that you license
-               files contains this suffix.
-            </para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><sgmltag class="attribute"
-              >rpm-check-signatures</sgmltag></term>
-          <listitem>
-            <para>Specifies whether RPM should check the package
-              signature or not </para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><sgmltag class="attribute"
-            >rpm-excludedocs</sgmltag></term>
-          <listitem>
-            <para> Specifies whether RPM should skip installing package
-              documentation </para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><sgmltag class="attribute">rpm-force</sgmltag></term>
-          <listitem>
-            <para>Specifies whether RPM should be called with
-                <option>--force</option>
-            </para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><sgmltag class="attribute">keytable</sgmltag></term>
-          <listitem>
-            <para>Specifies the name of the console keymap to use. The
-              value corresponds to a map file in
-                <filename>/usr/share/kbd/keymaps</filename>. The
-                <varname>KEYTABLE</varname> variable in
-                <filename>/etc/sysconfig/keyboard</filename> file is set
-              according to the keyboard mapping. </para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><sgmltag class="attribute">timezone</sgmltag></term>
-          <listitem>
-            <para>Specifies the time zone. Available time zones are
-              located in the <filename class="directory"
-                >/usr/share/zoneinfo</filename> directory. Specify the
-              attribute value relative to <filename class="directory"
-                >/usr/share/zoneinfo</filename>. For example, specify
-              Europe/Berlin for
-                <filename>/usr/share/zoneinfo/Europe/Berlin</filename>.
-              KIWI uses this value to configure the timezone in
-                <filename>/etc/localtime</filename> for the image. </para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><sgmltag class="attribute">locale</sgmltag></term>
-          <listitem>
-            <para> Specifies the name of the UTF-8 locale to use, which
-              defines the contents of the <envar>RC_LANG</envar> system
-              environment variable in
-                <filename>/etc/sysconfig/language</filename>. Please
-              note only UTF-8 locales are supported here which also
-              means that the encoding must <emphasis>not</emphasis> be
-              part of the locale information. The KIWI schema validates
-              the locale string according to the following
-                pattern:<literal>[a-z]{2}_[A-Z]{2}(,[a-z]{2}_[A-Z]{2})*</literal>.
-              This means you have to specify the locale like the
-              following example: en_US or en_US,de_DE </para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><sgmltag class="attribute">bootsplash-theme</sgmltag></term>
-          <listitem>
-            <para>Specifies the name of the bootsplash theme to use </para>
-          </listitem>
-        </varlistentry>
+       attribute to select the underlying type of the split image. The
+       attributes
+       <sgmltag class="attribute"
+                >fsreadwrite</sgmltag>,
+       <sgmltag class="attribute"
+                >fsreadonly</sgmltag> are
+       used to control the read-write properties of the filesystem specified
+       as the attributes value. Use the appropriate
+       <sgmltag>*config</sgmltag> child block to specify the properties of
+       the underlying image. For example when building a OEM based split
+       image use the <sgmltag>oemconfig</sgmltag> child section.
+      </para>
+     </listitem>
+    </varlistentry>
     <varlistentry>
-          <term><sgmltag class="attribute">bootloader-theme</sgmltag></term>
-          <listitem>
-            <para>Specifies the name of the gfxboot theme to use </para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><sgmltag class="attribute"
-            >defaultdestination</sgmltag></term>
-          <listitem>
-            <para>Used if the <option>--destdir</option> option is not
-              specified when calling KIWI</para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><sgmltag class="attribute">defaultroot</sgmltag></term>
-          <listitem>
-            <para>Used if the option <option>--root</option> is not
-              specified when calling KIWI </para>
-          </listitem>
-        </varlistentry>
-       </variablelist>
-
-      <para>The <sgmltag>type</sgmltag> element may contain child
-        elements to provide specific configuration information for the
-        given type. The following lists the supported child elements: </para>
-
-      <variablelist>
-        <varlistentry>
-          <term><sgmltag>systemdisk</sgmltag></term>
-          <listitem>
-            <para>Using the optional systemdisk section it is possible to
-              create a LVM (Logical Volume Management) based storage
-              layout. By default, the volume group is named
-              <emphasis>kiwiVG</emphasis>. It
-              is possible to change the name of the group by setting the
-              <sgmltag class="attribute">name</sgmltag> attribute
-              to the desired name. Individual volumes within the volume
-              group are specified using the
-              <sgmltag class="element">volume</sgmltag> element. </para>
-            <para>The following example shows the creation of a volume
-              named <emphasis role="italic">usr</emphasis> and a volume
-              named <emphasis role="italic">var</emphasis> inside the volume
-              group systemVG.</para>
-            <screen> &lt;systemdisk name="systemVG"&gt; 
+     <term><sgmltag class="attribute">image</sgmltag>="<sgmltag
+              class="attvalue">vmx</sgmltag>"</term>
+     <listitem>
+      <para>
+       Creation of a virtual disk system is enabled with the vmx value of
+       the image attribute. Set the filesystem of the virtual disk with the
+       filesystem attribute and select the appropriate boot image by setting
+       <sgmltag
+                class="attribute">boot</sgmltag>="<sgmltag
+                class="attvalue">vmxboot/suse-*</sgmltag>"
+       The optional format attribute is used to specify one of the
+       virtualization formats supported by QEMU, such as vmdk (also the
+       VMware format) or qcow2. For the virtual disk image the optional vga
+       attribute may be used to configure the kernel framebuffer device.
+       Acceptable values can be found in the Linux kernel documentation for
+       the framebuffer device (see
+       <filename>Documentation/fb/vesafb.txt</filename>). KIWI also supports
+       the selection of the bootloader for the virtual disk according to the
+       rules indicated for the USB system. Last but not least the virtual
+       disk system may also be created with a LVM based layout by using the
+       <sgmltag class="attribute">lvm</sgmltag> attribute. The previously
+       indicated rules apply. Use the <sgmltag>machine</sgmltag> child
+       element to specify appropriate configuration of the virtual disk
+       system.
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+   <para>
+    Within the type section, there could be other optional attributes which
+    are either universally valid or can be used for different image types in
+    the same way. The following list explains these attributes:
+   </para>
+   <variablelist>
+    <varlistentry>
+     <term><sgmltag class="attribute"
+          >kernelcmdline</sgmltag>
+     </term>
+     <listitem>
+      <para>
+       Specifies additional kernel parameters. The following example
+       disables kernel messages: <literal>kernelcmdline="quiet"</literal>
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><sgmltag class="attribute"
+                    >mdraid</sgmltag>
+     </term>
+     <listitem>
+      <para>
+       For disk based image types, aka oem and vmx, mdraid activates the
+       creation of a software raid image. The raid inside the image is
+       created in degraded mode because at creation time we only know about
+       one disk. It's in the hand of the user to add devices to the raid
+       after the image runs on the target machine. The value for mdraid can
+       be either <emphasis>mirroring</emphasis> or
+       <emphasis>striping</emphasis>, which means the raid level is set to
+       RAID1 (mirroring) or RAID0 (striping).
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+   <para>
+    Within the preferences section, there are the following optional
+    elements:
+   </para>
+   <variablelist>
+    <varlistentry>
+     <term><sgmltag class="attribute"
+              >showlicense</sgmltag>
+     </term>
+     <listitem>
+      <para>
+       Specifies the base name of a license file which is displayed in oem
+       images before the installation happens. It's possible to add more
+       showlicense sections to display more licenses one after the other. If
+       no such element is specified the default 'license' and 'EULA' files
+       are searched. The search algorithm will append the .txt or
+       .locale.txt suffix to the license name to form the license file name.
+       You should make sure that you license files contains this suffix.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><sgmltag class="attribute"
+              >rpm-check-signatures</sgmltag>
+     </term>
+     <listitem>
+      <para>
+       Specifies whether RPM should check the package signature or not
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><sgmltag class="attribute"
+            >rpm-excludedocs</sgmltag>
+     </term>
+     <listitem>
+      <para>
+       Specifies whether RPM should skip installing package documentation
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><sgmltag class="attribute">rpm-force</sgmltag>
+     </term>
+     <listitem>
+      <para>
+       Specifies whether RPM should be called with <option>--force</option>
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><sgmltag class="attribute">keytable</sgmltag>
+     </term>
+     <listitem>
+      <para>
+       Specifies the name of the console keymap to use. The value
+       corresponds to a map file in
+       <filename>/usr/share/kbd/keymaps</filename>. The
+       <varname>KEYTABLE</varname> variable in
+       <filename>/etc/sysconfig/keyboard</filename> file is set according to
+       the keyboard mapping.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><sgmltag class="attribute">timezone</sgmltag>
+     </term>
+     <listitem>
+      <para>
+       Specifies the time zone. Available time zones are located in the
+       <filename class="directory"
+                >/usr/share/zoneinfo</filename>
+       directory. Specify the attribute value relative to
+       <filename class="directory"
+                >/usr/share/zoneinfo</filename>.
+       For example, specify Europe/Berlin for
+       <filename>/usr/share/zoneinfo/Europe/Berlin</filename>. KIWI uses
+       this value to configure the timezone in
+       <filename>/etc/localtime</filename> for the image.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><sgmltag class="attribute">locale</sgmltag>
+     </term>
+     <listitem>
+      <para>
+       Specifies the name of the UTF-8 locale to use, which defines the
+       contents of the <envar>RC_LANG</envar> system environment variable in
+       <filename>/etc/sysconfig/language</filename>. Please note only UTF-8
+       locales are supported here which also means that the encoding must
+       <emphasis>not</emphasis> be part of the locale information. The KIWI
+       schema validates the locale string according to the following
+       pattern:<literal>[a-z]{2}_[A-Z]{2}(,[a-z]{2}_[A-Z]{2})*</literal>.
+       This means you have to specify the locale like the following example:
+       en_US or en_US,de_DE
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><sgmltag class="attribute">bootsplash-theme</sgmltag>
+     </term>
+     <listitem>
+      <para>
+       Specifies the name of the bootsplash theme to use
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><sgmltag class="attribute">bootloader-theme</sgmltag>
+     </term>
+     <listitem>
+      <para>
+       Specifies the name of the gfxboot theme to use
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><sgmltag class="attribute"
+            >defaultdestination</sgmltag>
+     </term>
+     <listitem>
+      <para>
+       Used if the <option>--destdir</option> option is not specified when
+       calling KIWI
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><sgmltag class="attribute">defaultroot</sgmltag>
+     </term>
+     <listitem>
+      <para>
+       Used if the option <option>--root</option> is not specified when
+       calling KIWI
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+   <para>
+    The <sgmltag>type</sgmltag> element may contain child elements to
+    provide specific configuration information for the given type. The
+    following lists the supported child elements:
+   </para>
+   <variablelist>
+    <varlistentry>
+     <term><sgmltag>systemdisk</sgmltag>
+     </term>
+     <listitem>
+      <para>
+       Using the optional systemdisk section it is possible to create a LVM
+       (Logical Volume Management) based storage layout. By default, the
+       volume group is named <emphasis>kiwiVG</emphasis>. It is possible to
+       change the name of the group by setting the
+       <sgmltag class="attribute">name</sgmltag> attribute to the desired
+       name. Individual volumes within the volume group are specified using
+       the <sgmltag class="element">volume</sgmltag> element.
+      </para>
+      <para>
+       The following example shows the creation of a volume named
+       <emphasis role="italic">usr</emphasis> and a volume named
+       <emphasis role="italic">var</emphasis> inside the volume group
+       systemVG.
+      </para>
+<screen> &lt;systemdisk name="systemVG"&gt; 
   &lt;volume name="usr" freespace="100M"/&gt; 
   &lt;volume name="var" size="200M"/&gt; 
 &lt;/systemdisk&gt;</screen>
-            <para>The optional attribute
-              <sgmltag class="attribute">freespace</sgmltag> controls the
-              amount of unused space available after software has been
-              installed in the given volume. By default the available space
-              of a created volume is between 10% and 20%. Using the optional
-              <sgmltag class="attribute">size</sgmltag> attribute the
-              absolute size of the given volume is specified. The
-              <sgmltag class="attribute">size</sgmltag> attribute takes
-              precedence over the
-              <sgmltag class="attribute">freespace</sgmltag> attribute. If
-              the specified size is insufficient, based on the estimated
-              software install size for the given volume, the specified
-              value will be ignored and a volume with default settings will
-              be created. This implies that the volume will be 80% to 90%
-              full. </para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><sgmltag>oemconfig</sgmltag></term>
-          <listitem>
-            <para>By default, the oemboot process will create or modify
-              a swap, and <filename>/</filename> partition. It is possible to
-              influence the behavior by the <filename>oem-*</filename>
-              elements explained below.</para>
-            <screen>&lt;oemconfig&gt;
+      <para>
+       The optional attribute <sgmltag class="attribute">freespace</sgmltag>
+       controls the amount of unused space available after software has been
+       installed in the given volume. By default the available space of a
+       created volume is between 10% and 20%. Using the optional
+       <sgmltag class="attribute">size</sgmltag> attribute the absolute size
+       of the given volume is specified. The
+       <sgmltag class="attribute">size</sgmltag> attribute takes precedence
+       over the <sgmltag class="attribute">freespace</sgmltag> attribute. If
+       the specified size is insufficient, based on the estimated software
+       install size for the given volume, the specified value will be
+       ignored and a volume with default settings will be created. This
+       implies that the volume will be 80% to 90% full.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><sgmltag>oemconfig</sgmltag>
+     </term>
+     <listitem>
+      <para>
+       By default, the oemboot process will create or modify a swap, and
+       <filename>/</filename> partition. It is possible to influence the
+       behavior by the <filename>oem-*</filename> elements explained below.
+      </para>
+<screen>&lt;oemconfig&gt;
    &lt;oem-systemsize&gt;2000&lt;/oem-systemsize&gt;
    &lt;oem-... &gt; 
 &lt;/oemconfig&gt;</screen>
-            <variablelist>
-              <varlistentry>
-                <term><sgmltag class="starttag"
+      <variablelist>
+       <varlistentry>
+        <term><sgmltag class="starttag"
                     >oem-boot-title</sgmltag>text<sgmltag class="endtag"
-                    >oem-boot-title</sgmltag></term>
-                <listitem>
-                  <para>By default, the string <phrase remap="verb"
-                      >OEM</phrase> will be used as the boot manager
-                    menu entry when KIWI creates the GRUB configuration
-                    during deployment. The
-                      <sgmltag>oem-boot-title</sgmltag> element allows
-                    you to set a custom name for the grub menu entry.
-                    This value is represented by the
-                      <varname>kiwi_oemtitle</varname> variable in the initrd</para>
-                </listitem>
-              </varlistentry>
-              <varlistentry>
-                <term><sgmltag class="starttag"
+                    >oem-boot-title</sgmltag>
+        </term>
+        <listitem>
+         <para>
+          By default, the string
+          <phrase remap="verb"
+                      >OEM</phrase> will be
+          used as the boot manager menu entry when KIWI creates the GRUB
+          configuration during deployment. The
+          <sgmltag>oem-boot-title</sgmltag> element allows you to set a
+          custom name for the grub menu entry. This value is represented by
+          the <varname>kiwi_oemtitle</varname> variable in the initrd
+         </para>
+        </listitem>
+       </varlistentry>
+       <varlistentry>
+        <term><sgmltag class="starttag"
                     >oem-bootwait</sgmltag>true|false<sgmltag
-                    class="endtag">oem-bootwait</sgmltag></term>
-                <listitem>
-                  <para>Specify if the system should wait for user interaction
-                    priot to  continuing the boot process after the oem image
-                    has been dumped to the designated storage device (default
-                    value is false). This value is represented by the
-                    <varname>kiwi_oembootwait</varname> variable in the initrd</para>
-                </listitem>
-              </varlistentry>
-              <varlistentry>
-                <term><sgmltag class="starttag"
+                    class="endtag">oem-bootwait</sgmltag>
+        </term>
+        <listitem>
+         <para>
+          Specify if the system should wait for user interaction priot to
+          continuing the boot process after the oem image has been dumped to
+          the designated storage device (default value is false). This value
+          is represented by the <varname>kiwi_oembootwait</varname> variable
+          in the initrd
+         </para>
+        </listitem>
+       </varlistentry>
+       <varlistentry>
+        <term><sgmltag class="starttag"
                     >oem-inplace-recovery</sgmltag>true|false<sgmltag
-                    class="endtag">oem-inplace-recovery</sgmltag></term>
-                <listitem>
-                  <para>Specify if the recovery archive is stored as part of
-                    the image or if the archive is to be created at the time
-                    the image is deployed to the target storage device.
-                    <varname>kiwi_oemrecoveryInPlace</varname> variable in the initrd</para>
-                </listitem>
-              </varlistentry>
-              <varlistentry>
-                <term><sgmltag class="starttag"
+                    class="endtag">oem-inplace-recovery</sgmltag>
+        </term>
+        <listitem>
+         <para>
+          Specify if the recovery archive is stored as part of the image or
+          if the archive is to be created at the time the image is deployed
+          to the target storage device.
+          <varname>kiwi_oemrecoveryInPlace</varname> variable in the initrd
+         </para>
+        </listitem>
+       </varlistentry>
+       <varlistentry>
+        <term><sgmltag class="starttag"
                     >oem-kiwi-initrd</sgmltag>true|false<sgmltag
-                    class="endtag">oem-kiwi-initrd</sgmltag></term>
-                <listitem>
-                  <para>If this element is set to true (default value is
-                    false) the oemboot boot image (initrd) will
-                      <emphasis>not</emphasis> be replaced by the system
-                    (mkinitrd) created initrd. This option is useful
-                    when the system is installed on removable storage
-                    such as a USB stick or a portable external drive.
-                    For movable devices it is potentially necessary to
-                    detect the storage location during every boot. This
-                    detection process is part of the oemboot boot image.
-                    This value is represented by the
-                    <varname>kiwi_oemkboot</varname> variable in the initrd</para>
-                </listitem>
-              </varlistentry>
-              <varlistentry>
-                <term><sgmltag class="starttag"
+                    class="endtag">oem-kiwi-initrd</sgmltag>
+        </term>
+        <listitem>
+         <para>
+          If this element is set to true (default value is false) the
+          oemboot boot image (initrd) will <emphasis>not</emphasis> be
+          replaced by the system (mkinitrd) created initrd. This option is
+          useful when the system is installed on removable storage such as a
+          USB stick or a portable external drive. For movable devices it is
+          potentially necessary to detect the storage location during every
+          boot. This detection process is part of the oemboot boot image.
+          This value is represented by the <varname>kiwi_oemkboot</varname>
+          variable in the initrd
+         </para>
+        </listitem>
+       </varlistentry>
+       <varlistentry>
+        <term><sgmltag class="starttag"
                     >oem-partition-install</sgmltag>true|false<sgmltag
-                    class="endtag">oem-partition-install</sgmltag></term>
-                <listitem>
-                  <para>Specify if the image is to be installed into a
-                      free partition on the target storage device. By default
-                      the value is false and Kiwi installs images to a
-                      target device which causes data loss on the device. With
-                      <sgmltag class="element">oem-partition-install</sgmltag>
-                      set to true any other settings that have influence on
-                      the partition table, such as
-                      <sgmltag class="element">oem-swap</sgmltag> are ignored.
-                      This value is represented by the
-                      <varname>kiwi_oempartition_install</varname> variable in the initrd</para>
-                </listitem>
-              </varlistentry>
-              <varlistentry>
-                <term><sgmltag class="starttag"
+                    class="endtag">oem-partition-install</sgmltag>
+        </term>
+        <listitem>
+         <para>
+          Specify if the image is to be installed into a free partition on
+          the target storage device. By default the value is false and Kiwi
+          installs images to a target device which causes data loss on the
+          device. With
+          <sgmltag class="element">oem-partition-install</sgmltag> set to
+          true any other settings that have influence on the partition
+          table, such as <sgmltag class="element">oem-swap</sgmltag> are
+          ignored. This value is represented by the
+          <varname>kiwi_oempartition_install</varname> variable in the
+          initrd
+         </para>
+        </listitem>
+       </varlistentry>
+       <varlistentry>
+        <term><sgmltag class="starttag"
                     >oem-reboot</sgmltag>true|false<sgmltag
-                    class="endtag">oem-reboot</sgmltag></term>
-                <listitem>
-                  <para>Specify if the system is to be rebooted after
-                    the oem image has been deployed to the designated
-                    storage device (default value is false). This value
-                    is represented by the <varname>kiwi_oemreboot</varname>
-                    variable in the initrd</para>
-                </listitem>
-              </varlistentry>
-              <varlistentry>
-                <term><sgmltag class="starttag"
+                    class="endtag">oem-reboot</sgmltag>
+        </term>
+        <listitem>
+         <para>
+          Specify if the system is to be rebooted after the oem image has
+          been deployed to the designated storage device (default value is
+          false). This value is represented by the
+          <varname>kiwi_oemreboot</varname> variable in the initrd
+         </para>
+        </listitem>
+       </varlistentry>
+       <varlistentry>
+        <term><sgmltag class="starttag"
                     >oem-reboot-interactive</sgmltag>true|false<sgmltag
-                    class="endtag">oem-reboot-interactive</sgmltag></term>
-                <listitem>
-                  <para>Specify if the system is to be rebooted after
-                    the oem image has been deployed to the designated
-                    storage device (default value is false). Prior to
-                    reboot a message is posted and must be acknowledged
-                    by the user in order for the system to reboot. This value
-                    is represented by the
-                    <varname>kiwi_oemrebootinteractive</varname> variable in the initrd</para>
-                </listitem>
-              </varlistentry>
-              <varlistentry>
-                <term><sgmltag class="starttag"
+                    class="endtag">oem-reboot-interactive</sgmltag>
+        </term>
+        <listitem>
+         <para>
+          Specify if the system is to be rebooted after the oem image has
+          been deployed to the designated storage device (default value is
+          false). Prior to reboot a message is posted and must be
+          acknowledged by the user in order for the system to reboot. This
+          value is represented by the
+          <varname>kiwi_oemrebootinteractive</varname> variable in the
+          initrd
+         </para>
+        </listitem>
+       </varlistentry>
+       <varlistentry>
+        <term><sgmltag class="starttag"
                     >oem-recovery</sgmltag>true|false<sgmltag
-                    class="endtag">oem-recovery</sgmltag></term>
-                <listitem>
-                  <para>If this element is set to true (default value is
-                    false), KIWI will create a recovery archive from the
-                    prepared root tree. The archive will appear as
-                      <filename>/recovery.tar.bz2</filename> in the
-                    image file. During first boot of the image a single
-                    recovery partition will be created and the recovery
-                    archive will be moved to the recovery partition. An
-                    additional boot menu entry is created that when
-                    selected restores the original root tree on the
-                    system. The user information on the <filename
-                      class="directory">/home</filename> partition or in
-                    the <filename class="directory">/home</filename>
-                    directory is not affected by the recovery process.
-                    This value is represented by the kiwi_oemrecovery
-                    variable in the initrd</para>
-                </listitem>
-              </varlistentry>
-              <varlistentry>
-                <term><sgmltag class="starttag"
+                    class="endtag">oem-recovery</sgmltag>
+        </term>
+        <listitem>
+         <para>
+          If this element is set to true (default value is false), KIWI will
+          create a recovery archive from the prepared root tree. The archive
+          will appear as <filename>/recovery.tar.bz2</filename> in the image
+          file. During first boot of the image a single recovery partition
+          will be created and the recovery archive will be moved to the
+          recovery partition. An additional boot menu entry is created that
+          when selected restores the original root tree on the system. The
+          user information on the
+          <filename
+                      class="directory">/home</filename>
+          partition or in the <filename class="directory">/home</filename>
+          directory is not affected by the recovery process. This value is
+          represented by the kiwi_oemrecovery variable in the initrd
+         </para>
+        </listitem>
+       </varlistentry>
+       <varlistentry>
+        <term><sgmltag class="starttag"
                     >oem-recoveryID</sgmltag>partition-id<sgmltag
-                    class="endtag">oem-recoveryID</sgmltag></term>
-                <listitem>
-                  <para>Specify the partition type for the recovery
-                    partition. The default is to create a Linux
-                    partition (id = 83). This value is represented by
-                    the <varname>kiwi_oemrecoveryID</varname> variable in the initrd</para>
-                </listitem>
-              </varlistentry>
-              <varlistentry>
-                <term><sgmltag class="starttag"
+                    class="endtag">oem-recoveryID</sgmltag>
+        </term>
+        <listitem>
+         <para>
+          Specify the partition type for the recovery partition. The default
+          is to create a Linux partition (id = 83). This value is
+          represented by the <varname>kiwi_oemrecoveryID</varname> variable
+          in the initrd
+         </para>
+        </listitem>
+       </varlistentry>
+       <varlistentry>
+        <term><sgmltag class="starttag"
                     >oem-silent-boot</sgmltag>true|false<sgmltag
-                    class="endtag">oem-silent-boot</sgmltag></term>
-                <listitem>
-                  <para>Specify if the system should boot in silent mode
-                    after the oem image has been deployed to the designated
-                    storage device (default value is false). This value
-                    is represented by the <varname>kiwi_oemsilentboot</varname>
-                    variable in the initrd</para>
-                </listitem>
-              </varlistentry>
-              <varlistentry>
-                <term><sgmltag class="starttag"
+                    class="endtag">oem-silent-boot</sgmltag>
+        </term>
+        <listitem>
+         <para>
+          Specify if the system should boot in silent mode after the oem
+          image has been deployed to the designated storage device (default
+          value is false). This value is represented by the
+          <varname>kiwi_oemsilentboot</varname> variable in the initrd
+         </para>
+        </listitem>
+       </varlistentry>
+       <varlistentry>
+        <term><sgmltag class="starttag"
                     >oem-shutdown</sgmltag>true|false<sgmltag
-                    class="endtag">oem-shutdown</sgmltag></term>
-                <listitem>
-                  <para>Specify if the system is to be powered down after
-                    the oem image has been deployed to the designated
-                    storage device (default value is false). This value
-                    is represented by the <varname>kiwi_oemshutdown</varname>
-                    variable in the initrd</para>
-                </listitem>
-              </varlistentry>
-              <varlistentry>
-                <term><sgmltag class="starttag"
+                    class="endtag">oem-shutdown</sgmltag>
+        </term>
+        <listitem>
+         <para>
+          Specify if the system is to be powered down after the oem image
+          has been deployed to the designated storage device (default value
+          is false). This value is represented by the
+          <varname>kiwi_oemshutdown</varname> variable in the initrd
+         </para>
+        </listitem>
+       </varlistentry>
+       <varlistentry>
+        <term><sgmltag class="starttag"
                     >oem-shutdown-interactive</sgmltag>true|false<sgmltag
-                    class="endtag">oem-shutdown-interactive</sgmltag></term>
-                <listitem>
-                  <para>Specify if the system is to be powered down after
-                    the oem image has been deployed to the designated
-                    storage device (default value is false). Prior to
-                    shutdown a message is posted and must be acknowledged
-                    by the user in order for the system to power off. This
-                    value is represented by the
-                    <varname>kiwi_oemshutdowninteractive</varname> variable in the initrd</para>
-                </listitem>
-              </varlistentry>
-              <varlistentry>
-                <term><sgmltag class="starttag"
+                    class="endtag">oem-shutdown-interactive</sgmltag>
+        </term>
+        <listitem>
+         <para>
+          Specify if the system is to be powered down after the oem image
+          has been deployed to the designated storage device (default value
+          is false). Prior to shutdown a message is posted and must be
+          acknowledged by the user in order for the system to power off.
+          This value is represented by the
+          <varname>kiwi_oemshutdowninteractive</varname> variable in the
+          initrd
+         </para>
+        </listitem>
+       </varlistentry>
+       <varlistentry>
+        <term><sgmltag class="starttag"
                     >oem-swap</sgmltag>true|false<sgmltag class="endtag"
-                    >oem-swap</sgmltag></term>
-                <listitem>
-                  <para>Specify if a swap partition should be created.
-                    The creation of a swap partition is the default
-                    behavior. This value is represented by the
-                      <varname>kiwi_oemswap</varname> variable in the initrd</para>
-                </listitem>
-              </varlistentry>
-              <varlistentry>
-                <term><sgmltag class="starttag"
+                    >oem-swap</sgmltag>
+        </term>
+        <listitem>
+         <para>
+          Specify if a swap partition should be created. The creation of a
+          swap partition is the default behavior. This value is represented
+          by the <varname>kiwi_oemswap</varname> variable in the initrd
+         </para>
+        </listitem>
+       </varlistentry>
+       <varlistentry>
+        <term><sgmltag class="starttag"
                   >oem-swapsize</sgmltag>number in MB<sgmltag
-                    class="endtag">oem-swapsize</sgmltag></term>
-                <listitem>
-                  <para>Set the size of the swap partition. If a swap
-                    partition is to be created and the size of the swap
-                    partition is not specified with this optional
-                    element, KIWI will calculate the size of the swap
-                    partition and create a swap partition equal to two
-                    times the RAM installed on the system at initial
-                    boot time. This value is represented by the
-                      <varname>kiwi_oemswapMB</varname> variable in the initrd</para>
-                </listitem>
-              </varlistentry>
-              <varlistentry>
-                <term><sgmltag class="starttag"
+                    class="endtag">oem-swapsize</sgmltag>
+        </term>
+        <listitem>
+         <para>
+          Set the size of the swap partition. If a swap partition is to be
+          created and the size of the swap partition is not specified with
+          this optional element, KIWI will calculate the size of the swap
+          partition and create a swap partition equal to two times the RAM
+          installed on the system at initial boot time. This value is
+          represented by the <varname>kiwi_oemswapMB</varname> variable in
+          the initrd
+         </para>
+        </listitem>
+       </varlistentry>
+       <varlistentry>
+        <term><sgmltag class="starttag"
                   >oem-systemsize</sgmltag>number in MB<sgmltag
-                    class="endtag">oem-systemsize</sgmltag></term>
-                <listitem>
-                  <para>Set the size the operating system is allowed to
-          consume on the target disk. The size limit does not
-          include any consideration for swap space or a
-          recovery partition.
-          In a setup <emphasis>without</emphasis> a
-          <sgmltag class="element">systemdisk</sgmltag> element
-          this value specifies the size of the root partition.
-          In a setup <emphasis>including</emphasis>
-          a <sgmltag class="element">systemdisk</sgmltag> element
-          this value specifies the size of the LVM partition which
-          contains all specified volumes. Thus, the sum of all
-          specified volume sizes plus the sum of the specified
-          freespace for each volume must be smaller or equal
-          to the size specified with the
-          <sgmltag class="element">oem-systemsize</sgmltag>.
-          This value is represented by the variable
-          <varname>kiwi_oemrootMB</varname> in the initrd</para>
-                </listitem>
-              </varlistentry>
-              <varlistentry>
-                <term><sgmltag class="starttag"
+                    class="endtag">oem-systemsize</sgmltag>
+        </term>
+        <listitem>
+         <para>
+          Set the size the operating system is allowed to consume on the
+          target disk. The size limit does not include any consideration for
+          swap space or a recovery partition. In a setup
+          <emphasis>without</emphasis> a
+          <sgmltag class="element">systemdisk</sgmltag> element this value
+          specifies the size of the root partition. In a setup
+          <emphasis>including</emphasis> a
+          <sgmltag class="element">systemdisk</sgmltag> element this value
+          specifies the size of the LVM partition which contains all
+          specified volumes. Thus, the sum of all specified volume sizes
+          plus the sum of the specified freespace for each volume must be
+          smaller or equal to the size specified with the
+          <sgmltag class="element">oem-systemsize</sgmltag>. This value is
+          represented by the variable <varname>kiwi_oemrootMB</varname> in
+          the initrd
+         </para>
+        </listitem>
+       </varlistentry>
+       <varlistentry>
+        <term><sgmltag class="starttag"
                   >oem-unattended</sgmltag>true|false<sgmltag
-                    class="endtag">oem-unattended</sgmltag></term>
-                <listitem>
-                  <para>The installation of the image to the target system
-                      occurs automatically without requiering user
-                      interaction. If multiple possible target devices are
-                      discovered the image is deployed to the first device.
-                      <varname>kiwi_oemunattended</varname> in the initrd</para>
-                </listitem>
-              </varlistentry>
-            </variablelist>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><sgmltag>pxedeploy</sgmltag></term>
-          <listitem>
-            <para>Information contained in the optional
-                <sgmltag>pxedeploy</sgmltag> section is only considered
-              if the <sgmltag class="attribute">image</sgmltag>
-              attribute of the <sgmltag>type</sgmltag> element is set to
-                <sgmltag class="attvalue">pxe</sgmltag>. In order to use
-              a PXE image it is necessary to create a network boot
-              infrastructure. Creation of the network boot
-              infrastructure is simplified by the KIWI provided package
-                <package>kiwi-pxeboot</package>. This package configures
-              the basic PXE boot environment as expected by KIWI pxe
-              images. The <package>kiwi-pxeboot</package> package
-              creates a directory structure in
-                <filename>/srv/tftpboot</filename>. Files created by the
-              KIWI create step need to be copied to the
-                <filename>/srv/tftpboot</filename> directory structure.
-              For additional details about the PXE image please refer
-              to the PXE Image chapter later in this document. </para>
-
-            <para>In addition to the image files it is necessary that
-              information be provided about the client setup. This
-              information, such as the image to be used or the
-              partitioning, is contained in a file with the name
-                  <filename>config.<replaceable>MAC</replaceable></filename>
-              in the directory <filename>/srv/tftpboot/KIWI</filename>.
-              The content of this file is created automatically by KIWI
-              if the pxedeploy section is provided in the image
-              description. A pxedeploy section is outlined below: </para>
-            <screen>&lt;pxedeploy server="IP" blocksize="4096"&gt;
+                    class="endtag">oem-unattended</sgmltag>
+        </term>
+        <listitem>
+         <para>
+          The installation of the image to the target system occurs
+          automatically without requiering user interaction. If multiple
+          possible target devices are discovered the image is deployed to
+          the first device. <varname>kiwi_oemunattended</varname> in the
+          initrd
+         </para>
+        </listitem>
+       </varlistentry>
+      </variablelist>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><sgmltag>pxedeploy</sgmltag>
+     </term>
+     <listitem>
+      <para>
+       Information contained in the optional <sgmltag>pxedeploy</sgmltag>
+       section is only considered if the
+       <sgmltag class="attribute">image</sgmltag> attribute of the
+       <sgmltag>type</sgmltag> element is set to
+       <sgmltag class="attvalue">pxe</sgmltag>. In order to use a PXE image
+       it is necessary to create a network boot infrastructure. Creation of
+       the network boot infrastructure is simplified by the KIWI provided
+       package
+       <package>kiwi-pxeboot</package>
+       . This package configures the basic PXE boot environment as expected
+       by KIWI pxe images. The
+       <package>kiwi-pxeboot</package>
+       package creates a directory structure in
+       <filename>/srv/tftpboot</filename>. Files created by the KIWI create
+       step need to be copied to the <filename>/srv/tftpboot</filename>
+       directory structure. For additional details about the PXE image
+       please refer to the PXE Image chapter later in this document.
+      </para>
+      <para>
+       In addition to the image files it is necessary that information be
+       provided about the client setup. This information, such as the image
+       to be used or the partitioning, is contained in a file with the name
+       <filename>config.<replaceable>MAC</replaceable></filename> in the
+       directory <filename>/srv/tftpboot/KIWI</filename>. The content of
+       this file is created automatically by KIWI if the pxedeploy section
+       is provided in the image description. A pxedeploy section is outlined
+       below:
+      </para>
+<screen>&lt;pxedeploy server="IP" blocksize="4096"&gt;
    &lt;timeout&gt;seconds&lt;/timeout&gt;
    &lt;kernel&gt;kernel-file&lt;/kernel&gt;
    &lt;initrd&gt;initrd-file&lt;/initrd&gt; 
@@ -1035,159 +1196,176 @@
    &lt;configuration source="/KIWI/../file" dest="/../file" arch="..."/&gt;
    &lt;configuration .../&gt; 
 &lt;/pxedeploy&gt; </screen>
-            <itemizedlist>
-              <listitem>
-                <para>The <sgmltag class="attribute">server</sgmltag>
-                  attribute is used to specify the IP address of the PXE
-                  server. The <sgmltag class="attribute"
-                    >blocksize</sgmltag> attributes specifies the
-                  blocksize for the image download. Other protocols are
-                  supported by KIWI but require the
-                    <parameter>kiwiserver</parameter> and
-                    <parameter>kiwiservertype</parameter> kernel
-                  parameters to be set when the client boots. </para>
-              </listitem>
-              <listitem>
-                <para>The value of the optional
-                    <sgmltag>timeout</sgmltag> element specifies the
-                  grub timeout in seconds to be used when the KIWI
-                  initrd configures and installs the grub boot loader on
-                  the client machine after the first deployment to allow
-                  standalone boot. </para>
-              </listitem>
-              <listitem>
-                <para>Passing kernel parameters is possible with the use
-                  of the optional <sgmltag class="attribute"
-                    >kernelcmdline</sgmltag> attribute in the
-                    <sgmltag>type</sgmltag> section. The value of this
-                  attribute is a string specifying the settings to be
-                  passed to the kernel by the GRUB bootloader. The KIWI
-                  initrd includes these kernel options when installing
-                  grub for standalone boot </para>
-              </listitem>
-              <listitem>
-                <para>The optional <sgmltag>kernel</sgmltag> and
-                    <sgmltag>initrd</sgmltag> elements are used to
-                  specify the file names for the kernel and initrd on
-                  the boot server respectively. When using a special
-                  boot method not supported by the distribution’s
-                  standard mkinitrd, it is imperative that the KIWI
-                  initrd remains on the PXE server and also be used for
-                  local boot. If the configured image uses the
-                    <sgmltag>split</sgmltag> type or the
-                    <sgmltag>pxedeploy</sgmltag> section includes any
-                  union information the kernel and initrd elements must
-                  be used. </para>
-              </listitem>
-              <listitem>
-                <para>The <sgmltag>partitions</sgmltag> section is
-                  required if the system image is to be installed on a
-                  disk or other permanent storage device. Each partition
-                  is specified with one partition child element. The
-                  mandatory type attribute specifies the partition type
-                  id.</para>
-                  <para>The required <sgmltag class="attribute"
-                    >number</sgmltag> attribute provides the number
-                  of the partition to be created. The size of the
-                  partition may be specified with the optional size
-                  attribute. The optional mountpoint attribute provides
-                  the value for the mount point of the partition. The
-                  optional boolean target attribute identifies the
-                  partition as the system image target partition. KIWI
-                  always generates the swap partition as the first
-                  partition of the netboot boot image. By default, the
-                  second partition is used for the system image. Use the
-                  boolean <sgmltag class="attribute">target</sgmltag>
-                  attribute to change this behavior. Providing the value
-                  image for the <sgmltag class="attribute"
-                    >size</sgmltag> attribute triggers KIWI into
-                  calculating the required size for this partition. The
-                  calculated size is sufficient for the created image.
-                  </para>
-              </listitem>
-              <listitem>
-                <para>If the system image is based on a read-only
-                  filesystem such as squashfs and should be mounted in
-                  read-write mode use the optional union element. The
-                  type attribute is used to specify one of the supported
-                  overlay filesystem <systemitem class="filesystem">clicfs</systemitem>
-                  Use the ro
-                  attribute to point to the read only device and the rw
-                  attribute to point to the read-write device. </para>
-              </listitem>
-              <listitem>
-                <para>The optional <sgmltag>configuration</sgmltag>
-                  element is used to integrate a network client’s
-                  configuration files that are stored on the server. The
-                  source attribute specifies the path on the server for
-                  the file to be downloaded. The dest attribute
-                  specifies destination of the downloaded file on the
-                  network client starting at the root (/) of the
-                  filesystem. Multiple configuration elements may be
-                  specified such that multiple files can be transferred
-                  to the network client. In addition configuration files
-                  can be bound to a specific client architecture by
-                  setting the optional arch attribute. To specify
-                  multiple architectures use a comma separated string.
-                </para>
-              </listitem>
-
-            </itemizedlist>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><sgmltag>size</sgmltag></term>
-          <listitem>
-            <para>Use the size element to specify the image size in
-              Megabytes or Gigabytes. The unit attribute specifies
-              whether the given value will be interpreted as Megabytes
-                (<sgmltag class="attribute">unit</sgmltag>="<sgmltag
-                class="attvalue">M</sgmltag>") or Gigabytes (<sgmltag
+      <itemizedlist>
+       <listitem>
+        <para>
+         The <sgmltag class="attribute">server</sgmltag> attribute is used
+         to specify the IP address of the PXE server. The
+         <sgmltag class="attribute"
+                    >blocksize</sgmltag>
+         attributes specifies the blocksize for the image download. Other
+         protocols are supported by KIWI but require the
+         <parameter>kiwiserver</parameter> and
+         <parameter>kiwiservertype</parameter> kernel parameters to be set
+         when the client boots.
+        </para>
+       </listitem>
+       <listitem>
+        <para>
+         The value of the optional <sgmltag>timeout</sgmltag> element
+         specifies the grub timeout in seconds to be used when the KIWI
+         initrd configures and installs the grub boot loader on the client
+         machine after the first deployment to allow standalone boot.
+        </para>
+       </listitem>
+       <listitem>
+        <para>
+         Passing kernel parameters is possible with the use of the optional
+         <sgmltag class="attribute"
+                    >kernelcmdline</sgmltag>
+         attribute in the <sgmltag>type</sgmltag> section. The value of this
+         attribute is a string specifying the settings to be passed to the
+         kernel by the GRUB bootloader. The KIWI initrd includes these
+         kernel options when installing grub for standalone boot
+        </para>
+       </listitem>
+       <listitem>
+        <para>
+         The optional <sgmltag>kernel</sgmltag> and
+         <sgmltag>initrd</sgmltag> elements are used to specify the file
+         names for the kernel and initrd on the boot server respectively.
+         When using a special boot method not supported by the
+         distribution’s standard mkinitrd, it is imperative that the KIWI
+         initrd remains on the PXE server and also be used for local boot.
+         If the configured image uses the <sgmltag>split</sgmltag> type or
+         the <sgmltag>pxedeploy</sgmltag> section includes any union
+         information the kernel and initrd elements must be used.
+        </para>
+       </listitem>
+       <listitem>
+        <para>
+         The <sgmltag>partitions</sgmltag> section is required if the system
+         image is to be installed on a disk or other permanent storage
+         device. Each partition is specified with one partition child
+         element. The mandatory type attribute specifies the partition type
+         id.
+        </para>
+        <para>
+         The required
+         <sgmltag class="attribute"
+                    >number</sgmltag>
+         attribute provides the number of the partition to be created. The
+         size of the partition may be specified with the optional size
+         attribute. The optional mountpoint attribute provides the value for
+         the mount point of the partition. The optional boolean target
+         attribute identifies the partition as the system image target
+         partition. KIWI always generates the swap partition as the first
+         partition of the netboot boot image. By default, the second
+         partition is used for the system image. Use the boolean
+         <sgmltag class="attribute">target</sgmltag> attribute to change
+         this behavior. Providing the value image for the
+         <sgmltag class="attribute"
+                    >size</sgmltag>
+         attribute triggers KIWI into calculating the required size for this
+         partition. The calculated size is sufficient for the created image.
+        </para>
+       </listitem>
+       <listitem>
+        <para>
+         If the system image is based on a read-only filesystem such as
+         squashfs and should be mounted in read-write mode use the optional
+         union element. The type attribute is used to specify one of the
+         supported overlay filesystem
+         <systemitem class="filesystem">clicfs</systemitem> Use the ro
+         attribute to point to the read only device and the rw attribute to
+         point to the read-write device.
+        </para>
+       </listitem>
+       <listitem>
+        <para>
+         The optional <sgmltag>configuration</sgmltag> element is used to
+         integrate a network client’s configuration files that are stored
+         on the server. The source attribute specifies the path on the
+         server for the file to be downloaded. The dest attribute specifies
+         destination of the downloaded file on the network client starting
+         at the root (/) of the filesystem. Multiple configuration elements
+         may be specified such that multiple files can be transferred to the
+         network client. In addition configuration files can be bound to a
+         specific client architecture by setting the optional arch
+         attribute. To specify multiple architectures use a comma separated
+         string.
+        </para>
+       </listitem>
+      </itemizedlist>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><sgmltag>size</sgmltag>
+     </term>
+     <listitem>
+      <para>
+       Use the size element to specify the image size in Megabytes or
+       Gigabytes. The unit attribute specifies whether the given value will
+       be interpreted as Megabytes
+       (<sgmltag class="attribute">unit</sgmltag>="<sgmltag
+                class="attvalue">M</sgmltag>")
+       or Gigabytes
+       (<sgmltag
                 class="attribute">unit</sgmltag>="<sgmltag
-                class="attvalue">G</sgmltag>"). The optional boolean
-              attribute additive specifies whether or not the given size
-              should be added to the size of the generated image or not. </para>
-            <para>In the event of a size specification that is too small
-              for the generated image, KIWI will expand the size
-              automatically unless the image size exceeds the specified
-              size by 100 MB or more. In this case KIWI will generate an
-              error and exit. </para>
-            <para>Should the given size exceed the necessary size for
-              the image KIWI will not alter the image size as the free
-              space might be required for proper execution of components
-              within the image. </para>
-            <para>If the size element is not used, KIWI will create an
-              image containing approximately 30 % free space. </para>
-            <screen>&lt;size unit="M"&gt;1000&lt;/size&gt;</screen>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><sgmltag>split</sgmltag></term>
-          <listitem>
-            <para>For images of type split or iso the information
-              provided in the optional <sgmltag>split</sgmltag> section
-              is considered if the compressed attribute is set to
-              true. With the configuration in this block it is possible
-              to determine which files are writable and whether these
-              files should be persistently writable or temporarily. Note
-              that for ISO images only temporary write access is
-              possible. </para>
-            <para>When processing the provided configuration KIWI
-              distinguishes between directories and files. For example,
-              providing <filename class="directory">/etc</filename> as
-              the value of the name attribute indicates that the
-                <filename class="directory">/etc</filename> directory
-              should be writable. However, this does not include any of
-              the files or sub-directories within <filename
-                class="directory">/etc</filename>. The content of /etc
-              is populated as symbolic links to the read-only files. The
-              advantage of setting only a directory to read-write access
-              is that any newly created files will be stored on the disk
-              instead of in <systemitem class="filesystem"
-                >tmpfs</systemitem>. Creating read-write access to a
-              directory and it’s files requires two specifications as
-              shown below. </para>
-            <screen>&lt;split&gt; 
+                class="attvalue">G</sgmltag>").
+       The optional boolean attribute additive specifies whether or not the
+       given size should be added to the size of the generated image or not.
+      </para>
+      <para>
+       In the event of a size specification that is too small for the
+       generated image, KIWI will expand the size automatically unless the
+       image size exceeds the specified size by 100 MB or more. In this
+       case KIWI will generate an error and exit.
+      </para>
+      <para>
+       Should the given size exceed the necessary size for the image KIWI
+       will not alter the image size as the free space might be required for
+       proper execution of components within the image.
+      </para>
+      <para>
+       If the size element is not used, KIWI will create an image containing
+       approximately 30 % free space.
+      </para>
+<screen>&lt;size unit="M"&gt;1000&lt;/size&gt;</screen>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><sgmltag>split</sgmltag>
+     </term>
+     <listitem>
+      <para>
+       For images of type split or iso the information provided in the
+       optional <sgmltag>split</sgmltag> section is considered if the
+       compressed attribute is set to true. With the configuration in this
+       block it is possible to determine which files are writable and
+       whether these files should be persistently writable or temporarily.
+       Note that for ISO images only temporary write access is possible.
+      </para>
+      <para>
+       When processing the provided configuration KIWI distinguishes between
+       directories and files. For example, providing
+       <filename class="directory">/etc</filename> as the value of the name
+       attribute indicates that the
+       <filename class="directory">/etc</filename> directory should be
+       writable. However, this does not include any of the files or
+       sub-directories within
+       <filename
+                class="directory">/etc</filename>. The
+       content of /etc is populated as symbolic links to the read-only
+       files. The advantage of setting only a directory to read-write access
+       is that any newly created files will be stored on the disk instead of
+       in
+       <systemitem class="filesystem"
+                >tmpfs</systemitem>.
+       Creating read-write access to a directory and it’s files requires
+       two specifications as shown below.
+      </para>
+<screen>&lt;split&gt; 
   &lt;temporary&gt; 
     <sgmltag class="sgmlcomment"> read/write access to </sgmltag>
     &lt;file name="/var"/&gt; 
@@ -1203,27 +1381,33 @@
     &lt;except name="/etc/passwd"/&gt; 
   &lt;/persistent&gt;
 &lt;/split&gt;</screen>
-            <para>Use the except element to specify exceptions to
-              previously configured rules. </para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><sgmltag>machine</sgmltag></term>
-          <listitem>
-            <para>The optional machine section serves to specify
-              information about a VM guest machine. Using the data
-              provided in this section, KIWI will create a guest
-              configuration file required to run the image on the target
-              machine. </para>
-            <para>If the target is a VMware virtual machine indicated by
-              the format attribute set to vmdk, KIWI creates a VMware
-              configuration file. If the target is a Xen virtual machine
-              indicated by the domain attribute in the machine section
-              KIWI will create a Xen guest config file. </para>
-            <para>The sample block below shows the general outline of
-              the information that can be specified to generate the
-              configuration file </para>
-            <screen>&lt;machine arch="arch" memory="MB"
+      <para>
+       Use the except element to specify exceptions to previously configured
+       rules.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><sgmltag>machine</sgmltag>
+     </term>
+     <listitem>
+      <para>
+       The optional machine section serves to specify information about a VM
+       guest machine. Using the data provided in this section, KIWI will
+       create a guest configuration file required to run the image on the
+       target machine.
+      </para>
+      <para>
+       If the target is a VMware virtual machine indicated by the format
+       attribute set to vmdk, KIWI creates a VMware configuration file. If
+       the target is a Xen virtual machine indicated by the domain attribute
+       in the machine section KIWI will create a Xen guest config file.
+      </para>
+      <para>
+       The sample block below shows the general outline of the information
+       that can be specified to generate the configuration file
+      </para>
+<screen>&lt;machine arch="arch" memory="MB"
   HWversion="number" guestOS="suse|sles"
   domain="dom0|domU"/&gt; 
    &lt;vmconfig-entry&gt;Entry_for_VM_config_file&lt;\vmconfig-entry&gt;
@@ -1233,551 +1417,663 @@
    &lt;vmdisk controller="ide|scsi" id="number"/&gt; 
    &lt;vmdvd  controller="ide|scsi" id="number"/&gt; 
 &lt;/machine&gt; </screen>
-            <variablelist>
-              <varlistentry>
-                <term><sgmltag class="attribute">arch</sgmltag></term>
-                <listitem>
-                  <para> The virtualized architecture. Supported values
-                    are <sgmltag class="attvalue">ix86</sgmltag> or
-                      <sgmltag class="attvalue">x86_64</sgmltag>. The
-                    default value is <sgmltag class="attvalue"
-                      >ix86</sgmltag>. </para>
-                </listitem>
-              </varlistentry>
-              <varlistentry>
-                <term><sgmltag class="attribute">memory</sgmltag></term>
-                <listitem>
-                  <para> The mandatory <sgmltag class="attribute"
-                      >memory</sgmltag> attribute specifies how much
-                    memory in MB should be allocated for the virtual
-                    machine </para>
-                </listitem>
-              </varlistentry>
-              <varlistentry>
-                <term><sgmltag class="attribute"
-                  >HWversion</sgmltag></term>
-                <listitem>
-                  <para> The VMware hardware version number, the default
-                    value is <sgmltag class="attvalue">3</sgmltag>.
-                  </para>
-                </listitem>
-              </varlistentry>
-              <varlistentry>
-                <term><sgmltag class="attribute"
-                  >guestOS</sgmltag></term>
-                <listitem>
-                  <para> The guest OS identifier. For the ix86
-                    architecture the default value is suse and for the
-                    x86_64 architecture suse-64 is the default. At this
-                    point only the SUSE and SLES guestOS types are
-                    supported. </para>
-                </listitem>
-              </varlistentry>
-              <varlistentry>
-                <term><sgmltag class="attribute">domain</sgmltag></term>
-                <listitem>
-                  <para> The Xen domain setup. This could be either a
-                    dom0 which is the host machine hosting the guests
-                    and therefore doesn’t require a configuration file,
-                    or it could be set to domU which indicates this is a
-                    guest and also requires a guest configuration which
-                    is created by KIWI. </para>
-                </listitem>
-              </varlistentry>
-            </variablelist>
-            <para>Use the <sgmltag class="element">vmconfig-entry</sgmltag>
-              element to create entries in the virtual machine's configuration
-              file; .vmx for VMware images and .xenconfig for Xen images.
-              You may specify as many configuration options as desired. The
-              value of the <sgmltag class="element">vmconfig-entry</sgmltag>
-              element is expected to be specified in the syntax required by
-              the VM configuration file to be written. The value is free
-              format text and is not validated by Kiwi in any way. The entry
-              is written to the VM configuration file verbatime.</para>
-            <para>Use the <sgmltag class="element">vmdisk</sgmltag> element
-              to setup the virtual main storage device.</para>
-            <variablelist>
-              <varlistentry>
-                <term><sgmltag class="attribute"
-                  >controller</sgmltag></term>
-                <listitem>
-                  <para> Supported values for the mandatory <sgmltag
-                      class="attribute">controller</sgmltag> attribute
-                    are <sgmltag class="attvalue">ide</sgmltag> and
-                      <sgmltag class="attvalue">scsi</sgmltag>. </para>
-                </listitem>
-              </varlistentry>
-              <varlistentry>
-                <term><sgmltag class="attribute">id</sgmltag></term>
-                <listitem>
-                  <para>The mandatory <sgmltag class="attribute"
-                      >id</sgmltag> attribute specifies the disk id. If
-                    only one disk is set the id value should be set to
-                    0. </para>
-                </listitem>
-              </varlistentry>
-              <varlistentry>
-                <term><sgmltag class="attribute">device</sgmltag></term>
-                <listitem>
-                  <para> The device attribute specifies the disk that
-                    should appear in the para virtual instance.
-                    Therefore only relevant for Xen </para>
-                </listitem>
-              </varlistentry>
-            </variablelist>
-            <para>Use the <sgmltag class="element">vmdvd</sgmltag> element
-              to setup a virtual optical drive (CD/DVD) connection</para>
-            <variablelist>
-              <varlistentry>
-                <term><sgmltag class="attribute"
-                  >controller</sgmltag></term>
-                <listitem>
-                  <para> Supported values for the mandatory <sgmltag
-                      class="attribute">controller</sgmltag> attribute
-                    are <sgmltag class="attvalue">ide</sgmltag> and
-                      <sgmltag class="attvalue">scsi</sgmltag>. </para>
-                </listitem>
-              </varlistentry>
-              <varlistentry>
-                <term><sgmltag class="attribute">id</sgmltag></term>
-                <listitem>
-                  <para>The mandatory <sgmltag class="attribute"
-                      >id</sgmltag> attribute specifies the disk id. If
-                    only one disk is set the id value should be set to
-                    0. </para>
-                </listitem>
-              </varlistentry>
-            </variablelist>
-            <para>Use the <sgmltag class="element">vmnic</sgmltag> element
-              to setup the virtual network interface. Multiple
-              <sgmltag class="element">vmnic</sgmltag> child elements may be
-              specified to setup multiple virtual network interfaces.</para>
-            <variablelist>
-              <varlistentry>
-                <term><sgmltag class="attribute">driver</sgmltag></term>
-                <listitem>
-                  <para> The mandatory <sgmltag class="attribute"
-                      >driver</sgmltag> attribute specifies the driver
-                    to be used for the virtual network card. The
-                    supported values are <sgmltag class="attvalue"
-                      >e100</sgmltag>, <sgmltag class="attvalue"
-                      >vlance</sgmltag>, and <sgmltag class="attvalue"
-                      >vmxnet</sgmltag>. If the vmxnet driver is
-                    specified the vmware tools must be installed in the
-                    image. </para>
-                </listitem>
-              </varlistentry>
-              <varlistentry>
-                <term><sgmltag class="attribute"
-                  >interface</sgmltag></term>
-                <listitem>
-                  <para> The mandatory <sgmltag class="attribute"
-                      >interface</sgmltag> attribute specifies the
-                    interface number. If only one interface is set the
-                    value should be set to 0. </para>
-                </listitem>
-              </varlistentry>
-              <varlistentry>
-                <term><sgmltag class="attribute">mode</sgmltag></term>
-                <listitem>
-                  <para> The network mode used to communicate outside
-                    the VM. In many cases the bridged mode is used.
-                  </para>
-                </listitem>
-              </varlistentry>
-            </variablelist>
-          </listitem>
-        </varlistentry>
+      <variablelist>
+       <varlistentry>
+        <term><sgmltag class="attribute">arch</sgmltag>
+        </term>
+        <listitem>
+         <para>
+          The virtualized architecture. Supported values are
+          <sgmltag class="attvalue">ix86</sgmltag> or
+          <sgmltag class="attvalue">x86_64</sgmltag>. The default value is
+          <sgmltag class="attvalue"
+                      >ix86</sgmltag>.
+         </para>
+        </listitem>
+       </varlistentry>
+       <varlistentry>
+        <term><sgmltag class="attribute">memory</sgmltag>
+        </term>
+        <listitem>
+         <para>
+          The mandatory
+          <sgmltag class="attribute"
+                      >memory</sgmltag>
+          attribute specifies how much memory in MB should be allocated for
+          the virtual machine
+         </para>
+        </listitem>
+       </varlistentry>
+       <varlistentry>
+        <term><sgmltag class="attribute"
+                  >HWversion</sgmltag>
+        </term>
+        <listitem>
+         <para>
+          The VMware hardware version number, the default value is
+          <sgmltag class="attvalue">3</sgmltag>.
+         </para>
+        </listitem>
+       </varlistentry>
+       <varlistentry>
+        <term><sgmltag class="attribute"
+                  >guestOS</sgmltag>
+        </term>
+        <listitem>
+         <para>
+          The guest OS identifier. For the ix86 architecture the default
+          value is suse and for the x86_64 architecture suse-64 is the
+          default. At this point only the SUSE and SLES guestOS types are
+          supported.
+         </para>
+        </listitem>
+       </varlistentry>
+       <varlistentry>
+        <term><sgmltag class="attribute">domain</sgmltag>
+        </term>
+        <listitem>
+         <para>
+          The Xen domain setup. This could be either a dom0 which is the
+          host machine hosting the guests and therefore doesn’t require a
+          configuration file, or it could be set to domU which indicates
+          this is a guest and also requires a guest configuration which is
+          created by KIWI.
+         </para>
+        </listitem>
+       </varlistentry>
       </variablelist>
-    </sect2>
+      <para>
+       Use the <sgmltag class="element">vmconfig-entry</sgmltag> element to
+       create entries in the virtual machine's configuration file; .vmx for
+       VMware images and .xenconfig for Xen images. You may specify as many
+       configuration options as desired. The value of the
+       <sgmltag class="element">vmconfig-entry</sgmltag> element is expected
+       to be specified in the syntax required by the VM configuration file
+       to be written. The value is free format text and is not validated by
+       Kiwi in any way. The entry is written to the VM configuration file
+       verbatime.
+      </para>
+      <para>
+       Use the <sgmltag class="element">vmdisk</sgmltag> element to setup
+       the virtual main storage device.
+      </para>
+      <variablelist>
+       <varlistentry>
+        <term><sgmltag class="attribute"
+                  >controller</sgmltag>
+        </term>
+        <listitem>
+         <para>
+          Supported values for the mandatory
+          <sgmltag
+                      class="attribute">controller</sgmltag>
+          attribute are <sgmltag class="attvalue">ide</sgmltag> and
+          <sgmltag class="attvalue">scsi</sgmltag>.
+         </para>
+        </listitem>
+       </varlistentry>
+       <varlistentry>
+        <term><sgmltag class="attribute">id</sgmltag>
+        </term>
+        <listitem>
+         <para>
+          The mandatory
+          <sgmltag class="attribute"
+                      >id</sgmltag>
+          attribute specifies the disk id. If only one disk is set the id
+          value should be set to 0.
+         </para>
+        </listitem>
+       </varlistentry>
+       <varlistentry>
+        <term><sgmltag class="attribute">device</sgmltag>
+        </term>
+        <listitem>
+         <para>
+          The device attribute specifies the disk that should appear in the
+          para virtual instance. Therefore only relevant for Xen
+         </para>
+        </listitem>
+       </varlistentry>
+      </variablelist>
+      <para>
+       Use the <sgmltag class="element">vmdvd</sgmltag> element to setup a
+       virtual optical drive (CD/DVD) connection
+      </para>
+      <variablelist>
+       <varlistentry>
+        <term><sgmltag class="attribute"
+                  >controller</sgmltag>
+        </term>
+        <listitem>
+         <para>
+          Supported values for the mandatory
+          <sgmltag
+                      class="attribute">controller</sgmltag>
+          attribute are <sgmltag class="attvalue">ide</sgmltag> and
+          <sgmltag class="attvalue">scsi</sgmltag>.
+         </para>
+        </listitem>
+       </varlistentry>
+       <varlistentry>
+        <term><sgmltag class="attribute">id</sgmltag>
+        </term>
+        <listitem>
+         <para>
+          The mandatory
+          <sgmltag class="attribute"
+                      >id</sgmltag>
+          attribute specifies the disk id. If only one disk is set the id
+          value should be set to 0.
+         </para>
+        </listitem>
+       </varlistentry>
+      </variablelist>
+      <para>
+       Use the <sgmltag class="element">vmnic</sgmltag> element to setup the
+       virtual network interface. Multiple
+       <sgmltag class="element">vmnic</sgmltag> child elements may be
+       specified to setup multiple virtual network interfaces.
+      </para>
+      <variablelist>
+       <varlistentry>
+        <term><sgmltag class="attribute">driver</sgmltag>
+        </term>
+        <listitem>
+         <para>
+          The mandatory
+          <sgmltag class="attribute"
+                      >driver</sgmltag>
+          attribute specifies the driver to be used for the virtual network
+          card. The supported values are
+          <sgmltag class="attvalue"
+                      >e100</sgmltag>,
+          <sgmltag class="attvalue"
+                      >vlance</sgmltag>,
+          and
+          <sgmltag class="attvalue"
+                      >vmxnet</sgmltag>.
+          If the vmxnet driver is specified the vmware tools must be
+          installed in the image.
+         </para>
+        </listitem>
+       </varlistentry>
+       <varlistentry>
+        <term><sgmltag class="attribute"
+                  >interface</sgmltag>
+        </term>
+        <listitem>
+         <para>
+          The mandatory
+          <sgmltag class="attribute"
+                      >interface</sgmltag>
+          attribute specifies the interface number. If only one interface is
+          set the value should be set to 0.
+         </para>
+        </listitem>
+       </varlistentry>
+       <varlistentry>
+        <term><sgmltag class="attribute">mode</sgmltag>
+        </term>
+        <listitem>
+         <para>
+          The network mode used to communicate outside the VM. In many cases
+          the bridged mode is used.
+         </para>
+        </listitem>
+       </varlistentry>
+      </variablelist>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </sect2>
 
-    <sect2 id="sec.description.users">
-      <title><sgmltag>users</sgmltag> Element</title>
-
-      <screen>&lt;users group="group_name" id="number"&gt; 
+  <sect2 id="sec.description.users">
+   <title><sgmltag>users</sgmltag> Element</title>
+<screen>&lt;users group="group_name" id="number"&gt; 
   &lt;user home="dir" id="number" name="user" password="..."
         pwdformat="encrypted|plain" realname="string" shell="path"/&gt;
   <sgmltag class="sgmlcomment"> ... </sgmltag>
 &lt;/users&gt;</screen>
+   <para>
+    The optional <sgmltag>users</sgmltag> element lists the users belonging
+    to the group specified with the
+    <sgmltag class="attribute">group</sgmltag> attribute. At least one user
+    child element must be specified as part of the <sgmltag>users</sgmltag>
+    element. Multiple users elements may be specified.
+   </para>
+   <para>
+    The attributes <sgmltag class="attribute">home</sgmltag>,
+    <sgmltag class="attribute">id</sgmltag>,
+    <sgmltag
+          class="attribute">name</sgmltag>,
+    <sgmltag class="attribute"
+          >pwd</sgmltag>,
+    <sgmltag class="attribute">realname</sgmltag>, and
+    <sgmltag class="attribute">shell</sgmltag> specify the created users
+    home directory, the user name, the user’s password, the user’s real
+    name, and the user’s login shell, respectively. By default, the value
+    of the password attribute is expected to be an encrypted string. An
+    encrypted password can be created using <command>kiwi</command>
+    <option>--createpassword</option>. It is also possible to specify the
+    password as a non encrypted string by using the pwdformat attribute and
+    setting it’s value to <quote>plain</quote>. KIWI will then encrypt the
+    password prior to the user being added to the system.
+   </para>
+   <para>
+    All specified users and groups will be created if they do not already
+    exist. By default, the defined users will be part of the group specified
+    with the group attribute of the users element and the default group
+    called <quote>users</quote>. If it is desired to have the specified
+    users to only be part of the given group it is necessary to specify the
+    <sgmltag
+          class="attribute">id</sgmltag> attribute. It is
+    recommended to use a group id greater than 100.
+   </para>
+  </sect2>
 
-      <para>The optional <sgmltag>users</sgmltag> element lists the users belonging to the
-        group specified with the <sgmltag class="attribute">group</sgmltag> attribute. At least one user
-        child element must be specified as part of the <sgmltag>users</sgmltag> element.
-        Multiple users elements may be specified. </para>
-
-      <para>The attributes <sgmltag class="attribute">home</sgmltag>,
-          <sgmltag class="attribute">id</sgmltag>, <sgmltag
-          class="attribute">name</sgmltag>, <sgmltag class="attribute"
-          >pwd</sgmltag>, <sgmltag class="attribute">realname</sgmltag>,
-        and <sgmltag class="attribute">shell</sgmltag> specify the
-        created users home directory, the user name, the user’s
-        password, the user’s real name, and the user’s login shell,
-        respectively. By default, the value of the password attribute is
-        expected to be an encrypted string. An encrypted password can be
-        created using <command>kiwi</command>
-        <option>--createpassword</option>. It is also possible to
-        specify the password as a non encrypted string by using the
-        pwdformat attribute and setting it’s value to
-          <quote>plain</quote>. KIWI will then encrypt the password
-        prior to the user being added to the system. </para>
-
-      <para>All specified users and groups will be created if they do
-        not already exist. By default, the defined users will be part of
-        the group specified with the group attribute of the users
-        element and the default group called <quote>users</quote>. If it
-        is desired to have the specified users to only be part of the
-        given group it is necessary to specify the <sgmltag
-          class="attribute">id</sgmltag> attribute. It is recommended to
-        use a group id greater than 100. </para>
-    </sect2>
-
-    <sect2 id="sec.description.drivers">
-      <title><sgmltag>drivers</sgmltag> Element</title>
-      <screen>&lt;drivers profiles="name"&gt; 
+  <sect2 id="sec.description.drivers">
+   <title><sgmltag>drivers</sgmltag> Element</title>
+<screen>&lt;drivers profiles="name"&gt; 
   &lt;file name="filename"/&gt; 
   <sgmltag class="sgmlcomment"> ... </sgmltag> 
 &lt;/drivers&gt;</screen>
+   <para>
+    The optional <sgmltag>drivers</sgmltag> element is only useful for boot
+    images (initrd). As a boot image doesn’t need to contain the complete
+    kernel one can save a lot of space if only the required drivers are part
+    of the image. Therefore the drivers section exists. If present only the
+    drivers which matches the file names or glob patterns will be included
+    into the boot image. Each file is specified relative to the
+    <filename class="directory">/lib/modules/<replaceable>Version</replaceable>/kernel</filename>
+    directory.
+   </para>
+   <para>
+    According to the <sgmltag>driver</sgmltag> element the specified files
+    are searched in the corresponding directory. The information about the
+    driver names is provided as environment variable named like the value of
+    the <sgmltag class="attribute"
+          >type</sgmltag> attribute and
+    is processed by the function <function>suseStripKernel</function>.
+    According to this along with a boot image description a script called
+    <command>images.sh</command> must exist which calls this function in
+    order to allow the driver information to have any effect.
+   </para>
+  </sect2>
 
-      <para>The optional <sgmltag>drivers</sgmltag> element is only
-        useful for boot images (initrd). As a boot image doesn’t need to
-        contain the complete kernel one can save a lot of space if only
-        the required drivers are part of the image. Therefore the
-        drivers section exists. If present only the drivers which
-        matches the file names or glob patterns will be included into
-        the boot image. Each file is specified relative to the
-        <filename class="directory">/lib/modules/<replaceable>Version</replaceable>/kernel</filename> directory.</para>
-
-      <para>According to the <sgmltag>driver</sgmltag> element the
-        specified files are searched in the corresponding directory. The
-        information about the driver names is provided as environment
-        variable named like the value of the <sgmltag class="attribute"
-          >type</sgmltag> attribute and is processed by the function
-          <function>suseStripKernel</function>. According to this along
-        with a boot image description a script called
-          <command>images.sh</command> must exist which calls this
-        function in order to allow the driver information to have any
-        effect. </para>
-    </sect2>
-
-    <sect2 id="sec.description.repository">
-      <title><sgmltag>repository</sgmltag> Element</title>
-      <screen>&lt;repository type="type" alias="name" imageinclude="true|false"
+  <sect2 id="sec.description.repository">
+   <title><sgmltag>repository</sgmltag> Element</title>
+<screen>&lt;repository type="type" alias="name" imageinclude="true|false"
               password="password" priority="number" status="replaceable"
               username="user-name"&gt; &lt;source path="URL"/&gt;
 &lt;/repository&gt;</screen>
-
-      <para>The mandatory <sgmltag class="element">repository</sgmltag> element
-        specifies the location and type of a repository to be used by the 
-        package manager as a package installation source. The mandatory
-        <sgmltag class="attribute">type</sgmltag> attribute
-        specifies the repository type. A specified repository can only be
-        accessed by the chosen package manager if the given type is supported
-        by the specified package manager. KIWI supports smart or zypper as
-        package managers, specified with the <sgmltag class="element">
-        packagemanager</sgmltag> element. The default package manager is
-        zypper. The following table shows the possible 
-        supported repository types for each package manager:</para>
-
-      <table id="tab.description.supported-types">
-        <title>Supported package manager repo types</title>
-        <tgroup cols="5">
-          <thead>
-            <row>
-              <entry>Type</entry>
-              <entry>smart</entry>
-              <entry>zypper</entry>
-              <entry>apt</entry>
-              <entry>yum</entry>
-            </row>
-          </thead>
-          <tbody>
-            <row>
-              <entry>apt-deb</entry>
-              <entry>yes</entry>
-              <entry>no</entry>
-              <entry>yes</entry>
-              <entry>no</entry>
-            </row>
-            <row>
-              <entry>rpm-dir</entry>
-              <entry>yes</entry>
-              <entry>yes</entry>
-              <entry>no</entry>
-              <entry>no</entry>
-            </row>
-            <row>
-              <entry>rpm-md</entry>
-              <entry>yes</entry>
-              <entry>yes</entry>
-              <entry>no</entry>
-              <entry>yes</entry>
-            </row>
-            <row>
-              <entry>yast2</entry>
-              <entry>yes</entry>
-              <entry>yes</entry>
-              <entry>no</entry>
-              <entry>no</entry>
-            </row>
-          </tbody>
-        </tgroup>
-      </table>
-
-      <para>The <sgmltag class="element">repository</sgmltag> element
-        has the following optional attributes: </para>
-
-      <variablelist>
-        <varlistentry>
-          <term><sgmltag class="attribute">alias</sgmltag>="<sgmltag
-              class="attvalue">name</sgmltag>"</term>
-          <listitem>
-            <para>Specifies an alternative name for the configured
-              repository. If the attribute is not specified KIWI will generate
-              an alias name by replacing any <quote>/</quote> in the given 
-              repository location with an <quote>_</quote>. It is helpful to
-              set an alias name if the repository path is insufficient in
-              expressing the purpose of the contained packages.</para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><sgmltag class="attribute">imageinclude</sgmltag>="<sgmltag
-              class="attvalue">true|false</sgmltag>"</term>
-          <listitem>
-            <para>Specifies whether the given repository should be configured
-              as a repository in the image or not. The default behavior is
-              that repositories used to build an image are not configured
-              as a repository inside the image. This feature allows you to
-              change the behavior by setting the value to <sgmltag
-              class="attvalue">true</sgmltag>. The repository is configured
-              in the image according to the source path as specified with the
-              <sgmltag class="attribute">path</sgmltag> attribute of the
-              <sgmltag class="element">source</sgmltag> element. Therefore,
-              if the path is not a fully qualified URL, you may need to adjust
-              the repository file in the image to accomodate the expected
-              location. It is recommended that you use the
-              <sgmltag class="attribute">alias</sgmltag> attribute in
-              combination with the
-              <sgmltag class="attribute">imageinclude</sgmltag> attribute to
-              avoid having unpredictable random names assigned to the
-              repository you wish to include in the image. This also
-              facilitates modification of the "baseurl" entry in the .repo
-              file from the config.sh script if you need to make adjustments
-              to the path.</para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-           <term><sgmltag class="attribute">password</sgmltag>="<sgmltag
-              class="attvalue">string</sgmltag>"</term>
-           <listitem>
-             <para>Specifies a password for the given repository. The
-               <sgmltag class="attribute">password</sgmltag> attribute must
-               be used in combination with the <sgmltag class="attribute">
-               username</sgmltag> attribute. Dependent on the
-               repository location this information may not be used.
-             </para>
-           </listitem>
-        </varlistentry>
+   <para>
+    The mandatory <sgmltag class="element">repository</sgmltag> element
+    specifies the location and type of a repository to be used by the
+    package manager as a package installation source. The mandatory
+    <sgmltag class="attribute">type</sgmltag> attribute specifies the
+    repository type. A specified repository can only be accessed by the
+    chosen package manager if the given type is supported by the specified
+    package manager. KIWI supports smart or zypper as package managers,
+    specified with the <sgmltag class="element"> packagemanager</sgmltag>
+    element. The default package manager is zypper. The following table
+    shows the possible supported repository types for each package manager:
+   </para>
+   <table id="tab.description.supported-types">
+    <title>Supported package manager repo types</title>
+    <tgroup cols="5">
+     <thead>
+      <row>
+       <entry>Type</entry>
+       <entry>smart</entry>
+       <entry>zypper</entry>
+       <entry>apt</entry>
+       <entry>yum</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>apt-deb</entry>
+       <entry>yes</entry>
+       <entry>no</entry>
+       <entry>yes</entry>
+       <entry>no</entry>
+      </row>
+      <row>
+       <entry>rpm-dir</entry>
+       <entry>yes</entry>
+       <entry>yes</entry>
+       <entry>no</entry>
+       <entry>no</entry>
+      </row>
+      <row>
+       <entry>rpm-md</entry>
+       <entry>yes</entry>
+       <entry>yes</entry>
+       <entry>no</entry>
+       <entry>yes</entry>
+      </row>
+      <row>
+       <entry>yast2</entry>
+       <entry>yes</entry>
+       <entry>yes</entry>
+       <entry>no</entry>
+       <entry>no</entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </table>
+   <para>
+    The <sgmltag class="element">repository</sgmltag> element has the
+    following optional attributes:
+   </para>
+   <variablelist>
     <varlistentry>
-      <term><sgmltag class="attribute">prefer-license</sgmltag>="<sgmltag
-        class="attvalue">true|false</sgmltag>"</term>
-      <listitem>
-        <para>The repository providing this attribute will be used
-        primarly to install the license tarball if found on that
-        repository. If no repository with a prefered license attribute
-        exists, the search happens over all repositories. It's not
-        guaranteed in that case that the search order follows the
-        repository order like they are written into the XML
-        description.</para>
-      </listitem>
-    </varlistentry>
-        <varlistentry>
-          <term><sgmltag class="attribute">priority</sgmltag>="<sgmltag
-              class="attvalue">number</sgmltag>"</term>
-          <listitem>
-            <para>Specifies the repository priority for this given repository.
-              Priority values are treated differently by different package
-              managers. Repository priorities allow the package management
-              system to disambiguate packages that may be contained in more
-              than one of the configured repositories. The smart package
-              manager treats packages from repositories with the 
-              <emphasis>highest</emphasis> priority number as preferable to
-              packages from a repository with a lower priority number.
-              The value 0 means <quote>no priority is set</quote>. The
-              zypper package manager prefers packages from a repository with 
-              a <emphasis>lower</emphasis> priority over packages from
-              a repository with higher priority values. The value 99 means
-              <quote>no priority is set</quote>.</para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><sgmltag class="attribute">status</sgmltag>="<sgmltag
-              class="attvalue">replaceable</sgmltag>"</term>
-          <listitem>
-            <para>This attribute should only be applied in the context of a
-              boot image description. Setting the <sgmltag class="attribute">
-              status</sgmltag> to <sgmltag class="attvalue">replaceable
-              </sgmltag> indicates that the specified repository my be
-              replaced by the repositories specified in the image description.
-              This is important as the KIWI generated boot image, if required,
-              should be created based on packages from the same repositories
-              used to build the system image.
-            </para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-           <term><sgmltag class="attribute">username</sgmltag>="<sgmltag
+     <term><sgmltag class="attribute">alias</sgmltag>="<sgmltag
               class="attvalue">name</sgmltag>"</term>
-           <listitem>
-             <para>Specifies a user name for the given repository. The
-               <sgmltag class="attribute">username</sgmltag> attribute must
-               be used in combination with the <sgmltag class="attribute">
-               password</sgmltag> attribute. Dependent on the
-               repository location this information may not be used.
-             </para>
-           </listitem>
-        </varlistentry>
-      </variablelist>
-
-      <para>When specifying an https location for a repository it is
-        generally necessary to include the <quote>openssl-certs</quote> and
-        <quote>cracklib-dict-full</quote> packages in the 
-        <sgmltag class="attvalue">bootstrap</sgmltag> section of the
-        image configuration.</para>
-      
-      <para>The location of a repository is specified by the 
-        <sgmltag class="attribute">path</sgmltag> attribute of the
-        mandatory <sgmltag class="element">source</sgmltag> child element.
-        The location specification may include the
-        <systemitem class="macro">%arch</systemitem> macro which will expand
-        to the architecture of the image building host. The value for the 
-        <sgmltag class="attribute">path</sgmltag> attribute may begin with
-        any of the following location indicators:</para>
-
-      <variablelist>
-        <varlistentry>
-          <term><uri>dir:///local/path</uri></term>
-          <listitem>
-            <para>An absolute path to a directory accessible through the
-              local file system. The <quote>dir://</quote> prefix may
-              be omitted.</para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><uri>ftp://<replaceable>URL</replaceable></uri></term>
-          <listitem>
-            <para>A ftp protocol based network location. </para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><uri>http://<replaceable>URL</replaceable></uri></term>
-          <listitem>
-            <para>A http protocol based network location. </para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><uri>https://<replaceable>URL</replaceable></uri></term>
-          <listitem>
-            <para>A https protocol based network location. See the comment
-              above about the handling of certificates and additional
-              package requirements in the <sgmltag class="attvalue">bootstrap
-              </sgmltag> section of the image configuration.</para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><uri>iso://<replaceable>path/to/isofile</replaceable></uri></term>
-          <listitem>
-            <para>An absolute path to an .iso file accessible via the local
-              file system. KIWI will loop mount the the .iso file to a
-              KIWI created directory with a generated name. The generated path
-              is provided to the specified package manager as a repository
-              location.</para>
-            <para>Using multiple .iso files from the same SLE product, requires
-              that all .iso files are located in the same directory. Only
-              the first .iso file is to be specified as a repository in
-              the <filename>config.xml</filename>. The first .iso file
-              contains all information necessary for the package manager to
-              locate packages that are contained in other .iso files of the
-              same product. Attempting to use multiple .iso files
-              in a series as standalone repositories will result in an
-              error.</para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><uri>obs://$dir1/$dir2</uri></term>
-          <listitem>
-            <para>A special network location used with the http protocol.
-                The values of <varname>$dir1</varname> and 
-                <varname>$dir2</varname> represent the project location in the 
-                openSUSE build service. The location is evaluated as
-                <uri>this://repos/$dir1/$dir2</uri>.</para>
-            <para>The <quote>obs://</quote> prefix is also valid as part
-              of the value for the <sgmltag class="attribute">boot</sgmltag>
-              attribute of the <sgmltag class="element">type</sgmltag>. If
-              used with the <sgmltag class="attribute">boot</sgmltag>
-              attribute it is evaluated as
-              <uri>this://images/$dir1/$dir2</uri>.
-            </para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><uri>opensuse://<replaceable>PROJECTNAME</replaceable></uri></term>
-          <listitem>
-            <para>A special network location used with the http protocol. The
-              given <replaceable>PROJECTNAME</replaceable> specifies a
-              project in the openSUSE buildservice. The repository is a
-              repository of type <sgmltag class="attvalue">rpm-md</sgmltag>.
-              For example: <sgmltag class="attribute">path</sgmltag>=
-              <sgmltag class="attvalue">"opensuse://openSUSE:10.3/standard"
-              </sgmltag>. </para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><uri>plain://<replaceable>URI</replaceable></uri></term>
-          <listitem>
-            <para>A plain resource string. Everything following 'plain://'
-             will be forwarded to the package manager without further
-             modification. This type of location specification is useful when
-             KIWI does not support a specific URI but the specified package
-             manager does.
-            </para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><uri>smb://<replaceable>Samba share pathname</replaceable></uri></term>
-          <listitem>
-            <para>A path to a samba share using the cifs protocol. KIWI
-              creates a mount point and mounts the share including username
-              and password, if specified. Access to the smb share from within
-              the new root tree is provided via a cifs mount. Therefore, 
-              the package providing the cifs tools must be included in the
-              package list for the <sgmltag class="attvalue">bootstrap
-              </sgmltag> section of the image configuration. At the time of
-              this writing the package providing the cifs tools is called
-              <emphasis>cifs-utils</emphasis>. If any packages provided by the
-              Samba share are used as part of the boot image the cifs tools
-              must also be included in the boot image. This is accomplished
-              with the <sgmltag class="attribute">bootinclude</sgmltag>
-              attribute of the <sgmltag class="element">package</sgmltag>
-              element. This is shown in the example below:</para>
-
+     <listitem>
+      <para>
+       Specifies an alternative name for the configured repository. If the
+       attribute is not specified KIWI will generate an alias name by
+       replacing any <quote>/</quote> in the given repository location with
+       an <quote>_</quote>. It is helpful to set an alias name if the
+       repository path is insufficient in expressing the purpose of the
+       contained packages.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><sgmltag class="attribute">imageinclude</sgmltag>="<sgmltag
+              class="attvalue">true|false</sgmltag>"</term>
+     <listitem>
+      <para>
+       Specifies whether the given repository should be configured as a
+       repository in the image or not. The default behavior is that
+       repositories used to build an image are not configured as a
+       repository inside the image. This feature allows you to change the
+       behavior by setting the value to
+       <sgmltag
+              class="attvalue">true</sgmltag>. The
+       repository is configured in the image according to the source path as
+       specified with the <sgmltag class="attribute">path</sgmltag>
+       attribute of the <sgmltag class="element">source</sgmltag> element.
+       Therefore, if the path is not a fully qualified URL, you may need to
+       adjust the repository file in the image to accomodate the expected
+       location. It is recommended that you use the
+       <sgmltag class="attribute">alias</sgmltag> attribute in combination
+       with the <sgmltag class="attribute">imageinclude</sgmltag> attribute
+       to avoid having unpredictable random names assigned to the repository
+       you wish to include in the image. This also facilitates modification
+       of the "baseurl" entry in the .repo file from the config.sh script if
+       you need to make adjustments to the path.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><sgmltag class="attribute">password</sgmltag>="<sgmltag
+              class="attvalue">string</sgmltag>"</term>
+     <listitem>
+      <para>
+       Specifies a password for the given repository. The
+       <sgmltag class="attribute">password</sgmltag> attribute must be used
+       in combination with the <sgmltag class="attribute">
+       username</sgmltag> attribute. Dependent on the repository location
+       this information may not be used.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><sgmltag class="attribute">prefer-license</sgmltag>="<sgmltag
+        class="attvalue">true|false</sgmltag>"</term>
+     <listitem>
+      <para>
+       The repository providing this attribute will be used primarly to
+       install the license tarball if found on that repository. If no
+       repository with a prefered license attribute exists, the search
+       happens over all repositories. It's not guaranteed in that case that
+       the search order follows the repository order like they are written
+       into the XML description.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><sgmltag class="attribute">priority</sgmltag>="<sgmltag
+              class="attvalue">number</sgmltag>"</term>
+     <listitem>
+      <para>
+       Specifies the repository priority for this given repository. Priority
+       values are treated differently by different package managers.
+       Repository priorities allow the package management system to
+       disambiguate packages that may be contained in more than one of the
+       configured repositories. The smart package manager treats packages
+       from repositories with the <emphasis>highest</emphasis> priority
+       number as preferable to packages from a repository with a lower
+       priority number. The value 0 means <quote>no priority is set</quote>.
+       The zypper package manager prefers packages from a repository with a
+       <emphasis>lower</emphasis> priority over packages from a repository
+       with higher priority values. The value 99 means <quote>no priority is
+       set</quote>.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><sgmltag class="attribute">status</sgmltag>="<sgmltag
+              class="attvalue">replaceable</sgmltag>"</term>
+     <listitem>
+      <para>
+       This attribute should only be applied in the context of a boot image
+       description. Setting the <sgmltag class="attribute"> status</sgmltag>
+       to <sgmltag class="attvalue">replaceable </sgmltag> indicates that
+       the specified repository my be replaced by the repositories specified
+       in the image description. This is important as the KIWI generated
+       boot image, if required, should be created based on packages from the
+       same repositories used to build the system image.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><sgmltag class="attribute">username</sgmltag>="<sgmltag
+              class="attvalue">name</sgmltag>"</term>
+     <listitem>
+      <para>
+       Specifies a user name for the given repository. The
+       <sgmltag class="attribute">username</sgmltag> attribute must be used
+       in combination with the <sgmltag class="attribute">
+       password</sgmltag> attribute. Dependent on the repository location
+       this information may not be used.
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+   <para>
+    When specifying an https location for a repository it is generally
+    necessary to include the <quote>openssl-certs</quote> and
+    <quote>cracklib-dict-full</quote> packages in the
+    <sgmltag class="attvalue">bootstrap</sgmltag> section of the image
+    configuration.
+   </para>
+   <para>
+    The location of a repository is specified by the
+    <sgmltag class="attribute">path</sgmltag> attribute of the mandatory
+    <sgmltag class="element">source</sgmltag> child element. The location
+    specification may include the
+    <systemitem class="macro">%arch</systemitem> macro which will expand to
+    the architecture of the image building host. The value for the
+    <sgmltag class="attribute">path</sgmltag> attribute may begin with any
+    of the following location indicators:
+   </para>
+   <variablelist>
+    <varlistentry>
+     <term>
+      <uri>dir:///local/path</uri>
+     </term>
+     <listitem>
+      <para>
+       An absolute path to a directory accessible through the local file
+       system. The <quote>dir://</quote> prefix may be omitted.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>
+      <uri>ftp://<replaceable>URL</replaceable>
+      </uri>
+     </term>
+     <listitem>
+      <para>
+       A ftp protocol based network location.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>
+      <uri>http://<replaceable>URL</replaceable>
+      </uri>
+     </term>
+     <listitem>
+      <para>
+       A http protocol based network location.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>
+      <uri>https://<replaceable>URL</replaceable>
+      </uri>
+     </term>
+     <listitem>
+      <para>
+       A https protocol based network location. See the comment above about
+       the handling of certificates and additional package requirements in
+       the <sgmltag class="attvalue">bootstrap </sgmltag> section of the
+       image configuration.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>
+      <uri>iso://<replaceable>path/to/isofile</replaceable>
+      </uri>
+     </term>
+     <listitem>
+      <para>
+       An absolute path to an .iso file accessible via the local file
+       system. KIWI will loop mount the the .iso file to a KIWI created
+       directory with a generated name. The generated path is provided to
+       the specified package manager as a repository location.
+      </para>
+      <para>
+       Using multiple .iso files from the same SLE product, requires that
+       all .iso files are located in the same directory. Only the first .iso
+       file is to be specified as a repository in the
+       <filename>config.xml</filename>. The first .iso file contains all
+       information necessary for the package manager to locate packages that
+       are contained in other .iso files of the same product. Attempting to
+       use multiple .iso files in a series as standalone repositories will
+       result in an error.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>
+      <uri>obs://$dir1/$dir2</uri>
+     </term>
+     <listitem>
+      <para>
+       A special network location used with the http protocol. The values of
+       <varname>$dir1</varname> and <varname>$dir2</varname> represent the
+       project location in the openSUSE build service. The location is
+       evaluated as
+       <uri>this://repos/$dir1/$dir2</uri>
+       .
+      </para>
+      <para>
+       The <quote>obs://</quote> prefix is also valid as part of the value
+       for the <sgmltag class="attribute">boot</sgmltag> attribute of the
+       <sgmltag class="element">type</sgmltag>. If used with the
+       <sgmltag class="attribute">boot</sgmltag> attribute it is evaluated
+       as
+       <uri>this://images/$dir1/$dir2</uri>
+       .
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>
+      <uri>opensuse://<replaceable>PROJECTNAME</replaceable>
+      </uri>
+     </term>
+     <listitem>
+      <para>
+       A special network location used with the http protocol. The given
+       <replaceable>PROJECTNAME</replaceable> specifies a project in the
+       openSUSE buildservice. The repository is a repository of type
+       <sgmltag class="attvalue">rpm-md</sgmltag>. For example:
+       <sgmltag class="attribute">path</sgmltag>=
+       <sgmltag class="attvalue">"opensuse://openSUSE:10.3/standard"
+       </sgmltag>.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>
+      <uri>plain://<replaceable>URI</replaceable>
+      </uri>
+     </term>
+     <listitem>
+      <para>
+       A plain resource string. Everything following 'plain://' will be
+       forwarded to the package manager without further modification. This
+       type of location specification is useful when KIWI does not support a
+       specific URI but the specified package manager does.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>
+      <uri>smb://<replaceable>Samba share pathname</replaceable>
+      </uri>
+     </term>
+     <listitem>
+      <para>
+       A path to a samba share using the cifs protocol. KIWI creates a mount
+       point and mounts the share including username and password, if
+       specified. Access to the smb share from within the new root tree is
+       provided via a cifs mount. Therefore, the package providing the cifs
+       tools must be included in the package list for the
+       <sgmltag class="attvalue">bootstrap </sgmltag> section of the image
+       configuration. At the time of this writing the package providing the
+       cifs tools is called <emphasis>cifs-utils</emphasis>. If any packages
+       provided by the Samba share are used as part of the boot image the
+       cifs tools must also be included in the boot image. This is
+       accomplished with the
+       <sgmltag class="attribute">bootinclude</sgmltag> attribute of the
+       <sgmltag class="element">package</sgmltag> element. This is shown in
+       the example below:
+      </para>
 <screen>&lt;packages type="bootstrap"&gt;
   &lt;package name="cifs-utils" bootinclude="true"/&gt;
   &lt;/packages&gt;</screen>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><uri>this://<replaceable>PATH</replaceable></uri></term>
-          <listitem>
-            <para><replaceable>PATH</replaceable> is the relative location to
-              the image description directory for the curent image.</para>
-          </listitem>
-        </varlistentry>
-      </variablelist>
-    </sect2>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>
+      <uri>this://<replaceable>PATH</replaceable>
+      </uri>
+     </term>
+     <listitem>
+      <para>
+       <replaceable>PATH</replaceable> is the relative location to the image
+       description directory for the curent image.
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </sect2>
 
-    <sect2 id="sec.description.packages">
-      <title><sgmltag>packages</sgmltag> Element</title>
-      <screen>&lt;packages type="type" profiles="name" patternType="type"
+  <sect2 id="sec.description.packages">
+   <title><sgmltag>packages</sgmltag> Element</title>
+<screen>&lt;packages type="type" profiles="name" patternType="type"
    &lt;package name="name" arch="arch"/&gt; 
    &lt;package name="name" replaces="name"/&gt;
    &lt;package name="name" bootinclude="true" bootdelete="true"/&gt; 
@@ -1790,201 +2086,226 @@
    &lt;ignore name="name"/&gt; 
    &lt;ignore .../&gt;
 &lt;/packages&gt;</screen>
-
-      <para>The mandatory <sgmltag>packages</sgmltag> element specifies
-        the list of packages (element <sgmltag>package</sgmltag>) and
-        patterns (element <sgmltag>namedCollection</sgmltag>) to be used
-        with the image. The value of the <sgmltag class="attribute"
-          >type</sgmltag> attribute specifies how the packages and
-        patterns listed are handled, supported values are as follows: </para>
-
-      <variablelist>
-        <varlistentry>
-          <term><sgmltag class="attvalue">bootstrap</sgmltag></term>
-          <listitem>
-            <para>Bootstrap packages, list of packages for the new
-              operating system root tree. The packages list the required
-              components to support a chroot environment in the new
-              system root tree, such as glibc. </para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><sgmltag class="attvalue">delete</sgmltag></term>
-          <listitem>
-            <para>Delete packages, list of packages to be deleted from
-              the image being created. </para>
-            <para>When using the delete type only
-                <sgmltag>package</sgmltag> elements are considered, all
-              other specifications such as
-                <sgmltag>namedCollection</sgmltag> are ignored. The
-              given package names are stored in the
-                $<envar>delete</envar> environment variable of the
-                <filename>/.profile</filename> file created by KIWI. The
-              list of package names is returned by the
-                <function>baseGetPackagesForDeletion</function>
-              function. This list can then be used to delete the
-              packages ignoring requirements or dependencies. This can
-              be accomplished in the <command>config.sh</command> or
-                <command>images.sh</command> script by calling the following
-              helper function: </para>
-            <screen><command>suseRemovePackagesMarkedForDeletion</command></screen>
-            <para>Note, that the delete value is indiscriminate of the
-              image type being built. </para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><sgmltag class="attvalue">image</sgmltag></term>
-          <listitem>
-            <para>Image packages, list of packages to be installed in
-              the image. </para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><sgmltag class="attvalue">iso</sgmltag></term>
-          <listitem>
-            <para>Image packages, a list of additional packages to be
-              installed when building an ISO image. </para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><sgmltag class="attvalue">oem</sgmltag></term>
-          <listitem>
-            <para>Image packages, a list of additional packages to be
-              installed when building an OEM image. </para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><sgmltag class="attvalue">pxe</sgmltag></term>
-          <listitem>
-            <para>Image packages, a list of additional packages to be
-              installed when building an PXE image. </para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><sgmltag class="attvalue">vmx</sgmltag></term>
-          <listitem>
-            <para>Image packages, a list of additional packages to be
-              installed when building a vmx virtual image of any format.
-            </para>
-          </listitem>
-        </varlistentry>
-      </variablelist>
-
-      <sect3 id="sec.descriptions.using-patterns">
-        <title>Using Patterns</title>
-        <indexterm>
-          <primary>KIWI</primary>
-          <secondary>patterns</secondary>
-        </indexterm>
-        <para> Using a pattern name allows you to considerably shorten
-          the list of specified packages in the <filename>config.xml</filename>
-          file. A named pattern, specified with the <sgmltag
-            class="element">namedCollection</sgmltag> element is a
-          representation of a predefined list of packages. Specifying a
-          pattern will install all packages listed in the named pattern to be
-          installed in the image. Support for patterns is distribution specific
-          and available with SLES, openSUSE, CentOS and RHEL. The
-          optional <sgmltag class="attribute">patternType</sgmltag> attribute
-          on the 
-          <sgmltag class="element">packages</sgmltag> element allows you to
-          control the installation of dependent packages in the image.
-          You may assigne one of the following values to the
-          <sgmltag class="attribute">patternType</sgmltag> attribute:
-        </para>
-        <variablelist>
-          <varlistentry>
-            <term><sgmltag class="attribute">onlyRequired</sgmltag></term>
-            <listitem>
-              <para>Incorporates only patterns and packages that
-               the specifeid patterns and packages require. This is
-               a "hard dependency" only resolution.
-              </para>
-            </listitem>
-          </varlistentry>
-          <varlistentry>
-            <term><sgmltag class="attribute"
-              >plusRecommended</sgmltag></term>
-            <listitem>
-              <para>Incorporates patterns and packages that are required
-               and recommended by the specified patterns and packages
-               in <filename>config.xml</filename>.
-              </para>
-            </listitem>
-          </varlistentry>
-        </variablelist>
-        <para>By default, only required patterns and packages are installed.
-          KIWI depends on the package manager to resolve the specified list
-          of patterns and packages against the specified repositories and
-          complete the installation. Note that not all supported package
-          managers support the use of named patterns, thus the value of the
-          <sgmltag class="element">packageManager</sgmltag> element
-          determines whether you are able to use named patterns or not.
-          Should the list of specified packages result in a conflict the
-          image creation process will stop and the information provided by
-          the package manager will be captured in the build log and will be
-          displayed in the terminal window where KIWI was started. The
-          <sgmltag class="element">ignore</sgmltag> element may be of use
-          in resolving such conflicts. However, the <sgmltag
-            class="element">ignore</sgmltag> element is limited to effect
-          packages named explicitely. Packages installed in the image through
-          a named pattern are not effected by the <sgmltag
-           class="element">ignore</sgmltag> element setting. THerefore,
-          package conflicts created by packages within named patterns cannot
-          be resolved using the ignore mechanism. Further, if a package is
-          specified to be ignored, but is required by another package, then
-          the required package is installed in the image via the automatic
-          dependency resolution by the package manager in use.
-        </para>
-      </sect3>
-      <sect3 id="sec.description.architecture-restrictions">
-        <title>Architecture Restrictions</title>
-        <indexterm>
-          <primary>KIWI</primary>
-          <secondary>architecture restrictions</secondary>
-        </indexterm>
-        <para> To restrict a package to a specific architecture, use the
-          arch attribute to specify a comma separated list of allowed
-          architectures. Such a package is only installed if the build
-          systems architecture (<command>uname</command>
-          <option>-m</option>) matches one of the specified values of
-          the arch attribute. </para>
-      </sect3>
-
-      <sect3 id="sec.description.packages.to.become.included">
-        <title>Packages to Become Included Into the Boot Image</title>
-        <para> The optional attributes bootinclude and bootdelete can be
-          used to mark a package inside the system image description to
-          become part of the corresponding boot image (initrd). This
-          feature is most often used to specify bootsplash and/or
-          graphics boot related packages inside the system image
-          description but they are required to be part of the boot image
-          as the data is used at boot time of the image.</para>
-        <para>Packages included into the boot image with the <sgmltag
-          class="attribute">bootinclude</sgmltag> are still included into
-          the system image as well. If packages should only be included into
-          the boot image, but not the system image, they need to be added to
-          the <sgmltag class="element">packages</sgmltag> section of
-          <sgmltag class="attribute">type</sgmltag>=<sgmltag
-          class="attvalue">delete</sgmltag>.</para>
-        <para>If the
-          bootdelete attribute is specified along with the bootinclude
-          attribute this means that the selected package will be marked
-          as a <quote>to become deleted</quote> package and is removed
-          by the contents of the <command>images.sh</command> script of
-          the corresponding boot image description.</para>
-      </sect3>
-
-      <sect3 id="sec.description.data.not.available">
-        <title>Data not Available as Packages to Become Included</title>
-        <para> With the optional <sgmltag>archive</sgmltag> element it’s
-          possible to include any kind of data into the image. The
-          archive elements expects the name of a tarball which must
-          exist as part of the system image description. KIWI then picks
-          up the tarball and installs it into the image. If the
-          bootinclude attribute is set along with the archive element
-          the data will also become installed into the boot image.
-        </para>
-      </sect3>
-    </sect2>
-  </sect1>
+   <para>
+    The mandatory <sgmltag>packages</sgmltag> element specifies the list of
+    packages (element <sgmltag>package</sgmltag>) and patterns (element
+    <sgmltag>namedCollection</sgmltag>) to be used with the image. The value
+    of the <sgmltag class="attribute"
+          >type</sgmltag> attribute
+    specifies how the packages and patterns listed are handled, supported
+    values are as follows:
+   </para>
+   <variablelist>
+    <varlistentry>
+     <term><sgmltag class="attvalue">bootstrap</sgmltag>
+     </term>
+     <listitem>
+      <para>
+       Bootstrap packages, list of packages for the new operating system
+       root tree. The packages list the required components to support a
+       chroot environment in the new system root tree, such as glibc.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><sgmltag class="attvalue">delete</sgmltag>
+     </term>
+     <listitem>
+      <para>
+       Delete packages, list of packages to be deleted from the image being
+       created.
+      </para>
+      <para>
+       When using the delete type only <sgmltag>package</sgmltag> elements
+       are considered, all other specifications such as
+       <sgmltag>namedCollection</sgmltag> are ignored. The given package
+       names are stored in the $<envar>delete</envar> environment variable
+       of the <filename>/.profile</filename> file created by KIWI. The list
+       of package names is returned by the
+       <function>baseGetPackagesForDeletion</function> function. This list
+       can then be used to delete the packages ignoring requirements or
+       dependencies. This can be accomplished in the
+       <command>config.sh</command> or <command>images.sh</command> script
+       by calling the following helper function:
+      </para>
+<screen><command>suseRemovePackagesMarkedForDeletion</command></screen>
+      <para>
+       Note, that the delete value is indiscriminate of the image type being
+       built.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><sgmltag class="attvalue">image</sgmltag>
+     </term>
+     <listitem>
+      <para>
+       Image packages, list of packages to be installed in the image.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><sgmltag class="attvalue">iso</sgmltag>
+     </term>
+     <listitem>
+      <para>
+       Image packages, a list of additional packages to be installed when
+       building an ISO image.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><sgmltag class="attvalue">oem</sgmltag>
+     </term>
+     <listitem>
+      <para>
+       Image packages, a list of additional packages to be installed when
+       building an OEM image.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><sgmltag class="attvalue">pxe</sgmltag>
+     </term>
+     <listitem>
+      <para>
+       Image packages, a list of additional packages to be installed when
+       building an PXE image.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><sgmltag class="attvalue">vmx</sgmltag>
+     </term>
+     <listitem>
+      <para>
+       Image packages, a list of additional packages to be installed when
+       building a vmx virtual image of any format.
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+   <sect3 id="sec.descriptions.using-patterns">
+    <title>Using Patterns</title><indexterm>
+    <primary>KIWI</primary>
+    <secondary>patterns</secondary></indexterm>
+    <para>
+     Using a pattern name allows you to considerably shorten the list of
+     specified packages in the <filename>config.xml</filename> file. A named
+     pattern, specified with the
+     <sgmltag
+            class="element">namedCollection</sgmltag> element
+     is a representation of a predefined list of packages. Specifying a
+     pattern will install all packages listed in the named pattern to be
+     installed in the image. Support for patterns is distribution specific
+     and available with SLES, openSUSE, CentOS and RHEL. The optional
+     <sgmltag class="attribute">patternType</sgmltag> attribute on the
+     <sgmltag class="element">packages</sgmltag> element allows you to
+     control the installation of dependent packages in the image. You may
+     assigne one of the following values to the
+     <sgmltag class="attribute">patternType</sgmltag> attribute:
+    </para>
+    <variablelist>
+     <varlistentry>
+      <term><sgmltag class="attribute">onlyRequired</sgmltag>
+      </term>
+      <listitem>
+       <para>
+        Incorporates only patterns and packages that the specifeid patterns
+        and packages require. This is a "hard dependency" only resolution.
+       </para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term><sgmltag class="attribute"
+              >plusRecommended</sgmltag>
+      </term>
+      <listitem>
+       <para>
+        Incorporates patterns and packages that are required and recommended
+        by the specified patterns and packages in
+        <filename>config.xml</filename>.
+       </para>
+      </listitem>
+     </varlistentry>
+    </variablelist>
+    <para>
+     By default, only required patterns and packages are installed. KIWI
+     depends on the package manager to resolve the specified list of
+     patterns and packages against the specified repositories and complete
+     the installation. Note that not all supported package managers support
+     the use of named patterns, thus the value of the
+     <sgmltag class="element">packageManager</sgmltag> element determines
+     whether you are able to use named patterns or not. Should the list of
+     specified packages result in a conflict the image creation process will
+     stop and the information provided by the package manager will be
+     captured in the build log and will be displayed in the terminal window
+     where KIWI was started. The <sgmltag class="element">ignore</sgmltag>
+     element may be of use in resolving such conflicts. However, the
+     <sgmltag
+            class="element">ignore</sgmltag> element is
+     limited to effect packages named explicitely. Packages installed in the
+     image through a named pattern are not effected by the
+     <sgmltag
+           class="element">ignore</sgmltag> element setting.
+     THerefore, package conflicts created by packages within named patterns
+     cannot be resolved using the ignore mechanism. Further, if a package is
+     specified to be ignored, but is required by another package, then the
+     required package is installed in the image via the automatic dependency
+     resolution by the package manager in use.
+    </para>
+   </sect3>
+   <sect3 id="sec.description.architecture-restrictions">
+    <title>Architecture Restrictions</title><indexterm>
+    <primary>KIWI</primary>
+    <secondary>architecture restrictions</secondary></indexterm>
+    <para>
+     To restrict a package to a specific architecture, use the arch
+     attribute to specify a comma separated list of allowed architectures.
+     Such a package is only installed if the build systems architecture
+     (<command>uname</command> <option>-m</option>) matches one of the
+     specified values of the arch attribute.
+    </para>
+   </sect3>
+   <sect3 id="sec.description.packages.to.become.included">
+    <title>Packages to Become Included Into the Boot Image</title>
+    <para>
+     The optional attributes bootinclude and bootdelete can be used to mark
+     a package inside the system image description to become part of the
+     corresponding boot image (initrd). This feature is most often used to
+     specify bootsplash and/or graphics boot related packages inside the
+     system image description but they are required to be part of the boot
+     image as the data is used at boot time of the image.
+    </para>
+    <para>
+     Packages included into the boot image with the
+     <sgmltag
+          class="attribute">bootinclude</sgmltag> are still
+     included into the system image as well. If packages should only be
+     included into the boot image, but not the system image, they need to be
+     added to the <sgmltag class="element">packages</sgmltag> section of
+     <sgmltag class="attribute">type</sgmltag>=<sgmltag
+          class="attvalue">delete</sgmltag>.
+    </para>
+    <para>
+     If the bootdelete attribute is specified along with the bootinclude
+     attribute this means that the selected package will be marked as a
+     <quote>to become deleted</quote> package and is removed by the contents
+     of the <command>images.sh</command> script of the corresponding boot
+     image description.
+    </para>
+   </sect3>
+   <sect3 id="sec.description.data.not.available">
+    <title>Data not Available as Packages to Become Included</title>
+    <para>
+     With the optional <sgmltag>archive</sgmltag> element it’s possible to
+     include any kind of data into the image. The archive elements expects
+     the name of a tarball which must exist as part of the system image
+     description. KIWI then picks up the tarball and installs it into the
+     image. If the bootinclude attribute is set along with the archive
+     element the data will also become installed into the boot image.
+    </para>
+   </sect3>
+  </sect2>
+ </sect1>
 </chapter>

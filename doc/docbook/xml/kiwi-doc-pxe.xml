@@ -1,83 +1,91 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
                          "http://www.docbook.org/xml/4.5/docbookx.dtd">
-
 <chapter id="chap.pxe">
-  <title>PXE Image / Thin Clients</title>
-  <indexterm>
-    <primary>KIWI</primary>
-    <secondary>PXE image</secondary>
-  </indexterm>
-  <indexterm>
-    <primary>images</primary>
-    <secondary>PXE</secondary>
-  </indexterm>
-  <indexterm>
-    <primary>PXE images</primary>
-  </indexterm>
-      <indexterm>
-        <primary>network boot</primary>
-      </indexterm>
-  <para>PXE is a boot protocol implemented in most BIOS implementations 
-    which makes it so interesting. The protocol
-    sends DHCP requests to assign an IP address and after that it uses
-    tftp to download kernel and boot instructions.
-  </para>
+ <title>PXE Image / Thin Clients</title><indexterm>
+ <primary>KIWI</primary>
+ <secondary>PXE image</secondary></indexterm><indexterm>
+ <primary>images</primary>
+ <secondary>PXE</secondary></indexterm><indexterm>
+ <primary>PXE images</primary></indexterm><indexterm>
+ <primary>network boot</primary></indexterm>
+ <para>
+  PXE is a boot protocol implemented in most BIOS implementations which
+  makes it so interesting. The protocol sends DHCP requests to assign an IP
+  address and after that it uses tftp to download kernel and boot
+  instructions.
+ </para>
+ <para>
+  A PXE image consists of a boot image and a system image like all other
+  image types too. But with a PXE image the image files are available
+  separately and needs to be copied at specific locations of a network boot
+  server.
+ </para>
+ <sect1 id="sec.pxe.setting-up">
+  <title>Setting Up the Required Services</title>
+
   <para>
-    A PXE image consists of a boot image and a system image like all
-    other image types too. But with a PXE image the image files are
-    available separately and needs to be copied at specific locations of
-    a network boot server.
+   Before you start to build PXE images with KIWI, setup the boot server.
+   The boot server requires the services atftp and DHCP to run.
   </para>
-  <sect1 id="sec.pxe.setting-up">
-    <title>Setting Up the Required Services</title>
-    <para>Before you start to build PXE images with KIWI, setup the boot
-      server. The boot server requires the services atftp and DHCP to
-      run. </para>
-    <sect2 id="sec.pxe.atftp-server">
-      <title>Atftp Server</title>
-      <para>In order to setup the <systemitem class="server"
-          >atftp</systemitem> server the following steps are required </para>
 
-      <procedure id="proc.pxe.atftp-server-setup">
-        <step>
-          <para>Install the packages <package>atftp</package> and
-              <package>kiwi-pxeboot</package>. </para>
-        </step>
-        <step>
-          <para>Edit the file
-            <filename>/etc/sysconfig/atftpd</filename>. Set or modify
-            the following variables: </para>
-	    <screen>ATFTPD_OPTIONS="--daemon --no-multicast"
+  <sect2 id="sec.pxe.atftp-server">
+   <title>Atftp Server</title>
+   <para>
+    In order to setup the
+    <literal>atftp</literal>> server the
+    following steps are required
+   </para>
+   <procedure id="proc.pxe.atftp-server-setup">
+    <step>
+     <para>
+      Install the packages
+      <systemitem class="resource">atftp</systemitem>
+      and <systemitem class="resource">kiwi-pxeboot</systemitem>.
+     </para>
+    </step>
+    <step>
+     <para>
+      Edit the file <filename>/etc/sysconfig/atftpd</filename>. Set or
+      modify the following variables:
+     </para>
+<screen>ATFTPD_OPTIONS="--daemon --no-multicast"
 ATFTPD_DIRECTORY="/srv/tftpboot"</screen>
-        </step>
-        <step>
-          <para>Run <systemitem class="service">atftpd</systemitem> by
-            calling the command:</para>
+    </step>
+    <step>
+     <para>
+      Run <systemitem class="service">atftpd</systemitem> by calling the
+      command:
+     </para>
 <screen><command>rcatftpd</command> start</screen>
-        </step>
-      </procedure>
-    </sect2>
+    </step>
+   </procedure>
+  </sect2>
 
-    <sect2 id="sec.pxe.dhcp-server">
-      <title>DHCP Server</title>
-      <para> In contrast to the atftp server setup the following DHCP
-        server setup can only serve as an example. Depending on your
-        network structure, the IP addresses, ranges and domain settings
-        needs to be adapted in order to allow the DHCP server to work
-        within your network. If you already have a DHCP server running
-        in your network, make sure that the filename and next-server
-        information is provided by your server. The following steps
-        describe how to setup a new DHCP server instance: </para>
-
-      <procedure id="proc.pxe.dhcp-server-setup">
-        <step>
-          <para>Install the package <package>dhcp-server</package>.
-          </para>
-        </step>
-        <step>
-          <para>Create the file <filename>/etc/dhcpd.conf</filename> and include the
-            following statements: </para>
+  <sect2 id="sec.pxe.dhcp-server">
+   <title>DHCP Server</title>
+   <para>
+    In contrast to the atftp server setup the following DHCP server setup
+    can only serve as an example. Depending on your network structure, the
+    IP addresses, ranges and domain settings needs to be adapted in order to
+    allow the DHCP server to work within your network. If you already have a
+    DHCP server running in your network, make sure that the filename and
+    next-server information is provided by your server. The following steps
+    describe how to setup a new DHCP server instance:
+   </para>
+   <procedure id="proc.pxe.dhcp-server-setup">
+    <step>
+     <para>
+      Install the package
+      <package>dhcp-server</package>
+      .
+     </para>
+    </step>
+    <step>
+     <para>
+      Create the file <filename>/etc/dhcpd.conf</filename> and include the
+      following statements:
+     </para>
 <screen>option domain-name "example.org";
 option domain-name-servers 192.168.100.2;
 option broadcast-address 192.168.100.255;
@@ -93,75 +101,93 @@ subnet 192.168.100.0 netmask 255.255.255.0 {
    next-server 192.168.100.2;
    range dynamic-bootp 192.168.100.5 192.168.100.20;
 }</screen>
-
-        </step>
-        <step>
-          <para>Edit the file <filename>/etc/sysconfig/dhcpd</filename>
-            and setup the network interface the server should listen on: </para>
+    </step>
+    <step>
+     <para>
+      Edit the file <filename>/etc/sysconfig/dhcpd</filename> and setup the
+      network interface the server should listen on:
+     </para>
 <screen>DHCPD_INTERFACE="eth0"</screen>
-        </step>
-        <step>
-          <para>Run the <systemitem class="server">dhcp</systemitem> server by calling:</para>
+    </step>
+    <step>
+     <para>
+      Run the <systemitem class="server">dhcp</systemitem> server by
+      calling:
+     </para>
 <screen><command>rcdhcpd</command> start</screen>
-        </step>
-      </procedure>
-    </sect2>
-  </sect1>
-  <sect1 id="sec.pxe.building">
-    <title>Building a PXE filesystem JeOS</title>
-    <para>This example is based on SLES version 12. It creates a
-    compressed root filesystem image which is deployed as overlayfs
-    based union system. Please kiwi also supports deployment of
-    oem disk images via PXE. This is different from the filesystem
-    deployment method. For details refer to to the OEM
-    chapter <xref linkend="chap.oem"/></para>
+    </step>
+   </procedure>
+  </sect2>
+ </sect1>
+ <sect1 id="sec.pxe.building">
+  <title>Building a PXE filesystem JeOS</title>
+
+  <para>
+   This example is based on SLES version 12. It creates a compressed root
+   filesystem image which is deployed as overlayfs based union system.
+   Please kiwi also supports deployment of oem disk images via PXE. This is
+   different from the filesystem deployment method. For details refer to to
+   the OEM chapter <xref linkend="chap.oem"/>
+  </para>
 
 <screen><command>kiwi</command> --build suse-SLE12-JeOS --add-profile netboot --type pxe -d /tmp/mypxe-result</screen>
-  </sect1>
+ </sect1>
+ <sect1 id="sec.pxe.using">
+  <title>Using the Image</title>
 
-  <sect1 id="sec.pxe.using">
-    <title>Using the Image</title>
-    <para>In order to make use of the image all related image parts
-      needs to be copied onto the boot server. According to the example
-      the following steps needs to be performed: </para>
+  <para>
+   In order to make use of the image all related image parts needs to be
+   copied onto the boot server. According to the example the following steps
+   needs to be performed:
+  </para>
 
-    <procedure id="proc.pxe.using">
-      <step>
-        <para>Change working directory:</para>
+  <procedure id="proc.pxe.using">
+   <step>
+    <para>
+     Change working directory:
+    </para>
 <screen><command>cd</command> /tmp/mypxe-result</screen>
-      </step>
-      <step>
-        <para>Copy of the boot and kernel image:</para>
+   </step>
+   <step>
+    <para>
+     Copy of the boot and kernel image:
+    </para>
 <screen><command>cp</command> initrd-netboot-suse-SLES12.x86_64-2.1.1.gz \
   /srv/tftpboot/boot/initrd
 <command>cp</command> initrd-netboot-suse-SLES12.x86_64-2.1.1.kernel \
   /srv/tftpboot/boot/linux</screen>
-      </step>
-      <step>
-        <para>Copy of the system image and md5 sum:</para>
+   </step>
+   <step>
+    <para>
+     Copy of the system image and md5 sum:
+    </para>
 <screen><command>cp</command> LimeJeOS-SLE12.x86_64-1.13.1 \
   /srv/tftpboot/image
 <command>cp</command> LimeJeOS-SLE12.x86_64-1.13.1.md5 \
   /srv/tftpboot/image</screen>
-      </step>
-      <step>
-        <para>Copy of the image boot configuration. Normally the boot
-          configuration applies to one client which means it is required
-          to obtain the MAC address of this client. If the boot
-          configuration should be used globally, copy the KIWI generated
-          file as <filename>config.default</filename>: </para>
+   </step>
+   <step>
+    <para>
+     Copy of the image boot configuration. Normally the boot configuration
+     applies to one client which means it is required to obtain the MAC
+     address of this client. If the boot configuration should be used
+     globally, copy the KIWI generated file as
+     <filename>config.default</filename>:
+    </para>
 <screen><command>cp</command> LimeJeOS-SLE12.x86_64-1.13.1.config \
   /srv/tftpboot/KIWI/config.<replaceable>MAC</replaceable></screen>
-      </step>
-      <step>
-        <para>Check the PXE configuration file. The PXE configuration
-          controls which kernel and initrd are loaded and which kernel
-          parameters are set. When installing the <package>kiwi-pxeboot</package> package,
-          a default configuration is added. To make sure the
-          configuration is valid according to this example, insert the
-          following information into the file
-            <filename>/srv/tftpboot/pxelinux.cfg/default</filename>: </para>
-
+   </step>
+   <step>
+    <para>
+     Check the PXE configuration file. The PXE configuration controls which
+     kernel and initrd are loaded and which kernel parameters are set. When
+     installing the
+     <package>kiwi-pxeboot</package>
+     package, a default configuration is added. To make sure the
+     configuration is valid according to this example, insert the following
+     information into the file
+     <filename>/srv/tftpboot/pxelinux.cfg/default</filename>:
+    </para>
 <screen>DEFAULT KIWI-Boot
 
 LABEL KIWI-Boot
@@ -171,771 +197,832 @@ LABEL KIWI-Boot
 
 LABEL Local-Boot
     localboot 0</screen>
+   </step>
+   <step>
+    <para>
+     Connect the client to the network and boot.
+    </para>
+   </step>
+  </procedure>
+ </sect1>
+ <sect1 id="sec.pxe.flavours">
+  <title>Flavours</title>
 
-      </step>
-      <step>
-        <para>Connect the client to the network and boot. </para>
-      </step>
-    </procedure>
-  </sect1>
-
-  <sect1 id="sec.pxe.flavours">
-    <title>Flavours</title>
-    <para>All the different PXE boot based deployment methods are
-      controlled by the
-        <filename>config.<replaceable>MAC</replaceable></filename> (or
-        <filename>config.default</filename>) file. When a new client
-      boots up and there is no client configuration file the new client
-      is registered by uploading a control file to the <systemitem
+  <para>
+   All the different PXE boot based deployment methods are controlled by the
+   <filename>config.<replaceable>MAC</replaceable></filename> (or
+   <filename>config.default</filename>) file. When a new client boots up and
+   there is no client configuration file the new client is registered by
+   uploading a control file to the
+   <systemitem
         class="server">TFTP</systemitem> server. The
-      following sections informs about the control and the configuration
-      file. </para>
+   following sections informs about the control and the configuration file.
+  </para>
 
-    <sect2 id="sec.pxe.client-control-file">
-      <title>The PXE Client Control File</title>
-      <para>This section describes the netboot client control file: </para>
+  <sect2 id="sec.pxe.client-control-file">
+   <title>The PXE Client Control File</title>
+   <para>
+    This section describes the netboot client control file:
+   </para>
 <screen>hwtype.$&lt;$MAC Address$&gt;$</screen>
-      <para>The control file is primarily used to set up new netboot
-        clients. In this case, there is no configuration file
-        corresponding to the client MAC address available. Using the MAC
-        address information, the control file is created, which is
-        uploaded to the <systemitem class="server">TFTP</systemitem> servers upload directory
-          <filename>/var/lib/tftpboot/upload</filename>. </para>
-    </sect2>
+   <para>
+    The control file is primarily used to set up new netboot clients. In
+    this case, there is no configuration file corresponding to the client
+    MAC address available. Using the MAC address information, the control
+    file is created, which is uploaded to the
+    <systemitem class="server">TFTP</systemitem> servers upload directory
+    <filename>/var/lib/tftpboot/upload</filename>.
+   </para>
+  </sect2>
 
-    <sect2 id="sec.pxe.client-config-file">
-      <title>The PXE Client Configuration File</title>
-      <para>This section describes the netboot client configuration
-        file: </para>
+  <sect2 id="sec.pxe.client-config-file">
+   <title>The PXE Client Configuration File</title>
+   <para>
+    This section describes the netboot client configuration file:
+   </para>
 <screen>config.$&lt;$MAC Address$&gt;$</screen>
-
-      <para>The configuration file contains data about image,
-        configuration, synchronization, or partition parameters. The
-        configuration file is loaded from the TFTP server directory
-          <filename>/var/lib/tftpboot/KIWI</filename> via TFTP for
-        previously installed netboot clients. New netboot clients are
-        immediately registered and a new configuration file with the
-        corresponding MAC address is created. The standard case for the
-        deployment of a PXE image is one image file based on a
-        read-write filesystem which is stored onto a local storage
-        device of the client. Below, find an example to cover this case. </para>
-
+   <para>
+    The configuration file contains data about image, configuration,
+    synchronization, or partition parameters. The configuration file is
+    loaded from the TFTP server directory
+    <filename>/var/lib/tftpboot/KIWI</filename> via TFTP for previously
+    installed netboot clients. New netboot clients are immediately
+    registered and a new configuration file with the corresponding MAC
+    address is created. The standard case for the deployment of a PXE image
+    is one image file based on a read-write filesystem which is stored onto
+    a local storage device of the client. Below, find an example to cover
+    this case.
+   </para>
 <screen>DISK=/dev/sda
 PART='5;S;x,x;L;/'
 IMAGE='/dev/sda2;suse-##.#-pxe-client.i686;1.2.8;192.168.100.2;4096'</screen>
-
-      <para>The following format is used: </para>
-
+   <para>
+    The following format is used:
+   </para>
 <screen>IMAGE='device;name;version;srvip;bsize;compressed,...,'
 CONF='src;dest;srvip;bsize;[hash],...,src;dest;srvip;bsize;[hash]'
 PART='size;id;Mount,...,size;id;Mount'
 DISK=device</screen>
-
+   <variablelist>
+    <varlistentry>
+     <term><varname>IMAGE</varname>
+     </term>
+     <listitem>
+      <para>
+       Specifies which image (name) should be loaded with which version
+       (version) and to which storage device (device) it should be linked,
+       e. g.,
+       <filename
+                class="devicefile">/dev/ram1</filename> or
+       <filename
+                class="devicefile">/dev/hda2</filename>.
+       The netboot client partition (device) hda2 defines the root file
+       system / and hda1 is used for the swap partition. The numbering of
+       the hard disk device should not be confused with the RAM disk device,
+       where
+       <filename
+                class="devicefile">/dev/ram0</filename> is
+       used for the initial RAM disk and can not be used as storage device
+       for the second stage system image. SUSE recommends to use the device
+       <filename class="devicefile">/dev/ram1</filename> for the RAM disk.
+       If the hard drive is used, a corresponding partitioning must be
+       performed.
+      </para>
       <variablelist>
-        <varlistentry>
-          <term><varname>IMAGE</varname></term>
-          <listitem>
-            <para>Specifies which image (name) should be loaded with
-              which version (version) and to which storage device
-              (device) it should be linked, e. g., <filename
-                class="devicefile">/dev/ram1</filename> or <filename
-                class="devicefile">/dev/hda2</filename>. The netboot
-              client partition (device) hda2 defines the root file
-              system / and hda1 is used for the swap partition. The
-              numbering of the hard disk device should not be confused
-              with the RAM disk device, where <filename
-                class="devicefile">/dev/ram0</filename> is used for the
-              initial RAM disk and can not be used as storage device for
-              the second stage system image. SUSE recommends to use the
-              device <filename class="devicefile">/dev/ram1</filename>
-              for the RAM disk. If the hard drive is used, a
-              corresponding partitioning must be performed. </para>
-
-            <variablelist>
-              <varlistentry>
-                <term>srvip</term>
-                <listitem>
-                  <para>Specifies the server IP address for the TFTP
-                    download. Must always be indicated, except in PART.
-                  </para>
-                </listitem>
-              </varlistentry>
-              <varlistentry>
-                <term>bsize</term>
-                <listitem>
-                  <para>Specifies the block size for the TFTP download.
-                    Must always be indicated, except in PART. If the
-                    block size is too small according to the maximum
-                    number of data packages (32768), linuxrc will
-                    automatically calculate a new blocksize for the
-                    download. </para>
-                </listitem>
-              </varlistentry>
-              <varlistentry>
-                <term>compressed</term>
-                <listitem>
-                  <para>Specifies if the image file on the TFTP server
-                    is compressed and handles it accordingly. To specify
-                    a compressed image download only the keyword
-                      <literal>"compressed"</literal> needs to be added.
-                    If compressed is not specified the standard download
-                    workflow is used. <emphasis role="bold"
-                      >Note:</emphasis> The download will fail if you
-                    specify <literal>"compressed"</literal> and the
-                    image isn’t compressed. It will also fail if you
-                    don’t specify <literal>"compressed"</literal> but
-                    the image is compressed. The name of the compressed
-                    image has to contain the suffix <filename
-                      class="extension">.gz</filename> and needs to be
-                    compressed with the <command>gzip</command> tool.
-                    Using a compressed image will automatically
-                      <emphasis>deactivate</emphasis> the multicast
-                    download option of atftp. </para>
-                </listitem>
-              </varlistentry>
-            </variablelist>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><varname>CONF</varname></term>
-          <listitem>
-            <para>Specifies a comma-separated list of source:target
-              configuration files. The source (src) corresponds to the
-              path on the TFTP server and is loaded via TFTP. The
-              download is made to the file on the netboot client
-              indicated by the target (dest). Download only happens when
-        configuration files are missing on the client or, if md5sum hash
-        is supplied ([hash]), when different. To achieve this, list of
-        CONF files (and VENDOR_CONF) files is kept on the client in
-        the <filename>/etc/KIWI/InstalledConfigFiles</filename> file, and
-              is compared to the CONF data gathered from the config.MAC and also
-        from other configuration files, e.g. config.group, if supplied.
-              Configuration files selected for comparison are those with
-        same (dest) path. If destination path (dest) is same for more configuration
-        files, only the last one is used (and VENDOR_CONF has always
-        precedence to CONF). By comparing configuration file lists
-        present in the current CONF, VENDOR_CONF variables and stored in
-        the backup file, following actions can result:
-
-<table id="tab.configuration.files.synchronization">
-      <title>Configuration files synchronization possibilities</title>
-      <tgroup cols="3">
-        <colspec colwidth="1*"/>
-        <colspec colwidth="1*"/>
-        <colspec colwidth="1*"/>
-        <thead>
+       <varlistentry>
+        <term>srvip</term>
+        <listitem>
+         <para>
+          Specifies the server IP address for the TFTP download. Must always
+          be indicated, except in PART.
+         </para>
+        </listitem>
+       </varlistentry>
+       <varlistentry>
+        <term>bsize</term>
+        <listitem>
+         <para>
+          Specifies the block size for the TFTP download. Must always be
+          indicated, except in PART. If the block size is too small
+          according to the maximum number of data packages (32768), linuxrc
+          will automatically calculate a new blocksize for the download.
+         </para>
+        </listitem>
+       </varlistentry>
+       <varlistentry>
+        <term>compressed</term>
+        <listitem>
+         <para>
+          Specifies if the image file on the TFTP server is compressed and
+          handles it accordingly. To specify a compressed image download
+          only the keyword <literal>"compressed"</literal> needs to be
+          added. If compressed is not specified the standard download
+          workflow is used.
+          <emphasis role="bold"
+                      >Note:</emphasis> The
+          download will fail if you specify <literal>"compressed"</literal>
+          and the image isn’t compressed. It will also fail if you don’t
+          specify <literal>"compressed"</literal> but the image is
+          compressed. The name of the compressed image has to contain the
+          suffix
+          <filename
+                      class="extension">.gz</filename>
+          and needs to be compressed with the <command>gzip</command> tool.
+          Using a compressed image will automatically
+          <emphasis>deactivate</emphasis> the multicast download option of
+          atftp.
+         </para>
+        </listitem>
+       </varlistentry>
+      </variablelist>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><varname>CONF</varname>
+     </term>
+     <listitem>
+      <para>
+       Specifies a comma-separated list of source:target configuration
+       files. The source (src) corresponds to the path on the TFTP server
+       and is loaded via TFTP. The download is made to the file on the
+       netboot client indicated by the target (dest). Download only happens
+       when configuration files are missing on the client or, if md5sum hash
+       is supplied ([hash]), when different. To achieve this, list of CONF
+       files (and VENDOR_CONF) files is kept on the client in the
+       <filename>/etc/KIWI/InstalledConfigFiles</filename> file, and is
+       compared to the CONF data gathered from the config.MAC and also from
+       other configuration files, e.g. config.group, if supplied.
+       Configuration files selected for comparison are those with same
+       (dest) path. If destination path (dest) is same for more
+       configuration files, only the last one is used (and VENDOR_CONF has
+       always precedence to CONF). By comparing configuration file lists
+       present in the current CONF, VENDOR_CONF variables and stored in the
+       backup file, following actions can result:
+       <table id="tab.configuration.files.synchronization">
+        <title>Configuration files synchronization possibilities</title>
+        <tgroup cols="3">
+         <colspec colwidth="1*"/>
+         <colspec colwidth="1*"/>
+         <colspec colwidth="1*"/>
+         <thead>
           <row>
-            <entry>File from CONF,VENDOR_CONF</entry>
-            <entry>File from InstalledConfigFiles</entry>
-            <entry>Action</entry>
+           <entry>File from CONF,VENDOR_CONF</entry>
+           <entry>File from InstalledConfigFiles</entry>
+           <entry>Action</entry>
           </row>
-        </thead>
-        <tbody>
+         </thead>
+         <tbody>
           <row>
-            <entry>hash_a</entry>
-            <entry>hash_a</entry>
-            <entry>nothing, keep</entry>
+           <entry>hash_a</entry>
+           <entry>hash_a</entry>
+           <entry>nothing, keep</entry>
           </row>
           <row>
-            <entry>hash_a</entry>
-            <entry>hash_b</entry>
-            <entry>download from server</entry>
+           <entry>hash_a</entry>
+           <entry>hash_b</entry>
+           <entry>download from server</entry>
           </row>
           <row>
-            <entry>none</entry>
-            <entry>hash</entry>
-            <entry>download from server</entry>
+           <entry>none</entry>
+           <entry>hash</entry>
+           <entry>download from server</entry>
           </row>
           <row>
-            <entry>hash</entry>
-            <entry>none</entry>
-            <entry>download from server</entry>
+           <entry>hash</entry>
+           <entry>none</entry>
+           <entry>download from server</entry>
           </row>
           <row>
-            <entry>none</entry>
-            <entry>none</entry>
-            <entry>nothing, keep</entry>
+           <entry>none</entry>
+           <entry>none</entry>
+           <entry>nothing, keep</entry>
           </row>
           <row>
-            <entry>present</entry>
-            <entry>not present</entry>
-            <entry>download from server (regardless hash)</entry>
+           <entry>present</entry>
+           <entry>not present</entry>
+           <entry>download from server (regardless hash)</entry>
           </row>
           <row>
-            <entry>not present</entry>
-            <entry>present</entry>
-            <entry>delete on client (regardles hash)</entry>
+           <entry>not present</entry>
+           <entry>present</entry>
+           <entry>delete on client (regardles hash)</entry>
           </row>
-        </tbody>
-      </tgroup>
-    </table>
-    Note that actual configuration files (or their md5sum hashes) on the client machine are not tested, only data from the backup file are used. This means that
-    actual configuration files can be altered or even deleted without triggering any action, or, on the other hand, an action can be triggered without modifying the
-    configuration files, only by modifying or removing of the backup file.
-    </para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><varname>PART</varname></term>
-          <listitem>
-            <para>Specifies the partitioning data. The comma-separated
-              list must contain the size (size), the type number (id),
-              and the mount point (Mount). The size is measured in MB by
-              default. The mount specifies the directory the partition
-              is mounted to. </para>
-            <itemizedlist>
-              <listitem>
-                <para>The first element of the list must define the swap
-                  partition. </para>
-              </listitem>
-              <listitem>
-                <para>The second element of the list must define the
-                  root partition. </para>
-              </listitem>
-              <listitem>
-                <para>The swap partition must not contain a mount point.
-                  A lowercase letter <literal>x</literal> must be set
-                  instead. </para>
-              </listitem>
-              <listitem>
-                <para>If a partition should take all the space left on a
-                  disk one can set a lower <literal>x</literal> letter
-                  as size specification. </para>
-              </listitem>
-            </itemizedlist>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><varname>RAID</varname></term>
-          <listitem>
-             <para>
-              In addtion to the PART line it's also allowed to add a raid
-              array setup. The first parmater of the RAID line is the raid level.
-              So far only raid1 (mirroring) is supported. The second and third
-              parameter specifies the raid disk devices which makes up the array.
-              If a RAID line is present all partitions in PART will be created
-              as raid partitions. The first raid is named md0 the second one md1
-              and so on. It's required to specifiy the correct raid partition in
-              the IMAGE line according to the PART setup.
-              A typical raid image setup could look like this:</para>
+         </tbody>
+        </tgroup>
+       </table>
+       Note that actual configuration files (or their md5sum hashes) on the
+       client machine are not tested, only data from the backup file are
+       used. This means that actual configuration files can be altered or
+       even deleted without triggering any action, or, on the other hand, an
+       action can be triggered without modifying the configuration files,
+       only by modifying or removing of the backup file.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><varname>PART</varname>
+     </term>
+     <listitem>
+      <para>
+       Specifies the partitioning data. The comma-separated list must
+       contain the size (size), the type number (id), and the mount point
+       (Mount). The size is measured in MB by default. The mount specifies
+       the directory the partition is mounted to.
+      </para>
+      <itemizedlist>
+       <listitem>
+        <para>
+         The first element of the list must define the swap partition.
+        </para>
+       </listitem>
+       <listitem>
+        <para>
+         The second element of the list must define the root partition.
+        </para>
+       </listitem>
+       <listitem>
+        <para>
+         The swap partition must not contain a mount point. A lowercase
+         letter <literal>x</literal> must be set instead.
+        </para>
+       </listitem>
+       <listitem>
+        <para>
+         If a partition should take all the space left on a disk one can set
+         a lower <literal>x</literal> letter as size specification.
+        </para>
+       </listitem>
+      </itemizedlist>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><varname>RAID</varname>
+     </term>
+     <listitem>
+      <para>
+       In addtion to the PART line it's also allowed to add a raid array
+       setup. The first parmater of the RAID line is the raid level. So far
+       only raid1 (mirroring) is supported. The second and third parameter
+       specifies the raid disk devices which makes up the array. If a RAID
+       line is present all partitions in PART will be created as raid
+       partitions. The first raid is named md0 the second one md1 and so on.
+       It's required to specifiy the correct raid partition in the IMAGE
+       line according to the PART setup. A typical raid image setup could
+       look like this:
+      </para>
 <screen>DISK=/dev/sda
 RAID='1;/dev/sda;/dev/sdb'
 IMAGE='/dev/md1;LimeJeOS-openSUSE-##.#.i686;1.11.3;192.168.100.2;4096'
 PART='5;S;x,2000;83;/'</screen>
-      </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><varname>DISK</varname></term>
-          <listitem>
-            <para>Specifies the hard disk. Used only with PART and
-              defines the device via which the hard disk can be
-              addressed, e.g., <filename class="devicefile"
-                >/dev/hda</filename>. </para>
-          </listitem>
-        </varlistentry>
+     </listitem>
+    </varlistentry>
     <varlistentry>
-      <term><varname>REBOOT_IMAGE</varname></term>
-          <listitem>
-            <para>If set to a non-empty string, this will reboot the
-        system after the initial deployment process is done.
-              This means before the system init process is activated
-              the system is rebooted. If the machine's default boot
-              setup is to boot via PXE it will again boot from the
-        network.
-            </para>
-          </listitem>
-        </varlistentry>
+     <term><varname>DISK</varname>
+     </term>
+     <listitem>
+      <para>
+       Specifies the hard disk. Used only with PART and defines the device
+       via which the hard disk can be addressed, e.g.,
+       <filename class="devicefile"
+                >/dev/hda</filename>.
+      </para>
+     </listitem>
+    </varlistentry>
     <varlistentry>
-          <term><varname>FORCE_KEXEC</varname></term>
-          <listitem>
-            <para>During the initial deployment process kiwi checks
-              if the running kernel is the same as the kernel installed
-              via the system image. If there is a mismatch kiwi activates
-              the installed kernel by calling kexec. This is mostly the
-              same as to perform a reboot but without the need of the
-              BIOS or any bootloader. If FORCE_KEXEC is set to a non-empty
-              string kiwi will also perform kexec if the kernel versions
-              matches.
-            </para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><varname>RELOAD_IMAGE</varname></term>
-          <listitem>
-            <para>If set to a non-empty string, this forces the
-              configured image to be loaded from the server even if the
-              image on the disk is up-to-date. The primary purpose of
-              this setting is to aid debugging. The option is sensible
-              only for disk based systems. </para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><varname>RELOAD_CONFIG</varname></term>
-          <listitem>
-            <para>If set to a non-empty string, this forces all config
-              files to be loaded from the server. The primary purpose of
-              this setting is to aid debugging. The option is sensible
-              only for disk based systems. </para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><varname>COMBINED_IMAGE</varname></term>
-          <listitem>
-            <para>If set to a non-empty string, indicates that the both
-              image specified needs to be combined into one bootable
-              image, whereas the first image defines the read-write part
-              and the second image defines the read-only part. </para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><varname>KIWI_INITRD</varname></term>
-          <listitem>
-            <para>Specifies the KIWI initrd to be used for local boot of
-              the system. The variables value must be set to the name of
-              the initrd file which is used via PXE network boot. If the
-              standard tftp setup suggested with the kiwi-pxeboot
-              package is used all initrd files resides in the <filename
-                class="directory">boot/</filename> directory below the
-              tftp server path <filename class="directory">/var/lib/tftpboot</filename>.
-              Because the tftp server do a chroot into the tftp server
-              path you need to specify the initrd file as the following
-              example shows: </para>
+     <term><varname>REBOOT_IMAGE</varname>
+     </term>
+     <listitem>
+      <para>
+       If set to a non-empty string, this will reboot the system after the
+       initial deployment process is done. This means before the system init
+       process is activated the system is rebooted. If the machine's default
+       boot setup is to boot via PXE it will again boot from the network.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><varname>FORCE_KEXEC</varname>
+     </term>
+     <listitem>
+      <para>
+       During the initial deployment process kiwi checks if the running
+       kernel is the same as the kernel installed via the system image. If
+       there is a mismatch kiwi activates the installed kernel by calling
+       kexec. This is mostly the same as to perform a reboot but without the
+       need of the BIOS or any bootloader. If FORCE_KEXEC is set to a
+       non-empty string kiwi will also perform kexec if the kernel versions
+       matches.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><varname>RELOAD_IMAGE</varname>
+     </term>
+     <listitem>
+      <para>
+       If set to a non-empty string, this forces the configured image to be
+       loaded from the server even if the image on the disk is up-to-date.
+       The primary purpose of this setting is to aid debugging. The option
+       is sensible only for disk based systems.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><varname>RELOAD_CONFIG</varname>
+     </term>
+     <listitem>
+      <para>
+       If set to a non-empty string, this forces all config files to be
+       loaded from the server. The primary purpose of this setting is to aid
+       debugging. The option is sensible only for disk based systems.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><varname>COMBINED_IMAGE</varname>
+     </term>
+     <listitem>
+      <para>
+       If set to a non-empty string, indicates that the both image specified
+       needs to be combined into one bootable image, whereas the first image
+       defines the read-write part and the second image defines the
+       read-only part.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><varname>KIWI_INITRD</varname>
+     </term>
+     <listitem>
+      <para>
+       Specifies the KIWI initrd to be used for local boot of the system.
+       The variables value must be set to the name of the initrd file which
+       is used via PXE network boot. If the standard tftp setup suggested
+       with the kiwi-pxeboot package is used all initrd files resides in the
+       <filename
+                class="directory">boot/</filename>
+       directory below the tftp server path
+       <filename class="directory">/var/lib/tftpboot</filename>. Because the
+       tftp server do a chroot into the tftp server path you need to specify
+       the initrd file as the following example shows:
+      </para>
 <screen>KIWI_INITRD=/boot/<replaceable>name-of-initrd-file</replaceable></screen>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><varname>UNIONFS_CONFIG</varname></term>
-          <listitem>
-            <para>For netboot images there is the
-              possibility to use overlayfs as container filesystem
-              in combination with a compressed system image. The
-              recommended compressed filesystem type for the system
-              image is <emphasis role="bold">overlayfs</emphasis>.
-            </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><varname>UNIONFS_CONFIG</varname>
+     </term>
+     <listitem>
+      <para>
+       For netboot images there is the possibility to use overlayfs as
+       container filesystem in combination with a compressed system image.
+       The recommended compressed filesystem type for the system image is
+       <emphasis role="bold">overlayfs</emphasis>.
+      </para>
 <screen>UNIONFS_CONFIG=/dev/sda2,/dev/sda3,overlayfs</screen>
-            <para>In this example the first device <filename
-                class="devicefile">/dev/sda2</filename> represents the
-              read/write filesystem and the second device <filename
-                class="devicefile">/dev/sda3</filename> represents the
-              compressed system image filesystem. The union filesystem
-              overlayfs is then used to cover the read/write layer
-              with the read-only device to one read/write filesystem. If
-              a file on the read-only device is going to be written the
-              changes inodes are part of the read/write filesystem.
-              Please note the device specifications in
-                <varname>UNIONFS_CONFIG</varname> must correspond with
-              the IMAGE and PART information. The following example
-              should explain the interconnections: </para>
-
+      <para>
+       In this example the first device
+       <filename
+                class="devicefile">/dev/sda2</filename>
+       represents the read/write filesystem and the second device
+       <filename
+                class="devicefile">/dev/sda3</filename>
+       represents the compressed system image filesystem. The union
+       filesystem overlayfs is then used to cover the read/write layer with
+       the read-only device to one read/write filesystem. If a file on the
+       read-only device is going to be written the changes inodes are part
+       of the read/write filesystem. Please note the device specifications
+       in <varname>UNIONFS_CONFIG</varname> must correspond with the IMAGE
+       and PART information. The following example should explain the
+       interconnections:
+      </para>
 <screen>DISK=/dev/sda
 IMAGE='/dev/sda3;image/myImage;1.1.1;192.168.1.1;4096'
 PART='200;S;x,300;L;/,x;L;x'
 UNIONFS_CONFIG=/dev/sda2,/dev/sda3,overlayfs</screen>
-
-            <para>As the second element of the PART list must define the
-              root partition it’s absolutely important that the first
-              device in <varname>UNIONFS_CONFIG</varname> references
-              this device as read/write device. The second device of
-                <varname>UNIONFS_CONFIG</varname> has to reference the
-              given IMAGE device name. </para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><varname>KIWI_KERNEL_OPTIONS</varname></term>
-          <listitem>
-            <para>Specifies additional command line options to be passed
-              to the kernel when booting from disk. For instance, to
-              enable a splash screen, you might use
-                <literal>vga=0x317</literal>
-              <literal>splash=silent</literal>. </para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><varname>KIWI_BOOT_TIMEOUT</varname></term>
-          <listitem>
-            <para>Specifies the number of seconds to wait at the grub
-              boot screen when doing a local boot. The default is 10.
-            </para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><varname>NBDROOT</varname></term>
-          <listitem>
-            <para>Mount the system image root filesystem remotely via
-              NBD (Network Block Device). This means there is a server
-              which exports the root directory of the system image via a
-              specified export name. The kernel provides the block layer,
-              together with a remote port that uses the nbd-server
-              program. For more information on how to set up the server,
-              see the nbd-server man pages. The kernel on the remote
-              client can set up a special network block device named
-                <filename class="devicefile">/dev/nb0</filename> using
-              the nbd-client command. After this device exists, the
-              mount program is used to mount the root filesystem. To
-              allow the KIWI boot image to use that, the following
-              information must be provided: </para>
-
+      <para>
+       As the second element of the PART list must define the root partition
+       it’s absolutely important that the first device in
+       <varname>UNIONFS_CONFIG</varname> references this device as
+       read/write device. The second device of
+       <varname>UNIONFS_CONFIG</varname> has to reference the given IMAGE
+       device name.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><varname>KIWI_KERNEL_OPTIONS</varname>
+     </term>
+     <listitem>
+      <para>
+       Specifies additional command line options to be passed to the kernel
+       when booting from disk. For instance, to enable a splash screen, you
+       might use <literal>vga=0x317</literal>
+       <literal>splash=silent</literal>.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><varname>KIWI_BOOT_TIMEOUT</varname>
+     </term>
+     <listitem>
+      <para>
+       Specifies the number of seconds to wait at the grub boot screen when
+       doing a local boot. The default is 10.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><varname>NBDROOT</varname>
+     </term>
+     <listitem>
+      <para>
+       Mount the system image root filesystem remotely via NBD (Network
+       Block Device). This means there is a server which exports the root
+       directory of the system image via a specified export name. The kernel
+       provides the block layer, together with a remote port that uses the
+       nbd-server program. For more information on how to set up the server,
+       see the nbd-server man pages. The kernel on the remote client can set
+       up a special network block device named
+       <filename class="devicefile">/dev/nb0</filename> using the nbd-client
+       command. After this device exists, the mount program is used to mount
+       the root filesystem. To allow the KIWI boot image to use that, the
+       following information must be provided:
+      </para>
 <screen>NBDROOT=NBD.Server.IP.address;\
 NBD-Export-Name;/dev/NBD-Device;\
 NBD-Swap-Export-Name;/dev/NBD-Swap-Device;\
 NBD-Write-Export-Name;/dev/NBD-Write-Device</screen>
-
-            <para>The server IP and the export name are mandatory
-              information. Whereas the other parameters are optional.
-              The default device names are, NBD-Device = <filename
-              class="devicefile">/dev/nbd0</filename>, NBD-Swap-Device =
-              <filename class="devicefile">/dev/nbd1</filename> and
-              NBD-Write-Device = <filename class="devicefile">/dev/ram1
-              </filename>. The setup of swap and/R/W over nbd depends
-              on if there are export names given or not. In addition a
-              requested nbd swap space is only established if the client
-              has less than 48 MB of RAM. The optional NBD-Write-Export-Name
-              and NBD-Write-Device specifies a write COW location for
-              the root filesystem. A separate write device is only used
-              together with a union setup based on e.g overlayfs</para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><varname>AOEROOT</varname></term>
-          <listitem>
-            <para>Mount the system image root filesystem remotely via
-              AoE (ATA over Ethernet). This means there is a server
-              which exports a block device representing the root
-              directory of the system image via the AoE subsystem. The
-              block device could be a partition of a real or a virtual
-              disk. In order to use the AoE subsystem I recommend to
-              install the <package>aoetools</package> and
-                <package>vblade</package> packages from here first:
-                <ulink
+      <para>
+       The server IP and the export name are mandatory information. Whereas
+       the other parameters are optional. The default device names are,
+       NBD-Device =
+       <filename
+              class="devicefile">/dev/nbd0</filename>,
+       NBD-Swap-Device = <filename class="devicefile">/dev/nbd1</filename>
+       and NBD-Write-Device = <filename class="devicefile">/dev/ram1
+       </filename>. The setup of swap and/R/W over nbd depends on if there
+       are export names given or not. In addition a requested nbd swap space
+       is only established if the client has less than 48 MB of RAM. The
+       optional NBD-Write-Export-Name and NBD-Write-Device specifies a write
+       COW location for the root filesystem. A separate write device is only
+       used together with a union setup based on e.g overlayfs
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><varname>AOEROOT</varname>
+     </term>
+     <listitem>
+      <para>
+       Mount the system image root filesystem remotely via AoE (ATA over
+       Ethernet). This means there is a server which exports a block device
+       representing the root directory of the system image via the AoE
+       subsystem. The block device could be a partition of a real or a
+       virtual disk. In order to use the AoE subsystem I recommend to
+       install the
+       <package>aoetools</package>
+       and
+       <package>vblade</package>
+       packages from here first:
+       <ulink
                 url="http://download.opensuse.org/repositories/server:/ltsp"
-              />. Once installed the following example shows how to
-              export the local <filename class="devicefile"
-                >/dev/sdb1</filename> partition via AoE:</para>
-
+              />.
+       Once installed the following example shows how to export the local
+       <filename class="devicefile"
+                >/dev/sdb1</filename>
+       partition via AoE:
+      </para>
 <screen><command>vbladed</command> 0 1 eth0 /dev/sdb1</screen>
-            <para> Some explanation about this command, each AoE device
-              is identified by a couple Major/Minor, with major between
-              0-65535 and minor between 0-255. AoE is based just over
-              Ethernet on the OSI models so we need to indicate which
-              ethernet card we’ll use. In this example we export
-                <filename class="devicefile">/dev/sdb1</filename> with a
-              major value of 0 and minor of 1 on the eth0 interface. We
-              are ready to use our partition on the network! To be able
-              to use the device KIWI needs the information which AoE
-              device contains the root filesystem. In our example this
-              is the device <filename class="devicefile"
-                >/dev/etherd/e0.1</filename>. According to this the
-              AOEROOT variable must be set as follows: </para>
-
+      <para>
+       Some explanation about this command, each AoE device is identified by
+       a couple Major/Minor, with major between 0-65535 and minor between
+       0-255. AoE is based just over Ethernet on the OSI models so we need
+       to indicate which ethernet card we’ll use. In this example we
+       export <filename class="devicefile">/dev/sdb1</filename> with a major
+       value of 0 and minor of 1 on the eth0 interface. We are ready to use
+       our partition on the network! To be able to use the device KIWI needs
+       the information which AoE device contains the root filesystem. In our
+       example this is the device
+       <filename class="devicefile"
+                >/dev/etherd/e0.1</filename>.
+       According to this the AOEROOT variable must be set as follows:
+      </para>
 <screen>AOEROOT=/dev/etherd/e0.1</screen>
-
-            <para> KIWI is now able to mount and use the specified AoE
-              device as the remote root filesystem. In case of a
-              compressed read-only image with <systemitem class="filesystem">overlayfs</systemitem>, the
-              AOEROOT variable can also contain a device for the write
-              actions: </para>
-
+      <para>
+       KIWI is now able to mount and use the specified AoE device as the
+       remote root filesystem. In case of a compressed read-only image with
+       <systemitem class="filesystem">overlayfs</systemitem>, the AOEROOT
+       variable can also contain a device for the write actions:
+      </para>
 <screen>AOEROOT=/dev/etherd/e0.1,/dev/ram1</screen>
-
-            <para> Writing to RAM is the default but you also can set
-              another device like another aoe location or a local device
-              for writing the data </para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><varname>NFSROOT</varname></term>
-          <listitem>
-            <para>Mount the system image root filesystem remotely via NFS
-              (Network File System). This means there is a
-              server which exports the root filesystem of the network
-              client in such a way that the client can mount it
-              read/write. In order to do that, the boot image must know
-              the server IP address and the path name where the root
-              directory exists on this server. The information must be
-              provided as in the following example: </para>
-
+      <para>
+       Writing to RAM is the default but you also can set another device
+       like another aoe location or a local device for writing the data
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><varname>NFSROOT</varname>
+     </term>
+     <listitem>
+      <para>
+       Mount the system image root filesystem remotely via NFS (Network File
+       System). This means there is a server which exports the root
+       filesystem of the network client in such a way that the client can
+       mount it read/write. In order to do that, the boot image must know
+       the server IP address and the path name where the root directory
+       exists on this server. The information must be provided as in the
+       following example:
+      </para>
 <screen>NFSROOT=NFS.Server.IP.address;/path/to/root/tree</screen>
-
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><varname>KIWI_INITRD</varname></term>
-          <listitem>
-            <para>Specifies the KIWI initrd to be used for a local boot
-              of the system. The value must be set to the name of the
-              initrd file which is used via PXE network boot. If the
-              standard TFTP setup suggested with the kiwi-pxeboot
-              package is used, all initrd files reside in the <filename
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><varname>KIWI_INITRD</varname>
+     </term>
+     <listitem>
+      <para>
+       Specifies the KIWI initrd to be used for a local boot of the system.
+       The value must be set to the name of the initrd file which is used
+       via PXE network boot. If the standard TFTP setup suggested with the
+       kiwi-pxeboot package is used, all initrd files reside in the
+       <filename
                 class="directory">/srv/tftpboot/boot/</filename>
-              directory. Because the TFTP server does a chroot into the
-              TFTP server path, you must specify the initrd file as
-              follows: </para>
-
+       directory. Because the TFTP server does a chroot into the TFTP server
+       path, you must specify the initrd file as follows:
+      </para>
 <screen>KIWI_INITRD=/boot/name-of-initrd-file</screen>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><varname>KIWI_KERNEL</varname></term>
-          <listitem>
-            <para>Specifies the kernel to be used for a local boot of
-              the system The same path rules as described for
-                <varname>KIWI_INITRD</varname> applies for the kernel
-              setup: </para>
-
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><varname>KIWI_KERNEL</varname>
+     </term>
+     <listitem>
+      <para>
+       Specifies the kernel to be used for a local boot of the system The
+       same path rules as described for <varname>KIWI_INITRD</varname>
+       applies for the kernel setup:
+      </para>
 <screen>KIWI_KERNEL=/boot/name-of-kernel-file</screen>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><varname>ERROR_INTERRUPT</varname></term>
-          <listitem>
-            <para>Specifies a message which is displayed during first
-              deployment. Along with the message a shell is provided.
-              This functionality should be used to send the user a
-              message if it’s clear the boot process will fail because
-              the boot environment or something else influences the PXE
-              boot process in a bad way. </para>
-          </listitem>
-        </varlistentry>
-      </variablelist>
-    </sect2>
-
-    <sect2 id="sec.pxe.another-user">
-      <title>Use Different Download Protocol</title>
-      <para>By default all downloads controlled by the KIWI linuxrc code
-        are performed by an atftp call and therefore uses the tftp
-        protocol. With PXE the download protocol is fixed and thus you
-        can’t change the way how the kernel and the boot image (initrd)
-        is downloaded. As soon as Linux takes over control the following
-        download protocols http, https and ftp are supported too. KIWI
-        makes use of the <command>curl</command> program to support the
-        additional protocols. </para>
-
-      <para>In order to select one of the additional download protocols
-        the following kernel parameters needs to be setup: </para>
-
-      <variablelist>
-        <varlistentry>
-          <term><parameter>kiwiserver</parameter></term>
-          <listitem>
-            <para>Name or IP address of the server who implements the
-              protocol </para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><parameter>kiwiservertype</parameter></term>
-          <listitem>
-            <para>Name of the download protocol which could be one of
-              http, https or ftp </para>
-          </listitem>
-        </varlistentry>
-      </variablelist>
-
-      <para>To setup this parameters edit the file
-          <filename>/srv/tftpboot/pxelinux.cfg/default</filename> on
-        your PXE boot server and change the append line accordingly.
-        Please note all downloads except for kernel and initrd are now
-        controlled by the given server and protocol. You need to make
-        sure that this server provides the same directory and file
-        structure as initially provided by the <package>kiwi-pxeboot</package> package.
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><varname>ERROR_INTERRUPT</varname>
+     </term>
+     <listitem>
+      <para>
+       Specifies a message which is displayed during first deployment. Along
+       with the message a shell is provided. This functionality should be
+       used to send the user a message if it’s clear the boot process will
+       fail because the boot environment or something else influences the
+       PXE boot process in a bad way.
       </para>
-    </sect2>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </sect2>
 
-    <sect2 id="sec.pxe.ram-only-image">
-      <title>RAM Only Image</title>
-      <indexterm>
-        <primary>KIWI</primary>
-        <secondary>RAM only image</secondary>
-      </indexterm>
-      <para>If there is no local storage and no remote root mount setup
-        the image can be stored into the main memory of the client.
-        Please be aware that there should be still enough RAM space
-        available for the operating system after the image has been
-        deployed into RAM. Below, find an example: </para>
+  <sect2 id="sec.pxe.another-user">
+   <title>Use Different Download Protocol</title>
+   <para>
+    By default all downloads controlled by the KIWI linuxrc code are
+    performed by an atftp call and therefore uses the tftp protocol. With
+    PXE the download protocol is fixed and thus you can’t change the way
+    how the kernel and the boot image (initrd) is downloaded. As soon as
+    Linux takes over control the following download protocols http, https
+    and ftp are supported too. KIWI makes use of the <command>curl</command>
+    program to support the additional protocols.
+   </para>
+   <para>
+    In order to select one of the additional download protocols the
+    following kernel parameters needs to be setup:
+   </para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>kiwiserver</parameter>
+     </term>
+     <listitem>
+      <para>
+       Name or IP address of the server who implements the protocol
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>kiwiservertype</parameter>
+     </term>
+     <listitem>
+      <para>
+       Name of the download protocol which could be one of http, https or
+       ftp
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+   <para>
+    To setup this parameters edit the file
+    <filename>/srv/tftpboot/pxelinux.cfg/default</filename> on your PXE boot
+    server and change the append line accordingly. Please note all downloads
+    except for kernel and initrd are now controlled by the given server and
+    protocol. You need to make sure that this server provides the same
+    directory and file structure as initially provided by the
+    <package>kiwi-pxeboot</package>
+    package.
+   </para>
+  </sect2>
 
-      <itemizedlist>
-        <listitem>
-          <para>Use a read-write filesystem in
-              <filename>config.xml</filename>, for example
-              <literal>filesystem="ext3"</literal>
-          </para>
-        </listitem>
-        <listitem>
-          <para>Create
-              <filename>config.<replaceable>MAC</replaceable></filename>
-          </para>
+  <sect2 id="sec.pxe.ram-only-image">
+   <title>RAM Only Image</title><indexterm>
+   <primary>KIWI</primary>
+   <secondary>RAM only image</secondary></indexterm>
+   <para>
+    If there is no local storage and no remote root mount setup the image
+    can be stored into the main memory of the client. Please be aware that
+    there should be still enough RAM space available for the operating
+    system after the image has been deployed into RAM. Below, find an
+    example:
+   </para>
+   <itemizedlist>
+    <listitem>
+     <para>
+      Use a read-write filesystem in <filename>config.xml</filename>, for
+      example <literal>filesystem="ext3"</literal>
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      Create <filename>config.<replaceable>MAC</replaceable></filename>
+     </para>
 <screen>IMAGE='/dev/ram1;suse-##.#-pxe-client.i686;1.2.8;192.168.100.2;4096'</screen>
-        </listitem>
-      </itemizedlist>
-    </sect2>
+    </listitem>
+   </itemizedlist>
+  </sect2>
 
-    <sect2 id="sec.pxe.union-image">
-      <title>Union Image</title>
-      <indexterm>
-        <primary>KIWI</primary>
-        <secondary>union image</secondary>
-      </indexterm>
-      <para>As used in the suse-pxe-client example it is possible to
-        make use of the union filesystem; overlayfs, to combine
-        two filesystems into one. In case of thin clients there is often
-        the need for a compressed filesystem due to space limitations.
-        Unfortunately all common compressed filesystems provides only
-        read-only access. Combining a read-only filesystem with a
-        read-write filesystem is a solution for this problem. In order
-        to use a compressed root filesystem based on squashfs make sure your
-        <filename>config.xml</filename>’s filesystem attribute
-        contains <systemitem class="filesystem">squashfs</systemitem>.
-      </para>
-
-    <sect3 id="sec.pxe.union.local.local">
-      <title>Download to Local Storage, Write to Local Storage</title>
-      <indexterm>
-        <primary>union image</primary>
-        <secondary>local-local</secondary>
-      </indexterm>
+  <sect2 id="sec.pxe.union-image">
+   <title>Union Image</title><indexterm>
+   <primary>KIWI</primary>
+   <secondary>union image</secondary></indexterm>
+   <para>
+    As used in the suse-pxe-client example it is possible to make use of the
+    union filesystem; overlayfs, to combine two filesystems into one. In
+    case of thin clients there is often the need for a compressed filesystem
+    due to space limitations. Unfortunately all common compressed
+    filesystems provides only read-only access. Combining a read-only
+    filesystem with a read-write filesystem is a solution for this problem.
+    In order to use a compressed root filesystem based on squashfs make sure
+    your <filename>config.xml</filename>’s filesystem attribute contains
+    <systemitem class="filesystem">squashfs</systemitem>.
+   </para>
+   <sect3 id="sec.pxe.union.local.local">
+    <title>Download to Local Storage, Write to Local Storage</title><indexterm>
+    <primary>union image</primary>
+    <secondary>local-local</secondary></indexterm>
 <screen>DISK=/dev/sda
 PART='5;S;x,400;L;/,x;L;x'
 IMAGE='/dev/sda2;suse-##.#-pxe-client.i386;1.2.8;192.168.100.2;4096'
 UNIONFS_CONFIG=/dev/sda3,/dev/sda2,overlayfs
 KIWI_INITRD=/boot/initrd</screen>
-    </sect3>
-    <sect3 id="sec.pxe.union.local.ram">
-      <title>Download to Local Storage, Write to RAM</title>
-      <indexterm>
-                <primary>union image</primary>
-                <secondary>local-ram</secondary>
-            </indexterm>
+   </sect3>
+   <sect3 id="sec.pxe.union.local.ram">
+    <title>Download to Local Storage, Write to RAM</title><indexterm>
+    <primary>union image</primary>
+    <secondary>local-ram</secondary></indexterm>
 <screen>DISK=/dev/sda
 PART='5;S;x,400;L;/'
 IMAGE='/dev/sda2;suse-##.#-pxe-client.i386;1.2.8;192.168.100.2;4096'
 UNIONFS_CONFIG=tmpfs,/dev/sda2,overlayfs</screen>
-        </sect3>
-    <sect3 id="sec.pxe.union.remote.local">
-      <title>Mount from Remote, Write to Local Storage</title>
-      <indexterm>
-                <primary>union image</primary>
-                <secondary>remote-local</secondary>
-            </indexterm>
-      <para>For all of the following modes I strongly recommend to check
-      on a separate client machine in the network if it is possible to
-            access the exported read-only and read-write device locations. If
-            accessing devices works the image should also be able to access
-            them on boot. If the boot fails it should be clear that the reason
-            is not the exported device.
-      </para>
-      <variablelist>
-       <varlistentry>
-        <term><envar>NFSROOT</envar></term>
-	<listitem>
+   </sect3>
+   <sect3 id="sec.pxe.union.remote.local">
+    <title>Mount from Remote, Write to Local Storage</title><indexterm>
+    <primary>union image</primary>
+    <secondary>remote-local</secondary></indexterm>
+    <para>
+     For all of the following modes I strongly recommend to check on a
+     separate client machine in the network if it is possible to access the
+     exported read-only and read-write device locations. If accessing
+     devices works the image should also be able to access them on boot. If
+     the boot fails it should be clear that the reason is not the exported
+     device.
+    </para>
+    <variablelist>
+     <varlistentry>
+      <term><envar>NFSROOT</envar>
+      </term>
+      <listitem>
 <screen>PART='5;S;x,x;L;x'
 NFSROOT="192.168.100.2;/srv/kiwi-read-only-path"
 UNIONFS_CONFIG=/dev/sda2,nfs,overlayfs</screen>
-        </listitem>
-       </varlistentry>
-       <varlistentry>
-        <term><envar>AOEROOT</envar></term>
-	<listitem>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term><envar>AOEROOT</envar>
+      </term>
+      <listitem>
 <screen>PART='5;S;x,x;L;x'
 AOEROOT=/dev/etherd/e0.1,/dev/sda2
 UNIONFS_CONFIG=/dev/sda2,aoe,overlayfs</screen>
-                </listitem>
-       </varlistentry>
-       <varlistentry>
-        <term><envar>NBDROOT</envar></term>
-	<listitem>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term><envar>NBDROOT</envar>
+      </term>
+      <listitem>
 <screen>PART='5;S;x,x;L;x'
 NBDROOT=192.168.100.7;root1;/dev/nbd0;;;;/dev/sda2
 UNIONFS_CONFIG=/dev/sda2,nbd,overlayfs</screen>
-                </listitem>
-       </varlistentry>
-      </variablelist>
-        </sect3>
-    <sect3 id="sec.pxe.union.remote.ram">
-      <title>Mount from Remote, Write to RAM</title>
-      <indexterm>
-                <primary>union image</primary>
-                <secondary>remote-ram</secondary>
-            </indexterm>
-       <variablelist>
-	<varlistentry>
-                <term><envar>NFSROOT</envar></term>
-<listitem>
+      </listitem>
+     </varlistentry>
+    </variablelist>
+   </sect3>
+   <sect3 id="sec.pxe.union.remote.ram">
+    <title>Mount from Remote, Write to RAM</title><indexterm>
+    <primary>union image</primary>
+    <secondary>remote-ram</secondary></indexterm>
+    <variablelist>
+     <varlistentry>
+      <term><envar>NFSROOT</envar>
+      </term>
+      <listitem>
 <screen>NFSROOT="192.168.100.2;/srv/kiwi-read-only-path"
 UNIONFS_CONFIG=tmpfs,nfs,overlayfs</screen>
-                </listitem>
-	</varlistentry>
-	<varlistentry>
-	 <term><envar>AOEROOT</envar></term>
-	 <listitem>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term><envar>AOEROOT</envar>
+      </term>
+      <listitem>
 <screen>AOEROOT=/dev/etherd/e0.1
 UNIONFS_CONFIG=tmpfs,aoe,overlayfs</screen>
-                </listitem>
-	</varlistentry>
-	<varlistentry>
-                <term><envar>NBDROOT</envar></term>
-		<listitem>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term><envar>NBDROOT</envar>
+      </term>
+      <listitem>
 <screen>NBDROOT=192.168.100.7;root1;/dev/nbd0
 UNIONFS_CONFIG=tmpfs,nbd,overlayfs</screen>
-                </listitem>
-	</varlistentry>
-       </variablelist>
-        </sect3>
-    <sect3 id="sec.pxe.union.remote.remote">
-      <title>Mount from Remote, Write to Remote</title>
-      <indexterm>
-                <primary>union image</primary>
-                <secondary>remote-remote</secondary>
-            </indexterm>
-	    <variablelist>
-	     <varlistentry>
-                <term><envar>NFSROOT</envar></term>
-		<listitem>
+      </listitem>
+     </varlistentry>
+    </variablelist>
+   </sect3>
+   <sect3 id="sec.pxe.union.remote.remote">
+    <title>Mount from Remote, Write to Remote</title><indexterm>
+    <primary>union image</primary>
+    <secondary>remote-remote</secondary></indexterm>
+    <variablelist>
+     <varlistentry>
+      <term><envar>NFSROOT</envar>
+      </term>
+      <listitem>
 <screen>NFSROOT="192.168.100.2;/srv/kiwi-read-only-path"
 UNIONFS_CONFIG=/srv/kiwi-read-write-path,nfs,overlayfs</screen>
-                </listitem>
-	     </varlistentry>
-	     <varlistentry>
-	      <term><envar>AOEROOT</envar></term>
-	      <listitem>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term><envar>AOEROOT</envar>
+      </term>
+      <listitem>
 <screen>AOEROOT=/dev/etherd/e0.1,/dev/etherd/e1.1
 UNIONFS_CONFIG=aoe,aoe,overlayfs</screen>
-                </listitem>
-	     </varlistentry>
-	     <varlistentry>
-                <term><envar>NBDROOT</envar></term>
-		<listitem>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term><envar>NBDROOT</envar>
+      </term>
+      <listitem>
 <screen>NBDROOT=192.168.100.7;root1;/dev/nbd0;swap1;/dev/nbd1;write1;/dev/nbd2
 UNIONFS_CONFIG=nbd,nbd,overlayfs</screen>
-                </listitem>
-	     </varlistentry>
-	    </variablelist>
-        </sect3>
-    </sect2>
+      </listitem>
+     </varlistentry>
+    </variablelist>
+   </sect3>
+  </sect2>
 
-    <sect2 id="sec.pxe.split-image">
-      <title>Split Image</title>
-      <indexterm>
-        <primary>KIWI</primary>
-        <secondary>split image</secondary>
-      </indexterm>
-      <para>As an alternative to the <varname>UNIONFS_CONFIG</varname>
-        method it is also possible to create a split image and combine
-        the two portions with the <varname>COMBINED_IMAGE</varname>
-        method. This allows to use different filesystems without the
-        need for an overlay filesystem to combine them together. Below
-        find an example: </para>
-
-      <itemizedlist>
-        <listitem>
-          <para>Add a split type in <filename>config.xml</filename>, for
-            example </para>
+  <sect2 id="sec.pxe.split-image">
+   <title>Split Image</title><indexterm>
+   <primary>KIWI</primary>
+   <secondary>split image</secondary></indexterm>
+   <para>
+    As an alternative to the <varname>UNIONFS_CONFIG</varname> method it is
+    also possible to create a split image and combine the two portions with
+    the <varname>COMBINED_IMAGE</varname> method. This allows to use
+    different filesystems without the need for an overlay filesystem to
+    combine them together. Below find an example:
+   </para>
+   <itemizedlist>
+    <listitem>
+     <para>
+      Add a split type in <filename>config.xml</filename>, for example
+     </para>
 <screen>&lt;type fsreadonly="squashfs" 
    image="split" fsreadwrite="ext3" boot="netboot/suse-..."/&gt;</screen>
-        </listitem>
-        <listitem>
-          <para>Add a split section inside the type to describe the
-              <sgmltag>temporary</sgmltag> and
-              <sgmltag>persistent</sgmltag> parts. For example:</para>
-
+    </listitem>
+    <listitem>
+     <para>
+      Add a split section inside the type to describe the
+      <sgmltag>temporary</sgmltag> and <sgmltag>persistent</sgmltag> parts.
+      For example:
+     </para>
 <screen>&lt;split&gt;
   &lt;temporary&gt; 
     <sgmltag class="sgmlcomment"> allow RAM read/write access to: </sgmltag>
@@ -954,112 +1041,140 @@ UNIONFS_CONFIG=nbd,nbd,overlayfs</screen>
     &lt;file name="/home/*"/&gt;
   &lt;/persistent&gt; 
 &lt;/split&gt;</screen>
-        </listitem>
-        <listitem>
-          <para>Sample
-              <filename>config.<replaceable>MAC</replaceable></filename>: </para>
-
+    </listitem>
+    <listitem>
+     <para>
+      Sample <filename>config.<replaceable>MAC</replaceable></filename>:
+     </para>
 <screen>IMAGE='/dev/sda2;suse-##.#-pxe-client.i686;1.2.8;192.168.100.2;4096,\
       /dev/sda3;suse-##.#-pxe-client-read-write.i686;1.2.8;192.168.100.2;4096'
 PART='200;S;x,500;L;/,x;L'
 DISK=/dev/sda
 COMBINED_IMAGE=yes
 KIWI_INITRD=/boot/initrd</screen>
-        </listitem>
-      </itemizedlist>
-    </sect2>
+    </listitem>
+   </itemizedlist>
+  </sect2>
 
-    <sect2 id="sec.pxe.root-tree-over-nfs">
-      <title>Root Tree Over NFS</title>
-      <para> Instead of installing the image onto a local storage device
-        of the client it is also possible to let the client mount the
-        root tree via an <systemitem class="service">NFS</systemitem>
-        remote mount. Below find an example: </para>
-
-      <itemizedlist>
-        <listitem>
-          <para>Export the KIWI prepared tree via NFS.</para>
-        </listitem>
-        <listitem>
-          <para>Sample
-              <filename>config.<replaceable>MAC</replaceable></filename>: </para>
+  <sect2 id="sec.pxe.root-tree-over-nfs">
+   <title>Root Tree Over NFS</title>
+   <para>
+    Instead of installing the image onto a local storage device of the
+    client it is also possible to let the client mount the root tree via an
+    <systemitem class="service">NFS</systemitem> remote mount. Below find an
+    example:
+   </para>
+   <itemizedlist>
+    <listitem>
+     <para>
+      Export the KIWI prepared tree via NFS.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      Sample <filename>config.<replaceable>MAC</replaceable></filename>:
+     </para>
 <screen>NFSROOT=192.168.100.7;/tmp/kiwi.nfsroot</screen>
-        </listitem>
-      </itemizedlist>
-    </sect2>
+    </listitem>
+   </itemizedlist>
+  </sect2>
 
-    <sect2 id="sec.pxe.root-tree-over-nbd">
-      <title>Root Tree Over NBD</title>
-
-      <para>As an alternative for root over NFS it is also possible to
-        let the client mount the root tree via a special network block
-        device. Below find an example: </para>
-
-      <itemizedlist>
-        <listitem>
-          <para>Use nbd-server to export the KIWI prepared tree.</para>
-        </listitem>
-        <listitem>
-          <para>Sample
-              <filename>config.<replaceable>MAC</replaceable></filename>
-          </para>
+  <sect2 id="sec.pxe.root-tree-over-nbd">
+   <title>Root Tree Over NBD</title>
+   <para>
+    As an alternative for root over NFS it is also possible to let the
+    client mount the root tree via a special network block device. Below
+    find an example:
+   </para>
+   <itemizedlist>
+    <listitem>
+     <para>
+      Use nbd-server to export the KIWI prepared tree.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      Sample <filename>config.<replaceable>MAC</replaceable></filename>
+     </para>
 <screen>NBDROOT=192.168.100.7;root1;/dev/nbd0</screen>
-        </listitem>
-      </itemizedlist>
-    </sect2>
+    </listitem>
+   </itemizedlist>
+  </sect2>
 
-    <sect2 id="sec.pxe.root-tree-over-aoe">
-      <title>Root Tree Over AoE</title>
-      <para>As an alternative for root over NBD it is also possible to
-        let the client mount the root device via a special ATA over
-        Ethernet network block device. Below find an example: </para>
-
-      <itemizedlist>
-        <listitem>
-          <para>Use the <command>vbladed</command> command to bind a
-            block device to an ethernet interface. The block device can
-            be a disk partition or a loop device (losetup) but not a
-            directory like with NBD. </para>
-        </listitem>
-        <listitem>
-          <para>Sample
-              <filename>config.<replaceable>MAC</replaceable></filename>: </para>
+  <sect2 id="sec.pxe.root-tree-over-aoe">
+   <title>Root Tree Over AoE</title>
+   <para>
+    As an alternative for root over NBD it is also possible to let the
+    client mount the root device via a special ATA over Ethernet network
+    block device. Below find an example:
+   </para>
+   <itemizedlist>
+    <listitem>
+     <para>
+      Use the <command>vbladed</command> command to bind a block device to
+      an ethernet interface. The block device can be a disk partition or a
+      loop device (losetup) but not a directory like with NBD.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      Sample <filename>config.<replaceable>MAC</replaceable></filename>:
+     </para>
 <screen>AOEROOT=/dev/etherd/e0.1</screen>
-          <para>This would require the following command to be called
-            first:</para>
+     <para>
+      This would require the following command to be called first:
+     </para>
 <screen><command>vbladed</command> 0 1 eth0 blockdevice</screen>
-        </listitem>
-      </itemizedlist>
-    </sect2>
-  </sect1>
-  <sect1 id="sec.pxe.groups">
-    <title>Hardware Grouping</title>
-    <para>While the PXE standard takes care of the ability to create hardware groups via hardware or
-      IP address groups, it does not take into account groups for non-contiguous hardware or IP
-      addresses. The PXE standard makes the assumption that each hardware group will be clearly
-      delineated by a range of IP addresses, or the hardware is from the same vendor. While an ideal
-      scenario, this may not be the case in an established, slightly dated installation where the
-      hardware itself has out-lived the vendors that made them.</para>
+    </listitem>
+   </itemizedlist>
+  </sect2>
+ </sect1>
+ <sect1 id="sec.pxe.groups">
+  <title>Hardware Grouping</title>
 
-    <para>KIWI has the ability to create groups for non-contiguous configurations
-      where different hardware types may be involved due to newer equipment being rotated into
-      production or older hardware failing and replacements are from different vendors. In addition,
-      an organization might decide to organize their equipment by function, rather than by vendor,
-      and may not be able to use the same hardware from one end to the other. </para>
-    <sect2>
-      <title>The Group Configuration File</title>
-      <para>To make use of the grouping functionality, some new configuration files will be
-        required. These configuration files currently have to be manually managed rather than
-        provided, however future versions of KIWI may provide a means of managing groups more
-        effectively once this feature stabilizes. The number of configuration files required will
-        depend on the number of hardware groups that will be created, rather than one configuration
-        file for each MAC address that will reside on the network. </para>
-      <para>There will be one configuration file that will always be required if using groups,
-        called:</para>
+  <para>
+   While the PXE standard takes care of the ability to create hardware
+   groups via hardware or IP address groups, it does not take into account
+   groups for non-contiguous hardware or IP addresses. The PXE standard
+   makes the assumption that each hardware group will be clearly delineated
+   by a range of IP addresses, or the hardware is from the same vendor.
+   While an ideal scenario, this may not be the case in an established,
+   slightly dated installation where the hardware itself has out-lived the
+   vendors that made them.
+  </para>
+
+  <para>
+   KIWI has the ability to create groups for non-contiguous configurations
+   where different hardware types may be involved due to newer equipment
+   being rotated into production or older hardware failing and replacements
+   are from different vendors. In addition, an organization might decide to
+   organize their equipment by function, rather than by vendor, and may not
+   be able to use the same hardware from one end to the other.
+  </para>
+
+  <sect2>
+   <title>The Group Configuration File</title>
+   <para>
+    To make use of the grouping functionality, some new configuration files
+    will be required. These configuration files currently have to be
+    manually managed rather than provided, however future versions of KIWI
+    may provide a means of managing groups more effectively once this
+    feature stabilizes. The number of configuration files required will
+    depend on the number of hardware groups that will be created, rather
+    than one configuration file for each MAC address that will reside on the
+    network.
+   </para>
+   <para>
+    There will be one configuration file that will always be required if
+    using groups, called:
+   </para>
 <screen>/srv/tftpboot/KIWI/config.group</screen>
-      <para>This file has a new static element that must exist, and one or more dynamic
-        elements depending on the number of groups that will be created. For example, the
-        config.group file defined below lists 3 distinct groups:</para>
+   <para>
+    This file has a new static element that must exist, and one or more
+    dynamic elements depending on the number of groups that will be created.
+    For example, the config.group file defined below lists 3 distinct
+    groups:
+   </para>
 <screen>KIWI_GROUP="test1, test2, test3"
 
 test1_KIWI_MAC_LIST="11:11:11:11:11:11, 00:11:00:11:22:CA"
@@ -1067,202 +1182,265 @@ test1_KIWI_MAC_LIST="11:11:11:11:11:11, 00:11:00:11:22:CA"
 test2_KIWI_MAC_LIST="00:22:00:44:00:4D, 99:3F:21:A2:F4:32"
 
 test3_KIWI_MAC_LIST="00:54:33:FA:44:33, 84:3D:45:2F:5F:33"</screen>
+   <para>
+    Note: The above hardware addresses contain random entries, and may not
+    reflect actual hardware.
+   </para>
+   <para>
+    As we can see in the above example the file contains 1 static element,
+    KIWI_GROUP, and 3 dynamic elements "test1_KIWI_MAC_LIST,
+    test2_KIWI_MAC_LIST and test3_KIWI_MAC_LIST". The definitions of these
+    elements are as follows:
+   </para>
+   <variablelist>
+    <varlistentry>
+     <term><literal>KIWI_GROUP</literal></term>
+     <listitem>
+      <para>
+       This element is the only static definition that needs to exist when
+       using groups. While there is no implicit limit to the number of groups
+       that can be configured, it should be kept to a minimum for reasonable
+       management or it could quickly become un-manageable. It will need to
+       contain one or more group names separated by comma's (,) and spacing
+       (for readability). In the example abobe, the following group names were
+       used:
+      </para>
+      <simplelist>
+       <member><literal>test1</literal></member>
+       <member><literal>test2</literal></member>
+       <member><literal>test3</literal></member>
+      </simplelist>
+      <para>
+       Valid group names are made up of upper and lower case letters, and can
+       use numeric, and underscore characters. The same rules used to define
+       bash/sh variable names should apply here, as these names will have to
+       be used as fully defined bash/sh variables when linking hardware
+       addresses to an assigned group. The following is an example that
+       contains valid names:
+      </para>
+      <screen>KIWI_GROUP="test1, test_my_name, LIST_HARDWARE, Multple_Case_Group_1"</screen>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>
+      <literal><replaceable>group_name</replaceable>_KIWI_MAC_LIST</literal>
+     </term>
+     <listitem>
+      <para>
+       The name of this element is dynamic and depends entirely on the list
+       of group names that were previously defined. Each group name that was
+       used in the KIWI_GROUP variable, must contain a matching dynamic
+       element, and have KIWI_MAC_LIST appended to the name. To continue with
+       our previous example, to create hardware lists for the groups already
+       defined, we need 3 dynamic elements called:
+      </para>
+      <simplelist>
+       <member><literal>test1_KIWI_MAC_LIST</literal></member>
+       <member><literal>test2_KIWI_MAC_LIST</literal></member>
+       <member><literal>test3_KIWI_MAC_LIST</literal></member>
+      </simplelist>
+      <para>
+       These variables will contain a comma delimited list of the hardware
+       addresses for all of the machines being assigned to the appropriate
+       group, but there are some caveats that need to be kept in mind. The
+       first caveat is for hardware addresses that contain the HEX characters
+       A-F. The PXE standard uses capital letters for these characters, and
+       as a result KIWI does upper case comparisons, so a MAC address that is
+       defined with lower case letters in this list will never get matched.
+      </para>
+      <para>
+       The second caveat is that as the list gets longer, it can be harder to
+       maintain and it has the potential to slow down the booting process.
+       However, testing has been completed with 1500+ hosts defined, and
+       there was little delay when transferring the file to a single host.
+       The file size will have a larger impact when trying to download it to
+       1500+ hosts, so some consideration will have to take that into
+       account. The comparison itself still occurred in under half a second
+       while searching through all 1500+ MAC addresses across 3 defined
+       groups.
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </sect2>
 
-      <para>Note: The above hardware addresses contain random entries, and may not reflect actual
-        hardware.</para>
-      <para>As we can see in the above example the file contains 1 static element, KIWI_GROUP, and 3
-        dynamic elements "test1_KIWI_MAC_LIST, test2_KIWI_MAC_LIST and test3_KIWI_MAC_LIST". The
-        definitions of these elements are as follows:</para>
-      <itemizedlist>
-        <listitem>
-          <para>KIWI_GROUP</para>
-          <para>This element is the only static definition that needs to exist when using groups.
-            While there is no implicit limit to the number of groups that can be configured, it
-            should be kept to a minimum for reasonable management or it could quickly become
-            un-manageable. It will need to contain one or more group names separated by comma's (,) and
-            spacing (for readability). In the above example, our group names were:</para>
-          <itemizedlist>
-            <listitem>
-              <para>test1</para>
-            </listitem>
-            <listitem>
-              <para>test2</para>
-            </listitem>
-            <listitem>
-              <para>test3</para>
-            </listitem>
-          </itemizedlist>
-          <para>Valid group names are made up of upper and lower case letters,  and can use numeric, and
-            underscore characters. The same rules used to define bash/sh variable names should apply
-            here, as these names will have to be used as fully defined bash/sh variables when
-            linking hardware addresses to an assigned group. The following is an example that contains
-            valid names:</para>
-<screen>KIWI_GROUP="test1, test_my_name, LIST_HARDWARE, Multple_Case_Group_1"</screen>
-        </listitem>
-        <listitem>
-          <para>&lt;GROUP_NAME>_KIWI_MAC_LIST</para>
-          <para>The name of this element is dynamic and depends entirely on the list of group names
-            that were previously defined. Each group name that was used in the KIWI_GROUP
-            variable, must contain a matching dynamic element, and have KIWI_MAC_LIST appended to
-            the name. To continue with our previous example, to create hardware lists for the groups 
-            already defined, we need 3 dynamic elements called:</para>
-          <itemizedlist>
-            <listitem>
-              <para>test1_KIWI_MAC_LIST</para>
-            </listitem>
-            <listitem>
-              <para>test2_KIWI_MAC_LIST</para>
-            </listitem>
-            <listitem>
-              <para>test3_KIWI_MAC_LIST</para>
-            </listitem>
-          </itemizedlist>
-          <para>These variables will contain a comma delimited list of the hardware addresses for
-            all of the machines being assigned to the appropriate group, but there are some caveats
-            that need to be kept in mind. The first caveat is for hardware addresses that contain
-            the HEX characters A-F. The PXE standard uses capital letters for these characters, and
-            as a result KIWI does upper case comparisons, so a MAC address that is defined with
-            lower case letters in this list will never get matched.</para>
-          <para>The second caveat is that as the list gets longer, it can be harder to maintain
-            and it has the potential to slow down the booting process. However, testing has been 
-            completed with 1500+ hosts defined, and there was little delay when transferring the 
-            file to a single host. The file size will have a larger impact when trying to download
-            it to 1500+ hosts, so some consideration will have to take that into account. 
-            The comparison itself still occurred in under half a second while searching 
-            through all 1500+ MAC addresses across 3 defined groups.</para>
-        </listitem>
-      </itemizedlist>
-    </sect2>
-    <sect2>
-      <title>The Group Details File</title>
-      <para>In addition to the <filename>config.group</filename> file,
-        each defined group will require a
-          <filename>config.&lt;GROUP_NAME></filename> file. This file is
-        exactly like a standard KIWI config.&lt;MAC> file, but is
-        assigned to a group of hosts rather than a single unit. If we
-        continue with the example we used in the previous section, we
-        would need the following files:</para>
+  <sect2>
+   <title>The Group Details File</title>
+   <para>
+    In addition to the <filename>config.group</filename> file, each defined
+    group will require a <filename>config.&lt;GROUP_NAME></filename> file.
+    This file is exactly like a standard KIWI config.&lt;MAC> file, but is
+    assigned to a group of hosts rather than a single unit. If we continue
+    with the example we used in the previous section, we would need the
+    following files:
+   </para>
 <screen>/srv/tftpboot/KIWI/config.test1
 /srv/tftpboot/KIWI/config.test2
 /srv/tftpboot/KIWI/config.test3</screen>
-      <para>The contents of these files is the same that would normally reside in a config.&lt;MAC>
-        file, and all definitions that would be supported for a single host, are supported for a
-        group of hosts. In addition, if a host is matched to a group, yet the config.&lt;GROUP_NAME>
-        file does not exist, KIWI will error out.</para>
-      <para>For example, the following configuration file, called
-          <filename>config.test1</filename> would be used for the group
-        called "test1":</para>
+   <para>
+    The contents of these files is the same that would normally reside in a
+    config.&lt;MAC> file, and all definitions that would be supported for a
+    single host, are supported for a group of hosts. In addition, if a host
+    is matched to a group, yet the config.&lt;GROUP_NAME> file does not
+    exist, KIWI will error out.
+   </para>
+   <para>
+    For example, the following configuration file, called
+    <filename>config.test1</filename> would be used for the group called
+    "test1":
+   </para>
 <screen>DISK=/dev/sda
 PART='5;S;x,x;L;/'
 IMAGE='/dev/sda2;suse-##.#-pxe-client.i686;1.2.8;192.168.100.2;4096'
 CONF='CONFIGURATIONS/xorg.conf.test1;/etc/X11/xorg.conf;192.168.100.2;4096,\
      CONFIGURATIONS/syslog.conf;/etc/sysconfig/syslog.conf;192.168.100.2;4096'</screen>
-      <para>As a result of this configuration file, the image would be
-        configured consistently across all the hosts assigned to test1.
-        The following file called <filename>config.test2</filename>,
-        contains a small change that may be specific to a
-        function:</para>
+   <para>
+    As a result of this configuration file, the image would be configured
+    consistently across all the hosts assigned to test1. The following file
+    called <filename>config.test2</filename>, contains a small change that
+    may be specific to a function:
+   </para>
 <screen>DISK=/dev/sda
 PART='5;S;x,x;L;/'
 IMAGE='/dev/sda2;suse-##.#-pxe-client.i686;1.2.8;192.168.100.2;4096'
 CONF='CONFIGURATIONS/xorg.conf.test2;/etc/X11/xorg.conf;192.168.100.2;4096,\
      CONFIGURATIONS/syslog.conf;/etc/sysconfig/syslog.conf;192.168.100.2;4096'</screen>
-      <para>As we can see, while group 1 and 2 share the syslog.conf
-        configuration file, they have different
-          <filename>xorg.conf</filename> files defined, therefore two
-        distinct groups with one or more hosts assigned to each group
-        can now be configured by managing a smaller number of
-        files.</para>
-    </sect2>
-    <sect2>
-      <title> Using Hardware Mapping to Provide Overrides</title>
-      <para>The only issue with running mixed hardware configurations
-        pertains primarily to hardware differences. For instance, it may
-        be possible to create a single, <filename>xorg.conf</filename>
-        file that is able to work with all of the hardware, but there is
-        a chance it might not be possible to do so. With this in mind,
-        KIWI provides a mechanism to provide "default" configurations
-        that works with the most common hardware configuration, while
-        providing hardware specific overrides to allow for any
-        differences and yet have all hardware linked to the same
-        group.</para>
-      <sect3>
-        <title>The Hardware Mapping Elements</title>
-        <para>To make use of the hardware linking mechanism, two
-          additional parameters needs to be added to the group details
-          file, the one named
-            <filename>config.&lt;group_name></filename>. These two
-          elements "link" hardware specific configurations to the
-          appropriate systems. A general example would look like
-          this:</para>
+   <para>
+    As we can see, while group 1 and 2 share the syslog.conf configuration
+    file, they have different <filename>xorg.conf</filename> files defined,
+    therefore two distinct groups with one or more hosts assigned to each
+    group can now be configured by managing a smaller number of files.
+   </para>
+  </sect2>
+
+  <sect2>
+   <title>Using Hardware Mapping to Provide Overrides</title>
+   <para>
+    The only issue with running mixed hardware configurations pertains
+    primarily to hardware differences. For instance, it may be possible to
+    create a single, <filename>xorg.conf</filename> file that is able to
+    work with all of the hardware, but there is a chance it might not be
+    possible to do so. With this in mind, KIWI provides a mechanism to
+    provide "default" configurations that works with the most common
+    hardware configuration, while providing hardware specific overrides to
+    allow for any differences and yet have all hardware linked to the same
+    group.
+   </para>
+   <sect3>
+    <title>The Hardware Mapping Elements</title>
+    <para>
+     To make use of the hardware linking mechanism, two additional
+     parameters needs to be added to the group details file, the one named
+     <filename>config.&lt;group_name></filename>. These two elements "link"
+     hardware specific configurations to the appropriate systems. A general
+     example would look like this:
+    </para>
 <screen>HARDWARE_MAP="vendor_name_model"
 vendor_name_model_HARDWARE_MAP="00:00:00:11:11:11"</screen>
-        <para>These parameters are not required, and the same functionality can be applied by using
-          multiple groups to do the same thing, but that might not be desirable to some
-          administrators. This feature allows for a slightly more complex group to be defined, but
-          the end result is a single group, that can contain multiple sub-groups ensuring
-          flexibility in using a mixed set of hardware. </para>
-        <para>The definitions for the above parameters are as follows: </para>
-        <itemizedlist>
-          <listitem>
-            <para>HARDWARE_MAP</para>
-            <para>This element follows the same rules as defined by the KIWI_GROUP element. However,
-              this variable will create sub-groups used to ensure multiple types of hardware vendors
-              can be used within the same group.  The name of the group(s) should be clearly
-              defined, and a good convention to follow would be to use a combination of the vendor
-              name with the model number or type. This would allow for cases where the same vendor
-              is used, but differences between alternative models requires different maps to be
-              used.</para>
-          </listitem>
-          <listitem>
-            <para>&lt;HARDWARE_MAP_NAME>_HARDWARE_MAP</para>
-            <para>This element behaves exactly like the &lt;GROUP_NAME>_KIWI_MAC_LIST element
-              defined above, in that it lists all MAC addreses that need to be linked to a hardware
-              map. Any host defined within the list will receive configuration files that have been
-              specifically defined in a hardware_config.&lt;hardware_map> file, in addition to any
-              files defined within a CONF element.</para>
-          </listitem>
-        </itemizedlist>
-      </sect3>
-      <sect3>
-        <title>The Hardware Mapping Details File</title>
-        <para>Once the hardware map has been defined, the last step is to ensure configuration
-          specific elements are linked to the host(s) in question. This is done by creating a new
-          hardware_config.&lt;hardware_map> file. The contents of the file is quite simple, and
-          contains only one element called VENDOR_CONF, as the following example shows:</para>
+    <para>
+     These parameters are not required, and the same functionality can be
+     applied by using multiple groups to do the same thing, but that might
+     not be desirable to some administrators. This feature allows for a
+     slightly more complex group to be defined, but the end result is a
+     single group, that can contain multiple sub-groups ensuring flexibility
+     in using a mixed set of hardware.
+    </para>
+    <para>
+     The definitions for the above parameters are as follows:
+    </para>
+    <variablelist>
+     <varlistentry>
+      <term><literal>HARDWARE_MAP</literal></term>
+      <listitem>
+       <para>
+	This element follows the same rules as defined by the KIWI_GROUP
+	element. However, this variable will create sub-groups used to ensure
+	multiple types of hardware vendors can be used within the same group.
+	The name of the group(s) should be clearly defined, and a good
+	convention to follow would be to use a combination of the vendor name
+	with the model number or type. This would allow for cases where the
+	same vendor is used, but differences between alternative models
+	requires different maps to be used.
+       </para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term>
+       <literal><replaceable>hardware_map_name</replaceable>_HARDWARE_MAP</literal></term>
+      <listitem>
+       <para>
+	This element behaves exactly like the
+	<replaceable>group_name</replaceable>_KIWI_MAC_LIST element defined
+	above, in that it lists all MAC addreses that need to be linked to a
+	hardware map. Any host defined within the list will receive
+	configuration files that have been specifically defined in a
+	hardware_config.&lt;hardware_map> file, in addition to any files
+	defined within a CONF element.
+       </para>
+     </listitem>
+     </varlistentry>
+    </variablelist>
+   </sect3>
+   <sect3>
+    <title>The Hardware Mapping Details File</title>
+    <para>
+     Once the hardware map has been defined, the last step is to ensure
+     configuration specific elements are linked to the host(s) in question.
+     This is done by creating a new hardware_config.&lt;hardware_map> file.
+     The contents of the file is quite simple, and contains only one element
+     called VENDOR_CONF, as the following example shows:
+    </para>
 <screen>VENDOR_CONF='CONFIGURATIONS/xorg.conf.hardware_name_model;/etc/X11/xorg.conf;192.168.100.2;4096'</screen>
-        <para>The format of the VENDOR_CONF values is exactly the same as the CONF variable used in
-          the standard host and group configurations. In addition, files defined within this list
-          will over-write any files defined in the group configuration, if and only if, all of the
-          following cases apply:</para>
-        <itemizedlist>
-          <listitem>
-            <para>The host is assigned to the current hardware map</para>
-          </listitem>
-          <listitem>
-            <para>The file is defined within the CONF and VENDOR_CONF elements</para>
-          </listitem>
-        </itemizedlist>
-        <para>NOTE: If a file is not defined in the CONF element, but is defined in the VENDOR_CONF
-          element, it is simply downloaded to the host as if it was a CONF file. In this case, no
-          overwritting will take place as it is considered a new file.</para>
-      </sect3>
-      <sect3>
-        <title>A Complete Example</title>
-        <para>The following is an example of a group that is using hardware from multiple vendors.
-          For the purposes of this example, lets assume the group will have 10 defined hosts, seven
-          are imaginative HP thinstations, while the remaining three are older Maxterm thinstations.
-          We will also assume that the differences we are trying to address are specific to the
-          video card and X.Org drivers used as a result.</para>
-        <para>With this in mind, we will need the following KIWI specific files:</para>
+    <para>
+     The format of the VENDOR_CONF values is exactly the same as the CONF
+     variable used in the standard host and group configurations. In
+     addition, files defined within this list will over-write any files
+     defined in the group configuration, if and only if, all of the
+     following cases apply:
+    </para>
+    <itemizedlist>
+     <listitem>
+      <para>
+       The host is assigned to the current hardware map
+      </para>
+     </listitem>
+     <listitem>
+      <para>
+       The file is defined within the CONF and VENDOR_CONF elements
+      </para>
+     </listitem>
+    </itemizedlist>
+    <para>
+     NOTE: If a file is not defined in the CONF element, but is defined in
+     the VENDOR_CONF element, it is simply downloaded to the host as if it
+     was a CONF file. In this case, no overwritting will take place as it is
+     considered a new file.
+    </para>
+   </sect3>
+   <sect3>
+    <title>A Complete Example</title>
+    <para>
+     The following is an example of a group that is using hardware from
+     multiple vendors. For the purposes of this example, lets assume the
+     group will have 10 defined hosts, seven are imaginative HP
+     thinstations, while the remaining three are older Maxterm thinstations.
+     We will also assume that the differences we are trying to address are
+     specific to the video card and X.Org drivers used as a result.
+    </para>
+    <para>
+     With this in mind, we will need the following KIWI specific files:
+    </para>
 <screen><command>cd</command> /srv/tftpboot/KIWI
 <command>ls</command>
    config.example1
    config.group
    hardware_config.maxterm_3500</screen>
-        <para>As we can see, there is a KIWI group file, the group configuration or details file,
-          and a new file that we have not seen before called hardware_config.maxterm_3500. We will
-          first look at the contents of the config,group file:</para>
+    <para>
+     As we can see, there is a KIWI group file, the group configuration or
+     details file, and a new file that we have not seen before called
+     hardware_config.maxterm_3500. We will first look at the contents of the
+     config,group file:
+    </para>
 <screen><command>cat</command> config.group
 
 KIWI_GROUP="example1"
@@ -1272,9 +1450,11 @@ example1_KIWI_MAC_LIST=
    00:00:00:00:00:05 00:00:00:00:00:06 \
    00:00:00:00:00:07 00:00:00:00:00:08 
    00:00:00:00:00:09 00:00:00:00:00:0A"</screen>
-        <para>Within the file, there is a group called "example1", with ten hosts defined, in this
-          case with imaginary sequential MAC addresses. Next, we look at the config.example1 group
-          details/configuration file:</para>
+    <para>
+     Within the file, there is a group called "example1", with ten hosts
+     defined, in this case with imaginary sequential MAC addresses. Next, we
+     look at the config.example1 group details/configuration file:
+    </para>
 <screen><command>cat</command> config.example1
 
 KIWI_INITRD=/boot/initrd
@@ -1288,54 +1468,62 @@ RELOAD_IMAGE=yes
 RELOAD_CONFIG=yes
 HARDWARE_MAP='maxterm_3500'
 maxterm_3500_HARDWARE_MAP='00:00:00:00:00:02 00:00:00:00:00:03 00:00:00:00:00:04'</screen>
-        <para>Here, most of the standard KIWI configuration elements are in place, with a few
-          extras. There are three areas we want to focus our attention on, the CONF, HARDWARE_MAP
-          and maxterm_3500_HARDWARE_MAP variables, as they are the most critical elements to our
-          example.</para>
-        <para>The first parameter to look at is the CONF parameter,
-          which indicates a <filename>prefs.js</filename> (for Mozilla
-          Firefox), and a xorg.conf (for X Windows) files will be copied
-          to the host during boot up. These files should be considered
-          defaults for the group, and all hosts defined in this group
-          will use these files. As such, when the systems boot, both of
-          these files will be copied over to their local file systems
-          when the CONF element is processed.</para>
-        <para>Lastly, we have a hardware mapping group called "maxterm_3500", with three of the
-          groups hosts defined as part of of a sub-group, or hardware map. The content of this file
-          is as follows:</para>
+    <para>
+     Here, most of the standard KIWI configuration elements are in place,
+     with a few extras. There are three areas we want to focus our attention
+     on, the CONF, HARDWARE_MAP and maxterm_3500_HARDWARE_MAP variables, as
+     they are the most critical elements to our example.
+    </para>
+    <para>
+     The first parameter to look at is the CONF parameter, which indicates a
+     <filename>prefs.js</filename> (for Mozilla Firefox), and a xorg.conf
+     (for X Windows) files will be copied to the host during boot up. These
+     files should be considered defaults for the group, and all hosts
+     defined in this group will use these files. As such, when the systems
+     boot, both of these files will be copied over to their local file
+     systems when the CONF element is processed.
+    </para>
+    <para>
+     Lastly, we have a hardware mapping group called "maxterm_3500", with
+     three of the groups hosts defined as part of of a sub-group, or
+     hardware map. The content of this file is as follows:
+    </para>
 <screen><command>cat</command> hardware_config.maxterm_3500
 
 VENDOR_CONF='xorg.conf.maxterm_3500;/etc/X11/xorg.conf;192.168.1.2;4096,
             someconfig.cfg;/etc/sysconfig/someconfig.cfg;192.168.1.2;4096'</screen>
-        <para>When the VENDOR_CONF defintition is used, we are telling KIWI that all files defined
-          within this element, are specific to the hardware map they are linked to. As a result, any
-          files listed here will be transferred to a host if, and only if, the host has been linked
-          to the hardware map via the maxterm_3500_HARDWARE_MAP element. In our example the only
-          systems that will receive the xorg.conf.maxterm_3500 file will be the three maxterms we
-          linked to the hardware map itself.</para>
-        <para>In our VENDOR_CONF element, we are indicating two files
-          that should be transferred, in addition to any file
-          transferred during the processing of the CONF element. A
-          "specific" <filename>xorg.conf</filename> file, as well as
-          someconfig.cfg. In the case of the xorg.conf.maxterm_3500
-          file, when it is transferred to the host, it will overwrite
-          the <filename>xorg.conf</filename> file that was previously
-          transferred via the CONF element. However, with the
-            <filename>someconfig.cfg</filename> file, because it was not
-          previously defined in the CONF element, it will simply get
-          transferred over, and is a perfect example of how one could
-          enable functionality that is not otherwise configured.</para>
-        <para>As a result of this example, we have seven terminals that
-          are using a prefs.js and generic xorg.conf file for their
-          system configuration, and three terminals that are using
-          prefs.js, a new version of the <filename>xorg.conf</filename>
-          file as well as a file called somconfig.cfg. For the purposes
-          of our example, the contents of the
-            <filename>prefs.js</filename>,
-            <filename>xorg.conf</filename>, xorg.conf.maxterm_3500 and
-            <filename>someconfig.cfg</filename> are arbitrary, and don't
-          need to be explained here.</para>
-      </sect3>
-    </sect2>
-  </sect1>
+    <para>
+     When the VENDOR_CONF defintition is used, we are telling KIWI that all
+     files defined within this element, are specific to the hardware map
+     they are linked to. As a result, any files listed here will be
+     transferred to a host if, and only if, the host has been linked to the
+     hardware map via the maxterm_3500_HARDWARE_MAP element. In our example
+     the only systems that will receive the xorg.conf.maxterm_3500 file will
+     be the three maxterms we linked to the hardware map itself.
+    </para>
+    <para>
+     In our VENDOR_CONF element, we are indicating two files that should be
+     transferred, in addition to any file transferred during the processing
+     of the CONF element. A "specific" <filename>xorg.conf</filename> file,
+     as well as someconfig.cfg. In the case of the xorg.conf.maxterm_3500
+     file, when it is transferred to the host, it will overwrite the
+     <filename>xorg.conf</filename> file that was previously transferred via
+     the CONF element. However, with the <filename>someconfig.cfg</filename>
+     file, because it was not previously defined in the CONF element, it
+     will simply get transferred over, and is a perfect example of how one
+     could enable functionality that is not otherwise configured.
+    </para>
+    <para>
+     As a result of this example, we have seven terminals that are using a
+     prefs.js and generic xorg.conf file for their system configuration, and
+     three terminals that are using prefs.js, a new version of the
+     <filename>xorg.conf</filename> file as well as a file called
+     somconfig.cfg. For the purposes of our example, the contents of the
+     <filename>prefs.js</filename>, <filename>xorg.conf</filename>,
+     xorg.conf.maxterm_3500 and <filename>someconfig.cfg</filename> are
+     arbitrary, and don't need to be explained here.
+    </para>
+   </sect3>
+  </sect2>
+ </sect1>
 </chapter>
