@@ -58,6 +58,7 @@ if [ ! -z "$signature" ] && [ ! "$signature" = "iso9660" ];then
     echo "Need a stick disk device not a partition"
     clean
 fi
+kiwi_devicepersistency=by-uuid
 device_disk=$(getDiskID $disk)
 device_part=$(getDiskID $(ddn $(dn $device_disk) 1))
 if [ ! -e "$device_disk" ];then
@@ -186,7 +187,7 @@ menuentry "$title" --class os {
         echo Loading live system...
         loopback loop /boot/$image_base
     echo Loading linux...
-        linux (loop)/boot/$arch/loader/linux $cmdline_std quiet
+        linux (loop)/boot/$arch/loader/linux $cmdline_std
     echo Loading initrd...
         initrd (loop)/boot/$arch/loader/initrd
 }
@@ -195,7 +196,7 @@ menuentry "Failsafe -- $title" --class os {
         echo Loading live system...
         loopback loop /boot/$image_base
         echo Loading linux...
-        linux (loop)/boot/$arch/loader/linux $cmdline_fsf quiet
+        linux (loop)/boot/$arch/loader/linux $cmdline_fsf
         echo Loading initrd...
         initrd (loop)/boot/$arch/loader/initrd
 }
