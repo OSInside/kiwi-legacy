@@ -13,53 +13,60 @@
   </para>
 
   <para>
-   A Linux image may present itself in many different formats, for example
-   the <filename class="extension">*.iso</filename> file you download to
-   burn a distribution installation file to optical media is an image. A
-   file used by virtualization systems such as KVM, Xen, or VMware is an
-   image. The installation of a Linux system on your hard drive can be
-   turned into an image using the <command>dd</command> command.
+   Images for Linux are available in many different formats. A Linux <filename
+   class="extension">*.iso</filename> file, that can be burned to an optical
+   medium to install Linux, is an image. A file used by virtualization systems
+   such as KVM, Xen, or VMware is an image. The installation of a Linux system
+   on your hard drive can be turned into an image using the
+   <command>dd</command> command.
   </para>
-
   <para>
-   Basically, you can think of an image as a Linux system in a file.
-   Depending on the type of the image you are dealing with you have
-   different options for using the image. For example you can burn an ISO
-   image to optical media and then boot your computer from the CD/DVD, or
-   you can run a Virtual Machine from the
+   Basically, an image is a Linux system in a file. Depending on the type of
+   the image, there are different use cases for it. It can be used to burn an
+   iso image to an optical medium with which the computer can be booted. An
+   image can also be used to run a Virtual Machine from the
    <filename class="extension">*.iso</filename> file (image) stored on your
    hard drive.
   </para>
  </sect1>
  <sect1 id="sec.introduction.whatdoeskiwido">
   <title>What does KIWI do?</title>
-
   <para>
-   KIWI builds images in a variety of formats.
+   KIWI allows you to configure, build, and deploy your own operating system
+   images in a variety of formats. The KIWI workflow is divided into two
+   distinct stages. For a detailed description of this process refer to <xref
+   linkend="chap.workflow"/>.
   </para>
-
-  <para>
-   As an image build tool, KIWI builds images in a relatively large number
-   of supported image formats. The details of the image creation process are
-   explained in the <xref linkend="chap.workflow"/> chapter. The image
-   format of the image produced by KIWI is defined within a configuration
-   file named <filename>config.xml</filename> or <filename>*.kiwi</filename>
-   as described in <xref linkend="chap.description"/>.
-  </para>
-
-  <para>
-   Note that not all elements and attributes that may be used in the KIWI
-   <filename>config.xml</filename> configuration file are listed or
-   described in this document. The complete schema documentation can be
-   accessed on the web at
-   <ulink url="http://doc.opensuse.org/projects/kiwi/schema-doc/"/>, latest
-   version, or on your local system using the <filename>
-   file:///usr/share/doc/packages/kiwi/schema/kiwi.html</filename> path as
-   the URL in the browser.
-  </para>
+  <procedure>
+   <step>
+    <formalpara>
+     <title>Preparation</title>
+     <para>
+      Create a root directory holding the contents of the new file
+      system. Install the required packages from a software package source
+      such as SUSE Linux Enterprise Server. Create an image description file,
+      (<filename>config.xml</filename>) and optionally apply
+      customizations. This operation results in the <quote>unpacked root
+      tree</quote>.
+     </para>
+    </formalpara>
+   </step>
+   <step>
+    <formalpara>
+     <title>Creation</title>
+     <para>
+      The image itself is created using the unpacked root tree created in the
+      prvious step. The image creation process does not require user
+      interaction, but can be fine-tuned by modifying the images.sh script
+      that is called during the creation process.
+     </para>
+    </formalpara>
+   </step>
+  </procedure>  
  </sect1>
+ 
  <sect1 id="sec.introduction.howtousekiwi">
-  <title>How do I use KIWI?</title>
+  <title>How to use KIWI?</title>
 
   <para>
    KIWI is a command line tool that is invoked with the
@@ -74,11 +81,11 @@
   </para>
 
   <para>
-   An image is created in a two step process as described in the
-   <xref linkend="chap.workflow"/> chapter. Use <command>kiwi
-   --prepare</command> for the first step and <command>kiwi
-   --create</command> for the second step. For user convenience KIWI also
-   has the <option>--build</option> that combines the
+   The two phases of the image creation process outlined in <xref
+   linkend="sec.introduction.whatdoeskiwido"/> can be started with the
+   commands <command>kiwi --prepare</command> for the first step and
+   <command>kiwi --create</command> for the second step. For convenience KIWI
+   also has the <option>--build</option> that combines the
    <emphasis>prepare</emphasis> and <emphasis>create</emphasis> steps.
   </para>
  </sect1>

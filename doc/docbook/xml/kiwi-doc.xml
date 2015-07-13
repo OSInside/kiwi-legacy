@@ -12,11 +12,14 @@
     <affiliation>
      <jobtitle>Software Engineer</jobtitle>
      <orgname>SUSE LINUX Products GmbH</orgname>
-    </affiliation><firstname>Marcus</firstname><surname>Schäfer</surname>
-    <contrib>Project, Design and Implementation</contrib><email>ms@suse.de</email>
+    </affiliation>
+    <firstname>Marcus</firstname>
+    <surname>Schäfer</surname>
+    <contrib>Project, Design and Implementation</contrib>
+    <email>ms@suse.de</email>
     <address>
-          SUSE LINUX Products GmbH
-          <street>Maxfeldstrasse 5</street><postcode>90409</postcode>
+     SUSE LINUX Products GmbH
+     <street>Maxfeldstrasse 5</street><postcode>90409</postcode>
      <city>Nürnberg</city>
     </address>
    </author>
@@ -24,14 +27,20 @@
     <affiliation>
      <jobtitle>Documentation Specialist</jobtitle>
      <orgname>SUSE LINUX Products GmbH</orgname>
-    </affiliation><firstname>Thomas</firstname><surname>Schraitle</surname>
-    <contrib>Various text improvements, migration to DocBook</contrib><email>toms@suse.de</email>
+    </affiliation>
+    <firstname>Thomas</firstname>
+    <surname>Schraitle</surname>
+    <contrib>Various text improvements, migration to DocBook</contrib>
+    <email>toms@suse.de</email>
    </othercredit>
    <othercredit>
     <affiliation>
      <orgname>SUSE LLC</orgname>
-    </affiliation><firstname>Robert</firstname><surname>Schweikert</surname>
-    <contrib>Various text improvements, implementation</contrib><email>rjschwei@suse.com</email>
+    </affiliation>
+    <firstname>Robert</firstname>
+    <surname>Schweikert</surname>
+    <contrib>Various text improvements, implementation</contrib>
+    <email>rjschwei@suse.com</email>
    </othercredit>
   </authorgroup>
   <xi:include href="kiwi-doc-license.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
@@ -71,5 +80,6 @@
   <xi:include href="kiwi-doc-lukssupport.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
  </part>
  <xi:include href="kiwi-doc-appendix.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+ <xi:include href="gfdl1.2.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
  <index/>
 </book>
