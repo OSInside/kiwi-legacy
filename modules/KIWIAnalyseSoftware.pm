@@ -296,12 +296,13 @@ sub __populateRepos {
     }
     foreach my $repo (@list) {
         $repo =~ s/^\s+//g;
-        if ($repo =~ /^\d.*\|(.*)\|.*\|(.*)\|.*\|(.*)\|(.*)\|(.*)\|/) {
-            my $enabled = $2;
-            my $source  = $5;
-            my $type    = $4;
-            my $alias   = $1;
-            my $prio    = $3;
+        if ($repo =~ /^\d/) {
+            my @record = split(/\|/, $repo);
+            my $enabled = $record[4];
+            my $source  = $record[8];
+            my $type    = $record[7];
+            my $alias   = $record[1];
+            my $prio    = $record[6];
             $enabled =~ s/^ +//; $enabled =~ s/ +$//;
             $source  =~ s/^ +//; $source  =~ s/ +$//;
             $type    =~ s/^ +//; $type    =~ s/ +$//;
