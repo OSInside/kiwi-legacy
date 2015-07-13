@@ -6,74 +6,82 @@
  <primary>KIWI</primary>
  <secondary>Installation</secondary></indexterm>
  <sect1 id="sec.installation.rpminstall">
-  <title>Installing using Packages</title>
+  <title>Installing KIWI Packages</title>
 
   <para>
-   Once you have added the appropriate repositories (more on this below) to
-   your system you can search for the kiwi packages through the YaST
-   interface or using <command>zypper</command> as shown below.
+   KIWI is shipped with all SUSE distributions, but not installed by
+   default. A minimum KIWI installation requires to install the package
+   <package>kiwi</package> and at least one package containing the boot
+   descriptions for the various image types:
   </para>
-
-<screen><command>zypper</command> se kiwi</screen>
-
+  <simplelist>
+   <member>
+    <package>kiwi-desc-isoboot</package>: Live ISO boot templates
+   </member>
+   <member>
+    <package>kiwi-desc-netboot</package>: PXE network boot templates
+   </member>
+   <member>
+    <package>kiwi-desc-oemboot</package>: Expandable Virtual Machine boot
+    templates
+   </member>
+   <member>
+    <package>kiwi-desc-vmxboot</package>: Virtual Machine boot templates
+   </member>
+  </simplelist>
   <para>
-   The list of packages returned by zypper contains the main package, simply
-   named <filename>kiwi-</filename>, the <filename>-doc</filename> package
-   containing the documentation files, and the <filename>-desc-</filename>
-   packages containing the boot descriptions for the various image types.
-   Installing this set of packages is sufficient to build your images.
+   It is also recommended to install the package <package>kiwi-doc</package>
+   containing the documentation. For a complete list of KIWI packages run the
+   command <command>zypper se kiwi</command>.
   </para>
-
-  <para>
-   Adding repositories to your system can be accomplished using the YaST
-   interface or the <command>zypper ar</command> command.
-  </para>
-
-  <sect2 id="sec.installation.reops">
-   <title>Package Repositories</title>
+  
+  <sect2 id="sec.installation.rpminstall.latest">
+   <title>Installing the Latest Version Available</title>
    <para>
-    The simplest and most straight forward way to install KIWI is to use the
-    packages that are provided in the Virtualization:Appliances project on
-    the web here:
-    <filename>http://download.opensuse.org/repositories/Virtualization:/Appliances/</filename>
+    KIWI is an active project and new releases are published
+    regularly. Packages with the latest KIWI version for all SUSE
+    distributions that are actively maintained can be obtained from the
+    Virtualization:Appliances repository at <ulink
+    url="http://download.opensuse.org/repositories/Virtualization:/Appliances/"/>.
    </para>
   </sect2>
  </sect1>
+
  <sect1 id="sec.installation.fromsource">
-  <title>Running from Source</title>
+  <title>Running KIWI from a Source Checkout</title>
 
   <para>
-   KIWI is developed and maintained in a git repository on GitHub. You can
+   KIWI is developed and maintained in a repository on GitHub. You can
    clone the source code using the following command.
   </para>
 
-<screen><command>git</command> clone <!--
-       -->https://github.com/openSUSE/kiwi.git</screen>
+  <screen>git clone https://github.com/openSUSE/kiwi.git</screen>
 
   <para>
-   Before running from source you want to verify that all the dependencies
-   are satisfied. The best way to accomplish this is to install all packages
-   listed as <emphasis>BuildRequires</emphasis> in the
-   <filename>.spec</filename> file found in the <filename>rpm</filename>
-   directory. Once all dependent packages are installed change your working
-   directory to the <filename>kiwi</filename> directory and run kiwi as
-   follows:
+   Before running KIWI make sure all its dependencies fullfilled. Get a list
+   of required packages by running the following command in the checkout
+   directory (<filename class="directory">kiwi/</filename>):
   </para>
-
-<screen><command>./kiwi</command></screen>
+  
+  <screen>awk '/BuildRequires:/ { print $2 | "sort" }' rpm/kiwi.spec</screen>
 
   <para>
-   The KIWI self tests are executed using:
+   Once all dependent packages are installed run the test suite from the
+   checkout directory as follows
   </para>
 
-<screen><command>make</command> test</screen>
+  <screen><command>make</command> test</screen>
 
   <para>
-   If you want to refresh your source with the latest checked in code you
-   can simply pull the latest sources from the GitHub repository using the
-   command shown below.
+   If all tests pass, all dependencies are fullfilled and KIWI can be run with
+   from the checkout directory with the following command:
   </para>
 
-<screen><command>git</command> pull</screen>
+  <screen><command>./kiwi</command></screen>
+
+  <para>
+   To update to the latest version available, run <command>git pull</command>
+   from the KIWI checkout directory.
+  </para>
  </sect1>
 </chapter>
