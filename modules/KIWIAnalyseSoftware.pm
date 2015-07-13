@@ -308,7 +308,7 @@ sub __populateRepos {
             $alias   =~ s/^ +//; $alias   =~ s/ +$//; $alias =~ s/ $/:/g;
             $prio    =~ s/^ +//; $prio    =~ s/ +$//;
             my $origsrc = $source;
-            if ($enabled eq "Yes") {
+            if ($enabled =~ /Yes/) {
                 #==========================================
                 # handle special source type dvd|cd://
                 #------------------------------------------
