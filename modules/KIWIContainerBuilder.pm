@@ -709,7 +709,7 @@ sub __disableServices {
     my $sysctl = $locator -> getExecPath('systemctl', $targetDir);
     my $ins = $locator -> getExecPath('chkconfig', $targetDir);
     my $croot = $locator -> getExecPath('chroot');
-    if ($sysctl) {
+    if (defined $sysctl) {
         my @srvs = qw (
             device-mapper.service
             kbd.service
@@ -743,7 +743,7 @@ sub __disableServices {
                 $kiwi -> done();
             }
         }
-    } elsif ($ins) {
+    } elsif (defined $ins) {
         my @services = (
             'boot.clock',
             'boot.device-mapper',
