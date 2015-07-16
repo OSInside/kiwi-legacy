@@ -146,7 +146,6 @@
         <package name="grub2-x86_64-xen" bootinclude="true"/>
         <package name="xen-kmp-default" bootinclude="true"/>
         <package name="xen-libs" arch="x86_64" replaces=""/>
-        <package name="xen-tools-domU" arch="x86_64" replaces=""/>
         <package name="xen-tools" arch="x86_64" replaces=""/>
         <package name="xen" arch="x86_64" replaces=""/>
         <package name="gfxboot-branding-SLE" bootinclude="true" bootdelete="true"/>
@@ -155,7 +154,6 @@
         <package name="kernel-xen" replaces="kernel-default"/>
         <package name="kernel-xen" replaces="xen-kmp-default"/>
         <package name="xen-libs" arch="x86_64" replaces=""/>
-        <package name="xen-tools-domU" arch="x86_64" replaces=""/>
         <package name="xen-tools" arch="x86_64" replaces=""/>
         <package name="xen" arch="x86_64" replaces=""/>
         <package name="gfxboot-branding-SLE" bootinclude="true" bootdelete="true"/>
@@ -165,7 +163,6 @@
         <package name="kernel-default" replaces="xen-kmp-default"/>
         <package name="kernel-default" replaces="xen-libs"/>
         <package name="kernel-default" replaces="xen-tools"/>
-        <package name="kernel-default" replaces="xen-tools-domU"/>
         <package name="kernel-default" replaces="xen"/>
         <package name="gfxboot-branding-SLE" bootinclude="true" bootdelete="true"/>
     </packages>
