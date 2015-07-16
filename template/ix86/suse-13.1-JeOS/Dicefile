@@ -1,0 +1,3 @@
+Dice.configure do |config|
+  config.buildhost = :DOCKER
+end
