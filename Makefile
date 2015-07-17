@@ -266,6 +266,8 @@ clean:
 	@echo Cleanup...
 	(cd system/boot && find -type f | grep -v .svn | xargs chmod u+w)
 	(find -name .checksum.md5 | xargs rm -f)
+	(find -name .dice | xargs rm -rf)
+	(find -name .vagrant | xargs rm -rf)
 	${MAKE} -C tools clean
 	${MAKE} -C locale clean
 	rm -f tools/burner/Makefile
