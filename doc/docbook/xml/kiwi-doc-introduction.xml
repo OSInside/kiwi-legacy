@@ -76,7 +76,7 @@
    </listitem>
    <listitem>
     <para>
-     KVM/Qemu (<filename class="extension">.qcow2<</filename>)
+     KVM/Qemu (<filename class="extension">.qcow2</filename>)
     </para>
    </listitem>
    <listitem>

@@ -11,12 +11,12 @@
    <author>
     <affiliation>
      <jobtitle>Software Engineer</jobtitle>
-     <orgname>SUSE LINUX Products GmbH</orgname>
+     <orgname>SUSE LINUX GmbH</orgname>
     </affiliation>
     <firstname>Marcus</firstname>
     <surname>Schäfer</surname>
     <contrib>Project, Design and Implementation</contrib>
-    <email>ms@suse.de</email>
+    <email>ms@suse.com</email>
     <address>
      SUSE LINUX Products GmbH
      <street>Maxfeldstrasse 5</street><postcode>90409</postcode>
@@ -26,12 +26,22 @@
    <othercredit>
     <affiliation>
      <jobtitle>Documentation Specialist</jobtitle>
-     <orgname>SUSE LINUX Products GmbH</orgname>
+     <orgname>SUSE LINUX GmbH</orgname>
     </affiliation>
     <firstname>Thomas</firstname>
     <surname>Schraitle</surname>
     <contrib>Various text improvements, migration to DocBook</contrib>
-    <email>toms@suse.de</email>
+    <email>toms@suse.com</email>
+   </othercredit>
+   <othercredit>
+    <affiliation>
+     <jobtitle>Documentation Specialist</jobtitle>
+     <orgname>SUSE LINUX GmbH</orgname>
+    </affiliation>
+    <firstname>Frank</firstname>
+    <surname>Sundermeyer</surname>
+    <contrib>Editorial review</contrib>
+    <email>fs@suse.com</email>
    </othercredit>
    <othercredit>
     <affiliation>
@@ -55,7 +65,7 @@
     </mediaobject>
 -->
  </bookinfo>
- <part>
+ <part id="part.basics">
   <title>Concepts and Basics</title>
   <xi:include href="kiwi-doc-introduction.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
   <xi:include href="kiwi-doc-installation.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
@@ -63,10 +73,10 @@
   <xi:include href="kiwi-doc-caches.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
   <xi:include href="kiwi-doc-description.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
   <xi:include href="kiwi-doc-appliance.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
- </part>
- <part>
-  <title>Usecases</title>
   <xi:include href="kiwi-doc-maintenance.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+ </part>
+ <part id="part.usecases">
+  <title>Usecases</title>
   <xi:include href="kiwi-doc-migrate.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
   <xi:include href="kiwi-doc-iso.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
   <xi:include href="kiwi-doc-vmx.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
