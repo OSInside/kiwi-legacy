@@ -514,25 +514,23 @@
    ADDENDUM: How to use this License for your documents
   </bridgehead>
 
-  <screen>
-   Copyright (c) YEAR YOUR NAME.
-   Permission is granted to copy, distribute and/or modify this document
-   under the terms of the GNU Free Documentation License, Version 1.2
-   or any later version published by the Free Software Foundation;
-   with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
-   A copy of the license is included in the section entitled &ldquo;GNU
-   Free Documentation License&rdquo;.
-  </screen>
+  <screen>Copyright (c) YEAR YOUR NAME.
+Permission is granted to copy, distribute and/or modify
+this document under the terms of the GNU Free Documentation
+License, Version 1.2 or any later version published by the
+Free Software Foundation; with no Invariant Sections,
+no Front-Cover Texts, and no Back-Cover Texts.
+A copy of the license is included in the section entitled
+&ldquo;GNU Free Documentation License&rdquo;.</screen>
 
   <para>
    If you have Invariant Sections, Front-Cover Texts and Back-Cover Texts,
    replace the &ldquo;with...Texts.&rdquo; line with this:
   </para>
 
-  <screen>
-   with the Invariant Sections being LIST THEIR TITLES, with the
-   Front-Cover Texts being LIST, and with the Back-Cover Texts being LIST.
-  </screen>
+  <screen>with the Invariant Sections being LIST THEIR TITLES,
+with the Front-Cover Texts being LIST, and with
+the Back-Cover Texts being LIST.</screen>
 
   <para>
    If you have Invariant Sections without Cover Texts, or some other

@@ -391,7 +391,10 @@
   
   <para>
    Detailed information, including step-by-step instructions on building
-   specific images can be found in <xref linkend="part.usecases"/>.
+   specific images can be found in <xref linkend="part.usecases"/>. That part
+   of the manual explains how to build a <quote>Just enough Operation
+   System</quote> (JeOS) image from a KIWI template for all supported image
+   types.
   </para>
   
  </sect2> 
