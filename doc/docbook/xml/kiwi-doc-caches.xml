@@ -1,18 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+<!DOCTYPE sect1 PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
                          "http://www.docbook.org/xml/4.5/docbookx.dtd">
-<chapter id="chap.caches">
+<sect1 id="chap.caches">
  <title>Image Caches</title><indexterm>
  <primary>KIWI</primary>
  <secondary>Caches</secondary></indexterm>
- <sect1 id="sec.caches.introduction">
-  <title>Introduction</title>
 
   <para>
    The process of creating an appliance could take quite some time and often
    the same software is installed over and over again. In order to speed up
-   that process kiwi is able to create and re-use so called image caches. An
-   image cache in kiwi is a partial root tree created from a cache image
+   that process KIWI is able to create and re-use so called image caches. An
+   image cache in KIWI is a partial root tree created from a cache image
    description.
   </para>
 
@@ -20,7 +18,7 @@
    <title>Image Caching Architecture</title>
    <mediaobject>
     <imageobject role="fo">
-     <imagedata fileref="cache.svg" format="SVG" width="90%"/>
+     <imagedata fileref="cache.svg" format="SVG" width="75%"/>
 <!-- width="50%" -->
     </imageobject>
     <imageobject role="html">
@@ -31,33 +29,31 @@
   </figure>
 
   <para>
-   Before one can use a cache it needs to be created. A cache can be created
-   from any standard kiwi image description, including boot image
+   A cache needs to be created before it can be used. This can be done using
+   any standard kiwi image description, including boot image
    descriptions. That means you can simply use one of the template or *boot
-   descriptions and create a cache from it. But it might be more clever to
-   create image descriptions for the purpose of caching. Such descriptions
-   could represent a set of patterns for example. The less special a cache
-   is the more often it can be re-used
+   descriptions and create a cache from it. However, it is more efficient to
+   create image descriptions for the sole purpose of caching. Such
+   descriptions could represent a set of patterns for example. The less
+   specific a cache is the more often it can be re-used
   </para>
 
   <para>
-   Once there are caches in the system kiwi selects the best match and
+   Once there are caches in the system KIWI selects the best match and
    mounts the cache in a way that all write actions (copy-on-write cache)
    are redirected to the new root system. That way the cache itself is never
-   changed and can be re-used simultaniosly for other build processes. As
+   changed and can be re-used simultaniosly for other build processes. As a
    result the build process doesn't start with an empty tree but with a tree
-   almost complete. Only the missing parts are now installed and according
-   to how much the cache already covered this process can speedup the build
+   filled with the contents of the cache. Only the missing parts need to be
+   added, which speeds up the build considerably.
   </para>
- </sect1>
- <sect1 id="sec.caches.example">
-  <title>Example</title>
+ <example id="sec.caches.example">
+  <title>Building Multiple VMX Images</title>
 
   <para>
-   Let's say we know that we want to build some images of type 'vmx' and
-   based on the SLES 12 JeOS image description. In order to create image
-   caches for the system and the boot image the following steps needs to be
-   done:
+   Assume we want to build some images of type 'vmx' based on the SLES 12 JeOS
+   image description. Create image caches for the system and the boot image
+   like follows:
   </para>
 
   <procedure>
@@ -65,31 +61,31 @@
     <para>
      Build the boot image (initrd) cache:
     </para>
-<screen><command>kiwi</command> --init-cache /usr/share/kiwi/image/vmxboot/suse-SLES12</screen>
+    <screen>kiwi --init-cache /usr/share/kiwi/image/vmxboot/suse-SLES12</screen>
    </step>
    <step>
     <para>
      Build the JeOS image cache:
     </para>
-<screen><command>kiwi</command> --init-cache /usr/share/kiwi/image/suse-SLE12-JeOS/</screen>
+    <screen>kiwi --init-cache /usr/share/kiwi/image/suse-SLE12-JeOS/</screen>
    </step>
   </procedure>
 
   <para>
    By default those caches will be created in
-   <filename>/var/cache/kiwi-images</filename>. To run a build which makes
-   use of the cache the following command is used:
+   <filename>/var/cache/kiwi-images</filename>. To run a build which makes use
+   of the caches, use the following command;
   </para>
 
-<screen><command>kiwi</command> --build suse-SLE12-JeOS -d /tmp/myimage --type vmx \
+<screen>kiwi --build suse-SLE12-JeOS -d /tmp/myimage --type vmx \
      --cache /var/cache/kiwi-images</screen>
 
   <para>
-   This call speeds up the build a lot compared to the creation without a
-   cache. It's important to understand that a cache based build will create
-   a root tree which contains only the differences compared to the used
+   This call speeds up the build a lot compared to building without
+   caches. It is important to understand that a cache based build will create a
+   root tree which contains only the differences compared to the used
    cache. Thus at any time you want to create an image out of it you have to
    make sure that the cache exists and is accessible on the system.
   </para>
- </sect1>
-</chapter>
+ </example>
+</sect1>

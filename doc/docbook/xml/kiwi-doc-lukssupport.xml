@@ -1,18 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+<!DOCTYPE sect1 PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
                          "http://www.docbook.org/xml/4.5/docbookx.dtd">
-<chapter id="chap.encryption">
+<sect1 id="chap.encryption">
  <title>KIWI Encryption Support</title><indexterm>
  <primary>KIWI</primary>
  <secondary>encryption</secondary></indexterm><indexterm>
  <primary>KIWI</primary>
  <secondary>luks</secondary></indexterm>
  <para>
-  KIWI supports LUKS encrypted images. To setup cryptographic volume along
-  with the given filesystem using the LUKS extension, add the parameter luks
-  in the type element in your config.xml. The value of the parameter
-  represents the password string used to be able to mount that filesystem
-  while booting:
+  KIWI supports Linux Unified Key Setup (LUKS) encrypted images. To setup an
+  encrypted volume , add the attribute <sgmltag
+  class="attribute">luks</sgmltag> to the <sgmltag
+  class="element">type</sgmltag> element in
+  <filename>config.xml</filename>. The value of the attribute represents the
+  password string which will be required to mount the filesystem while
+  booting:
  </para>
- <screen>&lt;type ... luks="password"&gt;</screen>
-</chapter>
+ <screen>&lt;type ... luks="<replaceable>password</replaceable>"&gt;</screen>
+</sect1>
