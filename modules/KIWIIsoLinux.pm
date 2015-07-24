@@ -1105,7 +1105,7 @@ sub createHybrid {
         $kiwi -> failed ();
         return;
     }
-    my @neededOpts = qw(id offset type partok);
+    my @neededOpts = qw(id offset type partok entry);
     my %optNames = %{$locator -> getExecArgsFormat ($isoHybrid, \@neededOpts)};
     if (! $optNames{'status'}) {
         $kiwi -> error ($optNames{'error'});
@@ -1123,6 +1123,7 @@ sub createHybrid {
     my $typeOpt   = $optNames{'type'};
     my $partOpt   = $optNames{'partok'};
     my $uefiOpt   = $optNames{'uefi'};
+    my $entryOpt  = $optNames{'entry'};
     my $offset    = $this->{magic_offset};
     if (($firmware eq 'efi' || $firmware eq 'uefi') && (! $uefiOpt)) {
         $kiwi -> error ("installed isohybrid does not support --uefi option");
@@ -1138,6 +1139,13 @@ sub createHybrid {
     }
     if ($firmware eq 'efi' || $firmware eq 'uefi') {
         $cmd.= " $uefiOpt";
+    }
+    if ($firmware eq 'bios') {
+        # allow to add a partition with the partition number 1 later
+        # e.g for stick devices with an additional persistent write
+        # partition. Along with efi the entry option has no effect.
+        # Thus we make use of this feature only in standard bios mode
+        $cmd.= " $entryOpt 2";
     }
     $data = KIWIQX::qxx ("$cmd $iso 2>&1");
     $code = $? >> 8;

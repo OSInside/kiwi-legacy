@@ -24,7 +24,6 @@ export TRANSFER_ERRORS_FILE=/tmp/transfer.errors
 export UFONT=/usr/share/fbiterm/fonts/b16.pcf.gz
 export CONSOLE_FONT=/usr/share/kbd/consolefonts/default8x16.gz
 export HYBRID_PERSISTENT_FS=btrfs
-export HYBRID_PERSISTENT_OPTS=""
 export HYBRID_PERSISTENT_ID=83
 export HYBRID_PERSISTENT_DIR=/read-write
 export UTIMER_INFO=/dev/utimer
@@ -8813,13 +8812,26 @@ function createHybridPersistent {
     #======================================
     # check persistent write partition
     #--------------------------------------
+    local hybrid_fs=$HYBRID_PERSISTENT_FS
+    if [ ! -z "$kiwi_hybridpersistent_filesystem" ];then
+        hybrid_fs=$kiwi_hybridpersistent_filesystem
+    fi
     for pID in 4 3 2 1;do
         local partd=$(ddn $device $pID)
         local label=$(blkid $partd -s LABEL -o value)
         if [ "$label" = "hybrid" ];then
             Echo "Existing persistent hybrid partition found"
+            if [ $hybrid_fs = "fat" ];then
+                if ! setupHybridCowDevice;then
+                    Echo "Failed to setup hybrid cow device"
+                    Echo "Persistent writing deactivated"
+                    unset kiwi_hybridpersistent
+                    return
+                fi
+            else
+                export HYBRID_RW=$partd
+            fi
             export skipSetupBootPartition=1
-            export HYBRID_RW=$partd
             return
         fi
     done
@@ -8834,11 +8846,38 @@ function createHybridPersistent {
         unset kiwi_hybridpersistent
         return
     fi
-    pID=$(parted -m -s $device print | grep -E ^[1-9]+: | wc -l)
-    pID=$((pID + 1))
-    createPartitionerInput \
-        n p:lxrw $pID . . t $pID $HYBRID_PERSISTENT_ID
-    callPartitioner $input
+    # Find partition ID we could use to create a new write partition
+    for pID in 1 2 3 4;do
+        local partd=$(ddn $device $pID)
+        if [ ! -e "$partd" ];then
+            Echo "Creating write partition at ID: $pID"
+            break
+        fi
+    done
+    if [ "$kiwi_firmware" = "bios" ];then
+        # we support creation of partitions which are not in ascending order
+        # in bios mode. The partition table created via isohybrid starts at
+        # the second partition to allow the creation of the write partition
+        # as first partition. Reason for this is to support Windows systems
+        # with a fat partition as write space which has to be the first
+        # partition otherwise Windows can't cope with it.
+        #
+        # Such a write partition can be created using fdisk, however for
+        # EFI capable hybrid ISO images the GPT table is used which fdisk
+        # can't handle.
+        #
+        # Therefore we use fdisk for bios firmware images and parted for
+        # efi|uefi firmware images.
+        #
+        # This also means we don't support fat
+        # based persistent write partitions to be created as first partition
+        # on efi|uefi ISO hybrid images
+        echo -e "n\np\n$pID\n\n\nw\nq" | fdisk $imageDiskDevice
+    else
+        createPartitionerInput \
+            n p:lxrw $pID . . t $pID $HYBRID_PERSISTENT_ID
+        callPartitioner $input
+    fi
     #======================================
     # check partition device node
     #--------------------------------------
@@ -8858,7 +8897,10 @@ function createHybridPersistent {
     # create filesystem on write partition
     #--------------------------------------
     local hybrid_device=$(ddn $device $pID)
-    if ! mkfs.$HYBRID_PERSISTENT_FS -L hybrid $HYBRID_PERSISTENT_OPTS $hybrid_device;then
+    local exception_handling="false"
+    if ! createFilesystem \
+        $hybrid_device "" "" "hybrid" $exception_handling $hybrid_fs
+    then
         Echo "Failed to create hybrid persistent filesystem"
         Echo "Persistent writing deactivated"
         unset kiwi_hybridpersistent
@@ -8867,8 +8909,56 @@ function createHybridPersistent {
     #======================================
     # export read-write device name
     #--------------------------------------
+    if [ $hybrid_fs = "fat" ];then
+        # The fat filesystem is not really suitable to be used as rootfs
+        # for linux. Therefore we create a btrfs based file which we store
+        # on the fat filesystem and loop setup it. The size of the file
+        # is set to half the size of the fat device
+        if ! setupHybridCowDevice $hybrid_device;then
+            Echo "Failed to setup hybrid cow device"
+            Echo "Persistent writing deactivated"
+            unset kiwi_hybridpersistent
+            return
+        fi
+    else
+        export HYBRID_RW=$(ddn $device $pID)
+    fi
+    #======================================
+    # skip boot partition setup on overlay
+    #--------------------------------------
     export skipSetupBootPartition=1
-    export HYBRID_RW=$(ddn $device $pID)
+}
+#======================================
+# setupHybridCowDevice
+#--------------------------------------
+function setupHybridCowDevice {
+    local IFS=$IFS_ORIG
+    local hybrid_device=$1
+    mkdir -p /cow
+    for i in 1 2 3;do
+        mount -L hybrid /cow && break || sleep 2
+    done
+    if [ ! $? = 0 ];then
+        Echo "Failed to mount hybrid persistent filesystem !"
+        return 1
+    fi
+    if [ ! -e "/cow/cowfile" ];then
+        local cowsize=$(($(blockdev --getsize64 $hybrid_device) / 2))
+        local exception_handling="false"
+        qemu-img create /cow/cowfile $cowsize
+        if ! createFilesystem \
+            "/cow/cowfile" "" "" "" $exception_handling "btrfs"
+        then
+            Echo "Failed to create hybrid persistent cow filesystem"
+            return 1
+        fi
+    fi
+    export HYBRID_RW=$(loop_setup /cow/cowfile)
+    if [ ! -e "$cowdevice" ];then
+        Echo "Failed to loop setup hybrid cow file !"
+        return 1
+    fi
+    return 0
 }
 #======================================
 # callPartitioner
@@ -9453,47 +9543,82 @@ function createFilesystem {
     local deviceCreate=$1
     local blocks=$2
     local uuid=$3
-    local opts
-    if [[ "$FSTYPE" =~ ext ]];then
-        opts="-F"
+    local label=$4
+    local exception_handling=$5
+    local filesystem=$6
+    local opts=$7
+    if [ -z "$filesystem" ];then
+        filesystem=$FSTYPE
+    fi
+    if [ -z "$exception_handling" ];then
+        exception_handling="true"
+    else
+        exception_handling="false"
+    fi
+    if [[ "$filesystem" =~ ext ]];then
+        opts="$opts -F"
         if [ ! -z "$uuid" ];then
             opts="$opts -U $uuid"
         fi
-    elif [ "$FSTYPE" = "reiserfs" ];then
-        opts="-f"
+        if [ ! -z "$label" ];then
+            opts="$opts -L $label"
+        fi
+    elif [ "$filesystem" = "reiserfs" ];then
+        opts="$opts -f"
         if [ ! -z "$uuid" ];then
             opts="$opts -d $uuid"
         fi
-    elif [ "$FSTYPE" = "btrfs" ];then
-        opts="-f"
+        if [ ! -z "$label" ];then
+            opts="$opts -l $label"
+        fi
+    elif [ "$filesystem" = "btrfs" ];then
+        opts="$opts -f"
         if [ ! -z "$uuid" ];then
             opts="$opts -U $uuid"
+        fi
+        if [ ! -z "$label" ];then
+            opts="$opts -L $label"
         fi
         if [ ! -z "$blocks" ];then
             local bytes=$((blocks * 4096))
             opts="$opts -b $bytes"
         fi
+    elif [ "$filesystem" = "fat" ];then
+        if [ ! -z "$label" ];then
+            opts="$opts -n $label"
+        fi
+    elif [ "$filesystem" = "ntfs" ];then
+        if [ ! -z "$label" ];then
+            opts="$opts -L $label"
+        fi
     fi
-    if [ "$FSTYPE" = "reiserfs" ];then
+    if [ "$filesystem" = "reiserfs" ];then
         mkreiserfs $opts $deviceCreate $blocks 1>&2
-    elif [ "$FSTYPE" = "ext2" ];then
+    elif [ "$filesystem" = "ext2" ];then
         mkfs.ext2 $opts $deviceCreate $blocks 1>&2
-    elif [ "$FSTYPE" = "ext3" ];then
+    elif [ "$filesystem" = "ext3" ];then
         mkfs.ext3 $opts $deviceCreate $blocks 1>&2
-    elif [ "$FSTYPE" = "ext4" ];then
+    elif [ "$filesystem" = "ext4" ];then
         mkfs.ext4 $opts $deviceCreate $blocks 1>&2
-    elif [ "$FSTYPE" = "btrfs" ];then
+    elif [ "$filesystem" = "btrfs" ];then
         # delete potentially existing btrfs on the device because even
         # with the force option enabled mkfs.btrfs refuses to create a
         # filesystem if the existing metadata contains the same UUID
-        dd if=/dev/zero of=$deviceCreate bs=1M count=1
+        dd if=/dev/zero of=$deviceCreate bs=1M count=1 conv=notrunc
         mkfs.btrfs $opts $deviceCreate
-    elif [ "$FSTYPE" = "xfs" ];then
+    elif [ "$filesystem" = "xfs" ];then
         mkfs.xfs -f $deviceCreate
         xfs_admin -U $uuid $deviceCreate
+    elif [ "$filesystem" = "fat" ];then
+        mkfs.fat $opts $deviceCreate $blocks 1>&2
+    elif [ "$filesystem" = "ntfs" ];then
+        mkfs.ntfs $opts $deviceCreate $blocks 1>&2
     else
         # use ext3 by default
         mkfs.ext3 $opts $deviceCreate $blocks 1>&2
+    fi
+    if [ $exception_handling = "false" ];then
+        return $?
     fi
     if [ ! $? = 0 ];then
         systemException \

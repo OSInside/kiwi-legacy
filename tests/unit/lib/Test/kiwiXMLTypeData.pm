@@ -1418,6 +1418,27 @@ sub test_getHybridPersistent {
 }
 
 #==========================================
+# test_getHybridPersistentFileSystem
+#------------------------------------------
+sub test_getHybridPersistentFileSystem {
+    # ...
+    # Test the getHybridPersistentFileSystem method
+    # ---
+    my $this = shift;
+    my $kiwi = $this -> {kiwi};
+    my $typeDataObj = $this -> __getTypeObj();
+    my $hybPFS = $typeDataObj -> getHybridPersistentFileSystem();
+    my $msg = $kiwi -> getMessage();
+    $this -> assert_str_equals('No messages set', $msg);
+    my $msgT = $kiwi -> getMessageType();
+    $this -> assert_str_equals('none', $msgT);
+    my $state = $kiwi -> getState();
+    $this -> assert_str_equals('No state set', $state);
+    $this -> assert_str_equals('btrfs', $hybPFS);
+    return;
+}
+
+#==========================================
 # test_getInstallBoot
 #------------------------------------------
 sub test_getInstallBoot {
@@ -1937,6 +1958,7 @@ sub test_getXMLElement{
         . 'fsreadwrite="xfs" '
         . 'hybrid="true" '
         . 'hybridpersistent="true" '
+        . 'hybridpersistent_filesystem="btrfs" '
         . 'installboot="install" '
         . 'installiso="true" '
         . 'installprovidefailsafe="true" '
@@ -3849,6 +3871,35 @@ sub test_setHybridPersistent {
 }
 
 #==========================================
+# test_setHybridPersistentFileSystem
+#------------------------------------------
+sub test_setHybridPersistentFileSystem {
+    # ...
+    # Test the setHybridPersistentFileSystem method
+    # ---
+    my $this = shift;
+    my $kiwi = $this -> {kiwi};
+    my $typeDataObj = $this -> __getTypeObj();
+    $typeDataObj = $typeDataObj -> setHybridPersistentFileSystem('fat');
+    my $msg = $kiwi -> getMessage();
+    $this -> assert_str_equals('No messages set', $msg);
+    my $msgT = $kiwi -> getMessageType();
+    $this -> assert_str_equals('none', $msgT);
+    my $state = $kiwi -> getState();
+    $this -> assert_str_equals('No state set', $state);
+    $this -> assert_not_null($typeDataObj);
+    my $hybrid_fs = $typeDataObj -> getHybridPersistentFileSystem();
+    $msg = $kiwi -> getMessage();
+    $this -> assert_str_equals('No messages set', $msg);
+    $msgT = $kiwi -> getMessageType();
+    $this -> assert_str_equals('none', $msgT);
+    $state = $kiwi -> getState();
+    $this -> assert_str_equals('No state set', $state);
+    $this -> assert_str_equals('fat', $hybrid_fs);
+    return;
+}
+
+#==========================================
 # test_setHybridPersistentNoArg
 #------------------------------------------
 sub test_setHybridPersistentNoArg {
@@ -5356,6 +5407,7 @@ sub __getTypeObj {
                 gcelicense             => '0815',
                 hybrid                 => 'true',
                 hybridpersistent       => 'true',
+                hybridpersistent_filesystem => 'btrfs',
                 image                  => 'oem',
                 installboot            => 'install',
                 installiso             => 'true',

@@ -151,6 +151,7 @@
         <package name="which"/>
         <package name="udev"/>
         <package name="e2fsprogs"/>
+        <package name="qemu-tools"/>
     </packages>
     <packages type="delete">
         <package name="cracklib-dict-full"/>

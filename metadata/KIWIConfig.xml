@@ -162,6 +162,7 @@
         <file name="mkfs.ext2"/>
         <file name="mkfs.ext3"/>
         <file name="mkfs.ext4"/>
+        <file name="mkfs.ntfs"/>
         <file name="mkfs.xfs"/>
         <file name="xfs_growfs"/>
         <file name="xfs_repair"/>
@@ -202,6 +203,7 @@
         <file name="plymouthd"/>
         <file name="plymouth-set-default-theme"/>
         <file name="qeth_configure"/>
+        <file name="qemu-img"/>
         <file name="readlink"/>
         <file name="reboot"/>
         <file name="systemctl"/>

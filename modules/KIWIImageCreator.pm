@@ -2007,6 +2007,19 @@ sub __addTypeToBootXML {
         $kiwi -> done();
     }
     #==========================================
+    # hybridpersistent_filesystem
+    #------------------------------------------
+    my $hybridpersistent_fs = $systemType -> getHybridPersistentFileSystem();
+    if ($hybridpersistent_fs) {
+        $kiwi -> info (
+            "--> hybridpersistent_filesystem: $hybridpersistent_fs"
+        );
+        $bootType -> setHybridPersistentFileSystem(
+            $hybridpersistent_fs
+        );
+        $kiwi -> done();
+    }
+    #==========================================
     # ramonly
     #------------------------------------------
     my $ramonly = $systemType -> getRAMOnly();

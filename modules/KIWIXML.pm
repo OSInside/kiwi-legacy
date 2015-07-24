@@ -3931,6 +3931,7 @@ sub __genTypeHash {
         'fsreadwrite',
         'hybrid',
         'hybridpersistent',
+        'hybridpersistent_filesystem',
         'image',
         'installboot',
         'installiso',

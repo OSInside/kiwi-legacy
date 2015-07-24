@@ -2393,6 +2393,18 @@ to keep data persistent over a reboot</a:documentation>
         <data type="boolean"/>
       </attribute>
     </define>
+    <define name="k.type.hybridpersistent_filesystem.attribute">
+      <attribute name="hybridpersistent_filesystem">
+        <a:documentation>for the iso type only:
+Set the filesystem to use for persistent writing if a
+hybrid ISO is used as disk on e.g a USB Stick. By default
+the btrfs filesystem is used</a:documentation>
+        <choice>
+          <value>btrfs</value>
+          <value>fat</value>
+        </choice>
+      </attribute>
+    </define>
     <define name="k.type.image.attribute">
       <attribute name="image">
         <a:documentation>Specifies the image type</a:documentation>
@@ -2612,6 +2624,9 @@ into the master block. There is space for 32 characters.</a:documentation>
         </optional>
         <optional>
           <ref name="k.type.hybridpersistent.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.type.hybridpersistent_filesystem.attribute"/>
         </optional>
         <ref name="k.type.image.attribute"/>
         <optional>

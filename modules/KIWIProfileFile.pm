@@ -76,6 +76,7 @@ sub new {
         kiwi_hwclock
         kiwi_hybrid
         kiwi_hybridpersistent
+        kiwi_hybridpersistent_filesystem
         kiwi_iname
         kiwi_installboot
         kiwi_iversion
@@ -372,22 +373,40 @@ sub __updateXMLType {
     #==========================================
     # get profile type variables
     #------------------------------------------
-    $data{kiwi_type}             = $type -> getTypeName();
-    $data{kiwi_compressed}       = $type -> getCompressed();
-    $data{kiwi_boot_timeout}     = $type -> getBootTimeout();
-    $data{kiwi_hybrid}           = $type -> getHybrid();
-    $data{kiwi_hybridpersistent} = $type -> getHybridPersistent();
-    $data{kiwi_ramonly}          = $type -> getRAMOnly();
-    $data{kiwi_target_blocksize} = $type -> getTargetBlockSize();
-    $data{kiwi_cmdline}          = $type -> getKernelCmdOpts();
-    $data{kiwi_firmware}         = $type -> getFirmwareType();
-    $data{kiwi_bootloader}       = $type -> getBootLoader();
-    $data{kiwi_devicepersistency}= $type -> getDevicePersistent();
-    $data{kiwi_installboot}      = $type -> getInstallBoot();
-    $data{kiwi_bootkernel}       = $type -> getBootKernel();
-    $data{kiwi_fsmountoptions}   = $type -> getFSMountOptions();
-    $data{kiwi_bootprofile}      = $type -> getBootProfile();
-    $data{kiwi_vga}              = $type -> getVGA();
+    $data{kiwi_type} =
+        $type -> getTypeName();
+    $data{kiwi_compressed} =
+        $type -> getCompressed();
+    $data{kiwi_boot_timeout} =
+        $type -> getBootTimeout();
+    $data{kiwi_hybrid} =
+        $type -> getHybrid();
+    $data{kiwi_hybridpersistent} =
+        $type -> getHybridPersistent();
+    $data{kiwi_hybridpersistent_filesystem} =
+        $type -> getHybridPersistentFileSystem();
+    $data{kiwi_ramonly} =
+        $type -> getRAMOnly();
+    $data{kiwi_target_blocksize} =
+        $type -> getTargetBlockSize();
+    $data{kiwi_cmdline} =
+        $type -> getKernelCmdOpts();
+    $data{kiwi_firmware} =
+        $type -> getFirmwareType();
+    $data{kiwi_bootloader} =
+        $type -> getBootLoader();
+    $data{kiwi_devicepersistency} =
+        $type -> getDevicePersistent();
+    $data{kiwi_installboot} =
+        $type -> getInstallBoot();
+    $data{kiwi_bootkernel} =
+        $type -> getBootKernel();
+    $data{kiwi_fsmountoptions} =
+        $type -> getFSMountOptions();
+    $data{kiwi_bootprofile} =
+        $type -> getBootProfile();
+    $data{kiwi_vga} =
+        $type -> getVGA();
     #==========================================
     # store as profile variable
     #------------------------------------------

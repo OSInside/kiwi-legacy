@@ -149,6 +149,7 @@ sub new {
         gcelicense
         hybrid
         hybridpersistent
+        hybridpersistent_filesystem
         image
         installboot
         installiso
@@ -218,6 +219,8 @@ sub new {
     $this->{gcelicense}             = $init->{gcelicense};
     $this->{fsreadonly}             = $init->{fsreadonly};
     $this->{fsreadwrite}            = $init->{fsreadwrite};
+    $this->{hybridpersistent_filesystem} =
+        $init->{hybridpersistent_filesystem};
     $this->{image}                  = $init->{image};
     $this->{installboot}            = $init->{installboot};
     $this->{kernelcmdline}          = $init->{kernelcmdline};
@@ -571,6 +574,18 @@ sub getHybridPersistent {
     # ---
     my $this = shift;
     return $this->{hybridpersistent};
+}
+
+#==========================================
+# getHybridPersistentFileSystem
+#------------------------------------------
+sub getHybridPersistentFileSystem {
+    # ...
+    # Return the flag value indicating which filesystem should be
+    # use for persistent writing on a hybrid capable ISO image
+    # ---
+    my $this = shift;
+    return $this->{hybridpersistent_filesystem};
 }
 
 #==========================================
@@ -996,6 +1011,10 @@ sub getXMLElement {
     my $hybridP = $this -> getHybridPersistent();
     if ($hybridP) {
         $element -> setAttribute('hybridpersistent', $hybridP);
+    }
+    my $hybridFS = $this -> getHybridPersistentFileSystem();
+    if ($hybridFS) {
+        $element -> setAttribute('hybridpersistent_filesystem', $hybridFS);
     }
     my $instBoot = $this -> getInstallBoot();
     if ($instBoot) {
@@ -1576,6 +1595,27 @@ sub setHybridPersistent {
         caller => 'setHybridPersistent'
     );
     return $this -> p_setBooleanValue(\%settings);
+}
+
+#==========================================
+# setHybridPersistentFileSystem
+#------------------------------------------
+sub setHybridPersistentFileSystem {
+    # ...
+    # Set the hybrid persistent filesystem name
+    # ---
+    my $this = shift;
+    my $opt  = shift;
+    if (! $opt ) {
+        my $kiwi = $this->{kiwi};
+        my $msg = 'setHybridPersistentFileSystem: no options given, retaining '
+            . 'current data.';
+        $kiwi -> error($msg);
+        $kiwi -> failed();
+        return;
+    }
+    $this->{hybridpersistent_filesystem} = $opt;
+    return $this;
 }
 
 #==========================================
