@@ -15,6 +15,28 @@
   a description can be found in the examples provided in
   <filename>/usr/share/doc/packages/kiwi/examples</filename>.
  </para>
+
+ <remark condition="clarity">
+  2015-07-24 - fs: TODO 
+ </remark>
+ 
+ <remark condition="clarity">
+  1. Explain templates (packages, overview of templates, where to find them, how to use them, how to customize)
+ </remark>
+ 
+ <remark condition="clarity">
+  2. How to manually validate, editor support (loading schema or DTD)
+ </remark>
+
+ <remark condition="clarity">
+  3. Shorten, restructure for a better readability
+ </remark>
+ 
+ <remark condition="cl">
+  4. Point to schema description, explain how to use/read it
+ </remark>
+ 
+
  <figure id="fig.description.imagedescrdir">
   <title>Image Description Directory</title>
   <mediaobject>
@@ -154,7 +176,7 @@
   <primary>KIWI</primary>
 
   <secondary>config.xml</secondary></indexterm>
-
+  
   <para>
    The mandatory image definition file is divided into different sections
    which describes information like the image name and type as well as the
