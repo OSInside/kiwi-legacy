@@ -50,7 +50,7 @@
    KIWI supports different flavors of file systems and boot methods along with
    the ISO image type. The template <literal>suse-SLE12-JeOS</literal> from
    the example above, uses an <systemitem
-   class="file system">overlayfs</systemitem>-based compressed root
+   class="filesystem">overlayfs</systemitem>-based compressed root
    file system. Set the file system type with the <sgmltag
    class="attribute">flags</sgmltag> attribute in
    <filename>configuration.xml</filename>:
@@ -73,9 +73,9 @@
     </term>
     <listitem>
      <para>
-      <systemitem class="file system">overlayfs</systemitem> allows to combine
+      <systemitem class="filesystem">overlayfs</systemitem> allows to combine
       two file systems into one. The root file system exists as a compressed
-      <systemitem class="file system">squashfs</systemitem> file system and all
+      <systemitem class="filesystem">squashfs</systemitem> file system and all
       write operations are redirected to the RAM or to a persistent area on a
       disk. The result is a fully writable live-system.
      </para>
@@ -103,7 +103,7 @@
     </term>
     <listitem>
      <para>
-      Creates a <systemitem class="file system">Btrfs</systemitem> image and
+      Creates a <systemitem class="filesystem">Btrfs</systemitem> image and
       allows write operations into a cow (seed) file. In case of an ISO image
       the seed device is created on a ramdisk.
      </para>
@@ -253,7 +253,7 @@
     <primary>KIWI</primary>
     <secondary>compressed root</secondary></indexterm>
     <para>
-     If a compressed file system type like <systemitem class="file system">overlayfs</systemitem> is used for the image
+     If a compressed file system type like <systemitem class="filesystem">overlayfs</systemitem> is used for the image
      root directory,  it is also possible to choose whether to write on a
      partition or to the RAM. KIWI provides the attribute <sgmltag
      class="attribute">ramonly</sgmltag> for this purpose. To create a
