@@ -72,6 +72,7 @@ sub new {
     my $vmsize = shift;
     my $device = shift;
     my $profile= shift;
+    my $xml    = shift;
     #==========================================
     # Constructor setup
     #------------------------------------------
@@ -94,7 +95,6 @@ sub new {
     my $isxen;
     my $xendomain;
     my $xengz;
-    my $xml;
     my %type;
     #==========================================
     # check initrd file parameter
@@ -259,7 +259,7 @@ sub new {
     #==========================================
     # read XML from given image file or path
     #------------------------------------------
-    if ($system) {
+    if ((! $xml) && ($system)) {
         my %read_result = $global -> readXMLFromImage (
             $system, $cmdL, $tmpdir
         );
@@ -2113,14 +2113,13 @@ sub setupBootDisk {
         $inplace = $oemconf -> getInplaceRecovery();
     }
     if (($inplace) && ("$inplace" eq "true")) {
-        my ($FD,$recoMB);
-        my $sizefile = "$destdir/recovery.partition.size";
-        if (open ($FD,'<',$sizefile)) {
-            $recoMB = <$FD>; chomp $recoMB; close $FD; unlink $sizefile;
+        my $partsize = $oemconf -> getRecoveryPartSize();
+        $partsize = int ($partsize * 1.7);
+        if ($partsize) {
             $kiwi -> info (
-                "Adding $recoMB MB spare space for in-place recovery"
+                "Adding $partsize MB spare space for in-place recovery"
             );
-            $this -> __updateDiskSize ($recoMB);
+            $this -> __updateDiskSize ($partsize);
             $kiwi -> done ();
         }
     }

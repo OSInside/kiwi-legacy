@@ -1300,6 +1300,7 @@ sub createImageInstallPXE {
 #------------------------------------------
 sub createImageDisk {
     my $this = shift;
+    my $xml  = shift;
     my $kiwi = $this->{kiwi};
     my $ird  = $this->{initrd};
     my $sys  = $this->{sysloc};
@@ -1322,7 +1323,7 @@ sub createImageDisk {
         return;
     }
     my $boot = KIWIBoot -> new(
-        $ird,$cmdL,$sys,$size,undef,$prof
+        $ird,$cmdL,$sys,$size,undef,$prof,$xml
     );
     if (! defined $boot) {
         return;

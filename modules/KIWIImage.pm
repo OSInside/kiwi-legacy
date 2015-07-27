@@ -1078,7 +1078,7 @@ sub createImageVMX {
         );
     }
     my $kic = KIWIImageCreator -> new($cmdL);
-    if ((! $kic) || (! $kic->createImageDisk())) {
+    if ((! $kic) || (! $kic->createImageDisk($xml))) {
         undef $kic;
         return;
     }
@@ -3099,7 +3099,7 @@ sub createImageSplit {
             $idest."/".$name->{systemImage}
         );
         my $kic = KIWIImageCreator -> new($cmdL);
-        if ((! $kic) || (! $kic->createImageDisk())) {
+        if ((! $kic) || (! $kic->createImageDisk($xml))) {
             undef $kic;
             return;
         }
