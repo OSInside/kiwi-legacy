@@ -590,9 +590,11 @@ sub setupRecoveryArchive {
     my $oemconf = $xml -> getOEMConfig();
     my $start;
     my $inplace;
+    my $partsize;
     if ($oemconf) {
         $start   = $oemconf -> getRecovery();
         $inplace = $oemconf -> getInplaceRecovery();
+        $partsize = $oemconf -> getRecoveryPartSize();
     }
     if ((! defined $start) || ("$start" eq "false")) {
         return $this;
@@ -668,12 +670,12 @@ sub setupRecoveryArchive {
     $psize = sprintf ("%.0f", $psize);
     print $SIZEFD $psize;
     $SIZEFD -> close();
-    $status = KIWIQX::qxx ("cp $root/recovery.partition.size $dest 2>&1");
-    $code = $? >> 8;
-    if ($code != 0) {
-        $kiwi -> failed ();
-        $kiwi -> error  ("Failed to copy partition size info file: $status");
-        return;
+    if (! $partsize) {
+        $oemconf -> setRecoveryPartSize($psize);
+    } elsif ($partsize < $psize) {
+        $kiwi -> warning("Specified recovery partition size too small\n");
+        $kiwi -> warning("--> need $psize MB, got $partsize MB\n");
+        $oemconf -> setRecoveryPartSize($psize);
     }
     #==========================================
     # Create destination filesystem information

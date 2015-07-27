@@ -39,19 +39,10 @@ function OEMRepartInit {
     #--------------------------------------
     recoMByte=0
     if [ ! -z "$kiwi_oemrecovery" ];then
-        if [ ! -f /recovery.partition.size ];then
+        if [ -z "$kiwi_oemrecoveryPartSize" ];then
             systemException "Can't find recovery part size info" "reboot"
         fi
-        recoMByte=$(cat /recovery.partition.size)
-        if [ ! -z "$kiwi_oemrecoveryPartSize" ];then
-            if [ $kiwi_oemrecoveryPartSize -lt $recoMByte ];then
-                Echo "Warning: Specified recovery partition size too small !"
-                Echo "need $recoMByte MB got $kiwi_oemrecoveryPartSize MB"
-                Echo "specified value will be ignored"
-            else
-                recoMByte=$kiwi_oemrecoveryPartSize
-            fi
-        fi
+        recoMByte=$kiwi_oemrecoveryPartSize
         recoID=83
         if [ ! -z "$kiwi_oemrecoveryID" ];then
             recoID=$kiwi_oemrecoveryID
