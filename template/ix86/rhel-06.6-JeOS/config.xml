@@ -110,8 +110,8 @@
         <package name="vim-enhanced"/>
         <package name="vim-minimal"/>
         <package name="w3m"/>
-        <namedCollection name="Base"/>
-        <namedCollection name="Console internet tools"/>
+        <namedCollection name="base"/>
+        <namedCollection name="console-internet"/>
         <package name="gfxboot-branding-upstream" bootinclude="true" bootdelete="true"/>
         <package name="yum-plugin-priorities" bootinclude="true"/>
     </packages>
