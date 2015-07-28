@@ -1341,11 +1341,18 @@ function installBootLoaderGrubRecovery {
     local IFS=$IFS_ORIG
     local input=/grub.input
     local gdevreco=$((recoid - 1))
-    echo "device (hd0) $imageDiskDevice" > $input
+    if [ ! -e /etc/redhat-release ];then
+        echo "device (hd0) $imageDiskDevice" > $input
+    fi
     echo "root (hd0,$gdevreco)"  >> $input
     echo "setup (hd0,$gdevreco)" >> $input
     echo "quit"          >> $input
     if lookup grub &>/dev/null;then
+        if [ -e /etc/redhat-release ];then
+            mount -L recovery /mnt
+            (cd /mnt/boot/grub && ln -s menu.lst grub.conf)
+            umount /mnt
+        fi
         if ! grub --batch < $input 1>&2;then
             Echo "Failed to install recovery boot loader"
             return 1
@@ -1851,7 +1858,7 @@ function setupBootLoaderSyslinuxRecovery {
             echo -n " $KIWI_INITRD_PARAMS"                 >> $conf
             echo -n " $KIWI_KERNEL_OPTIONS"                >> $conf
             echo " KIWI_RECOVERY=$recoid"                  >> $conf
-            echo " quiet showopts"                         >> $conf
+            echo " showopts"                               >> $conf
         fi
         #======================================
         # Restore
@@ -1873,7 +1880,7 @@ function setupBootLoaderSyslinuxRecovery {
             echo -n " $KIWI_INITRD_PARAMS"                 >> $conf
             echo -n " $KIWI_KERNEL_OPTIONS"                >> $conf
             echo " KIWI_RECOVERY=$recoid RESTORE=1"        >> $conf
-            echo " quiet showopts"                         >> $conf
+            echo " showopts"                               >> $conf
         fi
     fi
 }
@@ -1946,7 +1953,7 @@ function setupBootLoaderGrubRecovery {
             echo -n " $KIWI_INITRD_PARAMS"                >> $menu
             echo -n " $KIWI_KERNEL_OPTIONS"               >> $menu
             echo -n " KIWI_RECOVERY=$recoid"              >> $menu
-            echo " quiet showopts"                        >> $menu
+            echo " showopts"                              >> $menu
             echo " module /boot/$initrd"                  >> $menu
         else
             echo -n " kernel $gdev_recovery/boot/$kernel" >> $menu
@@ -1958,7 +1965,7 @@ function setupBootLoaderGrubRecovery {
             echo -n " $KIWI_INITRD_PARAMS"                >> $menu
             echo -n " $KIWI_KERNEL_OPTIONS"               >> $menu
             echo -n " KIWI_RECOVERY=$recoid"              >> $menu
-            echo " quiet showopts"                        >> $menu
+            echo " showopts"                              >> $menu
             echo " initrd $gdev_recovery/boot/$initrd"    >> $menu
         fi
         #======================================
@@ -1978,7 +1985,7 @@ function setupBootLoaderGrubRecovery {
             echo -n " $KIWI_INITRD_PARAMS"                >> $menu
             echo -n " $KIWI_KERNEL_OPTIONS"               >> $menu
             echo -n " KIWI_RECOVERY=$recoid"              >> $menu
-            echo " quiet showopts"                        >> $menu
+            echo " showopts"                              >> $menu
             echo " module /boot/$initrd"                  >> $menu
         else
             echo -n " kernel $gdev_recovery/boot/$kernel" >> $menu
@@ -1990,7 +1997,7 @@ function setupBootLoaderGrubRecovery {
             echo -n " $KIWI_INITRD_PARAMS"                >> $menu
             echo -n " $KIWI_KERNEL_OPTIONS"               >> $menu
             echo -n " KIWI_RECOVERY=$recoid RESTORE=1"    >> $menu
-            echo " quiet showopts"                        >> $menu
+            echo " showopts"                              >> $menu
             echo " initrd $gdev_recovery/boot/$initrd"    >> $menu
         fi
     fi
@@ -2300,7 +2307,7 @@ function setupBootLoaderS390 {
         fi
         echo -n " $KIWI_INITRD_PARAMS"  >> $conf
         echo -n " $KIWI_KERNEL_OPTIONS" >> $conf
-        echo " quiet showopts\""        >> $conf
+        echo " showopts\""              >> $conf
         #======================================
         # create failsafe entry
         #--------------------------------------
@@ -2315,7 +2322,7 @@ function setupBootLoaderS390 {
         echo -n " $KIWI_INITRD_PARAMS"         >> $conf
         echo -n " $KIWI_KERNEL_OPTIONS"        >> $conf
         echo -n " x11failsafe"                 >> $conf
-        echo " quiet showopts\""               >> $conf
+        echo " showopts\""                     >> $conf
         count=$((count + 1))
     done
     #======================================
@@ -2488,7 +2495,7 @@ function setupBootLoaderSyslinux {
                 fi
                 echo -n " $KIWI_INITRD_PARAMS"                 >> $conf
                 echo -n " $KIWI_KERNEL_OPTIONS"                >> $conf
-                echo " quiet showopts"                         >> $conf
+                echo " showopts"                               >> $conf
             fi
             #======================================
             # create Failsafe entry
@@ -2518,7 +2525,7 @@ function setupBootLoaderSyslinux {
                 echo -n " $KIWI_INITRD_PARAMS"                 >> $conf
                 echo -n " $KIWI_KERNEL_OPTIONS"                >> $conf
                 echo -n " $failsafe"                           >> $conf
-                echo " quiet showopts"                         >> $conf
+                echo " showopts"                               >> $conf
             fi
             count=$((count + 1))
         fi
@@ -2695,7 +2702,7 @@ function setupBootLoaderGrub {
                 fi
                 echo -n " $KIWI_INITRD_PARAMS"                    >> $menu
                 echo -n " $KIWI_KERNEL_OPTIONS"                   >> $menu
-                echo " quiet showopts"                            >> $menu
+                echo " showopts"                                  >> $menu
                 echo " module /boot/$initrd"                      >> $menu
             else
                 echo -n " kernel $gdev/boot/$kernel"              >> $menu
@@ -2714,7 +2721,7 @@ function setupBootLoaderGrub {
                 fi
                 echo -n " $KIWI_INITRD_PARAMS"                    >> $menu
                 echo -n " $KIWI_KERNEL_OPTIONS"                   >> $menu
-                echo " quiet showopts"                            >> $menu
+                echo " showopts"                                  >> $menu
                 echo " initrd $gdev/boot/$initrd"                 >> $menu
             fi
             #======================================
@@ -2739,7 +2746,7 @@ function setupBootLoaderGrub {
                 elif [ -e /dev/hvc0 ];then
                     echo -n " console=hvc console=tty"            >> $menu
                 fi
-                echo " quiet showopts"                            >> $menu
+                echo " showopts"                                  >> $menu
                 echo " module /boot/$initrd"                      >> $menu
             else
                 echo -n " kernel $gdev/boot/$kernel"              >> $menu
@@ -2756,7 +2763,7 @@ function setupBootLoaderGrub {
                 elif [ -e /dev/hvc0 ];then
                     echo -n " console=hvc console=tty"            >> $menu
                 fi
-                echo " quiet showopts"                            >> $menu
+                echo " showopts"                                  >> $menu
                 echo " initrd $gdev/boot/$initrd"                 >> $menu
             fi
             count=$((count + 1))
@@ -3149,7 +3156,7 @@ function setupBootLoaderYaboot {
                 echo "image=/boot/$kernel"                    >> $conf
                 echo "label=\"$title\""                       >> $conf
                 echo "initrd=/boot/$initrd"                   >> $conf
-                echo -n "append=\"quiet sysrq=1 panic=9"      >> $conf
+                echo -n "append=\"sysrq=1 panic=9"            >> $conf
                 echo -n " root=$diskByID"                     >> $conf
                 if [ ! -z "$imageDiskDevice" ];then
                     echo -n " disk=$(getDiskID $imageDiskDevice)" >> $conf
@@ -3165,7 +3172,7 @@ function setupBootLoaderYaboot {
                 fi
                 echo -n " $KIWI_INITRD_PARAMS"                >> $conf
                 echo -n " $KIWI_KERNEL_OPTIONS"               >> $conf
-                echo " quiet showopts\""                      >> $conf
+                echo " showopts\""                            >> $conf
             fi
             #======================================
             # create failsafe entry
@@ -3179,7 +3186,7 @@ function setupBootLoaderYaboot {
                 echo "image=/boot/$kernel"                    >> $conf
                 echo "label=\"$title\""                       >> $conf
                 echo "initrd=/boot/$initrd"                   >> $conf
-                echo -n "append=\"quiet sysrq=1 panic=9"      >> $conf
+                echo -n "append=\"sysrq=1 panic=9"            >> $conf
                 echo -n " root=$diskByID"                     >> $conf
                 if [ ! -z "$imageDiskDevice" ];then
                     echo -n " disk=$(getDiskID $imageDiskDevice)" >> $conf
@@ -3196,7 +3203,7 @@ function setupBootLoaderYaboot {
                 echo -n " $KIWI_INITRD_PARAMS"                >> $conf
                 echo -n " $KIWI_KERNEL_OPTIONS"               >> $conf
                 echo -n " $failsafe"                          >> $conf
-                echo " quiet showopts\""                      >> $conf
+                echo " showopts\""                            >> $conf
             fi
             count=$((count + 1))
         fi

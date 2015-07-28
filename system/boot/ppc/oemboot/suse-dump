@@ -868,7 +868,7 @@ function OEMInstall {
                     fi
                     rPDone=$(echo "scale=4; $recoBytes / $rReady" | bc)
                     rPDone=$(echo "scale=0; 100 / $rPDone" | bc)
-                    getText "archiving: %1..." "$rPDone%" > /progress
+                    getText "archiving: %1" "$rPDone%" > /progress
                     sleep 1
                 done
                 dPID=$(pidof mst)
