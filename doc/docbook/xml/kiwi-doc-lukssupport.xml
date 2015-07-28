@@ -16,5 +16,10 @@
   password string which will be required to mount the filesystem while
   booting:
  </para>
- <screen>&lt;type ... luks="<replaceable>password</replaceable>"&gt;</screen>
+ <screen>&lt;image ...&gt;
+  &lt;preferences&gt;
+    &lt;type ... luks="<replaceable>password</replaceable>"/&gt;
+  &lt;/preferences&gt;
+  ...
+&lt;/image&gt;</screen>
 </sect1>

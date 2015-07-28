@@ -79,7 +79,7 @@
      two can be part of the added repositories or the ones already configured.
     </para>
     <screen>kiwi --upgrade /tmp/myISO --add-repo <replaceable>REPO</replaceable> --add-repotype <replaceable>REPO_TYPE</replaceable> \
---add-package <replaceable>PACKAGE</replaceable> --add-pattern <replaceable>pattern</replaceable></screen>
+--add-package <replaceable>PACKAGE</replaceable> --add-pattern <replaceable>PATTERN</replaceable></screen>
    </step>
    <step>
     <para>

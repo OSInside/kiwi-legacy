@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
-                         "http://www.docbook.org/xml/4.5/docbookx.dtd">
+                         "http://www.docbook.org/xml/4.5/docbookx.dtd"
+[
+  <!ENTITY % entities SYSTEM "entity-decl.ent">
+  %entities;
+]>
+
 <chapter id="chap.iso">
  <title>ISO Image / Live System</title><indexterm>
  <primary>KIWI</primary>
@@ -18,15 +23,30 @@
    writing data.
   </para>
  </abstract>
+ 
+ <tip>
+  <title>ISO Image Description Templates</title>
+  <para>
+   &template_intro;
+  </para>
+  <para>
+   ISO image templates are shipped with the package
+   <package>kiwi-desc-isoboot</package>. They are installed to
+   <filename>/usr/share/kiwi/image/isoboot</filename>.
+  </para>
+ </tip>
+ 
+ &jeos_tip;
+
  <sect1 id="sec.iso.cd">
   <title>Building Live CD/DVD Images</title>
   <para>
-   The following example shows how to build a <quote>Just enough Operating
-   System (JeOS)</quote> based on SUSE Linux Enterprise 12:
+   The following example shows how to build a Just enough Operating
+   System (JeOS) based on SUSE Linux Enterprise 12:
   </para>
   <screen>kiwi --build suse-SLE12-JeOS -d /tmp/myiso-result --type iso</screen>
   <para>
-   There are possibilities to use the ISO image generated above:
+   There are two possibilities to use the ISO image generated above:
   </para>
   <orderedlist>
    <listitem>
@@ -53,7 +73,7 @@
    class="filesystem">overlayfs</systemitem>-based compressed root
    file system. Set the file system type with the <sgmltag
    class="attribute">flags</sgmltag> attribute in
-   <filename>configuration.xml</filename>:
+   <filename>config.xml</filename>:
   </para>
   <screen>&lt;image ...&gt;
   &lt;preferences&gt;
@@ -65,65 +85,81 @@
   <para>
    The following values can be set for <replaceable>FSTYPE</replaceable>:
   </para>
-  <variablelist>
-   <varlistentry>
-    <term>
-     <sgmltag class="attribute">flags</sgmltag>="<sgmltag
-     class="attvalue">overlay</sgmltag>"
-    </term>
-    <listitem>
-     <para>
-      <systemitem class="filesystem">overlayfs</systemitem> allows to combine
-      two file systems into one. The root file system exists as a compressed
-      <systemitem class="filesystem">squashfs</systemitem> file system and all
-      write operations are redirected to the RAM or to a persistent area on a
-      disk. The result is a fully writable live-system.
-     </para>
-    </listitem>
-   </varlistentry>
-   <varlistentry>
-    <term>
-     <sgmltag class="attribute">flags</sgmltag>="<sgmltag
-     class="attvalue">compressed</sgmltag>"
-    </term>
-    <listitem>
-     <para>
-      Does file system compression with squashfs, but does not use an overlay
-      file system for write support. A symbolic link list is used instead and
-      thus a <sgmltag class="element">split</sgmltag> element is required in
-      <filename>config.xml</filename>. See <xref
-      linkend="sec.iso.split-mode"/> for details.
-     </para>
-    </listitem>
-   </varlistentry>
-   <varlistentry>
-    <term>
-     <sgmltag class="attribute">flags</sgmltag>="<sgmltag
-     class="attvalue">seed</sgmltag>"
-    </term>
-    <listitem>
-     <para>
-      Creates a <systemitem class="filesystem">Btrfs</systemitem> image and
-      allows write operations into a cow (seed) file. In case of an ISO image
-      the seed device is created on a ramdisk.
-     </para>
-    </listitem>
-   </varlistentry>
-   <varlistentry>
-    <term>Flags Not Set</term>
-    <listitem>
-     <para>
-      If the <sgmltag class="attribute">flags</sgmltag> attribute is not set,
-      no compressed nor overlay file system will be used. The root tree will be
-      directly part of the ISO file system and the paths:
-      <filename>/bin</filename>, <filename>/boot</filename>,
-      <filename>/lib</filename>, <filename>/lib64</filename>,
-      <filename>/opt</filename>, <filename>/sbin</filename>, and
-      <filename>/usr</filename> will be read-only.
-     </para>
-    </listitem>
-   </varlistentry>
-  </variablelist>
+  <informaltable>
+   <tgroup cols="2">
+    <colspec colnum="1" colname="1" colwidth="20*"/>
+    <colspec colnum="2" colname="2" colwidth="80*"/>
+    <thead>
+     <row>
+      <entry><para>Value</para></entry>
+      <entry><para>Description</para></entry>
+     </row>
+    </thead>
+    <tbody>
+     <row>
+      <entry>
+       <para>
+	<sgmltag class="attvalue">compressed</sgmltag>
+       </para>
+      </entry>
+      <entry>
+       <para>
+	Does file system compression with squashfs, but does not use an
+	overlay file system for write support. A symbolic link list is used
+	instead and thus a <sgmltag class="element">split</sgmltag> element is
+	required in <filename>config.xml</filename>. See <xref
+	linkend="sec.iso.split-mode"/> for details.
+       </para>
+      </entry>
+     </row>
+     <row>
+      <entry>
+       <para>
+	<sgmltag class="attvalue">overlay</sgmltag>
+       </para>
+      </entry>
+      <entry>
+       <para>
+	<systemitem class="filesystem">overlayfs</systemitem> allows to
+	combine two file systems into one. The root file system exists as a
+	compressed <systemitem class="filesystem">squashfs</systemitem> file
+	system and all write operations are redirected to the RAM or to a
+	persistent area on a disk. The result is a fully writable
+	live-system.
+       </para>
+      </entry>
+     </row>
+     <row>
+      <entry>
+       <para>
+	<sgmltag class="attvalue">seed</sgmltag>
+       </para>
+      </entry>
+      <entry>
+       <para>
+	Creates a <systemitem class="filesystem">Btrfs</systemitem> image and
+	allows write operations into a cow (seed) file. In case of an ISO
+	image the seed device is created on a ramdisk.
+       </para>
+      </entry>
+     </row>
+     <row>
+      <entry><para><emphasis>unset</emphasis></para></entry>
+      <entry>
+       <para>
+	If the <sgmltag class="attribute">flags</sgmltag> attribute is not
+	set, no compressed nor overlay file system will be used. The root tree
+	will be directly part of the ISO file system and the paths:
+	<filename>/bin</filename>, <filename>/boot</filename>,
+	<filename>/lib</filename>, <filename>/lib64</filename>,
+	<filename>/opt</filename>, <filename>/sbin</filename>, and
+	<filename>/usr</filename> will be read-only.
+       </para>
+      </entry>
+     </row>
+    </tbody>
+   </tgroup>
+  </informaltable>
 
   <sect2 id="sec.iso.split-mode">
    <title>Split mode</title><indexterm>

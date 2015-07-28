@@ -98,25 +98,51 @@
    The volume is mounted to <filename class="directory">/tmp</filename>:
   </para>
 
-  <screen>&lt;systemdisk name="vgroup-name"&gt;
-  &lt;volume name="tmp"/&gt;
-&lt;/systemdisk&gt;</screen>
-
+  <screen>&lt;image ...&gt;
+  &lt;preferences&gt;
+    &lt;type ...&gt;
+      &lt;systemdisk name="vgroup-name"&gt;
+        &lt;volume name="tmp"/&gt;
+      &lt;/systemdisk&gt;
+      ...
+    &lt;/type&gt;
+    ...
+  &lt;/preferences&gt;
+  ...
+&lt;/image&gt;</screen>
   <para>
    To set the volume size to 200 MB use:
   </para>
 
-<screen>&lt;systemdisk name="vgroup-name"&gt;
-  &lt;volume name="tmp" size="200M"/&gt;
-&lt;/systemdisk&gt;</screen>
+<screen>&lt;image ...&gt;
+  &lt;preferences&gt;
+    &lt;type ...&gt;
+      &lt;systemdisk name="vgroup-name"&gt;
+        &lt;volume name="tmp" size="200M"/&gt;
+      &lt;/systemdisk&gt;
+      ...
+    &lt;/type&gt;
+    ...
+  &lt;/preferences&gt;
+  ...
+&lt;/image&gt;</screen>
 
   <para>
    To create the logical volume named <literal>foo</literal> with 500 MB of free space mounted as <filename class="directory">/tmp</filename>, use:
   </para>
 
-  <screen>&lt;systemdisk name="vgroup-name"&gt;
-  &lt;volume name="tmp" freespace="500M" mountpoint="tmp"/&gt;
-&lt;/systemdisk&gt;</screen>
+  <screen>&lt;image ...&gt;
+  &lt;preferences&gt;
+    &lt;type ...&gt;
+      &lt;systemdisk name="vgroup-name"&gt;
+        &lt;volume name="tmp" freespace="500M" mountpoint="tmp"/&gt;
+      &lt;/systemdisk&gt;
+      ...
+    &lt;/type&gt;
+    ...
+  &lt;/preferences&gt;
+  ...
+&lt;/image&gt;</screen>
 
   <para>
    The volumes <literal>LVRoot</literal> and <literal>LVSwap</literal> for the
@@ -125,9 +151,18 @@
    <literal>@root</literal>.
   </para>
 
-  <screen>&lt;systemdisk name="vgroup-name"&gt;
-  &lt;volume name="@root" size="2M"/&gt;
-&lt;/systemdisk&gt;</screen>
+  <screen>&lt;image ...&gt;
+  &lt;preferences&gt;
+    &lt;type ...&gt;
+      &lt;systemdisk name="vgroup-name"&gt;
+        &lt;volume name="@root" size="2M"/&gt;
+      &lt;/systemdisk&gt;
+      ...
+    &lt;/type&gt;
+    ...
+  &lt;/preferences&gt;
+  ...
+&lt;/image&gt;</screen>
   </example>
  </sect2>
 

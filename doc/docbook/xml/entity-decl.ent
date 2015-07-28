@@ -1,0 +1,31 @@
+<!-- .............................................................. -->
+<!-- Entities for KIWI                                              -->
+<!-- .............................................................. -->
+
+
+
+
+
+<!-- .............XML snippets used more than one ................. -->
+
+<!ENTITY template_intro
+'KIWI comes with a large number of image description templates. It is
+   recommended to use them as a basis for your own image descriptions. To do
+   so, copy the respective directory containing the image description of your
+   choice to you working directory and adjust it according to your needs.'> 
+
+<!ENTITY jeos_tip
+'<tip>
+  <title>Just Enough Operating System (JeOS) Templates</title>
+  <para>
+   The package <package>kiwi-templates</package> contains ready-to-use JeOS
+   templates. They are installed to <filename
+    class="directory">/usr/share/kiwi/image/*-JeOS/</filename>. These
+   templates can be used without any modification to build images containing
+   a minimal operating system. The template directory is in KIWI&apos;s search
+   path, therefore it is sufficient to only specify the name of the
+   <filename>*-JeOS</filename> directory on the KIWI command line. Get a list
+   of available templates with the following command:
+  </para>
+  <screen>(cd /usr/share/kiwi/image/ &amp;&amp; ls -d1 *-JeOS)</screen>
+ </tip>'>
