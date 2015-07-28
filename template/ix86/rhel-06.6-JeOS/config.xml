@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="6.2" name="LimeJeOS-RHEL-06.5">
+<image schemaversion="6.2" name="LimeJeOS-RHEL-06.6">
     <description type="system">
         <author>Marcus Schäfer</author>
         <contact>ms@suse.com</contact>
@@ -41,7 +41,8 @@
         </type>
         <type bootloader="grub" image="oem" boot="oemboot/rhel-06.0" filesystem="ext3" installiso="true">
             <oemconfig>
-                <oem-systemsize>2048</oem-systemsize>
+                <oem-recovery>true</oem-recovery>
+                <oem-inplace-recovery>true</oem-inplace-recovery>
                 <oem-swap>true</oem-swap>
                 <oem-swapsize>200</oem-swapsize>
             </oemconfig>
@@ -52,7 +53,7 @@
     </users>
     <repository type="rpm-md" profiles="RedHat">
 <!-- Use the set-repo option to replace this first repo if needed -->
-        <source path="iso:///image/CDs/RHEL-6.2-x86_64-DVD.iso"/>
+        <source path="iso:///image/CDs/rhel-server-6.6-x86_64-dvd.iso"/>
     </repository>
 <!-- Don't remove the following repos, they contain tools needed by kiwi -->
     <repository type="rpm-md" priority="1" profiles="RedHat,Oracle">
