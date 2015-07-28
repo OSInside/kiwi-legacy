@@ -483,14 +483,6 @@ sub setupUpgrade {
         }
         @addonPackages = @newpacks;
         if (@newpatts) {
-            print $fd "for i in @newpatts;do\n";
-            print $fd "\tif ! @kchroot @yum grouplist | grep -q \"\$i\";then\n";
-            print $fd "\t\tECODE=1\n";
-            print $fd "\t\techo \$ECODE > $screenCall.exit\n";
-            print $fd "\t\texit \$ECODE\n";
-            print $fd "\tfi\n";
-            print $fd "done\n";
-            print $fd "test \$? = 0 && ";
             print $fd "@kchroot @yum groupinstall @newpatts &\n";
             print $fd "SPID=\$!;wait \$SPID\n";
         }
@@ -594,13 +586,6 @@ sub setupRootSystem {
         print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
         print $fd "trap clean INT TERM\n";
         if (@newpatts) {
-            print $fd "for i in @newpatts;do\n";
-            print $fd "\tif ! @yum grouplist | grep -q \"\$i\";then\n";
-            print $fd "\t\tECODE=1\n";
-            print $fd "\t\techo \$ECODE > $screenCall.exit\n";
-            print $fd "\t\texit \$ECODE\n";
-            print $fd "\tfi\n";
-            print $fd "done\n";
             print $fd "@yum --installroot=$root groupinstall @newpatts &\n";
             print $fd "SPID=\$!;wait \$SPID\n";
         }
@@ -647,13 +632,6 @@ sub setupRootSystem {
         print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
         print $fd "trap clean INT TERM\n";
         if (@newpatts) {
-            print $fd "for i in @newpatts;do\n";
-            print $fd "\tif ! @kchroot @yum grouplist | grep -q \"\$i\";then\n";
-            print $fd "\t\tECODE=1\n";
-            print $fd "\t\techo \$ECODE > $screenCall.exit\n";
-            print $fd "\t\texit \$ECODE\n";
-            print $fd "\tfi\n";
-            print $fd "done\n";
             print $fd "@kchroot @yum groupinstall @newpatts &\n";
             print $fd "SPID=\$!;wait \$SPID\n";
         }
