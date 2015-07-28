@@ -783,7 +783,7 @@ rm -rf $RPM_BUILD_ROOT
 %exclude %{_datadir}/kiwi/image/suse-13.2-JeOS
 %exclude %{_datadir}/kiwi/image/suse-SLE11-JeOS
 %exclude %{_datadir}/kiwi/image/suse-SLE12-JeOS
-%exclude %{_datadir}/kiwi/image/rhel-06.0-JeOS
+%exclude %{_datadir}/kiwi/image/rhel-06.6-JeOS
 %exclude %{_datadir}/kiwi/image/rhel-07.0-JeOS
 %endif
 %ifarch s390 s390x
@@ -938,7 +938,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/kiwi/image/suse-13.2-JeOS
 %{_datadir}/kiwi/image/suse-SLE11-JeOS
 %{_datadir}/kiwi/image/suse-SLE12-JeOS
-%{_datadir}/kiwi/image/rhel-06.0-JeOS
+%{_datadir}/kiwi/image/rhel-06.6-JeOS
 %{_datadir}/kiwi/image/rhel-07.0-JeOS
 %endif
 %ifarch s390 s390x
