@@ -396,8 +396,8 @@
               class="attvalue">lxc|docker</sgmltag>"</term>
      <listitem>
       <para>
-       Use the lxc or docker image type to build a linux container image For
-       additional information refer to the <xref linkend="chap.lxc"/>
+       Use the lxc or docker image type to build a linux container image. For
+       additional information refer to the <xref linkend="chap.docker"/>
        chapter.
       </para>
      </listitem>

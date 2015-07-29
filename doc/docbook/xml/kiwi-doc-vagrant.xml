@@ -140,7 +140,7 @@ vagrant box add LimeJeOS-SLE12.x86_64-1.13.1.libvirt.json</screen>
    would just be a tarball whose contents must match the vagrant box
    requirements listed above. Therefore building a docker base box for
    vagrant in kiwi is not different from just building a docker image as
-   described in <xref linkend="chap.lxc"/>
+   described in <xref linkend="chap.docker"/>
   </para>
  </sect1>
 </chapter>

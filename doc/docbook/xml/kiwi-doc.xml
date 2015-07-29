@@ -86,7 +86,7 @@
 	            xmlns:xi="http://www.w3.org/2001/XInclude"/> 
   <xi:include href="kiwi-doc-vmx.xml"
 	            xmlns:xi="http://www.w3.org/2001/XInclude"/>
-  <xi:include href="kiwi-doc-lxc.xml"
+  <xi:include href="kiwi-doc-docker.xml"
 	            xmlns:xi="http://www.w3.org/2001/XInclude"/>
   <xi:include href="kiwi-doc-vagrant.xml"
 	            xmlns:xi="http://www.w3.org/2001/XInclude"/>
