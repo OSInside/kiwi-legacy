@@ -4246,9 +4246,16 @@ sub __getPreferencesXMLElement {
                 for my $child (@typeChildren) {
                     if ($types->{$typeName}{$child}) {
                         my $chObj = $types->{$typeName}{$child};
-                        my $cElement =
-                            $types->{$typeName}{$child} -> getXMLElement();
-                        $tElem  -> addChild($cElement);
+                        my $chObj_type = ref($chObj);
+                        if ($chObj_type eq 'ARRAY') {
+                            foreach my $object (@{$chObj}) {
+                                my $cElement = $object -> getXMLElement();
+                                $tElem  -> addChild($cElement);
+                            }
+                        } else {
+                            my $cElement = $chObj -> getXMLElement();
+                            $tElem  -> addChild($cElement);
+                        }
                     }
                 }
                 # PXE is special

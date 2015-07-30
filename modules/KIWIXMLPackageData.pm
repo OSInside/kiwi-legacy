@@ -131,7 +131,7 @@ sub getXMLElement {
     my $replace = $this -> getPackageToReplace();
     if ($replace) {
         if ($replace eq "none") {
-            $elem  -> setAttribute('replaces');
+            $elem  -> setAttribute('replaces', q{});
         } else {
             $elem  -> setAttribute('replaces', $replace);
         }
