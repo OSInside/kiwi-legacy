@@ -103,6 +103,8 @@
  </part>
  <xi:include href="kiwi-doc-appendix.xml"
 	           xmlns:xi="http://www.w3.org/2001/XInclude"/>
+ <xi:include href="kiwi-doc-bootserver.xml"
+	           xmlns:xi="http://www.w3.org/2001/XInclude"/>
  <xi:include href="gfdl1.2.xml"
 	           xmlns:xi="http://www.w3.org/2001/XInclude"/>
  <index/>

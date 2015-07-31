@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE appendix PUBLIC "-//Novell//DTD NovDoc XML V1.0//EN"
+                      "novdocx.dtd">
+<appendix id="app.bootserver">
+ <title>Setting Up a Network Boot Server</title>
+ <para>
+  In order to be able to deploy PXE bot images created with KIWI, you need to
+  set up a network boot server providing the services DHCP and atftp.
+ </para>
+ <procedure id="proc.pxe.atftp-server-setup">
+  <title>Installing and Configuring atftp</title>
+  <step>
+   <para>
+    Install the packages <package>atftp</package> and
+    <package>kiwi-pxeboot</package>.
+   </para>
+  </step>
+  <step>
+   <para>
+    Edit the file <filename>/etc/sysconfig/atftpd</filename>. Set or modify
+    the following variables:
+   </para>
+   <screen>ATFTPD_OPTIONS="--daemon --no-multicast"
+ATFTPD_DIRECTORY="/srv/tftpboot"</screen>
+  </step>
+  <step>
+   <para>
+    Start the <systemitem class="service">atftpd</systemitem> service by
+    running:
+   </para>
+   <screen>systemctl start atftpd</screen>
+  </step>
+ </procedure>
+
+ <procedure>
+  <title>Installing and Configuring DHCP</title>
+  <para>
+   Contrary to the atftp server setup the following instructions can only
+   serve as an example. Depending on your network structure, the IP addresses,
+   ranges and domain settings need to be adapted to allow the DHCP server to
+   work within your network. If you already have a DHCP server running in your
+   network, make sure that the <literal>filename</literal> and
+   <literal>next-server</literal> are correctly set in
+   <filename>/etc/dhcpd.conf</filename> on this server.
+  </para>
+  <para>
+    The following steps describe how to setup a new DHCP server instance:
+  </para>
+    <step>
+     <para>
+      Install the package <package>dhcp-server</package>.
+     </para>
+    </step>
+    <step>
+     <para>
+      Create the file <filename>/etc/dhcpd.conf</filename> and include the
+      following statements. Note that all <emphasis>values</emphasis> listed
+      below are examples, make sure to replace them with data fitting your
+      network setup.  
+     </para>
+<screen>option domain-name "example.org";
+option domain-name-servers 192.168.100.2;
+option broadcast-address 192.168.100.255;
+option routers 192.168.100.2;
+option subnet-mask 255.255.255.0;
+default-lease-time 600;
+max-lease-time 7200;
+ddns-update-style none; ddns-updates off;
+log-facility local7;
+
+subnet 192.168.100.0 netmask 255.255.255.0 {
+   filename "pxelinux.0";
+   next-server 192.168.100.2;
+   range dynamic-bootp 192.168.100.5 192.168.100.20;
+}</screen>
+    </step>
+    <step>
+     <para>
+      Edit the file <filename>/etc/sysconfig/dhcpd</filename> and setup the
+      network interface the server should listen on:
+     </para>
+<screen>DHCPD_INTERFACE="eth0"</screen>
+    </step>
+    <step>
+     <para>
+      Run the <systemitem class="server">dhcp</systemitem> server by
+      calling:
+     </para>
+<screen>systemctl start wickedd-dhcp4</screen>
+    </step>  
+ </procedure>
+</appendix>
+ 

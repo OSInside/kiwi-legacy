@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
-                         "http://www.docbook.org/xml/4.5/docbookx.dtd">
+                         "http://www.docbook.org/xml/4.5/docbookx.dtd"
+[
+  <!ENTITY % entities SYSTEM "entity-decl.ent">
+  %entities;
+]>
 <chapter id="chap.pxe">
  <title>PXE Image / Thin Clients</title><indexterm>
  <primary>KIWI</primary>
@@ -9,186 +13,95 @@
  <secondary>PXE</secondary></indexterm><indexterm>
  <primary>PXE images</primary></indexterm><indexterm>
  <primary>network boot</primary></indexterm>
- <para>
-  PXE is a boot protocol implemented in most BIOS implementations which
-  makes it so interesting. The protocol sends DHCP requests to assign an IP
-  address and after that it uses tftp to download kernel and boot
-  instructions.
- </para>
- <para>
-  A PXE image consists of a boot image and a system image like all other
-  image types too. But with a PXE image the image files are available
-  separately and needs to be copied at specific locations of a network boot
-  server.
- </para>
- <sect1 id="sec.pxe.setting-up">
-  <title>Setting Up the Required Services</title>
-
+ <abstract>
   <para>
-   Before you start to build PXE images with KIWI, setup the boot server.
-   The boot server requires the services atftp and DHCP to run.
+   PXE is a network boot protocol that is shipped with most BIOS
+   implementations. The protocol sends a DHCP request to get an IP
+   address. Once an IP address is assigned, it uses the TFTP protocol to
+   download a Kernel and boot instructions. Contrary to other images built
+   with KIWI, a PXE image consists of separate boot and system images, since
+   both images need to be made available in different locations on the network
+   boot server.
   </para>
-
-  <sect2 id="sec.pxe.atftp-server">
-   <title>Atftp Server</title>
-   <para>
-    In order to setup the
-    <literal>atftp</literal>> server the
-    following steps are required
-   </para>
-   <procedure id="proc.pxe.atftp-server-setup">
-    <step>
-     <para>
-      Install the packages
-      <systemitem class="resource">atftp</systemitem>
-      and <systemitem class="resource">kiwi-pxeboot</systemitem>.
-     </para>
-    </step>
-    <step>
-     <para>
-      Edit the file <filename>/etc/sysconfig/atftpd</filename>. Set or
-      modify the following variables:
-     </para>
-<screen>ATFTPD_OPTIONS="--daemon --no-multicast"
-ATFTPD_DIRECTORY="/srv/tftpboot"</screen>
-    </step>
-    <step>
-     <para>
-      Run <systemitem class="service">atftpd</systemitem> by calling the
-      command:
-     </para>
-<screen><command>rcatftpd</command> start</screen>
-    </step>
-   </procedure>
-  </sect2>
-
-  <sect2 id="sec.pxe.dhcp-server">
-   <title>DHCP Server</title>
-   <para>
-    In contrast to the atftp server setup the following DHCP server setup
-    can only serve as an example. Depending on your network structure, the
-    IP addresses, ranges and domain settings needs to be adapted in order to
-    allow the DHCP server to work within your network. If you already have a
-    DHCP server running in your network, make sure that the filename and
-    next-server information is provided by your server. The following steps
-    describe how to setup a new DHCP server instance:
-   </para>
-   <procedure id="proc.pxe.dhcp-server-setup">
-    <step>
-     <para>
-      Install the package
-      <package>dhcp-server</package>
-      .
-     </para>
-    </step>
-    <step>
-     <para>
-      Create the file <filename>/etc/dhcpd.conf</filename> and include the
-      following statements:
-     </para>
-<screen>option domain-name "example.org";
-option domain-name-servers 192.168.100.2;
-option broadcast-address 192.168.100.255;
-option routers 192.168.100.2;
-option subnet-mask 255.255.255.0;
-default-lease-time 600;
-max-lease-time 7200;
-ddns-update-style none; ddns-updates off;
-log-facility local7;
-
-subnet 192.168.100.0 netmask 255.255.255.0 {
-   filename "pxelinux.0";
-   next-server 192.168.100.2;
-   range dynamic-bootp 192.168.100.5 192.168.100.20;
-}</screen>
-    </step>
-    <step>
-     <para>
-      Edit the file <filename>/etc/sysconfig/dhcpd</filename> and setup the
-      network interface the server should listen on:
-     </para>
-<screen>DHCPD_INTERFACE="eth0"</screen>
-    </step>
-    <step>
-     <para>
-      Run the <systemitem class="server">dhcp</systemitem> server by
-      calling:
-     </para>
-<screen><command>rcdhcpd</command> start</screen>
-    </step>
-   </procedure>
-  </sect2>
- </sect1>
+ </abstract>
+ 
+ <tip>
+  <title>PXE Image Description Templates</title>
+  <para>
+   &template_intro;
+  </para>
+  <para>
+   PXE image templates are shipped with the package
+   <package>kiwi-desc-netboot</package>. They are installed to
+   <filename>/usr/share/kiwi/image/netboot</filename>.
+  </para>
+ </tip>
+ 
+ &jeos_tip;
  <sect1 id="sec.pxe.building">
-  <title>Building a PXE filesystem JeOS</title>
+  <title>Building PXE Images</title>
 
   <para>
-   This example is based on SLES version 12. It creates a compressed root
-   filesystem image which is deployed as overlayfs based union system.
-   Please kiwi also supports deployment of oem disk images via PXE. This is
-   different from the filesystem deployment method. For details refer to to
-   the OEM chapter <xref linkend="chap.oem"/>
+   The following example shows how to build a Just enough Operating
+   System (JeOS) based on SUSE Linux Enterprise 12:
   </para>
-
-<screen><command>kiwi</command> --build suse-SLE12-JeOS --add-profile netboot --type pxe -d /tmp/mypxe-result</screen>
- </sect1>
- <sect1 id="sec.pxe.using">
-  <title>Using the Image</title>
-
+  <screen>kiwi --build suse-SLE12-JeOS --add-profile netboot --type pxe -d /tmp/mypxe-result</screen>
   <para>
-   In order to make use of the image all related image parts needs to be
-   copied onto the boot server. According to the example the following steps
-   needs to be performed:
+   This command generates a compressed root filesystem image which is deployed
+   as an overlayfs-based union system. To use the image, all image parts need
+   to be copied to a boot server. If you have not set up such a server, refer
+   to <xref linkend="app.bootserver"/> for instructions. The following example
+   assumes you have created the PXE image on the boot server itself.
   </para>
 
   <procedure id="proc.pxe.using">
    <step>
     <para>
-     Change working directory:
+     Change into the build directory:
     </para>
-<screen><command>cd</command> /tmp/mypxe-result</screen>
+    <screen>cd /tmp/mypxe-result</screen>
    </step>
    <step>
     <para>
-     Copy of the boot and kernel image:
+     Copy of the boot and kernel images to
+     <filename class="directory">/srv/tftpboot/boot/initrd</filename>:
     </para>
-<screen><command>cp</command> initrd-netboot-suse-SLES12.x86_64-2.1.1.gz \
-  /srv/tftpboot/boot/initrd
-<command>cp</command> initrd-netboot-suse-SLES12.x86_64-2.1.1.kernel \
-  /srv/tftpboot/boot/linux</screen>
+    <screen>cp initrd-netboot-suse-SLES12.x86_64-2.1.1.gz /srv/tftpboot/boot/initrd
+cp initrd-netboot-suse-SLES12.x86_64-2.1.1.kernel /srv/tftpboot/boot/linux</screen>
    </step>
    <step>
     <para>
-     Copy of the system image and md5 sum:
+     Copy of the system image and it's md5 sum to <filename
+     class="directory">/srv/tftpboot/image</filename>:
     </para>
-<screen><command>cp</command> LimeJeOS-SLE12.x86_64-1.13.1 \
-  /srv/tftpboot/image
-<command>cp</command> LimeJeOS-SLE12.x86_64-1.13.1.md5 \
-  /srv/tftpboot/image</screen>
+<screen>cp LimeJeOS-SLE12.x86_64-1.13.1 /srv/tftpboot/image
+cp LimeJeOS-SLE12.x86_64-1.13.1.md5 /srv/tftpboot/image</screen>
    </step>
    <step>
     <para>
-     Copy of the image boot configuration. Normally the boot configuration
-     applies to one client which means it is required to obtain the MAC
-     address of this client. If the boot configuration should be used
-     globally, copy the KIWI generated file as
-     <filename>config.default</filename>:
+     Copy of the image boot configuration to <filename
+     class="directory">/srv/tftpboot/KIWI/</filename>. In case the boot
+     configuration is intended to be served to a dedicated machine only, the
+     target file name is
+     <filename>config.<replaceable>MAC</replaceable></filename>. If the boot
+     configuration should be used globally, the target file name is
+     <filename>configuration.default</filename>.
     </para>
-<screen><command>cp</command> LimeJeOS-SLE12.x86_64-1.13.1.config \
-  /srv/tftpboot/KIWI/config.<replaceable>MAC</replaceable></screen>
+    <screen>cp LimeJeOS-SLE12.x86_64-1.13.1.config \
+ /srv/tftpboot/KIWI/<replaceable>CONFIGURATION_FILE</replaceable></screen>
+    <para>
+     See below for more information about the boot configuration file.
+    </para>
    </step>
    <step>
     <para>
-     Check the PXE configuration file. The PXE configuration controls which
-     kernel and initrd are loaded and which kernel parameters are set. When
-     installing the
-     <package>kiwi-pxeboot</package>
-     package, a default configuration is added. To make sure the
-     configuration is valid according to this example, insert the following
-     information into the file
-     <filename>/srv/tftpboot/pxelinux.cfg/default</filename>:
+     Adjust the PXE configuration file. it controls which kernel and initrd is
+     loaded and which kernel parameters are set. A template has been installed
+     at <filename>/srv/tftpboot/pxelinux.cfg/default</filename> with the
+     <package>kiwi-pxeboot</package> package. The minimal configuration
+     required to boot the SLE 12 JeOS looks like to following:
     </para>
-<screen>DEFAULT KIWI-Boot
+    <screen>DEFAULT KIWI-Boot
 
 LABEL KIWI-Boot
     kernel boot/linux
@@ -197,73 +110,274 @@ LABEL KIWI-Boot
 
 LABEL Local-Boot
     localboot 0</screen>
+
+
+    <remark condition="clarity">
+     2015-07-31 - fs: The content differs from what is installed with
+     kiwi-pxeboot.
+    </remark>
+    
+
    </step>
    <step>
     <para>
-     Connect the client to the network and boot.
+     Connect the client to the network and boot it.
     </para>
    </step>
   </procedure>
  </sect1>
- <sect1 id="sec.pxe.flavours">
-  <title>Flavours</title>
+ <sect1 id="sec.pxe.files">
+  <title>PXE Control and Configuration Files</title>
 
   <para>
-   All the different PXE boot based deployment methods are controlled by the
+   All PXE boot based deployment methods are controlled by the
    <filename>config.<replaceable>MAC</replaceable></filename> (or
    <filename>config.default</filename>) file. When a new client boots up and
-   there is no client configuration file the new client is registered by
-   uploading a control file to the
-   <systemitem
-        class="server">TFTP</systemitem> server. The
-   following sections informs about the control and the configuration file.
+   there is no client configuration file matching its MAC address, the new
+   client is registered by uploading a control file to the <systemitem class="server">TFTP</systemitem> server.
   </para>
 
   <sect2 id="sec.pxe.client-control-file">
    <title>The PXE Client Control File</title>
    <para>
-    This section describes the netboot client control file:
+    The netboot client control file is named
+    
+    <remark condition="clarity">
+     2015-07-31 - fs: Naming is unclear with all the $ characters  - is it
+     hwtype.$$00.11.22.33.44.55$$, hwtype.$00.11.22.33.44.55$, or
+     hwtype.00.11.22.33.44.55
+    </remark>
    </para>
-<screen>hwtype.$&lt;$MAC Address$&gt;$</screen>
+   <screen>hwtype.$&lt;$MAC Address$&gt;$</screen>
    <para>
-    The control file is primarily used to set up new netboot clients. In
-    this case, there is no configuration file corresponding to the client
-    MAC address available. Using the MAC address information, the control
-    file is created, which is uploaded to the
-    <systemitem class="server">TFTP</systemitem> servers upload directory
+    The control file is primarily used to set up new netboot clients when no
+    configuration file corresponding to the client's MAC address
+    available. The control file is uploaded to
     <filename>/var/lib/tftpboot/upload</filename>.
    </para>
+   
+   <remark condition="clarity">
+    2015-07-31 - fs: What is the relevance of this chapter? Does this file
+    have any influence on how the image behaves and does the KIWI user have
+    any influence on it? If not, let's delete this section.
+   </remark>
   </sect2>
 
   <sect2 id="sec.pxe.client-config-file">
    <title>The PXE Client Configuration File</title>
    <para>
-    This section describes the netboot client configuration file:
+    The netboot client configuration file is named
    </para>
-<screen>config.$&lt;$MAC Address$&gt;$</screen>
+   <remark condition="clarity">
+    2015-07-31 - fs: Naming is unclear with all the $ characters - is it
+    config.$$00.11.22.33.44.55$$, config.$00.11.22.33.44.55$, or
+    config.00.11.22.33.44.55
+   </remark>
+   <screen>config.$&lt;$MAC Address$&gt;$</screen>
+
+   
+   <remark condition="clarity">
+    2015-07-31 - fs: In which relation does this file stand to the files in
+    /srv/tftpboot/KIWI/? Are they just copies/links or are they generated from
+    them?
+   </remark>
+
+   <remark condition="clarity">
+    2015-07-31 - fs: Again, no hint how this is relevant. Can a user edit
+    and adjust these files? Does the user have any influence via KIWI on how
+    these files look like?
+   </remark>
+   
    <para>
-    The configuration file contains data about image, configuration,
-    synchronization, or partition parameters. The configuration file is
+    The configuration file contains data about the image as well as about configuration, synchronization, and partition parameters. It is
     loaded from the TFTP server directory
     <filename>/var/lib/tftpboot/KIWI</filename> via TFTP for previously
     installed netboot clients. New netboot clients are immediately
     registered and a new configuration file with the corresponding MAC
-    address is created. The standard case for the deployment of a PXE image
-    is one image file based on a read-write filesystem which is stored onto
-    a local storage device of the client. Below, find an example to cover
-    this case.
+    address is created. 
+    <remark condition="clarity">
+     2015-07-31 - fs: Above we are claiming that /var/lib/tftpboot/upload/hwtype.$&lt;$MAC Address$&gt;$ is created
+    </remark>
    </para>
-<screen>DISK=/dev/sda
+   <para>
+    The configuration file has got the following general format:
+   </para>
+   <screen>AOEROOT=device
+COMBINED_IMAGE=1
+CONF='src;dest;srvip;bsize;[hash],...,src;dest;srvip;bsize;[hash]'
+DISK=device
+ERROR_INTERRUPT='message-string'
+FORCE_KEXEC=1
+IMAGE='device;name;version;srvip;bsize;compressed,...,'
+KIWI_BOOT_TIMEOUT='seconds'
+KIWI_INITRD=path-to-initrd
+KIWI_KERNEL=path-to-kernel
+KIWI_KERNEL_OPTIONS=opt1 opt2 ...
+NBDROOTNBDROOT='ip-address;export-name;device;swap-export-name;swap-device;write-export-name;write-device'
+NFSROOT='ip-address;path'
+PART='size;id;Mount,...,size;id;Mount'
+RAID='raid-level;device1;device2;...'
+REBOOT_IMAGE=1
+RELOAD_CONFIG=1
+RELOAD_IMAGE=1
+UNIONFS_CONFIGURATION=rw-partition,compressed-partition,container-fs</screen>
+
+   <remark condition="clarity">
+    2015-07-31 - fs: Are the different delimiters correct? ";" seems to be
+    default, KIWI_KERNEL_OPTIONS uses spaces and UNIONFS_CONFIGURATION uses
+    comma
+   </remark>
+
+   <para>
+    Not all configuration options need to be specified. The following
+    configuration is an example for an image based on a read-write filesystem
+    stored on a local disk:
+   </para>
+   <screen>DISK=/dev/sda
 PART='5;S;x,x;L;/'
 IMAGE='/dev/sda2;suse-##.#-pxe-client.i686;1.2.8;192.168.100.2;4096'</screen>
+
    <para>
-    The following format is used:
+    Refer to the following list for details on each configuration option:
    </para>
-<screen>IMAGE='device;name;version;srvip;bsize;compressed,...,'
-CONF='src;dest;srvip;bsize;[hash],...,src;dest;srvip;bsize;[hash]'
-PART='size;id;Mount,...,size;id;Mount'
-DISK=device</screen>
+   
    <variablelist>
+    <varlistentry>
+     <term><varname>AOEROOT</varname></term>
+     <listitem>
+      <para>
+       Mount the system image root filesystem remotely via AoE (ATA over
+       Ethernet). This requires a server exporting a block device
+       representing the root directory of the system image via the AoE
+       subsystem. The block device could be a partition of a real or a
+       virtual disk. In order to use the AoE subsystem it is recommended to
+       install the <package>aoetools</package> and <package>vblade</package>
+       packages from <ulink
+       url="http://download.opensuse.org/repositories/server:/ltsp"/>.
+      </para>
+      <para>
+       Once these packages are installed, partitions can be exported with the
+       <command>vbladed</command> command. The following example shows how to
+       export <filename class="devicefile">/dev/sdb1</filename> via AoE with a
+       major value of 0 and minor of 1 on the eth0 interface.:
+      </para>
+      <screen><command>vbladed</command> 0 1 eth0 /dev/sdb1</screen>
+      <para>
+       To be able to use the device KIWI needs the information which AoE device contains the root filesystem. In this example this is the device
+       <filename class="devicefile">/dev/etherd/e0.1</filename>:
+      </para>
+      <screen>AOEROOT=/dev/etherd/e0.1</screen>
+      <para>
+       In case of a compressed read-only image with
+       <systemitem class="filesystem">overlayfs</systemitem>, the AOEROOT
+       variable can also contain a second device for the write actions:
+      </para>
+      <screen>AOEROOT=/dev/etherd/e0.1,/dev/ram1</screen>
+      <para>
+       Writing to RAM as in the example above, is the default. You also can
+       specify another AoE location or a local device for writing the data.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><varname>COMBINED_IMAGE</varname>
+     </term>
+     <listitem>
+      <para>
+       If set to a non-empty string, indicates that the boot and the system
+       image need to be combined into a single bootable image. The first image
+       defines the read-write part and the second image defines the read-only
+       part.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><varname>CONF</varname>
+     </term>
+     <listitem>
+      <para>
+       Specifies a comma-separated list of source:target configuration
+       file names. The <literal>source</literal> corresponds to the path on the
+       TFTP server. It is downloaded to <literal>target</literal> on the
+       client. The download is only done when the file is missing on the
+       client or has a different md5-sum (in case the md5sum hash is supplied
+       with <literal>hash</literal>.
+       <!-- fs 2015-07-31: Go on from here -->
+       To achieve this, list of CONF
+       files (and VENDOR_CONF) files is kept on the client in the
+       <filename>/etc/KIWI/InstalledConfigFiles</filename> file, and is
+       compared to the CONF data gathered from the config.MAC and also from
+       other configuration files, e.g. config.group, if supplied.
+       Configuration files selected for comparison are those with same
+       (dest) path. If destination path (dest) is same for more
+       configuration files, only the last one is used (and VENDOR_CONF has
+       always precedence to CONF). By comparing configuration file lists
+       present in the current CONF, VENDOR_CONF variables and stored in the
+       backup file, following actions can result:
+       <table id="tab.configuration.files.synchronization">
+        <title>Configuration files synchronization possibilities</title>
+        <tgroup cols="3">
+         <colspec colwidth="1*"/>
+         <colspec colwidth="1*"/>
+         <colspec colwidth="1*"/>
+         <thead>
+          <row>
+           <entry>File from CONF,VENDOR_CONF</entry>
+           <entry>File from InstalledConfigFiles</entry>
+           <entry>Action</entry>
+          </row>
+         </thead>
+         <tbody>
+          <row>
+           <entry>hash_a</entry>
+           <entry>hash_a</entry>
+           <entry>nothing, keep</entry>
+          </row>
+          <row>
+           <entry>hash_a</entry>
+           <entry>hash_b</entry>
+           <entry>download from server</entry>
+          </row>
+          <row>
+           <entry>none</entry>
+           <entry>hash</entry>
+           <entry>download from server</entry>
+          </row>
+          <row>
+           <entry>hash</entry>
+           <entry>none</entry>
+           <entry>download from server</entry>
+          </row>
+          <row>
+           <entry>none</entry>
+           <entry>none</entry>
+           <entry>nothing, keep</entry>
+          </row>
+          <row>
+           <entry>present</entry>
+           <entry>not present</entry>
+           <entry>download from server (regardless hash)</entry>
+          </row>
+          <row>
+           <entry>not present</entry>
+           <entry>present</entry>
+           <entry>delete on client (regardles hash)</entry>
+          </row>
+         </tbody>
+        </tgroup>
+       </table>
+       Note that actual configuration files (or their md5sum hashes) on the
+       client machine are not tested, only data from the backup file are
+       used. This means that actual configuration files can be altered or
+       even deleted without triggering any action, or, on the other hand, an
+       action can be triggered without modifying the configuration files,
+       only by modifying or removing of the backup file.
+      </para>
+     </listitem>
+    </varlistentry>
+
+
+    
     <varlistentry>
      <term><varname>IMAGE</varname>
      </term>
@@ -335,88 +449,6 @@ DISK=device</screen>
         </listitem>
        </varlistentry>
       </variablelist>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
-     <term><varname>CONF</varname>
-     </term>
-     <listitem>
-      <para>
-       Specifies a comma-separated list of source:target configuration
-       files. The source (src) corresponds to the path on the TFTP server
-       and is loaded via TFTP. The download is made to the file on the
-       netboot client indicated by the target (dest). Download only happens
-       when configuration files are missing on the client or, if md5sum hash
-       is supplied ([hash]), when different. To achieve this, list of CONF
-       files (and VENDOR_CONF) files is kept on the client in the
-       <filename>/etc/KIWI/InstalledConfigFiles</filename> file, and is
-       compared to the CONF data gathered from the config.MAC and also from
-       other configuration files, e.g. config.group, if supplied.
-       Configuration files selected for comparison are those with same
-       (dest) path. If destination path (dest) is same for more
-       configuration files, only the last one is used (and VENDOR_CONF has
-       always precedence to CONF). By comparing configuration file lists
-       present in the current CONF, VENDOR_CONF variables and stored in the
-       backup file, following actions can result:
-       <table id="tab.configuration.files.synchronization">
-        <title>Configuration files synchronization possibilities</title>
-        <tgroup cols="3">
-         <colspec colwidth="1*"/>
-         <colspec colwidth="1*"/>
-         <colspec colwidth="1*"/>
-         <thead>
-          <row>
-           <entry>File from CONF,VENDOR_CONF</entry>
-           <entry>File from InstalledConfigFiles</entry>
-           <entry>Action</entry>
-          </row>
-         </thead>
-         <tbody>
-          <row>
-           <entry>hash_a</entry>
-           <entry>hash_a</entry>
-           <entry>nothing, keep</entry>
-          </row>
-          <row>
-           <entry>hash_a</entry>
-           <entry>hash_b</entry>
-           <entry>download from server</entry>
-          </row>
-          <row>
-           <entry>none</entry>
-           <entry>hash</entry>
-           <entry>download from server</entry>
-          </row>
-          <row>
-           <entry>hash</entry>
-           <entry>none</entry>
-           <entry>download from server</entry>
-          </row>
-          <row>
-           <entry>none</entry>
-           <entry>none</entry>
-           <entry>nothing, keep</entry>
-          </row>
-          <row>
-           <entry>present</entry>
-           <entry>not present</entry>
-           <entry>download from server (regardless hash)</entry>
-          </row>
-          <row>
-           <entry>not present</entry>
-           <entry>present</entry>
-           <entry>delete on client (regardles hash)</entry>
-          </row>
-         </tbody>
-        </tgroup>
-       </table>
-       Note that actual configuration files (or their md5sum hashes) on the
-       client machine are not tested, only data from the backup file are
-       used. This means that actual configuration files can be altered or
-       even deleted without triggering any action, or, on the other hand, an
-       action can be triggered without modifying the configuration files,
-       only by modifying or removing of the backup file.
-      </para>
      </listitem>
     </varlistentry>
     <varlistentry>
@@ -539,18 +571,6 @@ PART='5;S;x,2000;83;/'</screen>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><varname>COMBINED_IMAGE</varname>
-     </term>
-     <listitem>
-      <para>
-       If set to a non-empty string, indicates that the both image specified
-       needs to be combined into one bootable image, whereas the first image
-       defines the read-write part and the second image defines the
-       read-only part.
-      </para>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
      <term><varname>KIWI_INITRD</varname>
      </term>
      <listitem>
@@ -667,58 +687,6 @@ NBD-Write-Export-Name;/dev/NBD-Write-Device</screen>
        optional NBD-Write-Export-Name and NBD-Write-Device specifies a write
        COW location for the root filesystem. A separate write device is only
        used together with a union setup based on e.g overlayfs
-      </para>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
-     <term><varname>AOEROOT</varname>
-     </term>
-     <listitem>
-      <para>
-       Mount the system image root filesystem remotely via AoE (ATA over
-       Ethernet). This means there is a server which exports a block device
-       representing the root directory of the system image via the AoE
-       subsystem. The block device could be a partition of a real or a
-       virtual disk. In order to use the AoE subsystem I recommend to
-       install the
-       <package>aoetools</package>
-       and
-       <package>vblade</package>
-       packages from here first:
-       <ulink
-                url="http://download.opensuse.org/repositories/server:/ltsp"
-              />.
-       Once installed the following example shows how to export the local
-       <filename class="devicefile"
-                >/dev/sdb1</filename>
-       partition via AoE:
-      </para>
-<screen><command>vbladed</command> 0 1 eth0 /dev/sdb1</screen>
-      <para>
-       Some explanation about this command, each AoE device is identified by
-       a couple Major/Minor, with major between 0-65535 and minor between
-       0-255. AoE is based just over Ethernet on the OSI models so we need
-       to indicate which ethernet card we’ll use. In this example we
-       export <filename class="devicefile">/dev/sdb1</filename> with a major
-       value of 0 and minor of 1 on the eth0 interface. We are ready to use
-       our partition on the network! To be able to use the device KIWI needs
-       the information which AoE device contains the root filesystem. In our
-       example this is the device
-       <filename class="devicefile"
-                >/dev/etherd/e0.1</filename>.
-       According to this the AOEROOT variable must be set as follows:
-      </para>
-<screen>AOEROOT=/dev/etherd/e0.1</screen>
-      <para>
-       KIWI is now able to mount and use the specified AoE device as the
-       remote root filesystem. In case of a compressed read-only image with
-       <systemitem class="filesystem">overlayfs</systemitem>, the AOEROOT
-       variable can also contain a device for the write actions:
-      </para>
-<screen>AOEROOT=/dev/etherd/e0.1,/dev/ram1</screen>
-      <para>
-       Writing to RAM is the default but you also can set another device
-       like another aoe location or a local device for writing the data
       </para>
      </listitem>
     </varlistentry>
