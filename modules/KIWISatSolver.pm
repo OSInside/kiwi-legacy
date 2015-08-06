@@ -231,6 +231,8 @@ sub new {
         # Create SaT pool
         #------------------------------------------
         $pool = $this -> __createPool();
+        # Help with debugging solver issues
+        # pool->set_debuglevel(5);
         #==========================================
         # Create SaT repos
         #------------------------------------------
