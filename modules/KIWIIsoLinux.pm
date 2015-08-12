@@ -9,7 +9,7 @@
 # BELONGS TO    : Operating System images
 #               :
 # DESCRIPTION   : This module is used to create an ISO
-#               : filesystem based on genisoimage/mkisofs
+#               : filesystem based on mkisofs
 #               :
 #               :
 # STATUS        : Development
@@ -46,7 +46,7 @@ my @EXPORT_OK = qw ();
 sub new {
     # ...
     # Create a new KIWIIsoLinux object which is used to wrap
-    # around the major genisoimage/mkisofs call. This code requires a
+    # around the major mkisofs call. This code requires a
     # specific source directory structure which is:
     # ---
     # $source/boot/<arch>/loader
@@ -67,7 +67,7 @@ sub new {
     #------------------------------------------
     my $source       = shift;  # location of source tree
     my $dest         = shift;  # destination for the iso file
-    my $params       = shift;  # global genisoimage/mkisofs parameters
+    my $params       = shift;  # global mkisofs parameters
     my $mediacheck   = shift;  # run tagmedia with --check y/n
     my $cmdL         = shift;  # commandline params: optional
     my $xml          = shift;  # system image XML: optional
@@ -99,7 +99,7 @@ sub new {
     # Find iso tool to use on this system
     #------------------------------------------
     my $locator = KIWILocator -> instance();
-    my $genTool = $locator -> getExecPath('genisoimage');
+    my $genTool = $locator -> getExecPath('mkisofs');
     my $mkTool = $locator -> getExecPath('mkisofs');
     if ($genTool && -x $genTool) {
         $tool = $genTool;
@@ -1162,7 +1162,7 @@ sub createHybrid {
 #------------------------------------------
 sub relocateCatalog {
     # ...
-    # mkisofs/genisoimage leave one sector empty (or fill it with
+    # mkisofs leave one sector empty (or fill it with
     # version info if the ISODEBUG environment variable is set) before
     # starting the path table. We use this space to move the boot
     # catalog there. It's important that the boot catalog is at the
