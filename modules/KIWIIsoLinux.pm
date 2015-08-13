@@ -1406,6 +1406,11 @@ sub fixCatalog {
     substr($entry1, 12, 20) = pack "Ca19", 1, "Legacy (isolinux)";
     substr($boot_catalog, 32 * 1, 32) = $entry1;
     my $entry2 = substr $boot_catalog, 32 * 2, 32;
+    my $t = (unpack "C", $entry2)[0];
+    if ($t == 0x90 || $t == 0x91) {
+        close $ISO;
+        return;
+    }
     substr($entry2, 12, 20) = pack "Ca19", 1, "UEFI (elilo)";
     if((unpack "C", $entry2)[0] == 0x88) {
         substr($boot_catalog, 32 * 3, 32) = $entry2;
