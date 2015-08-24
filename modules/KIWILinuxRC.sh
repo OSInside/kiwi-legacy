@@ -5419,7 +5419,13 @@ function setupNetworkStatic {
         #======================================
         # activate network
         #--------------------------------------
-        local iface=$(cat /proc/net/dev|tail -n1|cut -d':' -f1|sed 's/ //g')
+        # Please note: It is assumed the last interface in the list is the
+        # one which should receive the interface config. While the loopback
+        # interface is skipped this could still result in an unexpected
+        # behavior.
+        local iface=$(
+            cat /proc/net/dev|grep -v lo:|tail -n1|cut -d':' -f1|sed 's/ //g'
+        )
         if ! setupNic $iface $hostip $netmask;then
             if [ -e "$root" ];then
                 Echo "Failed to set up the network: $iface"
