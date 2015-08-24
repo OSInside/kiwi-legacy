@@ -203,7 +203,6 @@ Provides:       kiwi-filesystem:ext4
 Provides:       kiwi-filesystem:squashfs
 Provides:       kiwi-packagemanager:zypper
 Provides:       kiwi-image:docker
-Provides:       kiwi-image:tbz
 Requires:       btrfsprogs
 Requires:       e2fsprogs
 Requires:       kiwi = %{version}
