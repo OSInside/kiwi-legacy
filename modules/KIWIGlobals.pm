@@ -1811,7 +1811,6 @@ sub readXMLFromImage {
     my $global = KIWIGlobals -> instance();
     my $profile= $cmdL -> getBuildProfiles();
     my $syszSize = 0;
-    my $originXMLPath;
     if ((! $system) || (! $cmdL)) {
         return;
     }
@@ -1852,13 +1851,6 @@ sub readXMLFromImage {
         # set root path to mountpoint
         #------------------------------------------
         $rootpath = $tmpdir;
-    }
-    #==========================================
-    # read origin path of XML description
-    #------------------------------------------
-    if (open my $FD, '<', "$rootpath/image/main::Prepare") {
-        my $idesc = <$FD>; close $FD;
-        $originXMLPath = $idesc;
     }
     #==========================================
     # read and validate XML description
@@ -1910,8 +1902,7 @@ sub readXMLFromImage {
     #------------------------------------------
     my %result = (
         "xml" => $xml,
-        "sysz_size" => $syszSize,
-        "originXMLPath" => $originXMLPath
+        "sysz_size" => $syszSize
     );
     return %result;
 }

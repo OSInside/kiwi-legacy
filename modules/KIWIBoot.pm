@@ -272,9 +272,13 @@ sub new {
         if ($read_result{sysz_size}) {
             $syszip = $read_result{sysz_size};
         }
-        if ($read_result{originXMLPath}) {
-            $this->{originXMLPath} = $read_result{originXMLPath};
-        }
+    }
+    #==========================================
+    # read origin path of XML description
+    #------------------------------------------
+    if (($system) && (open my $FD, '<', "$system/image/main::Prepare")) {
+        my $idesc = <$FD>; close $FD;
+        $this->{originXMLPath} = $idesc;
     }
     #==========================================
     # store systemdisk information
