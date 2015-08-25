@@ -620,7 +620,7 @@ sub __checkFilesystemTool {
             $toolError = 1;
         }
     } elsif ($typeName eq 'iso') {
-        my $genTool = $this -> {locator} -> getExecPath('genisoimage');
+        my $genTool = $this -> {locator} -> getExecPath('mkisofs');
         my $mkTool = $this -> {locator} -> getExecPath('mkisofs');
         if ((! $genTool) && (! $mkTool)) {
             $checkedFS = 'iso';
@@ -1801,7 +1801,7 @@ sub __hasBootLoaderTools {
     my $bootloader = $bldType -> getBootLoader();
     my $loader_check;
     if ($imgType eq 'iso') {
-        $loader_check = 'genisoimage';
+        $loader_check = 'mkisofs';
     } elsif ((! $bootloader) || ($bootloader eq 'grub')) {
         $loader_check = 'grub-install';
     } elsif (($bootloader eq 'grub2') && ($firmware eq 'bios')) {

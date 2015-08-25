@@ -83,7 +83,7 @@
         <package name="e2fsprogs"/>
         <package name="file"/>
         <package name="gawk"/>
-        <package name="genisoimage"/>
+        <package name="mkisofs"/>
         <package name="hdparm"/>
         <package name="hwinfo"/>
         <package name="initscripts"/>
