@@ -4052,6 +4052,9 @@ function searchImageISODevice {
     local isoinfo=/usr/bin/isoinfo
     mkdir -p /cdrom
     if [ ! -e $isoinfo ];then
+        isoinfo=/usr/lib/genisoimage/isoinfo
+    fi
+    if [ ! -e $isoinfo ];then
         systemException \
             "Can't find isoinfo tool in initrd" \
         "reboot"
