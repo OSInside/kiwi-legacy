@@ -34,7 +34,7 @@ fi
 
 # install required packages
 spec=/home/jenkins/kiwi/kiwi/rpm/kiwi.spec
-packages="grub grub2 mkisofs squashfs osc yum trang dosfstools"
+packages="grub grub2 genisoimage cdrkit-cdrtools-compat squashfs osc yum trang dosfstools"
 if ! zypper -n install --no-recommends $packages;then
     exit 1
 fi
