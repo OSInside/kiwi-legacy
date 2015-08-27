@@ -1039,6 +1039,27 @@ sub test_getBootTimeout {
 }
 
 #==========================================
+# test_getWWIDWaitTimeout
+#------------------------------------------
+sub test_getWWIDWaitTimeout {
+    # ...
+    # Test the getWWIDWaitTimeout method
+    # ---
+    my $this = shift;
+    my $kiwi = $this -> {kiwi};
+    my $typeDataObj = $this -> __getTypeObj();
+    my $time = $typeDataObj -> getWWIDWaitTimeout();
+    my $msg = $kiwi -> getMessage();
+    $this -> assert_str_equals('No messages set', $msg);
+    my $msgT = $kiwi -> getMessageType();
+    $this -> assert_str_equals('none', $msgT);
+    my $state = $kiwi -> getState();
+    $this -> assert_str_equals('No state set', $state);
+    $this -> assert_str_equals('42', $time);
+    return;
+}
+
+#==========================================
 # test_getCheckPrebuilt
 #------------------------------------------
 sub test_getCheckPrebuilt {
@@ -1941,6 +1962,7 @@ sub test_getXMLElement{
         . 'bootpartition="true" '
         . 'bootprofile="std" '
         . 'boottimeout="5" '
+        . 'wwid_wait_timeout="42" '
         . 'checkprebuilt="true" '
         . 'compressed="true" '
         . 'container="mycont" '
@@ -2544,6 +2566,35 @@ sub test_setBootTimeout {
     $state = $kiwi -> getState();
     $this -> assert_str_equals('No state set', $state);
     $this -> assert_str_equals('8', $time);
+    return;
+}
+
+#==========================================
+# test_setWWIDWaitTimeout
+#------------------------------------------
+sub test_setWWIDWaitTimeout {
+    # ...
+    # Test the setWWIDWaitTimeout method
+    # ---
+    my $this = shift;
+    my $kiwi = $this -> {kiwi};
+    my $typeDataObj = $this -> __getTypeObj();
+    $typeDataObj = $typeDataObj -> setWWIDWaitTimeout('2');
+    my $msg = $kiwi -> getMessage();
+    $this -> assert_str_equals('No messages set', $msg);
+    my $msgT = $kiwi -> getMessageType();
+    $this -> assert_str_equals('none', $msgT);
+    my $state = $kiwi -> getState();
+    $this -> assert_str_equals('No state set', $state);
+    $this -> assert_not_null($typeDataObj);
+    my $time = $typeDataObj -> getWWIDWaitTimeout();
+    $msg = $kiwi -> getMessage();
+    $this -> assert_str_equals('No messages set', $msg);
+    $msgT = $kiwi -> getMessageType();
+    $this -> assert_str_equals('none', $msgT);
+    $state = $kiwi -> getState();
+    $this -> assert_str_equals('No state set', $state);
+    $this -> assert_str_equals('2', $time);
     return;
 }
 
@@ -5389,6 +5440,7 @@ sub __getTypeObj {
                 bootpartsize           => '512',
                 bootprofile            => 'std',
                 boottimeout            => '5',
+                wwid_wait_timeout      => '42',
                 checkprebuilt          => 'true',
                 compressed             => 'true',
                 container              => 'mycont',

@@ -2542,6 +2542,14 @@ Specifies the volume ID (volume name or label) to be written
 into the master block. There is space for 32 characters.</a:documentation>
       </attribute>
     </define>
+    <define name="k.type.wwid_wait_timeout.attribute">
+      <attribute name="wwid_wait_timeout">
+        <a:documentation>Specifies the wait period in seconds after launching
+the multipath daemon to wait until all presented devices
+are available on the host. Default timeout is 3 seconds</a:documentation>
+        <data type="nonNegativeInteger"/>
+      </attribute>
+    </define>
     <define name="k.type.attlist">
       <interleave>
         <optional>
@@ -2673,6 +2681,9 @@ into the master block. There is space for 32 characters.</a:documentation>
         </optional>
         <optional>
           <ref name="k.type.volid.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.type.wwid_wait_timeout.attribute"/>
         </optional>
         <optional>
           <ref name="k.type.zfsoptions.attribute"/>

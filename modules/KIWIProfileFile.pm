@@ -379,6 +379,8 @@ sub __updateXMLType {
         $type -> getCompressed();
     $data{kiwi_boot_timeout} =
         $type -> getBootTimeout();
+    $data{kiwi_wwid_wait_timeout} =
+        $type -> getWWIDWaitTimeout();
     $data{kiwi_hybrid} =
         $type -> getHybrid();
     $data{kiwi_hybridpersistent} =

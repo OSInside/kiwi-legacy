@@ -3947,6 +3947,7 @@ sub __genTypeHash {
         'vga',
         'vhdfixedtag',
         'volid',
+        'wwid_wait_timeout',
         'zfsoptions',
         'zipl_targettype'
     );

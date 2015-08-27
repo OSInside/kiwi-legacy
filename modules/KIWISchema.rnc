@@ -1860,6 +1860,11 @@ div {
         ## Specifies the volume ID (volume name or label) to be written
         ## into the master block. There is space for 32 characters.
         attribute volid { text }
+    k.type.wwid_wait_timeout.attribute =
+        ## Specifies the wait period in seconds after launching
+        ## the multipath daemon to wait until all presented devices
+        ## are available on the host. Default timeout is 3 seconds
+        attribute wwid_wait_timeout { xsd:nonNegativeInteger }
     k.type.attlist =
         k.type.boot.attribute? &
         k.type.bootfilesystem.attribute? &
@@ -1905,6 +1910,7 @@ div {
         k.type.vga.attribute? &
         k.type.vhdfixedtag.attribute? &
         k.type.volid.attribute? &
+        k.type.wwid_wait_timeout.attribute? &
         k.type.zfsoptions.attribute?
     k.type =
         ## The Image Type of the Logical Extend

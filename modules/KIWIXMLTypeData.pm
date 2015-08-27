@@ -99,6 +99,7 @@ sub new {
     #     vga                    = ''
     #     vhdfixedtag            = ''
     #     volid                  = ''
+    #     wwid_wait_timeout      = ''
     #     zipl_targettype        = ''
     # }
     # ---
@@ -169,6 +170,7 @@ sub new {
         vga
         vhdfixedtag
         volid
+        wwid_wait_timeout
         zipl_targettype
     );
     $this->{supportedKeywords} = \%keywords;
@@ -233,6 +235,7 @@ sub new {
     $this->{vga}                    = $init->{vga};
     $this->{vhdfixedtag}            = $init->{vhdfixedtag};
     $this->{volid}                  = $init->{volid};
+    $this->{wwid_wait_timeout}      = $init->{wwid_wait_timeout};
     $this->{target_blocksize}       = $init->{target_blocksize};
     $this->{zfsoptions}             = $init->{zfsoptions};
     # Set default values
@@ -374,6 +377,14 @@ sub getBootTimeout {
     # ---
     my $this = shift;
     return $this->{boottimeout};
+}
+
+#==========================================
+# getWWIDWaitTimeout
+#------------------------------------------
+sub getWWIDWaitTimeout {
+    my $this = shift;
+    return $this->{wwid_wait_timeout};
 }
 
 #==========================================
@@ -938,6 +949,10 @@ sub getXMLElement {
     if ($bTime) {
         $element -> setAttribute('boottimeout', $bTime);
     }
+    my $wwidwait = $this -> getWWIDWaitTimeout();
+    if ($wwidwait) {
+        $element -> setAttribute('wwid_wait_timeout', $wwidwait);
+    }
     my $cPreb = $this -> getCheckPrebuilt();
     if ($cPreb) {
         $element -> setAttribute('checkprebuilt', $cPreb);
@@ -1287,6 +1302,27 @@ sub setBootTimeout {
         return;
     }
     $this->{boottimeout} = $time;
+    return $this;
+}
+
+#==========================================
+# setWWIDWaitTimeout
+#------------------------------------------
+sub setWWIDWaitTimeout {
+    # ...
+    # Set the configuration for the wwid wait timeout
+    # ---
+    my $this = shift;
+    my $time = shift;
+    if (! $time) {
+        my $kiwi = $this->{kiwi};
+        my $msg = 'setWWIDWaitTimeout: no timeout value given, retaining '
+            . 'current data.';
+        $kiwi -> error($msg);
+        $kiwi -> failed();
+        return;
+    }
+    $this->{wwid_wait_timeout} = $time;
     return $this;
 }
 

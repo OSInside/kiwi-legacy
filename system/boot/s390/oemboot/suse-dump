@@ -976,6 +976,7 @@ function identifyMultipath {
     local device_disks_new
     local disk
     local wwn
+    local wwid_timeout=3
     #======================================
     # check the tools
     #--------------------------------------
@@ -1015,7 +1016,10 @@ function identifyMultipath {
     # sleep for a while
     #--------------------------------------
     # make sure /etc/multipath/wwids are written
-    sleep 3
+    if [ ! -z "$kiwi_wwid_wait_timeout" ];then
+        wwid_timeout=$kiwi_wwid_wait_timeout
+    fi
+    sleep $wwid_timeout
     #======================================
     # strip list of disk devices
     #--------------------------------------
