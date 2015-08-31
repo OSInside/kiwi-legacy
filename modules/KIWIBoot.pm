@@ -1986,9 +1986,10 @@ sub setupBootDisk {
     #==========================================
     # Do we need a jump to boot partition
     #------------------------------------------
-    if (($firmware eq "efi")  ||
-        ($firmware eq "uefi") ||
-        ($firmware eq "vboot")
+    if (($firmware eq "efi")        ||
+        ($firmware eq "uefi")       ||
+        ($firmware eq "vboot")      ||
+        ($bootloader eq "ziplgrub")
     ) {
         $this->{jumpsize} = 200;
         $this -> __updateDiskSize ($this->{jumpsize});
@@ -2021,6 +2022,11 @@ sub setupBootDisk {
         } else {
             $needBootP = 0;
         }
+    }
+    if ($bootloader eq "ziplgrub") {
+        # in ziplgrub mode a jump partition boot/zipl is used.
+        # Therefore an additional extra boot partition is not needed
+        $needBootP = 0;
     }
     $this->{needBootP} = $needBootP;
     #==========================================
@@ -2283,7 +2289,11 @@ sub setupBootDisk {
         }
         if ($needJumpP) {
             $pnr++;
-            push @commands,"n","p:UEFI",$pnr,".","+".$this->{jumpsize}."M";
+            my $label = 'p:UEFI';
+            if ($bootloader eq "ziplgrub") {
+                $label = 'p:ZIPL';
+            }
+            push @commands,"n",$label,$pnr,".","+".$this->{jumpsize}."M";
             push @commands,"t",$pnr,"c";
             $this->{partids}{jump} = $pnr;
             $active = $pnr;
@@ -2789,7 +2799,13 @@ sub setupBootDisk {
         # build jump boot filesystem
         #------------------------------------------
         my $jump = $deviceMap{jump};
-        if (! $this -> setupFilesystem ('fat16',$jump,"jump","EFI")) {
+        my $filesystem = 'fat16';
+        my $label = 'EFI';
+        if ($bootloader eq "ziplgrub") {
+            $filesystem = 'ext2';
+            $label = 'ZIPL';
+        }
+        if (! $this -> setupFilesystem ($filesystem,$jump,"jump",$label)) {
             $this -> cleanStack ();
             return;
         }
@@ -2845,13 +2861,15 @@ sub setupBootDisk {
         $this -> cleanStack ();
         return;
     }
-    if ($firmware =~ /efi|uefi|vboot/) {
+    if (($firmware =~ /efi|uefi|vboot/) || ($bootloader eq "ziplgrub")) {
         #==========================================
         # Mount jump boot space on this disk
         #------------------------------------------
         my $subdir = 'efi';
         if ($firmware eq 'vboot') {
             $subdir = 'vboot';
+        } elsif ($bootloader eq "ziplgrub") {
+            $subdir = 'boot/zipl';
         }
         my $jump = $deviceMap{jump};
         KIWIQX::qxx ("mkdir -p $loopdir/$subdir");
@@ -3520,7 +3538,7 @@ sub setupBootLoaderStages {
     #==========================================
     # Grub2
     #------------------------------------------
-    if ($loader eq "grub2") {
+    if (($loader eq "grub2") || ($loader eq "ziplgrub")) {
         my $efipc;
         my $grubpc;
         my $grubofw;
@@ -3552,6 +3570,10 @@ sub setupBootLoaderStages {
             if ($firmware eq 'ofw') {
                 $grubofw = 'powerpc-ieee1275';
             }
+        } elsif ($arch eq 's390x') {
+            $grubpc = 's390x-emu';
+        } elsif ($arch eq 's390') {
+            $grubpc = 's390-emu';
         } else {
             $kiwi -> failed ();
             $kiwi -> error  (
@@ -3825,6 +3847,12 @@ sub setupBootLoaderStages {
             return;
         }
         $kiwi -> done();
+        #==========================================
+        # return early for ziplgrub
+        #------------------------------------------
+        if ($loader eq "ziplgrub") {
+            return $this;
+        }
         #==========================================
         # Lookup grub2 mkimage tool
         #------------------------------------------
@@ -5102,13 +5130,18 @@ sub setupBootLoaderConfiguration {
     #==========================================
     # Zipl
     #------------------------------------------
-    if ($loader eq "zipl") {
+    if (($loader eq "zipl") || ($loader eq "ziplgrub")) {
         #==========================================
-        # Create zipl.conf
+        # Create zipl configuration
         #------------------------------------------
         KIWIQX::qxx ("mkdir -p $tmpdir/boot/zipl");
         $cmdline =~ s/\n//g;
-        my $ziplconfig = "zipl.conf";
+        my $prefix = "boot";
+        my $ziplconfig = "$prefix/zipl.conf";
+        if ($loader eq "ziplgrub") {
+            $prefix = "boot/zipl";
+            $ziplconfig = "$prefix/config";
+        }
         $kiwi -> info ("Creating $ziplconfig config file...");
         if ($isxen) {
             $kiwi -> failed ();
@@ -5116,14 +5149,8 @@ sub setupBootLoaderConfiguration {
             $kiwi -> failed ();
             return;
         }
-        if (! -e "/boot/zipl") {
-            $kiwi -> failed ();
-            $kiwi -> error  ("Can't find bootloader: /boot/zipl");
-            $kiwi -> failed ();
-            return;
-        }
         my $FD = FileHandle -> new();
-        if (! $FD -> open (">$tmpdir/boot/$ziplconfig")) {
+        if (! $FD -> open (">$tmpdir/$ziplconfig")) {
             $kiwi -> failed ();
             $kiwi -> error  ("Couldn't create $ziplconfig: $!");
             $kiwi -> failed ();
@@ -5179,13 +5206,13 @@ sub setupBootLoaderConfiguration {
             $kiwi -> failed ();
             return;
         } elsif (($topic=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
-            print $FD "\t"."image   = boot/linux.vmx"."\n";
+            print $FD "\t"."image   = $prefix/linux.vmx"."\n";
             print $FD "\t"."target  = boot/zipl"."\n";
-            print $FD "\t"."ramdisk = boot/initrd.vmx,0x4000000"."\n";
+            print $FD "\t"."ramdisk = $prefix/initrd.vmx,0x4000000"."\n";
         } else {
-            print $FD "\t"."image   = boot/linux"."\n";
+            print $FD "\t"."image   = $prefix/linux"."\n";
             print $FD "\t"."target  = boot/zipl"."\n";
-            print $FD "\t"."ramdisk = boot/initrd,0x4000000"."\n";
+            print $FD "\t"."ramdisk = $prefix/initrd,0x4000000"."\n";
         }
         print $FD "\t"."parameters = \"$cmdline\""."\n";
         #==========================================
@@ -5199,13 +5226,13 @@ sub setupBootLoaderConfiguration {
                 $kiwi -> failed ();
                 return;
             } elsif (($topic=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
-                print $FD "\t"."image   = boot/linux.vmx"."\n";
+                print $FD "\t"."image   = $prefix/linux.vmx"."\n";
                 print $FD "\t"."target  = boot/zipl"."\n";
-                print $FD "\t"."ramdisk = boot/initrd.vmx,0x4000000"."\n";
+                print $FD "\t"."ramdisk = $prefix/initrd.vmx,0x4000000"."\n";
             } else {
-                print $FD "\t"."image   = boot/linux"."\n";
+                print $FD "\t"."image   = $prefix/linux"."\n";
                 print $FD "\t"."target  = boot/zipl"."\n";
-                print $FD "\t"."ramdisk = boot/initrd,0x4000000"."\n";
+                print $FD "\t"."ramdisk = $prefix/initrd,0x4000000"."\n";
             }
             print $FD "\t"."parameters = \"x11failsafe";
             print $FD " $cmdline\""."\n";
@@ -5967,7 +5994,7 @@ sub installBootLoader {
     #==========================================
     # Zipl
     #------------------------------------------
-    if ($loader eq "zipl") {
+    if (($loader eq "zipl") || ($loader eq "ziplgrub")) {
         $kiwi -> info ("Installing zipl on device: $diskname\n");
         my $haveRealDevice = 1;
         my $offset;
@@ -5994,7 +6021,39 @@ sub installBootLoader {
             $this -> cleanStack ();
             return;
         }
+        if ($loader eq "ziplgrub") {
+            #==========================================
+            # Mount jump partition in boot
+            #------------------------------------------
+            KIWIQX::qxx ("mkdir -p $mount/boot/zipl");
+            if (! KIWIGlobals -> instance() -> mount (
+                $deviceMap->{jump}, "$mount/boot/zipl", undef, $xml
+            )) {
+                $kiwi -> error ("Couldn't mount jump partition: $bootdev");
+                $kiwi -> failed ();
+                $this -> cleanStack ();
+                return;
+            }
+            #==========================================
+            # Move kiwi initrd to zipl stage
+            #------------------------------------------
+            $status = KIWIQX::qxx (
+                "mv $mount/boot/*.vmx $mount/boot/zipl 2>&1"
+            );
+            $result = $? >> 8;
+            if ($result != 0) {
+                $kiwi -> error  (
+                    "Couldn't move kiwi kernel/initrd: $status"
+                );
+                $kiwi -> failed ();
+                $this -> cleanStack ();
+                return;
+            }
+        }
         my $config = "$mount/boot/zipl.conf";
+        if ($loader eq "ziplgrub") {
+            $config = "$mount/boot/zipl/config";
+        }
         if (! $haveRealDevice) {
             #==========================================
             # set target type
@@ -6020,7 +6079,7 @@ sub installBootLoader {
                 }
             }
             #==========================================
-            # setup zipl caller options in zipl.conf
+            # setup zipl caller options
             #------------------------------------------
             my $readzconf = FileHandle -> new();
             if (! $readzconf -> open ($config)) {
@@ -6436,7 +6495,7 @@ sub setStoragePartition {
                 if (($cmd =~ /^[0-9]$/) && ($action ne "t")) {
                     next;
                 }
-                if (($cmd eq "83") || ($cmd eq "8e")) {
+                if (($cmd eq "83") || ($cmd eq "8e") || ($cmd eq "c")) {
                     $cmd = 1;
                 }
                 if ($cmd eq "82") {
