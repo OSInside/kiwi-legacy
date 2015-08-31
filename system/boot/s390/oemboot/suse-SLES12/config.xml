@@ -140,6 +140,8 @@
         <package name="sysvinit-tools"/>
         <package name="multipath-tools"/>
         <package name="xz"/>
+        <package name="grub2-s390x-emu"/>
+        <package name="grub2"/>
     </packages>
     <packages type="delete">
         <package name="cracklib-dict-full"/>

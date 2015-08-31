@@ -17,9 +17,14 @@
         <keytable>us.map.gz</keytable>
         <timezone>Europe/Berlin</timezone>
         <hwclock>utc</hwclock>
-        <type image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES12" bootloader="zipl" primary="true" target_blocksize="4096" zipl_targettype="CDL"/>
-        <type image="oem" filesystem="ext3" boot="oemboot/suse-SLES12" bootloader="zipl" target_blocksize="4096" zipl_targettype="CDL">
-            <systemdisk/>
+        <type image="vmx" filesystem="btrfs" boot="vmxboot/suse-SLES12" bootloader="ziplgrub" primary="true" target_blocksize="4096" zipl_targettype="CDL" kernelcmdline="cio_ignore=all,!ipldev,!condev">
+            <size unit="G">2</size>
+        </type>
+        <type image="oem" filesystem="btrfs" boot="oemboot/suse-SLES12" bootloader="ziplgrub" target_blocksize="4096" zipl_targettype="CDL" kernelcmdline="cio_ignore=all,!ipldev,!condev">
+            <size unit="G">2</size>
+            <systemdisk>
+                <volume name="home"/>
+            </systemdisk>
             <oemconfig>
                 <oem-swap>true</oem-swap>
                 <oem-swapsize>512</oem-swapsize>
@@ -39,8 +44,26 @@
         <package name="cmsfs"/>
         <package name="kernel-default"/>
         <package name="iputils"/>
+        <package name="iproute2"/>
         <package name="vim"/>
         <package name="s390-tools"/>
+        <package name="grub2-s390x-emu"/>
+        <package name="grub2"/>
+        <package name="lvm2"/>
+        <package name="tar"/>
+        <package name="parted"/>
+        <package name="systemd"/>
+        <package name="dracut"/>
+        <package name="wicked"/>
+        <package name="openssh"/>
+        <package name="rsync"/>
+        <package name="psmisc"/>
+        <package name="sudo"/>
+        <package name="dhcp-client"/>
+        <package name="which"/>
+        <package name="btrfsprogs"/>
+        <package name="kexec-tools"/>
+        <package name="less"/>
     </packages>
     <packages type="bootstrap">
         <package name="filesystem"/>
