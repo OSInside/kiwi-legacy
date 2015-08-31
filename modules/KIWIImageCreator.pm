@@ -123,6 +123,12 @@ sub initialize {
     $this->{configDir}        = $cmdL -> getConfigDir();
     $this->{buildType}        = $cmdL -> getBuildType();
     #==========================================
+    # Cleanup buildtype from cmdL if boot image
+    #------------------------------------------
+    if ($this->{configDir} =~ /(iso|oem|net|vmx)boot/) {
+        undef $this->{buildType};
+    }
+    #==========================================
     # Store default image type
     #------------------------------------------
     if (! $this->{buildType}) {
