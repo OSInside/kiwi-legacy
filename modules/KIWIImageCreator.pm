@@ -125,7 +125,9 @@ sub initialize {
     #==========================================
     # Cleanup buildtype from cmdL if boot image
     #------------------------------------------
-    if ($this->{configDir} =~ /(iso|oem|net|vmx)boot/) {
+    if (($this->{configDir}) &&
+        ($this->{configDir} =~ /(iso|oem|net|vmx)boot/)
+    ) {
         undef $this->{buildType};
     }
     #==========================================
