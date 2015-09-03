@@ -994,10 +994,13 @@ sub isols {
     my $iso  = $this -> {dest};
     my $fd   = FileHandle -> new();
     my $dir  = "/";
+    my $isoinfo_opts = " -R -l -i $iso 2>/dev/null |";
     my $files;
     local $_;
-    if (! $fd -> open ("isoinfo -R -l -i $iso 2>/dev/null |")) {
-        return;
+    if (! $fd -> open ("/usr/bin/isoinfo" . $isoinfo_opts)) {
+        if (! $fd -> open ("/usr/lib/genisoimage/isoinfo" . $isoinfo_opts)) {
+            return;
+        }
     }
     while(<$fd>) {
         if(/^Directory listing of\s*(\/.*\/)/) {
