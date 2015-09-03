@@ -4267,7 +4267,7 @@ function searchImageISODevice {
     if [ ! -x $isoinfo ]; then
        isoinfo=/usr/lib/genisoimage/isoinfo
     fi
-    if [ ! -e $isoinfo ];then
+    if [ ! -x $isoinfo ];then
         systemException \
             "Can't find isoinfo tool in initrd" \
         "reboot"
