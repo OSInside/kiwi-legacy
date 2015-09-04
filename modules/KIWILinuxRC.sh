@@ -6692,7 +6692,7 @@ function mountSystemClicFS {
     #======================================
     # mount root over clic
     #--------------------------------------
-    size=`stat -c %s $roDir/fsdata.ext4`
+    size=$(stat -c %s $roDir/fsdata.ext4)
     size=$((size/512))
     # we don't want reserved blocks...
     tune2fs -m 0 $roDir/fsdata.ext4 >/dev/null
@@ -6707,9 +6707,15 @@ function mountSystemClicFS {
     mount -o loop,noatime,nodiratime,errors=remount-ro,barrier=0 \
         $roDir/fsdata.ext4 $prefix
     if [ ! $? = 0 ];then
-        Echo "Failed to mount ext3 clic container"
+        Echo "Failed to mount ext4 clic container"
         return 1
     fi
+    # Give fuse enough time to settle for I/O in the ext4 container
+    # Unconditional waiting is never a good idea however I couldn't
+    # find a good solution to this problem because a lookup on read
+    # or write could cause an ro remount of the ext4 container
+    # Thus we just sleep a while before proceeding
+    sleep 5
     export haveClicFS=yes
     return 0
 }
