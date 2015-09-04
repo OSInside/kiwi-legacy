@@ -5371,9 +5371,11 @@ sub __setDefaultBuildType {
         $defType = $this->{imageConfig}
             ->{kiwi_default}->{preferences}->{types}->{$defTypeName};
         my $type = $defType->{type};
-        my $prim = $type -> getPrimary();
-        if ($prim && $prim eq 'true') {
-            $primaryCount++;
+        if ($type) {
+            my $prim = $type -> getPrimary();
+            if ($prim && $prim eq 'true') {
+                $primaryCount++;
+            }
         }
     }
     # /.../

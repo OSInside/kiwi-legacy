@@ -2251,6 +2251,7 @@ sub __isValidBootloader {
         berryboot
         yaboot
         zipl
+        ziplgrub
     );
     if (! $supported{$bootL} ) {
         my $msg = "$caller: specified bootloader '$bootL' is not supported.";

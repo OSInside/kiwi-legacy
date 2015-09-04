@@ -930,6 +930,8 @@ function installBootLoader {
         x86_64-extlinux) installBootLoaderSyslinux ;;
         s390-zipl)       installBootLoaderS390 ;;
         s390x-zipl)      installBootLoaderS390 ;;
+        s390-ziplgrub)   installBootLoaderS390Grub ;;
+        s390x-ziplgrub)  installBootLoaderS390Grub ;;
         aarch64-uboot)   installBootLoaderUBoot ;;
         aarch64-grub2)   installBootLoaderGrub2 ;;
         *)
@@ -1012,6 +1014,80 @@ function installBootLoaderUBoot {
     else
         runHook installUBoot "$@"
     fi
+}
+#======================================
+# installBootLoaderS390Grub
+#--------------------------------------
+function installBootLoaderS390Grub {
+    # /.../
+    # Create/Delete
+    # - create active_devices.txt
+    # - delete kiwi initrd/kernel .vmx files
+    # Run grub2-mkconfig
+    # - create new boot/grub2/grub.cfg
+    # Run grub2-install
+    # - creates a new boot/zipl/config
+    # - creates zipl initrd which loads grub2/kexec
+    # - install zipl
+    # ----
+    local IFS=$IFS_ORIG
+    local confTool=grub2-mkconfig
+    local instTool=grub2-install
+    local confFile_grub=/boot/grub2/grub.cfg
+    local active_devs=/boot/zipl/active_devices.txt
+    local deviceID=$(cat /sys/firmware/ipl/device)
+    #======================================
+    # mount zipl jump partition
+    #--------------------------------------
+    if [ ! -z "$kiwi_JumpPart" ];then
+        local jdev=$(ddn $imageDiskDevice $kiwi_JumpPart)
+        local label=$(blkid $jdev -s LABEL -o value)
+        if [ "$label" = "ZIPL" ];then
+            mkdir -p /boot/zipl
+            if ! mount $jdev /boot/zipl;then
+                Echo "Failed to mount zipl boot partition"
+                return 1
+            fi
+        fi
+    fi
+    #======================================
+    # Create active devices information
+    #--------------------------------------
+    echo $deviceID > $active_devs
+    #======================================
+    # create grub2 configuration
+    #--------------------------------------
+    if ! lookup $confTool &>/dev/null;then
+        Echo "System image doesn't provide $confTool"
+        Echo "Can't create bootloader configuration"
+        return 1
+    fi
+    $confTool > $confFile_grub
+    if [ ! $? = 0 ];then
+        Echo "Failed to create grub2 boot configuration"
+        return 1
+    fi
+    #======================================
+    # Run grub2-install
+    #--------------------------------------
+    if ! lookup $instTool &>/dev/null;then
+        Echo "System image doesn't provide $instTool"
+        Echo "Can't install bootloader"
+        return 1
+    fi
+    if ! $instTool;then
+        Echo "Failed to install bootloader"
+        return 1
+    fi
+    #======================================
+    # Delete kiwi initrd files
+    #--------------------------------------
+    rm -f /boot/zipl/*.vmx
+    #======================================
+    # umount zipl boot partition
+    #--------------------------------------
+    mountpoint -q /boot/zipl && umount /boot/zipl
+    return 0
 }
 #======================================
 # installBootLoaderS390
@@ -1653,6 +1729,8 @@ function setupBootLoader {
         x86_64-extlinux) eval setupBootLoaderSyslinux $para ;;
         s390-zipl)       eval setupBootLoaderS390 $para ;;
         s390x-zipl)      eval setupBootLoaderS390 $para ;;
+        s390-ziplgrub)   eval setupBootLoaderS390Grub $para ;;
+        s390x-ziplgrub)  eval setupBootLoaderS390Grub $para ;;
         ppc*)            eval setupBootLoaderYaboot $para ;;
         aarch64-uboot)   eval setupBootLoaderUBoot $para ;;
         aarch64-grub2)   eval setupBootLoaderGrub2 $para ;;
@@ -1757,6 +1835,8 @@ function setupBootLoaderRecovery {
         x86_64-extlinux) eval setupBootLoaderSyslinuxRecovery $para ;;
         s390-zipl)       eval setupBootLoaderS390Recovery $para ;;
         s390x-zipl)      eval setupBootLoaderS390Recovery $para ;;
+        s390-ziplgrub)   eval setupBootLoaderS390Recovery $para ;;
+        s390x-ziplgrub)  eval setupBootLoaderS390Recovery $para ;;
         *)
         systemException \
             "*** boot loader setup for $arch-$loader not implemented ***" \
@@ -2161,6 +2241,137 @@ function setupBootLoaderUBoot {
     else
         runHook setupUBoot "$@"
     fi
+}
+#======================================
+# setupBootLoaderS390Grub
+#--------------------------------------
+function setupBootLoaderS390Grub {
+    # /.../
+    # create grub2 configuration for s390
+    # ----
+    local IFS=$IFS_ORIG
+    #======================================
+    # function paramters
+    #--------------------------------------
+    local mountPrefix=$1  # mount path of the image
+    local destsPrefix=$2  # base dir for the config files
+    local gnum=$3         # grub boot partition ID
+    local rdev=$4         # grub root partition
+    local gfix=$5         # grub title postfix
+    local swap=$6         # optional swap partition
+    #======================================
+    # local variables
+    #--------------------------------------
+    local kname=$(uname -r)
+    local loader_type=grub2
+    local timeout=10
+    local title
+    local cmdline
+    local vesa
+    #======================================
+    # setup path names
+    #--------------------------------------
+    local orig_sysimg_profile=$mountPrefix/image/.profile
+    local inst_default_grub=$destsPrefix/etc/default/grub
+    local inst_default_grubdev=$destsPrefix/etc/default/grub_installdevice
+    local inst_default_grubmap=$destsPrefix/boot/grub2/device.map
+    local inst_sysb=$destsPrefix/etc/sysconfig/bootloader
+    #======================================
+    # setup ID device names
+    #--------------------------------------
+    local rootByID=$(getDiskID $rdev)
+    local swapByID=$(getDiskID $swap swap)
+    local diskByID=$(getDiskID $imageDiskDevice)
+    if [ "$FSTYPE" = "zfs" ];then
+        rootByID="ZFS=kiwipool/ROOT/system-1"
+    fi
+    #======================================
+    # check for system image .profile
+    #--------------------------------------
+    if [ -f $orig_sysimg_profile ];then
+        importFile < $orig_sysimg_profile
+    fi
+    #======================================
+    # setup title name
+    #--------------------------------------
+    if [ -z "$gfix" ];then
+        gfix="unknown"
+    fi
+    if [ -z "$kiwi_oemtitle" ] && [ ! -z "$kiwi_displayname" ];then
+        kiwi_oemtitle=$kiwi_displayname
+    fi
+    if ! echo $gfix | grep -E -q "OEM|USB|VMX|NET|unknown";then
+        title=$(makeLabel "$gfix")
+    elif [ -z "$kiwi_oemtitle" ];then
+        title=$(makeLabel "$kname [ $gfix ]")
+    else
+        title=$(makeLabel "$kiwi_oemtitle [ $gfix ]")
+    fi
+    #======================================
+    # check for kernel options
+    #--------------------------------------
+    if [ ! -z "$rootByID" ];then
+        cmdline="$cmdline root=$rootByID"
+    fi
+    if [ ! -z "$diskByID" ];then
+        cmdline="$cmdline disk=$diskByID"
+    fi
+    if [ ! -z "$swapByID" ];then
+        cmdline="$cmdline resume=$swapByID"
+    fi
+    if [ ! -z "$kiwi_cmdline" ];then
+        cmdline="$cmdline $kiwi_cmdline"
+    fi
+    if [[ ! $cmdline =~ quiet ]];then
+        cmdline="$cmdline quiet"
+    fi
+    #======================================
+    # check for boot TIMEOUT
+    #--------------------------------------
+    if [ ! -z "$kiwi_boot_timeout" ];then
+        timeout=$kiwi_boot_timeout
+    fi
+    #======================================
+    # write etc/default/grub
+    #--------------------------------------
+    mkdir -p $destsPrefix/etc/default
+cat > $inst_default_grub << EOF
+GRUB_DISTRIBUTOR=$(printf %q "$title")
+GRUB_DEFAULT=0
+GRUB_HIDDEN_TIMEOUT=0
+GRUB_HIDDEN_TIMEOUT_QUIET=true
+GRUB_TIMEOUT=$timeout
+GRUB_CMDLINE_LINUX_DEFAULT="$cmdline"
+GRUB_TERMINAL=console
+EOF
+    #======================================
+    # enable rollback capability
+    #--------------------------------------
+    if [ "$FSTYPE" = "btrfs" ];then
+        echo "SUSE_BTRFS_SNAPSHOT_BOOTING=true" >> $inst_default_grub
+    fi
+    #======================================
+    # write etc/default/grub_installdevice
+    #--------------------------------------
+cat > $inst_default_grubdev << EOF
+$diskByID
+EOF
+    #======================================
+    # write boot/grub2/device.map
+    #--------------------------------------
+    mkdir -p $destsPrefix/boot/grub2
+cat > $inst_default_grubmap << EOF
+(hd0) $diskByID
+EOF
+    #======================================
+    # write sysconfig/bootloader
+    #--------------------------------------
+    mkdir -p $destsPrefix/etc/sysconfig
+cat > $inst_sysb << EOF
+LOADER_TYPE=$loader_type
+DEFAULT_APPEND="$cmdline"
+FAILSAFE_APPEND="$failsafe $cmdline"
+EOF
 }
 #======================================
 # setupBootLoaderS390
@@ -3408,6 +3619,10 @@ function updateBootDeviceFstab {
         if [ ! -z "$fstype" ] && [ "$label" = "EFI" ];then
             jdev=$(getDiskID $jdev)
             echo "$jdev /boot/efi $fstype defaults 0 0" >> $nfstab
+        fi
+        if [ ! -z "$fstype" ] && [ "$label" = "ZIPL" ];then
+            jdev=$(getDiskID $jdev)
+            echo "$jdev /boot/zipl $fstype defaults 0 0" >> $nfstab
         fi
     fi
 }

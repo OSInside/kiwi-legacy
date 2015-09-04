@@ -136,6 +136,8 @@
         <package name="s390-tools"/>
         <package name="psmisc"/>
         <package name="sysvinit-tools"/>
+        <package name="grub2-s390x-emu"/>
+        <package name="grub2"/>
     </packages>
     <packages type="delete">
         <package name="cracklib-dict-full"/>

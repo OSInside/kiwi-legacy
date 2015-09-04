@@ -1634,7 +1634,7 @@ div {
         ## At the moment grub, zipl and sys|extlinux are supported
         attribute bootloader {
             "extlinux" | "grub" | "grub2" | "syslinux" |
-            "zipl" | "yaboot" | "uboot" | "berryboot"
+            "zipl" | "yaboot" | "uboot" | "berryboot" | "ziplgrub"
         }
     k.type.target_blocksize =
         ## Specifies the image blocksize in bytes which has to match
