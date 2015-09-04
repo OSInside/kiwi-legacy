@@ -9,7 +9,7 @@
 # BELONGS TO    : Operating System images
 #               :
 # DESCRIPTION   : This module is used to create an ISO
-#               : filesystem based on genisoimage/mkisofs
+#               : filesystem based on mkisofs
 #               :
 #               :
 # STATUS        : Development
@@ -46,7 +46,7 @@ my @EXPORT_OK = qw ();
 sub new {
     # ...
     # Create a new KIWIIsoLinux object which is used to wrap
-    # around the major genisoimage/mkisofs call. This code requires a
+    # around the major mkisofs call. This code requires a
     # specific source directory structure which is:
     # ---
     # $source/boot/<arch>/loader
@@ -67,7 +67,7 @@ sub new {
     #------------------------------------------
     my $source       = shift;  # location of source tree
     my $dest         = shift;  # destination for the iso file
-    my $params       = shift;  # global genisoimage/mkisofs parameters
+    my $params       = shift;  # global mkisofs parameters
     my $mediacheck   = shift;  # run tagmedia with --check y/n
     my $cmdL         = shift;  # commandline params: optional
     my $xml          = shift;  # system image XML: optional
@@ -99,7 +99,7 @@ sub new {
     # Find iso tool to use on this system
     #------------------------------------------
     my $locator = KIWILocator -> instance();
-    my $genTool = $locator -> getExecPath('genisoimage');
+    my $genTool = $locator -> getExecPath('mkisofs');
     my $mkTool = $locator -> getExecPath('mkisofs');
     if ($genTool && -x $genTool) {
         $tool = $genTool;
@@ -994,10 +994,13 @@ sub isols {
     my $iso  = $this -> {dest};
     my $fd   = FileHandle -> new();
     my $dir  = "/";
+    my $isoinfo_opts = " -R -l -i $iso 2>/dev/null |";
     my $files;
     local $_;
-    if (! $fd -> open ("isoinfo -R -l -i $iso 2>/dev/null |")) {
-        return;
+    if (! $fd -> open ("/usr/bin/isoinfo" . $isoinfo_opts)) {
+        if (! $fd -> open ("/usr/lib/genisoimage/isoinfo" . $isoinfo_opts)) {
+            return;
+        }
     }
     while(<$fd>) {
         if(/^Directory listing of\s*(\/.*\/)/) {
@@ -1162,7 +1165,7 @@ sub createHybrid {
 #------------------------------------------
 sub relocateCatalog {
     # ...
-    # mkisofs/genisoimage leave one sector empty (or fill it with
+    # mkisofs leave one sector empty (or fill it with
     # version info if the ISODEBUG environment variable is set) before
     # starting the path table. We use this space to move the boot
     # catalog there. It's important that the boot catalog is at the
@@ -1406,6 +1409,11 @@ sub fixCatalog {
     substr($entry1, 12, 20) = pack "Ca19", 1, "Legacy (isolinux)";
     substr($boot_catalog, 32 * 1, 32) = $entry1;
     my $entry2 = substr $boot_catalog, 32 * 2, 32;
+    my $t = (unpack "C", $entry2)[0];
+    if ($t == 0x90 || $t == 0x91) {
+        close $ISO;
+        return;
+    }
     substr($entry2, 12, 20) = pack "Ca19", 1, "UEFI (elilo)";
     if((unpack "C", $entry2)[0] == 0x88) {
         substr($boot_catalog, 32 * 3, 32) = $entry2;

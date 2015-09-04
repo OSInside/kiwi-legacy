@@ -22,6 +22,15 @@ if [ -z "$1" ] || [ -z "$2" ];then
     exit 1
 fi
 
+isoinfo=/usr/bin/isoinfo
+if [ ! -x $isoinfo ]; then
+   isoinfo=/usr/lib/genisoimage/isoinfo
+fi
+if [ ! -x $isoinfo ];then
+    echo "Can't find isoinfo in /usr/bin or /usr/lib/genisoimage"
+    exit 1
+fi
+
 #==========================================
 # Functions
 #------------------------------------------
@@ -82,7 +91,7 @@ fi
 #==========================================
 # check if file is a kiwi live iso
 #------------------------------------------
-if ! isoinfo -l -i $image 2>/dev/null | grep -q LIVEBOOT;then
+if ! $isoinfo -l -i $image 2>/dev/null | grep -q LIVEBOOT;then
     echo "Can't find live iso signature"
     echo "Make sure the given kiwi image file is of type: image=iso"
     clean
@@ -144,7 +153,7 @@ echo 'set prefix=($root)/boot/grub2'   >> $conf
 #------------------------------------------
 conf=$tmpdir/boot/grub2/grub.cfg
 arch=x86_64
-if ! isoinfo -p -i $image | grep -q X86_64;then
+if ! $isoinfo -p -i $image | grep -q X86_64;then
     arch=i386
     title=$(echo $image_base | sed -e s@\.i.86.*@@)
 else
