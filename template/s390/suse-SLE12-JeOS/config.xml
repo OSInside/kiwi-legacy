@@ -64,6 +64,7 @@
         <package name="btrfsprogs"/>
         <package name="kexec-tools"/>
         <package name="less"/>
+        <package name="patch"/>
     </packages>
     <packages type="bootstrap">
         <package name="filesystem"/>
