@@ -505,6 +505,9 @@ sub init {
         KIWIQX::qxx ("mkdir -p $root/etc/sysconfig");
         KIWIQX::qxx ("mkdir -m 755 -p $root/var");
         KIWIQX::qxx ("chown root:root $root/var");
+        KIWIQX::qxx ("mkdir -m 755 -p $root/run");
+        KIWIQX::qxx ("chown root:root $root/run");
+        KIWIQX::qxx ("ln -s /run $root/var/run");
         # for zypper we need a yast log dir
         if ($packager eq "zypper") {
             KIWIQX::qxx ("mkdir -p $root/var/log/YaST2");
@@ -1640,7 +1643,6 @@ sub setupMount {
         push (@mountList,"$root/dev");
     }
     if (! -e "$root/var/run/dbus/pid") {
-        KIWIQX::qxx ("mkdir -p $root/var/run/dbus");
         KIWIQX::qxx ("mount -n --bind /var/run/dbus $root/var/run/dbus");
         push (@mountList,"$root/var/run/dbus");
     }
