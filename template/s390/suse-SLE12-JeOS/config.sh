@@ -11,6 +11,12 @@ test -f /.profile && . /.profile
 echo "Configure image: [$kiwi_iname]..."
 
 #======================================
+# Live patching
+#--------------------------------------
+patch -p0 < /do-convertfs.sh.patch || exit 1
+rm -f /do-convertfs.sh.patch
+
+#======================================
 # Mount system filesystems
 #--------------------------------------
 baseMount

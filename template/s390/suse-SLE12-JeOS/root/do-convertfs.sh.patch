@@ -1,0 +1,23 @@
+--- /usr/lib/dracut/modules.d/30convertfs/do-convertfs.sh	2015-09-07 09:07:36.892942252 +0200
++++ /usr/lib/dracut/modules.d/30convertfs/do-convertfs.sh	2015-09-07 09:07:50.912942252 +0200
+@@ -8,10 +8,8 @@
+     info "Converting both /var/run to /run tmpfs and /usr/bin -> /bin"
+     if getargbool 0 rd.debug; then
+         bash -x convertfs "$NEWROOT" 2>&1 | vinfo
+-        exit 0
+     else
+         convertfs "$NEWROOT" 2>&1 | vinfo
+-        exit 0
+     fi
+ fi
+ 
+@@ -20,9 +18,7 @@
+     info "Converting /var/run to /run tmpfs"
+     if getargbool 0 rd.debug; then
+         bash -x convertrunfs "$NEWROOT" 2>&1 | vinfo
+-        exit 0
+     else
+         convertrunfs "$NEWROOT" 2>&1 | vinfo
+-        exit 0
+     fi
+ fi
