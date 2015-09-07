@@ -1989,7 +1989,7 @@ sub setupBootDisk {
     if (($firmware eq "efi")        ||
         ($firmware eq "uefi")       ||
         ($firmware eq "vboot")      ||
-        ($bootloader eq "ziplgrub")
+        ($bootloader eq "grub2_s390x_emu")
     ) {
         $this->{jumpsize} = 200;
         $this -> __updateDiskSize ($this->{jumpsize});
@@ -2023,8 +2023,8 @@ sub setupBootDisk {
             $needBootP = 0;
         }
     }
-    if ($bootloader eq "ziplgrub") {
-        # in ziplgrub mode a jump partition boot/zipl is used.
+    if ($bootloader eq "grub2_s390x_emu") {
+        # in grub2_s390x_emu mode a jump partition boot/zipl is used.
         # Therefore an additional extra boot partition is not needed
         $needBootP = 0;
     }
@@ -2290,7 +2290,7 @@ sub setupBootDisk {
         if ($needJumpP) {
             $pnr++;
             my $label = 'p:UEFI';
-            if ($bootloader eq "ziplgrub") {
+            if ($bootloader eq "grub2_s390x_emu") {
                 $label = 'p:ZIPL';
             }
             push @commands,"n",$label,$pnr,".","+".$this->{jumpsize}."M";
@@ -2801,7 +2801,7 @@ sub setupBootDisk {
         my $jump = $deviceMap{jump};
         my $filesystem = 'fat16';
         my $label = 'EFI';
-        if ($bootloader eq "ziplgrub") {
+        if ($bootloader eq "grub2_s390x_emu") {
             $filesystem = 'ext2';
             $label = 'ZIPL';
         }
@@ -2861,14 +2861,14 @@ sub setupBootDisk {
         $this -> cleanStack ();
         return;
     }
-    if (($firmware =~ /efi|uefi|vboot/) || ($bootloader eq "ziplgrub")) {
+    if (($firmware =~ /efi|uefi|vboot/) || ($bootloader eq "grub2_s390x_emu")) {
         #==========================================
         # Mount jump boot space on this disk
         #------------------------------------------
         my $subdir = 'efi';
         if ($firmware eq 'vboot') {
             $subdir = 'vboot';
-        } elsif ($bootloader eq "ziplgrub") {
+        } elsif ($bootloader eq "grub2_s390x_emu") {
             $subdir = 'boot/zipl';
         }
         my $jump = $deviceMap{jump};
@@ -3538,7 +3538,7 @@ sub setupBootLoaderStages {
     #==========================================
     # Grub2
     #------------------------------------------
-    if (($loader eq "grub2") || ($loader eq "ziplgrub")) {
+    if (($loader eq "grub2") || ($loader eq "grub2_s390x_emu")) {
         my $efipc;
         my $grubpc;
         my $grubofw;
@@ -3848,9 +3848,9 @@ sub setupBootLoaderStages {
         }
         $kiwi -> done();
         #==========================================
-        # return early for ziplgrub
+        # return early for grub2_s390x_emu
         #------------------------------------------
-        if ($loader eq "ziplgrub") {
+        if ($loader eq "grub2_s390x_emu") {
             return $this;
         }
         #==========================================
@@ -5130,7 +5130,7 @@ sub setupBootLoaderConfiguration {
     #==========================================
     # Zipl
     #------------------------------------------
-    if (($loader eq "zipl") || ($loader eq "ziplgrub")) {
+    if (($loader eq "zipl") || ($loader eq "grub2_s390x_emu")) {
         #==========================================
         # Create zipl configuration
         #------------------------------------------
@@ -5138,7 +5138,7 @@ sub setupBootLoaderConfiguration {
         $cmdline =~ s/\n//g;
         my $prefix = "boot";
         my $ziplconfig = "$prefix/zipl.conf";
-        if ($loader eq "ziplgrub") {
+        if ($loader eq "grub2_s390x_emu") {
             $prefix = "boot/zipl";
             $ziplconfig = "$prefix/config";
         }
@@ -5994,7 +5994,7 @@ sub installBootLoader {
     #==========================================
     # Zipl
     #------------------------------------------
-    if (($loader eq "zipl") || ($loader eq "ziplgrub")) {
+    if (($loader eq "zipl") || ($loader eq "grub2_s390x_emu")) {
         $kiwi -> info ("Installing zipl on device: $diskname\n");
         my $haveRealDevice = 1;
         my $offset;
@@ -6021,7 +6021,7 @@ sub installBootLoader {
             $this -> cleanStack ();
             return;
         }
-        if ($loader eq "ziplgrub") {
+        if ($loader eq "grub2_s390x_emu") {
             #==========================================
             # Mount jump partition in boot
             #------------------------------------------
@@ -6051,7 +6051,7 @@ sub installBootLoader {
             }
         }
         my $config = "$mount/boot/zipl.conf";
-        if ($loader eq "ziplgrub") {
+        if ($loader eq "grub2_s390x_emu") {
             $config = "$mount/boot/zipl/config";
         }
         if (! $haveRealDevice) {

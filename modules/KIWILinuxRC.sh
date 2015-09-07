@@ -930,8 +930,7 @@ function installBootLoader {
         x86_64-extlinux) installBootLoaderSyslinux ;;
         s390-zipl)       installBootLoaderS390 ;;
         s390x-zipl)      installBootLoaderS390 ;;
-        s390-ziplgrub)   installBootLoaderS390Grub ;;
-        s390x-ziplgrub)  installBootLoaderS390Grub ;;
+        s390x-grub2_s390x_emu)  installBootLoaderS390Grub ;;
         aarch64-uboot)   installBootLoaderUBoot ;;
         aarch64-grub2)   installBootLoaderGrub2 ;;
         *)
@@ -1729,8 +1728,7 @@ function setupBootLoader {
         x86_64-extlinux) eval setupBootLoaderSyslinux $para ;;
         s390-zipl)       eval setupBootLoaderS390 $para ;;
         s390x-zipl)      eval setupBootLoaderS390 $para ;;
-        s390-ziplgrub)   eval setupBootLoaderS390Grub $para ;;
-        s390x-ziplgrub)  eval setupBootLoaderS390Grub $para ;;
+        s390x-grub2_s390x_emu)  eval setupBootLoaderS390Grub $para ;;
         ppc*)            eval setupBootLoaderYaboot $para ;;
         aarch64-uboot)   eval setupBootLoaderUBoot $para ;;
         aarch64-grub2)   eval setupBootLoaderGrub2 $para ;;
@@ -1835,8 +1833,7 @@ function setupBootLoaderRecovery {
         x86_64-extlinux) eval setupBootLoaderSyslinuxRecovery $para ;;
         s390-zipl)       eval setupBootLoaderS390Recovery $para ;;
         s390x-zipl)      eval setupBootLoaderS390Recovery $para ;;
-        s390-ziplgrub)   eval setupBootLoaderS390Recovery $para ;;
-        s390x-ziplgrub)  eval setupBootLoaderS390Recovery $para ;;
+        s390x-grub2_s390x_emu)  eval setupBootLoaderS390Recovery $para ;;
         *)
         systemException \
             "*** boot loader setup for $arch-$loader not implemented ***" \
