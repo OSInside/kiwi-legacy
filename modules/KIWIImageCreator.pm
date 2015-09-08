@@ -2074,6 +2074,15 @@ sub __addTypeToBootXML {
         $kiwi -> done();
     }
     #==========================================
+    # wwid_wait_timeout
+    #------------------------------------------
+    my $wwid_timeout = $systemType -> getWWIDWaitTimeout();
+    if (defined $wwid_timeout) {
+        $kiwi -> info ("--> wwid_wait_timeout: $wwid_timeout");
+        $bootType -> setWWIDWaitTimeout($wwid_timeout);
+        $kiwi -> done();
+    }
+    #==========================================
     # devicepersistency
     #------------------------------------------
     my $devicepersistency = $systemType -> getDevicePersistent();
