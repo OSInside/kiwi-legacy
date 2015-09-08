@@ -114,7 +114,7 @@
         <package name="bc"/>
         <package name="e2fsprogs"/>
         <package name="gettext"/>
-        <package name="mkisofs"/>
+        <package name="genisoimage"/>
         <package name="syslinux"/>
         <package name="sysvinit-tools"/>
     </packages>

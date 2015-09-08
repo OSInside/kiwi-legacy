@@ -98,7 +98,7 @@
         <package name="fbiterm"/>
         <package name="file"/>
         <package name="fribidi"/>
-        <package name="mkisofs"/>
+        <package name="genisoimage"/>
         <package name="gettext-runtime"/>
         <package name="hwinfo"/>
         <package name="iputils"/>
