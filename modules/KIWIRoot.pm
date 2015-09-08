@@ -1124,7 +1124,7 @@ sub setup {
     #========================================
     # create .profile from <image> tags
     #----------------------------------------
-    $kiwi -> info ("Create .profile environment");
+    $kiwi -> info ("Create .profile environment\n");
     my $profile = KIWIProfileFile -> new();
     if (! $profile) {
         return;
@@ -1141,7 +1141,6 @@ sub setup {
     if (! $status) {
         return;
     }
-    $kiwi -> done();
     #========================================
     # configure the system
     #----------------------------------------

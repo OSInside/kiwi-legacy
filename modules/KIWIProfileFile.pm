@@ -125,6 +125,7 @@ sub new {
         kiwi_timezone
         kiwi_type
         kiwi_vga
+        kiwi_wwid_wait_timeout
         kiwi_xendomain
     );
     #==========================================
