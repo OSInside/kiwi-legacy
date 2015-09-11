@@ -500,6 +500,7 @@ Requires:       parted
 Requires:       genisoimage
 Requires:       cdrkit-cdrtools-compat
 Requires:       multipath-tools
+Requires:       mtools
 Requires:       squashfs
 %endif
 %if 0%{?rhel_version} || 0%{?centos_version}
