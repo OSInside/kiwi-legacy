@@ -70,13 +70,6 @@ sed -i -e's/^syntax on/" syntax on/' /etc/vimrc
 suseConfig
 
 #======================================
-# Add Factory repo
-#--------------------------------------
-baseRepo="http://download.opensuse.org/openSUSE:Factory:ARM/standard"
-baseName="suse-13.2"
-zypper ar $baseRepo $baseName
-
-#======================================
 # Remove yast if not in use
 #--------------------------------------
 suseRemoveYaST

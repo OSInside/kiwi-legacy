@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="6.1" name="LimeJeOS-13.2">
+<image schemaversion="6.1" name="LimeJeOS-SLE12">
     <description type="system">
         <author>Marcus Schäfer</author>
         <contact>ms@novell.com</contact>
         <specification>
-            13.2 JeOS image for arm boards
+            SUSE Linux Enterprise 12 JeOS image for arm boards
         </specification>
     </description>
     <profiles>
@@ -25,7 +25,7 @@
         <bootloader-theme>openSUSE</bootloader-theme>
     </preferences>
     <preferences profiles="raspberryFlavour">
-        <type image="oem" filesystem="ext4" boot="oemboot/suse-13.2" firmware="vboot" bootloader="berryboot" fsmountoptions="noatime,nobarrier" kernelcmdline="dwc_otg.lpm_enable=0 console=ttyAMA0,115200 kgdboc=ttyAMA0,115200 console=tty1 rootfstype=ext4 rootflags=commit=120,data=writeback rootwait rw" editbootconfig="berryboot-image-setup">
+        <type image="oem" filesystem="ext4" boot="oemboot/suse-SLES12" firmware="vboot" bootloader="berryboot" fsmountoptions="noatime,nobarrier" kernelcmdline="dwc_otg.lpm_enable=0 console=ttyAMA0,115200 kgdboc=ttyAMA0,115200 console=tty1 rootfstype=ext4 rootflags=commit=120,data=writeback rootwait rw" editbootconfig="berryboot-image-setup">
             <systemdisk/>
             <oemconfig>
                 <oem-swapsize>500</oem-swapsize>
@@ -37,13 +37,7 @@
         <user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
     </users>
     <repository type="yast2" profiles="raspberryFlavour">
-        <source path="http://download.opensuse.org/ports/armv6hl/factory/repo/oss"/>
-    </repository>
-    <repository type="rpm-md" priority="5" profiles="raspberryFlavour">
-        <source path="obs://devel:ARM:Factory:Contrib:RaspberryPi/standard"/>
-    </repository>
-    <repository type="rpm-md" priority="10" profiles="raspberryFlavour">
-        <source path="obs://devel:ARM:Factory:Contrib:RaspberryPi:upstream/standard"/>
+        <source path="obs://SUSE:SLE-12:GA/standard"/>
     </repository>
     <packages type="bootstrap" profiles="raspberryFlavour">
         <package name="kernel-default" bootinclude="true"/>

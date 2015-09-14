@@ -1,4 +1,0 @@
-Build instructions for local build
-==================================
-* call kiwi:
-  kiwi --build suse-13.2-JeOS --add-profile raspberryFlavour -d /tmp/myimage

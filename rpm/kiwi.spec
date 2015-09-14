@@ -791,9 +791,7 @@ rm -rf $RPM_BUILD_ROOT
 %exclude %{_datadir}/kiwi/image/suse-SLE12-JeOS
 %endif
 %ifarch %arm aarch64
-%exclude %{_datadir}/kiwi/image/suse-12.3-JeOS
-%exclude %{_datadir}/kiwi/image/suse-13.1-JeOS
-%exclude %{_datadir}/kiwi/image/suse-13.2-JeOS
+%exclude %{_datadir}/kiwi/image/suse-SLE12-JeOS
 %endif
 %{_datadir}/kiwi/.revision
 %{_datadir}/kiwi/modules
@@ -946,9 +944,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/kiwi/image/suse-SLE12-JeOS
 %endif
 %ifarch %arm aarch64
-%{_datadir}/kiwi/image/suse-12.3-JeOS
-%{_datadir}/kiwi/image/suse-13.1-JeOS
-%{_datadir}/kiwi/image/suse-13.2-JeOS
+%{_datadir}/kiwi/image/suse-SLE12-JeOS
 %endif
 %ifarch ppc ppc64 ppc64le
 %{_datadir}/kiwi/image/suse-SLE11-JeOS
