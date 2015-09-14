@@ -142,7 +142,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 %endif
 # Leap 42.1:
 %if %suse_version == 1315 && 0%{?is_opensuse}
-%define mysystems leap-42.1
+%define mysystems suse-leap42.1
 %endif
 # Tumbleweed:
 # Current Tumbleweed version, moving target
