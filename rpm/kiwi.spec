@@ -139,7 +139,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 # SLE12: NOTE: potential problems ahead with the first SP of SLES12
 %if %suse_version == 1315
 %ifarch x86_64
-%define mysystems suse-SLES12 suse-SLED12
+%define mysystems suse-SLES12
 %else
 %define mysystems suse-SLES12
 %endif
@@ -147,13 +147,13 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 # redefine for the SLE11 case if no sles_version exists
 # SLE11: NOTE: this works only because openSUSE 11.1 is out of scope
 %if %suse_version == 1110
-%define mysystems suse-SLES11 suse-SLED11
+%define mysystems suse-SLES11
 %endif
 %endif
 # SLES with sles_version macro
 %if 0%{?sles_version}
 %ifarch %ix86 x86_64
-%define mysystems suse-SLES%{sles_version} suse-SLED%{sles_version}
+%define mysystems suse-SLES%{sles_version}
 %else
 %define mysystems suse-SLES%{sles_version}
 %endif
@@ -747,7 +747,7 @@ fi
 %post -n kiwi-templates
 #============================================================
 # Clean up old old template directories if present
-for dist in 10.1 10.2 10.3 11.0 11.1 11.2 11.3 12.1 12.2 SLE10 SLED10; do
+for dist in 10.1 10.2 10.3 11.0 11.1 11.2 11.3 12.1 12.2 12.3 SLE10 SLED10; do
     if ( [ -d /usr/share/kiwi/image/suse-$dist-JeOS ] ) ; then
         rm -rf /usr/share/kiwi/image/suse-$dist-JeOS
     fi
