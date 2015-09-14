@@ -136,13 +136,18 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 %if 0%{?suse_version}
 %define mysystems %(echo `export VER=%{suse_version}; echo "suse-${VER:0:2}.${VER:2:1}"`)
 # redefine for the SLES case if no sles_version exists
-# SLE12: NOTE: potential problems ahead with the first SP of SLES12
-%if %suse_version == 1315
-%ifarch x86_64
-%define mysystems suse-SLES12
-%else
+# SLE12:
+%if %suse_version == 1315 && !0%{?is_opensuse}
 %define mysystems suse-SLES12
 %endif
+# Leap 42.1:
+%if %suse_version == 1315 && 0%{?is_opensuse}
+%define mysystems leap-42.1
+%endif
+# Tumbleweed:
+# Current Tumbleweed version, moving target
+%if %suse_version == 1330
+%define mysystems suse-tumbleweed
 %endif
 # redefine for the SLE11 case if no sles_version exists
 # SLE11: NOTE: this works only because openSUSE 11.1 is out of scope
