@@ -14,7 +14,7 @@
         <profile name="vmxFlavour" description="VMX with default kernel" import="true"/>
     </profiles>
     <preferences>
-        <type image="iso" primary="true" boot="isoboot/leap-42.1" flags="overlay" hybrid="true" firmware="efi" kernelcmdline="splash"/>
+        <type image="iso" primary="true" boot="isoboot/suse-leap42.1" flags="overlay" hybrid="true" firmware="efi" kernelcmdline="splash"/>
         <version>1.42.1</version>
         <packagemanager>zypper</packagemanager>
         <locale>en_US</locale>
@@ -27,16 +27,16 @@
         <bootloader-theme>openSUSE</bootloader-theme>
     </preferences>
     <preferences profiles="ec2Flavour">
-        <type image="vmx" filesystem="ext3" boot="vmxboot/leap-42.1" bootprofile="ec2" bootkernel="ec2k" bootloader="grub2" kernelcmdline="xencons=xvc0 console=xvc0 multipath=off splash" firmware="ec2"/>
+        <type image="vmx" filesystem="ext3" boot="vmxboot/suse-leap42.1" bootprofile="ec2" bootkernel="ec2k" bootloader="grub2" kernelcmdline="xencons=xvc0 console=xvc0 multipath=off splash" firmware="ec2"/>
     </preferences>
     <preferences profiles="xenFlavour">
-        <type image="vmx" filesystem="ext3" boot="vmxboot/leap-42.1" bootprofile="xen" bootkernel="xenk" bootloader="grub2" kernelcmdline="splash">
+        <type image="vmx" filesystem="ext3" boot="vmxboot/suse-leap42.1" bootprofile="xen" bootkernel="xenk" bootloader="grub2" kernelcmdline="splash">
             <machine memory="512" domain="domU">
                 <vmdisk id="0" device="/dev/xvda" controller="ide"/>
                 <vmnic interface=""/>
             </machine>
         </type>
-        <type image="oem" filesystem="ext3" boot="oemboot/leap-42.1" bootprofile="xen" bootkernel="xenk" installiso="true" bootloader="grub2" kernelcmdline="splash">
+        <type image="oem" filesystem="ext3" boot="oemboot/suse-leap42.1" bootprofile="xen" bootkernel="xenk" installiso="true" bootloader="grub2" kernelcmdline="splash">
             <oemconfig>
                 <oem-systemsize>2048</oem-systemsize>
                 <oem-swap>true</oem-swap>
@@ -47,14 +47,14 @@
         </type>
     </preferences>
     <preferences profiles="vmxFlavour">
-        <type image="vmx" filesystem="ext3" boot="vmxboot/leap-42.1" format="ova" bootloader="grub2" kernelcmdline="splash" firmware="efi">
+        <type image="vmx" filesystem="ext3" boot="vmxboot/suse-leap42.1" format="ova" bootloader="grub2" kernelcmdline="splash" firmware="efi">
             <machine memory="4096" guestOS="sles-64" HWversion="7" arch="x86_64" ovftype="vmware">
                 <vmdisk controller="lsilogic" id="0" diskmode="streamOptimized"/>
                 <vmdvd controller="ide" id="0"/>
                 <vmnic driver="vmxnet3" interface="0" mode="bridged"/>
             </machine>
         </type>
-        <type image="oem" filesystem="ext3" boot="oemboot/leap-42.1" installiso="true" bootloader="grub2" kernelcmdline="splash" firmware="efi">
+        <type image="oem" filesystem="ext3" boot="oemboot/suse-leap42.1" installiso="true" bootloader="grub2" kernelcmdline="splash" firmware="efi">
             <oemconfig>
                 <oem-systemsize>2048</oem-systemsize>
                 <oem-swap>true</oem-swap>
