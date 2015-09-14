@@ -1,5 +1,0 @@
-Welcome to SUSENebula
-
-The next few setup steps will guide you through the final configuration of the 
-Cloud Head node. After this is complete, your head node is ready for business.
-

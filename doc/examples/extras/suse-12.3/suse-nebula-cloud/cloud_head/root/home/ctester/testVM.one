@@ -1,5 +1,0 @@
-NAME = "openSUSE test image"
-PATH = "/home/ctester/suse-12.3-SUSENebula-guest.x86_64-1.0.0.qcow2"
-PUBLIC = YES
-DESCRIPTION = "A test image to test the basic functionality of the openSUSE based OpenNebula setup"
-
