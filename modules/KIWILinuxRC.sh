@@ -2365,7 +2365,7 @@ EOF
     #--------------------------------------
     mkdir -p $destsPrefix/etc/sysconfig
 cat > $inst_sysb << EOF
-LOADER_TYPE=$loader_type
+LOADER_TYPE="$loader_type"
 DEFAULT_APPEND="$cmdline"
 FAILSAFE_APPEND="$failsafe $cmdline"
 EOF
