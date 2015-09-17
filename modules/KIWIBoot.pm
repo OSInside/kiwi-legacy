@@ -4581,28 +4581,58 @@ sub setupBootLoaderConfiguration {
             if ($iso) {
                 print $FD "\t"."echo Loading linux...\n";
                 print $FD "\t"."set gfxpayload=$gfx"."\n";
-                print $FD "\t".'$linux '.$bootpath.'/linux';
+                if (($isxen) && ($firmware eq 'bios')) {
+                    # Xen's pygrub loader doesn't like command variables
+                    print $FD "\t".'linux '.$bootpath.'/linux';
+                } else {
+                    print $FD "\t".'$linux '.$bootpath.'/linux';
+                }
                 print $FD ' ramdisk_size=512000 ramdisk_blocksize=4096';
                 print $FD " cdinst=1";
             } elsif (($topic=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
                 print $FD "\t"."echo Loading linux.vmx...\n";
                 print $FD "\t"."set gfxpayload=$gfx"."\n";
-                print $FD "\t".'$linux '.$bootpath.'/linux.vmx';
+                if (($isxen) && ($firmware eq 'bios')) {
+                    # Xen's pygrub loader doesn't like command variables
+                    print $FD "\t".'linux '.$bootpath.'/linux.vmx';
+                } else {
+                    print $FD "\t".'$linux '.$bootpath.'/linux.vmx';
+                }
             } else {
                 print $FD "\t"."echo Loading linux...\n";
                 print $FD "\t"."set gfxpayload=$gfx"."\n";
-                print $FD "\t".'$linux '.$bootpath.'/linux';
+                if (($isxen) && ($firmware eq 'bios')) {
+                    # Xen's pygrub loader doesn't like command variables
+                    print $FD "\t".'linux '.$bootpath.'/linux';
+                } else {
+                    print $FD "\t".'$linux '.$bootpath.'/linux';
+                }
             }
             print $FD $cmdline;
             if ($iso) {
                 print $FD "\t"."echo Loading initrd...\n";
-                print $FD "\t".'$initrd '.$bootpath.'/initrd'."\n";
+                if (($isxen) && ($firmware eq 'bios')) {
+                    # Xen's pygrub loader doesn't like command variables
+                    print $FD "\t".'initrd '.$bootpath.'/initrd'."\n";
+                } else {
+                    print $FD "\t".'$initrd '.$bootpath.'/initrd'."\n";
+                }
             } elsif (($topic=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split/)) {
                 print $FD "\t"."echo Loading initrd.vmx...\n";
-                print $FD "\t".'$initrd '.$bootpath.'/initrd.vmx'."\n";
+                if (($isxen) && ($firmware eq 'bios')) {
+                    # Xen's pygrub loader doesn't like command variables
+                    print $FD "\t".'initrd '.$bootpath.'/initrd.vmx'."\n";
+                } else {
+                    print $FD "\t".'$initrd '.$bootpath.'/initrd.vmx'."\n";
+                }
             } else {
                 print $FD "\t"."echo Loading initrd...\n";
-                print $FD "\t".'$initrd '.$bootpath.'/initrd'."\n";
+                if (($isxen) && ($firmware eq 'bios')) {
+                    # Xen's pygrub loader doesn't like command variables
+                    print $FD "\t".'initrd '.$bootpath.'/initrd'."\n";
+                } else {
+                    print $FD "\t".'$initrd '.$bootpath.'/initrd'."\n";
+                }
             }
             print $FD "}\n";
         } else {
