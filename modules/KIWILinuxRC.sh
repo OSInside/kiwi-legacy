@@ -6967,6 +6967,21 @@ function mountSystem {
     return $retval
 }
 #======================================
+# mountLivecd
+#--------------------------------------
+function mountLivecd {
+    if [ -n $TORAM ]; then
+        mkdir -p ${LIVECD}R $LIVECD && eval mount $cdopt $biosBootDevice ${LIVECD}R
+        SIZE="$(/usr/bin/du -s /${LIVECD}R | /usr/bin/gawk '{print int($1*1.1)}')"
+        test -n $SIZE || SIZE="800000"
+        /bin/mount -t tmpfs -o size=${SIZE}k tmpfs $LIVECD
+        cp -r ${LIVECD}R/* $LIVECD/
+        umount ${LIVECD}R
+    else
+	mkdir -p $LIVECD && eval mount $cdopt $biosBootDevice $LIVECD
+    fi
+}
+#======================================
 # cleanDirectory
 #--------------------------------------
 function cleanDirectory {
