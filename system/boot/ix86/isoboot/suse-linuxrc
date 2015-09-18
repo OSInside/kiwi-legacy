@@ -213,7 +213,7 @@ if [ -z "$UNIONFS_CONFIG" ] && [ -z "$COMBINED_IMAGE" ];then
         systemException "Failed to mount RW root filesystem" "reboot"
     fi
     cdopt=$(CDMountOption $biosBootDevice)
-    mountLivecd
+    mountOrCopyLiveCD 
     #======================================
     # 12.2) Create RO Link list
     #--------------------------------------
@@ -250,7 +250,7 @@ else
         Echo "Mounting compressed unified tree..."
     fi
     cdopt=$(CDMountOption $biosBootDevice)
-    mountLivecd
+    mountOrCopyLiveCD 
     if ! mountSystem /dev/loop1 $LIVECD/$imageReadOnly;then
         systemException "Failed to mount root filesystem" "reboot"
     fi
