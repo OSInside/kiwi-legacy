@@ -4489,7 +4489,30 @@ sub setupBootLoaderConfiguration {
         } else {
             print $FD "search --file --set=root $bootpath/$this->{mbrid}"."\n";
         }
-        print $FD 'set prefix=($root)'.$bootpath.'/grub2'."\n";
+        # Setup prefix path to the same as we see when installing grub.
+        # This is done for safety reasons if grub for whatever reason
+        # was able to load its config file but has no knowledge about
+        # its module path.
+        #
+        # However we don't set the prefix for Xen guest images. This is
+        # because Xen PV guests boot via a first stage loader pygrub/pvgrub
+        # and interpret the grub config file differently. One inconsistency
+        # for example is that pvgrub searches for the grub modules at
+        # a different place. Setting up the prefix will point pvgrub to
+        # the wrong place and the system does not boot.
+        #
+        # Therefore this is skipped in the Xen case. Because we can't
+        # distinguish in a safe way if the image is used as PV or HVM guest
+        # (actually we could only guess that according to the used kernel)
+        # this setup affects Xen HVM images too. In this full virtualized
+        # Xen mode the guest boots with the installed bootloader and it
+        # is expected that the grub env provides the correct prefix setup
+        #
+        # If you encounter that we need a prefix setup for Xen HVM images
+        # it has to be addressed here
+        if ((! $isxen) || ($isxen && $xendomain eq "dom0")) {
+            print $FD 'set prefix=($root)'.$bootpath.'/grub2'."\n";
+        }
         # print $FD "set debug=all\n";
         print $FD 'set linux=linux'."\n";
         print $FD 'set initrd=initrd'."\n";
