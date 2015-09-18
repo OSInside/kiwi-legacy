@@ -3378,6 +3378,9 @@ sub setupPartIDs {
         if ($this->{partids}{boot}) {
             $entry = "kiwi_BootPart=\"$this->{partids}{boot}\"\n";
             if (! $currentIDs{$entry}) { print $ID_FD $entry }
+        } else {
+            $entry = "kiwi_BootPart=\"$this->{partids}{root}\"\n";
+            if (! $currentIDs{$entry}) { print $ID_FD $entry }
         }
         if ($this->{partids}{jump}) {
             $entry = "kiwi_JumpPart=\"$this->{partids}{jump}\"\n";
