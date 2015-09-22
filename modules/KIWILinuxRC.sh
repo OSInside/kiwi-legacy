@@ -6967,6 +6967,22 @@ function mountSystem {
     return $retval
 }
 #======================================
+# mountOrCopyLiveCD
+#--------------------------------------
+function mountOrCopyLiveCD {
+    if [ -n $TORAM ]; then
+        Echo "Copying CD system into tmpfs"
+        mkdir -p ${LIVECD}R $LIVECD && eval mount $cdopt $biosBootDevice ${LIVECD}R
+        SIZE="$(du -s /${LIVECD}R | gawk '{print int($1*1.1)}')"
+        mount -t tmpfs -o size=${SIZE}k tmpfs $LIVECD
+        cp -ar ${LIVECD}R/* $LIVECD/
+        umount ${LIVECD}R
+        rmdir ${LIVECD}R
+    else
+        mkdir -p $LIVECD && eval mount $cdopt $biosBootDevice $LIVECD
+    fi
+}
+#======================================
 # cleanDirectory
 #--------------------------------------
 function cleanDirectory {

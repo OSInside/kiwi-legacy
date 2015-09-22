@@ -65,6 +65,9 @@ includeKernelParameters
 if grep -i -q "livecd_config=[a-zA-Z0-9/]" /proc/cmdline; then
     export LIVECD_CONFIG=`sed 's/.*livecd_config=\([^ ]*\).*/\1/' /proc/cmdline`
 fi
+if grep -qi "toram" /proc/cmdline; then
+    export TORAM=true
+fi
 
 #======================================
 # 3) Prepare module load support 
@@ -210,7 +213,7 @@ if [ -z "$UNIONFS_CONFIG" ] && [ -z "$COMBINED_IMAGE" ];then
         systemException "Failed to mount RW root filesystem" "reboot"
     fi
     cdopt=$(CDMountOption $biosBootDevice)
-    mkdir -p $LIVECD && eval mount $cdopt $biosBootDevice $LIVECD
+    mountOrCopyLiveCD 
     #======================================
     # 12.2) Create RO Link list
     #--------------------------------------
@@ -247,7 +250,7 @@ else
         Echo "Mounting compressed unified tree..."
     fi
     cdopt=$(CDMountOption $biosBootDevice)
-    mkdir -p $LIVECD && eval mount $cdopt $biosBootDevice $LIVECD
+    mountOrCopyLiveCD 
     if ! mountSystem /dev/loop1 $LIVECD/$imageReadOnly;then
         systemException "Failed to mount root filesystem" "reboot"
     fi
