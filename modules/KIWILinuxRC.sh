@@ -6970,12 +6970,18 @@ function mountSystem {
 # mountOrCopyLiveCD
 #--------------------------------------
 function mountOrCopyLiveCD {
-    if [ -n $TORAM ]; then
+    local SIZE
+    if [ ! -z "$TORAM" ]; then
         Echo "Copying CD system into tmpfs"
-        mkdir -p ${LIVECD}R $LIVECD && eval mount $cdopt $biosBootDevice ${LIVECD}R
+        mkdir -p ${LIVECD}R $LIVECD && \
+            eval mount $cdopt $biosBootDevice ${LIVECD}R
         SIZE="$(du -s /${LIVECD}R | gawk '{print int($1*1.1)}')"
         mount -t tmpfs -o size=${SIZE}k tmpfs $LIVECD
-        cp -ar ${LIVECD}R/* $LIVECD/
+        if ! cp -ar ${LIVECD}R/* $LIVECD; then
+            systemException \
+                "Copying CD contents to tmpfs failed" \
+            "reboot"
+        fi
         umount ${LIVECD}R
         rmdir ${LIVECD}R
     else
