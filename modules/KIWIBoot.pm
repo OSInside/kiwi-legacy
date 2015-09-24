@@ -4550,8 +4550,6 @@ sub setupBootLoaderConfiguration {
             print $FD "\t".'loadfont '.$fodir.$theme.'/'.$font."\n";
         }
         print $FD "\t".'set theme='.$fodir.$theme.'/theme.txt'."\n";
-        print $FD "\t".'background_image -m stretch ';
-        print $FD $fodir.$theme.'/background.png'."\n";
         print $FD 'fi'."\n";
         # ----
         my $bootTimeout = 10;
