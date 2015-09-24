@@ -4540,6 +4540,7 @@ sub setupBootLoaderConfiguration {
         #
         print $FD 'if loadfont $font ;then'."\n";
         print $FD "\t"."set gfxmode=$gfx"."\n";
+        print $FD "\t"."insmod all_video"."\n";
         print $FD "\t".'terminal_input gfxterm'."\n";
         print $FD "\t".'if terminal_output gfxterm;then true;else'."\n";
         print $FD "\t\t".'terminal gfxterm'."\n";
