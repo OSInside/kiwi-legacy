@@ -3939,7 +3939,7 @@ sub setupBootLoaderStages {
             my @modules  = @ofw_core_modules;
             my $core     = "$tmpdir/boot/grub2/$format/core.elf";
             my $core_opts;
-            $core_opts = "-O $format -o $core -c $earlyboot";
+            $core_opts = "-O $format -o $core -c $earlyboot ";
             $core_opts.= "-d $tmpdir/$stages{ofw}{stageSRC}";
             my $status = KIWIQX::qxx (
                 "$grub2_mkimage $core_opts @modules 2>&1"
