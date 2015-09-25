@@ -4540,6 +4540,7 @@ sub setupBootLoaderConfiguration {
         #
         print $FD 'if loadfont $font ;then'."\n";
         print $FD "\t"."set gfxmode=$gfx"."\n";
+        print $FD "\t"."insmod all_video"."\n";
         print $FD "\t".'terminal_input gfxterm'."\n";
         print $FD "\t".'if terminal_output gfxterm;then true;else'."\n";
         print $FD "\t\t".'terminal gfxterm'."\n";
@@ -4550,8 +4551,6 @@ sub setupBootLoaderConfiguration {
             print $FD "\t".'loadfont '.$fodir.$theme.'/'.$font."\n";
         }
         print $FD "\t".'set theme='.$fodir.$theme.'/theme.txt'."\n";
-        print $FD "\t".'background_image -m stretch ';
-        print $FD $fodir.$theme.'/background.png'."\n";
         print $FD 'fi'."\n";
         # ----
         my $bootTimeout = 10;
