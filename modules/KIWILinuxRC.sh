@@ -1324,8 +1324,9 @@ EOF
     # install grub2 in BIOS mode
     #--------------------------------------
     if [ ! -z "$kiwi_OfwGrub" ];then
+        local prepdev=$(ddn $imageDiskDevice $kiwi_OfwGrub)
         # install powerpc grub2
-        $instTool $imagePrepDevice 1>&2
+        $instTool $prepdev 1>&2
         if [ ! $? = 0 ];then
             Echo "Failed to install boot loader"
             return 1
