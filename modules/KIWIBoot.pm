@@ -4531,21 +4531,30 @@ sub setupBootLoaderConfiguration {
         print $FD 'fi'."\n";
         print $FD "set default=$defaultBootNr\n";
         print $FD "set font=$bootpath/unicode.pf2"."\n";
-        # setup to use boot graphics. If this is unwanted
-        # you can disable it with the following alternative
-        # console setup
-        #
-        # print $FD "\t".'terminal_input console'."\n";
-        # print $FD "\t".'terminal_output console'."\n";
-        #
-        print $FD 'if loadfont $font ;then'."\n";
-        print $FD "\t"."set gfxmode=$gfx"."\n";
-        print $FD "\t"."insmod all_video"."\n";
-        print $FD "\t".'terminal_input gfxterm'."\n";
-        print $FD "\t".'if terminal_output gfxterm;then true;else'."\n";
-        print $FD "\t\t".'terminal gfxterm'."\n";
-        print $FD "\t".'fi'."\n";
-        print $FD 'fi'."\n";
+        # by default grub uses a graphics console. If this is unwanted
+        # you can change the following variable to use a non graphics
+        # console (console) or the serial terminal (serial)
+        my $console_mode = 'graphics';
+
+        if ($console_mode eq 'console') {
+            print $FD "\t".'terminal_input console'."\n";
+            print $FD "\t".'terminal_output console'."\n";
+        } elsif ($console_mode eq 'serial') {
+            print $FD "\t".'serial --speed=9600 --unit=0';
+            print $FD ' --word=8 --parity=no --stop=1'."\n";
+            print $FD "\t".'terminal_input serial'."\n";
+            print $FD "\t".'terminal_output serial'."\n";
+        } else {
+            print $FD 'if loadfont $font ;then'."\n";
+            print $FD "\t"."set gfxmode=$gfx"."\n";
+            print $FD "\t"."insmod all_video"."\n";
+            print $FD "\t".'terminal_input gfxterm'."\n";
+            print $FD "\t".'if terminal_output gfxterm;then true;else'."\n";
+            print $FD "\t\t".'terminal gfxterm'."\n";
+            print $FD "\t".'fi'."\n";
+            print $FD 'fi'."\n";
+        }
+
         print $FD 'if loadfont '.$fodir.$theme.'/'.$ascii.';then'."\n";
         foreach my $font (@fonts) {
             print $FD "\t".'loadfont '.$fodir.$theme.'/'.$font."\n";
