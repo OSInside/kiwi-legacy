@@ -766,7 +766,6 @@ function setupDeviceNames {
     local bootID=$4
     local iorwID=$5
     local vgroup=$6
-    local prepID=$7
     if [ -z "$vgroup" ];then
         #======================================
         # set root device name
@@ -801,10 +800,6 @@ function setupDeviceNames {
         # set boot device name
         #--------------------------------------
         export imageBootDevice=$(ddn $imageDiskDevice $bootID)
-        #======================================
-        # set PReP device name
-        #--------------------------------------
-        export imagePrepDevice=$(ddn $imageDiskDevice $prepID)
         #======================================
         # set boot partition id
         #--------------------------------------
@@ -842,10 +837,6 @@ function setupDeviceNames {
         # set LVM boot device name
         #--------------------------------------
         export imageBootDevice=$(ddn $imageDiskDevice $bootID)
-        #======================================
-        # set PReP boot device name
-        #--------------------------------------
-        export imagePrepDevice=$(ddn $imageDiskDevice $prepID)
         #======================================
         # set LVM boot partition id
         #--------------------------------------
