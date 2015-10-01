@@ -453,7 +453,7 @@ function createInitialDevices {
     #--------------------------------------
     mkdir -p -m 0755 /run
     mkdir -p -m 0755 /var/run
-    if [[ ! $kiwi_iname =~ SLE.11 ]];then
+    if [[ ! $kiwi_iname =~ SLE.11 ]] && [[ ! $kiwi_iname =~ "rhel-06" ]] ; then
         mount -t tmpfs -o mode=0755,nodev,nosuid tmpfs /run
         mount --bind /run /var/run
     fi
