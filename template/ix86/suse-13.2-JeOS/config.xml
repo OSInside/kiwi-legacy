@@ -150,7 +150,4 @@
 -->
         <package name="openSUSE-release"/>
     </packages>
-    <packages type="delete">
-        <package name="kernel-debug"/>
-    </packages>
 </image>
