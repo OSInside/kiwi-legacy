@@ -150,18 +150,60 @@ sub execute {
         $this->handler()->collect()->basedir()
     );
 
+    my @grubfiles;
+    find(
+        sub { find_cb($this, '.*/grub\.cfg$', \@grubfiles) },
+        $this->handler()->collect()->basedir()
+    );
+
     if (!@gfxbootfiles) {
         my $msg = "No gfxboot.cfg file found! "
             . "This _MIGHT_ be ok for S/390. "
             . "Please verify <installation-images> package(s)";
         $this->logMsg("W", $msg);
-        return $retval;
     }
-    $retval = $this -> updateGraphicsBootConfig (
-        \@gfxbootfiles, $repoloc, $srv, $path
-    );
+    $this -> updateGrubConfig(\@grubfiles, $repoloc);
+    if (@gfxbootfiles) {
+        $retval = $this -> updateGraphicsBootConfig (
+            \@gfxbootfiles, $repoloc, $srv, $path
+        );
+    }
 
     return $retval;
+}
+
+sub updateGrubConfig {
+    my $this = shift;
+    my $grubfiles = shift;
+    my $repoloc = shift;
+    foreach my $grubcfg(@{$grubfiles}) {
+       if ( -f $grubcfg && ! -l $grubcfg) {
+          $this->logMsg("I", "editing <$grubcfg>");
+          my $IN  = FileHandle -> new();
+          my $OUT = FileHandle -> new();
+          if (! $IN -> open($grubcfg)) {
+              croak "Cant open file for reading $grubcfg: $!";
+          }
+          if (! $OUT -> open(">$grubcfg.new")) {
+              croak "Cant open file for writing $grubcfg.new: $!";
+          }
+          while(<$IN>) {
+              my $line = $_;
+              chomp $line;
+              if ($line =~ /linux.*\/boot\/.*\/linux/ ) {
+                  $this->logMsg("I", "-$line");
+                  $line = "$line install=$repoloc";
+                  $this->logMsg("I", "+$line");
+              }
+             print $OUT "$line\n";
+          }
+          $OUT -> close();
+          $IN  -> close();
+          $this -> callCmd("diff -u $grubcfg $grubcfg.new");
+          rename("$grubcfg.new", $grubcfg);
+        }
+    }
+    return $this;
 }
 
 sub removeInstallSystem {
