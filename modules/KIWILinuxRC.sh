@@ -11053,12 +11053,14 @@ function resetBootBind {
     #======================================
     # reset bind mount to standard boot dir
     #--------------------------------------
+    shopt -s dotglob
     umount $bprefix/boot
     mv /$bootdir/boot /$bootdir/tmp
     mv /$bootdir/tmp/* /$bootdir
     rm -rf /$bootdir/tmp
     umount /$bootdir
     rmdir /$bootdir
+    shopt -u dotglob
     #======================================
     # update fstab entry
     #--------------------------------------
