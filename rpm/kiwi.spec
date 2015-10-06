@@ -785,18 +785,18 @@ rm -rf $RPM_BUILD_ROOT
 %ifarch %ix86 x86_64
 %exclude %{_datadir}/kiwi/image/suse-13.1-JeOS
 %exclude %{_datadir}/kiwi/image/suse-13.2-JeOS
-%exclude %{_datadir}/kiwi/image/suse-SLE11-JeOS
-%exclude %{_datadir}/kiwi/image/suse-SLE12-JeOS
+%exclude %{_datadir}/kiwi/image/suse-SLE11-community-JeOS
+%exclude %{_datadir}/kiwi/image/suse-SLE12-community-JeOS
 %exclude %{_datadir}/kiwi/image/suse-leap-42.1-JeOS
 %exclude %{_datadir}/kiwi/image/rhel-06.6-JeOS
 %exclude %{_datadir}/kiwi/image/rhel-07.0-JeOS
 %endif
 %ifarch s390 s390x
-%exclude %{_datadir}/kiwi/image/suse-SLE11-JeOS
-%exclude %{_datadir}/kiwi/image/suse-SLE12-JeOS
+%exclude %{_datadir}/kiwi/image/suse-SLE11-community-JeOS
+%exclude %{_datadir}/kiwi/image/suse-SLE12-community-JeOS
 %endif
 %ifarch %arm aarch64
-%exclude %{_datadir}/kiwi/image/suse-SLE12-JeOS
+%exclude %{_datadir}/kiwi/image/suse-SLE12-community-JeOS
 %endif
 %{_datadir}/kiwi/.revision
 %{_datadir}/kiwi/modules
@@ -938,22 +938,22 @@ rm -rf $RPM_BUILD_ROOT
 %ifarch %ix86 x86_64
 %{_datadir}/kiwi/image/suse-13.1-JeOS
 %{_datadir}/kiwi/image/suse-13.2-JeOS
-%{_datadir}/kiwi/image/suse-SLE11-JeOS
-%{_datadir}/kiwi/image/suse-SLE12-JeOS
+%{_datadir}/kiwi/image/suse-SLE11-community-JeOS
+%{_datadir}/kiwi/image/suse-SLE12-community-JeOS
 %{_datadir}/kiwi/image/suse-leap-42.1-JeOS
 %{_datadir}/kiwi/image/rhel-06.6-JeOS
 %{_datadir}/kiwi/image/rhel-07.0-JeOS
 %endif
 %ifarch s390 s390x
-%{_datadir}/kiwi/image/suse-SLE11-JeOS
-%{_datadir}/kiwi/image/suse-SLE12-JeOS
+%{_datadir}/kiwi/image/suse-SLE11-community-JeOS
+%{_datadir}/kiwi/image/suse-SLE12-community-JeOS
 %endif
 %ifarch %arm aarch64
-%{_datadir}/kiwi/image/suse-SLE12-JeOS
+%{_datadir}/kiwi/image/suse-SLE12-community-JeOS
 %endif
 %ifarch ppc ppc64 ppc64le
-%{_datadir}/kiwi/image/suse-SLE11-JeOS
-%{_datadir}/kiwi/image/suse-SLE12-JeOS
+%{_datadir}/kiwi/image/suse-SLE11-community-JeOS
+%{_datadir}/kiwi/image/suse-SLE12-community-JeOS
 %endif
 
 %endif
