@@ -140,6 +140,10 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 %if %suse_version == 1315 && !0%{?is_opensuse}
 %define mysystems suse-SLES12
 %endif
+# SLE12-SP1:
+%if %suse_version == 1316 && !0%{?is_opensuse}
+%define mysystems suse-SLES12
+%endif
 # Leap 42.1:
 %if %suse_version == 1315 && 0%{?is_opensuse}
 %define mysystems suse-leap42.1
