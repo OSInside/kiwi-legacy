@@ -4475,6 +4475,7 @@ function searchBusIDBootDevice {
     local dev_type=$(cat /sys/bus/ccw/devices/$deviceID/devtype)
     local wwpn
     local slun
+    local disk
     #======================================
     # check for custom device init command
     #--------------------------------------
@@ -4547,6 +4548,14 @@ function searchBusIDBootDevice {
         zfcp_host_configure $deviceID 1
         zfcp_disk_configure $deviceID $wwpn $slun 1
         biosBootDevice="$dpath/ccw-$deviceID-zfcp-$wwpn:$slun"
+        if startMultipathd; then
+            for wwn in $(multipath -l -v1 $biosBootDevice);do
+                disk=/dev/mapper/$wwn
+                if [ -e $disk ];then
+                    biosBootDevice=$disk
+                fi
+            done
+        fi
     fi
     #======================================
     # setup boot device variable
