@@ -971,55 +971,17 @@ function identifyDevice {
 # identifyMultipath
 #--------------------------------------
 function identifyMultipath {
-    local multipath_config=/etc/multipath.conf
     local device_disks=$deviceDisks
     local device_disks_new
     local disk
     local wwn
+    #======================================
+    # start the multipath daemon
+    #--------------------------------------
     local wwid_timeout=3
-    #======================================
-    # check the tools
-    #--------------------------------------
-    for tool in multipathd multipath;do
-        if ! lookup $tool &>/dev/null;then
-            Echo "identifyMultipath: $tool not found"
-            return
-        fi
-    done
-    #======================================
-    # lookup multipath configuration
-    #--------------------------------------
-    if [ ! -f $multipath_config ];then
-        Echo "identifyMultipath: no multipath configuration found"
+    if ! startMultipathd; then
         return
     fi
-    #======================================
-    # load multipath dm modules
-    #--------------------------------------
-    if ! modprobe dm-multipath;then
-        Echo "identifyMultipath: can't load dm-multipath"
-        return
-    fi
-    #======================================
-    # start multipath daemon
-    #--------------------------------------
-    mkdir -p /etc/multipath
-    if ! multipathd;then
-        Echo "identifyMultipath: failed to start multipathd"
-        return
-    fi
-    #======================================
-    # wait for devices to settle
-    #--------------------------------------
-    udevPending
-    #======================================
-    # sleep for a while
-    #--------------------------------------
-    # make sure /etc/multipath/wwids are written
-    if [ ! -z "$kiwi_wwid_wait_timeout" ];then
-        wwid_timeout=$kiwi_wwid_wait_timeout
-    fi
-    sleep $wwid_timeout
     #======================================
     # strip list of disk devices
     #--------------------------------------
