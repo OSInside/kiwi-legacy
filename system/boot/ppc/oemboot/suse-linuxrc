@@ -231,6 +231,7 @@ if [ -z "$pxe" ];then
             if ! searchOFBootDevice;then
                 systemException "$biosBootDevice" "reboot"
             fi
+            setupBootDeviceIfMultipath
             export imageDiskDevice=$biosBootDevice
         else
             waitForStorageDevice $disk

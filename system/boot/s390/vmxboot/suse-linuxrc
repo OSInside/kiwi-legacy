@@ -135,6 +135,7 @@ if [ "$LOCAL_BOOT" = "no" ];then
     if [ ! -e "$biosBootDevice" ];then
         systemException "$biosBootDevice" "reboot"
     fi
+    setupBootDeviceIfMultipath
     export imageDiskDevice=$biosBootDevice
 else
     waitForStorageDevice $disk
