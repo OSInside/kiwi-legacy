@@ -1,22 +1,24 @@
+#
 # translation of kiwi.nl.po to Dutch
 # @TITLE@
 # Copyright (C) 2006, SUSE Linux GmbH, Nuremberg
 #
 # This file is distributed under the same license as @PACKAGE@ package. FIRST
 #
-# Freek de Kruijf <freek@opensuse.org>, 2009, 2010.
+# Freek de Kruijf <freek@opensuse.org>, 2009, 2010, 2014.
 msgid ""
 msgstr ""
 "Project-Id-Version: kiwi.nl\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2010-04-07 09:01+0200\n"
+"POT-Creation-Date: 2005-07-27 16:23+0200\n"
+"PO-Revision-Date: 2014-10-10 10:20+0200\n"
 "Last-Translator: Freek de Kruijf <freek@opensuse.org>\n"
-"Language-Team: Dutch <yast-nl-l10n@lists.sf.kovoks.nl>\n"
+"Language-Team: Dutch <opensuse-nl@opensuse.org>\n"
 "Language: nl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: KBabel 1.11.4\n"
+"X-Generator: Lokalize 1.5\n"
 "Plural-Forms: nplurals=2; plural= n != 1;\n"
 
 #. /.../
@@ -56,9 +58,8 @@ msgstr "%1 bestanden van %2 hersteld..."
 msgid "backing up: %1..."
 msgstr "reservekopie maken van: %1..."
 
-#, fuzzy
 msgid "archiving: %1..."
-msgstr "reservekopie maken van: %1..."
+msgstr "archiveren van: %1..."
 
 #
 msgid "restoring: %1..."
@@ -89,13 +90,11 @@ msgid ""
 "the bootloader before next reboot. Check /var/log/boot.kiwi for details"
 msgstr ""
 
-#, fuzzy
 msgid "Please remove the CD/DVD before reboot"
-msgstr "Gaarne de installatie cd/dvd uitwerpen alvorens door te gaan"
+msgstr "Gaarne de installatie cd/dvd verwijderen voor het opnieuw opstarten"
 
-#, fuzzy
 msgid "Please unplug the USB stick before reboot"
-msgstr "De installatie USB-stick verwijderen alvorens verder te gaan"
+msgstr "De installatie USB-stick uitnemen voor het opnieuw opstarten"
 
 #
 msgid "Installation..."
@@ -106,14 +105,13 @@ msgid "Loading %1"
 msgstr "%1 wordt geladen"
 
 msgid "Verifying %1"
-msgstr ""
+msgstr "Verifiëren van %1"
 
 msgid "Select disk for installation:"
 msgstr "Selecteer de schijf voor installatie:"
 
-#, fuzzy
 msgid "Select %1 partition for installation:"
-msgstr "Selecteer de schijf voor installatie:"
+msgstr "Selecteer %1 partitie voor installatie:"
 
 msgid "System will be shutdown. Remove USB stick before power on"
 msgstr ""

@@ -4,7 +4,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: kiwi\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2010-04-11 09:34+0900\n"
+"POT-Creation-Date: 2005-07-27 16:23+0200\n"
+"PO-Revision-Date: 2010-09-02 20:11+0900\n"
 "Last-Translator: Yasuhiko Kamata <belphegor@belbel.or.jp>\n"
 "Language-Team: Japanese <opensuse-ja@opensuse.org>\n"
 "Language: ja\n"
@@ -51,9 +52,8 @@ msgstr "%2 から %1 ファイルを復元しました..."
 msgid "backing up: %1..."
 msgstr "バックアップしています: %1..."
 
-#, fuzzy
 msgid "archiving: %1..."
-msgstr "バックアップしています: %1..."
+msgstr "アーカイブを作成しています: %1..."
 
 msgid "restoring: %1..."
 msgstr "復元しています: %1..."
@@ -83,13 +83,11 @@ msgid ""
 "the bootloader before next reboot. Check /var/log/boot.kiwi for details"
 msgstr ""
 
-#, fuzzy
 msgid "Please remove the CD/DVD before reboot"
-msgstr "続行するには、インストール CD/DVD を取り出してください"
+msgstr "再起動を行なう前に、 CD/DVD メディアを取り出してください"
 
-#, fuzzy
 msgid "Please unplug the USB stick before reboot"
-msgstr "続行するには、インストール USB メモリを取り出してください"
+msgstr "再起動を行なう前に、 USB メモリを取り出してください"
 
 msgid "Installation..."
 msgstr "インストール..."
@@ -99,14 +97,13 @@ msgid "Loading %1"
 msgstr "%1 を読み込んでいます"
 
 msgid "Verifying %1"
-msgstr ""
+msgstr "%1 を検証しています"
 
 msgid "Select disk for installation:"
 msgstr "インストール用のディスクを選択:"
 
-#, fuzzy
 msgid "Select %1 partition for installation:"
-msgstr "インストール用のディスクを選択:"
+msgstr "インストール用に %1 パーティションを選択:"
 
 msgid "System will be shutdown. Remove USB stick before power on"
 msgstr ""

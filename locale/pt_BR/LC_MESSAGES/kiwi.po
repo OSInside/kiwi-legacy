@@ -1,21 +1,23 @@
 # @TITLE@
 # Copyright (C) 2006, SUSE Linux GmbH, Nuremberg
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
 # This file is distributed under the same license as @PACKAGE@ package. FIRST
 #
+# Isis Binder <isis.binder@gmail.com>, 2010.
+# Luiz Fernando Ranghetti <elchevive@opensuse.org>, 2010.
 msgid ""
 msgstr ""
 "Project-Id-Version: @PACKAGE@\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2010-05-05 18:13-0300\n"
-"Last-Translator: Isis Binder <isis.binder@gmail.com>\n"
-"Language-Team: Novell Language <language@novell.com>\n"
-"Language: \n"
+"POT-Creation-Date: 2005-08-18 14:46+0200\n"
+"PO-Revision-Date: 2011-06-22 21:41-0300\n"
+"Last-Translator: Luiz Fernando Ranghetti <elchevive@opensuse.org>\n"
+"Language-Team: Brazilian Portuguese <opensuse-pt@opensuse.org>\n"
+"Language: pt_BR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: KBabel 1.9\n"
+"X-Generator: Lokalize 1.0\n"
 "Plural-Forms: nplurals=2; plural=n>1;\n"
 
 #. /.../
@@ -34,11 +36,11 @@ msgstr "Você aceita o contrato de licença?"
 
 # power-off message
 msgid "Do you want to start the System-Recovery ?"
-msgstr "Você quer iniciar a recuperação do sistema?"
+msgstr "Você deseja iniciar a recuperação do sistema?"
 
 # power-off message
 msgid "Do you want to start the System-Restore ?"
-msgstr "Você quer iniciar a restauração do sistema?"
+msgstr "Você deseja iniciar a restauração do sistema?"
 
 msgid "Restoring base operating system..."
 msgstr "Restaurando o sistema operacional base..."
@@ -55,9 +57,8 @@ msgstr "%1 arquivos de %2 restaurados..."
 msgid "backing up: %1..."
 msgstr "fazendo backup: %1..."
 
-#, fuzzy
 msgid "archiving: %1..."
-msgstr "fazendo backup: %1..."
+msgstr "arquivando: %1..."
 
 msgid "restoring: %1..."
 msgstr "restaurando: %1..."
@@ -87,13 +88,11 @@ msgid ""
 "the bootloader before next reboot. Check /var/log/boot.kiwi for details"
 msgstr ""
 
-#, fuzzy
 msgid "Please remove the CD/DVD before reboot"
-msgstr "Por favor, ejete o CD/DVD de instalação antes de continuar"
+msgstr "Por favor, remova o CD/DVD antes de reiniciar"
 
-#, fuzzy
 msgid "Please unplug the USB stick before reboot"
-msgstr "Por favor, remova o pendrive USB de instalação antes de continuar"
+msgstr "Por favor, desconecte o pendrive USB antes de reiniciar"
 
 msgid "Installation..."
 msgstr "Instalação..."
@@ -103,14 +102,13 @@ msgid "Loading %1"
 msgstr "Carregando %1"
 
 msgid "Verifying %1"
-msgstr ""
+msgstr "Verificando %1"
 
 msgid "Select disk for installation:"
 msgstr "Selecione o disco para instalação:"
 
-#, fuzzy
 msgid "Select %1 partition for installation:"
-msgstr "Selecione o disco para instalação:"
+msgstr "Selecione %1 partição para instalação:"
 
 msgid "System will be shutdown. Remove USB stick before power on"
 msgstr ""

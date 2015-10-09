@@ -3,6 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: kiwi\n"
 "Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2009-10-14 08:40+0100\n"
 "PO-Revision-Date: 2010-04-10 20:32+0300\n"
 "Last-Translator: Alexander Melentyev <alex239@gmail.com>\n"
 "Language-Team: Russian <opensuse-translation-ru@opensuse.org>\n"
@@ -49,9 +50,8 @@ msgstr "Восстановлено %1 файлов из %2..."
 msgid "backing up: %1..."
 msgstr "резервное копирование: %1..."
 
-#, fuzzy
 msgid "archiving: %1..."
-msgstr "резервное копирование: %1..."
+msgstr "архивирование: %1..."
 
 msgid "restoring: %1..."
 msgstr "восстановление: %1..."
@@ -79,13 +79,11 @@ msgid ""
 "the bootloader before next reboot. Check /var/log/boot.kiwi for details"
 msgstr ""
 
-#, fuzzy
 msgid "Please remove the CD/DVD before reboot"
-msgstr "Перед продолжением извлеките установочный CD/DVD"
+msgstr "Перед перезагрузкой выньте CD/DVD"
 
-#, fuzzy
 msgid "Please unplug the USB stick before reboot"
-msgstr "Перед продолжением извлеките установочный USB"
+msgstr "Перед перезагрузкой выньте USB-брелок"
 
 msgid "Installation..."
 msgstr "Установка..."
@@ -94,14 +92,13 @@ msgid "Loading %1"
 msgstr "Загрузка %1"
 
 msgid "Verifying %1"
-msgstr ""
+msgstr "Проверка %1"
 
 msgid "Select disk for installation:"
 msgstr "Выберите диск для установки:"
 
-#, fuzzy
 msgid "Select %1 partition for installation:"
-msgstr "Выберите диск для установки:"
+msgstr "Выберите раздел (%1) для установки:"
 
 msgid "System will be shutdown. Remove USB stick before power on"
 msgstr ""

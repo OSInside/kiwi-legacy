@@ -3,19 +3,20 @@
 # This file is distributed under the same license as the PACKAGE package.
 #
 # Kalman Kemenczy <kkemenczy@novell.com>, 2009, 2010.
+# Kalman Kemenczy <kkemenczy@opensuse.org>, 2011.
 msgid ""
 msgstr ""
 "Project-Id-Version: kiwi.hu\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2010-04-04 14:49+0200\n"
-"Last-Translator: kalman <kkemenczy@gmail.com>\n"
+"PO-Revision-Date: 2011-03-02 10:54+0100\n"
+"Last-Translator: Kalman Kemenczy <kkemenczy@opensuse.org>\n"
 "Language-Team: Hungarian <kde-i18n-doc@kde.org>\n"
 "Language: hu\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Pootle 2.0.2\n"
+"X-Generator: Lokalize 1.0\n"
 
 #. /.../
 #. Copyright (c) 2005 SuSE GmbH Nuernberg, Germany.  All rights reserved.
@@ -52,9 +53,8 @@ msgstr "%1 visszaállítása innen: %2..."
 msgid "backing up: %1..."
 msgstr "%1 mentése..."
 
-#, fuzzy
 msgid "archiving: %1..."
-msgstr "%1 mentése..."
+msgstr "%1 archiválása…"
 
 msgid "restoring: %1..."
 msgstr "%1 visszaállítása..."
@@ -69,7 +69,7 @@ msgid "OK"
 msgstr "OK"
 
 msgid "Cancel"
-msgstr "Mégse"
+msgstr "Mégsem"
 
 msgid "Exit"
 msgstr "Kilépés"
@@ -82,14 +82,11 @@ msgid ""
 "the bootloader before next reboot. Check /var/log/boot.kiwi for details"
 msgstr ""
 
-#, fuzzy
 msgid "Please remove the CD/DVD before reboot"
-msgstr "Folytatás előtt kérem vegye ki a telepítő CD/DVD-t a meghajtóból"
+msgstr "Újraindítás előtt vegye ki a telepítő CD/DVD-t a meghajtóból"
 
-#, fuzzy
 msgid "Please unplug the USB stick before reboot"
-msgstr ""
-"Folytatás előtt kérem vegye ki a telepítő USB pendrive-ot a meghajtóból"
+msgstr "Újraindítás előtt húzza le az USB pendrive-ot"
 
 msgid "Installation..."
 msgstr "Telepítés..."
@@ -98,14 +95,13 @@ msgid "Loading %1"
 msgstr "%1 betöltése"
 
 msgid "Verifying %1"
-msgstr ""
+msgstr "%1 ellenőrzése"
 
 msgid "Select disk for installation:"
 msgstr "Válassza ki a lemezt a telepítéshez:"
 
-#, fuzzy
 msgid "Select %1 partition for installation:"
-msgstr "Válassza ki a lemezt a telepítéshez:"
+msgstr "Válasszon ki %1 partíciót a telepítéshez:"
 
 msgid "System will be shutdown. Remove USB stick before power on"
 msgstr ""

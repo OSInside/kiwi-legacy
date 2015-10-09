@@ -2,15 +2,17 @@
 # translation of kiwi.po to
 # Jyri Palokangas <jyri.palokangas@opensuse.org>, 2009, 2010.
 # Asko Isonokari <askoin@opensuse.fi>, 2009.
-# Jyri Palokangas <jmp@opensuse.org>, 2010.
+# Jyri Palokangas <jmp@opensuse.org>, 2010, 2011.
+# Katariina Kemppainen <katariina@opensuse.fi>, 2011.
 msgid ""
 msgstr ""
 "Project-Id-Version: kiwi.fi\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2010-04-20 22:59+0300\n"
-"Last-Translator: Jyri Palokangas <jmp@opensuse.org>\n"
-"Language-Team: TRANSLATIONS <kde-i18n-doc@kde.org>\n"
-"Language: \n"
+"POT-Creation-Date: 2005-07-27 16:23+0200\n"
+"PO-Revision-Date: 2011-02-28 17:18+0200\n"
+"Last-Translator: Katariina Kemppainen <katariina@opensuse.fi>\n"
+"Language-Team: Finnish <kde-i18n-doc@kde.org>\n"
+"Language: fi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -26,7 +28,7 @@ msgid "Boot continues in 10 sec"
 msgstr ""
 
 msgid "Enter LUKS passphrase"
-msgstr "Anna LUKS tunnuslause"
+msgstr "Anna LUKS-tunnuslause"
 
 #
 msgid "Do you accept the license agreement ?"
@@ -34,11 +36,11 @@ msgstr "Hyväksytkö käyttöoikeussopimuksen ?"
 
 # power-off message
 msgid "Do you want to start the System-Recovery ?"
-msgstr "Haluatko käynnistää Järjestelmän pelastuksen?"
+msgstr "Haluatko käynnistää järjestelmän korjausohjelman ?"
 
 # power-off message
 msgid "Do you want to start the System-Restore ?"
-msgstr "Haluatko käynnistää Järjestelmän palautuksen."
+msgstr "Haluatko käynnistää järjestelmän palautusohjelman ?"
 
 #
 msgid "Restoring base operating system..."
@@ -56,9 +58,8 @@ msgstr "%1 tiedostoa %2 palautettiin..."
 msgid "backing up: %1..."
 msgstr "varmuuskopioidaan: %1..."
 
-#, fuzzy
 msgid "archiving: %1..."
-msgstr "varmuuskopioidaan: %1..."
+msgstr "arkistoidaan: %1..."
 
 #
 msgid "restoring: %1..."
@@ -89,13 +90,11 @@ msgid ""
 "the bootloader before next reboot. Check /var/log/boot.kiwi for details"
 msgstr ""
 
-#, fuzzy
 msgid "Please remove the CD/DVD before reboot"
-msgstr "Poista asennus-CD/DVD ennen jatkamista"
+msgstr "Poista CD/DVD ennen jatkamista"
 
-#, fuzzy
 msgid "Please unplug the USB stick before reboot"
-msgstr "Poista asennus-USB-tikku ennen jatkamista"
+msgstr "Poista USB-tikku ennen jatkamista"
 
 #
 msgid "Installation..."
@@ -106,14 +105,14 @@ msgid "Loading %1"
 msgstr "Ladataan %1"
 
 msgid "Verifying %1"
-msgstr ""
+msgstr "Tarkistetaan %1"
 
 msgid "Select disk for installation:"
 msgstr "Valitse levy asennusta varten:"
 
-#, fuzzy
+#
 msgid "Select %1 partition for installation:"
-msgstr "Valitse levy asennusta varten:"
+msgstr "Valitse osio %1 asennusta varten:"
 
 msgid "System will be shutdown. Remove USB stick before power on"
 msgstr ""
