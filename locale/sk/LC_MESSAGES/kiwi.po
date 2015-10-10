@@ -83,12 +83,15 @@ msgid "Exit"
 msgstr "Skončiť"
 
 msgid "Bootloader installation has failed"
-msgstr ""
+msgstr "Inštalácia správcu štartu zlyhala"
 
 msgid ""
 "The system will not be able to reboot. Please make sure to fixup and install "
 "the bootloader before next reboot. Check /var/log/boot.kiwi for details"
 msgstr ""
+"Systém nebude schopný reštartovať. Prosím, uistite sa, že ste opravili a "
+"nainštalovali správcu štartu pred reštartom. Podrobnosti skontrolujte v "
+"/var/log/boot.kiwi."
 
 msgid "Please remove the CD/DVD before reboot"
 msgstr "Prosím vyberte CD/DVD pred reštartom"
@@ -114,7 +117,7 @@ msgid "Select %1 partition for installation:"
 msgstr "Vybrať %1 oddiel pre inštaláciu:"
 
 msgid "System will be shutdown. Remove USB stick before power on"
-msgstr ""
+msgstr "Systém bude vypnutý. Pred zapnutím odstráňte USB kľúč"
 
 msgid "Please remove the CD/DVD before shutdown"
 msgstr "Prosím vyberte CD/DVD pred vypnutím"
