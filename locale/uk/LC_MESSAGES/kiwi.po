@@ -12,16 +12,16 @@ msgstr ""
 "Project-Id-Version: kiwi.uk\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2006-08-02 09:00-0600\n"
-"PO-Revision-Date: 2014-09-26 18:06+0300\n"
+"PO-Revision-Date: 2015-10-10 20:01+0200\n"
 "Last-Translator: Andriy Bandura <andriykopanytsia@gmail.com>\n"
-"Language-Team: Ukrainian <www-uk-translations@gnu.org>\n"
+"Language-Team: Ukrainian <http://10n.opensuse.org/projects/kiwi/master/uk/>\n"
 "Language: uk\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Lokalize 1.5\n"
-"Plural-Forms:  nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
-"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<="
+"4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
+"X-Generator: Weblate 2.3\n"
 
 #. /.../
 #. Copyright (c) 2005 SuSE GmbH Nuernberg, Germany.  All rights reserved.
@@ -29,7 +29,7 @@ msgstr ""
 #. boot code for KIWI 
 #.
 msgid "Boot continues in 10 sec"
-msgstr ""
+msgstr "Завантаження триває 10 секунд"
 
 msgid "Enter LUKS passphrase"
 msgstr "Введіть фразу пароля LUKS"
@@ -86,18 +86,21 @@ msgid "Exit"
 msgstr "Вийти"
 
 msgid "Bootloader installation has failed"
-msgstr ""
+msgstr "Встановлення завантажувача зазнало невдачі"
 
 msgid ""
 "The system will not be able to reboot. Please make sure to fixup and install "
 "the bootloader before next reboot. Check /var/log/boot.kiwi for details"
 msgstr ""
+"Система не спроможна перевантажитися. Будь ласка, переконайтеся, що ви "
+"виправили і встановили завантажувач перед наступним перезавантаженняи. "
+"Перегляньте файл /var/log/boot.kiwi за подробицями"
 
 msgid "Please remove the CD/DVD before reboot"
 msgstr "Виштовхніть КД/DVD перед перезавантаженням"
 
 msgid "Please unplug the USB stick before reboot"
-msgstr "Перед перезавантаженням вийміть USB-носій."
+msgstr "Перед перезавантаженням вийміть USB-носій"
 
 msgid "Installation..."
 msgstr "Встановлення..."
@@ -116,8 +119,7 @@ msgid "Select %1 partition for installation:"
 msgstr "Виберіть %1 розділ  для встановлення:"
 
 msgid "System will be shutdown. Remove USB stick before power on"
-msgstr ""
+msgstr "Система буде вимкнена. Вийміть USB-накопичувач до увімкнення живлення"
 
-#, fuzzy
 msgid "Please remove the CD/DVD before shutdown"
-msgstr "Будь ласка, виштовхніть носій встановлення перш ніж продовжити"
+msgstr "Будь ласка, виштовхніть КД/ДВД перед вимкненням"
