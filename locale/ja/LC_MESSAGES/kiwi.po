@@ -5,15 +5,15 @@ msgstr ""
 "Project-Id-Version: kiwi\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2005-07-27 16:23+0200\n"
-"PO-Revision-Date: 2010-09-02 20:11+0900\n"
+"PO-Revision-Date: 2015-10-11 02:45+0200\n"
 "Last-Translator: Yasuhiko Kamata <belphegor@belbel.or.jp>\n"
-"Language-Team: Japanese <opensuse-ja@opensuse.org>\n"
+"Language-Team: Japanese <http://10n.opensuse.org/projects/kiwi/master/ja/>\n"
 "Language: ja\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: KBabel 1.11.4\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 2.3\n"
 
 #. /.../
 #. Copyright (c) 2005 SuSE GmbH Nuernberg, Germany.  All rights reserved.
@@ -21,7 +21,7 @@ msgstr ""
 #. boot code for KIWI 
 #.
 msgid "Boot continues in 10 sec"
-msgstr ""
+msgstr "10 秒すると起動が始まります"
 
 msgid "Enter LUKS passphrase"
 msgstr "LUKS パスフレーズの入力"
@@ -76,12 +76,14 @@ msgid "Exit"
 msgstr "終了"
 
 msgid "Bootloader installation has failed"
-msgstr ""
+msgstr "ブートローダのインストールに失敗しました"
 
 msgid ""
 "The system will not be able to reboot. Please make sure to fixup and install "
 "the bootloader before next reboot. Check /var/log/boot.kiwi for details"
 msgstr ""
+"システムは再起動できなくなってしまいます。次回の再起動までの間に、ブートローダの設定を修正してインストールし直してください。詳しくは /var/log/"
+"boot.kiwi をお読みください"
 
 msgid "Please remove the CD/DVD before reboot"
 msgstr "再起動を行なう前に、 CD/DVD メディアを取り出してください"
@@ -106,8 +108,7 @@ msgid "Select %1 partition for installation:"
 msgstr "インストール用に %1 パーティションを選択:"
 
 msgid "System will be shutdown. Remove USB stick before power on"
-msgstr ""
+msgstr "システムをシャットダウンします。次回電源を投入するまでの間に、 USB メモリを取り外してください"
 
-#, fuzzy
 msgid "Please remove the CD/DVD before shutdown"
-msgstr "続行するには、インストール CD/DVD を取り出してください"
+msgstr "シャットダウンを行なう前に、 CD/DVD を取り出してください"
