@@ -3,15 +3,15 @@ msgstr ""
 "Project-Id-Version: @PACKAGE@\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2006-05-15 15:07+0200\n"
-"PO-Revision-Date: 2014-09-05 13:31+0100\n"
-"Last-Translator: David Medina <opensusecatala@gmail.com>\n"
-"Language-Team: Catalan\n"
+"PO-Revision-Date: 2015-10-14 09:18+0200\n"
+"Last-Translator: David Medina <medipas@gmail.com>\n"
+"Language-Team: Catalan <http://10n.opensuse.org/projects/kiwi/master/ca/>\n"
 "Language: ca\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 1.6.9\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 2.3\n"
 
 #. /.../
 #. Copyright (c) 2005 SuSE GmbH Nuernberg, Germany.  All rights reserved.
@@ -19,7 +19,7 @@ msgstr ""
 #. boot code for KIWI 
 #.
 msgid "Boot continues in 10 sec"
-msgstr ""
+msgstr "L'arrencada continuarà d'aquí a 10 segons."
 
 msgid "Enter LUKS passphrase"
 msgstr "Introduïu la frase de pas LUKS"
@@ -74,12 +74,15 @@ msgid "Exit"
 msgstr "Sortida"
 
 msgid "Bootloader installation has failed"
-msgstr ""
+msgstr "Ha acabat la instal·lació del carregador d'arrencada"
 
 msgid ""
 "The system will not be able to reboot. Please make sure to fixup and install "
 "the bootloader before next reboot. Check /var/log/boot.kiwi for details"
 msgstr ""
+"El sistema no podrà arrencar. Si us plau, assegureu-vos d'arreglar i instal·"
+"lar el carregador d'arrencada abans de reiniciar el sistema. Mireu /var/log/"
+"boot.kiwi per a més detalls."
 
 msgid "Please remove the CD/DVD before reboot"
 msgstr "Si us plau, traieu el CD o DVD abans de reiniciar"
@@ -107,7 +110,7 @@ msgstr "Seleccioneu %1 partició per a la instal·lació:"
 
 msgid "System will be shutdown. Remove USB stick before power on"
 msgstr ""
+"El sistema s'aturarà. Traieu la memòria USB abans de tornar-lo a engegar."
 
-#, fuzzy
 msgid "Please remove the CD/DVD before shutdown"
-msgstr "Si us plau, traieu el CD o DVD abans de reiniciar"
+msgstr "Si us plau, traieu el CD o DVD abans d'aturar l'ordinador."
