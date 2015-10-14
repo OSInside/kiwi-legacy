@@ -234,7 +234,7 @@ sub executeDir {
         return 1;
     }
     if (-x "/usr/bin/openSUSE-appstream-process") {
-        foreach my $p (@{$paths}) {
+        foreach my $p (@paths) {
             $cmd = "/usr/bin/openSUSE-appstream-process";
             $cmd .= " $p";
             $cmd .= " $targetdir";
