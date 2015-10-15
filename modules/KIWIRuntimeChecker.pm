@@ -43,6 +43,7 @@ use KIWIXMLTypeData;
 use KIWIXMLVMachineData;
 use Readonly;
 use File::stat;
+use File::Basename;
 use Fcntl;
 
 #==========================================
@@ -197,6 +198,9 @@ sub prepareChecks {
     # Runtime checks specific to the prepare step
     # ---
     my $this = shift;
+    if (! $this -> __checkRootDirOutsideImageDescription()) {
+        return;
+    }
     if (! $this -> __checkImageIncludeApplicable()) {
         return;
     }
@@ -923,6 +927,44 @@ sub __checkTargetLocation {
             $kiwi -> failed();
             return;
         }
+    }
+    return 1;
+}
+
+#==========================================
+# __checkRootDirOutsideImageDescription
+#------------------------------------------
+sub __checkRootDirOutsideImageDescription {
+    # ...
+    # It should be avoided to create a new root image tree inside of
+    # the image description directory. This could lead to infinite loops
+    # or unexpected behavior if e.g the new root directory is named 'root'
+    # which conflicts with the image description overlay directory also
+    # named 'root'
+    # ---
+    my $this = shift;
+    my $kiwi = $this -> {kiwi};
+    my $cmdL = $this -> {cmdArgs};
+    my $root = $cmdL->getRootTargetDir();
+    my $parent_dir = dirname ($root);
+    my @forbidden = ('config.xml', '*.kiwi');
+    my $looks_like_description_dir;
+    if (opendir (my $FD, $parent_dir)) {
+        my @dir_entries = readdir ($FD);
+        closedir ($FD);
+        foreach my $entry (@dir_entries) {
+            if ($entry eq 'config.xml' || $entry =~ /\.kiwi$/) {
+                $looks_like_description_dir = 1;
+                last;
+            }
+        }
+    }
+    if ($looks_like_description_dir) {
+        $kiwi -> error (
+            "root target '$root' lives in kiwi description directory"
+        );
+        $kiwi -> failed();
+        return;
     }
     return 1;
 }
