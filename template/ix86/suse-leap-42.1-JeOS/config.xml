@@ -40,6 +40,7 @@
             <oemconfig>
                 <oem-systemsize>2048</oem-systemsize>
                 <oem-swap>true</oem-swap>
+                <oem-device-filter>/dev/ram</oem-device-filter>
             </oemconfig>
             <machine domain="dom0">
                 <vmdisk id="0" controller="ide"/>
@@ -58,6 +59,7 @@
             <oemconfig>
                 <oem-systemsize>2048</oem-systemsize>
                 <oem-swap>true</oem-swap>
+                <oem-device-filter>/dev/ram</oem-device-filter>
             </oemconfig>
             <machine memory="512" guestOS="suse" HWversion="4">
                 <vmdisk id="0" controller="ide"/>
