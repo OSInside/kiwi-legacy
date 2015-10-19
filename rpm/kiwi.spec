@@ -93,6 +93,7 @@ Requires:       screen
 Requires:       tar
 Requires:       psmisc
 Requires:       util-linux
+Requires:       sysvinit-tools
 %if 0%{?suse_version}
 # SUSE specific requires
 %if 0%{?suse_version} >= 1210

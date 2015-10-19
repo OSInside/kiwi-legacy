@@ -6980,13 +6980,20 @@ sub setVolumeGroup {
     push @cStack,"vgchange -an $VGroup";
     $this->{cleanupStack} = \@cStack;
     $kiwi -> info ("--> Creating logical volumes\n");
+    my $lvm_opts = "";
+    $status = KIWIQX::qxx ("pidof systemd-udevd 2>&1");
+    $result = $? >> 8;
+    if ($result != 0) {
+        # udev daemon is not running, pass noudevsync to lvm commands
+        $lvm_opts = "--noudevsync";
+    }
     if (($syszip) || ($haveSplit)) {
         $status = KIWIQX::qxx (
-            "lvcreate --noudevsync -L $syszip -n LVComp $VGroup 2>&1"
+            "lvcreate $lvm_opts -L $syszip -n LVComp $VGroup 2>&1"
         );
         $result = $? >> 8;
         $status.= KIWIQX::qxx (
-            "lvcreate --noudevsync -l +100%FREE -n LVRoot $VGroup 2>&1"
+            "lvcreate $lvm_opts -l +100%FREE -n LVRoot $VGroup 2>&1"
         );
         $result+= $? >> 8;
         if ($result != 0) {
@@ -7024,7 +7031,7 @@ sub setVolumeGroup {
                     }
                     $ihash{$lvdev} = $inodes;
                     $status = KIWIQX::qxx (
-                        "lvcreate --noudevsync -L $lvsize -n $lvname $VGroup 2>&1"
+                        "lvcreate $lvm_opts -L $lvsize -n $lvname $VGroup 2>&1"
                     );
                     $result = $? >> 8;
                     if ($result != 0) {
@@ -7038,11 +7045,11 @@ sub setVolumeGroup {
             if (($lvmparts{'@root'}) && ($lvmparts{'@root'}->[3])) {
                 my $rootsize = $lvmparts{'@root'}->[3];
                 $status = KIWIQX::qxx (
-                    "lvcreate --noudevsync -L $rootsize -n LVRoot $VGroup 2>&1"
+                    "lvcreate $lvm_opts -L $rootsize -n LVRoot $VGroup 2>&1"
                 );
             } else {
                 $status = KIWIQX::qxx (
-                    "lvcreate --noudevsync -l +100%FREE -n LVRoot $VGroup 2>&1"
+                    "lvcreate $lvm_opts -l +100%FREE -n LVRoot $VGroup 2>&1"
                 );
             }
             $result = $? >> 8;
