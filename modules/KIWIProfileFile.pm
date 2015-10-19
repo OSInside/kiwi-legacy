@@ -665,6 +665,12 @@ sub __updateXMLOEMConfig {
         #==========================================
         # special handling
         #------------------------------------------
+        if (! defined $oem{kiwi_oemataraid_scan}) {
+            $oem{kiwi_oemataraid_scan} = "true";
+        }
+        if (! defined $oem{kiwi_oemmultipath_scan}) {
+            $oem{kiwi_oemmultipath_scan} = "true";
+        }
         if (($oem{kiwi_oemswap}) &&
             ($oem{kiwi_oemswap} ne 'false')
         ) {
@@ -672,20 +678,6 @@ sub __updateXMLOEMConfig {
             if (($oem{kiwi_oemswapMB}) && ($oem{kiwi_oemswapMB} > 0)) {
                 $this -> addEntry('kiwi_oemswapMB',$oem{kiwi_oemswapMB});
             }
-        }
-        if (($oem{kiwi_oemataraid_scan}) &&
-            ($oem{kiwi_oemataraid_scan} eq 'false')
-        ) {
-            $this -> addEntry(
-                'kiwi_oemataraid_scan',$oem{kiwi_oemataraid_scan}
-            );
-        }
-        if (($oem{kiwi_oemmultipath_scan}) &&
-            ($oem{kiwi_oemmultipath_scan} eq 'false')
-        ) {
-            $this -> addEntry(
-                'kiwi_oemmultipath_scan',$oem{kiwi_oemmultipath_scan}
-            );
         }
         if ($oem{kiwi_oemtitle}) {
             $this -> addEntry(
@@ -709,8 +701,6 @@ sub __updateXMLOEMConfig {
         delete $oem{kiwi_oemtitle};
         delete $oem{kiwi_oemswap};
         delete $oem{kiwi_oemswapMB};
-        delete $oem{kiwi_oemataraid_scan};
-        delete $oem{kiwi_oemmultipath_scan};
         #==========================================
         # default handling for non false values
         #------------------------------------------

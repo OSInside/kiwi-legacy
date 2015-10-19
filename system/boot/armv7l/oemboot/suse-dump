@@ -193,13 +193,13 @@ function OEMInstall {
     #======================================
     # Add optional dmraid device(s)
     #--------------------------------------
-    if [ ! "$kiwi_oemataraid_scan" = "false" ];then
+    if [ "$kiwi_oemataraid_scan" = "true" ];then
         identifyDMRaid
     fi
     #======================================
     # Add optional multipath device(s)
     #--------------------------------------
-    if [ ! "$kiwi_oemmultipath_scan" = "false" ];then
+    if [ "$kiwi_oemmultipath_scan" = "true" ];then
         identifyMultipath
     fi
     #======================================
