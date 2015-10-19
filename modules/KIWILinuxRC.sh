@@ -11010,6 +11010,9 @@ function updatePartitionTable {
     # check table type
     #--------------------------------------
     plabel=$(cat /tmp/table | grep ^$device: | cut -f6 -d:)
+    if [[ "$plabel" =~ gpt ]];then
+        relocateGPTAtEndOfDisk
+    fi
     if [ ! "$plabel" = "gpt_sync_mbr" ];then
         return 0
     fi
@@ -11246,6 +11249,30 @@ function updateProtectiveMBR {
     if [ ! $? = 0 ]; then
         Echo "Failed to create protective MBR !"
         Echo "This could prevent the system to boot via EFI"
+    fi
+}
+#======================================
+# relocateGPTAtEndOfDisk
+#--------------------------------------
+function relocateGPTAtEndOfDisk {
+    local IFS=$IFS_ORIG
+    local device=$1
+    local input=/part.input
+    if ! lookup gdisk &>/dev/null;then
+        Echo "Warning, gdisk tool not found"
+        Echo "This could break the resize of the image"
+    fi
+    rm -f $input
+    if [ ! -e "$device" ];then
+        device=$imageDiskDevice
+    fi
+    for cmd in x e w y; do
+        echo $cmd >> $input
+    done
+    gdisk $device < $input 1>&2
+    if [ ! $? = 0 ]; then
+        Echo "Failed to write backup GPT at end of disk !"
+        Echo "This could break the resize of the image"
     fi
 }
 #======================================
