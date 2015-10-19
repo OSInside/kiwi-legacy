@@ -1920,7 +1920,8 @@ sub createImageLiveCD {
             print $FD "\t"."echo Loading linux...\n";
             print $FD "\t"."set gfxpayload=keep"."\n";
             print $FD "\t"."\$linux /boot/$isoarch/loader/linux";
-            print $FD ' ramdisk_size=512000 ramdisk_blocksize=4096'."\n";
+            print $FD ' ramdisk_size=512000 ramdisk_blocksize=4096';
+            print $FD " ${cmdline}\n";
             print $FD "\t"."echo Loading initrd...\n";
             print $FD "\t"."\$initrd /boot/$isoarch/loader/initrd\n";
             print $FD "}\n";
@@ -1930,7 +1931,8 @@ sub createImageLiveCD {
             print $FD "\t"."echo Loading linux...\n";
             print $FD "\t"."set gfxpayload=keep"."\n";
             print $FD "\t"."module /boot/$isoarch/loader/linux dummy";
-            print $FD ' ramdisk_size=512000 ramdisk_blocksize=4096'."\n";
+            print $FD ' ramdisk_size=512000 ramdisk_blocksize=4096';
+            print $FD " ${cmdline}\n";
             print $FD "\t"."echo Loading initrd...\n";
             print $FD "\t"."module /boot/$isoarch/loader/initrd dummy\n";
             print $FD "}\n";
@@ -1945,7 +1947,7 @@ sub createImageLiveCD {
             print $FD "\t"."set gfxpayload=keep"."\n";
             print $FD "\t"."\$linux /boot/$isoarch/loader/linux";
             print $FD ' ramdisk_size=512000 ramdisk_blocksize=4096';
-            print $FD " @failsafe"."\n";
+            print $FD " @failsafe ${cmdline}"."\n";
             print $FD "\t"."echo Loading initrd...\n";
             print $FD "\t"."\$initrd /boot/$isoarch/loader/initrd\n";
             print $FD "}\n";
@@ -1956,7 +1958,7 @@ sub createImageLiveCD {
             print $FD "\t"."set gfxpayload=keep"."\n";
             print $FD "\t"."module /boot/$isoarch/loader/linux dummy";
             print $FD ' ramdisk_size=512000 ramdisk_blocksize=4096';
-            print $FD " @failsafe"."\n";
+            print $FD " @failsafe ${cmdline}"."\n";
             print $FD "\t"."echo Loading initrd...\n";
             print $FD "\t"."module /boot/$isoarch/loader/initrd dummy\n";
             print $FD "}\n";
