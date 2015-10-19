@@ -946,6 +946,9 @@ sub __checkRootDirOutsideImageDescription {
     my $kiwi = $this -> {kiwi};
     my $cmdL = $this -> {cmdArgs};
     my $root = $cmdL->getRootTargetDir();
+    if (! $root) {
+        return 1;
+    }
     my $parent_dir = dirname ($root);
     my @forbidden = ('config.xml', '*.kiwi');
     my $looks_like_description_dir;
