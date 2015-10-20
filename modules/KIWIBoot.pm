@@ -6981,7 +6981,7 @@ sub setVolumeGroup {
     $this->{cleanupStack} = \@cStack;
     $kiwi -> info ("--> Creating logical volumes\n");
     my $lvm_opts = "";
-    $status = KIWIQX::qxx ("pidof systemd-udevd 2>&1");
+    $status = KIWIQX::qxx ("pidof systemd-udevd udevd 2>&1");
     $result = $? >> 8;
     if ($result != 0) {
         # udev daemon is not running, pass noudevsync to lvm commands
