@@ -1474,9 +1474,6 @@ function suseStripKernel {
             #==========================================
             # check for weak-/updates and backup them
             #------------------------------------------
-            if [ -d $kversion/updates ];then
-                mv $kversion/updates /tmp
-            fi
             if [ -d $kversion/weak-updates ];then
                 mv $kversion/weak-updates /tmp
             fi
@@ -1487,7 +1484,7 @@ function suseStripKernel {
             for mod in $(echo $kiwi_drivers | tr , ' '); do
                 local path=`/usr/bin/dirname $mod`
                 local base=`/usr/bin/basename $mod`
-                for d in kernel;do
+                for d in "." kernel updates;do
                     if [ "$base" = "*" ];then
                         if test -d $kversion/$d/$path ; then
                             mkdir -pv $stripdir$kversion/$d/$path
@@ -1539,9 +1536,6 @@ function suseStripKernel {
             #------------------------------------------
             if [ -f /tmp/modules.order ];then
                 mv /tmp/modules.order $kversion
-            fi
-            if [ -d /tmp/updates ];then
-                mv /tmp/updates $kversion
             fi
             if [ -d /tmp/weak-updates ];then
                 mv /tmp/weak-updates $kversion
