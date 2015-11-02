@@ -67,8 +67,14 @@ BuildRequires:  syslinux
 %endif
 %if 0%{?suse_version} > 1140
 BuildRequires:  btrfsprogs
+
+%if 0%{?suse_version} <= 1315
 BuildRequires:  cdrkit-cdrtools-compat
 BuildRequires:  genisoimage
+%else
+BuildRequires:  mkisofs
+%endif
+
 BuildRequires:  squashfs
 BuildRequires:  zypper
 %endif
@@ -242,8 +248,14 @@ Requires:       createrepo
 Requires:       inst-source-utils
 Requires:       kiwi-instsource-plugin
 Requires:       kiwi = %{version}
-Requires:       cdrkit-cdrtools-compat
-Requires:       genisoimage
+
+%if 0%{?suse_version} <= 1315
+BuildRequires:  cdrkit-cdrtools-compat
+BuildRequires:  genisoimage
+%else
+BuildRequires:  mkisofs
+%endif
+
 %ifarch %ix86 x86_64
 Requires:       syslinux
 %endif
@@ -336,10 +348,16 @@ Requires:       kiwi = %{version}
 Requires:       syslinux
 %endif
 Requires:       dosfstools
+
 %if 0%{?suse_version}
-Requires:       genisoimage
-Requires:       cdrkit-cdrtools-compat
+%if 0%{?suse_version} <= 1315
+BuildRequires:  cdrkit-cdrtools-compat
+BuildRequires:  genisoimage
+%else
+BuildRequires:  mkisofs
 %endif
+%endif
+
 License:        GPL-2.0+
 Group:          System/Management
 
@@ -354,10 +372,16 @@ Authors:
 %package -n kiwi-desc-isoboot-requires
 Provides:       kiwi-image:iso
 Provides:       kiwi-boot:isoboot
+
 %if 0%{?suse_version}
-Requires:       genisoimage
-Requires:       cdrkit-cdrtools-compat
+%if 0%{?suse_version} <= 1315
+BuildRequires:  cdrkit-cdrtools-compat
+BuildRequires:  genisoimage
+%else
+BuildRequires:  mkisofs
 %endif
+%endif
+
 Requires:       kiwi-desc-isoboot = %{version}
 Requires:       %(echo `bash %{S:4} %{S:0} isoboot %{myarch} %{mysystems}`)
 %ifarch ppc ppc64 ppc64le
@@ -426,10 +450,16 @@ Authors:
 Summary:        KIWI - buildservice package requirements for vmxboot
 Provides:       kiwi-image:vmx
 Provides:       kiwi-boot:vmxboot
+
 %if 0%{?suse_version}
-Requires:       genisoimage
-Requires:       cdrkit-cdrtools-compat
+%if 0%{?suse_version} <= 1315
+BuildRequires:  cdrkit-cdrtools-compat
+BuildRequires:  genisoimage
+%else
+BuildRequires:  mkisofs
 %endif
+%endif
+
 Requires:       kiwi-desc-vmxboot = %{version}
 Requires:       %(echo `bash %{S:4} %{S:0} vmxboot %{myarch} %{mysystems}`)
 %ifarch ppc ppc64 ppc64le
@@ -507,8 +537,14 @@ Requires:       e2fsprogs
 Requires:       kiwi = %{version}
 Requires:       parted
 %if 0%{?suse_version}
-Requires:       genisoimage
-Requires:       cdrkit-cdrtools-compat
+
+%if 0%{?suse_version} <= 1315
+BuildRequires:  cdrkit-cdrtools-compat
+BuildRequires:  genisoimage
+%else
+BuildRequires:  mkisofs
+%endif
+
 Requires:       multipath-tools
 Requires:       mtools
 Requires:       squashfs
@@ -543,10 +579,16 @@ Authors:
 Provides:       kiwi-image:oem
 Provides:       kiwi-boot:oemboot
 Provides:       kiwi-boot:tbz
+
 %if 0%{?suse_version}
-Requires:       genisoimage
-Requires:       cdrkit-cdrtools-compat
+%if 0%{?suse_version} <= 1315
+BuildRequires:  cdrkit-cdrtools-compat
+BuildRequires:  genisoimage
+%else
+BuildRequires:  mkisofs
 %endif
+%endif
+
 Requires:       kiwi-desc-oemboot = %{version}
 Requires:       %(echo `bash %{S:4} %{S:0} oemboot %{myarch} %{mysystems}`)
 %ifarch ppc ppc64 ppc64le

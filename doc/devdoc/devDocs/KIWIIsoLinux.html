@@ -193,7 +193,7 @@ Called in
 <a name="new"><h2>new</h2></a>
 <p>
      Create a new KIWIIsoLinux object which is used to wrap
-     around the major genisoimage/mkisofs call. This code requires a
+     around the major mkisofs call. This code requires a
      specific source directory structure which is:
 <p>
 Defined on line: 46
@@ -215,7 +215,7 @@ Called in
 <li><a href="KIWIIsoLinux.html">KIWIIsoLinux</a> : 1174</li><li><a href="KIWIIsoLinux.html">KIWIIsoLinux</a> : 1357</li></ul>
 <a name="relocateCatalog"><h2>relocateCatalog</h2></a>
 <p>
-     mkisofs/genisoimage leave one sector empty (or fill it with
+     mkisofs leave one sector empty (or fill it with
      version info if the ISODEBUG environment variable is set) before
      starting the path table. We use this space to move the boot
      catalog there. It's important that the boot catalog is at the

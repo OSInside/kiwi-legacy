@@ -114,7 +114,7 @@
         <package name="filesystem"/>
         <package name="fribidi"/>
         <package name="gawk"/>
-        <package name="genisoimage"/>
+        <package name="mkisofs"/>
         <package name="gfxboot"/>
         <package name="glibc"/>
         <package name="glibc-locale"/>
