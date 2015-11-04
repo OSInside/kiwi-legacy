@@ -27,7 +27,7 @@ msgstr ""
 #. boot code for KIWI 
 #.
 msgid "Boot continues in 10 sec"
-msgstr ""
+msgstr "Opstarten gaat verder na 10 seconden"
 
 msgid "Enter LUKS passphrase"
 msgstr "Voer LUKS wachtwoordzin in"
@@ -83,12 +83,15 @@ msgid "Exit"
 msgstr "Stoppen"
 
 msgid "Bootloader installation has failed"
-msgstr ""
+msgstr "Installatie van bootloader is mislukt"
 
 msgid ""
 "The system will not be able to reboot. Please make sure to fixup and install "
 "the bootloader before next reboot. Check /var/log/boot.kiwi for details"
 msgstr ""
+"Het systeem zal niet in staat zijn om opnieuw op te starten (boot). Repareer "
+"dit en installeer de bootloader vóór de volgende herstart. Controleer "
+"/var/log/boot.kiwi voor details"
 
 msgid "Please remove the CD/DVD before reboot"
 msgstr "Gaarne de installatie cd/dvd verwijderen voor het opnieuw opstarten"
@@ -115,7 +118,8 @@ msgstr "Selecteer %1 partitie voor installatie:"
 
 msgid "System will be shutdown. Remove USB stick before power on"
 msgstr ""
+"Systeem zal worden afgesloten. Verwijder de USB-stick alvorens het systeem "
+"aan te zetten"
 
-#, fuzzy
 msgid "Please remove the CD/DVD before shutdown"
-msgstr "Gaarne de installatie cd/dvd uitwerpen alvorens door te gaan"
+msgstr "De installatie-cd/dvd verwijderen alvorens af te sluiten"
