@@ -10,9 +10,11 @@
 
   <para>
    KIWI is shipped with all SUSE distributions, but not installed by
-   default. A minimum KIWI installation requires to install the package
-   <package>kiwi</package> and at least one package containing the boot
-   descriptions for the various image types:
+   default. With SUSE Linux Enterprise 11, KIWI is included in the 
+   software development kit (SDK), not the main installation media.
+   A minimum KIWI installation requires installing the 
+   <package>kiwi</package> packag eand at least one package containing
+   the boot descriptions for the various image types:
   </para>
   <simplelist>
    <member>
@@ -58,7 +60,7 @@
   <screen>git clone https://github.com/openSUSE/kiwi.git</screen>
 
   <para>
-   Before running KIWI make sure all its dependencies fullfilled. Get a list
+   Before running KIWI make sure all its dependencies are fullfilled. Get a list
    of required packages by running the following command in the checkout
    directory (<filename class="directory">kiwi/</filename>):
   </para>

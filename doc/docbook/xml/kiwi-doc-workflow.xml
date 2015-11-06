@@ -9,7 +9,7 @@
   <title>Introduction</title>
 
   <para>
-   Installation of a Linux system generally occurs by booting a target system
+   Installation of a Linux system generally occurs by booting the target system
    from an installation source such as an installation CD/DVD, a live CD/DVD,
    or a network boot environment (PXE). The installation process is often
    driven by an installer that interacts with the user to collect information
@@ -32,7 +32,7 @@
   </para>
   <para>
    The behavior of the image upon deployment varies
-   depending on the image type and the image configuration since KIWI allows
+   depending on the image type and the image configuration since KIWI allows you
    to completely customize the initial start-up behavior of the image. Among
    others, this includes images that
   </para>
@@ -126,6 +126,7 @@
     <listitem>
      <para>
       Encapsulated system reachable via kernel filesystem/extension drivers
+      such as loopback mounts, etc.
      </para>
     </listitem>
    </varlistentry>
