@@ -9,10 +9,10 @@
   <title>What is KIWI?</title>
 
   <para>
-   KIWI is a command line tools for building images for Linux. It supports a
-   variety of image formats. KIWI is used as a back-end for the appliance
-   builder <ulink url="http://susestudio.com/">SUSE Studio</ulink>. It is also
-   used to build images in the <ulink
+   KIWI is a command line tool, written in Perl, for building images for Linux.
+   It supports a variety of image formats. KIWI is used as a back-end for the
+   appliance builder <ulink url="http://susestudio.com/">SUSE Studio</ulink>.
+   It is also used to build images in the <ulink
    url="http://build.opensuse.org/">openSUSE Build Service</ulink>, among them
    images for all SUSE products.
   </para>
@@ -126,7 +126,8 @@
      <para>
       Create a root directory holding the contents of the new file
       system. Install the required packages from a software package source
-      such as SUSE Linux Enterprise Server. Create an image description file,
+      such as the installation media for SUSE Linux Enterprise Server, or
+      an online repository. Create an image description file,
       (<filename>config.xml</filename>) and optionally apply
       customizations. This operation results in the <quote>unpacked root
       tree</quote>.
@@ -138,9 +139,9 @@
      <title>Creation</title>
      <para>
       The image itself is created using the unpacked root tree created in the
-      prvious step. The image creation process does not require user
-      interaction, but can be fine-tuned by modifying the images.sh script
-      that is called during the creation process.
+      previous step. The image creation process does not require user
+      interaction, but can be fine-tuned by modifying the <filename>images.sh</filename>
+      script that is called during the creation process.
      </para>
     </formalpara>
    </step>
