@@ -398,15 +398,25 @@ sub __bundleDisk {
     my $buildinfo = $this->{buildinfo};
     my $data;
     my $code;
+    my $ret;
+    my $install = 0;
     #==========================================
     # handle install media
     #------------------------------------------
     if ($buildinfo->exists('main','install.iso')) {
-        return $this -> __bundleExtension ('install.iso');
-    } elsif ($buildinfo->exists('main','install.stick')) {
-        return $this -> __bundleExtension ('install.raw');
-    } elsif ($buildinfo->exists('main','install.pxe')) {
-        return $this -> __bundleExtension ('install.tar.xz');
+        $install = 1;
+        $ret |= $this -> __bundleExtension ('install.iso');
+    }
+    if ($buildinfo->exists('main','install.stick')) {
+        $install = 1;
+        $ret |= $this -> __bundleExtension ('install.raw');
+    }
+    if ($buildinfo->exists('main','install.pxe')) {
+        $install = 1;
+        $ret |= $this -> __bundleExtension ('install.tar.xz');
+    }
+    if ($install) {
+        return $ret;
     }
     #==========================================
     # handle formats
