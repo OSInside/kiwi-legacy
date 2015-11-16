@@ -121,9 +121,6 @@ sub createChecks {
     if (! $this -> __checkTargetLocation()) {
         return;
     }
-    if (! $this -> __checkMountDependencies()) {
-        return;
-    }
     if (! $this -> __checkCorrectRootFSPermissons()) {
         return;
     }
@@ -214,9 +211,6 @@ sub prepareChecks {
         return;
     }
     if (! $this -> __checkTargetLocation()) {
-        return;
-    }
-    if (! $this -> __checkMountDependencies()) {
         return;
     }
     if (! $this -> __checkDeprecatedFilesystem()) {
@@ -1755,69 +1749,6 @@ sub __checkDeprecatedFilesystem {
         return 1;
     }
     return 1;
-}
-
-#==========================================
-# __checkMountDependencies
-#------------------------------------------
-sub __checkMountDependencies {
-    my $this = shift;
-    my $kiwi = $this->{kiwi};
-    my $msg;
-    if ($ENV{KIWI_IGNORE_OLD_MOUNTS}) {
-        return 1;
-    }
-    my %proc_result;
-    foreach my $pid ($this->__read_pids('/proc')) {
-        foreach my $task_pid ($this->__read_pids("/proc/$pid/task")) {
-            my $TASK_MOUNTS = FileHandle->new();
-            if ($TASK_MOUNTS->open("/proc/$pid/task/$task_pid/mounts")) {
-                while (my $line = <$TASK_MOUNTS>) {
-                    # The search expression to indicate this mount belongs to
-                    # some kiwi process is not 100% reliable, but so far the
-                    # only solution I could come up with
-                    if ($line =~ /kiwi/) {
-                        $proc_result{$task_pid} = 1;
-                    }
-                }
-                $TASK_MOUNTS->close();
-            }
-        }
-    }
-    my @kiwi_mount_references = sort keys %proc_result;
-    if (! @kiwi_mount_references) {
-        return 1;
-    }
-
-    $msg = <<'    END_MESSAGE';
-    It appears there are processes which are holding onto
-    mounts created by a previous run
-    END_MESSAGE
-    $kiwi->error($this->__here_format($msg));
-
-    my $PS = FileHandle->new();
-    if ($PS->open("pstree -p|")) {
-        while (my $line = <$PS>) {
-            foreach my $ref_pid (@kiwi_mount_references) {
-                if ($line =~ /\($ref_pid\)/) {
-                    $kiwi->note($line);
-                    last;
-                }
-            }
-        }
-        $PS -> close();
-    }
-    $kiwi->note("\n");
-
-    $msg = <<'    END_MESSAGE';
-    This could cause kiwi to fail, or even worse, if you are
-    building on tmpfs, it could totally freeze or crash your
-    machine. Please first clean up these old mounts, or export
-    'KIWI_IGNORE_OLD_MOUNTS=yes' and re-run
-    END_MESSAGE
-    $kiwi->error($this->__here_format($msg));
-
-    return;
 }
 
 #==========================================
