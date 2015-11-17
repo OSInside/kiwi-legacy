@@ -358,6 +358,8 @@ sub createVMDK {
     my $result;
     my $diskCnt;
     my $diskMode;
+    my $tools_install_type = 4;
+    my $global = KIWIGlobals -> instance();
     if ($vmdata) {
         $diskCnt  = $vmdata -> getSystemDiskController();
         $diskMode = $vmdata -> getSystemDiskMode();
@@ -365,6 +367,23 @@ sub createVMDK {
     my $qemu_img = $this -> __checkQemuImg();
     if (! $qemu_img) {
         return;
+    }
+    my $image_root_path = KIWIQX::qxx ("mktemp -qdt kiwi_root.XXXXXX");
+    chomp $image_root_path;
+    if (! $global -> mount ($source, $image_root_path)) {
+        return;
+    }
+    my $tools_version = KIWIQX::qxx (
+        "chroot $image_root_path /usr/bin/vmtoolsd --version 2>/dev/null"
+    );
+    $global -> umount();
+    unlink($image_root_path);
+    if ($tools_version) {
+        if ($tools_version =~ /version (.*)\.(.*)\.(.*)\.(.*?)\s/) {
+            $tools_version=(int($1) * 1024) + (int($2) * 32) + $3;
+        } else {
+            undef $tools_version;
+        }
     }
     $kiwi -> info ("Creating $format image...");
     $target  =~ s/\.raw$/\.$format/;
@@ -399,6 +418,17 @@ sub createVMDK {
         return;
     }
     $kiwi -> done ();
+    $kiwi -> info ("Updating VMDK metadata\n");
+    if (! $tools_version) {
+        $kiwi -> warning ("--> No VM tools version detected");
+        $kiwi -> skipped();
+    } else {
+        $kiwi -> info ("--> Setting tools version: $tools_version\n");
+        $kiwi -> info ("--> Setting tools install type: $tools_install_type\n");
+        $this -> __update_vmdk_descriptor(
+            $target, $tools_version, $tools_install_type
+        );
+    }
     return $target;
 }
 
@@ -1496,6 +1526,47 @@ sub __checkQemuImg {
         return;
     }
     return $qemu_img;
+}
+#==========================================
+# __update_vmdk_descriptor
+#------------------------------------------
+sub __update_vmdk_descriptor {
+    my $this = shift;
+    my $vmdk = shift;
+    my $ddb_tools_version = shift;
+    my $ddb_install_type = shift;
+    my $kiwi = $this->{kiwi};
+    my $data = KIWIQX::qxx ("dd if=$vmdk bs=1 count=1024 skip=512 2>/dev/null");
+    my $code = $? >> 8;
+    if ($code != 0) {
+        $kiwi -> error  ("failed to read vmdk descriptor");
+        $kiwi -> failed ();
+        return
+    }
+    my @descriptor_lines = split(/\n/, $data);
+    unshift (@descriptor_lines, 'encoding="UTF-8"');
+    push (@descriptor_lines, "ddb.toolsInstallType = \"$ddb_install_type\"");
+    push (@descriptor_lines, "ddb.toolsVersion = \"$ddb_tools_version\"");
+
+    $data = join("\n", @descriptor_lines);
+
+    my $FD = FileHandle -> new();
+    if (! $FD->open(
+        "|dd of=$vmdk bs=1 seek=512 conv=sparse,notrunc 2>/dev/null")
+    ) {
+        $kiwi -> error  ("failed to open vmdk descriptor: $!");
+        $kiwi -> failed ();
+        return
+    }
+    print $FD $data;
+    $FD -> close();
+    $code = $? >> 8;
+    if ($code != 0) {
+        $kiwi -> error  ("failed to write vmdk descriptor");
+        $kiwi -> failed ();
+        return
+    }
+    return $this;
 }
 #==========================================
 # Destructor
