@@ -358,6 +358,8 @@ sub createVMDK {
     my $result;
     my $diskCnt;
     my $diskMode;
+    my $tools_install_type = 4;
+    my $global = KIWIGlobals -> instance();
     if ($vmdata) {
         $diskCnt  = $vmdata -> getSystemDiskController();
         $diskMode = $vmdata -> getSystemDiskMode();
@@ -365,6 +367,23 @@ sub createVMDK {
     my $qemu_img = $this -> __checkQemuImg();
     if (! $qemu_img) {
         return;
+    }
+    my $image_root_path = KIWIQX::qxx ("mktemp -qdt kiwi_root.XXXXXX");
+    chomp $image_root_path;
+    if (! $global -> mount ($source, $image_root_path)) {
+        return;
+    }
+    my $tools_version = KIWIQX::qxx (
+        "chroot $image_root_path /usr/bin/vmtoolsd --version 2>/dev/null"
+    );
+    $global -> umount();
+    unlink($image_root_path);
+    if ($tools_version) {
+        if ($tools_version =~ /version (.*)\.(.*)\.(.*)\.(.*?)\s/) {
+            $tools_version=(int($1) * 1024) + (int($2) * 32) + $3;
+        } else {
+            undef $tools_version;
+        }
     }
     $kiwi -> info ("Creating $format image...");
     $target  =~ s/\.raw$/\.$format/;
@@ -398,12 +417,18 @@ sub createVMDK {
         $kiwi -> failed ();
         return;
     }
-    my $tools_install_type = 4;
-    my $tools_version = 9344;
-    $this -> __update_vmdk_descriptor(
-        $target, $tools_version, $tools_install_type
-    );
     $kiwi -> done ();
+    $kiwi -> info ("Updating VMDK metadata\n");
+    if (! $tools_version) {
+        $kiwi -> warning ("--> No VM tools version detected");
+        $kiwi -> skipped();
+    } else {
+        $kiwi -> info ("--> Setting tools version: $tools_version\n");
+        $kiwi -> info ("--> Setting tools install type: $tools_install_type\n");
+        $this -> __update_vmdk_descriptor(
+            $target, $tools_version, $tools_install_type
+        );
+    }
     return $target;
 }
 
