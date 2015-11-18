@@ -237,7 +237,7 @@ sub executeDir {
         foreach my $p (@paths) {
             $cmd = "/usr/bin/openSUSE-appstream-process";
             $cmd .= " $p";
-            $cmd .= " $targetdir";
+            $cmd .= " $p/$descrdir";
             $call = $this -> callCmd($cmd);
             $status = $call->[0];
             my $out = join("\n",@{$call->[1]});
