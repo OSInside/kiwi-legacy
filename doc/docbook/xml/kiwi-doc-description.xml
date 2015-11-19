@@ -852,7 +852,11 @@
      <listitem>
       <para>
        Using the optional systemdisk section it is possible to create a LVM
-       (Logical Volume Management) based storage layout. By default, the
+       (Logical Volume Management) based storage layout or a btrfs based
+       layout using sub volumes. See chapter 17 for details.
+      </para>
+      <para>
+       By default, the
        volume group is named <emphasis>kiwiVG</emphasis>. It is possible to
        change the name of the group by setting the
        <sgmltag class="attribute">name</sgmltag> attribute to the desired
