@@ -4192,6 +4192,11 @@ sub extractLinux {
         }
         KIWIQX::qxx ("rm -rf $imageTree/boot/*");
     }
+    else {
+        $kiwi -> warning  ("--> Can't find kernel for extraction: " .
+                           "did you call suseStripKernel?");
+        $kiwi -> skipped ();
+    }
     return $name;
 }
 
