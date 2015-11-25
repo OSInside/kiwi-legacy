@@ -1205,7 +1205,7 @@ function suseGFXBoot {
         mv /boot/*.img /image/loader &>/dev/null
         mv /boot/*.imx /image/loader &>/dev/null
         mv /boot/*.dtb /image/loader &>/dev/null
-        mv /boot/dtb/  /image/loader &>/dev/null
+        mv /boot/dtb*  /image/loader &>/dev/null
         mv /boot/*.elf /image/loader &>/dev/null
     else
         # boot loader binaries

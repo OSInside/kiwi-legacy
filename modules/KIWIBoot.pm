@@ -5562,7 +5562,7 @@ sub copyBootCode {
         my $target = $dest;
         KIWIQX::qxx ("mv $dest/boot/boot.scr $target &>/dev/null");
         KIWIQX::qxx ("mv $dest/boot/*.dtb $target &>/dev/null");
-        KIWIQX::qxx ("mv $dest/boot/dtb/  $target &>/dev/null");
+        KIWIQX::qxx ("mv $dest/boot/dtb*  $target &>/dev/null");
         if (-f "$dest/boot/MLO") {
             $status = KIWIQX::qxx ("mv $dest/boot/MLO $target");
             $result = $? >> 8;
