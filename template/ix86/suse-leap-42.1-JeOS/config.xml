@@ -14,7 +14,7 @@
         <profile name="vmxFlavour" description="VMX with default kernel" import="true"/>
     </profiles>
     <preferences>
-        <type image="iso" primary="true" boot="isoboot/suse-leap42.1" flags="overlay" hybrid="true" firmware="efi" kernelcmdline="splash"/>
+        <type image="iso" primary="true" boot="isoboot/suse-leap42.1" flags="overlay" hybrid="true" firmware="efi" kernelcmdline="splash" hybridpersistent_filesystem="ext4" hybridpersistent="true"/>
         <version>1.42.1</version>
         <packagemanager>zypper</packagemanager>
         <locale>en_US</locale>
