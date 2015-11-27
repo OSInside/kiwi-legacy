@@ -3894,6 +3894,7 @@ sub setupBootLoaderStages {
             my $core= "$tmpdir/EFI/BOOT/$fo_bin";
             my $core_opts;
             $core_opts = "-O $fo -o $core -c $earlyboot ";
+            $core_opts.= "-p /boot/grub2 ";
             $core_opts.= "-d $tmpdir/$stages{efi}{stageSRC}";
             $status = KIWIQX::qxx (
                 "$grub2_mkimage $core_opts @modules 2>&1"
@@ -3997,6 +3998,7 @@ sub setupBootLoaderStages {
             my $core     = "$tmpdir/boot/grub2/$format/core.elf";
             my $core_opts;
             $core_opts = "-O $format -o $core -c $earlyboot ";
+            $core_opts.= "-p /boot/grub2 ";
             $core_opts.= "-d $tmpdir/$stages{ofw}{stageSRC}";
             my $status = KIWIQX::qxx (
                 "$grub2_mkimage $core_opts @modules 2>&1"
@@ -4028,6 +4030,7 @@ sub setupBootLoaderStages {
             my $cdcore   = "$tmpdir/boot/grub2/$format/cdboot.img";
             my $core_opts;
             $core_opts = "-O $format -o $core -c $earlyboot ";
+            $core_opts.= "-p /boot/grub2 ";
             $core_opts.= "-d $tmpdir/$stages{bios}{stageSRC}";
             my $status = KIWIQX::qxx (
                 "$grub2_mkimage $core_opts @modules 2>&1"
