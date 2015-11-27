@@ -168,17 +168,13 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 %define mysystems suse-SLES%{sles_version}
 %endif
 %endif
-# RHEL
-%if 0%{?rhel_version} == 600
+# RHEL // CentOS
+# use the rhel templates for CentOS, too
+%if 0%{?rhel_version} == 600 || 0%{?centos_version} == 600
 %define mysystems rhel-06.0
 %endif
-%if 0%{?rhel_version} == 700
+%if 0%{?rhel_version} == 700 || 0%{?centos_version} == 700
 %define mysystems rhel-07.0
-%endif
-# CentOS
-%if 0%{?centos_version} == 600
-# use the rhel templates for CentOS 6
-%define mysystems rhel-06.0
 %endif
 
 # find out about my arch name, could be done also via symlinks
@@ -211,18 +207,20 @@ Provides:       kiwi-filesystem:xfs
 Provides:       kiwi-filesystem:ext3
 Provides:       kiwi-filesystem:ext4
 Provides:       kiwi-filesystem:squashfs
-Provides:       kiwi-packagemanager:zypper
 Provides:       kiwi-image:docker
 Requires:       btrfsprogs
 Requires:       e2fsprogs
 Requires:       kiwi = %{version}
-Requires:       zypper
 License:        GPL-2.0
 Group:          System/Management
 %if 0%{?rhel_version} || 0%{?centos_version}
+Provides:       kiwi-packagemanager:yum
+Requires:       yum
 Requires:       squashfs-tools
 %endif
 %if 0%{?suse_version}
+Provides:       kiwi-packagemanager:zypper
+Requires:       zypper
 Requires:       squashfs
 %endif
 %if 0%{?suse_version} > 1120
@@ -371,7 +369,8 @@ Requires:       yaboot
 Requires:       s390-tools
 %endif
 %ifarch %ix86 x86_64
-%if 0%{?suse_version} < 1315
+# rhel7 has no grub, only grub2
+%if 0%{?suse_version} < 1315 && 0%{?rhel_version} < 700 && 0%{?centos_version} < 700
 Requires:       grub
 %endif
 %endif
@@ -405,7 +404,7 @@ Requires:       squashfs-tools
 %endif
 %ifarch %ix86 x86_64
 Requires:       syslinux
-%if 0%{?suse_version} >= 1220
+%if 0%{?suse_version} >= 1220 || 0%{?rhel_version} >= 700 || 0%{?centos_version} >= 700
 Requires:       grub2
 %else
 Requires:       grub
@@ -443,10 +442,10 @@ Requires:       yaboot
 Requires:       s390-tools
 %endif
 %ifarch %ix86 x86_64
-%if 0%{?suse_version} < 1315
+%if 0%{?suse_version} < 1315 && 0%{?rhel_version} < 700 && 0%{?centos_version} < 700
 Requires:       grub
 %endif
-%if 0%{?suse_version} >= 1220
+%if 0%{?suse_version} >= 1220 || 0%{?rhel_version} >= 700 || 0%{?centos_version} >= 700
 Requires:       grub2
 %ifarch x86_64
 Requires:       grub2-x86_64-efi
@@ -519,7 +518,7 @@ Requires:       squashfs-tools
 %endif
 %ifarch %ix86 x86_64
 Requires:       syslinux
-%if 0%{?suse_version} >= 1220
+%if 0%{?suse_version} >= 1220 || 0%{?rhel_version} >= 700 || 0%{?centos_version} >= 700
 Requires:       grub2
 %else
 Requires:       grub
@@ -560,10 +559,10 @@ Requires:       yaboot
 Requires:       s390-tools
 %endif
 %ifarch %ix86 x86_64
-%if 0%{?suse_version} < 1315
+%if 0%{?suse_version} < 1315 && 0%{?rhel_version} < 700 && 0%{?centos_version} < 700
 Requires:       grub
 %endif
-%if 0%{?suse_version} >= 1220
+%if 0%{?suse_version} >= 1220 || 0%{?rhel_version} >= 700 || 0%{?centos_version} >= 700
 Requires:       grub2
 %ifarch x86_64
 Requires:       grub2-x86_64-efi
