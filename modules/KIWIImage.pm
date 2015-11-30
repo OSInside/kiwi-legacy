@@ -2205,7 +2205,7 @@ sub createImageLiveCD {
         } elsif ($gzip =~ /^seed/) {
             print $CFD "UNIONFS_CONFIG='/dev/ram1,loop,seed'\n";
         } elsif ($gzip =~ /^overlay/) {
-            print $CFD "UNIONFS_CONFIG='/dev/ram1,loop,overlay'\n";
+            print $CFD "UNIONFS_CONFIG='tmpfs,loop,overlay'\n";
         } else {
             print $CFD "COMBINED_IMAGE=yes\n";
         }

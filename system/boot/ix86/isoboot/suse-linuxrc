@@ -109,7 +109,10 @@ fi
 importFile < $LIVECD_CONFIG
 if [ ! -z "$HYBRID_RW" ];then
     if [ ! -z "$UNIONFS_CONFIG" ];then
-        UNIONFS_CONFIG=$(echo $UNIONFS_CONFIG | sed -e s@/dev/ram1@$HYBRID_RW@)
+        tmp_rwDevice=$(echo $UNIONFS_CONFIG | cut -d , -f 1)
+        UNIONFS_CONFIG=$(
+            echo $UNIONFS_CONFIG | sed -e s@$tmp_rwDevice@$HYBRID_RW@
+        )
     else
         IMAGE=$(echo $IMAGE | sed -e s@/dev/ram1@$HYBRID_RW@)
     fi
