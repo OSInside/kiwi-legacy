@@ -1759,10 +1759,10 @@ sub cleanMount {
             }
         }
         if (($prefix) && ($item =~ /^$prefix/)) {
-            KIWIQX::qxx ("rmdir -p \"$item\" 2>&1");
+            KIWIQX::qxx ("rmdir \"$item\" 2>&1");
         }
         if ($item =~ /^\/tmp\/kiwimount/) {
-            KIWIQX::qxx ("rmdir -p \"$item\" 2>&1");
+            KIWIQX::qxx ("rmdir \"$item\" 2>&1");
         }
         
     }
