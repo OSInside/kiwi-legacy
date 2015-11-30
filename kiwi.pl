@@ -2184,7 +2184,7 @@ sub createHash {
         $kiwi -> failed ();
         kiwiExit (1);
     }
-    my $cmd  = "find -L -type f | grep -v .svn | grep -v .checksum.md5";
+    my $cmd  = "find -L -type f ! -wholename '*.svn*' ! -name .checksum.md5 | sort";
     my $status = KIWIQX::qxx (
         "cd $idesc && $cmd | xargs md5sum > .checksum.md5"
     );
