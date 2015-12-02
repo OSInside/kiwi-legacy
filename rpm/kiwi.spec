@@ -668,6 +668,7 @@ Authors:
 %setup -q -n %name -a2 -a3
 
 %build
+echo "mysystems set to: %{mysystems}"
 # empty because of rpmlint warning rpm-buildroot-usage
 
 %if 0%{?suse_version} > 1140
