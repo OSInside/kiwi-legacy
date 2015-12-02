@@ -482,6 +482,9 @@ sub init {
     #----------------------------------
     $kiwi -> info ("Creating default template files for new root system");
     if (! defined $this->{cacheRoot}) {
+        my $type = $xml -> getImageType();
+        my $boot_description = $type -> getBootImageDescript();
+
         KIWIQX::qxx ("mkdir -p $root/dev");
         KIWIQX::qxx ("chown root:root $root/dev");
         KIWIQX::qxx ("mkdir -m 755 -p $root/proc");
@@ -505,9 +508,24 @@ sub init {
         KIWIQX::qxx ("mkdir -p $root/etc/sysconfig");
         KIWIQX::qxx ("mkdir -m 755 -p $root/var");
         KIWIQX::qxx ("chown root:root $root/var");
-        KIWIQX::qxx ("mkdir -m 755 -p $root/run");
-        KIWIQX::qxx ("chown root:root $root/run");
-        KIWIQX::qxx ("ln -s /run $root/var/run");
+
+        # this is a bad hack to check which system var/run vs. /run structure
+        # we need. Unfortunately the suse packages does not handle this
+        # correctly because it depends on the order of the packages
+        # if the setup is correct or not. We have no influence on the order
+        # because we pass the package installation to the package manager
+        # Thus there is at the moment no other way to pro actively create
+        # filesystem structures which really should not be kiwi's task
+        # to this extend
+        if (($boot_description) && ($boot_description =~ /SLES11|rhel-06/)) {
+            KIWIQX::qxx ("mkdir -m 755 -p $root/var/run");
+            KIWIQX::qxx ("chown root:root $root/var/run");
+        } else {
+            KIWIQX::qxx ("mkdir -m 755 -p $root/run");
+            KIWIQX::qxx ("chown root:root $root/run");
+            KIWIQX::qxx ("ln -s ../run $root/var/run");
+        }
+
         # for zypper we need a yast log dir
         if ($packager eq "zypper") {
             KIWIQX::qxx ("mkdir -p $root/var/log/YaST2");
