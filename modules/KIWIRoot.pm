@@ -1776,7 +1776,9 @@ sub cleanMount {
                 $kiwi -> skipped ();
             }
         }
-        if (($prefix) && ($item =~ /^$prefix/)) {
+        if (($prefix) && ($item =~ /^$prefix/) && ($item =~ /base-system/)) {
+            KIWIQX::qxx ("rmdir -p \"$item\" 2>&1");
+        } elsif (($prefix) && ($item =~ /^$prefix/)) {
             KIWIQX::qxx ("rmdir \"$item\" 2>&1");
         }
         if ($item =~ /^\/tmp\/kiwimount/) {
