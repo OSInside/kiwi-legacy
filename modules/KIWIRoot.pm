@@ -520,9 +520,13 @@ sub init {
         if (($boot_description) && ($boot_description =~ /SLES11|rhel-06/)) {
             KIWIQX::qxx ("mkdir -m 755 -p $root/var/run");
             KIWIQX::qxx ("chown root:root $root/var/run");
+            KIWIQX::qxx ("mkdir -m 755 -p $root/var/run/dbus");
+            KIWIQX::qxx ("chown root:root $root/var/run/dbus");
         } else {
             KIWIQX::qxx ("mkdir -m 755 -p $root/run");
             KIWIQX::qxx ("chown root:root $root/run");
+            KIWIQX::qxx ("mkdir -m 755 -p $root/run/dbus");
+            KIWIQX::qxx ("chown root:root $root/run/dbus");
             KIWIQX::qxx ("ln -s ../run $root/var/run");
         }
 
