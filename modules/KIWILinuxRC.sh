@@ -3736,12 +3736,9 @@ function setupKernelModules {
     #======================================
     # update config file
     #--------------------------------------
-    for key in INITRD_MODULES DOMU_INITRD_MODULES;do
+    for key in INITRD_MODULES;do
         if [ $key = "INITRD_MODULES" ];then
             val=$INITRD_MODULES
-        fi
-        if [ $key = "DOMU_INITRD_MODULES" ];then
-            val=$DOMURD_MODULES
         fi
         if [ -z "$val" ];then
             continue

@@ -27,7 +27,6 @@ export DOBACKUP=1
 #======================================
 # Exports (Booting)
 #--------------------------------------
-export DOMURD_MODULES="xennet xenblk"
 export INITRD_MODULES="ipr lpfc ibmvscsic"
 export LOCAL_BOOT=no
 export systemIntegrity="clean"
