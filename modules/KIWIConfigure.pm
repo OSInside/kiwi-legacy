@@ -736,24 +736,25 @@ sub setupUsers {
     my $root    = $this->{root};
     my $xml     = $this->{xml};
     my $users    = $xml -> getUsers();
-    my $adduser  = $locator -> getExecPath('useradd', $root);
     my $chown    = $locator -> getExecPath('chown', $root);
     my $grep     = $locator -> getExecPath('grep', $root);
-    my $moduser  = $locator -> getExecPath('usermod', $root);
     my $numUsers = scalar @{$users};
-    if ($numUsers) {
-        if (! $adduser) {
-            $kiwi -> error ("Missing useradd command");
-            $kiwi -> failed ();
-            return;
-        }
-        if (! $moduser) {
-            $kiwi -> error ("Missing usermod command");
-            $kiwi -> failed ();
-            return;
-        }
-    }
+
     for my $user (@{$users}) {
+        my $adduser  = $locator -> getExecPath('useradd', $root);
+        my $moduser  = $locator -> getExecPath('usermod', $root);
+        if ($numUsers) {
+            if (! $adduser) {
+                $kiwi -> error ("Missing useradd command");
+                $kiwi -> failed ();
+                return;
+            }
+            if (! $moduser) {
+                $kiwi -> error ("Missing usermod command");
+                $kiwi -> failed ();
+                return;
+            }
+        }
         my $group     = $user -> getGroupName();
         my $gid       = $user -> getGroupID();
         my $logShell  = $user -> getLoginShell();
