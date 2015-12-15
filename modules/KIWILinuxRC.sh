@@ -1593,9 +1593,9 @@ function setupInitrd {
         #--------------------------------------
         if [ -x "$dracutExec" ]; then
             # 1. dracut
-            Echo "Creating dracut based initrd"
             params=" -f /boot/initrd-$kernel_version $kernel_version"
-            if [[ $kiwi_iname =~ vmxboot ]];then
+            if [[ $kiwi_initrdname =~ vmxboot ]];then
+                Echo "Creating dracut based initrd (background process)"
                 # run dracut in the background to speed up the boot.
                 # We loose the status check of the call and reboot is
                 # only safe after the call has finished. Therefore this
@@ -1603,6 +1603,7 @@ function setupInitrd {
                 # mostly used in cloud frameworks
                 $dracutExec -H $params &>/dev/null </dev/null &
             else
+                Echo "Creating dracut based initrd"
                 if ! $dracutExec -H $params;then
                     Echo "Can't create initrd with dracut"
                     systemIntegrity=unknown
@@ -11455,6 +11456,7 @@ function initialize {
         if [ ! -z "$kiwi_bootloader" ];then
             export loader=$kiwi_bootloader
         fi
+        export kiwi_initrdname=$kiwi_iname
     fi
     #======================================
     # Check partitioner capabilities
