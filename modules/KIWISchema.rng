@@ -2404,6 +2404,7 @@ the btrfs filesystem is used</a:documentation>
           <value>btrfs</value>
           <value>fat</value>
           <value>ext4</value>
+          <value>xfs</value>
         </choice>
       </attribute>
     </define>
