@@ -6,7 +6,7 @@ callpath=$(dirname $0)
 pushd $callpath &>/dev/null
 
 if [ ! -f "metadata/KIWIAnalyse.tgz" ];then
-    su $USER -c "tar -C metadata -czf metadata/KIWIAnalyse.tgz d3"
+    sudo su $USER -c "tar -C metadata -czf metadata/KIWIAnalyse.tgz d3"
 fi
 if [ ! -s ".revision" ];then
     ./.version > .revision
