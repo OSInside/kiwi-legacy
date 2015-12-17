@@ -937,7 +937,9 @@
     </term>
     <listitem>
      <para>
-      Use an alternative device instead of the loop device.
+      Use an alternative block device instead of the loop device.
+      The given location must be a block device node, not a symlink or
+      other linux device node type.
      </para>
     </listitem>
    </varlistentry>
