@@ -1483,10 +1483,20 @@ sub init {
         $kiwi -> failed ();
         kiwiExit (1);
     }
-    if (($targetDevice) && (! -b $targetDevice)) {
-        $kiwi -> error ("Target device $targetDevice doesn't exist");
-        $kiwi -> failed ();
-        kiwiExit (1);
+    if ($targetDevice) {
+        if (! -e $targetDevice) {
+            $kiwi -> error (
+                "Target device $targetDevice doesn't exist"
+            );
+            $kiwi -> failed ();
+            kiwiExit (1);
+        } elsif ((-l $targetDevice) || (! -b $targetDevice)) {
+            $kiwi -> error (
+                "Target device $targetDevice is not a block device"
+            );
+            $kiwi -> failed ();
+            kiwiExit (1);
+        }
     }
     if ((defined $IgnoreRepos) && (defined $SetRepository)) {
         $kiwi -> error ("Can't use ignore repos together with set repos");
