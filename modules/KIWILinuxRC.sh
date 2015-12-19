@@ -6406,35 +6406,23 @@ function setupReadWrite {
         if [ "$RELOAD_IMAGE" = "yes" ] || \
             ! mount -o ro $rwDevice $rwDir &>/dev/null
         then
-            #======================================
-            # store old FSTYPE value
-            #--------------------------------------
-            if [ ! -z "$FSTYPE" ];then
-                FSTYPE_SAVE=$FSTYPE
+            local hybrid_fs=$HYBRID_PERSISTENT_FS
+            if [ ! -z "$kiwi_hybridpersistent_filesystem" ];then
+                hybrid_fs=$kiwi_hybridpersistent_filesystem
             fi
-            #======================================
-            # probe filesystem
-            #--------------------------------------
-            probeFileSystem $rwDevice
-            if [ ! "$FSTYPE" = "unknown" ];then
-                Echo "Checking filesystem for RW data on $rwDevice..."
-                e2fsck -p $rwDevice
-            fi
-            #======================================
-            # restore FSTYPE
-            #--------------------------------------
-            if [ ! -z "$FSTYPE_SAVE" ];then
-                FSTYPE=$FSTYPE_SAVE
-            fi
+            Echo "Checking filesystem for RW data on $rwDevice..."
+            checkFilesystem $rwDevice
+
             if [ "$RELOAD_IMAGE" = "yes" ] || \
                 ! mount -o ro $rwDevice $rwDir &>/dev/null
             then
                 Echo "Creating filesystem for RW data on $rwDevice..."
-                if ! mkfs.ext3 -F $rwDevice >/dev/null;then
+                local exception_handling="false"
+                if ! createFilesystem $rwDevice "" "" "hybrid" $exception_handling $hybrid_fs; then
                     Echo "Failed to create ext3 filesystem"
                     return 1
                 fi
-                e2fsck -p $rwDevice >/dev/null
+                checkFilesystem $rwDevice >/dev/null
             fi
         else
             umount $rwDevice
