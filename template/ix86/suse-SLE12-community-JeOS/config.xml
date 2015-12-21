@@ -186,7 +186,4 @@
 -->
         <package name="sles-release"/>
     </packages>
-    <packages type="delete">
-        <package name="kernel-debug"/>
-    </packages>
 </image>
