@@ -894,6 +894,11 @@
      </term>
      <listitem>
       <para>
+       
+       <remark condition="clarity">
+	2015-11-30 - fs: This whole section has also been copied to the OEM chapter 
+       </remark>
+
        By default, the oemboot process will create or modify a swap, and
        <filename>/</filename> partition. It is possible to influence the
        behavior by the <filename>oem-*</filename> elements explained below.
