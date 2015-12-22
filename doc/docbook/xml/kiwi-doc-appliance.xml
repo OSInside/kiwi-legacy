@@ -220,7 +220,7 @@ diff -u /tmp/deployPackages /tmp/appliancePackages</screen>
        files</literal>. Make sure to add all files from this list
        <emphasis>which are not created automatically</emphasis> to your image
        description. To do this, clone (copy) these files with respect to the
-       filesystem structure as overlay files in your image description
+       file system structure as overlay files in your image description
        <filename class="directory">root/</filename> directory.
       </para>
      </step>

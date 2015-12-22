@@ -170,7 +170,7 @@
    <para>
     If no overlay file system is in use but the image file system is based on a
     compressed file system, KIWI allows to setup which files and directories
-    should be writable in a so-called split section. In order to aloow login
+    should be writable in a so-called split section. In order to allow login
     in to the system, at least the <filename class="directory">/var</filename>
     directory needs to be writable. This is because the PAM authentication
     requires to be able to report any login attempt to
@@ -179,7 +179,7 @@
     class="directory">/boot</filename>, <filename
     class="directory">/etc</filename>, <filename
     class="directory">/home</filename>, and <filename
-    class="directory">/var</filename> are writeable:
+    class="directory">/var</filename> are writable:
    </para>
    <screen>&lt;image ...&gt;
   ...
@@ -276,7 +276,7 @@
     Reading the data from a tmpfs is however much faster than reading the data
     from CD/DVD drive or USB stick. An additional benefit of the toram mode is
     the ability to disconnect the CD/DVD drive or USB slot the live system
-    orignially existed. However the costs for the performance win are a slower
+    originally existed. However the costs for the performance win are a slower
     initial startup time as well as more RAM requirements. A minimum 2GB of
     RAM is recommended to boot 700M compressed live image. In order to activate
     the toram mode place the following option at the boot prompt when the
@@ -299,7 +299,7 @@
    </para>
    <screen>kiwi --create ... --fat-storage 500</screen>
    <para>
-    If this option is set, KIWI will use the syslinux bootloader for the
+    If this option is set, KIWI will use the syslinux boot loader for the
     image as well as for the first FAT partition with the specified
     size. The live operating system itself will be hosted on a logical volume
     (LVM), which allows to easily manipulate the logical root volume. For further information about the OEM image type please refer <xref linkend="chap.oem"/>.

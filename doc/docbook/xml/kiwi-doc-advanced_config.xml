@@ -7,7 +7,7 @@
   <para>
    In this chapter you will learn how to speed up image rebuilds by using
    images caches. It also deals with setting up images supporting complex
-   storage scenarios such as RAID, LVM and encrypted partions.
+   storage scenarios such as RAID, LVM and encrypted partitions.
   </para>
  </abstract>
  <xi:include href="kiwi-doc-caches.xml"

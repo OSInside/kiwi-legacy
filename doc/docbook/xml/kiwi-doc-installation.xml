@@ -13,7 +13,7 @@
    default. With SUSE Linux Enterprise 11, KIWI is included in the 
    software development kit (SDK), not the main installation media.
    A minimum KIWI installation requires installing the 
-   <package>kiwi</package> packag eand at least one package containing
+   <package>kiwi</package> package and at least one package containing
    the boot descriptions for the various image types:
   </para>
   <simplelist>

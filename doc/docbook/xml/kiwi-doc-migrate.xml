@@ -4,9 +4,9 @@
 <chapter id="chap.migration">
  <title>System Analysis/Migration</title><indexterm>
  <primary>KIWI</primary>
- <secondary>imge analysis</secondary></indexterm>
+ <secondary>image analysis</secondary></indexterm>
  <para>
-  KIWI provides a module which allows you to analyse the running system for
+  KIWI provides a module which allows you to analyze the running system for
   creating a report and an image description representing the current state of
   the machine. Among others, this allows you to clone your currently running
   system into an image. The process has the following limitations at the
@@ -32,10 +32,10 @@
   result is a list of packages and patterns representing your system. Files
   not belonging to any packages, such as user data or configuration files, are
   provided as custom data by KIWI. In addition, KIWI offers different data
-  visualisations e.g unmanaged binary data. Along with the software analysis,
+  visualization e.g unmanaged binary data. Along with the software analysis,
   KIWI also checks for enabled systemd services, augeas configuration
   inventory and more. The process will not go beyond the scope of local
-  filesystems.
+  file systems.
  </para>
  <para>
   To create an image of your running system, proceed as follows:
@@ -59,7 +59,7 @@
     add the repositories containing these packages to your system (for
     example with <command>zypper addrepo</command>) and run the previous
     command again. Alternatively, tell KIWI which additional repos to check,
-    by using the previuos command together with the
+    by using the previous command together with the
     <option>--add-repo</option> and <option>--add-repotype</option> options
     (refer to <command>man 1 kiwi</command> for more information).
    </para>
@@ -88,7 +88,7 @@
     <filename>/var/cache/kiwi/describe/workstation/custom.files</filename>. Among
     others, this list contains user data, configuration files, and database
     files. Make sure to only add files to the image that are really needed. In
-    case you want to publish the image, doublecheck the list for password
+    case you want to publish the image, double check the list for password
     files, configuration files containing plain text passwords, user data,
     databases and other sensitive data. All files that should become part of
     the image description need to be moved from <filename
@@ -121,7 +121,7 @@
     </listitem>
     <listitem>
      <para>
-      If you want to access any remote filesystem its a good idea to let
+      If you want to access any remote file system its a good idea to let
       AutoYaST add them on first boot of the system.
      </para>
     </listitem>

@@ -170,7 +170,7 @@
   <title>Custom Partitioning via Btrfs</title>
 
   <para>
-   If Btrfs is used as a filesystem, the subvolume management is configured
+   If Btrfs is used as a file system, the subvolume management is configured
    via the same <sgmltag class="element">systemdisk</sgmltag> element as
    explained in <xref linkend="chap.partitions.lvm"/>. Also the same rules as
    explained for lvm volumes applies to btrfs subvolumes with the following
@@ -179,10 +179,10 @@
   <formalpara>
    <title>There is no @root volume and no size setup</title>
    <para>
-    The btrfs filesystem is created with an initial size which can be
+    The btrfs file system is created with an initial size which can be
     specified by the <sgmltag class="element">size</sgmltag> element All
-    subvolumes are part of the filesystem itself and managed by a
-    namespace. The overall size is shared across the entire filesystem and the
+    subvolumes are part of the file system itself and managed by a
+    namespace. The overall size is shared across the entire file system and the
     size of an entity can be controlled by a btrfs quota which is not applied
     by kiwi at the moment
    </para>

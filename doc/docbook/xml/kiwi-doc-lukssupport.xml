@@ -13,7 +13,7 @@
   class="attribute">luks</sgmltag> to the <sgmltag
   class="element">type</sgmltag> element in
   <filename>config.xml</filename>. The value of the attribute represents the
-  password string which will be required to mount the filesystem while
+  password string which will be required to mount the file system while
   booting:
  </para>
  <screen>&lt;image ...&gt;

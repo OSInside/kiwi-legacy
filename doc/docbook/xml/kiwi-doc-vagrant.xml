@@ -13,7 +13,7 @@
   <para>
    <ulink url="http://vagrantup.com/">Vagrant</ulink> is a nice framework to
    implement consistent processing/testing work environments based on
-   virtualisation technologies. In order to run a system, Vagrant needs
+   Virtualization technologies. In order to run a system, Vagrant needs
    so-called <quote>boxes</quote>. A box is a TAR archive containing a virtual
    disk image and some metadata.
   </para>
@@ -47,7 +47,7 @@
    class="extension">.json</filename> files are needed in order to add and run
    the box in Vagrant. The <filename class="extension">.box</filename> file is
    a TAR archive containing the virtual disk image for the selected
-   virtualisation provider.  In this example it is a qcow2 image to be used
+   virtualization provider.  In this example it is a qcow2 image to be used
    with libvirt and some metadata which mostly duplicates the information from
    the '.json' file to have it packaged in one place, too. 
    <remark condition="clarity">
@@ -104,7 +104,7 @@
   <para>
    Adding the box to Vagrant can be done in two ways. Either by using the
    <filename class="extension">.box</filename> file and providing a name at
-   the commandline:
+   the command line:
   </para>
   <screen>cd /tmp/my-box
 vagrant box add my-box LimeJeOS-SLE12.x86_64-1.13.1.libvirt.box</screen>

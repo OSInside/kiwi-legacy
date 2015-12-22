@@ -36,7 +36,7 @@
    permanent and will not be automatically restored. It is also the script
    authors tasks to check if changes done before do not interfere in a
    negative way if another image type is created from the same unpacked
-   image root tree If <filename>images.sh</filename> exitswith an exit code
+   image root tree If <filename>images.sh</filename> exits with an exit code
    != 0 the kiwi process will exit with an error too.
   </para>
   <example>
@@ -79,7 +79,7 @@ exit</programlisting>
     </term>
     <listitem>
      <para>
-      Umount the system filesystems <filename>/proc</filename>,
+      Umount the system file systems <filename>/proc</filename>,
       <filename>/dev/pts</filename>, and <filename>/sys</filename>.
      </para>
     </listitem>
@@ -290,7 +290,7 @@ exit</programlisting>
     </term>
     <listitem>
      <para>
-      The basic image type. Can be a simply filesystem image type of ext2,
+      The basic image type. Can be a simply file system image type of ext2,
       ext3, reiserfs, squashfs, and cpio or one of the following complex
       image types: iso split usb vmx oem xen pxe
      </para>

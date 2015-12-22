@@ -78,7 +78,7 @@
   </para>
   <para>
    In the preparation step, you prepare a directory including the contents
-   of your new filesystem based on one or more software package source(s)
+   of your new file system based on one or more software package source(s)
    The creation step is based on the result of the preparation step and uses
    the contents of the new image root tree to create the output image. If
    the image type ISO was requested, the output image would be a file with
@@ -185,10 +185,10 @@
  <refsect1 id="kiwi.image.system2image">
   <title>System Analysis</title>
   <para>
-   KIWI provides a module which allows you to analyse the running system and
+   KIWI provides a module which allows you to analyze the running system and
    create a report and an image description representing the current state
    of the machine. Among others this allows you to clone your currently
-   running system into an image. The system requires the zypper backend in
+   running system into an image. The system requires the zypper back-end in
    order to work properly.
   </para>
   <para>
@@ -209,7 +209,7 @@
    manual fine tuning is required. This includes the repository selection
    and the unmanaged files along with the configuration details of your
    currently running operating system. You should understand the module as a
-   helper to analyse running linux systems.
+   helper to analyze running linux systems.
   </para>
   <cmdsynopsis><command>kiwi</command><group choice="req">
    <arg choice="plain">--describe</arg></group>
@@ -280,11 +280,11 @@
  <refsect1>
   <title>Helper Tools</title>
   <para>
-   The helper tools provide optional functions like creating a crypted
+   The helper tools provide optional functions like creating an encrypted
    password string for the users section of the
    <filename>config.xml</filename> file as well as signing the image
    description with an md5sum hash and adding splash data to the boot image
-   used by the bootloader.
+   used by the boot loader.
   </para>
   <cmdsynopsis><command>kiwi</command>
    <arg choice="plain">--createpassword</arg>
@@ -400,7 +400,7 @@
     <listitem>
      <para>
       Set/Overwrite repo type for the first listed repo. The supported repo
-      types depends on the packagemanager. Commonly supported are rpm-md,
+      types depends on the package manager. Commonly supported are rpm-md,
       rpm-dir and yast2. The change is temporary and will not be written to
       the XML file.
      </para>
@@ -426,7 +426,7 @@
     <listitem>
      <para>
       Set/Overwrite priority for the first listed repo. Works with the smart
-      packagemanager only. The Channel priority assigned to all packages
+      package manager only. The Channel priority assigned to all packages
       available in this channel (0 if not set). If the exact same package is
       available in more than one channel, the highest priority is used.
      </para>
@@ -454,7 +454,7 @@
      <para>
       Ignore all repositories specified so far, in XML or elsewhere. This
       option should be used in conjunction with subsequent calls to
-      <option>--add-repo</option> to specify repositories at the commandline
+      <option>--add-repo</option> to specify repositories at the command line
       that override previous specifications.
      </para>
     </listitem>
@@ -576,7 +576,7 @@
     <listitem>
      <para>
       This option bundles the build results to be suitable for publishing it
-      in the buildservice. It allows adding a build-number in combination
+      in the Build Service. It allows adding a build-number in combination
       with the <option>--bundle-id</option> option as well as a SHA key to
       the results. It also removes intermediate build results not relevant
       for users if they don't want to rebuild the image.
@@ -664,7 +664,7 @@
      <para>
       In combination with recycle-root this option forces to call the
       bootstrap phase of kiwi, which is not considered necessary under
-      normal circumstations.
+      normal circumstances.
      </para>
     </listitem>
    </varlistentry>
@@ -792,7 +792,7 @@
     <listitem>
      <para>
       When calling KIWI in creation mode this option will set the block size
-      in bytes. For ISO images with the old style ramdisk setup a blocksize
+      in bytes. For ISO images with the old style ramdisk setup a block size
       of 4096 bytes is required
      </para>
     </listitem>
@@ -803,8 +803,8 @@
     <listitem>
      <para>
       When calling KIWI in creation mode this option will set the journal
-      size in mega bytes for ext[23] based filesystems and in blocks if the
-      reiser filesystem is used
+      size in mega bytes for ext[23] based file systems and in blocks if the
+      Reiser file system is used
      </para>
     </listitem>
    </varlistentry>
@@ -814,7 +814,7 @@
     <listitem>
      <para>
       When calling KIWI in creation mode this option will set the inode size
-      in bytes. This option has no effect if the reiser filesystem is used
+      in bytes. This option has no effect if the Reiser file system is used
      </para>
     </listitem>
    </varlistentry>
@@ -823,8 +823,8 @@
     </term>
     <listitem>
      <para>
-      Set the bytes/inode ratio. This option has no effect if the reiser
-      filesystem is used
+      Set the bytes/inode ratio. This option has no effect if the Reiser
+      file system is used
      </para>
     </listitem>
    </varlistentry>
@@ -834,8 +834,8 @@
     <listitem>
      <para>
       When calling kiwi in creation mode this option will set the number of
-      mounts after which the filesystem will be checked. Set to 0 to disable
-      checks. This option applies only to ext[234] filesystems.
+      mounts after which the file system will be checked. Set to 0 to disable
+      checks. This option applies only to ext[234] file systems.
      </para>
     </listitem>
    </varlistentry>
@@ -845,8 +845,8 @@
     <listitem>
      <para>
       When calling kiwi in creation mode this option will set the maximal
-      time between two filesystem checks. Set to 0 to disable time-dependent
-      checks. This option applies only to ext[234] filesystems.
+      time between two file system checks. Set to 0 to disable time-dependent
+      checks. This option applies only to ext[234] file systems.
      </para>
     </listitem>
    </varlistentry>
@@ -855,7 +855,7 @@
     </term>
     <listitem>
      <para>
-      if the syslinux bootlaoder is used this option allows to specify the
+      if the syslinux boatload is used this option allows to specify the
       size of the fat partition. This is useful if the fat space is not only
       used for booting the system but also for custom data. Therefore this
       option makes sense when building a USB stick image (image type: usb or
@@ -902,12 +902,12 @@
     <listitem>
      <para>
       Specifies the location of a custom script which is called right before
-      the bootloader is installed. This allows to modify the bootloader
+      the boot loader is installed. This allows to modify the boot loader
       configuration file written by kiwi. The scripts working directory is
-      the one which represents the image structure including the bootloader
+      the one which represents the image structure including the boot loader
       configuration files. Please have in mind that according to the image
-      type, architecture and bootloader type the files/directory structure
-      and also the name of the bootloader configuration files might be
+      type, architecture and boot loader type the files/directory structure
+      and also the name of the boot loader configuration files might be
       different.
      </para>
     </listitem>
@@ -918,7 +918,7 @@
     <listitem>
      <para>
       Specifies the location of a custom script which is called right after
-      the bootloader is installed.
+      the boot loader is installed.
      </para>
     </listitem>
    </varlistentry>

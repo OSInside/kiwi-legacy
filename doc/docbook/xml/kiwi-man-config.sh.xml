@@ -35,7 +35,7 @@
    creating configuration files, prepare an environment for a firstboot
    workflow, etc. The <filename>config.sh</filename> script is called
    <emphasis>after</emphasis> the following kiwi built in configuration
-   tasks: User/Groups, copy of overlay root tree and setup of autoyast If
+   tasks: User/Groups, copy of overlay root tree and setup of AutoYaST If
    <filename>config.sh</filename> exits with an exit code != 0 the kiwi
    process will exit with an error too.
   </para>
@@ -383,7 +383,7 @@ exit 0</programlisting>
     </term>
     <listitem>
      <para>
-      Deactive the given service by using the chkconfig or systemctl
+      Deactivate the given service by using the chkconfig or systemctl
       program. Which init system is in use is auto detected
      </para>
     </listitem>
@@ -429,7 +429,7 @@ exit 0</programlisting>
      <para>
       This function will use zypper to search for the installed product and
       install all product specific packages. This function only makes sense
-      if zypper is used as packagemanager
+      if zypper is used as package manager
      </para>
     </listitem>
    </varlistentry>
@@ -557,7 +557,7 @@ exit 0</programlisting>
     </term>
     <listitem>
      <para>
-      The basic image type. Can be a simply filesystem image type of ext2,
+      The basic image type. Can be a simply file system image type of ext2,
       ext3, reiserfs, squashfs, cpio, or one of the following complex image
       types: iso, split, usb, vmx, oem, xen, or pxe.
      </para>

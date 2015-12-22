@@ -47,7 +47,7 @@
   </para>
   <screen>kiwi --build suse-SLE12-community-JeOS --add-profile netboot --type pxe -d /tmp/mypxe-result</screen>
   <para>
-   This command generates a compressed root filesystem image which is deployed
+   This command generates a compressed root file system image which is deployed
    as an overlayfs-based union system. To use the image, all image parts need
    to be copied to a PXE boot server. If you have not set up such a server,
    refer to <xref linkend="app.bootserver"/> for instructions. The following
@@ -226,7 +226,7 @@ UNIONFS_CONFIGURATION="rw-partition,compressed-partition,container-fs"</screen>
 
    <para>
     Not all configuration options need to be specified. The following
-    configuration is an example for an image based on a read-write filesystem
+    configuration is an example for an image based on a read-write file system
     stored on a local disk:
    </para>
    <screen>DISK="/dev/sda"
@@ -242,7 +242,7 @@ IMAGE="/dev/sda2;suse-##.#-pxe-client.i686;1.2.8;192.168.100.2;4096"</screen>
      <term><varname>AOEROOT</varname></term>
      <listitem>
       <para>
-       Mount the system image root filesystem remotely via AoE (ATA over
+       Mount the system image root file system remotely via AoE (ATA over
        Ethernet). This requires a server exporting a block device
        representing the root directory of the system image via the AoE
        subsystem. The block device could be a partition of a real or a
@@ -260,7 +260,7 @@ IMAGE="/dev/sda2;suse-##.#-pxe-client.i686;1.2.8;192.168.100.2;4096"</screen>
       <screen><command>vbladed</command> 0 1 eth0 /dev/sdb1</screen>
       <para>
        To be able to use the device KIWI needs the information which AoE
-       device contains the root filesystem. In this example this is the device
+       device contains the root file system. In this example this is the device
        <filename class="devicefile">/dev/etherd/e0.1</filename>:
       </para>
       <screen>AOEROOT=/dev/etherd/e0.1</screen>
@@ -368,7 +368,7 @@ IMAGE="/dev/sda2;suse-##.#-pxe-client.i686;1.2.8;192.168.100.2;4096"</screen>
           <row>
            <entry>not present</entry>
            <entry>present</entry>
-           <entry>delete on client (regardles hash)</entry>
+           <entry>delete on client (regardless hash)</entry>
           </row>
          </tbody>
         </tgroup>
@@ -452,7 +452,7 @@ IMAGE="/dev/sda2;suse-##.#-pxe-client.i686;1.2.8;192.168.100.2;4096"</screen>
          <para>
           The device the root file system should be installed on. Can either
           be a RAM disk (for example <filename
-          class="devicefile">/dev/ram1</filename> or a block devivce (for
+          class="devicefile">/dev/ram1</filename> or a block device (for
           example <filename class="devicefile">/dev/hda2</filename>).
          </para>
          <para>
@@ -465,7 +465,7 @@ IMAGE="/dev/sda2;suse-##.#-pxe-client.i686;1.2.8;192.168.100.2;4096"</screen>
          <para>
           When using a block device, always make sure to also create a
           corresponding <envar>PART</envar> entry defining the
-          partinioning. Note that a partitioning scheme defined with
+          partitioning. Note that a partitioning scheme defined with
           <envar>PART</envar> always defines the first partition as swap and
           the second partition as the root file system. Therefore
           <literal>device</literal> needs to point to the second partition
@@ -602,7 +602,7 @@ IMAGE="/dev/sda2;suse-##.#-pxe-client.i686;1.2.8;192.168.100.2;4096"</screen>
      </term>
      <listitem>
       <para>
-       Mount the system image root filesystem remotely via NBD (Network Block
+       Mount the system image root file system remotely via NBD (Network Block
        Device). This requires a server which exports the root directory
        of the system image via a specified export name. The Kernel provides
        the block layer, together with a remote port that uses the nbd-server
@@ -611,7 +611,7 @@ IMAGE="/dev/sda2;suse-##.#-pxe-client.i686;1.2.8;192.168.100.2;4096"</screen>
        can set up a special network block device named <filename
        class="devicefile">/dev/nb0</filename> using the nbd-client
        command. After this device exists, the mount program is used to mount
-       the root filesystem. To allow the KIWI boot image to use that, the
+       the root file system. To allow the KIWI boot image to use that, the
        following information must be provided:
       </para>
 <screen>NBDROOT=<replaceable>NBD.Server.IP.address;</replaceable>\
@@ -643,7 +643,7 @@ IMAGE="/dev/sda2;suse-##.#-pxe-client.i686;1.2.8;192.168.100.2;4096"</screen>
        Defining a a swap device is optional. It is only set up if the client
        has less than 48 MB of RAM. The optional NBD-Write-Export-Name and
        NBD-Write-Device define a write copy-on-write (COW) location for the
-       root filesystem. A separate write device is only used together with a
+       root file system. A separate write device is only used together with a
        union setup based on, for example, overlayfs.
       </para>
      </listitem>
@@ -653,8 +653,8 @@ IMAGE="/dev/sda2;suse-##.#-pxe-client.i686;1.2.8;192.168.100.2;4096"</screen>
      </term>
      <listitem>
       <para>
-       Mount the system image root filesystem remotely via NFS (Network File
-       System). This requires a server which exports the root filesystem of
+       Mount the system image root file system remotely via NFS (Network File
+       System). This requires a server which exports the root file system of
        the network client in such a way that the client can mount it
        read/write. In order to do that, the boot image must know the server IP
        address and the path name where the root directory exists on this
@@ -733,13 +733,13 @@ IMAGE="/dev/sda2;suse-##.#-pxe-client.i686;1.2.8;192.168.100.2;4096"</screen>
      </term>
      <listitem>
       <para>
-       In addtion to the <varname>PART</varname> line it's also allowed to add
-       a raid array setup. The first parmater of the <varname>RAID</varname>
+       In addition to the <varname>PART</varname> line it's also allowed to add
+       a raid array setup. The first parameter of the <varname>RAID</varname>
        line is the raid level. So far only raid1 (mirroring) is supported. The
        second and third parameter specifies the raid disk devices which make
        up the array. If a RAID line is present all partitions in PART will be
        created as raid partitions. The first raid is named md0 the second one
-       md1 and so on.  It's required to specifiy the correct raid partition in
+       md1 and so on.  It's required to specify the correct raid partition in
        the IMAGE line according to the PART setup. A typical raid image setup
        could look like this:
       </para>
@@ -789,23 +789,23 @@ PART='5;S;x,2000;L;/'</screen>
      <listitem>
       <para>
        Netboot images may use overlayfs as a
-       container filesystem in combination with a compressed system image.
-       The recommended compressed filesystem type for the system image is
+       container file system in combination with a compressed system image.
+       The recommended compressed file system type for the system image is
        <emphasis role="bold">overlayfs</emphasis>.
       </para>
 <screen>UNIONFS_CONFIG=/dev/sda2,/dev/sda3,overlayfs</screen>
       <para>
        In this example the first device <filename
        class="devicefile">/dev/sda2</filename> represents the read/write
-       filesystem and the second device <filename
+       file system and the second device <filename
        class="devicefile">/dev/sda3</filename> represents the compressed
-       system image filesystem.
+       system image file system.
       </para>
       <para>
-       The union filesystem overlayfs is then used to cover the read/write
-       layer with the read-only device to one read/write filesystem. If a file
+       The union file system overlayfs is then used to cover the read/write
+       layer with the read-only device to one read/write file system. If a file
        on the read-only device is going to be written, the changed inodes are
-       part of the read/write filesystem. Please note the device
+       part of the read/write file system. Please note the device
        specifications in <varname>UNIONFS_CONFIG</varname> must correspond to
        the <varname>IMAGE</varname> and <varname>PART</varname>
        information. The following example should explain the interconnections:
@@ -885,7 +885,7 @@ UNIONFS_CONFIG=/dev/sda2,/dev/sda3,overlayfs</screen>
     <procedure>
      <step>
       <para>
-       Use a read-write filesystem in <filename>config.xml</filename>, for
+       Use a read-write file system in <filename>config.xml</filename>, for
        example <literal>filesystem="ext3"</literal>
       </para>
      </step>
@@ -905,12 +905,12 @@ UNIONFS_CONFIG=/dev/sda2,/dev/sda3,overlayfs</screen>
     <para>
      As shown in <xref linkend="var.pxe.client-config-file.unionfs"/> it is
      possible to make use of the union file system with overlayfs, to combine
-     two filesystems into one. In case of thin clients there is often the need
-     for a compressed filesystem due to space limitations. However, all
-     supported compressed filesystems only allow read-only access. Combining a
-     read-only filesystem with a read-write filesystem is a solution for this
+     two file systems into one. In case of thin clients there is often the need
+     for a compressed file system due to space limitations. However, all
+     supported compressed file systems only allow read-only access. Combining a
+     read-only file system with a read-write file system is a solution for this
      problem.  KIWI uses squashfs compressing file systems. To create an image
-     with a compressed root file system, make sure the filesystem attribute in
+     with a compressed root file system, make sure the file system attribute in
      <filename>config.xml</filename> contains <systemitem
      class="filesystem">squashfs</systemitem>.
      <remark condition="clarity">
@@ -1092,7 +1092,7 @@ UNIONFS_CONFIG=/srv/kiwi-read-write-path,nfs,overlayfs</screen>
      linkend="sec.pxe.union-image"/>)is a split image that combines the read
      and read-write partitions with
      the <varname>COMBINED_IMAGE</varname> method. This allows to use
-     different filesystems without the need for an overlay file system.
+     different file systems without the need for an overlay file system.
     </para>
     <para>
      Edit <filename>config.xml</filename> and add a split type plus a split
@@ -1150,7 +1150,7 @@ KIWI_INITRD=/boot/initrd</screen>
      <screen>vbladed 0 1 eth0 <replaceable>blockdevice</replaceable></screen>
      <para>
       Create a <filename>config.<replaceable>MAC</replaceable></filename>
-      poiting to the exported AoE device. For the example above, this would
+      pointing to the exported AoE device. For the example above, this would
       be:
      </para>
      <screen>AOEROOT=/dev/etherd/e0.1</screen>
@@ -1297,10 +1297,10 @@ KIWI_INITRD=/boot/initrd</screen>
     <sect3 id="sec.pxe.groups.group_file.overrides">
      <title>Hardware-Specific Configuration Files</title>
      <para>
-      Some scenarios may require to provide differnt system configuration
-      files to clients belomging to the same hardware group: If grouping
+      Some scenarios may require to provide different system configuration
+      files to clients belonging to the same hardware group: If grouping
       clients with similar hardware, but for example different graphic cards,
-      it may be necessary to provide grphic card specific configuration
+      it may be necessary to provide graphic card specific configuration
       files. If setting up a PXE server supporting different locations within
       your organization, you may want to deliver country specific
       configurations for the system language and the keyboard layout.
@@ -1361,7 +1361,7 @@ KIWI_INITRD=/boot/initrd</screen>
         <para>
          This element behaves exactly like the
          <replaceable>GROUP_NAME</replaceable>_KIWI_MAC_LIST element. It lists
-         all MAC addreses that need to be linked to a hardware map. Any host
+         all MAC addresses that need to be linked to a hardware map. Any host
          defined within the list will receive configuration files that have
          been specifically defined in a
          hardware_config.<replaceable>HARDWARE_MAP</replaceable> file (in
@@ -1407,7 +1407,7 @@ myvendor_foo2000_HARDWARE_MAP="00:11:00:11:22:CA"</screen>
      <para>
       NOTE: If a file is not defined in the CONF element, but is defined in
       the VENDOR_CONF element, it is simply downloaded to the host as if it
-      was a CONF file. In this case, no overwritting will take place as it is
+      was a CONF file. In this case, no overwriting will take place as it is
       considered a new file.
      </para>
     </sect4>
@@ -1514,7 +1514,7 @@ myvendor_foo2000_HARDWARE_MAP='00:00:00:00:00:02 00:00:00:00:00:03 00:00:00:00:0
      <screen>VENDOR_CONF='xorg.conf.myvendor_foo2000;/etc/X11/xorg.conf;192.168.1.2;4096,\
 someconfig.cfg;/etc/sysconfig/someconfig.cfg;192.168.1.2;4096'</screen>
     <para>
-     When the VENDOR_CONF defintition is used, we are telling KIWI that all
+     When the VENDOR_CONF definition is used, we are telling KIWI that all
      files defined within this element, are specific to the hardware map they
      are linked to. As a result, all files listed here will be transferred to
      a host if, and only if, the host has been linked to the hardware map via

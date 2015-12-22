@@ -44,7 +44,7 @@
   via a boot infrastructure. For paravirtual images <literal>pyGrub</literal>
   or <literal>pvGrub</literal> can be used, while for HVM (fully virtualized)
   a special hvmloader is used. Xen extracts boot information from the given
-  image and boots the guest. Depending on the guest type, also the bootloader
+  image and boots the guest. Depending on the guest type, also the boot loader
   configuration needs to be read. This puts some constraints on the
   configuration which are addressed by KIWI.
  </para>

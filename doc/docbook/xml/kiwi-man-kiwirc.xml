@@ -25,7 +25,7 @@
  <refsect1 id="kiwi.kiwirc.description">
   <title>Description</title>
   <para>
-   The KIWI imaging toolchain supports the use of an optional resource file
+   The KIWI imaging tool chain supports the use of an optional resource file
    named <filename>.kiwirc</filename> located in the users home directory.
   </para>
   <para>
@@ -90,7 +90,7 @@ $System='/usr/share/kiwi/image';</screen>
     </term>
     <listitem>
      <para>
-      Specify the cipher for the encrypted Luks filesystem.
+      Specify the cipher for the encrypted Luks file system.
      </para>
     </listitem>
    </varlistentry>

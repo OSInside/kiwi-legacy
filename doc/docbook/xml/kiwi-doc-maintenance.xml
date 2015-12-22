@@ -212,7 +212,7 @@
    </para>
    <para>
     Do not make any changes to the system, since they will get lost when
-    re-running the prepare step again. Whatsmore, you may introduce errors
+    re-running the prepare step again. Whats more, you may introduce errors
     that will occur during the create step, that are difficult to track. The
     recommended way to apply changes to the unpacked image directory is to
     change the configuration and re-run the prepare step as described above.

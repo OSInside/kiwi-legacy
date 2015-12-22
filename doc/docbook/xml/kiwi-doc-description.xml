@@ -218,10 +218,10 @@
      </term>
      <listitem>
       <para>
-       Allows setup of the boot menu title for the selected bootloader. So
+       Allows setup of the boot menu title for the selected boot loader. So
        you can have <emphasis>suse-SLED-foo</emphasis> as the image name but
        a different name as the boot display name. Spaces are not allowed in
-       the display name because it causes problems for some bootloaders and
+       the display name because it causes problems for some boot loaders and
        kiwi did not take the effort to separate the ones which can display
        them correctly from the ones which can't
       </para>
@@ -615,7 +615,7 @@
      <listitem>
       <para>
        The split image support allows the creation of an image as split
-       files. Using this technique one can assign different filesystems and
+       files. Using this technique one can assign different file systems and
        different read-write properties to the different sections of the
        image. The <sgmltag>oem</sgmltag>, <sgmltag>pxe</sgmltag>,
        <sgmltag>usb</sgmltag>, and <sgmltag>vmx</sgmltag> types can be
@@ -655,7 +655,7 @@
        Acceptable values can be found in the Linux kernel documentation for
        the framebuffer device (see
        <filename>Documentation/fb/vesafb.txt</filename>). KIWI also supports
-       the selection of the bootloader for the virtual disk according to the
+       the selection of the boot loader for the virtual disk according to the
        rules indicated for the USB system. Last but not least the virtual
        disk system may also be created with a LVM based layout by using the
        <sgmltag class="attribute">lvm</sgmltag> attribute. The previously
@@ -933,7 +933,7 @@
         </term>
         <listitem>
          <para>
-          Specify if the system should wait for user interaction priot to
+          Specify if the system should wait for user interaction prior to
           continuing the boot process after the oem image has been dumped to
           the designated storage device (default value is false). This value
           is represented by the <varname>kiwi_oembootwait</varname> variable
@@ -1170,7 +1170,7 @@
         <listitem>
          <para>
           The installation of the image to the target system occurs
-          automatically without requiering user interaction. If multiple
+          automatically without requiring user interaction. If multiple
           possible target devices are discovered the image is deployed to
           the first device. <varname>kiwi_oemunattended</varname> in the
           initrd
@@ -1522,7 +1522,7 @@
        to be specified in the syntax required by the VM configuration file
        to be written. The value is free format text and is not validated by
        Kiwi in any way. The entry is written to the VM configuration file
-       verbatime.
+       verbatim.
       </para>
       <para>
        Use the <sgmltag class="element">vmdisk</sgmltag> element to setup
@@ -1751,7 +1751,7 @@
     shows the possible supported repository types for each package manager:
    </para>
    <table id="tab.description.supported-types">
-    <title>Supported package manager repo types</title>
+    <title>Supported Package Manager Repository Types</title>
     <tgroup cols="5">
      <thead>
       <row>
@@ -1829,7 +1829,7 @@
        specified with the <sgmltag class="attribute">path</sgmltag>
        attribute of the <sgmltag class="element">source</sgmltag> element.
        Therefore, if the path is not a fully qualified URL, you may need to
-       adjust the repository file in the image to accomodate the expected
+       adjust the repository file in the image to accommodate the expected
        location. It is recommended that you use the
        <sgmltag class="attribute">alias</sgmltag> attribute in combination
        with the <sgmltag class="attribute">imageinclude</sgmltag> attribute
@@ -1858,9 +1858,9 @@
         class="attvalue">true|false</sgmltag>"</term>
      <listitem>
       <para>
-       The repository providing this attribute will be used primarly to
+       The repository providing this attribute will be used primarily to
        install the license tarball if found on that repository. If no
-       repository with a prefered license attribute exists, the search
+       repository with a preferred license attribute exists, the search
        happens over all repositories. It's not guaranteed in that case that
        the search order follows the repository order like they are written
        into the XML description.
@@ -2038,7 +2038,7 @@
       <para>
        A special network location used with the http protocol. The given
        <replaceable>PROJECTNAME</replaceable> specifies a project in the
-       openSUSE buildservice. The repository is a repository of type
+       openSUSE Build Service. The repository is a repository of type
        <sgmltag class="attvalue">rpm-md</sgmltag>. For example:
        <sgmltag class="attribute">path</sgmltag>=
        <sgmltag class="attvalue">"opensuse://openSUSE:10.3/standard"
@@ -2095,7 +2095,7 @@
      <listitem>
       <para>
        <replaceable>PATH</replaceable> is the relative location to the image
-       description directory for the curent image.
+       description directory for the current image.
       </para>
      </listitem>
     </varlistentry>
@@ -2233,7 +2233,7 @@
      <sgmltag class="attribute">patternType</sgmltag> attribute on the
      <sgmltag class="element">packages</sgmltag> element allows you to
      control the installation of dependent packages in the image. You may
-     assigne one of the following values to the
+     assign one of the following values to the
      <sgmltag class="attribute">patternType</sgmltag> attribute:
     </para>
     <variablelist>
@@ -2242,7 +2242,7 @@
       </term>
       <listitem>
        <para>
-        Incorporates only patterns and packages that the specifeid patterns
+        Incorporates only patterns and packages that the specified patterns
         and packages require. This is a "hard dependency" only resolution.
        </para>
       </listitem>
@@ -2275,11 +2275,11 @@
      element may be of use in resolving such conflicts. However, the
      <sgmltag
             class="element">ignore</sgmltag> element is
-     limited to effect packages named explicitely. Packages installed in the
+     limited to effect packages named explicitly. Packages installed in the
      image through a named pattern are not effected by the
      <sgmltag
            class="element">ignore</sgmltag> element setting.
-     THerefore, package conflicts created by packages within named patterns
+     Therefore, package conflicts created by packages within named patterns
      cannot be resolved using the ignore mechanism. Further, if a package is
      specified to be ignored, but is required by another package, then the
      required package is installed in the image via the automatic dependency

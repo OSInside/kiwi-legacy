@@ -14,7 +14,7 @@
  <primary>OEM images</primary></indexterm>
  <para>
   An OEM image is a virtual disk image representing all partitions and
-  bootloader information the same way as on a physical disk. All flavors
+  boot loader information the same way as on a physical disk. All flavors
   discussed previously in <xref linkend="chap.vmx"/> also apply to the OEM
   image type. Compared to the VMX image type, an OEM image comes with
   additional features. It is able to expand itself to a custom disk geometry
@@ -110,11 +110,11 @@ dd if=LimeJeOS-SLE12.x86_64-1.13.1.raw of=/dev/<replaceable>device</replaceable>
   </note
 -->
   <para>
-   Note, when testing an oem image using the virtual disk image, i.e. the
+   Note, when testing an OEM image using the virtual disk image, i.e. the
    <filename class="extension">.raw</filename> file, the geometry of the
    disk image is not changed and therefore retains the disk geometry of the
    host system. This implies that the re-partitioning performed for a
-   physical disk install during the oem boot workflow will be skipped.
+   physical disk install during the OEM boot workflow will be skipped.
 
    <remark condition="clarity">
     2015-11-30 - fs: Does this mean you are asked whether you want to perform
@@ -137,7 +137,7 @@ qemu -hda /tmp/mydisk -cdrom LimeJeOS-SLE12.x86_64-1.13.1.iso -boot d</screen>
 
 
  <sect1 id="sec.oem.flavours">
-  <title>Installation Image Flavours</title>
+  <title>Installation Image Flavors</title>
 
   <para>
    <indexterm>
@@ -152,9 +152,9 @@ qemu -hda /tmp/mydisk -cdrom LimeJeOS-SLE12.x86_64-1.13.1.iso -boot d</screen>
   </para>
   <para>
    The installation image can be created in two formats: a hybrid image
-   suitable for CD/DVD media and flsh disks and a second one suitable for a
+   suitable for CD/DVD media and flash disks and a second one suitable for a
    flash disks only. The latter format can be used if the BIOS/EFI does not
-   support booting from hybrif images.  The following
+   support booting from hybrid images.  The following
    configuration snippets show the use of the <sgmltag
    class="attribute">installiso</sgmltag> to create a CD/DVD iso image and
    <sgmltag class="attribute">installstick</sgmltag> attributes in
@@ -196,7 +196,7 @@ qemu -hda /tmp/mydisk -cdrom LimeJeOS-SLE12.x86_64-1.13.1.iso -boot d</screen>
      <para>
       Creates a <filename class="extension">.raw.install</filename> file
       which can be dumped (<command>dd</command>) onto a USB stick. Use this
-      format if your machine canmnot boot from a hybrid image.
+      format if your machine cannot boot from a hybrid image.
      </para>
      <screen>&lt;image ...&gt;
   &lt;preferences&gt;
@@ -213,7 +213,7 @@ qemu -hda /tmp/mydisk -cdrom LimeJeOS-SLE12.x86_64-1.13.1.iso -boot d</screen>
  </sect1>
 
  <sect1 id="sec.oem.customize">
-  <title>Customizinge the OEM Images</title>
+  <title>Customizing the OEM Images</title>
   <para>
    KIWI not only allows to customize the boot process of an OEM image by
    adding scripts to the image but also provides many configuration options
@@ -394,7 +394,7 @@ qemu -hda /tmp/mydisk -cdrom LimeJeOS-SLE12.x86_64-1.13.1.iso -boot d</screen>
      <listitem>
       <para>
        If set to <literal>true</literal>, the system reboots after the OEM
-       image has been deployed. By default this parameter si set to
+       image has been deployed. By default this parameter is set to
        <literal>false</literal>. This value can also be set at the boot prompt
        by the parameter
        <literal>kiwi_oemreboot=<replaceable>TRUE_OR_FALSE</replaceable></literal>.
@@ -603,7 +603,7 @@ qemu -hda /tmp/mydisk -cdrom LimeJeOS-SLE12.x86_64-1.13.1.iso -boot d</screen>
    <itemizedlist>
     <listitem>
      <para>
-      The bootloader will be set up to boot the installed system only. If a
+      The boot loader will be set up to boot the installed system only. If a
       multi-boot setup is required, it needs to be manually configured by the
       user after the initial boot.
      </para>
@@ -682,7 +682,7 @@ qemu -hda /tmp/mydisk -cdrom LimeJeOS-SLE12.x86_64-1.13.1.iso -boot d</screen>
    </step>
    <step>
     <para>
-     Copy the kernel commandline parameters from
+     Copy the kernel command line parameters from
      <filename><replaceable>IMAGE_FILE</replaceable>.append</filename>. Edit
      your PXE configuration (for example
      <filename>pxelinux.cfg/default</filename>) on the PXE server and add

@@ -20,7 +20,7 @@
    installs the software onto the target system using packages from the
    software sources (repositories) available. After the installation is
    complete the system usually reboots and enters a configuration procedure
-   upon startup. The configuration may be fully automatic or it may include
+   upon start up. The configuration may be fully automatic or it may include
    user interaction.
   </para>
 
@@ -125,7 +125,7 @@
     <term>(2) Packed Image</term>
     <listitem>
      <para>
-      Encapsulated system reachable via kernel filesystem/extension drivers
+      Encapsulated system reachable via kernel file system/extension drivers
       such as loopback mounts, etc.
      </para>
     </listitem>
@@ -148,7 +148,7 @@
     <option>--root</option> argument or the value of the <sgmltag
     class="element">defaultroot</sgmltag> element in the
     <filename>config.xml</filename> file. This directory will be the
-    inatsllation target for software packages to be installed during the image
+    installation target for software packages to be installed during the image
     creation process.
    </para>
    <para>
@@ -272,7 +272,7 @@
     </formalpara>
     <para>
      Do not make any changes to the system, since they will get lost when
-     re-running the <literal>prepare</literal> step again. Whatsmore, you may
+     re-running the <literal>prepare</literal> step again. Whats more, you may
      introduce errors that will occur during the <literal>create</literal>
      step, that are difficult to track. The recommended way to apply changes
      to the unpacked image directory is to change the configuration and re-run
@@ -502,7 +502,7 @@
   <tip>
    <title>De-activating Hooks at Boot Time</title>
    <para>
-    The execution of hooks can be globaly deactivated by passing the
+    The execution of hooks can be globally deactivated by passing the
     following variable to the kernel command line:
    </para>
    <screen>KIWI_FORBID_HOOKS=1</screen>
@@ -825,7 +825,7 @@
    </orderedlist>
    
    <tip>
-    <title>Disable Post Command Excetution at Boot Time</title>
+    <title>Disable Post Command Execution at Boot Time</title>
     <para>
      To disable all post commands for the current boot process pass the
      following variable to the Kernel command line:
@@ -852,7 +852,7 @@
   <para>
    Using these options allows users to base the boot image on
    the KIWI provided descriptions rather than having to define a configuration
-   from scrach (however, this is possible if wanted). The following
+   from scratch (however, this is possible if wanted). The following
    question and answer section provides solutions to the most common
    scenarios that require a customized boot image.
   </para>
@@ -1116,7 +1116,7 @@ rsync -avz &lt;ip&gt;:/var/log/boot.kiwi</screen>
    distribution name followed by a <quote>-</quote>, for example
    <literal>suse-linuxrc</literal>. When KIWI creates a boot
    image for a SUSE distribution the <command>suse-linuxrc</command> file
-   from the boot discription is used as the <command>linuxrc</command> file
+   from the boot description is used as the <command>linuxrc</command> file
    that the Linux kernel calls.
   </para>
 

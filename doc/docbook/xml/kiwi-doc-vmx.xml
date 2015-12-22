@@ -18,7 +18,7 @@
    A VMX image is a virtual disk image for use in full virtualization systems
    like Qemu or VMware. The image is a file containing the system (represented
    by the configured packages in <filename>config.xml</filename>) as well as
-   partition data and bootloader information. VMX images have a fixed disk
+   partition data and boot loader information. VMX images have a fixed disk
    size and geometry that cannot be changed (see <xref linkend="chap.oem"/>
    for images with expandable disks).
   </para>
@@ -144,7 +144,7 @@
   </para>
   <para>
    It is possible to specify the VMware configuration settings in
-   <filename>config.xml</filename>. Additionaly, it is possible to also
+   <filename>config.xml</filename>. Additionally, it is possible to also
    include selected packages in the created image that are specific to the VM
    image generation. This is done in the <emphasis>machine</emphasis> section
    in the configuration file. The following example will create a VMware
@@ -191,7 +191,7 @@
   ...
 &lt;/image&gt;</screen>
  <para>
-   When using modern filesystems like Btrfs or zfs, KIWI also supports using
+   When using modern file systems like Btrfs or zfs, KIWI also supports using
    their native volume management system. For more information how to setup
    custom partitions/volumes, see <xref linkend="chap.partitions"/>.
  </para>
@@ -202,7 +202,7 @@
  <primary>KIWI</primary>
  <secondary>boot partition</secondary></indexterm>
  <para>
-  Depending on the selected root filesystem and the capabilities of the boot
+  Depending on the selected root file system and the capabilities of the boot
   loader, KIWI automatically decides whether to set up a separate boot
   partition. The format of a boot partition is set to ext2 by default.
  </para>

@@ -42,7 +42,7 @@
    Once there are caches in the system KIWI selects the best match and
    mounts the cache in a way that all write actions (copy-on-write cache)
    are redirected to the new root system. That way the cache itself is never
-   changed and can be re-used simultaniosly for other build processes. As a
+   changed and can be re-used simultaneously for other build processes. As a
    result the build process doesn't start with an empty tree but with a tree
    filled with the contents of the cache. Only the missing parts need to be
    added, which speeds up the build considerably.
