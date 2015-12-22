@@ -17,7 +17,7 @@
    multiple machines, this often requires to start the application
    installation on each machine. Furthermore, in case of machines
    solely dedicated to a single application or a defined set of applications,
-   it is good practice to adjust the operating system to optimize resource
+   it is good practice, to adjust the operating system to optimize resource
    management and maximize security and performance. When multiple machines
    are affected, the steps for adjusting the operating system have to be
    performed on each machine, too.
@@ -28,19 +28,19 @@
    combination of the parts of a general purpose OS needed by a given
    application and the application itself, bundled and delivered as one
    unit. This unit may be delivered in a variety of formats, for example a
-   ready to run virtual machine or a self installing system on an optical media
-   or a USB stick.
+   ready to run virtual machine or a self-installing system on an optical media
+   or a flash drive.
   </para>
 
   <para>
    The appliance model has a number of advantages. Operating system and
    application installation are no longer separate steps. The application is
-   installed together with the operating system and it's installation does not
-   require manuals intervention. The appliance provider can preconfigure the
-   application so it is ready-to-run directly after installation. Furthermore,
+   installed together with the operating system and the installation does not
+   require manual intervention. The appliance provider can preconfigure the
+   application to be ready-to-run directly after installation. Furthermore,
    the appliance provider can customize the operating system in terms of
    performance, resources and security, so it best fits the the given
-   appliance. 
+   appliance.
   </para>
  </sect1>
  <sect1 id="sec.appliance.kiwi-model">
@@ -52,16 +52,21 @@
 
   <para>
    KIWI supports building appliances. When building appliances with KIWI the
-   following proceeding has proven to work reliably. Nevertheless it is just a
+   following procedure has proven to work reliably. Nevertheless it is just a
    recommendation and can be adapted to special needs and environments.
   </para>
 
   <procedure id="proc.appliance.general-building">
    <step>
     <para>
-     Choose an appropriate image description template from the examples
-     provided by KIWI. Add or adapt repositories and/or package names,
-     according to the distribution you want to build an image for.
+     Choose an appropriate image description from the KIWI example templates.
+     They are provided by the packages <package>kiwi-templates</package>,
+     <package>kiwi-desc-vmxboot</package>,
+     <package>kiwi-desc-netboot</package>, and
+     <package>kiwi-desc-oemboot</package>. The templates are installed to
+     <filename class="directory">/usr/share/kiwi/images</filename>.  Add or
+     adapt repositories and/or package names, according to the distribution
+     you want to build an image for.
     </para>
    </step>
    <step>
@@ -74,8 +79,8 @@
    </step>
    <step>
     <para>
-     Set up a testing environment. A physical machine which allows to boot
-     from a USB stick is recommended. All image templates provided by KIWI
+     Set up a testing environment. A physical machine supporting to boot
+     from a flash disk is recommended. All image templates provided by KIWI
      contain a hybrid iso type setup which is suitable for such a machine.
     </para>
    </step>
@@ -87,24 +92,24 @@
    </step>
    <step>
     <para>
-     Transfer the image generated in the previous step to a USB stick. Note
-     that all data on the stick will be erased!
+     Transfer the image generated in the previous step to the flash disk. Note
+     that all data on the disk will be erased!
     </para>
     <screen>dd if=<replaceable>PATH_TO_ISO_IMAGE</replaceable>
-    of=<replaceable>USB_STORAGE_DEVICE</replaceable> bs=4M</screen>
+    of=<replaceable>FLASH_DISK_DEVICE</replaceable> bs=4M</screen>
    </step>
    <step>
     <para>
-     Plug the USB stick into your test machine and boot it from the stick
+     Plug the flash disk into your test machine and boot it from the disk
      containing the appliance.
     </para>
    </step>
    <step>
     <para>
-     After your test system has successfully booted from stick, log in to
-     your appliance and start to tweak the system according to your needs.
-     This includes all actions required to configure the appliance according
-     to your needs. Before you start take care for the following:
+     After your test system has successfully booted the image, log in to your
+     appliance and start to tweak the system according to your needs.  This
+     includes all actions required to configure the appliance as
+     needed. Before you start take care for the following:
     </para>
     <substeps>
      <step>
@@ -121,20 +126,20 @@
       </para>
       <itemizedlist>
        <listitem>
-	<para>
-	 the file is not yet part of the repository
-	</para>
+        <para>
+         the file is not yet part of the repository
+        </para>
        </listitem>
        <listitem>
-	<para>
-	 you do not plan to change the file
-	</para>
+        <para>
+         you do not plan to change the file
+        </para>
        </listitem>
        <listitem>
-	<para>
-	 the file will not be included by one of the image description overlay
-	 files
-	</para>
+        <para>
+         the file will not be included by one of the image description overlay
+         files
+        </para>
        </listitem>
       </itemizedlist>
      </step>
@@ -143,19 +148,19 @@
      Once the initial package list exist and the git repository is set up,
      you can start to configure the system.
     </para>
-    
+
     <important>
      <title>Installing Additional Software</title>
      <para>
-      Do not add additional software by installing a package not being part of
+      Do not add additional software by installing a package being part of
       a repository not listed in <filename>configuration.xml</filename> or by
       compiling it from the sources. It is very hard to find out what binary
-      files have been installed that way and it is also not architecture-safe. 
+      files have been installed that way and it is also not architecture-safe.
      </para>
      <para>
       If there is really no other way for the software to become part of the
       image, you should address this issue directly in your image description
-      and the <command>config.sh</command>, script but not after the initial
+      and the <command>config.sh</command> script, but not after the initial
       deployment has happened.
      </para>
     </important>
@@ -165,7 +170,7 @@
      As soon as the appliance on your test system works as expected it is
      ready to enter the final stage. At this point you have done several
      changes to the system which are tracked by the git repository and the
-     package list. To include them into your image description, us the
+     package list. To include them into your image description, use the
      following process:
     </para>
     <substeps>
@@ -187,7 +192,7 @@ diff -u /tmp/deployPackages /tmp/appliancePackages</screen>
        by the package manager, make sure you address these packages in the
        <filename>config.sh</filename> script. If you have installed packages
        from repositories which are not yet configured in
-       <filename>config.xml</filename> add them in order to allow KIWI to
+       <filename>config.xml</filename>, add them in order to allow KIWI to
        install the packages.
       </para>
      </step>
@@ -237,29 +242,26 @@ diff -u /tmp/deployPackages /tmp/appliancePackages</screen>
    this appliance is a server, you may want to keep it, because it allows you
    to keep track of changes during the live time of this appliance.
   </para>
- </sect1>
- <sect1 id="sec.appliance.crossplatform">
-  <title>Cross Platform Appliance Building</title><indexterm>
+  <important>
+   <title>Cross Platform Appliance Building</title><indexterm>
+   <primary>KIWI</primary>
+   <secondary>cross-platform</secondary></indexterm>
 
-  <primary>KIWI</primary>
-
-  <secondary>cross-platform</secondary></indexterm>
-
-  <para>
-   Building appliances for a specific processor architecture on a different
-   processor architecture is in generally <emphasis>not</emphasis> possible
-   with KIWI. This limitation is based on the requirement that KIWI needs to
-   be able to execute installed software inside the unpacked image tree. If
-   the software installed inside the unpacked image tree does not run on the
-   architecture of the build platform then KIWI cannot build the
-   appliance. The only exception is building 32-bit x86 appliances on a 64-bit
-   x86-64 architecture.
-  </para>
-
-  <para>
-   KIWI's option <option>--target-arch</option> is not intended to
-   support cross-platform appliance builds. It rather tells the package
-   manager to install packages for the specified architecture.
-  </para>
+   <para>
+    Building appliances for a specific processor architecture on a different
+    processor architecture is in generally <emphasis>not</emphasis> possible
+    with KIWI. This limitation is based on the requirement that KIWI needs to
+    be able to execute installed software inside the unpacked image tree. If
+    the software installed inside the unpacked image tree does not run on the
+    architecture of the build platform then KIWI cannot build the
+    appliance. The only exception is building 32-bit x86 appliances on a
+    64-bit x86-64 architecture.
+   </para>
+   <para>
+    KIWI's option <option>--target-arch</option> is not intended to support
+    cross-platform appliance builds. It rather tells the package manager to
+    install packages for the specified architecture.
+   </para>
+  </important>
  </sect1>
 </chapter>
