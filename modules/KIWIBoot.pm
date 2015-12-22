@@ -5591,6 +5591,11 @@ sub copyBootCode {
         KIWIQX::qxx ("mv $dest/boot/*.img $target &>/dev/null");
         KIWIQX::qxx ("mv $dest/boot/*.imx $target &>/dev/null");
         KIWIQX::qxx ("mv $dest/boot/*.elf $target &>/dev/null");
+        if (-d "$dest/boot/vc") {
+            # Raspberry Pi VideoCore files
+            KIWIQX::qxx ("mv $dest/boot/vc/* $target &>/dev/null");
+            KIWIQX::qxx ("mv $dest/boot/vc $dest &>/dev/null");
+        }
     }
     #==========================================
     # YaBoot
