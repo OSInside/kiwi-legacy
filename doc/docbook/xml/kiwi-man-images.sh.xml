@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE refentry PUBLIC 
+<!DOCTYPE refentry PUBLIC
   "-//OASIS//DTD DocBook XML V4.4//EN"
   "http://www.docbook.org/xml/4.4/docbookx.dtd">
 <refentry id="ref.kiwi.images.sh">
@@ -99,7 +99,7 @@ exit</programlisting>
     <listitem>
      <para>
       Return the list of packages setup in the packages
-      <sgmltag 
+      <sgmltag
               class="attribute">type</sgmltag>="<sgmltag class="attvalue">delete</sgmltag>"
       section of the <filename>config.xml</filename> used to build this
       image.
@@ -112,7 +112,7 @@ exit</programlisting>
     <listitem>
      <para>
       This function requires the gfxboot and at least one bootsplash-theme-*
-      package to be installed in order to work correctly. The function
+      package to be installed to work correctly. The function
       creates from this package data a graphics boot screen for the isolinux
       and grub boot loaders. Additionally it creates the bootsplash files
       for the resolutions 800x600, 1024x768, and 1280x1024
@@ -135,7 +135,7 @@ exit</programlisting>
     <listitem>
      <para>
       This function removes a whole bunch of tools binaries and libraries
-      which are not required in order to boot a suse system with KIWI.
+      which are not required to boot a suse system with KIWI.
      </para>
     </listitem>
    </varlistentry>
@@ -182,7 +182,7 @@ exit</programlisting>
   <title>Profile environment variables</title>
   <para>
    The .profile environment file contains a specific set of variables which
-   are listed below. Some of the functions above makes use of the variables.
+   are listed below. Some of the functions above use the variables.
   </para>
   <variablelist>
    <varlistentry>
@@ -239,7 +239,7 @@ exit</programlisting>
     <listitem>
      <para>
       A list of all packages which are part of the packages section with
-      <sgmltag class="attribute">type</sgmltag>="<sgmltag 
+      <sgmltag class="attribute">type</sgmltag>="<sgmltag
               class="attvalue">delete</sgmltag>"
       in <filename>config.xml</filename>
      </para>

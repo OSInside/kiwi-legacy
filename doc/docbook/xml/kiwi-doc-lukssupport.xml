@@ -8,7 +8,7 @@
  <primary>KIWI</primary>
  <secondary>luks</secondary></indexterm>
  <para>
-  KIWI supports Linux Unified Key Setup (LUKS) encrypted images. To setup an
+  KIWI supports Linux Unified Key Setup (LUKS) encrypted images. To set up an
   encrypted volume , add the attribute <sgmltag
   class="attribute">luks</sgmltag> to the <sgmltag
   class="element">type</sgmltag> element in

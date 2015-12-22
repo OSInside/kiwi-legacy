@@ -13,7 +13,7 @@
    <term>Real RAID Controllers with Their Own Firmware</term>
    <listitem>
     <para>
-     KIWI only has to make sure the drivers are part of the initrd e.g cciss
+     KIWI only needs to make sure the drivers are part of the initrd e.g cciss
      for the smart array controllers built into some server boards.
     </para>
    </listitem>
@@ -51,16 +51,16 @@
      the RAID is created but not all devices to build it are attached. That is
      because an image initially only consists of a single disk. The user needs
      to add devices or change the RAID mode manually after deployment. This is
-     an easy task if the system comes up prepared accordingly. In order to use
-     linux software raid in KIWI images you only have to set:
+     an easy task if the system comes up prepared accordingly. To use
+     Linux software raid in KIWI images you only need to set:
     </para>
     <para>
      &lt;type ... mdraid="mirroring"&gt;
     </para>
     <para>
      Currently kiwi supports a degraded mirroring (raid:1) or stripping
-     (raid:0) config but you can change the mode to any supported raid level
-     after deployment.
+     (raid:0) configuratiom but you can change the mode to any supported raid
+     level after deployment.
     </para>
    </listitem>
   </varlistentry>

@@ -27,7 +27,7 @@
   first guest operating system, called in Xen terminology <quote>domain
   0</quote> (dom0), is booted automatically when the hypervisor boots and
   given special management privileges and direct access to the physical
-  hardware. The system administrator logs into dom0 in order to start any
+  hardware. The system administrator logs into dom0 to start any
   further guest operating systems, called <quote>domain 0</quote> (domU) in
   Xen terminology.
   </para>
@@ -40,7 +40,7 @@
   Xen kernel modules.
  </para>
  <para>
-  A Xen image can only be booted on a Xen dom0 server. A xen guest is booted
+  A Xen image can only be booted on a Xen dom0 server. A Xen guest is booted
   via a boot infrastructure. For paravirtual images <literal>pyGrub</literal>
   or <literal>pvGrub</literal> can be used, while for HVM (fully virtualized)
   a special hvmloader is used. Xen extracts boot information from the given
@@ -83,12 +83,11 @@
   <title>Testing the Dom0 Image</title>
 
   <para>
-   Basically the dom0 represents the most privileged layer with access to
-   the hardware. Running such an image in a fully
-   virtualized system like Qemu, as shown below, is only suitable for testing
-   purposes. For production system this is not supported and suffers from a
-   major performance penalty. To test the image
-   with <command>qemu</command>, run the following commands:
+   The dom0 represents the most privileged layer with access to the
+   hardware. Running such an image in a fully virtualized system like Qemu, as
+   shown below, is only suitable for testing purposes. For production system
+   this is not supported and suffers from a major performance penalty. To test
+   the image with <command>qemu</command>, run the following commands:
   </para>
 
 <screen><command>cd</command> /tmp/myoem-result
@@ -96,7 +95,7 @@
 <command>qemu</command> -cdrom LimeJeOS-SLE12.x86_64-1.13.1.install.iso -hda mydom0 -boot d</screen>
 
   <para>
-   Once booted <emphasis>mydom0</emphasis> is a Xen dom0 from which other
+   When booted <emphasis>mydom0</emphasis> is a Xen dom0 from which other
    Xen guests can be started.
   </para>
  </sect1>
@@ -106,10 +105,10 @@
 
   <para>
    The following example shows how to build a Just enough Operating System
-   (JeOS) based on SUSE Linux Enterprise 12. The example again makes use of
+   (JeOS) based on SUSE Linux Enterprise 12. The example again uses
    the <literal>xenFlavour</literal> profile but builds a simple vmx
    image. The result is a disk image with kernel-xen prepared for paravirtual
-   boot via GRUB2. In order to boot such a guest a <literal>pvGrub</literal>
+   boot via GRUB2. To boot such a guest a <literal>pvGrub</literal>
    or <literal>pyGrub</literal> machine configuration supporting GRUB2 must be
    provided.
   </para>
@@ -125,23 +124,20 @@
    The following example shows how to build a Just enough Operating System
    (JeOS) based on SUSE Linux Enterprise 12. Contrary to the paravirtual
    guest image this example builds a simple vmx image including the standard
-   kernel plus some kernel modules required by Xen. In order to boot such a
-   guest a hvmloader machine configuration must be provided.
+   kernel plus some kernel modules required by Xen. To boot such a
+   guest, a hvmloader machine configuration must be provided.
   </para>
 
 <screen><command>kiwi</command> --build suse-SLE12-JeOS -d /tmp/myvmx-result --type vmx \
      --add-profile xenFlavourHVM</screen>
  </sect1>
 
-
-<!-- from here -->
-
  <sect1 id="sec.xen.using">
   <title>Using the Guest Images</title>
 
   <para>
-   In order to run a domain U the Xen tool <command>xl</command> needs to be
-   called in conjunction with a domain U configuration file:
+   To run a domain U the Xen tool <command>xl</command> needs to be
+   called in with a domain U configuration file:
   </para>
 
 <screen><command>xl</command> create -f <replaceable>CONFIG-FILE</replaceable></screen>
@@ -167,7 +163,7 @@
   <para>
    If this information exists, KIWI creates a file with the extension
    <filename>.xenconfig</filename>. Note that not all possible configuration
-   options are supported by the KIWI Xen config file creator. For fully
+   options are supported by the KIWI Xen configuration file creator. For fully
    virtualized images there is currently no support to create the
    configuration from KIWI. However tools like <command>virt-manager</command>
    support you setting up the machine configuration. Refer to the <ulink

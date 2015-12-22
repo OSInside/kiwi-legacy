@@ -24,7 +24,7 @@
  <primary>rpm keys</primary>
  <secondary>importing</secondary></indexterm>
  <para>
-  In order to permanently import the package signing keys into your
+  To permanently import the package signing keys into your
   appliance follow the steps outlined below:
  </para>
  <itemizedlist>

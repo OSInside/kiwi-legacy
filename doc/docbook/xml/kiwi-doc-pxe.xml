@@ -17,7 +17,7 @@
   <para>
    PXE is a network boot protocol that is shipped with most BIOS
    implementations. The protocol sends a DHCP request to get an IP
-   address. Once an IP address is assigned, it uses the TFTP protocol to
+   address. When an IP address is assigned, it uses the TFTP protocol to
    download a Kernel and boot instructions. Contrary to other images built
    with KIWI, a PXE image consists of separate boot and system images, since
    both images need to be made available in different locations on the network
@@ -193,7 +193,7 @@ LABEL Local-Boot
   <sect1 id="sec.pxe.client-config-file">
    <title>The PXE Client Configuration File Syntax</title>
    <para>
-    The configuration file contains data about the image as well as about
+    The configuration file contains data about the image and about
     configuration, synchronization, and partition parameters.
     The configuration file has got the following general format:
    </para>
@@ -246,13 +246,13 @@ IMAGE="/dev/sda2;suse-##.#-pxe-client.i686;1.2.8;192.168.100.2;4096"</screen>
        Ethernet). This requires a server exporting a block device
        representing the root directory of the system image via the AoE
        subsystem. The block device could be a partition of a real or a
-       virtual disk. In order to use the AoE subsystem it is recommended to
+       virtual disk. To use the AoE subsystem it is recommended to
        install the <package>aoetools</package> and <package>vblade</package>
        packages from <ulink
        url="http://download.opensuse.org/repositories/server:/ltsp"/>.
       </para>
       <para>
-       Once these packages are installed, partitions can be exported with the
+       When these packages are installed, partitions can be exported with the
        <command>vbladed</command> command. The following example shows how to
        export <filename class="devicefile">/dev/sdb1</filename> via AoE with a
        major value of 0 and minor of 1 on the eth0 interface.:
@@ -525,7 +525,7 @@ IMAGE="/dev/sda2;suse-##.#-pxe-client.i686;1.2.8;192.168.100.2;4096"</screen>
           compressed is not specified the standard download workflow is used.
          </para>
          <para>
-          The name of the compressed image has to contain the suffix <filename
+          The name of the compressed image needs to contain the suffix <filename
           class="extension">.gz</filename> and the image needs to be
           compressed with the <command>gzip</command> tool.  Using a
           compressed image will automatically <emphasis>deactivate</emphasis>
@@ -536,7 +536,7 @@ IMAGE="/dev/sda2;suse-##.#-pxe-client.i686;1.2.8;192.168.100.2;4096"</screen>
           <title></title>
           <para>
            The download will fail if you specify <literal>compressed</literal>
-           and the image isn’t compressed. It will also fail if you don’t
+           and the image is not compressed. It will also fail if you don’t
            specify <literal>compressed</literal> but the image is compressed.
           </para>
          </important>
@@ -563,10 +563,10 @@ IMAGE="/dev/sda2;suse-##.#-pxe-client.i686;1.2.8;192.168.100.2;4096"</screen>
       <para>
        Specifies the KIWI initrd to be used for a local boot of the system.
        The value must be set to the name of the initrd file which is used via
-       PXE network boot. If the standard tftp setup suggested with the
+       PXE network boot. If the standard TFTP setup suggested with the
        kiwi-pxeboot package is used all initrd files reside in <filename
        class="directory">/var/lib/tftpboot/boot/</filename>. However, because
-       the tftp server does a change root (<command>chroot
+       the TFTP server does a change root (<command>chroot
        /var/lib/tftpboot</command>) you need to specify the initrd file as in
        the following example:
       </para>
@@ -620,7 +620,7 @@ IMAGE="/dev/sda2;suse-##.#-pxe-client.i686;1.2.8;192.168.100.2;4096"</screen>
 <replaceable>NBD-Write-Export-Name</replaceable>;/dev/<replaceable>NBD-Write-Device</replaceable></screen>
       <para>
        The server IP and the export name are mandatory parameters, all other
-       other parameters are optional. The default device names are:
+       parameters are optional. The default device names are:
       </para>
       <itemizedlist>
        <listitem>
@@ -640,7 +640,7 @@ IMAGE="/dev/sda2;suse-##.#-pxe-client.i686;1.2.8;192.168.100.2;4096"</screen>
        </listitem>
       </itemizedlist>
       <para>
-       Defining a a swap device is optional. It is only set up if the client
+       Defining a swap device is optional. It is only set up if the client
        has less than 48 MB of RAM. The optional NBD-Write-Export-Name and
        NBD-Write-Device define a write copy-on-write (COW) location for the
        root file system. A separate write device is only used together with a
@@ -656,7 +656,7 @@ IMAGE="/dev/sda2;suse-##.#-pxe-client.i686;1.2.8;192.168.100.2;4096"</screen>
        Mount the system image root file system remotely via NFS (Network File
        System). This requires a server which exports the root file system of
        the network client in such a way that the client can mount it
-       read/write. In order to do that, the boot image must know the server IP
+       read/write. To do that, the boot image must know the server IP
        address and the path name where the root directory exists on this
        server. The information must be provided like follows:
       </para>
@@ -733,15 +733,15 @@ IMAGE="/dev/sda2;suse-##.#-pxe-client.i686;1.2.8;192.168.100.2;4096"</screen>
      </term>
      <listitem>
       <para>
-       In addition to the <varname>PART</varname> line it's also allowed to add
-       a raid array setup. The first parameter of the <varname>RAID</varname>
-       line is the raid level. So far only raid1 (mirroring) is supported. The
-       second and third parameter specifies the raid disk devices which make
-       up the array. If a RAID line is present all partitions in PART will be
-       created as raid partitions. The first raid is named md0 the second one
-       md1 and so on.  It's required to specify the correct raid partition in
-       the IMAGE line according to the PART setup. A typical raid image setup
-       could look like this:
+       In addition to the <varname>PART</varname> line it is also allowed to
+       add a raid array setup. The first parameter of the
+       <varname>RAID</varname> line is the raid level. So far only raid1
+       (mirroring) is supported. The second and third parameter specifies the
+       raid disk devices which make up the array. If a RAID line is present
+       all partitions in PART will be created as raid partitions. The first
+       raid is named md0 the second one md1 and so on.  It is required to
+       specify the correct raid partition in the IMAGE line according to the
+       PART setup. A typical raid image setup could look like this:
       </para>
 <screen>DISK=/dev/sda
 RAID='1;/dev/sda;/dev/sdb'
@@ -803,12 +803,12 @@ PART='5;S;x,2000;L;/'</screen>
       </para>
       <para>
        The union file system overlayfs is then used to cover the read/write
-       layer with the read-only device to one read/write file system. If a file
-       on the read-only device is going to be written, the changed inodes are
-       part of the read/write file system. Please note the device
-       specifications in <varname>UNIONFS_CONFIG</varname> must correspond to
-       the <varname>IMAGE</varname> and <varname>PART</varname>
-       information. The following example should explain the interconnections:
+       layer with the read-only device to one read/write file system. If a
+       file on the read-only device is going to be written, the changed inodes
+       are part of the read/write file system. Note the device specifications
+       in <varname>UNIONFS_CONFIG</varname> must correspond to the
+       <varname>IMAGE</varname> and <varname>PART</varname> information. The
+       following example should explain the interconnections:
       </para>
 <screen>DISK=/dev/sda
 IMAGE='/dev/sda3;image/myImage;1.1.1;192.168.1.1;4096'
@@ -816,9 +816,9 @@ PART='200;S;x,300;L;/,x;L;x'
 UNIONFS_CONFIG=/dev/sda2,/dev/sda3,overlayfs</screen>
       <para>
        As the second element of the PART list must define the root partition
-       it’s absolutely important that the first device in
+       it is absolutely important that the first device in
        <varname>UNIONFS_CONFIG</varname> matches this device as read/write
-       device. The second device of <varname>UNIONFS_CONFIG</varname> has to
+       device. The second device of <varname>UNIONFS_CONFIG</varname> needs to
        match the given IMAGE device name.
       </para>
      </listitem>
@@ -828,15 +828,14 @@ UNIONFS_CONFIG=/dev/sda2,/dev/sda3,overlayfs</screen>
     <title>Use a Different Download Protocol</title>
     <para>
      By default all downloads controlled by the KIWI linuxrc code are
-     performed by an atftp call using the tftp protocol. With PXE the download
-     protocol is fixed and thus you can’t change the way how the kernel and
+     performed by an atftp call using the TFTP protocol. With PXE the download
+     protocol is fixed and thus you cannott change the way how the kernel and
      the boot image (initrd) is downloaded. As soon as Linux takes over, the
-     download protocols HTTP, HTTPS and FTP are supported too. KIWI makes use
-     of the <command>curl</command> program to support the additional
-     protocols.
+     download protocols HTTP, HTTPS and FTP are supported too. KIWI uses of
+     the <command>curl</command> program to support the additional protocols.
     </para>
     <para>
-     In order to select one of the additional download protocols the following
+     To select one of the additional download protocols the following
      kernel parameters need to be specified ion
      <filename>/srv/tftpboot/pxelinux.cfg/default</filename>:
     </para>
@@ -861,12 +860,12 @@ UNIONFS_CONFIG=/dev/sda2,/dev/sda3,overlayfs</screen>
      </varlistentry>
     </variablelist>
     <para>
-     To setup this parameters edit the file
+     To set up this parameters edit the file
      <filename>/srv/tftpboot/pxelinux.cfg/default</filename> on your PXE boot
-     server and change the append line accordingly. Please note that all
-     downloads except for kernel and initrd are now controlled by the given
-     server and protocol. You need to make sure that this server provides the
-     same directory and file structure as initially provided by the
+     server and change the append line accordingly. Note that all downloads
+     except for kernel and initrd are now controlled by the given server and
+     protocol. You need to make sure that this server provides the same
+     directory and file structure as initially provided by the
      <package>kiwi-pxeboot</package> package.
     </para>
    </sect2>
@@ -904,15 +903,15 @@ UNIONFS_CONFIG=/dev/sda2,/dev/sda3,overlayfs</screen>
     <secondary>union image</secondary></indexterm>
     <para>
      As shown in <xref linkend="var.pxe.client-config-file.unionfs"/> it is
-     possible to make use of the union file system with overlayfs, to combine
-     two file systems into one. In case of thin clients there is often the need
-     for a compressed file system due to space limitations. However, all
-     supported compressed file systems only allow read-only access. Combining a
-     read-only file system with a read-write file system is a solution for this
-     problem.  KIWI uses squashfs compressing file systems. To create an image
-     with a compressed root file system, make sure the file system attribute in
-     <filename>config.xml</filename> contains <systemitem
-     class="filesystem">squashfs</systemitem>.
+     possible to use the union file system with overlayfs, to combine
+     two file systems into one. In case of thin clients there is often the
+     need for a compressed file system because of space limitations. However,
+     all supported compressed file systems only allow read-only
+     access. Combining a read-only file system with a read-write file system
+     is a solution for this problem.  KIWI uses squashfs compressing file
+     systems. To create an image with a compressed root file system, make sure
+     the file system attribute in <filename>config.xml</filename> contains
+     <systemitem class="filesystem">squashfs</systemitem>.
      <remark condition="clarity">
       2015-11-25 - fs: where should this attribute be set? A link to an
       example or an example right here is needed.
@@ -1144,7 +1143,7 @@ KIWI_INITRD=/boot/initrd</screen>
      <title>Root Tree Over AoE</title>
      <para>
       Use the <command>vbladed</command> command on the remote server to bind
-      a block device to an ethernet interface. The block device can be a disk
+      a block device to an Ethernet interface. The block device can be a disk
       partition or a loop device (losetup) but not a directory. For example:
      </para>
      <screen>vbladed 0 1 eth0 <replaceable>blockdevice</replaceable></screen>
@@ -1239,10 +1238,10 @@ KIWI_INITRD=/boot/initrd</screen>
         be kept to a minimum for reasonable manageability.
        </para>
        <para>
-        Valid group names are made up of upper and lower case letters, and may
-        use numeric, and underscore characters. The same rules used to define
-        bash or sh variable names apply. The following example contains valid
-        names:
+        Valid group names are made up of uppercase and lowercase letters, and
+        may use numeric, and underscore characters. The same rules used to
+        define Bash or sh variable names apply. The following example contains
+        valid names:
        </para>
        <screen>KIWI_GROUP="group1, group2, group3"</screen>
       </listitem>
@@ -1306,7 +1305,7 @@ KIWI_INITRD=/boot/initrd</screen>
       configurations for the system language and the keyboard layout.
      </para>
      <para>
-      The concept is similar to the one used with the group definition an
+      The concept is similar to the one used with the group definition a
       configuration files. A list of MAC addresses that will receive
       individual configuration files is specified with two hardware mapping
       element in the group configuration file. A list of system configuration
@@ -1325,7 +1324,7 @@ KIWI_INITRD=/boot/initrd</screen>
      <sect4 id="sec.pxe.groups.group_file.overrides.hw_element">
       <title>The Hardware Mapping Elements</title>
       <para>
-       To make use of the hardware linking mechanism, two additional elements
+       To use the hardware linking mechanism, two additional elements
        needs to be added to the group details file
        (<filename>config.<replaceable>GROUP_NAME</replaceable></filename>. These
        two elements link hardware specific configurations to the appropriate
@@ -1359,7 +1358,7 @@ KIWI_INITRD=/boot/initrd</screen>
        <literal><replaceable>HARDWARE_MAP_NAME</replaceable>_HARDWARE_MAP</literal></term>
        <listitem>
         <para>
-         This element behaves exactly like the
+         This element behaves identical to the
          <replaceable>GROUP_NAME</replaceable>_KIWI_MAC_LIST element. It lists
          all MAC addresses that need to be linked to a hardware map. Any host
          defined within the list will receive configuration files that have
@@ -1376,7 +1375,7 @@ myvendor_foo2000_HARDWARE_MAP="00:11:00:11:22:CA"</screen>
     <sect4 id="sec.pxe.groups.group_file.overrides.hw_config">
      <title>The Hardware Mapping Configuration File</title>
      <para>
-      Once the hardware map has been defined, the last step is to ensure
+      When the hardware map has been defined, the last step is to ensure
       configuration specific elements are linked to the host(s) in question.
       This is done by creating a new
       hardware_config.<replaceable>hardware_map</replaceable> file.  The
@@ -1385,7 +1384,7 @@ myvendor_foo2000_HARDWARE_MAP="00:11:00:11:22:CA"</screen>
      </para>
 <screen>VENDOR_CONF='CONFIGURATIONS/xorg.conf.<replaceable>hardware_name_model</replaceable>;/etc/X11/xorg.conf;192.168.100.2;4096'</screen>
      <para>
-      The format of the VENDOR_CONF values is exactly the same as the CONF
+      The format of the VENDOR_CONF values is identical to the CONF
       variable used in the standard host and group configurations (see <xref
       linkend="sec.pxe.client-config-file"/>). In addition, files defined
       within this list will over-write any files defined in the group
@@ -1416,13 +1415,12 @@ myvendor_foo2000_HARDWARE_MAP="00:11:00:11:22:CA"</screen>
     <title>A Complete Example</title>
     <para>
      The following is an example of a group that is using hardware from
-     multiple vendors. For the purposes of this example, lets assume the group
-     will have 10 defined hosts, seven are
-     <replaceable>myvendor_foo1000</replaceable> thin client, while the
-     remaining three are <replaceable>myvendor_foo2000</replaceable>
-     thin clients. We will also assume that the differences between the two
-     hardware models are specific to the video card and therefore require
-     different X drivers.
+     multiple vendors. For this example, lets assume the group will have 10
+     defined hosts, seven are <replaceable>myvendor_foo1000</replaceable> thin
+     client, while the remaining three are
+     <replaceable>myvendor_foo2000</replaceable> thin clients. We will also
+     assume that the differences between the two hardware models are specific
+     to the video card and therefore require different X drivers.
     </para>
     <para>
      The following configuration files in <filename>/srv/tftpboot/KIWI</filename>are required:
@@ -1524,7 +1522,7 @@ someconfig.cfg;/etc/sysconfig/someconfig.cfg;192.168.1.2;4096'</screen>
     </para>
     <para>
      In this VENDOR_CONF element, two files are defined. An override
-     <filename>xorg.conf</filename> file as well as an additional file called
+     <filename>xorg.conf</filename> file and an additional file called
      <filename>someconfig.cfg</filename>.
      <filename>xorg.conf.myvendor_foo2000</filename> will overwrite the
      <filename>xorg.conf</filename> file that was previously transferred via

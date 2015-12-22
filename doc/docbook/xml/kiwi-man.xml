@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE refentry PUBLIC 
+<!DOCTYPE refentry PUBLIC
   "-//OASIS//DTD DocBook XML V4.4//EN"
   "http://www.docbook.org/xml/4.4/docbookx.dtd">
 <refentry id="ref.kiwi.kiwi">
@@ -69,7 +69,7 @@
    always operates in two steps. The KIWI <option>--build</option> option
    just combines both steps into one to make it easier to start with KIWI.
    The first step is the preparation step and if that step was successful, a
-   creation step follows which is able to create different image output
+   creation step follows which can create different image output
    types. If you have started with an example and want to add you own
    changes it might be a good idea to clone of from this example. This can
    be done by simply copying the entire image description or you can let
@@ -84,7 +84,7 @@
    the image type ISO was requested, the output image would be a file with
    the suffix <filename
         class="extension">.iso</filename>
-   representing a live system on CD or DVD. Other than that KIWI is able to
+   representing a live system on CD or DVD. Other than that KIWI can
    create images for virtual and para-virtual (Xen) environments as well as
    for USB stick, PXE network clients and OEM customized Linux systems.
   </para>
@@ -730,7 +730,7 @@
      <para>
       Specify the output image type to use for this image. Each type is
       described in a <replaceable>type</replaceable> section of the
-      preferences section. At least one type has to be specified in the
+      preferences section. At least one type needs to be specified in the
       <filename>config.xml</filename> description. By default, the types
       specifying the <emphasis>primary</emphasis> attribute will be used. If
       there is no primary attribute set, the first type section of the

@@ -12,9 +12,9 @@
    <authorgroup>
     <author>
      <affiliation>
-      <orgname>SUSE LINUX Products GmbH</orgname>
-     </affiliation><firstname>Marcus</firstname><surname>Sch??fer</surname>
-     <contrib>Project Lead, Design, Doc, Implementation</contrib><email>ms@suse.de</email>
+      <orgname>SUSE LINUX GmbH</orgname>
+     </affiliation><firstname>Marcus</firstname><surname>Schäfer</surname>
+     <contrib>Project Lead, Design, Documantation, Implementation</contrib><email>ms@suse.com</email>
     </author>
     <othercredit>
      <affiliation>
@@ -24,27 +24,33 @@
     </othercredit>
     <othercredit>
      <affiliation>
-      <orgname>SUSE LINUX Products GmbH</orgname>
+      <orgname>SUSE LINUX GmbH</orgname>
      </affiliation><firstname>Thomas</firstname><surname>Schraitle</surname>
-     <contrib>Documentation, XSLT</contrib><email>toms@suse.de</email>
+     <contrib>Documentation, XSLT</contrib><email>toms@suse.com</email>
     </othercredit>
     <othercredit>
      <affiliation>
-      <orgname>SUSE LINUX Products GmbH</orgname>
+      <orgname>SUSE LINUX GmbH</orgname>
      </affiliation><firstname>Adrian</firstname><surname>Schroeter</surname>
-     <contrib>Build Service integration</contrib><email>adrian@suse.de</email>
+     <contrib>Build Service integration</contrib><email>adrian@suse.com</email>
     </othercredit>
     <othercredit>
      <affiliation>
-      <orgname>SUSE</orgname>
+      <orgname>SUSE LINUX GmbH</orgname>
      </affiliation><firstname>Robert</firstname><surname>Schweikert</surname>
-     <contrib>Design, Doc, Implementation</contrib><email>rjschwei@suse.com</email>
+     <contrib>Design, Documentation, Implementation</contrib><email>rjschwei@suse.com</email>
     </othercredit>
     <othercredit>
      <affiliation>
-      <orgname>SUSE</orgname>
+      <orgname>SUSE LINUX GmbH</orgname>
      </affiliation><firstname>Dinar</firstname><surname>Valeev</surname>
      <contrib>Implementation, Power architecture</contrib><email>dvaleev@suse.com</email>
+    </othercredit>
+    <othercredit>
+     <affiliation>
+      <orgname>SUSE LINUX GmbH</orgname>
+     </affiliation><firstname>Frank</firstname><surname>Sundermeyer</surname>
+     <contrib>Documentation</contrib><email>fs@suse.com</email>
     </othercredit>
    </authorgroup>
   </info>

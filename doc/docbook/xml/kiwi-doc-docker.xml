@@ -55,7 +55,7 @@
 -->
   <para>
    Docker is a shipping container system for code that can run virtually
-   everywhere. Basically it is an extension of LXC's capabilities. Since
+   everywhere. It is an extension of LXC's capabilities. Since
    Docker is based on LXC, a Docker container does not include a separate
    operating system. It relies on the functionality provided by the underlying
    infrastructure. As such, it can package the application and all its
@@ -66,7 +66,7 @@
    machines. It also includes versioning capabilities for tracking different
    versions of a container, it allows re-using containers as a base for other
    specialized components, and much more. Find more information about Docker
-   on its homepage at <ulink url="http://www.docker.io"/>.
+   on its home page at <ulink url="http://www.docker.io"/>.
   </para>
  </abstract>
 
@@ -93,7 +93,7 @@
   <screen>cat /tmp/my-container/LimeJeOS-SLE12-docker.x86_64-1.13.1.tar.xz |\
 docker import - sle12-jeos:new</screen>
   <para>
-   Once imported, a container instance can be started as follows:
+   When imported, a container instance can be started as follows:
   </para>
   <screen>docker run --privileged=true -t -i sle12-jeos:new /bin/bash</screen>
 
@@ -126,11 +126,11 @@ docker import - sle12-jeos:new</screen>
    class="element">vmnic</sgmltag> in the
    <filename>config.xml</filename> file as shown below. The
    <sgmltag class="attribute">mode</sgmltag> attribute configures the network
-   mode, with <emphasis>veth</emphasis> being the default. 
+   mode, with <emphasis>veth</emphasis> being the default.
    <remark condition="clarity">
     2015-07-29 - fs: which other modes are valid?
    </remark>
-   
+
   </para>
   <para>
    Although it is possible to configure multiple network interfaces in the
@@ -138,11 +138,11 @@ docker import - sle12-jeos:new</screen>
    container. Prerequisite for a working network in the container is a network
    bridge named <systemitem class="resource">br0</systemitem> configured on
    the host system.  For complex network setups is necessary to edit the
-   config file for the container. 
+   configuration file for the container.
    <remark condition="clarity">
     2015-07-29 - fs: How? Unpack TAR archive, edit and tar again?
    </remark>
-   
+
   </para>
   <screen>&lt;image ...&gt;
   &lt;preferences&gt;

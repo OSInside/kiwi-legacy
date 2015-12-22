@@ -4,7 +4,7 @@
 <appendix id="app.bootserver">
  <title>Setting Up a Network Boot Server</title>
  <para>
-  In order to be able to deploy PXE bot images created with KIWI, you need to
+  To be able to deploy PXE bot images created with KIWI, you need to
   set up a network boot server providing the services DHCP and atftp.
  </para>
  <procedure id="proc.pxe.atftp-server-setup">
@@ -44,7 +44,7 @@ ATFTPD_DIRECTORY="/srv/tftpboot"</screen>
    <filename>/etc/dhcpd.conf</filename> on this server.
   </para>
   <para>
-    The following steps describe how to setup a new DHCP server instance:
+    The following steps describe how to set up a new DHCP server instance:
   </para>
     <step>
      <para>
@@ -56,7 +56,7 @@ ATFTPD_DIRECTORY="/srv/tftpboot"</screen>
       Create the file <filename>/etc/dhcpd.conf</filename> and include the
       following statements. Note that all <emphasis>values</emphasis> listed
       below are examples, make sure to replace them with data fitting your
-      network setup.  
+      network setup.
      </para>
 <screen>option domain-name "example.org";
 option domain-name-servers 192.168.100.2;
@@ -87,7 +87,6 @@ subnet 192.168.100.0 netmask 255.255.255.0 {
       calling:
      </para>
 <screen>systemctl start wickedd-dhcp4</screen>
-    </step>  
+    </step>
  </procedure>
 </appendix>
- 

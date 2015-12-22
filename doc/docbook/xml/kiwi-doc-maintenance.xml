@@ -37,7 +37,7 @@
     <para>
      In case the appliance configuration or the image description needs to be
      changed, the image root tree needs to be rebuilt with
-     <option>--prepare</option> in order to make these changes permanent. We
+     <option>--prepare</option> to make these changes permanent. We
      using this method to upgrade an existing image, it is recommended to put
      the image description under a version control system such as git or
      subversion. This allows to track the changes and to easily switch between
@@ -88,7 +88,7 @@
      <filename>/tmp</filename>:
     </para>
     <screen>kiwi --create /tmp/myISO --destdir /tmp</screen>
-   </step>   
+   </step>
   </procedure>
 
   <warning>
@@ -117,12 +117,12 @@
     tree from scratch with <command>kiwi --prepare</command>.
    </para>
   </important>
-  
+
  </sect1>
 
  <sect1 id="sec.maintenance.config">
   <title>Image Maintenance: Modifying the Configuration</title>
-  <para> 
+  <para>
    In case you need to change the configuration of the appliance (see <xref
    linkend="sec.appliance.kiwi-model"/>) or the image description (see <xref
    linkend="chap.description"/> you need to rebuild the complete image tree by
@@ -130,7 +130,7 @@
    permanent. It is strongly recommended to put your image description under a
    version control system to enable tracking of changes and different version
    builds.
-  </para> 
+  </para>
   <procedure>
    <step>
     <para>
@@ -141,7 +141,7 @@
    <step>
     <para>
      Change the image description as needed. Stick to the following general
-     rules: 
+     rules:
     </para>
     <substeps>
      <step>
@@ -193,22 +193,22 @@
    </step>
    <step>
     <para>
-     Once the final version of your changes has been applied, make sure to
-     check this state in to the version control system. 
+     When the final version of your changes has been applied, make sure to
+     check this state in to the version control system.
     </para>
    </step>
   </procedure>
-  
+
   <important>
    <title>Do not Manipulate the Unpacked Root Image</title>
    <para>
-    The unpacked image directory is just a directory, as far as the build
-    system is concerned and you can manipulate the content of this directory
-    according to your needs. Since it represents a system installation you can
-    “chroot” into this directory for testing purposes. The file system
-    contains an additional directory named /image that is not present in a
-    regular system. It contains information KIWI requires during the create
-    step, including a copy of the config.xml file.
+    The unpacked image directory is a directory, as far as the build system is
+    concerned and you can manipulate the content of this directory according
+    to your needs. Since it represents a system installation you can “chroot”
+    into this directory for testing purposes. The file system contains an
+    additional directory named /image that is not present in a regular
+    system. It contains information KIWI requires during the create step,
+    including a copy of the config.xml file.
    </para>
    <para>
     Do not make any changes to the system, since they will get lost when

@@ -8,10 +8,9 @@
 
   <para>
    The process of creating an appliance could take quite some time and often
-   the same software is installed over and over again. In order to speed up
-   that process KIWI is able to create and re-use so called image caches. An
-   image cache in KIWI is a partial root tree created from a cache image
-   description.
+   the same software is installed over and over again. To speed up that
+   process KIWI can create and re-use so called image caches. An image cache
+   in KIWI is a partial root tree created from a cache image description.
   </para>
 
   <figure id="fig.imagecachingarch">
@@ -43,7 +42,7 @@
    mounts the cache in a way that all write actions (copy-on-write cache)
    are redirected to the new root system. That way the cache itself is never
    changed and can be re-used simultaneously for other build processes. As a
-   result the build process doesn't start with an empty tree but with a tree
+   result the build process does not start with an empty tree but with a tree
    filled with the contents of the cache. Only the missing parts need to be
    added, which speeds up the build considerably.
   </para>
@@ -73,8 +72,8 @@
 
   <para>
    By default those caches will be created in
-   <filename>/var/cache/kiwi-images</filename>. To run a build which makes use
-   of the caches, use the following command;
+   <filename>/var/cache/kiwi-images</filename>. To run a build which uses
+   caches, run the following command;
   </para>
 
 <screen>kiwi --build suse-SLE12-JeOS -d /tmp/myimage --type vmx \
@@ -84,7 +83,7 @@
    This call speeds up the build a lot compared to building without
    caches. It is important to understand that a cache based build will create a
    root tree which contains only the differences compared to the used
-   cache. Thus at any time you want to create an image out of it you have to
+   cache. Thus at any time you want to create an image out of it you need to
    make sure that the cache exists and is accessible on the system.
   </para>
  </example>

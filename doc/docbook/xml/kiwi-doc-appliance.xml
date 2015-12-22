@@ -3,13 +3,7 @@
                          "http://www.docbook.org/xml/4.5/docbookx.dtd">
 <chapter id="chap.appliance">
  <title>Creating Appliances</title>
- <sect1 id="sec.appliance.overview">
-  <title>Overview</title><indexterm>
-
-  <primary>KIWI</primary>
-
-  <secondary>overview</secondary></indexterm>
-
+ <abstract>
   <para>
    With the traditional model of application delivery, applications such as a
    word processor or an e-mail program are installed by a user or an
@@ -19,7 +13,7 @@
    solely dedicated to a single application or a defined set of applications,
    it is good practice, to adjust the operating system to optimize resource
    management and maximize security and performance. When multiple machines
-   are affected, the steps for adjusting the operating system have to be
+   are affected, the steps for adjusting the operating system need to be
    performed on each machine, too.
   </para>
   <para>
@@ -28,21 +22,21 @@
    combination of the parts of a general purpose OS needed by a given
    application and the application itself, bundled and delivered as one
    unit. This unit may be delivered in a variety of formats, for example a
-   ready to run virtual machine or a self-installing system on an optical media
-   or a flash drive.
+   ready to run virtual machine or a self-installing system on an optical
+   media or a flash disk.
   </para>
 
   <para>
-   The appliance model has a number of advantages. Operating system and
+   The appliance model has a many advantages. Operating system and
    application installation are no longer separate steps. The application is
    installed together with the operating system and the installation does not
    require manual intervention. The appliance provider can preconfigure the
    application to be ready-to-run directly after installation. Furthermore,
    the appliance provider can customize the operating system in terms of
-   performance, resources and security, so it best fits the the given
+   performance, resources and security, so it best fits the given
    appliance.
   </para>
- </sect1>
+ </abstract>
  <sect1 id="sec.appliance.kiwi-model">
   <title>The KIWI Model</title><indexterm>
 
@@ -52,8 +46,8 @@
 
   <para>
    KIWI supports building appliances. When building appliances with KIWI the
-   following procedure has proven to work reliably. Nevertheless it is just a
-   recommendation and can be adapted to special needs and environments.
+   following procedure has proven to work reliably. Nevertheless it is a
+   recommendation only and can be adapted to special needs and environments.
   </para>
 
   <procedure id="proc.appliance.general-building">
@@ -145,7 +139,7 @@
      </step>
     </substeps>
     <para>
-     Once the initial package list exist and the git repository is set up,
+     When the initial package list exist and the git repository is set up,
      you can start to configure the system.
     </para>
 
@@ -192,7 +186,7 @@ diff -u /tmp/deployPackages /tmp/appliancePackages</screen>
        by the package manager, make sure you address these packages in the
        <filename>config.sh</filename> script. If you have installed packages
        from repositories which are not yet configured in
-       <filename>config.xml</filename>, add them in order to allow KIWI to
+       <filename>config.xml</filename>, add them to allow KIWI to
        install the packages.
       </para>
      </step>
@@ -219,7 +213,7 @@ diff -u /tmp/deployPackages /tmp/appliancePackages</screen>
        All files not yet tracked, will be listed under <literal>Untracked
        files</literal>. Make sure to add all files from this list
        <emphasis>which are not created automatically</emphasis> to your image
-       description. To do this, clone (copy) these files with respect to the
+       description. To do this, clone (copy) these files with regards to the
        file system structure as overlay files in your image description
        <filename class="directory">root/</filename> directory.
       </para>
@@ -229,7 +223,7 @@ diff -u /tmp/deployPackages /tmp/appliancePackages</screen>
    <step>
     <para>
      All customization work you did within your appliance is now stored in the
-     image description. The image description you just created can be re-used
+     image description. The image description you created can be re-used
      for all image types supported by KIWI.
     </para>
    </step>
@@ -239,8 +233,8 @@ diff -u /tmp/deployPackages /tmp/appliancePackages</screen>
    To make sure the appliance works as expected prepare a new image tree and
    create an image from the new tree. You may optionally disable the creation
    of the git repository within this new image tree to save disk space. If
-   this appliance is a server, you may want to keep it, because it allows you
-   to keep track of changes during the live time of this appliance.
+   this appliance is a server, you should keep it, because it allows you to
+   keep track of changes during the live time of this appliance.
   </para>
   <important>
    <title>Cross Platform Appliance Building</title><indexterm>

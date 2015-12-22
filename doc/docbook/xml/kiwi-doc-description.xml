@@ -6,9 +6,9 @@
  <primary>KIWI</primary>
  <secondary>image description</secondary></indexterm>
  <para>
-  In order to be able to create an image with KIWI, a so called image
+  To be able to create an image with KIWI, a so called image
   description must be created. The image description is represented by a
-  directory which has to contain at least one file named
+  directory which needs to contain at least one file named
   <filename>config.xml</filename> or
   <filename
       class="extension">*.kiwi</filename>. A good start for such
@@ -17,13 +17,13 @@
  </para>
 
  <remark condition="clarity">
-  2015-07-24 - fs: TODO 
+  2015-07-24 - fs: TODO
  </remark>
- 
+
  <remark condition="clarity">
   1. Explain templates (packages, overview of templates, where to find them, how to use them, how to customize)
  </remark>
- 
+
  <remark condition="clarity">
   2. How to manually validate, editor support (loading schema or DTD)
  </remark>
@@ -31,11 +31,11 @@
  <remark condition="clarity">
   3. Shorten, restructure for a better readability
  </remark>
- 
+
  <remark condition="cl">
   4. Point to schema description, explain how to use/read it
  </remark>
- 
+
 
  <figure id="fig.description.imagedescrdir">
   <title>Image Description Directory</title>
@@ -162,7 +162,7 @@
    <listitem>
     <para>
      Optional subdirectory that contains Bash scripts that are called after
-     the installation of all the image packages, primarily in order to
+     the installation of all the image packages, primarily to
      remove the parts of a package that are not needed for the operating
      system. The name of the Bash script must resemble the package name
      listed in the config.xml.
@@ -176,7 +176,7 @@
   <primary>KIWI</primary>
 
   <secondary>config.xml</secondary></indexterm>
-  
+
   <para>
    The mandatory image definition file is divided into different sections
    which describes information like the image name and type as well as the
@@ -194,8 +194,8 @@
   <sect2 id="sec.description.image">
    <title><sgmltag>image</sgmltag> Element</title>
 <screen>&lt;image schemaversion="6.2" name="iname"
-  displayname="text" 
-  kiwirevision="number" 
+  displayname="text"
+  kiwirevision="number"
   id="10 digit number"&gt;
   <sgmltag class="sgmlcomment"> ... </sgmltag>
 &lt;/image&gt;</screen>
@@ -320,7 +320,7 @@
   &lt;packagemanager&gt;zypper&lt;/packagemanager&gt;
   &lt;type image="name" ...&gt;
     &lt;machine|oemconfig|pxedeploy|size|split|systemdisk|vagrantconfig&gt;
-  &lt;/type&gt; 
+  &lt;/type&gt;
 &lt;/preferences&gt;</screen>
    <para>
     The mandatory <sgmltag>preferences</sgmltag> section contains
@@ -795,7 +795,7 @@
        <emphasis>not</emphasis> be part of the locale information. The KIWI
        schema validates the locale string according to the following
        pattern:<literal>[a-z]{2}_[A-Z]{2}(,[a-z]{2}_[A-Z]{2})*</literal>.
-       This means you have to specify the locale like the following example:
+       This means you need to specify the locale like the following example:
        en_US or en_US,de_DE
       </para>
      </listitem>
@@ -869,9 +869,9 @@
        <emphasis role="italic">var</emphasis> inside the volume group
        systemVG.
       </para>
-<screen> &lt;systemdisk name="systemVG"&gt; 
-  &lt;volume name="usr" freespace="100M"/&gt; 
-  &lt;volume name="var" size="200M"/&gt; 
+<screen> &lt;systemdisk name="systemVG"&gt;
+  &lt;volume name="usr" freespace="100M"/&gt;
+  &lt;volume name="var" size="200M"/&gt;
 &lt;/systemdisk&gt;</screen>
       <para>
        The optional attribute <sgmltag class="attribute">freespace</sgmltag>
@@ -894,9 +894,9 @@
      </term>
      <listitem>
       <para>
-       
+
        <remark condition="clarity">
-	2015-11-30 - fs: This whole section has also been copied to the OEM chapter 
+        2015-11-30 - fs: This whole section has also been copied to the OEM chapter
        </remark>
 
        By default, the oemboot process will create or modify a swap, and
@@ -905,7 +905,7 @@
       </para>
 <screen>&lt;oemconfig&gt;
    &lt;oem-systemsize&gt;2000&lt;/oem-systemsize&gt;
-   &lt;oem-... &gt; 
+   &lt;oem-... &gt;
 &lt;/oemconfig&gt;</screen>
       <variablelist>
        <varlistentry>
@@ -1189,7 +1189,7 @@
        section is only considered if the
        <sgmltag class="attribute">image</sgmltag> attribute of the
        <sgmltag>type</sgmltag> element is set to
-       <sgmltag class="attvalue">pxe</sgmltag>. In order to use a PXE image
+       <sgmltag class="attvalue">pxe</sgmltag>. To use a PXE image
        it is necessary to create a network boot infrastructure. Creation of
        the network boot infrastructure is simplified by the KIWI provided
        package
@@ -1216,16 +1216,16 @@
 <screen>&lt;pxedeploy server="IP" blocksize="4096"&gt;
    &lt;timeout&gt;seconds&lt;/timeout&gt;
    &lt;kernel&gt;kernel-file&lt;/kernel&gt;
-   &lt;initrd&gt;initrd-file&lt;/initrd&gt; 
-   &lt;partitions device="/dev/sda"&gt; 
-     &lt;partition type="swap" number="1" size="MB"/&gt; 
+   &lt;initrd&gt;initrd-file&lt;/initrd&gt;
+   &lt;partitions device="/dev/sda"&gt;
+     &lt;partition type="swap" number="1" size="MB"/&gt;
      &lt;partition type="L" number="2" size="MB"
-              mountpoint="/" target="true"/&gt; 
-     &lt;partition type="fd"  number="3"/&gt; 
-   &lt;/partitions&gt; 
-   &lt;union ro="dev" rw="dev" type="clicfs"/&gt; 
+              mountpoint="/" target="true"/&gt;
+     &lt;partition type="fd"  number="3"/&gt;
+   &lt;/partitions&gt;
+   &lt;union ro="dev" rw="dev" type="clicfs"/&gt;
    &lt;configuration source="/KIWI/../file" dest="/../file" arch="..."/&gt;
-   &lt;configuration .../&gt; 
+   &lt;configuration .../&gt;
 &lt;/pxedeploy&gt; </screen>
       <itemizedlist>
        <listitem>
@@ -1396,20 +1396,20 @@
        Creating read-write access to a directory and it’s files requires
        two specifications as shown below.
       </para>
-<screen>&lt;split&gt; 
-  &lt;temporary&gt; 
+<screen>&lt;split&gt;
+  &lt;temporary&gt;
     <sgmltag class="sgmlcomment"> read/write access to </sgmltag>
-    &lt;file name="/var"/&gt; 
-    &lt;file name="/var/*"/&gt; 
+    &lt;file name="/var"/&gt;
+    &lt;file name="/var/*"/&gt;
     <sgmltag class="sgmlcomment"> but not on this file: </sgmltag>
-    &lt;except name="/etc/shadow"/&gt; 
+    &lt;except name="/etc/shadow"/&gt;
   &lt;/temporary&gt;
   &lt;persistent&gt;
     <sgmltag class="sgmlcomment"> persistent read/write access to: </sgmltag>
-    &lt;file name="/etc"/&gt; 
-    &lt;file name="/etc/*"/&gt; 
+    &lt;file name="/etc"/&gt;
+    &lt;file name="/etc/*"/&gt;
     <sgmltag class="sgmlcomment"> but not on this file: </sgmltag>
-    &lt;except name="/etc/passwd"/&gt; 
+    &lt;except name="/etc/passwd"/&gt;
   &lt;/persistent&gt;
 &lt;/split&gt;</screen>
       <para>
@@ -1440,13 +1440,13 @@
       </para>
 <screen>&lt;machine arch="arch" memory="MB"
   HWversion="number" guestOS="suse|sles"
-  domain="dom0|domU"/&gt; 
+  domain="dom0|domU"/&gt;
    &lt;vmconfig-entry&gt;Entry_for_VM_config_file&lt;\vmconfig-entry&gt;
    &lt;vmconfig-entry .../&gt;
-   &lt;vmnic driver="name" interface="number" mode="mode"/&gt; 
+   &lt;vmnic driver="name" interface="number" mode="mode"/&gt;
    &lt;vmnic ...&gt;
-   &lt;vmdisk controller="ide|scsi" id="number"/&gt; 
-   &lt;vmdvd  controller="ide|scsi" id="number"/&gt; 
+   &lt;vmdisk controller="ide|scsi" id="number"/&gt;
+   &lt;vmdvd  controller="ide|scsi" id="number"/&gt;
 &lt;/machine&gt; </screen>
       <variablelist>
        <varlistentry>
@@ -1661,7 +1661,7 @@
 
   <sect2 id="sec.description.users">
    <title><sgmltag>users</sgmltag> Element</title>
-<screen>&lt;users group="group_name" id="number"&gt; 
+<screen>&lt;users group="group_name" id="number"&gt;
   &lt;user home="dir" id="number" name="user" password="..."
         pwdformat="encrypted|plain" realname="string" shell="path"/&gt;
   <sgmltag class="sgmlcomment"> ... </sgmltag>
@@ -1705,9 +1705,9 @@
 
   <sect2 id="sec.description.drivers">
    <title><sgmltag>drivers</sgmltag> Element</title>
-<screen>&lt;drivers profiles="name"&gt; 
-  &lt;file name="filename"/&gt; 
-  <sgmltag class="sgmlcomment"> ... </sgmltag> 
+<screen>&lt;drivers profiles="name"&gt;
+  &lt;file name="filename"/&gt;
+  <sgmltag class="sgmlcomment"> ... </sgmltag>
 &lt;/drivers&gt;</screen>
    <para>
     The optional <sgmltag>drivers</sgmltag> element is only useful for boot
@@ -2105,16 +2105,16 @@
   <sect2 id="sec.description.packages">
    <title><sgmltag>packages</sgmltag> Element</title>
 <screen>&lt;packages type="type" profiles="name" patternType="type"
-   &lt;package name="name" arch="arch"/&gt; 
+   &lt;package name="name" arch="arch"/&gt;
    &lt;package name="name" replaces="name"/&gt;
-   &lt;package name="name" bootinclude="true" bootdelete="true"/&gt; 
-   &lt;archive name="name" bootinclude="true"/&gt; 
-   &lt;package .../&gt; 
-   &lt;namedCollection name="name"/&gt; 
+   &lt;package name="name" bootinclude="true" bootdelete="true"/&gt;
+   &lt;archive name="name" bootinclude="true"/&gt;
+   &lt;package .../&gt;
+   &lt;namedCollection name="name"/&gt;
    &lt;namedCollection .../&gt;
-   &lt;opensuseProduct name="name"/&gt; 
-   &lt;opensuseProduct .../&gt; 
-   &lt;ignore name="name"/&gt; 
+   &lt;opensuseProduct name="name"/&gt;
+   &lt;opensuseProduct .../&gt;
+   &lt;ignore name="name"/&gt;
    &lt;ignore .../&gt;
 &lt;/packages&gt;</screen>
    <para>

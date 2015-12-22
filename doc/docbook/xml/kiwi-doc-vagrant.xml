@@ -13,9 +13,9 @@
   <para>
    <ulink url="http://vagrantup.com/">Vagrant</ulink> is a nice framework to
    implement consistent processing/testing work environments based on
-   Virtualization technologies. In order to run a system, Vagrant needs
-   so-called <quote>boxes</quote>. A box is a TAR archive containing a virtual
-   disk image and some metadata.
+   Virtualization technologies. To run a system, Vagrant needs so-called
+   <quote>boxes</quote>. A box is a TAR archive containing a virtual disk
+   image and some metadata.
   </para>
   <para>
    To build Vagrant boxes, you can use <ulink
@@ -44,19 +44,19 @@
   <para>
    The build result is written to <filename>/tmp/my-box</filename>. The
    <filename class="extension">.box</filename> and <filename
-   class="extension">.json</filename> files are needed in order to add and run
-   the box in Vagrant. The <filename class="extension">.box</filename> file is
-   a TAR archive containing the virtual disk image for the selected
-   virtualization provider.  In this example it is a qcow2 image to be used
-   with libvirt and some metadata which mostly duplicates the information from
-   the '.json' file to have it packaged in one place, too. 
+   class="extension">.json</filename> files are needed to add and run the box
+   in Vagrant. The <filename class="extension">.box</filename> file is a TAR
+   archive containing the virtual disk image for the selected virtualization
+   provider.  In this example it is a qcow2 image to be used with libvirt and
+   some metadata which mostly duplicates the information from the '.json' file
+   to have it packaged in one place, too.
    <remark condition="clarity">
     2015-07-29 - fs: not sure what the last part of the sentence is supposed
     to say... .
    </remark>
   </para>
   <para>
-   The system installed on the virtual disk has to fulfill some requirements
+   The system installed on the virtual disk needs to fulfill some requirements
    which are documented at <ulink
    url="http://docs.vagrantup.com/v2/boxes/base.html"/>. The KIWI template
    makes sure these requirements are met:
@@ -109,7 +109,7 @@
   <screen>cd /tmp/my-box
 vagrant box add my-box LimeJeOS-SLE12.x86_64-1.13.1.libvirt.box</screen>
   <para>
-   or by utilizing the <filename class="extension">.json</filename> file to
+   or by using the <filename class="extension">.json</filename> file to
    provide metadata such as a version number (similar to the boxes downloaded
    from <ulink url="https://vagrantcloud.com/"/>):
   </para>
@@ -133,7 +133,7 @@ vagrant box add /tmp/my-box/LimeJeOS-SLE12.x86_64-1.13.1.libvirt.json ?
  This is the Lime-JeOS SLE12 Linux System...
  vagrant@linux:~&gt;</screen>
 
- 
+
   <tip>
    <title>Vagrant with Docker</title>
    <para>

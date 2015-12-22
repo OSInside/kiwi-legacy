@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE refentry PUBLIC 
+<!DOCTYPE refentry PUBLIC
   "-//OASIS//DTD DocBook XML V4.4//EN"
   "http://www.docbook.org/xml/4.4/docbookx.dtd">
 <refentry id="ref.kiwi.config.sh">
@@ -449,7 +449,7 @@ exit 0</programlisting>
   <title>Profile environment variables</title>
   <para>
    The .profile environment file contains a specific set of variables which
-   are listed below. Some of the functions above makes use of the variables.
+   are listed below. Some of the functions above use the variables.
   </para>
   <variablelist>
    <varlistentry>
@@ -468,7 +468,7 @@ exit 0</programlisting>
     <listitem>
      <para>
       A list of all packages which are part of the packages section with
-      <sgmltag class="attribute">type</sgmltag>="<sgmltag 
+      <sgmltag class="attribute">type</sgmltag>="<sgmltag
               class="attvalue">delete</sgmltag>"
       in <filename>config.xml</filename>
      </para>

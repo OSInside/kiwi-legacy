@@ -17,7 +17,7 @@
   boot loader information the same way as on a physical disk. All flavors
   discussed previously in <xref linkend="chap.vmx"/> also apply to the OEM
   image type. Compared to the VMX image type, an OEM image comes with
-  additional features. It is able to expand itself to a custom disk geometry
+  additional features. It can expand itself to a custom disk geometry
   and KIWI can create installation images which embeds the OEM image for
   deployment from CD/DVD/Stick and over the network via PXE.
  </para>
@@ -110,11 +110,11 @@ dd if=LimeJeOS-SLE12.x86_64-1.13.1.raw of=/dev/<replaceable>device</replaceable>
   </note
 -->
   <para>
-   Note, when testing an OEM image using the virtual disk image, i.e. the
-   <filename class="extension">.raw</filename> file, the geometry of the
+   Note, when testing an OEM image using the virtual disk image, for example
+   the <filename class="extension">.raw</filename> file, the geometry of the
    disk image is not changed and therefore retains the disk geometry of the
-   host system. This implies that the re-partitioning performed for a
-   physical disk install during the OEM boot workflow will be skipped.
+   host system. This implies that the re-partitioning performed for a physical
+   disk install during the OEM boot workflow will be skipped.
 
    <remark condition="clarity">
     2015-11-30 - fs: Does this mean you are asked whether you want to perform
@@ -158,7 +158,7 @@ qemu -hda /tmp/mydisk -cdrom LimeJeOS-SLE12.x86_64-1.13.1.iso -boot d</screen>
    configuration snippets show the use of the <sgmltag
    class="attribute">installiso</sgmltag> to create a CD/DVD iso image and
    <sgmltag class="attribute">installstick</sgmltag> attributes in
-   <filename>configuration.xml</filename> to create an USB installation image
+   <filename>configuration.xml</filename> to create a USB installation image
    format.
   </para>
 
@@ -195,7 +195,7 @@ qemu -hda /tmp/mydisk -cdrom LimeJeOS-SLE12.x86_64-1.13.1.iso -boot d</screen>
     <listitem>
      <para>
       Creates a <filename class="extension">.raw.install</filename> file
-      which can be dumped (<command>dd</command>) onto a USB stick. Use this
+      which can be dumped (<command>dd</command>) onto a flash disk. Use this
       format if your machine cannot boot from a hybrid image.
      </para>
      <screen>&lt;image ...&gt;
@@ -265,7 +265,7 @@ qemu -hda /tmp/mydisk -cdrom LimeJeOS-SLE12.x86_64-1.13.1.iso -boot d</screen>
      <listitem>
       <para>
        This script is executed directly after the OEM image dump onto the
-       target storage device once the image checksum has been successfully
+       target storage device when the image checksum has been successfully
        verified.
       </para>
      </listitem>
@@ -307,7 +307,7 @@ qemu -hda /tmp/mydisk -cdrom LimeJeOS-SLE12.x86_64-1.13.1.iso -boot d</screen>
        By default, the string <literal>OEM</literal>> will be used
        as the boot manager menu entry when KIWI creates the GRUB configuration
        during deployment. The <sgmltag>oem-boot-title</sgmltag> element allows
-       you to set a custom name for the grub menu entry. This value can also
+       you to set a custom name for the GRUB menu entry. This value can also
        be set at the boot prompt by the parameter
        <literal>kiwi_oemtitle="<replaceable>TITLE</replaceable>"</literal>.
       </para>
@@ -353,8 +353,8 @@ qemu -hda /tmp/mydisk -cdrom LimeJeOS-SLE12.x86_64-1.13.1.iso -boot d</screen>
        If this element is set to <literal>true</literal> (default value is
        <literal>false</literal>) the oemboot boot image (initrd) will
        <emphasis>not</emphasis> be replaced by the initrd created by the
-       system. This option is useful when the system is installed on flash
-       drives. When booting from such a drive it is usually necessary to
+       system. This option is useful when the system is installed on a flash
+       disk. When booting from such a drive it is usually necessary to
        detect the storage location on each boot. This detection process is
        part of the oemboot boot image. This value can also be set at the boot
        prompt by the parameter
@@ -409,7 +409,7 @@ qemu -hda /tmp/mydisk -cdrom LimeJeOS-SLE12.x86_64-1.13.1.iso -boot d</screen>
      <listitem>
       <para>
        If set to <literal>true</literal>, the system reboots after the OEM
-       image has been deployed. A message, which the user has to confirm to
+       image has been deployed. A message, which the user needs to confirm to
        start the reboot is displayed. By default this parameter is set to
        <literal>false</literal>. This value can also be set at the boot prompt
        by the parameter
@@ -490,7 +490,7 @@ qemu -hda /tmp/mydisk -cdrom LimeJeOS-SLE12.x86_64-1.13.1.iso -boot d</screen>
      <listitem>
       <para>
        Specify if the system is to be powered down after the OEM image has
-       been deployed. A message, which the user has to confirm to start the
+       been deployed. A message, which the user needs to confirm to start the
        shutdown process, is displayed. This value can also be set at the boot
        prompt by the parameter
        <literal>kiwi_oemshutdowninteractive=<replaceable>TRUE_OR_FALSE</replaceable></literal>.
@@ -582,7 +582,7 @@ qemu -hda /tmp/mydisk -cdrom LimeJeOS-SLE12.x86_64-1.13.1.iso -boot d</screen>
     partitions. This requires to set up <emphasis>empty</emphasis> (no file
     system) partitions prior to deploying the image. This way already existing
     data will not be touched. To activate the partition based install mode the
-    following option has to be set in <filename>config.xml</filename>:
+    following option needs to be set in <filename>config.xml</filename>:
    </para>
    <screen>&lt;image ...&gt;
   &lt;preferences&gt;
@@ -621,7 +621,7 @@ qemu -hda /tmp/mydisk -cdrom LimeJeOS-SLE12.x86_64-1.13.1.iso -boot d</screen>
     <listitem>
      <para>
       There is no support for a remote (PXE) OEM installation, because KIWI
-      has to loop-mount the disk image and need to address specific regions
+      needss to loop-mount the disk image and need to address specific regions
       inside of the image. Such operations are not implemented for remote
       access
      </para>
@@ -641,12 +641,12 @@ qemu -hda /tmp/mydisk -cdrom LimeJeOS-SLE12.x86_64-1.13.1.iso -boot d</screen>
    downloaded from a PXE boot server over the network. This requires a PXE
    network boot server to be setup as explained in <xref
    linkend="chap.pxe"/>. If your PXE server is running the following steps are
-   required to setup the installation process over the network:
+   required to set up the installation process over the network:
   </para>
   <procedure>
    <step>
     <para>
-     Make sure to create an installation PXE tarball along with your OEM
+     Make sure to create an installation PXE TAR archive along with your OEM
      image by setting the following option in
      <filename>configuration.xml</filename>:
     </para>
@@ -675,7 +675,7 @@ qemu -hda /tmp/mydisk -cdrom LimeJeOS-SLE12.x86_64-1.13.1.iso -boot d</screen>
    </step>
    <step>
     <para>
-     Also copy the system image and the md5 sum to to the PXE boot server:
+     Also copy the system image and the md5 sum to the PXE boot server:
     </para>
     <screen><command>scp</command> <replaceable>IMAGE_FILE</replaceable>.xz  <replaceable>PXE_SERVER_IP</replaceable>:/srv/tftpboot/image/
 <command>scp</command> <replaceable>IMAGE_FILE</replaceable>.md5 <replaceable>PXE_SERVER_IP</replaceable>:/srv/tftpboot/image/</screen>
@@ -689,7 +689,7 @@ qemu -hda /tmp/mydisk -cdrom LimeJeOS-SLE12.x86_64-1.13.1.iso -boot d</screen>
      these parameters to the append line.
     </para>
     <para>
-     Optionally the image and it's md5sum can be stored on a FTP or HTTP
+     Optionally the image and its md5sum can be stored on an FTP or HTTP
      server specified via the parameters
      <command>kiwiserver=<replaceable>IP_ADRESS</replaceable></command> and
      <command>kiwiservertype=<replaceable>HTTP_HTTPS_OR_FTP</replaceable></command>. In
@@ -697,7 +697,7 @@ qemu -hda /tmp/mydisk -cdrom LimeJeOS-SLE12.x86_64-1.13.1.iso -boot d</screen>
      location on the server. KIWI searches the image at
      <replaceable>SERVER_ROOT</replaceable>/image (for example
      http://www.example.com/image/<replaceable>IMAGE_FILE</replaceable>.xz). Note
-     that initrd and linux kernel are always loaded via PXE.
+     that initrd and Linux Kernel are always loaded via PXE.
     </para>
    </step>
   </procedure>

@@ -9,7 +9,7 @@
 <!-- .............XML snippets used more than one ................. -->
 
 <!ENTITY template_intro
-'KIWI comes with a large number of image description templates. It is
+'KIWI comes with many image description templates. It is
    recommended to use them as a basis for your own image descriptions. To do
    so, copy the respective directory containing the image description of your
    choice to you working directory and adjust it according to your needs.'> 

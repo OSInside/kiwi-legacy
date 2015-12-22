@@ -43,8 +43,8 @@
       class="attribute">mountpoint</sgmltag> is not specified, a directory
       with the given name will be created by KIWI if it does not already exist
       inside the root tree. However, if the name contains the KIWI internal
-      path field separator <quote>_</quote>, it's required to specify the path
-      in an additional mountpoint attribute. The special value
+      path field separator <quote>_</quote>, it is required to specify the
+      path in an additional mount point attribute. The special value
       <emphasis>@root</emphasis> can be combined with the <sgmltag
       class="attribute">size</sgmltag> or <sgmltag
       class="attribute">freespace</sgmltag> attribute to control the size of
@@ -82,7 +82,7 @@
     </term>
     <listitem>
      <para>
-      An optional attribute. Specifies a path which has to exist inside the
+      An optional attribute. Specifies a path which needs to exist inside the
       root directory.
      </para>
     </listitem>
@@ -173,20 +173,19 @@
    If Btrfs is used as a file system, the subvolume management is configured
    via the same <sgmltag class="element">systemdisk</sgmltag> element as
    explained in <xref linkend="chap.partitions.lvm"/>. Also the same rules as
-   explained for lvm volumes applies to btrfs subvolumes with the following
+   explained for lvm volumes applies to Btrfs subvolumes with the following
    exception;
   </para>
   <formalpara>
    <title>There is no @root volume and no size setup</title>
    <para>
-    The btrfs file system is created with an initial size which can be
+    The Btrfs file system is created with an initial size which can be
     specified by the <sgmltag class="element">size</sgmltag> element All
     subvolumes are part of the file system itself and managed by a
     namespace. The overall size is shared across the entire file system and the
-    size of an entity can be controlled by a btrfs quota which is not applied
+    size of an entity can be controlled by a Btrfs quota which is not applied
     by kiwi at the moment
    </para>
   </formalpara>
  </sect2>
 </sect1>
-
