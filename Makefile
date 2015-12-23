@@ -280,11 +280,11 @@ clean:
 
 uninstall:
 	@echo Uninstalling...
-	rm -rf /usr/share/kiwi
-	rm -rf /usr/share/doc/packages/kiwi
-	rm -f /usr/sbin/kiwi
-	rm -f /usr/share/emacs/site-lisp/suse-start-kiwi-mode.el
-	rm -f /etc/bash_completion.d/kiwi.sh
+	rm -rf ${buildroot}/usr/share/kiwi
+	rm -rf ${buildroot}/usr/share/doc/packages/kiwi
+	rm -f ${buildroot}/usr/sbin/kiwi
+	rm -f ${buildroot}/usr/share/emacs/site-lisp/suse-start-kiwi-mode.el
+	rm -f ${buildroot}/etc/bash_completion.d/kiwi.sh
 
 build: clean
 	./.doit -p --local
