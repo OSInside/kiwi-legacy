@@ -122,7 +122,7 @@ install: uninstall
 	#============================================
 	# kiwi manual pages
 	#--------------------------------------------
-	for i in $(shell ls -1 ./doc/*.1);do \
+	for i in $(shell ls -1 ./doc/man/*.1);do \
 		install -m 644 $$i ${MANVZ} ;\
 	done
 
