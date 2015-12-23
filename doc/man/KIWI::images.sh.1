@@ -2,12 +2,12 @@
 .\"     Title: kiwi::images.sh
 .\"    Author: Marcus Schäfer <ms (AT) suse.de>
 .\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: Created: 07/08/2015
+.\"      Date: Created: 12/23/2015
 .\"    Manual: KIWI Manualpage
 .\"    Source: KIWI 7.03
 .\"  Language: English
 .\"
-.TH "KIWI::IMAGES\&.SH" "1" "Created: 07/08/2015" "KIWI 7\&.03" "KIWI Manualpage"
+.TH "KIWI::IMAGES\&.SH" "1" "Created: 12/23/2015" "KIWI 7\&.03" "KIWI Manualpage"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -35,7 +35,7 @@ The KIWI image description allows to have an optional
 images\&.sh
 bash script in place\&. It can be used for changes appropriate for certain images/image types on case\-by\-case basis (since it runs at beginning of create step) Basically the script should be designed to take over control of handling image type specific tasks\&. For example if building the oem type requires some additional package or config it can be handled in images\&.sh\&. Please keep in mind there is only one unpacked root tree the script operates in\&. This means all changes are permanent and will not be automatically restored\&. It is also the script authors tasks to check if changes done before do not interfere in a negative way if another image type is created from the same unpacked image root tree If
 images\&.sh
-exitswith an exit code != 0 the kiwi process will exit with an error too\&.
+exits with an exit code != 0 the kiwi process will exit with an error too\&.
 .PP
 \fBExample\ \&1.\ \&Template for images.sh\fR
 .sp
@@ -79,7 +79,7 @@ script\&.
 .PP
 [baseCleanMount]
 .RS 4
-Umount the system filesystems
+Umount the system file systems
 /proc,
 /dev/pts, and
 /sys\&.
@@ -100,7 +100,7 @@ used to build this image\&.
 .PP
 [suseGFXBoot {theme} {loadertype}]
 .RS 4
-This function requires the gfxboot and at least one bootsplash\-theme\-* package to be installed in order to work correctly\&. The function creates from this package data a graphics boot screen for the isolinux and grub boot loaders\&. Additionally it creates the bootsplash files for the resolutions 800x600, 1024x768, and 1280x1024
+This function requires the gfxboot and at least one bootsplash\-theme\-* package to be installed to work correctly\&. The function creates from this package data a graphics boot screen for the isolinux and grub boot loaders\&. Additionally it creates the bootsplash files for the resolutions 800x600, 1024x768, and 1280x1024
 .RE
 .PP
 [suseStripKernel]
@@ -112,7 +112,7 @@ file\&.
 .PP
 [suseStripInitrd]
 .RS 4
-This function removes a whole bunch of tools binaries and libraries which are not required in order to boot a suse system with KIWI\&.
+This function removes a whole bunch of tools binaries and libraries which are not required to boot a suse system with KIWI\&.
 .RE
 .PP
 [Rm {list of files}]
@@ -138,7 +138,7 @@ is set to 1\&.
 .RE
 .SH "PROFILE ENVIRONMENT VARIABLES"
 .PP
-The \&.profile environment file contains a specific set of variables which are listed below\&. Some of the functions above makes use of the variables\&.
+The \&.profile environment file contains a specific set of variables which are listed below\&. Some of the functions above use the variables\&.
 .PP
 [$kiwi_iname]
 .RS 4
@@ -199,7 +199,7 @@ The value of the compressed attribute set in the type element in config\&.xml
 .PP
 [$kiwi_type]
 .RS 4
-The basic image type\&. Can be a simply filesystem image type of ext2, ext3, reiserfs, squashfs, and cpio or one of the following complex image types: iso split usb vmx oem xen pxe
+The basic image type\&. Can be a simply file system image type of ext2, ext3, reiserfs, squashfs, and cpio or one of the following complex image types: iso split usb vmx oem xen pxe
 .RE
 .SH "AUTHOR"
 .PP

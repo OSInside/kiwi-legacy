@@ -2,12 +2,12 @@
 .\"     Title: kiwi
 .\"    Author: Marcus Schaefer <ms (AT) suse.de>
 .\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: Created: 07/08/2015
+.\"      Date: Created: 12/23/2015
 .\"    Manual: KIWI Manualpage
 .\"    Source: KIWI 7.03
 .\"  Language: English
 .\"
-.TH "KIWI" "1" "Created: 07/08/2015" "KIWI 7\&.03" "KIWI Manualpage"
+.TH "KIWI" "1" "Created: 12/23/2015" "KIWI 7\&.03" "KIWI Manualpage"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -48,13 +48,13 @@ package provides example descriptions based on a JeOS system\&. JeOS means
 Detailed description of the kiwi image system exists in the system design document in
 \m[blue]\fB\%file:///usr/share/doc/packages/kiwi/kiwi.pdf\fR\m[]\&. KIWI always operates in two steps\&. The KIWI
 \fB\-\-build\fR
-option just combines both steps into one to make it easier to start with KIWI\&. The first step is the preparation step and if that step was successful, a creation step follows which is able to create different image output types\&. If you have started with an example and want to add you own changes it might be a good idea to clone of from this example\&. This can be done by simply copying the entire image description or you can let KIWI do that for you by using the
+option just combines both steps into one to make it easier to start with KIWI\&. The first step is the preparation step and if that step was successful, a creation step follows which can create different image output types\&. If you have started with an example and want to add you own changes it might be a good idea to clone of from this example\&. This can be done by simply copying the entire image description or you can let KIWI do that for you by using the
 \fBkiwi\fR\fB\-\-clone\fR
 command\&.
 .PP
-In the preparation step, you prepare a directory including the contents of your new filesystem based on one or more software package source(s) The creation step is based on the result of the preparation step and uses the contents of the new image root tree to create the output image\&. If the image type ISO was requested, the output image would be a file with the suffix
+In the preparation step, you prepare a directory including the contents of your new file system based on one or more software package source(s) The creation step is based on the result of the preparation step and uses the contents of the new image root tree to create the output image\&. If the image type ISO was requested, the output image would be a file with the suffix
 \&.iso
-representing a live system on CD or DVD\&. Other than that KIWI is able to create images for virtual and para\-virtual (Xen) environments as well as for USB stick, PXE network clients and OEM customized Linux systems\&.
+representing a live system on CD or DVD\&. Other than that KIWI can create images for virtual and para\-virtual (Xen) environments as well as for USB stick, PXE network clients and OEM customized Linux systems\&.
 .SH "GENERAL OPTIONS"
 .PP
 [\fB\-h\fR | \fB\-\-help\fR]
@@ -94,7 +94,7 @@ includes this update channel as repository, it is useful to store the image root
 \fBkiwi\fR {\-u | \-\-upgrade} \fIimage\-root\fR [\-\-add\-package\ \fIname\fR] [\-\-add\-pattern\ \fIname\fR]
 .SH "SYSTEM ANALYSIS"
 .PP
-KIWI provides a module which allows you to analyse the running system and create a report and an image description representing the current state of the machine\&. Among others this allows you to clone your currently running system into an image\&. The system requires the zypper backend in order to work properly\&.
+KIWI provides a module which allows you to analyze the running system and create a report and an image description representing the current state of the machine\&. Among others this allows you to clone your currently running system into an image\&. The system requires the zypper back\-end in order to work properly\&.
 .PP
 The process will always place it\*(Aqs result into the
 /tmp/$OptionValueOf\-\-describe
@@ -102,7 +102,7 @@ directory\&. The reason for this is because
 /tmp
 is always excluded from the analysis and therefore we can safely place new files there without influencing the process itself\&. You should have at least 100\ \&MB free space for the cache file and the image description all the rest are just hard links\&.
 .PP
-As one result a HTML based report file is created which contains important information about the system\&. You are free to ignore that information but with the risk that the image from that description does not represent the same system which is running at the moment\&. The less issues left in the report the better is the result\&. In most cases a manual fine tuning is required\&. This includes the repository selection and the unmanaged files along with the configuration details of your currently running operating system\&. You should understand the module as a helper to analyse running linux systems\&.
+As one result a HTML based report file is created which contains important information about the system\&. You are free to ignore that information but with the risk that the image from that description does not represent the same system which is running at the moment\&. The less issues left in the report the better is the result\&. In most cases a manual fine tuning is required\&. This includes the repository selection and the unmanaged files along with the configuration details of your currently running operating system\&. You should understand the module as a helper to analyze running linux systems\&.
 .HP \w'\fBkiwi\fR\ 'u
 \fBkiwi\fR {\-\-describe} \fIname\fR
 .SH "IMAGE POSTPROCESSING MODES"
@@ -127,9 +127,9 @@ The KIWI format conversion is useful to perform the creation of another image ou
 \fBkiwi\fR \-\-convert\ \fIsystemImage\fR [\-\-format\ \fIvmdk|ovf|qcow2|vhd\fR]
 .SH "HELPER TOOLS"
 .PP
-The helper tools provide optional functions like creating a crypted password string for the users section of the
+The helper tools provide optional functions like creating an encrypted password string for the users section of the
 config\&.xml
-file as well as signing the image description with an md5sum hash and adding splash data to the boot image used by the bootloader\&.
+file as well as signing the image description with an md5sum hash and adding splash data to the boot image used by the boot loader\&.
 .HP \w'\fBkiwi\fR\ 'u
 \fBkiwi\fR \-\-createpassword
 .HP \w'\fBkiwi\fR\ 'u
@@ -146,14 +146,14 @@ The following list describes the helper tools more detailed
 Create a crypted password hash and prints it on the console\&. The user can use the string as value for the pwd attribute in the XML users section
 .RE
 .PP
-[\fB\-\-createhash \fR\fB\fIimage\-path\fR\fR ]
+[\fB\-\-createhash \fR\fB\fIimage\-path\fR\fR]
 .RS 4
 Sign your image description with a md5sum\&. The result is written to a file named
 \&.checksum\&.md
 and is checked if KIWI creates an image from this description\&.
 .RE
 .PP
-[ \fB\-i\fR | \fB\-\-info \fR\fB\fIimage\-path\fR\fR \fB\-\-select \fR\fB\fIselection\fR\fR ]
+[\fB\-i\fR | \fB\-\-info \fR\fB\fIimage\-path\fR\fR\fB\-\-select \fR\fB\fIselection\fR\fR]
 .RS 4
 List general information about the image description\&. So far you can get information about the available patterns in the configured repositories with
 \fIrepo\-patterns\fR, a list of used patterns for this image with
@@ -166,28 +166,28 @@ List general information about the image description\&. So far you can get infor
 \fIversion\fR
 .RE
 .PP
-[\fB\-\-setup\-splash \fR\fB\fIinitrd\fR\fR ]
+[\fB\-\-setup\-splash \fR\fB\fIinitrd\fR\fR]
 .RS 4
 Create splash screen from the data inside the initrd and re\-create the initrd with the splash screen attached to the initrd cpio archive\&. This enables the kernel to load the splash screen at boot time\&. If splashy is used only a link to the original initrd will be created
 .RE
 .SH "GLOBAL OPTIONS"
 .PP
-[\fB\-\-add\-profile\fR \fIprofile\-name\fR]
+[\fB\-\-add\-profile\fR\fIprofile\-name\fR]
 .RS 4
 Use the specified profile\&. A profile is a part of the XML image description and therefore can enhance each section with additional information\&. For example adding packages\&.
 .RE
 .PP
-[\fB\-\-set\-repo\fR \fIURL\fR]
+[\fB\-\-set\-repo\fR\fIURL\fR]
 .RS 4
 Set/Overwrite the repo URL for the first repo listed in the configuration file that does not have a "fixed" status\&. The change is temporary and will not be written to the XML file\&.
 .RE
 .PP
-[\fB\-\-set\-repotype\fR \fItype\fR]
+[\fB\-\-set\-repotype\fR\fItype\fR]
 .RS 4
-Set/Overwrite repo type for the first listed repo\&. The supported repo types depends on the packagemanager\&. Commonly supported are rpm\-md, rpm\-dir and yast2\&. The change is temporary and will not be written to the XML file\&.
+Set/Overwrite repo type for the first listed repo\&. The supported repo types depends on the package manager\&. Commonly supported are rpm\-md, rpm\-dir and yast2\&. The change is temporary and will not be written to the XML file\&.
 .RE
 .PP
-[\fB\-\-set\-repoalias\fR \fIname\fR]
+[\fB\-\-set\-repoalias\fR\fIname\fR]
 .RS 4
 Set/Overwrite alias name for the first listed repo\&. Alias names are optional free form text\&. If not set the source attribute value is used and builds the alias name by replacing each
 \(lq/\(rq
@@ -195,12 +195,12 @@ with a
 \(lq_\(rq\&. An alias name should be set if the source argument doesn\*(Aqt really explain what this repository contains\&. The change is temporary and will not be written to the XML file\&.
 .RE
 .PP
-[\fB\-\-set\-repoprio\fR \fInumber\fR]
+[\fB\-\-set\-repoprio\fR\fInumber\fR]
 .RS 4
-Set/Overwrite priority for the first listed repo\&. Works with the smart packagemanager only\&. The Channel priority assigned to all packages available in this channel (0 if not set)\&. If the exact same package is available in more than one channel, the highest priority is used\&.
+Set/Overwrite priority for the first listed repo\&. Works with the smart package manager only\&. The Channel priority assigned to all packages available in this channel (0 if not set)\&. If the exact same package is available in more than one channel, the highest priority is used\&.
 .RE
 .PP
-[\fB\-\-add\-repo \fR\fB\fIURL\fR\fR, \fB\-\-add\-repotype \fR\fB\fItype\fR\fR \fB\-\-add\-repoalias \fR\fB\fIname\fR\fR \fB\-\-add\-repoprio \fR\fB\fInumber\fR\fR ]
+[\fB\-\-add\-repo \fR\fB\fIURL\fR\fR, \fB\-\-add\-repotype \fR\fB\fItype\fR\fR\fB\-\-add\-repoalias \fR\fB\fIname\fR\fR\fB\-\-add\-repoprio \fR\fB\fInumber\fR\fR]
 .RS 4
 Add the given repository and type for this run of an image prepare or upgrade process\&. Multiple
 \fB\-\-add\-repo\fR/\fB\-\-add\-repotype\fR
@@ -213,7 +213,7 @@ file
 .RS 4
 Ignore all repositories specified so far, in XML or elsewhere\&. This option should be used in conjunction with subsequent calls to
 \fB\-\-add\-repo\fR
-to specify repositories at the commandline that override previous specifications\&.
+to specify repositories at the command line that override previous specifications\&.
 .RE
 .PP
 [\fB\-\-logfile \fR\fB\fIFilename\fR\fR | \fBterminal\fR]
@@ -230,12 +230,12 @@ Specify an alternate command to run when compressing boot and system images\&. C
 options\&.
 .RE
 .PP
-[\fB\-\-package\-manager \fR\fB\fIsmart|zypper\fR\fR ]
+[\fB\-\-package\-manager \fR\fB\fIsmart|zypper\fR\fR]
 .RS 4
 Set the package manager to use for this image\&. If set it will temporarily overwrite the value set in the xml description\&.
 .RE
 .PP
-[\fB\-A\fR | \fB\-\-target\-arch \fR\fB\fIi586|x86_64|armv5tel|ppc\fR\fR ]
+[\fB\-A\fR | \fB\-\-target\-arch \fR\fB\fIi586|x86_64|armv5tel|ppc\fR\fR]
 .RS 4
 Set a special target\-architecture\&. This overrides the used architecture for the image\-packages in
 zypp\&.conf\&. When used with smart this option doesn\*(Aqt have any effect\&.
@@ -261,29 +261,29 @@ Align the start of each partition to the specified value\&. By default 4096 byte
 Prints a stack trace in case of internal errors
 .RE
 .PP
-[\fB\-\-verbose \fR\fB\fI1|2|3\fR\fR ]
+[\fB\-\-verbose \fR\fB\fI1|2|3\fR\fR]
 .RS 4
 Controls the verbosity level for the instsource module
 .RE
 .PP
-[\fB\-y\fR | \fB\-\-yes\fR ]
+[\fB\-y\fR | \fB\-\-yes\fR]
 .RS 4
 Answer any interactive questions with yes
 .RE
 .PP
-[\fB\-\-create\-instsource \fR\fB\fIpath\-to\-config\&.xml\fR\fR ]
+[\fB\-\-create\-instsource \fR\fB\fIpath\-to\-config\&.xml\fR\fR]
 .RS 4
 Using this option, it is possible to create a valid installation repository from blank RPM file trees\&. The created tree can be used directly for the image creation process afterwards\&.
 .RE
 .PP
-[\fB\-\-bundle\-build\fR ]
+[\fB\-\-bundle\-build\fR]
 .RS 4
-This option bundles the build results to be suitable for publishing it in the buildservice\&. It allows adding a build\-number in combination with the
+This option bundles the build results to be suitable for publishing it in the Build Service\&. It allows adding a build\-number in combination with the
 \fB\-\-bundle\-id\fR
 option as well as a SHA key to the results\&. It also removes intermediate build results not relevant for users if they don\*(Aqt want to rebuild the image\&.
 .RE
 .PP
-[\fB\-\-bundle\-id \fR\fB\fIbuild\-number\fR\fR ]
+[\fB\-\-bundle\-id \fR\fB\fIbuild\-number\fR\fR]
 .RS 4
 The build\-number/string in combination with
 \fB\-\-bundle\-build\fR
@@ -306,12 +306,12 @@ Force creation of new root directory\&. If the directory already exists, it is d
 .RE
 .SH "IMAGE UPGRADE/PREPARATION OPTIONS"
 .PP
-[\fB\-\-cache\fR \fIdirectory\fR ]
+[\fB\-\-cache\fR\fIdirectory\fR]
 .RS 4
 When specifying a cache directory, KIWI will create a cache each for patterns and packages and re\-use them, if possible, for subsequent root tree preparations of this and/or other images
 .RE
 .PP
-[\fB\-\-init\-cache\fR \fIimage description\fR ]
+[\fB\-\-init\-cache\fR\fIimage description\fR]
 .RS 4
 Creates a cache from a KIWI image description\&.
 .RE
@@ -323,24 +323,24 @@ Uses an existing root tree and base the kiwi prepare step on top of it\&. This i
 .PP
 [\fB\-\-force\-bootstrap\fR]
 .RS 4
-In combination with recycle\-root this option forces to call the bootstrap phase of kiwi, which is not considered necessary under normal circumstations\&.
+In combination with recycle\-root this option forces to call the bootstrap phase of kiwi, which is not considered necessary under normal circumstances\&.
 .RE
 .PP
-[\fB\-\-add\-package\fR \fIpackage\fR ]
+[\fB\-\-add\-package\fR\fIpackage\fR]
 .RS 4
 Add the given package name to the list of image packages multiple
 \fB\-\-add\-package\fR
 options are possible\&. The change will not be written to the XML description\&.
 .RE
 .PP
-[\fB\-\-add\-pattern\fR \fIname\fR ]
+[\fB\-\-add\-pattern\fR\fIname\fR]
 .RS 4
 Add the given pattern name to the list of image packages multiple
 \fB\-\-add\-pattern\fR
 options are possible\&. The change will not be written to the xml description\&. Patterns can be handled by SUSE based repositories only\&.
 .RE
 .PP
-[\fB\-\-del\-package\fR \fIpackage\fR ]
+[\fB\-\-del\-package\fR\fIpackage\fR]
 .RS 4
 Removes the given package by adding it the list of packages to become removed\&. The change will not be written to the xml description\&.
 .RE
@@ -361,7 +361,7 @@ file\&. If it exists its value is used as destination directory\&. If no destina
 .RS 4
 Specify the output image type to use for this image\&. Each type is described in a
 \fItype\fR
-section of the preferences section\&. At least one type has to be specified in the
+section of the preferences section\&. At least one type needs to be specified in the
 config\&.xml
 description\&. By default, the types specifying the
 \fIprimary\fR
@@ -398,42 +398,42 @@ option is specified a new boot menu entry will be generated which allows to chec
 Use the logical volume manager to control the disk\&. The partition table will include one lvm partition and one standard ext2 boot partition\&. Use of this option makes sense for the create step only and also only for the image types: vmx, oem, and usb
 .RE
 .PP
-[\fB\-\-fs\-blocksize \fR\fB\fInumber\fR\fR ]
+[\fB\-\-fs\-blocksize \fR\fB\fInumber\fR\fR]
 .RS 4
-When calling KIWI in creation mode this option will set the block size in bytes\&. For ISO images with the old style ramdisk setup a blocksize of 4096 bytes is required
+When calling KIWI in creation mode this option will set the block size in bytes\&. For ISO images with the old style ramdisk setup a block size of 4096 bytes is required
 .RE
 .PP
-[\fB\-\-fs\-journalsize \fR\fB\fInumber\fR\fR ]
+[\fB\-\-fs\-journalsize \fR\fB\fInumber\fR\fR]
 .RS 4
-When calling KIWI in creation mode this option will set the journal size in mega bytes for ext[23] based filesystems and in blocks if the reiser filesystem is used
+When calling KIWI in creation mode this option will set the journal size in mega bytes for ext[23] based file systems and in blocks if the Reiser file system is used
 .RE
 .PP
-[\fB\-\-fs\-inodesize \fR\fB\fInumber\fR\fR ]
+[\fB\-\-fs\-inodesize \fR\fB\fInumber\fR\fR]
 .RS 4
-When calling KIWI in creation mode this option will set the inode size in bytes\&. This option has no effect if the reiser filesystem is used
+When calling KIWI in creation mode this option will set the inode size in bytes\&. This option has no effect if the Reiser file system is used
 .RE
 .PP
-[\fB\-\-fs\-inoderatio \fR\fB\fInumber\fR\fR ]
+[\fB\-\-fs\-inoderatio \fR\fB\fInumber\fR\fR]
 .RS 4
-Set the bytes/inode ratio\&. This option has no effect if the reiser filesystem is used
+Set the bytes/inode ratio\&. This option has no effect if the Reiser file system is used
 .RE
 .PP
-[\fB\-\-fs\-max\-mount\-count \fR\fB\fInumber\fR\fR ]
+[\fB\-\-fs\-max\-mount\-count \fR\fB\fInumber\fR\fR]
 .RS 4
-When calling kiwi in creation mode this option will set the number of mounts after which the filesystem will be checked\&. Set to 0 to disable checks\&. This option applies only to ext[234] filesystems\&.
+When calling kiwi in creation mode this option will set the number of mounts after which the file system will be checked\&. Set to 0 to disable checks\&. This option applies only to ext[234] file systems\&.
 .RE
 .PP
-[\fB\-\-fs\-check\-interval \fR\fB\fInumber\fR\fR ]
+[\fB\-\-fs\-check\-interval \fR\fB\fInumber\fR\fR]
 .RS 4
-When calling kiwi in creation mode this option will set the maximal time between two filesystem checks\&. Set to 0 to disable time\-dependent checks\&. This option applies only to ext[234] filesystems\&.
+When calling kiwi in creation mode this option will set the maximal time between two file system checks\&. Set to 0 to disable time\-dependent checks\&. This option applies only to ext[234] file systems\&.
 .RE
 .PP
-[\fB\-\-fat\-storage \fR\fB\fIsize in MB\fR\fR ]
+[\fB\-\-fat\-storage \fR\fB\fIsize in MB\fR\fR]
 .RS 4
-if the syslinux bootlaoder is used this option allows to specify the size of the fat partition\&. This is useful if the fat space is not only used for booting the system but also for custom data\&. Therefore this option makes sense when building a USB stick image (image type: usb or oem)
+if the syslinux boatload is used this option allows to specify the size of the fat partition\&. This is useful if the fat space is not only used for booting the system but also for custom data\&. Therefore this option makes sense when building a USB stick image (image type: usb or oem)
 .RE
 .PP
-[\fB\-\-partitioner \fR\fB\fIparted|fdasd\fR\fR ]
+[\fB\-\-partitioner \fR\fB\fIparted|fdasd\fR\fR]
 .RS 4
 Select the tool to create partition tables\&. Supported are parted and fdasd (s390)\&. By default parted is used
 .RE
@@ -450,12 +450,12 @@ Specifies a custom mbrid\&. The number value is treated as decimal number which 
 .PP
 [\fB\-\-edit\-bootconfig \fR\fB\fIscript\fR\fR]
 .RS 4
-Specifies the location of a custom script which is called right before the bootloader is installed\&. This allows to modify the bootloader configuration file written by kiwi\&. The scripts working directory is the one which represents the image structure including the bootloader configuration files\&. Please have in mind that according to the image type, architecture and bootloader type the files/directory structure and also the name of the bootloader configuration files might be different\&.
+Specifies the location of a custom script which is called right before the boot loader is installed\&. This allows to modify the boot loader configuration file written by kiwi\&. The scripts working directory is the one which represents the image structure including the boot loader configuration files\&. Please have in mind that according to the image type, architecture and boot loader type the files/directory structure and also the name of the boot loader configuration files might be different\&.
 .RE
 .PP
 [\fB\-\-edit\-bootinstall \fR\fB\fIscript\fR\fR]
 .RS 4
-Specifies the location of a custom script which is called right after the bootloader is installed\&.
+Specifies the location of a custom script which is called right after the boot loader is installed\&.
 .RE
 .PP
 [\fB\-\-archive\-image\fR]
@@ -465,15 +465,15 @@ When calling kiwi
 this option allows to pack the build result(s) into a tar archive\&.
 .RE
 .PP
-[\fB\-\-targetdevice\fR \fIdevice\fR]
+[\fB\-\-targetdevice\fR\fIdevice\fR]
 .RS 4
-Use an alternative device instead of the loop device\&.
+Use an alternative block device instead of the loop device\&. The given location must be a block device node, not a symlink or other linux device node type\&.
 .RE
 .SH "FOR MORE INFORMATION"
 .PP
 More information about KIWI, its files can be found at:
 .PP
-\m[blue]\fB\%http://en.opensuse.org/Portal:KIWI\fR\m[]
+\m[blue]\fB\%https://opensuse.github.io/kiwi/\fR\m[]
 .RS 4
 KIWI wiki
 .RE

@@ -107,15 +107,17 @@ install: uninstall
 	# kiwi documentation and examples
 	#--------------------------------------------
 	cp -a doc/examples/ ${PACKDOCVZ}
-	cp -a doc/images/   ${PACKDOCVZ}
 	cp -a doc/schema/   ${PACKDOCVZ}
-	cp -a doc/kiwi.pdf  ${PACKDOCVZ}
-	cp -a doc/kiwi.html ${PACKDOCVZ}
-	cp -a doc/*.css     ${PACKDOCVZ}
+	cp -a doc/pdf/      ${PACKDOCVZ}
+	cp -a doc/html/     ${PACKDOCVZ}
 	cp -a doc/COPYING   ${PACKDOCVZ}
-	test -e doc/ChangeLog && cp -a doc/ChangeLog ${PACKDOCVZ} || true
+
+	rm -rf ${PACKDOCVZ}/html/images
+	mkdir -p ${PACKDOCVZ}/html/images
+	cp -a doc/docbook/images/*.png ${PACKDOCVZ}/html/images
+	cp -a doc/docbook/images/callouts ${PACKDOCVZ}/html/images
+
 	rm -f ${PACKDOCVZ}/schema/Makefile
-	rm -f ${PACKDOCVZ}/schema/susesync
 
 	#============================================
 	# kiwi manual pages

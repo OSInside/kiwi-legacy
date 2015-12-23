@@ -14,11 +14,10 @@ DEVDOCS := yes
 #----------
 # general 
 DB        := /usr/share/xml/docbook/stylesheet/nwalsh/current
-DEVDOCDIR := ../devdoc
 BUILDDIR  := build
 
 FIGDIR    := images/src/fig
-PNGDIR    := ../images
+PNGDIR    := ./images
 SVGDIR    := $(BUILDDIR)
 FOPCONFIG := etc/fop.xml
 MAIN      := xml/kiwi-doc.xml
@@ -33,10 +32,10 @@ fop       := /usr/bin/fop -c $(FOPCONFIG)
 #------------------------------------------------------------
 # files
 profiled  := $(BUILDDIR)/.profiled.xml
-html      := ../kiwi.html
-man       := $(addprefix ../,KIWI*config.sh.1 KIWI*images.sh.1 KIWI*kiwirc.1 kiwi.1)
+html      := ../html/kiwi.html
+man       := $(addprefix ../man/,KIWI*config.sh.1 KIWI*images.sh.1 KIWI*kiwirc.1 kiwi.1)
 fo        := $(BUILDDIR)/.kiwi.fo
-pdf       := ../kiwi.pdf
+pdf       := ../pdf/kiwi.pdf
 rev_file  := xml/Revision.txt
 
 results   := $(html) $(man) $(pdf)
@@ -173,9 +172,6 @@ check:
 	  docbook-xsl-stylesheets xmlgraphics-fop xmlgraphics-batik \
 	  dejavu-fonts sil-charis-fonts xmlgraphics-commons \
 	  excalibur-avalon-framework
-
-devdoc:
-	$(MAKE) -C $(DEVDOCDIR) all
 
 real-clean: clean
 	rm -f $(pngs) $(results) $(rev_file)
