@@ -1751,6 +1751,22 @@ function setupBootLoader {
         "reboot"
     esac
     setupBootThemes "/config"
+    if [ "$haveLuks" = "yes" ]; then
+        setupCryptTab
+    fi
+}
+#======================================
+# setupCryptTab
+#--------------------------------------
+function setupCryptTab {
+    local IFS=$IFS_ORIG
+    local rootdevice=$(ddn $imageDiskDevice $kiwi_RootPart)
+    local fsuuid=$(blkid $rootdevice -s UUID -o value)
+    local prefix=$1
+    if [ -z "$prefix" ];then
+        prefix=/mnt
+    fi
+    echo "luks UUID=$fsuuid" > $prefix/etc/crypttab
 }
 #======================================
 # setupBootThemes
@@ -8606,7 +8622,7 @@ function luksOpen {
     # no map name set, build it from device
     #--------------------------------------
     if [ -z "$name" ];then
-        name=luks_$(basename "$ldev")
+        name=luks
     fi
     #======================================
     # luks map already exists, return
