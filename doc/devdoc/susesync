@@ -1,2 +1,0 @@
-rsync -rlvt devDocs/* \
-    community.opensuse.org:doc.opensuse.org/htdocs/projects/kiwi/devdoc
