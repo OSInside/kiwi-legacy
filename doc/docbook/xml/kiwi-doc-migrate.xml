@@ -1,152 +1,163 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
                          "http://www.docbook.org/xml/4.5/docbookx.dtd">
-
 <chapter id="chap.migration">
-  <title>System Analysis/Migration</title>
-  <indexterm>
-    <primary>KIWI</primary>
-    <secondary>imge analysis</secondary>
-  </indexterm>
-  <para>KIWI provides a module which allows you to analyse
-    the running system and create a report and an image description
-  representing the current state of the machine. Among others this allows
-    you to clone your currently running system into an image. The
-    process has the following limitations at the moment: </para>
+ <title>System Analysis/Migration</title><indexterm>
+ <primary>KIWI</primary>
+ <secondary>image analysis</secondary></indexterm>
+ <para>
+  KIWI provides a module which allows you to analyze the running system for
+  creating a report and an image description representing the current state of
+  the machine. Among others, this allows you to clone your currently running
+  system into an image. The process has the following limitations at the
+  moment:
+ </para>
+ <itemizedlist>
+  <listitem>
+   <para>
+    Works for SUSE systems only (with zypper on board)
+   </para>
+  </listitem>
+  <listitem>
+   <para>
+    The process works semi-automatically&mdash;depending on the
+    complexity of the system, some manual postprocessing might be necessary
+   </para>
+  </listitem>
+ </itemizedlist>
+ <para>
+  When calling KIWI's analysis module it tries to find the base version of
+  your operating system by using the active repositories specified in the
+  zypper database to identify the software packages currently installed. The
+  result is a list of packages and patterns representing your system. Files
+  not belonging to any packages, such as user data or configuration files, are
+  provided as custom data by KIWI. In addition, KIWI offers different data
+  visualization e.g unmanaged binary data. Along with the software analysis,
+  KIWI also checks for enabled systemd services, augeas configuration
+  inventory and more. The process will not go beyond the scope of local
+  file systems.
+ </para>
+ <para>
+  To create an image of your running system, proceed as follows:
+ </para>
+ <procedure>
+  <step>
+   <para>
+    Create a report listing all packages and repositories currently installed
+    by running
+   </para>
+   <screen>sudo kiwi --describe workstation</screen>
+   <para>
+    The result will be written to /var/cache/kiwi/describe/workstation
+   </para>
+  </step>
+  <step>
+   <para>
+    Check the result of the previous step for packages that cannot be assigned
+    to a repository. If you do not need these packages within your image,
+    proceed with the next step. If you want them to be in the image, either
+    add the repositories containing these packages to your system (for
+    example with <command>zypper addrepo</command>) and run the previous
+    command again. Alternatively, tell KIWI which additional repos to check,
+    by using the previous command together with the
+    <option>--add-repo</option> and <option>--add-repotype</option> options
+    (refer to <command>man 1 kiwi</command> for more information).
+   </para>
+  </step>
+  <step>
+   <para>
+    Rerun the report generating command. List all packages that are not part
+    of a repository or should not be included with the <option>--skip</option>
+    parameter. In case you have previously used the
+    <option>--add-repo</option> and <option>--add-repotype</option> options,
+    use them again with this command:
 
-  <itemizedlist>
+    <remark condition="clarity">
+     2015-12-22 - fs: --skip and --nofiles are not mentioned in "man 1 kiwi"
+    </remark>
+
+   </para>
+
+   <screen><command>kiwi</command> --describe workstation --nofiles \
+--skip "<replaceable>LIST_OF_PAKAGES</replaceable>" \
+--add-repo <replaceable>REPO</replaceable> --add-repotype <replaceable>TYPE</replaceable></screen>
+  </step>
+  <step>
+   <para>
+    Next check the list of files not belonging to any packages in
+    <filename>/var/cache/kiwi/describe/workstation/custom.files</filename>. Among
+    others, this list contains user data, configuration files, and database
+    files. Make sure to only add files to the image that are really needed. In
+    case you want to publish the image, double check the list for password
+    files, configuration files containing plain text passwords, user data,
+    databases and other sensitive data. All files that should become part of
+    the image description need to be moved from <filename
+    class="directory">/var/cache/kiwi/describe/worksation/custom</filename> to
+    <filename>/var/cache/kiwi/describe/worksation/root</filename>. For
+    additional information also check <filename>/var/cache/kiwi/describe/workstation/custom.files.readme</filename>.
+   </para>
+  </step>
+  <step>
+   <para>
+    Adjust the image description according to your needs by checking the
+    following items:
+   </para>
+   <itemizedlist>
     <listitem>
-      <para>Works for SUSE systems only (with zypper on board) </para>
+     <para>
+      Change author and contact in <filename>config.xml</filename>.
+     </para>
     </listitem>
     <listitem>
-      <para>The process works semi automatically which means depending
-        on the complexity of the system some manual postprocessing might
-        be necessary </para>
+     <para>
+      Set appropriate name for your image in <filename>config.xml</filename>.
+     </para>
     </listitem>
-  </itemizedlist>
-
-  <para>When calling KIWI’s analysis mode it will try to find the base
-    version of your operating system and uses the currently active
-    repositories specified in the zypper database to match the software
-    which exists in terms of packages and patterns. The result is a list
-    of packages and patterns which represents your system so far. Of
-    course there are normally some data which doesn’t belong to any
-    package. These are for example configurations or user data. KIWI
-    collects all this information and provides it as custom data. In
-    addition kiwi offers different data visualisations e.g unmanaged
-    binary data. Along with the software analysis kiwi also checks
-    for enabled systemd services, augeas configuration inventory and more.
-    The process will not go beyond the scope of local filesystems.</para>
-
-  <sect1 id="sec.migrate.create-clean-repository">
-    <title>Create a Clean Repository Set First</title>
-    <para> When starting with the analysis it is useful to let kiwi
-      know about all the repositories from which packages has been
-      installed to the system. In a first step call: </para>
-
-    <screen><command>kiwi</command> --describe workstation </screen>
-
-    <para>This will create an HTML report where you can check which
-      packages and patterns could be assigned to the given base
-      repository. In almost all cases there will be information about
-      packages which couldn’t be assigned. You should go to that list
-      and think of the repository which contains that packages (Packman,
-      etc). If something is missing add it either to the zypper list on
-      your system or use the KIWI options <option>--add-repo</option> …
-        <option>--add-repotype</option>. </para>
-
-    <para>Continue calling the following command only if your list is
-      clean and no skipped packages are used except you know
-      that this package can’t be provided or is not worth to become part
-      of the description. </para>
-
-    <screen><command>kiwi</command> --describe workstation --nofiles<!-- 
-    --> [--skip package ... ]</screen>
-  </sect1>
-
-  <sect1 id="sec.migrate.watch-overlay">
-    <title>Watch the Custom Files</title>
-    <indexterm>
-      <primary>KIWI</primary>
-      <secondary>custom files</secondary>
-    </indexterm>
-    <indexterm>
-      <primary>custom files</primary>
-    </indexterm>
-    <para>Several reasons could lead to unmanaged data. In most cases
-      these are user data like pictures, movies but also database
-      files and external party software not installed as a package
-      belongs to it. It's up to the user to decide if these data
-      needs to be part of the description or not. Along with this
-      important custom data there are unfortunately also a bunch of
-      other custom data due to packaging inconsistencies or left
-      over data as result of an upgrade process. These data taints
-      your system and you are doing good in removing it.
-      The quality of the description depends on how well the custom
-      data tree is handled and how clean the system was when the
-      analysis was started. Those data which should become part of
-      the image description needs to be moved from the
-      <filename>/var/cache/kiwi/describe/worksation/custom</filename> directory
-      to the <filename>/var/cache/kiwi/describe/worksation/root</filename> directory</para>
-  </sect1>
-
-  <sect1 id="sec.migrate.checklist">
-    <title>Checklist</title>
-    <indexterm>
-      <primary>KIWI</primary>
-      <secondary>checklist</secondary>
-    </indexterm>
-    <indexterm>
-      <primary>checklist</primary>
-    </indexterm>
-    <para> After that you should walk through the following check list </para>
-
-    <itemizedlist>
-      <listitem>
-        <para>Change author and contact in <filename>config.xml</filename>
-        </para>
-      </listitem>
-      <listitem>
-        <para>Set appropriate name for your image in
-            <filename>config.xml</filename>. </para>
-      </listitem>
-      <listitem>
-        <para>Add/modify default type (oem) set in <filename>config.xml</filename> if needed
-        </para>
-      </listitem>
-      <listitem>
-        <para>If you want to access any remote filesystem it’s a good
-          idea to let AutoYaST add them on first boot of the system
-        </para>
-      </listitem>
-      <listitem>
-        <para>Check your network setup in
-            <filename>/etc/sysconfig/network</filename>. Is this setup
-          still possible in the cloned environment? Make sure you check
-          for the MAC address of the card first. </para>
-      </listitem>
-    </itemizedlist>
-  </sect1>
-
-  <sect1 id="sec.migrate.turn-system-into-image">
-    <title>Turn Into an Image…</title>
-    <para>After the process has finished you should check the size of
-      the image description. The description itself shouldn’t be that
-      big. The size of a migrated image description mainly depends on
-      how many overlay files exists in the <filename class="directory"
-        >root/</filename> directory. You should make sure to maintain
-      only required overlay files. Now let’s try to create a clone image
-      from the description. By default an OEM image which is a virtual
-      disk which is able to run on real hardware too is created. On
-      success you will also find a ISO file which is an installable
-      version of the OEM image. If you burn the ISO on a DVD you can use
-      that DVD to install your cloned image on another computer. </para>
-
-    <screen><command>kiwi</command> --build /var/cache/kiwi/describe/workstation -d /tmp/myResult</screen>
-
-    <para>If everything worked well you can test the created OEM image
-      in any full virtual operating system environment like Qemu or
-        <trademark>VMware</trademark>. Once created the image
-      description can serve for all image types KIWI supports. </para>
-  </sect1>
+    <listitem>
+     <para>
+      Add or modify the image type (<literal>oem</literal> by default) set in
+      <filename>config.xml</filename> if needed.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      If you want to access any remote file system its a good idea to let
+      AutoYaST add them on first boot of the system.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      Check the network setup in
+      <filename>/etc/sysconfig/network</filename>. Is this setup still
+      possible in the cloned environment? Make sure you check for the MAC
+      address of the card first.
+     </para>
+    </listitem>
+   </itemizedlist>
+  </step>
+  <step>
+   <para>
+    Check the size of the image description. It's good practice to keep the
+    image as small as possible. The size of a migrated image description
+    mainly depends on how many overlay files exists in the <filename
+    class="directory">root/</filename> directory. You should make sure to
+    maintain only required overlay files.
+   </para>
+  </step>
+  <step>
+   <para>
+    Create an image from the description. By default an OEM image, containing
+    a virtual disk that can also be deployed to a physical machine, is
+    created. In addition to that, an ISO image containing an installable
+    version of the image, is also generated. Refer to <xref
+    linkend="chap.oem"/> for details.
+   </para>
+<screen><command>kiwi</command> --build /var/cache/kiwi/describe/workstation -d /tmp/myResult</screen>
+  </step>
+  <step>
+   <para>
+    Test the image as described in <xref linkend="sec.oem.testing"/>.
+   </para>
+  </step>
+ </procedure>
 </chapter>

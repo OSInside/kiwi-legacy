@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+                         "http://www.docbook.org/xml/4.5/docbookx.dtd"
+[
+  <!ENTITY % entities SYSTEM "entity-decl.ent">
+  %entities;
+]>
+<chapter id="chap.docker">
+<!--
+ <title>Linux Containers and Docker</title>
+-->
+ <title>Docker images</title>
+ <indexterm>
+  <primary>KIWI</primary>
+  <secondary>Container image</secondary>
+ </indexterm>
+ <indexterm>
+  <primary>container</primary>
+  <secondary>docker</secondary>
+ </indexterm>
+<!--
+ <indexterm>
+  <primary>images</primary>
+  <secondary>lxc</secondary>
+ </indexterm>
+ <indexterm>
+  <primary>Container image</primary>
+  <secondary>lxc image</secondary>
+ </indexterm>
+-->
+ <abstract>
+  <!--
+  <para>
+   Linux Containers (LXC) provide operating system-level virtualization,
+   utilizing Control Groups (cgroups). The virtualization is similar to
+   technologies in OpenVZ, Linux-VServer, FreeBSD jails, AIX Workload
+   Partitions, and Solaris Containers. The network and process space of the
+   container is separated from the host resources by using namespaces. Kernel
+   space information is mounted into the container root filesystem using the
+   <filename>fstab</filename> file in the configuration directory. The
+   container root filesystem provides the new user space on top of the running
+   kernel of the host.
+  </para>
+  <para>
+   A Linux container has two components: the container root file system stored
+   in <filename
+   class="directory">/var/lib/lxc/<replaceable>CONTAINER_NAME</replaceable></filename>
+   and the container configuration stored in <filename
+   class="directory">/etc/lxc/<replaceable>CONTAINER_NAME</replaceable></filename>.
+   A container image created by KIWI is packed into a TAR archive containing the
+   root filesystem and the configuration. To install it, unpack it at the
+   root level (<filename class="directory">/</filename>) of the host system.
+   For information on SUSE Linux Enterprise and LXC refer to <ulink url="https://www.suse.com/documentation/sles-12/book_virt/data/part_virt_lxc.html"/>.
+ </para>
+-->
+  <para>
+   Docker is a shipping container system for code that can run virtually
+   everywhere. It is an extension of LXC's capabilities. Since
+   Docker is based on LXC, a Docker container does not include a separate
+   operating system. It relies on the functionality provided by the underlying
+   infrastructure. As such, it can package the application and all its
+   dependencies in a virtual container which can be run on any Linux server.
+  </para>
+  <para>
+   Docker not only makes it possible to deploy portable containers across
+   machines. It also includes versioning capabilities for tracking different
+   versions of a container, it allows re-using containers as a base for other
+   specialized components, and much more. Find more information about Docker
+   on its home page at <ulink url="http://www.docker.io"/>.
+  </para>
+ </abstract>
+
+ &jeos_tip;
+
+ <sect1 id="sec.docker.building">
+  <title>Building Docker Images</title>
+
+  <para>
+   The following example shows how to build a Just enough Operating System
+   (JeOS) based on SUSE Linux Enterprise 12:
+  </para>
+
+  <screen>kiwi --build suse-SLE12-JeOS --add-profile docker --type docker -d /tmp/my-container</screen>
+
+  <para>
+   The image is packed into a TAR archive,
+   <filename>/tmp/my-container/LimeJeOS-SLE12-docker.x86_64-1.13.1.tar.xz</filename>
+   in this example. To use this image with Docker it must be imported via the
+   <command>docker</command> command. The package <package>docker</package>
+   needs to be installed and the daemon <systemitem
+   class="daemon">dockerd</systemitem> needs to run:
+  </para>
+  <screen>cat /tmp/my-container/LimeJeOS-SLE12-docker.x86_64-1.13.1.tar.xz |\
+docker import - sle12-jeos:new</screen>
+  <para>
+   When imported, a container instance can be started as follows:
+  </para>
+  <screen>docker run --privileged=true -t -i sle12-jeos:new /bin/bash</screen>
+
+  <warning>
+   <title>Unpacking the TAR archive</title>
+   <para>
+    LXC images created by KIWI are packed into a TAR archive and need to be
+    unpacked at the root level (<filename class="directory">/</filename>) of the
+    host system. <emphasis>Never do this with a Docker TAR archive</emphasis>
+    since it would overwrite data on the host system. Always use the
+    <command>docker</command> command as described above to import the image.
+   </para>
+  </warning>
+ </sect1>
+
+ <sect1 id="sec.docker.details">
+  <title>Image Configuration Details</title>
+
+  <para>
+   The configuration for a container does not need to contain a kernel
+   package. The container represents the user space that runs on top of the
+   kernel of the container host system. However, the container itself must
+   include the Linux user space container tools. <remark condition="clarity">
+   2015-07-29 - fs: Is this a package? What needs to be done to include these
+   tools?</remark>
+  </para>
+
+  <para>
+   to configure the network for the container use the <sgmltag
+   class="element">vmnic</sgmltag> in the
+   <filename>config.xml</filename> file as shown below. The
+   <sgmltag class="attribute">mode</sgmltag> attribute configures the network
+   mode, with <emphasis>veth</emphasis> being the default.
+   <remark condition="clarity">
+    2015-07-29 - fs: which other modes are valid?
+   </remark>
+
+  </para>
+  <para>
+   Although it is possible to configure multiple network interfaces in the
+   <filename>config.xml</filename> file, only the first one is used in the
+   container. Prerequisite for a working network in the container is a network
+   bridge named <systemitem class="resource">br0</systemitem> configured on
+   the host system.  For complex network setups is necessary to edit the
+   configuration file for the container.
+   <remark condition="clarity">
+    2015-07-29 - fs: How? Unpack TAR archive, edit and tar again?
+   </remark>
+
+  </para>
+  <screen>&lt;image ...&gt;
+  &lt;preferences&gt;
+    &lt;type ...&gt;
+      &lt;machine ...&gt;
+        &lt;vmnic interface="0" mode="veth"/&gt;
+        ...
+      &lt;/machine&gt;
+      ...
+    &lt;/type&gt;
+  &lt;/preferences&gt;
+  ...
+&lt;/image&gt;</screen>
+
+  <para>
+   The generated configuration file restricts the device access of the
+   container according to a generally accepted best practice security model.
+   The device access permissions may be modified by editing the
+   <filename>config</filename> file for the container.
+  </para>
+ </sect1>
+</chapter>

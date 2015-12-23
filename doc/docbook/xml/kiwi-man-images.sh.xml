@@ -1,61 +1,47 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE refentry PUBLIC 
+<!DOCTYPE refentry PUBLIC
   "-//OASIS//DTD DocBook XML V4.4//EN"
   "http://www.docbook.org/xml/4.4/docbookx.dtd">
-
 <refentry id="ref.kiwi.images.sh">
-  <refentryinfo>
-    <indexterm>
-      <primary>manpages</primary>
-      <secondary>kiwi::images.sh</secondary>
-    </indexterm>
-    <productname>KIWI</productname>
-    <!--<productnumber></productnumber>-->
-    <date>Created: <?dbtimestamp?></date>
-    <authorgroup>
-      <author>
-        <firstname>Marcus</firstname>
-        <surname>Schäfer</surname>
-        <contrib>Developer</contrib>
-        <email>ms (AT) suse.de</email>
-      </author>
-    </authorgroup>    
-  </refentryinfo>
-  <refmeta>
-    <refentrytitle>kiwi::images.sh</refentrytitle>
-    <manvolnum>1</manvolnum>
-    <refmiscinfo class="version">_KV_</refmiscinfo>
-    <refmiscinfo class="manual">KIWI Manualpage</refmiscinfo>
-  </refmeta>
-  <refnamediv>
-    <refname>KIWI::images.sh</refname>
-    <refpurpose>Customization File for KIWI image description</refpurpose>
-  </refnamediv>
-
-  <refsect1 id="kiwi.images.description">
-    <title>Description</title>
-    <para>
-      The KIWI image description allows to have an optional
-      <filename>images.sh</filename> bash script in place. It can be
-      used for changes appropriate for certain images/image types on
-      case-by-case basis (since it runs at beginning of create step)
-
-      Basically the script should be designed to take over control of
-      handling image type specific tasks. For example if building the
-      oem type requires some additional package or config it can be
-      handled in images.sh. Please keep in mind there is only one
-      unpacked root tree the script operates in. This means all
-      changes are permanent and will not be automatically restored.
-      It is also the script authors tasks to check if changes done
-      before do not interfere in a negative way if another image type
-      is created from the same unpacked image root tree
-
-      If <filename>images.sh</filename> exitswith an exit code != 0
-      the kiwi process will exit with an error too.
-    </para>
+ <refentryinfo><indexterm>
+  <primary>manpages</primary>
+  <secondary>kiwi::images.sh</secondary></indexterm><productname>KIWI</productname>
+<!--<productnumber></productnumber>--><date>Created: <?dbtimestamp?></date>
+  <authorgroup>
+   <author><firstname>Marcus</firstname><surname>Schäfer</surname>
+    <contrib>Developer</contrib><email>ms (AT) suse.de</email>
+   </author>
+  </authorgroup>
+ </refentryinfo>
+ <refmeta>
+  <refentrytitle>kiwi::images.sh</refentrytitle>
+  <manvolnum>1</manvolnum>
+  <refmiscinfo class="version">_KV_</refmiscinfo>
+  <refmiscinfo class="manual">KIWI Manualpage</refmiscinfo>
+ </refmeta>
+ <refnamediv>
+  <refname>KIWI::images.sh</refname><refpurpose>Customization File for KIWI image description</refpurpose>
+ </refnamediv>
+ <refsect1 id="kiwi.images.description">
+  <title>Description</title>
+  <para>
+   The KIWI image description allows to have an optional
+   <filename>images.sh</filename> bash script in place. It can be used for
+   changes appropriate for certain images/image types on case-by-case basis
+   (since it runs at beginning of create step) Basically the script should
+   be designed to take over control of handling image type specific tasks.
+   For example if building the oem type requires some additional package or
+   config it can be handled in images.sh. Please keep in mind there is only
+   one unpacked root tree the script operates in. This means all changes are
+   permanent and will not be automatically restored. It is also the script
+   authors tasks to check if changes done before do not interfere in a
+   negative way if another image type is created from the same unpacked
+   image root tree If <filename>images.sh</filename> exits with an exit code
+   != 0 the kiwi process will exit with an error too.
+  </para>
   <example>
-    <title>Template for images.sh</title>
-    <programlisting>#======================================
+   <title>Template for images.sh</title>
+<programlisting>#======================================
 # Functions...
 #--------------------------------------
 test -f /.kconfig &amp;&amp; . /.kconfig
@@ -76,218 +62,240 @@ echo "Configure image: [$kiwi_iname]..."
 #--------------------------------------
 exit</programlisting>
   </example>
-  </refsect1>
-  
-  <refsect1 id="kiwi.image.functions">
-    <title>Common functions</title>
-    <para>
-     The <filename>.kconfig</filename> file allows to make use of a common
-      set of functions. Functions specific to SUSE Linux specific begin with 
-      the name <emphasis>suse</emphasis>. Functions applicable to all linux 
-      systems starts with the name <emphasis>base</emphasis>.
-      The following list describes the functions available inside the
-      <filename>images.sh</filename> script.
-    </para>    
-  <variablelist>
-      <varlistentry>
-        <term><optional>baseCleanMount</optional></term>
-        <listitem>
-          <para>
-            Umount the system filesystems <filename>/proc</filename>, 
-            <filename>/dev/pts</filename>, and
-            <filename>/sys</filename>.
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-        <term><optional>baseGetProfilesUsed</optional></term>
-        <listitem>
-          <para>
-            Return the name(s) of profiles used to build this image.
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-        <term><optional>baseGetPackagesForDeletion</optional></term>
-        <listitem>
-          <para>
-            Return the list of packages setup in the packages <sgmltag 
-              class="attribute">type</sgmltag>="<sgmltag class="attvalue">delete</sgmltag>"
-            section of the <filename>config.xml</filename> used to build
-            this image.
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-         <term><optional>suseGFXBoot {theme} {loadertype}</optional></term>
-        <listitem>
-          <para>
-            This function requires the gfxboot and at least one bootsplash-theme-*
-            package to be installed in order to work correctly. The function
-            creates from this package data a graphics boot screen for the isolinux
-            and grub boot loaders. Additionally it creates the bootsplash files
-            for the resolutions 800x600, 1024x768, and 1280x1024
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-        <term><optional>suseStripKernel</optional></term>
-        <listitem>
-          <para>
-            This function removes all kernel drivers which are not listed in
-            the *drivers sections of the <filename>config.xml</filename>
-            file.
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-        <term><optional>suseStripInitrd</optional></term>
-        <listitem>
-          <para>
-            This function removes a whole bunch of tools binaries and libraries which
-            are not required in order to boot a suse system with KIWI.
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-         <term><optional>Rm {list of files}</optional></term>
-        <listitem>
-          <para>
-            Helper function to delete files and announce it to log.
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-         <term><optional>Rpm {rpm commandline}</optional></term>
-        <listitem>
-          <para>
-            Helper function to the rpm function and announce it to log.
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-         <term><optional>Echo {echo commandline}</optional></term>
-        <listitem>
-          <para>
-            Helper function to print a message to the controlling
-            terminal.
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-         <term><optional>Debug {message}</optional></term>
-        <listitem>
-          <para>
-            Helper function to print a message 
-            if the variable <varname>DEBUG</varname> is set to 1.
-          </para>
-        </listitem>
-      </varlistentry>
-    </variablelist>
-  </refsect1>
-  <refsect1 id="kiwi.images.environment">
-    <title>Profile environment variables</title>
-    <para>
-      The .profile environment file contains a specific set of variables which
-      are listed below. Some of the functions above makes use of the variables.
+ </refsect1>
+ <refsect1 id="kiwi.image.functions">
+  <title>Common functions</title>
+  <para>
+   The <filename>.kconfig</filename> file allows to make use of a common set
+   of functions. Functions specific to SUSE Linux specific begin with the
+   name <emphasis>suse</emphasis>. Functions applicable to all linux systems
+   starts with the name <emphasis>base</emphasis>. The following list
+   describes the functions available inside the
+   <filename>images.sh</filename> script.
   </para>
-    <variablelist>
-      <varlistentry>
-       <term><optional>$kiwi_iname</optional></term>
-        <listitem>
-          <para>
-            The name of the image as listed in config.xml
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-       <term><optional>$kiwi_iversion</optional></term>
-        <listitem>
-          <para>
-            The image version string major.minor.release
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-        <term><optional>$kiwi_keytable</optional></term>
-        <listitem>
-          <para>
-            The contents of the keytable setup as done in <filename>config.xml</filename>
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-        <term><optional>$kiwi_language</optional></term>
-        <listitem>
-          <para>
-            The contents of the locale setup as done in <filename>config.xml</filename>
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-        <term><optional>$kiwi_timezone</optional></term>
-        <listitem>
-          <para>
-            The contents of the timezone setup as done in <filename>config.xml</filename>
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-        <term><optional>$kiwi_delete</optional></term>
-        <listitem>
-          <para>
-            A list of all packages which are part of the packages section
-            with <sgmltag class="attribute">type</sgmltag>="<sgmltag 
-              class="attvalue">delete</sgmltag>" in <filename>config.xml</filename>
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-        <term><optional>$kiwi_profiles</optional></term>
-        <listitem>
-          <para>
-            A list of profiles used to build this image
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-        <term><optional>$kiwi_drivers</optional></term>
-        <listitem>
-          <para>
-            A comma separated list of the driver entries as listed in the
-            drivers section of the <filename>config.xml</filename>. 
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-        <term><optional>$kiwi_size</optional></term>
-        <listitem>
-          <para>
-            The predefined size value for this image. This is not the computed
-            size but only the optional size value of the preferences section
-            in <filename>config.xml</filename>
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-        <term><optional>$kiwi_compressed</optional></term>
-        <listitem>
-          <para>
-      The value of the compressed attribute set in the type element 
-      in config.xml
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-        <term><optional>$kiwi_type</optional></term>
-        <listitem>
-          <para>
-            The basic image type. Can be a simply filesystem image type of
-            ext2, ext3, reiserfs, squashfs, and cpio or one of the following complex
-            image types: iso split usb vmx oem xen pxe
-          </para>
-        </listitem>
-      </varlistentry>
-    </variablelist>
-  </refsect1>  
+  <variablelist>
+   <varlistentry>
+    <term><optional>baseCleanMount</optional>
+    </term>
+    <listitem>
+     <para>
+      Umount the system file systems <filename>/proc</filename>,
+      <filename>/dev/pts</filename>, and <filename>/sys</filename>.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional>baseGetProfilesUsed</optional>
+    </term>
+    <listitem>
+     <para>
+      Return the name(s) of profiles used to build this image.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional>baseGetPackagesForDeletion</optional>
+    </term>
+    <listitem>
+     <para>
+      Return the list of packages setup in the packages
+      <sgmltag
+              class="attribute">type</sgmltag>="<sgmltag class="attvalue">delete</sgmltag>"
+      section of the <filename>config.xml</filename> used to build this
+      image.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional>suseGFXBoot {theme} {loadertype}</optional>
+    </term>
+    <listitem>
+     <para>
+      This function requires the gfxboot and at least one bootsplash-theme-*
+      package to be installed to work correctly. The function
+      creates from this package data a graphics boot screen for the isolinux
+      and grub boot loaders. Additionally it creates the bootsplash files
+      for the resolutions 800x600, 1024x768, and 1280x1024
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional>suseStripKernel</optional>
+    </term>
+    <listitem>
+     <para>
+      This function removes all kernel drivers which are not listed in the
+      *drivers sections of the <filename>config.xml</filename> file.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional>suseStripInitrd</optional>
+    </term>
+    <listitem>
+     <para>
+      This function removes a whole bunch of tools binaries and libraries
+      which are not required to boot a suse system with KIWI.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional>Rm {list of files}</optional>
+    </term>
+    <listitem>
+     <para>
+      Helper function to delete files and announce it to log.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional>Rpm {rpm commandline}</optional>
+    </term>
+    <listitem>
+     <para>
+      Helper function to the rpm function and announce it to log.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional>Echo {echo commandline}</optional>
+    </term>
+    <listitem>
+     <para>
+      Helper function to print a message to the controlling terminal.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional>Debug {message}</optional>
+    </term>
+    <listitem>
+     <para>
+      Helper function to print a message if the variable
+      <varname>DEBUG</varname> is set to 1.
+     </para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+ </refsect1>
+ <refsect1 id="kiwi.images.environment">
+  <title>Profile environment variables</title>
+  <para>
+   The .profile environment file contains a specific set of variables which
+   are listed below. Some of the functions above use the variables.
+  </para>
+  <variablelist>
+   <varlistentry>
+    <term><optional>$kiwi_iname</optional>
+    </term>
+    <listitem>
+     <para>
+      The name of the image as listed in config.xml
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional>$kiwi_iversion</optional>
+    </term>
+    <listitem>
+     <para>
+      The image version string major.minor.release
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional>$kiwi_keytable</optional>
+    </term>
+    <listitem>
+     <para>
+      The contents of the keytable setup as done in
+      <filename>config.xml</filename>
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional>$kiwi_language</optional>
+    </term>
+    <listitem>
+     <para>
+      The contents of the locale setup as done in
+      <filename>config.xml</filename>
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional>$kiwi_timezone</optional>
+    </term>
+    <listitem>
+     <para>
+      The contents of the timezone setup as done in
+      <filename>config.xml</filename>
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional>$kiwi_delete</optional>
+    </term>
+    <listitem>
+     <para>
+      A list of all packages which are part of the packages section with
+      <sgmltag class="attribute">type</sgmltag>="<sgmltag
+              class="attvalue">delete</sgmltag>"
+      in <filename>config.xml</filename>
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional>$kiwi_profiles</optional>
+    </term>
+    <listitem>
+     <para>
+      A list of profiles used to build this image
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional>$kiwi_drivers</optional>
+    </term>
+    <listitem>
+     <para>
+      A comma separated list of the driver entries as listed in the drivers
+      section of the <filename>config.xml</filename>.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional>$kiwi_size</optional>
+    </term>
+    <listitem>
+     <para>
+      The predefined size value for this image. This is not the computed
+      size but only the optional size value of the preferences section in
+      <filename>config.xml</filename>
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional>$kiwi_compressed</optional>
+    </term>
+    <listitem>
+     <para>
+      The value of the compressed attribute set in the type element in
+      config.xml
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional>$kiwi_type</optional>
+    </term>
+    <listitem>
+     <para>
+      The basic image type. Can be a simply file system image type of ext2,
+      ext3, reiserfs, squashfs, and cpio or one of the following complex
+      image types: iso split usb vmx oem xen pxe
+     </para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+ </refsect1>
 </refentry>

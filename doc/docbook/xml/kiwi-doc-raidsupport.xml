@@ -1,79 +1,68 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+<!DOCTYPE sect1 PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
                          "http://www.docbook.org/xml/4.5/docbookx.dtd">
-
-<chapter id="chap.raid">
-  <title>KIWI RAID Support</title>
-  <indexterm>
-    <primary>KIWI</primary>
-    <secondary>RAID</secondary>
-  </indexterm>
-  <para>
-   KIWI supports three types of RAID systems:
-  </para>
-  <variablelist>
-    <varlistentry>
-      <term>Real RAID controllers with its own firmware</term>
-      <listitem>
-        <para>
-         KIWI only has to make sure the drivers are part of the
-         initrd e.g cciss for the smart array controllers built
-         into some server boards.
-        </para>
-      </listitem>
-    </varlistentry>
-    <varlistentry>
-      <term>BIOS RAID controllers</term>
-      <listitem>
-        <para>
-         Cheap onboard controller devices with the RAID
-         software inside the BIOS (so called fake RAID).
-         Linux supports some of them with the 'dmraid' utility
-         and the support is a mix of BIOS calls and some
-         device mapper calls.
-        </para>
-        <para>
-         The check for these devices can be switched on
-         and off with &lt;oem-ataraid-scan&gt;true|false&lt;/oem-ataraid-scan&gt;
-        </para>
-      </listitem>
-    </varlistentry>
-    <varlistentry>
-      <term>Linux software RAID</term>
-      <listitem>
-        <para>
-         There is no hardware involved. The Linux kernel
-         can control any storage device by adding RAID
-         capabilities. All the work done by a real hardware
-         controller is done in software. 
-        </para>
-        <para>
-         All this is done using the 'mdadm' utility.
-         The metadata for the devices are stored in RAID
-         blocks on the storage device which requires them
-         to be of the correct partition type.
-        </para>
-      </listitem>
-    </varlistentry>
-  </variablelist>
-  <para>
-   The software RAID is supported in a so called degraded mode.
-   This means the RAID is created but not all devices to build
-   it are attached. That's because an image consists initially
-   out of one disk and not more. The user should add devices or
-   change the RAID mode manually after deployment. This is an
-   easy task if the system comes up prepared for all this. In
-   order to use linux software raid in kiwi images you only have
-   to set:
-  </para>
-  <para>
-   &lt;type ... mdraid="mirroring"&gt;
-  </para>
-  <para>
-   Currently kiwi supports a degraded mirroring (raid:1) or
-   stripping (raid:0) config
-   but you can change the mode to any supported raid level after
-   deployment.
-  </para>
-</chapter>
-
+<sect1 id="chap.raid">
+ <title>KIWI RAID Support</title><indexterm>
+ <primary>KIWI</primary>
+ <secondary>RAID</secondary></indexterm>
+ <para>
+  KIWI supports three types of RAID systems:
+ </para>
+ <variablelist>
+  <varlistentry>
+   <term>Real RAID Controllers with Their Own Firmware</term>
+   <listitem>
+    <para>
+     KIWI only needs to make sure the drivers are part of the initrd e.g cciss
+     for the smart array controllers built into some server boards.
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term>BIOS RAID Controllers</term>
+   <listitem>
+    <para>
+     Cheap onboard controller devices with the RAID software inside the BIOS
+     (so called fake RAID). Linux supports some of them with the 'dmraid'
+     utility and the support is a mix of BIOS calls and some device mapper
+     calls.
+    </para>
+    <para>
+     The check for these devices can be switched on and off with
+     &lt;oem-ataraid-scan&gt;true|false&lt;/oem-ataraid-scan&gt;
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term>Linux Software RAID</term>
+   <listitem>
+    <para>
+     There is no hardware involved. The Linux kernel can control any storage
+     device by adding RAID capabilities. All the work done by a real
+     hardware controller is done in software.
+    </para>
+    <para>
+     All this is done using the 'mdadm' utility. The metadata for the
+     devices are stored in RAID blocks on the storage device which requires
+     them to be of the correct partition type.
+    </para>
+    <para>
+     The software RAID is supported in a so called degraded mode. This means
+     the RAID is created but not all devices to build it are attached. That is
+     because an image initially only consists of a single disk. The user needs
+     to add devices or change the RAID mode manually after deployment. This is
+     an easy task if the system comes up prepared accordingly. To use
+     Linux software raid in KIWI images you only need to set:
+    </para>
+    <para>
+     &lt;type ... mdraid="mirroring"&gt;
+    </para>
+    <para>
+     Currently kiwi supports a degraded mirroring (raid:1) or stripping
+     (raid:0) configuratiom but you can change the mode to any supported raid
+     level after deployment.
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</sect1>

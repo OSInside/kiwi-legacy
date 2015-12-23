@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+                         "http://www.docbook.org/xml/4.5/docbookx.dtd">
+<chapter id="chap.adv_setup">
+ <title>Advanced Configuration</title>
+ <abstract>
+  <para>
+   In this chapter you will learn how to speed up image rebuilds by using
+   images caches. It also deals with setting up images supporting complex
+   storage scenarios such as RAID, LVM and encrypted partitions.
+  </para>
+ </abstract>
+ <xi:include href="kiwi-doc-caches.xml"
+	     xmlns:xi="http://www.w3.org/2001/XInclude"/>
+ <xi:include href="kiwi-doc-raidsupport.xml"
+	     xmlns:xi="http://www.w3.org/2001/XInclude"/>
+ <xi:include href="kiwi-doc-lvmsupport.xml"
+	     xmlns:xi="http://www.w3.org/2001/XInclude"/>
+ <xi:include href="kiwi-doc-lukssupport.xml"
+	     xmlns:xi="http://www.w3.org/2001/XInclude"/>
+</chapter>

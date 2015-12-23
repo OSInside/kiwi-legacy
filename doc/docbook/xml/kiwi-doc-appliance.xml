@@ -1,239 +1,261 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
                          "http://www.docbook.org/xml/4.5/docbookx.dtd">
-
 <chapter id="chap.appliance">
-  <title>Creating Appliances with KIWI</title>
+ <title>Creating Appliances</title>
+ <abstract>
+  <para>
+   With the traditional model of application delivery, applications such as a
+   word processor or an e-mail program are installed by a user or an
+   administrator on individual machines. When deploying the application on
+   multiple machines, this often requires to start the application
+   installation on each machine. Furthermore, in case of machines
+   solely dedicated to a single application or a defined set of applications,
+   it is good practice, to adjust the operating system to optimize resource
+   management and maximize security and performance. When multiple machines
+   are affected, the steps for adjusting the operating system need to be
+   performed on each machine, too.
+  </para>
+  <para>
+   An alternative to the traditional model of application delivery is to
+   provide a so-called <quote>appliance</quote>. An appliance is the
+   combination of the parts of a general purpose OS needed by a given
+   application and the application itself, bundled and delivered as one
+   unit. This unit may be delivered in a variety of formats, for example a
+   ready to run virtual machine or a self-installing system on an optical
+   media or a flash disk.
+  </para>
 
-  <sect1 id="sec.appliance.overview">
-    <title>Overview</title>
-    <indexterm>
-      <primary>KIWI</primary>
-      <secondary>overview</secondary>
-    </indexterm>
-    <para>Traditionally, computing functions such as word processing or
-      e-mail handling are delivered as software applications. These
-      applications are targeted to run on a computer with an installed
-      general purpose operating system. Applications often have a
-      specialized installer that must be run by the consumer (whether home
-      computer user or an administrator in an IT department of a company) to
-      install the application on the computer in question. For installation
-      of an application on multiple computers the installation program must
-      often be run on each computer where the application is to be installed.
-      In most cases a given application uses only a small part of the
-      capabilities provided by the general purpose operating system running
-      on a computer. Additionally if an application needs special settings
-      to be applied to the general purpose operating system, these often
-      have to be set by the consumer after the installation is complete.
-      These settings are often documented in an installation guide that
-      consumers may or may not read. Last but not least, running a general
-      purpose operating system to support an application that only requires
-      a small part of the functionality provided by the general purpose OS
-      is a waste of computing resources.</para>
+  <para>
+   The appliance model has a many advantages. Operating system and
+   application installation are no longer separate steps. The application is
+   installed together with the operating system and the installation does not
+   require manual intervention. The appliance provider can preconfigure the
+   application to be ready-to-run directly after installation. Furthermore,
+   the appliance provider can customize the operating system in terms of
+   performance, resources and security, so it best fits the given
+   appliance.
+  </para>
+ </abstract>
+ <sect1 id="sec.appliance.kiwi-model">
+  <title>The KIWI Model</title><indexterm>
 
-    <para>An appliance is the combination of the parts of a general
-      purpose OS needed by a given application and the application itself,
-      bundled and delivered as one unit. This unit may be delivered in
-      a variety of formats, for example a ready to run virtual machine or
-      a self installing system on optical media or a USB stick.</para>
+  <primary>KIWI</primary>
 
-    <para>Compared to the traditional model of application delivery the
-      appliance model has a number of advantages. The consumer no longer
-      has to install a general purpose OS and the application in separate
-      steps. The application is part of the appliance and the appliance
-      provider, as the application expert, takes care of the application
-      "installation". Further, the appliance provider takes care of any
-      OS tuning that may benefit the application. Last but not least, the
-      reduced size of the OS does not only consume fewer resources than
-      a full blow "regular" install of a general purpose OS, but it also
-      provides a reduced footprint for potential security exposure. From the
-      application providers point of view there may be an opportunity to
-      drop the implementation and maintenance of a specialized installer
-      as the application installation no longer has to be "consumer friendly".
+  <secondary>model</secondary></indexterm>
+
+  <para>
+   KIWI supports building appliances. When building appliances with KIWI the
+   following procedure has proven to work reliably. Nevertheless it is a
+   recommendation only and can be adapted to special needs and environments.
+  </para>
+
+  <procedure id="proc.appliance.general-building">
+   <step>
+    <para>
+     Choose an appropriate image description from the KIWI example templates.
+     They are provided by the packages <package>kiwi-templates</package>,
+     <package>kiwi-desc-vmxboot</package>,
+     <package>kiwi-desc-netboot</package>, and
+     <package>kiwi-desc-oemboot</package>. The templates are installed to
+     <filename class="directory">/usr/share/kiwi/images</filename>.  Add or
+     adapt repositories and/or package names, according to the distribution
+     you want to build an image for.
+    </para>
+   </step>
+   <step>
+    <para>
+     Allow the image to create an in-place git repository to allow tracking
+     non-binary changes. This is done by adding the following line into the
+     <command>config.sh</command> script:
+    </para>
+    <screen>baseSetupPlainTextGITRepository</screen>
+   </step>
+   <step>
+    <para>
+     Set up a testing environment. A physical machine supporting to boot
+     from a flash disk is recommended. All image templates provided by KIWI
+     contain a hybrid iso type setup which is suitable for such a machine.
+    </para>
+   </step>
+   <step>
+    <para>
+     Build the live stick appliance by running
+    </para>
+    <screen>kiwi --build template-name</screen>
+   </step>
+   <step>
+    <para>
+     Transfer the image generated in the previous step to the flash disk. Note
+     that all data on the disk will be erased!
+    </para>
+    <screen>dd if=<replaceable>PATH_TO_ISO_IMAGE</replaceable>
+    of=<replaceable>FLASH_DISK_DEVICE</replaceable> bs=4M</screen>
+   </step>
+   <step>
+    <para>
+     Plug the flash disk into your test machine and boot it from the disk
+     containing the appliance.
+    </para>
+   </step>
+   <step>
+    <para>
+     After your test system has successfully booted the image, log in to your
+     appliance and start to tweak the system according to your needs.  This
+     includes all actions required to configure the appliance as
+     needed. Before you start take care for the following:
+    </para>
+    <substeps>
+     <step>
+      <para>
+       Create an initial package list. This can be done by calling:
       </para>
-
-    <para>The traditional software delivery model certainly has it's place.
-      However, for many purposes appliances present a more convenient
-      mechanism for consumers.</para>
-  </sect1>
-
-  <sect1 id="sec.appliance.kiwi-model">
-    <title>The KIWI Model</title>
-    <indexterm>
-      <primary>KIWI</primary>
-      <secondary>model</secondary>
-    </indexterm>
-    <para> With KIWI we started to use a different model. Instead of
-      installing firewall software on top of a general purpose
-      computer/operating system, the designers/engineers built images
-      that are designed specifically for the task. These are so called
-      appliances. When building appliances with KIWI the following
-      proceeding has proven to work reliably. Nevertheless the following
-      is just a recommendation and can be adapted to special needs and
-      environments. </para>
-
-    <procedure id="proc.appliance.general-building">
-      <step>
-        <para>Choose an appropriate image description
-          template from the provided KIWI examples. Add or adapt
-          repositories, package names or both, according to the distribution
-          you want to build an image for.</para>
-      </step>
-      <step>
-        <para>Allow the image to create an in-place git repository to
-          allow tracking of non-binary changes. This is done by adding
-          the following line into your <command>config.sh</command> script:</para>
-        <screen>baseSetupPlainTextGITRepository</screen>
-      </step>
-      <step>
-        <para>Decide for a testing environment. In my opinion a real
-          hardware based test machine which allows to boot from USB is a
-          good and fast approach. All template images provided by us
-          contains an hybrid iso type setup which is suitable for this
-          environment.
+      <screen>rpm -qa | sort &gt; /tmp/deployPackages</screen>
+     </step>
+     <step>
+      <para>
+       Check the output of the command <command>git</command>
+       <option>status</option> and add all files matching the following
+       criteria to <filename>/.gitignore</filename>:
+      </para>
+      <itemizedlist>
+       <listitem>
+        <para>
+         the file is not yet part of the repository
         </para>
-      </step>
-      <step>
-        <para>Build the live stick appliance by calling
-          <screen><command>kiwi</command><option>--build template-name</option></screen>
-          After successful creation of the
-          image files find an USB stick which is able to store your
-          appliance and plug it into a free USB port on your image build
-          machine. The deployment of the generated hybrid iso file can be
-          performed from any
-          OS including Windows as long as a tool to dump data onto a disk
-          device exists and is used.
+       </listitem>
+       <listitem>
+        <para>
+         you do not plan to change the file
         </para>
-      </step>
-      <step>
-        <para>Plug in the stick on your test machine and boot it.
+       </listitem>
+       <listitem>
+        <para>
+         the file will not be included by one of the image description overlay
+         files
         </para>
-      </step>
-      <step>
-        <para>After your test system has successfully booted from stick
-          login into your appliance and start to tweak the system
-          according to your needs. This includes all actions required to
-          make the appliance work as you wish. Before you start take
-          care for the following: </para>
+       </listitem>
+      </itemizedlist>
+     </step>
+    </substeps>
+    <para>
+     When the initial package list exist and the git repository is set up,
+     you can start to configure the system.
+    </para>
 
-        <itemizedlist>
-          <listitem>
-            <para>Create an initial package list. This can be done by
-              calling: </para>
-            <screen><command>rpm</command> -qa | <command>sort</command> &gt; /tmp/deployPackages</screen>
-          </listitem>
-          <listitem>
-            <para>Check the output of the command <command>git</command> <option>status</option> and include
-              everything which is unknown to git and surely will not be
-              changed by you and will not become part of the image
-              description overlay files to the <filename>/.gitignore</filename> files </para>
-          </listitem>
-        </itemizedlist>
+    <important>
+     <title>Installing Additional Software</title>
+     <para>
+      Do not add additional software by installing a package being part of
+      a repository not listed in <filename>configuration.xml</filename> or by
+      compiling it from the sources. It is very hard to find out what binary
+      files have been installed that way and it is also not architecture-safe.
+     </para>
+     <para>
+      If there is really no other way for the software to become part of the
+      image, you should address this issue directly in your image description
+      and the <command>config.sh</command> script, but not after the initial
+      deployment has happened.
+     </para>
+    </important>
+   </step>
+   <step>
+    <para>
+     As soon as the appliance on your test system works as expected it is
+     ready to enter the final stage. At this point you have done several
+     changes to the system which are tracked by the git repository and the
+     package list. To include them into your image description, use the
+     following process:
+    </para>
+    <substeps>
+     <step>
+      <para>
+       Check the differences between the currently installed packages and
+       the initial deployment list. This can be done by running:
+      </para>
+      <screen>rpm -qa | sort &gt; /tmp/appliancePackages
+diff -u /tmp/deployPackages /tmp/appliancePackages</screen>
+      <para>
+       Add all packages labeled with <literal>(&plus;)</literal> to the
+       <sgmltag class="starttag">packages type="image"</sgmltag> section of
+       your config.xml file and remove packages labeled with
+       <literal>(&minus;)</literal>.
+      </para>
+      <para>
+       In case you want to keep packages that have been automatically removed
+       by the package manager, make sure you address these packages in the
+       <filename>config.sh</filename> script. If you have installed packages
+       from repositories which are not yet configured in
+       <filename>config.xml</filename>, add them to allow KIWI to
+       install the packages.
+      </para>
+     </step>
+     <step>
+      <para>
+       Check the differences made in the configuration files by running:
+      </para>
+      <screen>git diff &gt;/tmp/appliancePatch</screen>
+      <para>
+       The patch created with this command
+       (<filename>/tmp/appliancePatch</filename>) should become part of your
+       image description. To make sure it is applied when preparing the image,
+       add the following line to <command>config.sh</command>:
+      </para>
+      <screen><command>patch</command> -p0 &lt; appliancePatch</screen>
+     </step>
+     <step>
+      <para>
+       Check for new non binary files that have been added. This can be done
+       by calling:
+      </para>
+      <screen><command>git</command> status</screen>
+      <para>
+       All files not yet tracked, will be listed under <literal>Untracked
+       files</literal>. Make sure to add all files from this list
+       <emphasis>which are not created automatically</emphasis> to your image
+       description. To do this, clone (copy) these files with regards to the
+       file system structure as overlay files in your image description
+       <filename class="directory">root/</filename> directory.
+      </para>
+     </step>
+    </substeps>
+   </step>
+   <step>
+    <para>
+     All customization work you did within your appliance is now stored in the
+     image description. The image description you created can be re-used
+     for all image types supported by KIWI.
+    </para>
+   </step>
+  </procedure>
 
-        <para>After the initial package list exists and the git
-          repository is clean you can start to configure the system. You
-          never should install additional software just by installing an
-          unmanaged archive or build and install from source. It’s very
-          hard to find out what binary files had been installed and it’s
-          also not architecture safe. If there is really no other way
-          for the software to become part of the image you should
-          address this issue directly in your image description and the
-            <command>config.sh</command> script but not after the
-          initial deployment has happened. </para>
-      </step>
-      <step>
-        <para>As soon as your system works as expected your new
-          appliance is ready to enter the final stage. At this point you
-          have done several changes to the system but they are all
-          tracked and should now become part of your image description.
-          To include the changes into your image description the
-          following process should be used: </para>
+  <para>
+   To make sure the appliance works as expected prepare a new image tree and
+   create an image from the new tree. You may optionally disable the creation
+   of the git repository within this new image tree to save disk space. If
+   this appliance is a server, you should keep it, because it allows you to
+   keep track of changes during the live time of this appliance.
+  </para>
+  <important>
+   <title>Cross Platform Appliance Building</title><indexterm>
+   <primary>KIWI</primary>
+   <secondary>cross-platform</secondary></indexterm>
 
-        <itemizedlist>
-          <listitem>
-            <para>Check the differences between the currently installed
-              packages and the initial deployment list. This can be done
-              by calling:</para>
-
-            <screen><command>rpm</command> -qa | <command>sort</command> &gt; /tmp/appliancePackages
-<command>diff</command> -u /tmp/deployPackages /tmp/appliancePackages</screen>
-
-            <para>Add those packages which are labeled with (&plus;) to the
-                <sgmltag class="starttag">packages
-                type="image"</sgmltag> section of your config.xml file
-              and remove those packages which has been removed (&minus;)
-              appropriately. If there are packages which has been
-              removed against the will of the package manager make sure
-              you address the uninstallation of these packages in your
-                <command>config.sh</command> script. If you have
-              installed packages from repositories which are not part of
-              your <filename>config.xml</filename> file you should also
-              add these repositories in order to allow KIWI to install
-              the packages </para>
-          </listitem>
-
-          <listitem>
-            <para>Check the differences made in the configuration files.
-              This can be easily done by calling: </para>
-            <screen><command>git</command> diff >/tmp/appliancePatch</screen>
-            <para>The created patch should become part of your image
-              description and you should make sure the patch is applied
-              when preparing the image. According to this the command: </para>
-            <screen><command>patch</command> -p0 &lt; appliancePatch</screen>
-            <para>needs to be added as part of your
-                <command>config.sh</command> script. </para>
-          </listitem>
-          <listitem>
-            <para>Check for new non binary files added. This can be done
-              by calling: </para>
-            <screen><command>git</command> status</screen>
-            <para>All files not under version control so far will be
-              listed by the command above. Check the contents of this
-              list make sure to add all files which are not created
-              automatically to become part of your image description. To
-              do this simply clone (copy) these files with respect to
-              the filesystem structure as overlay files in your image
-              description <filename class="directory">root/</filename>
-              directory. </para>
-          </listitem>
-        </itemizedlist>
-      </step>
-      <step>
-        <para> All your valuable work is now stored in one image
-          description and can be re-used in all KIWI supported image
-          types. </para>
-      </step>
-    </procedure>
-
-    <para>Congratulation! To make sure the appliance works as expected
-      prepare a new image tree and create an image from the new tree. If
-      you like you can deactivate the creation of the git repository
-      which will save you some space on the filesystem. If this
-      appliance is a server I recommend to leave the repository because
-      it allows you to keep track of changes during the live time of
-      this appliance. </para>
-
-  </sect1>
-
-  <sect1 id="sec.appliance.crossplatform">
-    <title>Cross Platform Appliance Build</title>
-    <indexterm>
-      <primary>KIWI</primary>
-      <secondary>cross-platform</secondary>
-    </indexterm>
-    <para>Building appliances for one processor architecture on another
-      processor architecture is in general not possible with KIWI. The
-      exception is that it is possible to build 32 bit (ix86) appliances on a
-      64 bit system running on the x86-64 architecture. This cross-platform
-      limitation is based on the requirement that KIWI be able to execute
-      installed software inside the unpacked image tree. If the software
-      installed inside the unpacked image tree does not run on the
-      architecture of the build platform then KIWI cannot build the
-      appliance.</para>
-
-    <para>While KIWI has the <option>--target-arch</option> command line
-      argument to instruct the package manager <emphasis>zypper</emphasis>
-      to install packages for the specified architecture, this option
-      is not intended to support cross-platform appliance builds.</para>
-   </sect1>
+   <para>
+    Building appliances for a specific processor architecture on a different
+    processor architecture is in generally <emphasis>not</emphasis> possible
+    with KIWI. This limitation is based on the requirement that KIWI needs to
+    be able to execute installed software inside the unpacked image tree. If
+    the software installed inside the unpacked image tree does not run on the
+    architecture of the build platform then KIWI cannot build the
+    appliance. The only exception is building 32-bit x86 appliances on a
+    64-bit x86-64 architecture.
+   </para>
+   <para>
+    KIWI's option <option>--target-arch</option> is not intended to support
+    cross-platform appliance builds. It rather tells the package manager to
+    install packages for the specified architecture.
+   </para>
+  </important>
+ </sect1>
 </chapter>

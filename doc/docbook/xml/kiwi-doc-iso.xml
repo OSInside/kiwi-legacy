@@ -1,241 +1,330 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
-                         "http://www.docbook.org/xml/4.5/docbookx.dtd">
+                         "http://www.docbook.org/xml/4.5/docbookx.dtd"
+[
+  <!ENTITY % entities SYSTEM "entity-decl.ent">
+  %entities;
+]>
 
 <chapter id="chap.iso">
-  <title>ISO Image / Live System</title>
-  <indexterm>
-    <primary>KIWI</primary>
-    <secondary>ISO image</secondary>
-  </indexterm>
-  <indexterm>
-    <primary>images</primary>
-    <secondary>ISO</secondary>
-  </indexterm>
-  <indexterm>
-    <primary>ISO images</primary>
-  </indexterm>
-  <para>A live system image is an operating System on CD or DVD. In
-    principle one can treat the CD/DVD as the hard disk of the system
-    with the restriction that you can’t write data on it. So as soon as
-    the media is plugged into the computer, the machine is able to boot
-    from that media. After some time one can login to the system and
-    work with it like on any other system. By default All write actions
-    takes place in RAM space and therefore all changes will be lost
-    as soon as the computer shuts down.</para>
+ <title>ISO Image / Live System</title><indexterm>
+ <primary>KIWI</primary>
+ <secondary>ISO image</secondary></indexterm><indexterm>
+ <primary>images</primary>
+ <secondary>ISO</secondary></indexterm><indexterm>
+ <primary>ISO images</primary></indexterm>
+ <abstract>
+  <para>
+   A live system image is an operating System on CD, DVD or removable USB
+   storage. It can bee booted directly from the media. A CD/DVD live system is
+   read-only&mdash;all changes to the system are done in RAM will be lost as
+   soon as the computer shuts down. A removable USB storage can optionally be
+   set up with an additional partition (hybrid ISO image) which can be used for
+   writing data.
+  </para>
+ </abstract>
 
-  <sect1 id="sec.iso.building">
-    <title>Building a live JeOS</title>
+ <tip>
+  <title>ISO Image Description Templates</title>
+  <para>
+   &template_intro;
+  </para>
+  <para>
+   ISO image templates are shipped with the package
+   <package>kiwi-desc-isoboot</package>. They are installed to
+   <filename>/usr/share/kiwi/image/isoboot</filename>.
+  </para>
+ </tip>
 
-    <para>This example is based on SLES version 12.</para>
+ &jeos_tip;
 
-<screen><command>kiwi</command> --build suse-SLE12-JeOS -d /tmp/myiso-result --type iso</screen>
-  </sect1>
-
-  <sect1 id="sec.iso.using">
-    <title>Using the Image</title>
-    <para>There are two ways to use the generated ISO image: </para>
-
-    <itemizedlist>
-      <listitem>
-        <para>Burn the <filename class="extension">.iso</filename> file
-          on a CD or DVD with your preferred burn program. Plug in the
-          CD or DVD into a test computer and (re)boot the machine. Make
-          sure the computer boot from the CD drive as first boot device.
-        </para>
-      </listitem>
-      <listitem>
-        <para>Use a virtualization system to test the image directly.
-          Testing an iso can be done with any full virtual system for
-          example:</para>
-<screen><command>qemu</command> -cdrom /tmp/myiso-result/LimeJeOS-SLE12.x86_64-1.13.1.iso</screen>
-      </listitem>
-    </itemizedlist>
-  </sect1>
-
-  <sect1 id="sec.iso.flavours">
-    <title>Flavours</title>
+ <sect1 id="sec.iso.cd">
+  <title>Building Live CD/DVD Images</title>
+  <para>
+   The following example shows how to build a Just enough Operating
+   System (JeOS) based on SUSE Linux Enterprise 12:
+  </para>
+  <screen>kiwi --build suse-SLE12-JeOS -d /tmp/myiso-result --type iso</screen>
+  <para>
+   There are two possibilities to use the ISO image generated above:
+  </para>
+  <orderedlist>
+   <listitem>
     <para>
-    KIWI supports different filesystems and boot methods along
-    with the ISO image type. The provided example by default uses an
-    <systemitem class="filesystem">overlayfs</systemitem> based compressed
-    root filesystem. overlayfs allows to combine two filesystems into
-    one. The root filesystem exists as compressed squashfs filesystem
-    and all write operations are redirected in RAM or in a persistent
-    area on a disk. The result is a full writable live-system.
-
-    The flags attribute in <filename>config.xml</filename> exists to be
-    able to have the following alternative solutions:
+     Burn the <filename class="extension">.iso</filename> file on a CD or
+     DVD with your preferred burn program. Plug in the CD or DVD into a test
+     computer and (re)boot the machine. Make sure the computer boots from the
+     CD drive as first boot device.
     </para>
-    <variablelist>
-      <varlistentry>
-        <term><sgmltag class="attribute">flags</sgmltag>="<sgmltag
-            class="attvalue">compressed</sgmltag>"</term>
-        <listitem>
-          <para> Does filesystem compression with squashfs, but don’t
-            use an overlay filesystem for write support. A symbolic link
-            list is used instead and thus a split element is required in
-            <filename>config.xml</filename>. See the split mode
-            section below for details. </para>
-        </listitem>
-      </varlistentry>
+   </listitem>
+   <listitem>
+    <para>
+     Use a virtualization system to test the image directly. Testing an ISO
+     image can be done with any full virtual system for example
+     <literal>QEMU</literal>:
+    </para>
+    <screen>qemu -cdrom /tmp/myiso-result/LimeJeOS-SLE12.x86_64-1.13.1.iso</screen>
+   </listitem>
+  </orderedlist>
+  <para>
+   KIWI supports different flavors of file systems and boot methods along with
+   the ISO image type. The template <literal>suse-SLE12-JeOS</literal> from
+   the example above, uses an <systemitem
+   class="filesystem">overlayfs</systemitem>-based compressed root
+   file system. Set the file system type with the <sgmltag
+   class="attribute">flags</sgmltag> attribute in
+   <filename>config.xml</filename>:
+  </para>
+  <screen>&lt;image ...&gt;
+  &lt;preferences&gt;
+    &lt;type image="iso" flags="<replaceable>FSTYPE</replaceable>" .../&gt;
+    ...
+  &lt;/preferences
+  ...
+&lt;/image&gt;</screen>
+  <para>
+   The following values can be set for <replaceable>FSTYPE</replaceable>:
+  </para>
+  <informaltable>
+   <tgroup cols="2">
+    <colspec colnum="1" colname="1" colwidth="20*"/>
+    <colspec colnum="2" colname="2" colwidth="80*"/>
+    <thead>
+     <row>
+      <entry><para>Value</para></entry>
+      <entry><para>Description</para></entry>
+     </row>
+    </thead>
+    <tbody>
+     <row>
+      <entry>
+       <para>
+        <sgmltag class="attvalue">compressed</sgmltag>
+       </para>
+      </entry>
+      <entry>
+       <para>
+        Does file system compression with squashfs, but does not use an
+        overlay file system for write support. A symbolic link list is used
+        instead and thus a <sgmltag class="element">split</sgmltag> element is
+        required in <filename>config.xml</filename>. See <xref
+        linkend="sec.iso.split-mode"/> for details.
+       </para>
+      </entry>
+     </row>
+     <row>
+      <entry>
+       <para>
+        <sgmltag class="attvalue">overlay</sgmltag>
+       </para>
+      </entry>
+      <entry>
+       <para>
+        <systemitem class="filesystem">overlayfs</systemitem> allows to
+        combine two file systems into one. The root file system exists as a
+        compressed <systemitem class="filesystem">squashfs</systemitem> file
+        system and all write operations are redirected to the RAM or to a
+        persistent area on a disk. The result is a fully writable
+        live-system.
+       </para>
+      </entry>
+     </row>
+     <row>
+      <entry>
+       <para>
+        <sgmltag class="attvalue">seed</sgmltag>
+       </para>
+      </entry>
+      <entry>
+       <para>
+        Creates a <systemitem class="filesystem">Btrfs</systemitem> image and
+        allows write operations into a cow (seed) file. In case of an ISO
+        image the seed device is created on a RAM disk.
+       </para>
+      </entry>
+     </row>
+     <row>
+      <entry><para><emphasis>unset</emphasis></para></entry>
+      <entry>
+       <para>
+        If the <sgmltag class="attribute">flags</sgmltag> attribute is not
+        set, no compressed nor overlay file system will be used. The root tree
+        will be directly part of the ISO file system and the paths:
+        <filename>/bin</filename>, <filename>/boot</filename>,
+        <filename>/lib</filename>, <filename>/lib64</filename>,
+        <filename>/opt</filename>, <filename>/sbin</filename>, and
+        <filename>/usr</filename> will be read-only.
+       </para>
+      </entry>
+     </row>
+    </tbody>
+   </tgroup>
+  </informaltable>
 
-      <varlistentry>
-        <term><sgmltag class="attribute">flags</sgmltag>="<sgmltag
-            class="attvalue">seed</sgmltag>"</term>
-        <listitem>
-          <para> Creates a <systemitem class="filesystem"
-              >btrfs</systemitem> image and allows write operations
-            into a cow (seed) file. In case of an ISO the seed device is created
-            on a ramdisk.</para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-        <term>Flags Not Set</term>
-        <listitem>
-          <para>If no <sgmltag class="attribute">flags</sgmltag>
-            attribute is set no compressed filesystem, no overlay
-            filesystem will be used. The root tree will be directly part
-            of the ISO filesystem and the paths:
-              <filename>/bin</filename>, <filename>/boot</filename>,
-              <filename>/lib</filename>, <filename>/lib64</filename>,
-              <filename>/opt</filename>, <filename>/sbin</filename>, and
-              <filename>/usr</filename> will be read-only. </para>
-        </listitem>
-      </varlistentry>
-    </variablelist>
-
-    <sect2 id="sec.iso.split-mode">
-      <title>Split mode</title>
-      <indexterm>
-        <primary>KIWI</primary>
-        <secondary>split mode</secondary>
-      </indexterm>
-      <indexterm>
-        <primary>KIWI</primary>
-        <secondary>overlay filesystem</secondary>
-      </indexterm>
-      <para>If no overlay filesystem is in use but the image filesystem
-        is based on a compressed filesystem KIWI allows to setup which
-        files and directories should be writable in a so called split
-        section. In order to allow to login into the system, at least
-        the <filename class="directory">/var</filename> directory should
-        be writable. This is because the PAM authentication requires
-        to be able to report any login attempt to
-          <filename>/var/log/messages</filename> which therefore needs
-        to be writable. The following split section can be used if the
-        flag compressed is used: </para>
-
-<screen>&lt;split&gt; 
-  &lt;persistent&gt; 
-     &lt;file name="/var"/&gt;
-     &lt;file name="/var/*"/&gt; 
-     &lt;file name="/boot"/&gt; 
-     &lt;file name="/boot/*"/&gt; 
-     &lt;file name="/etc"/&gt; 
-     &lt;file name="/etc/*"/&gt; 
-     &lt;file name="/home"/&gt; 
-     &lt;file name="/home/*"/&gt;
-     &lt;file name="/tmp"/&gt;
-     &lt;file name="/tmp/*"/&gt;
-  &lt;/persistent&gt; 
-&lt;/split&gt;</screen>
-
-    </sect2>
+  <sect2 id="sec.iso.split-mode">
+   <title>Split mode</title><indexterm>
+   <primary>KIWI</primary>
+   <secondary>split mode</secondary></indexterm><indexterm>
+   <primary>KIWI</primary>
+   <secondary>overlay file system</secondary></indexterm>
+   <para>
+    If no overlay file system is in use but the image file system is based on
+    a compressed file system, KIWI allows toc onfigure which files and
+    directories should be writable in a so-called split section. To allow
+    login in to the system, at least the <filename
+    class="directory">/var</filename> directory needs to be writable. This is
+    because the PAM authentication requires to be able to report any login
+    attempt to <filename>/var/log/messages</filename> which therefore needs to
+    be writable. The following example ensures that <filename
+    class="directory">/boot</filename>, <filename
+    class="directory">/etc</filename>, <filename
+    class="directory">/home</filename>, and <filename
+    class="directory">/var</filename> are writable:
+   </para>
+   <screen>&lt;image ...&gt;
+  ...
+  &lt;preferences&gt;
+    &lt;type image="iso" flags="compressed" .../&gt;
+    &lt;split&gt;
+      &lt;persistent&gt;
+        &lt;file name="/var"/&gt;
+        &lt;file name="/var/*"/&gt;
+        &lt;file name="/boot"/&gt;
+        &lt;file name="/boot/*"/&gt;
+        &lt;file name="/etc"/&gt;
+        &lt;file name="/etc/*"/&gt;
+        &lt;file name="/home"/&gt;
+        &lt;file name="/home/*"/&gt;
+        &lt;file name="/tmp"/&gt;
+        &lt;file name="/tmp/*"/&gt;
+      &lt;/persistent&gt;
+    &lt;/split&gt;
+    ...
+  &lt;/type&gt;
+&lt;/image&gt;</screen>
+  </sect2>
 
   <sect2 id="sec.iso.hybrid-mode">
-    <title>Hybrid mode</title>
-    <indexterm>
-      <primary>KIWI</primary>
-      <secondary>hybrid mode</secondary>
-    </indexterm>
-    <indexterm>
-      <primary>KIWI</primary>
-      <secondary>USB sticks</secondary>
-    </indexterm>
-    <para>
-      A hybrid image is a iso image including a partition table and can
-      therefore be attached as a CD/DVD <emphasis>and</emphasis> as a
-      normal disk to the system. This has the advantage that a hybrid
-      iso live system can be burned to a CD/DVD as well as uploaded to
-      a USB stick. In order to activate the hybrid feature the hybrid
-      flag must be set to true as indicated below. 
-    </para>
-
-<screen>&lt;type image="iso" ... hybrid="true"/&gt;</screen>    
+   <title>Hybrid mode</title><indexterm>
+   <primary>KIWI</primary>
+   <secondary>hybrid mode</secondary></indexterm><indexterm>
+   <primary>KIWI</primary>
+   <secondary>USB sticks</secondary></indexterm>
+   <para>
+    A hybrid image is an ISO image including a partition table.  therefore it
+    cab be attached as a CD/DVD <emphasis>and</emphasis> as a normal disk to
+    the system. This has the advantage that a hybrid ISO live system can be
+    burned to a CD/DVD and uploaded to a flash disk. To activate the hybrid
+    feature the <sgmltag class="attribute">hybrid</sgmltag> attribute must be
+    set to <sgmltag class="attvalue">true</sgmltag> as follows:
+   </para>
+   <screen>&lt;image ...&gt;
+  &lt;preferences&gt;
+    &lt;type image="iso" hybrid="true" .../&gt;
+    ...
+  &lt;/preferences
+  ...
+&lt;/image&gt;</screen>
   </sect2>
-  </sect1>
+ </sect1>
+ <sect1 id="sec.iso.usb">
+  <title>Building Live Images for Removable USB Devices</title><indexterm>
 
-  <sect1>
-  <title>USB stick images</title>
-  <indexterm>
-    <primary>KIWI</primary>
-    <secondary>USB</secondary>
-  </indexterm>
+  <primary>KIWI</primary>
+
+  <secondary>USB</secondary></indexterm>
+
   <para>
-    kiwi supports two types of USB stick images. The first type which
-    are the hybrid ISO images and basically the same as the live ISO images
-    and the second type which are the OEM virtual disk images.
-    The deployment of both types can be performed from any OS including
-    Windows as long as a tool to dump data onto a disk device exists
-    and is used.
+   KIWI supports two types of images for removable USB devices. Hybrid ISO
+   images are the same as the live CD/DVD images. The second type are OEM
+   virtual disk images. The deployment of both types can be performed from any
+   OS including Windows as long as a tool to dump data onto a disk device
+   exists and is used.
   </para>
 
-  <sect2>
-    <title>ISO Hybrid stick</title>
-    <indexterm>
-      <primary>KIWI</primary>
-      <secondary>Hybrid stick</secondary>
-    </indexterm>
+  <sect2 id="sec.iso.usb.hybrid">
+   <title>Hybrid ISO Image</title><indexterm>
+   <primary>KIWI</primary>
+   <secondary>Hybrid stick</secondary></indexterm>
+   <para>
+    As indicated above a hybrid ISO image also works as an image for removable
+    USB devices. If a hybrid ISO image is used like a disk image on a writable
+    medium like a flash disk, it is possible to write into a persistent area
+    on the stick instead of the RAM. KIWI creates an additional Ext2 partition
+    for this purpose if the attribute <sgmltag
+    class="attribute">hybridpersistent</sgmltag> is set to <sgmltag
+    class="attvalue">true</sgmltag>.
+   </para>
+<screen>&lt;image ...&gt;
+  &lt;preferences&gt;
+    &lt;type image="iso" hybrid="true" .../&gt;
+    ...
+  &lt;/preferences
+  ...
+&lt;/image&gt;&lt;</screen>
+  </sect2>
+
+  <sect2 id="sec.iso.tmpfs">
+   <title>In RAM ISO Image</title><indexterm>
+   <primary>KIWI</primary>
+   <secondary>ram only system</secondary></indexterm>
+   <para>
+    Any live CD iso image supports the <replaceable>toram</replaceable> mode.
+    In this mode the contents on the ISO are copied into a tmpfs on the
+    system.  In the standard live image mode the ISO is only mounted to the
+    system.  Reading the data from a tmpfs is however much faster than reading
+    the data from CD/DVD drive or flash disk. An additional benefit of the
+    toram mode is the ability to disconnect the CD/DVD drive or USB slot the
+    live system originally existed. However the costs for the performance win
+    are a slower initial start-up time and more RAM requirements. A minimum
+    2GB of RAM is recommended to boot 700M compressed live image. To activate
+    the toram mode place the following option at the boot prompt when the
+    system starts up.
+   </para>
+<screen>toram</screen>
+  </sect2>
+
+  <sect2 id="sec.iso.usb.oem">
+   <title>OEM Virtual Disk Image</title><indexterm>
+   <primary>KIWI</primary>
+   <secondary>OEM stick</secondary></indexterm>
+   <para>
+    In contrast to the hybrid ISO image it is also possible to create an OEM
+    virtual disk image. This image type allows to create the
+    live operating system plus a data partition for custom data. The data
+    partition is a fat partition also recognized by Windows. To create such a
+    partition use the option <option>--fat-storage
+    <replaceable>size-in-MB</replaceable></option> on the KIWI command line:
+   </para>
+   <screen>kiwi --create ... --fat-storage 500</screen>
+   <para>
+    If this option is set, KIWI will use the syslinux boot loader for the
+    image and for the first FAT partition with the specified size. The live
+    operating system itself will be hosted on a logical volume (LVM), which
+    allows to easily manipulate the logical root volume. For further
+    information about the OEM image type refer <xref linkend="chap.oem"/>.
+   </para>
+   <sect3 id="sec.iso.usb.oem.ro">
+    <title>OEM compressed / Read-only removable USB Media</title><indexterm>
+    <primary>KIWI</primary>
+    <secondary>compressed root</secondary></indexterm>
     <para>
-      As indicated above a hybrid iso image also works as USB stick image.
-      If a hybrid iso is used like a disk image on a writable medium
-      like a USB stick it's possible to write into a persistent area on
-      the stick instead of the RAM. kiwi will create an additional ext2
-      partition to store that information on the disk if the attribute
-      hybridpersistent is set to true.
+     If a compressed file system type like <systemitem class="filesystem">overlayfs</systemitem> is used for the image
+     root directory,  it is also possible to choose whether to write on a
+     partition or to the RAM. KIWI provides the attribute <sgmltag
+     class="attribute">ramonly</sgmltag> for this purpose. To create a
+     read-only image with compressed
+     root file system for a removable USB medium the following configuration
+     is required:
     </para>
-
-<screen>&lt;type image="iso" ... hybridpersistent="true"/&gt;</screen>
+    <screen>&lt;image ...&gt;
+  &lt;preferences&gt;
+    &lt;type image="iso" file system="overlayfs" ramonly="true" .../&gt;
+    ...
+  &lt;/preferences
+  ...
+&lt;/image&gt;</screen>
+   </sect3>
   </sect2>
-  <sect2>
-    <title>OEM USB stick</title>
-    <indexterm>
-      <primary>KIWI</primary>
-      <secondary>OEM stick</secondary>
-    </indexterm>
-    <para> In contrast to the hybrid iso image it's also possible to
-        create a oem virtual disk image which is dumped on the stick.
-        The big advantage with this approach is, that it's possible to
-        create a stick which contains a live OS but also a data
-        partition for custom data. The data partition is a fat partition
-        also recognized by the Windows operating system. In order to
-        create such a Windows friendly stick one has to pass the option
-          <option>--fat-storage &lt;size-in-MB&gt;</option>.</para>
-        <screen><command>kiwi</command> --create ... --fat-storage 500</screen>
-        <para>If this option is set kiwi will use the syslinux bootloader for
-        the image as well as the first partition as fat partition of the
-        specified size. The live OS itself will live in a LVM which
-        allows easy manipulation of the logical root volume. For further
-        information about the OEM image type please refer to the OEM
-        chapter <xref linkend="chap.oem"/>
-      </para>
-    <sect3>
-      <title>OEM compressed / readonly USB stick</title>
-      <indexterm>
-        <primary>KIWI</primary>
-        <secondary>compressed root</secondary>
-      </indexterm>
-    <para> If a compressed filesystem type like overlayfs is used for the
-          image root directory it's also possible to allow persistent
-          writing on the USB stick or alternatively disallow that and
-          let all write actions perfom in RAM only. kiwi provides the
-          type attribute ramonly for this purpose. So in order to create
-          a read-only oem stick with compressed root filesystem the
-          following type section is required:</para>
-          <screen>&lt;type image="oem" filesystem="overlayfs" ramonly="true"/&gt;</screen>
-    </sect3>
-  </sect2>
-  </sect1>
-
+ </sect1>
 </chapter>

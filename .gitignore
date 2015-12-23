@@ -2,6 +2,8 @@
 *.ts
 tests/.timestamps
 # emacs backup files
+\#*#
+.#*
 *~
 # localization files
 *.mo
@@ -14,3 +16,7 @@ tests/.timestamps
 .revision
 # d3 css data packed into a tarball
 metadata/KIWIAnalyse.tgz
+# doc build specific stuff
+doc/docbook/build/
+# emacs schema definition
+doc/docbook/xml/schemas.xml

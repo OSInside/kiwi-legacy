@@ -1,407 +1,447 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
                          "http://www.docbook.org/xml/4.5/docbookx.dtd">
-
 <chapter id="chap.workflow">
-  <title>Basic Workflow</title>
-  <indexterm>
-    <primary>KIWI</primary>
-    <secondary>Workflow</secondary>
-  </indexterm>
-  
-  <sect1 id="sec.workflow.introduction">
-    <title>Introduction</title>
-    <para>KIWI creates images in a two step process, as mentioned previously.
-    The first step, the <emphasis>prepare</emphasis> operation, generates a
-    so called <emphasis>unpacked image</emphasis> tree (directory) using
-    the information provided in the <filename>config.xml</filename>
-    configuration file. The <filename>config.xml</filename> file is part of the
-    <emphasis>configuration directory (tree)</emphasis> that describes the
-    image to be created by KIWI. The second step, the
-    <emphasis>create</emphasis> operation, creates the
-    <emphasis>packed image</emphasis> or <emphasis>image</emphasis> in the
-    specified format based on the unpacked image and the information
-    provided in the <filename>config.xml</filename> stored inside of the
-    unpacked image below the <filename>image/</filename> directory.
-    </para>
+ <title>Basic Workflow</title><indexterm>
+ <primary>KIWI</primary>
+ <secondary>Workflow</secondary></indexterm>
+ <abstract>
+  <para>
+   Installation of a Linux system generally occurs by booting the target
+   system from an installation source such as an installation CD/DVD, a live
+   CD/DVD, or a network boot environment (PXE). The installation process is
+   often driven by an installer that interacts with the user to collect
+   information about the installation. This information generally includes the
+   <emphasis>software to be installed</emphasis>, the
+   <emphasis>timezone</emphasis>, system <emphasis>user</emphasis> data, and
+   other information. Once all the information is collected, the installer
+   installs the software onto the target system using packages from the
+   software sources (repositories) available. After the installation is
+   complete the system usually reboots and enters a configuration procedure
+   upon start-up. The configuration may be fully automatic or it may include
+   user interaction.
+  </para>
+ </abstract>
+ <para>
+  A system image (usually called <quote>image</quote>), is a
+  <emphasis>complete installation</emphasis> of a Linux system within a
+  file. The image represents an operational system and&mdash;optionally
+  contains the <quote>final</quote> configuration.
+ </para>
+ <para>
+  The behavior of the image upon deployment varies depending on the image type
+  and the image configuration since KIWI allows you to completely customize
+  the initial start-up behavior of the image. Among others, this includes
+  images that
+ </para>
+ <itemizedlist>
+  <listitem>
+   <para>
+    can be deployed inside an existing virtual environment without requiring
+    configuration at start-up.
+   </para>
+  </listitem>
+  <listitem>
+   <para>
+    automatically configure themselves in a known target environment.
+   </para>
+  </listitem>
+  <listitem>
+   <para>
+    prompt the user for an interactive system configuration.
+   </para>
+  </listitem>
+ </itemizedlist>
+ <para>
+  The image creation process with KIWI is automated and does not require any
+  user interaction. The information required for the image creation process is
+  provided by the primary configuration file named
+  <filename>config.xml</filename>. In addition, the image can optionally be
+  customized using the <filename>config.sh</filename> and
+  <filename>images.sh</filename> scripts and by using an <emphasis>overlay
+  tree (directory)</emphasis> called <quote>root</quote>.
+  </para>
 
-    <figure id="fig.imagecreationarch">
-     <title>Image Creation Architecture</title>
+  <note>
+   <title>Previous Knowledge</title>
+   <para>
+    This manual assumes that you are familiar with the general concepts of
+    Linux, including the boot process, and distribution concepts such as
+    package management.
+   </para>
+  </note>
+
+ <sect1 id="sec.workflow.buildprocess">
+  <title>Building Images</title><indexterm>
+
+  <primary>KIWI</primary>
+
+  <secondary>build process</secondary></indexterm><indexterm>
+
+  <primary>build process</primary></indexterm>
+
+  <para>
+   KIWI creates images in a two step process. The first step, the
+   <literal>prepare</literal> operation, generates a so-called
+   <emphasis>unpacked image</emphasis> tree (directory) using the information
+   provided in the <filename>config.xml</filename> configuration file. The
+   <filename>config.xml</filename> file is part of the <emphasis>configuration
+   directory (tree)</emphasis> that describes the image to be created by
+   KIWI.
+  </para>
+  <para>
+   The second step, the <literal>create</literal> operation, creates
+   the <emphasis>packed image</emphasis> or <emphasis>image</emphasis> in the
+   specified format based on the unpacked image and the information provided
+   in the <filename>config.xml</filename> configuration file.
+  </para>
+
+  <figure id="fig.imagecreationarch">
+   <title>Image Creation Architecture</title>
+   <mediaobject>
+    <imageobject role="fo">
+     <imagedata fileref="intro.svg" format="SVG" width="75%"/>
+<!-- width="50%" -->
+    </imageobject>
+    <imageobject role="html">
+     <imagedata fileref="intro.png" format="PNG"/>
+<!-- width="50%" -->
+    </imageobject>
+   </mediaobject>
+  </figure>
+
+  <variablelist>
+   <varlistentry>
+    <term>(1) Unpacked Image</term>
+    <listitem>
+     <para>
+      Encapsulated system reachable via chroot
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>(2) Packed Image</term>
+    <listitem>
+     <para>
+      Encapsulated system reachable via kernel file system/extension drivers
+      such as loopback mounts, etc.
+     </para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+
+
+  <sect2 id="sec.workflow.buildprocess.prepare">
+   <title>The Prepare Step</title>
+   <para>
+    The creation of an image with KIWI is a two step process. The first step
+    is called the <literal>prepare</literal> step and it must complete
+    successfully before the second step, the <literal>create</literal> step
+    can be executed.
+   </para>
+   <para>
+    During the prepare step, KIWI creates an <emphasis>unpacked
+    image</emphasis>, also called <quote>root tree</quote>. The new root tree
+    is created in a directory specified on the command line with the
+    <option>--root</option> argument or the value of the <sgmltag
+    class="element">defaultroot</sgmltag> element in the
+    <filename>config.xml</filename> file. This directory will be the
+    installation target for software packages to be installed during the image
+    creation process.
+   </para>
+   <para>
+    For package installation, KIWI relies on the package manager specified
+    with the <sgmltag class="element">packagemanager</sgmltag> element in the
+    <filename>config.xml</filename> file. KIWI supports the following package
+    managers: <systemitem>smart</systemitem>, <systemitem>zypper</systemitem>
+    (default), <systemitem>yum</systemitem> and <systemitem>apt</systemitem>.
+   </para>
+   <para>
+    The prepare step consists of the following substeps::
+   </para>
+   <orderedlist>
+    <listitem>
+     <formalpara>
+      <title>Create Target Root Directory</title><indexterm>
+      <primary>KIWI</primary>
+      <secondary>prepare -- create target root directory</secondary></indexterm>
+      <para>
+       KIWI will exit with an error if the target root tree already exists to
+       prevent accidental deletion of an existing unpacked image. Using the
+       <option>--force-new-root</option> command line argument will force kiwi
+       to delete the existing target directory and create a new unpacked image
+       in a new directory with the same name.
+      </para>
+     </formalpara>
+    </listitem>
+    <listitem>
+     <formalpara>
+      <title>Install Packages</title><indexterm>
+      <primary>KIWI</primary>
+      <secondary>prepare -- install packages</secondary></indexterm>
+      <para>
+       Initially KIWI configures the package manager to use the repositories
+       specified in the configuration file and/or the command line. Following
+       the repository setup the packages specified in the <sgmltag
+       class="attribute">bootstrap</sgmltag> section of the configuration file
+       are installed in a temporary workspace external to the target root
+       tree. This establishes the initial environment, to support the
+       completion of the process in chroot setting. The essential packages to
+       specify as part of the bootstrap environment are the
+       <package>filesystem</package> and <package>glibc-locale</package>
+       packages. The dependency chain of these two packages is sufficient to
+       populate the bootstrap environment with all required software to
+       support the installation of packages into the new root tree.
+      </para>
+     </formalpara>
+     <para>
+      The installation of software packages through the selected package
+      manager may install unwanted packages. Removing such packages can
+      be accomplished by marking them for deletion in the configuration
+      file. To do so specify a configuration entry like:
+     </para>
+     <screen>&lt;package type="delete"&gt;<replaceable>package_to_be_deleted</replaceable>&lt;/package&gt;</screen>
+   </listitem>
+   <listitem>
+    <formalpara>
+     <title>Apply The Overlay Tree</title><indexterm>
+     <primary>KIWI</primary>
+     <secondary>prepare -- apply overlay tree</secondary></indexterm>
+     <para>
+      After the package installation is complete, KIWI will apply all files
+      and directories present in the overlay directory named
+      <emphasis>root</emphasis> to the target root tree. Files already present
+      in the target root directory will be overwritten, others will be
+      added. This allows you to overwrite any file that was installed by one
+      of the packages during the installation phase.
+     </para>
+    </formalpara>
+   </listitem>
+   <listitem>
+    <formalpara>
+     <title>Apply Archives</title><indexterm>
+     <primary>KIWI</primary>
+     <secondary>prepare -- apply archives</secondary></indexterm>
+     <para>
+      Any archive specified with the <sgmltag
+      class="element">archive</sgmltag> element in the
+      <filename>config.xml</filename> file is applied in the specified order
+      (top to bottom) after the overlay tree copy operation is complete. Files
+      and directories will be extracted relative to the top level of the new
+      root tree. As with the overlay tree, it is possible to overwrite files
+      already existing in the target root tree.
+     </para>
+    </formalpara>
+   </listitem>
+   <listitem>
+    <formalpara>
+     <title>
+      Execute the User-defined Script <filename>config.sh</filename>
+     </title>
+     <indexterm>
+     <primary>KIWI</primary>
+     <secondary>prepare -- user defined scripts config.sh</secondary></indexterm>
+     <para>
+      At the end of the preparation stage the script named
+      <filename>config.sh</filename> is executed if present. It is executed on
+      the top level of the target root tree. The script's primary function is to
+      complete the system configuration, for example by activating services.
+      For a detailed description of pre-defined configuration functions
+      consult the <xref linkend="ref.kiwi.config.sh"/> man page.
+     </para>
+    </formalpara>
+   </listitem>
+   <listitem>
+    <formalpara>
+     <title>Manage The New Root Tree</title><indexterm>
+     <primary>KIWI</primary>
+     <secondary>prepare -- manage target root tree</secondary></indexterm>
+     <para>
+      The unpacked image directory is a directory, as far as the build system
+      is concerned and you can manipulate the content of this directory
+      according to your needs. Since it represents a system installation you
+      can <quote>chroot</quote> into this directory for testing purposes. The
+      file system contains an additional directory named <filename
+      class="directory">/image</filename> that is not present in a regular
+      system. It contains information KIWI requires during the create step,
+      including a copy of the <filename>config.xml</filename> file.
+     </para>
+    </formalpara>
+    <para>
+     Do not make any changes to the system, since they will get lost when
+     re-running the <literal>prepare</literal> step again. Whats more, you may
+     introduce errors that will occur during the <literal>create</literal>
+     step, that are difficult to track. The recommended way to apply changes
+     to the unpacked image directory is to change the configuration and re-run
+     the <literal>prepare</literal> step.
+    </para>
+   </listitem>
+  </orderedlist>
+ </sect2>
+
+ <sect2 id="sec.workflow.buildprocess.create">
+  <title>The Create Step</title>
+  <para>
+   The successful completion of the <literal>prepare</literal> step is a
+   prerequisite for the <literal>create</literal> step. It ensures the
+   unpacked root tree is complete and consistent. Creating the packed, or
+   final, image is done in the <literal>create</literal> step. Multiple
+   images can be created using the same unpacked root tree. It is, for
+   example, possible to create a self installing OEM image and a virtual
+   machine image from a single unpacked root tree. The only prerequisite is
+   that both image types are specified in the <filename>config.xml</filename>
+   before the prepare step is executed.
+  </para>
+  <para>
+   During the <literal>create</literal> step the following major operations
+   are performed by kiwi:
+  </para>
+
+  <orderedlist><indexterm>
+   <primary>KIWI</primary>
+   <secondary>stages</secondary></indexterm>
+   <listitem>
+    <formalpara>
+     <title>
+      Execute the User-defined Script <filename>images.sh</filename>
+     </title>
+     <indexterm>
+     <primary>KIWI</primary>
+     <secondary>create -- user defined scripts images.sh</secondary></indexterm>
+     <para>
+      At the beginning of the image creation process the script named
+      <filename>images.sh</filename> is executed if present. It is executed on
+      the top level of the target root tree. The script is usually used to
+      remove files that are no needed in the final image. For example, if an
+      appliance is being built for a specific hardware, unnecessary kernel
+      drivers can be removed using this script. Consult the <xref
+      linkend="ref.kiwi.images.sh"/> man page for a detailed description of
+      pre-defined functions available in the <filename>images.sh</filename>
+      script.
+     </para>
+    </formalpara>
+   </listitem>
+   <listitem>
+    <formalpara>
+     <title>Create Requested Image Type</title><indexterm>
+     <primary>KIWI</primary>
+     <secondary>create -- requested image types</secondary></indexterm>
+     <para>
+      The image types that can be created from a prepared image tree depend on
+      the types specified in the image description
+      <filename>config.xml</filename> file. The configuration file must
+      contain at least one <sgmltag class="element">type</sgmltag>
+      element. The figure below shows the currently supported image types:
+     </para>
+    </formalpara>
+    <figure id="fig.imagetypes">
+     <title>Image Types</title>
      <mediaobject>
-       <imageobject role="fo">
-        <imagedata fileref="intro.svg" format="SVG"/><!-- width="50%" -->
-       </imageobject>
-       <imageobject role="html">
-        <imagedata fileref="intro.png" format="PNG"/><!-- width="50%" -->
-       </imageobject>
+      <imageobject role="fo">
+       <imagedata fileref="types.svg" format="SVG"/>
+<!-- width="60%" -->
+      </imageobject>
+      <imageobject role="html">
+       <imagedata fileref="types.png" format="PNG"/>
+<!-- width="60%" -->
+      </imageobject>
      </mediaobject>
     </figure>
-
     <variablelist>
      <varlistentry>
-      <term>(1) Unpacked Image</term>
+      <term>(1) Live Image</term>
       <listitem>
        <para>
-	Encapsulated system reachable via chroot
+        For CDs, DVDs or flash disks.
        </para>
       </listitem>
      </varlistentry>
      <varlistentry>
-      <term>(2) Packed Image</term>
+      <term>(2) Disk Image</term>
       <listitem>
        <para>
-	Encapsulated system reachable via kernel filesystem/extension drivers
+        Virtual system disk that can be used in virtual environments such as
+        VMware, Xen, Amazon Cloud, KVM, and others. Depending on the format a
+        guest configuration file is created.
+       </para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term>(3) OEM Image</term>
+      <listitem>
+       <para>
+        Preload system for install media CD/DVD or flash disk.
+       </para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term>(4) PXE Image</term>
+      <listitem>
+       <para>
+        Network boot image. KIWI also provides the bootp environment via the
+        package <package>kiwi-pxeboot</package>.
        </para>
       </listitem>
      </varlistentry>
     </variablelist>
-    
-  <para>Prior to building an image with KIWI it is important to understand
-    the composition of an image, the general concepts of Linux,
-    including the boot process, and distribution concepts such as package
-    management.</para>
-  <para>Installation of a Linux system generally occurs by booting a target
-    system from an installation source such as an install CD/DVD, a live
-    CD/DVD, or entering the PXE boot environment. The installation process is
-    often driven by an installer that interacts with the user to collect
-    collect information about the installation. This information generally
-    includes the <emphasis>software to be installed</emphasis>, the 
-    <emphasis>timezone</emphasis>, system <emphasis>user</emphasis> data,
-    and other information. Once all the information is collected the installer
-    installs the necessary and specified software onto the target system using
-    packages from the available software sources (repositories). After the
-    installation is complete the system generally reboots and enters a
-    configuration procedure upon startup. The configuration may be fully
-    automatic or it may include user interaction.</para>
-  <para>A system image, or image, is a
-    <emphasis>complete installation</emphasis> of a Linux system in a
-    file. The image represents an operational system and may or may not
-    contain the "final" configuration. The behavior of the image upon
-    deployment varies depending on image type and image configuration. With
-    KIWI it is possible to completely customize the initial start up behavior
-    of the image. This may include behavior that allows the image to simply
-    be deployed inside an existing virtual environment with no required
-    configuration at start up. It is also possible to create images that
-    automatically configure themselves in a known target environment. Further,
-    the startup of an interactive configuration procedure can be integrated
-    into the image to allow the user to configure the image when it is booted
-    for the first time. The image configuration possibilities are practically
-    unlimited. The image creation process with KIWI is automated and does not
-    require any user interaction. The required information for the image
-    creation process is provided in the primary configuration file named
-    <filename>config.xml</filename>. The image can optionally be customized
-    using the <filename>config.sh</filename> and
-    <filename>images.sh</filename> scripts. Additional customization can
-    be accomplished with the use of an optional
-    <emphasis>overlay tree (directory)</emphasis> called
-    <filename>root</filename>. The configuration information is stored
-    in the so called <emphasis>image description</emphasis> or
-    <emphasis>configuration directory (tree)</emphasis>.</para>
-  </sect1>
-  
-  <sect1 id="sec.workflow.buildprocess">
-    <title>Build Process</title>
-    <indexterm>
-      <primary>KIWI</primary>
-      <secondary>build process</secondary>
-    </indexterm>
-    <indexterm>
-      <primary>build process</primary>
-    </indexterm>
-  <para>The creation of an image with KIWI is a two step process, the
-    first step is called the <emphasis>prepare</emphasis> step and it
-    must complete successfully before the second step, the
-    <emphasis>create</emphasis> step can be executed. During the prepare
-    step KIWI creates a new root tree or so called
-    <emphasis>unpacked image</emphasis>. The new root tree is created in a
-    directory specified on the command line with the <option>--root</option>
-    argument or the value of the <sgmltag class="element">defaultroot</sgmltag>
-    element in the <filename>config.xml</filename> file. This directory
-    will be the target for any software packages to be installed during the
-    image creation process. For package installation KIWI relies on the
-    package manager specified with the
-    <sgmltag class="element">packagemanager</sgmltag> element in the
-    <filename>config.xml</filename> file. KIWI supports the
-    <emphasis>smart</emphasis>, <emphasis>zypper</emphasis>,
-    <emphasis>yum</emphasis> and <emphasis>apt</emphasis> package
-    managers. The prepare step executes the following major stages: </para>
+   </listitem>
+  </orderedlist>
 
-  <itemizedlist>
-    <listitem>
-      <formalpara>
-        <title>Create Target Root Directory</title>
-        <indexterm>
-          <primary>KIWI</primary>
-          <secondary>prepare -- create target root directory</secondary>
-        </indexterm>
-        <para>KIWI will exit with an error if the target root tree
-          already exists to prevent accidental deletion of an existing
-          unpacked image. Using the <option>--force-new-root</option>
-          command line argument will force kiwi to delete the existing
-          target directory and create a new unpacked image in a new
-          directory with the same name.</para>
-      </formalpara>
-    </listitem>
-    <listitem>
-      <formalpara>
-        <title>Install Packages</title>
-        <indexterm>
-          <primary>KIWI</primary>
-          <secondary>prepare -- install packages</secondary>
-        </indexterm>
-        <para>Initially KIWI configures the package manager
-          (zypper by default) to be used for the image creation to use
-          the repositories specified in the configuration file and/or
-          specified on the command line. Following the repository setup the
-          packages specified in the
-          <sgmltag class="attribute">bootstrap</sgmltag> section are installed
-          in a temporary workspace external to the target root tree. This
-          establishes the initial environment, to support the completion
-          of the process in chroot setting. The essential packages to
-          specify as part of the bootstrap environment are the
-          <emphasis>filesystem</emphasis> and
-          <emphasis>glibc-locale</emphasis> packages. The dependency chain
-          of these two packages is sufficient to populate the bootstrap
-          environment with all required software to support the installation
-          of packages into the new root tree. The installation of software
-          packages through the selected package manager may install packages
-          that you do not want in your image. Removing undesired packages
-          can be accomplished by specifying the packages you would like to
-          remove from the image as children of a
-          <sgmltag class="element">packages</sgmltag> element where the
-          value of the <sgmltag class="attribute">type</sgmltag> attribute
-          of the <sgmltag class="element">packages</sgmltag> element is
-          set to <sgmltag class="attvalue">delete</sgmltag>.</para>
-      </formalpara>
-    </listitem>
-    <listitem>
-      <formalpara>
-        <title>Apply The Overlay Tree</title>
-        <indexterm>
-          <primary>KIWI</primary>
-          <secondary>prepare -- apply overlay tree</secondary>
-        </indexterm>
-        <para>After the package installation with the package manager is
-           complete, KIWI will apply all files and directories present in the
-           overlay directory named <emphasis>root</emphasis> inside the
-           configuration directory to the target root tree. This allows
-           you to over write any file that was installed by one of the
-           packages installed during the installation phase. Files and
-           directories will appear in the unpacked image tree in the same
-           location as they are found in the directory named
-           <emphasis>root</emphasis>.</para>
-      </formalpara>
-    </listitem>
-    <listitem>
-      <formalpara>
-        <title>Apply Archives</title>
-        <indexterm>
-          <primary>KIWI</primary>
-          <secondary>prepare -- apply archives</secondary>
-        </indexterm>
-        <para>Any archives specified with the
-           <sgmltag class="element">archive</sgmltag> element in the
-           <filename>config.xml</filename> file are applied in the 
-           specified order (top to bottom) after the overlay tree copy
-           operation is complete. Archives are unpacked at the top level of
-           the new root tree and files will be located according to their
-           path in the archive. As with the overlay tree, it is possible to
-           over write any file in the target root tree.</para>
-      </formalpara>
-    </listitem>
-    <listitem>
-      <formalpara>
-        <title>Execute User Defined config.sh Script</title>
-        <indexterm>
-          <primary>KIWI</primary>
-          <secondary>prepare -- user defined scripts config.sh</secondary>
-        </indexterm>
-        <para>At the end of the preparation stage the optional script
-          named <filename>config.sh</filename> is executed at the root
-          level of the target root tree. The primary intended use of this
-          script is to complete system configuration such as service
-          activation. For detailed description pre-defined configuration
-          functions consult the <xref linkend="ref.kiwi.config.sh"/>
-          man page.</para>
-      </formalpara>
-    </listitem>
-    <listitem>
-      <formalpara>
-        <title>Manage The New Root Tree</title>
-        <indexterm>
-          <primary>KIWI</primary>
-          <secondary>prepare -- manage target root tree</secondary>
-        </indexterm>
-        <para>The unpacked image directory is just a directory, as far as the
-          build system is concerned and you can manipulate the content of
-          this directory to your liking. Further, as this directory
-          represents a system installation you can chroot into this directory
-          and run in the chroot environment to make changes. However,
-          it is strongly discouraged to apply changes directly to the
-          unpacked root, as any changes you apply will be lost when the
-          <emphasis>prepare</emphasis> step for the image is repeated.
-          In addition you may introduce errors into the unpacked root tree
-          that may lead to very difficult to track kiwi build issues
-          during the <emphasis>create</emphasis> step of the image build
-          process. The best practice is to apply any necessary changes to
-          the configuration directory followed by a new prepare
-          operation. If you inspect the created unpacked root tree you will
-          find a directory named <filename class="directory">image</filename>
-          at the top level that you would not find on a system installed
-          with the distribution installer. This directory contains information
-          KIWI requires during the create step, including a copy of the
-          <filename>config.xml</filename> file. You can make modifications
-          to data in this directory to influence the create step, however,
-          as mentioned previously this is discouraged and changes will be lost
-          once the prepare step is repeated.</para>
-      </formalpara>
-    </listitem>
-  </itemizedlist>
+  <para>
+   Detailed information, including step-by-step instructions on building
+   specific images can be found in <xref linkend="part.usecases"/>. That part
+   of the manual explains how to build a <quote>Just enough Operation
+   System</quote> (JeOS) image from a KIWI template for all supported image
+   types.
+  </para>
 
-  <para>Successful completion of the <emphasis>prepare</emphasis> step
-    is a the pre-requisite for the <emphasis>create</emphasis> step of the
-    image build process. With the successful completion of the image
-    preparation the unpacked root tree is considered complete and consistent.
-    Creating the packed, or final image requires the execution of the
-    <emphasis>create</emphasis> step. Multiple images can be created using
-    the same unpacked root tree, for example it is possible to create
-    a self installing OEM image and a virtual machine image from
-    one unpacked root tree, under the condition that both image types
-    are specified in the <filename>config.xml</filename> when the prepare
-    step is executed. During the <emphasis>create</emphasis> step the
-    following major operations are performed by kiwi:</para>
+ </sect2>
+</sect1>
+ <sect1 id="sec.workflow.bootprocess">
+  <title>Customizing the Boot Process</title><indexterm>
 
-  <itemizedlist>
-    <indexterm>
-      <primary>KIWI</primary>
-      <secondary>stages</secondary>
-    </indexterm>
-    <listitem>
-      <formalpara>
-        <title>Execute User Defined images.sh Script</title>
-        <indexterm>
-          <primary>KIWI</primary>
-          <secondary>create -- user defined scripts images.sh</secondary>
-        </indexterm>
-        <para>At the beginning of the image creation process the optional
-          <filename>images.sh</filename> script is executed at the top level
-          of the unpacked image directory. Unlike the
-          <filename>config.sh</filename> script, the
-          <filename>images.sh</filename> script does not have a target use
-          case. The script is most often used to remove files that are no
-          needed in the final image. For example if an appliance is being
-          built that is targeted for specific hardware one can remove all
-          unnecessary kernel drivers from the image using this script. 
-          Consult the <xref linkend="ref.kiwi.images.sh"/> man page for
-          a detailed description of pre-defined functions available in
-          the <filename>images.sh</filename> script.</para>
-      </formalpara>
-    </listitem>
-    <listitem>
-      <formalpara>
-        <title>Create Requested Image Type</title>
-        <indexterm>
-          <primary>KIWI</primary>
-          <secondary>create -- requested image types</secondary>
-        </indexterm>
-        <para>The image types that can be created from a prepared image tree
-          depend on the types specified in the image description
-          <filename>config.xml</filename> file. The configuration file
-          must contain contain at least one
-          <sgmltag class="element">type</sgmltag> element. The figure below
-          shows the currently image types:</para>
-      </formalpara>
+  <primary>KIWI</primary>
 
-      <figure id="fig.imagetypes">
-        <title>Image Types</title>
-        <mediaobject>
-          <imageobject role="fo">
-           <imagedata fileref="types.svg" format="SVG"/><!-- width="60%" -->
-          </imageobject>
-          <imageobject role="html">
-           <imagedata fileref="types.png" format="PNG"/><!-- width="60%" -->
-          </imageobject>
-        </mediaobject>
-      </figure>
-      <variablelist>
-       <varlistentry>
-	<term>(1) Live Image</term>
-	<listitem>
-	 <para>
-	  From CD, DVD or USB stick
-	 </para>
-	</listitem>
-       </varlistentry>
-       <varlistentry>
-	<term>(2) Disk Image</term>
-	<listitem>
-	 <para>
-	  Virtual system than can be used in VMware, Xen, Amazon Cloud, KVM,
-	  etc. virtual environments. Depending on the format a guest
-	  configuration file is created.
-	 </para>
-	</listitem>
-       </varlistentry>
-       <varlistentry>
-	<term>(3) OEM Image</term>
-	<listitem>
-	 <para>
-	  Preload system for install media CD/DVD or USB stick
-	 </para>
-	</listitem>
-       </varlistentry>
-       <varlistentry>
-	<term>(4) PXE Image</term>
-	<listitem>
-	 <para>
-	  Network boot image. KIWI also provides the bootp environment via the
-	  package kiwi-pxeboot.
-	 </para>
-	</listitem>
-       </varlistentry>
-      </variablelist>
-    </listitem>
-  </itemizedlist>
+  <secondary>boot process</secondary></indexterm>
 
-  <para>Detailed information, including step by step instructions about using
-  the <command>kiwi</command> command and building specific images, as
-  well as the configuration of the supported image types is provided
-  later.</para>
-  </sect1>
+  <para>
+   Most Linux systems use a special boot image to control the system boot
+   process after the system firmware, BIOS or UEFI, hands control of the
+   hardware to the operating system. This boot image is called the
+   <emphasis>initrd</emphasis>. The Linux kernel loads the initrd, a
+   compressed cpio initial RAM disk, into the RAM and executes
+   <emphasis>init</emphasis> or, if present, <emphasis>linuxrc</emphasis>.
+  </para>
+  <para>
+   Depending on the image type, KIWI creates the boot image automatically
+   during the <emphasis>create</emphasis> step. Each image type has
+   its own description for the boot image. Common functionality is shared
+   between the boot images through a set of functions. The boot image
+   descriptions follow the same principles as the system image descriptions,
+   KIWI ships with pre-defined boot image descriptions.
+  </para>
 
-  <sect1 id="sec.workflow.bootprocess">
-    <title>Boot Process</title>
-    <indexterm>
-      <primary>KIWI</primary>
-      <secondary>boot process</secondary>
-    </indexterm>
-
-    <para>Most Linux systems use a special boot image to control
-      the system boot process after the system firmware, BIOS or UEFI,
-      hands control of the hardware to the operating system. This boot image
-      is called the <emphasis>initrd</emphasis>. The Linux kernel loads the
-      initrd, a compressed cpio initial ramdisk, into RAM and executes
-      <emphasis>init</emphasis> or, if present, <emphasis>linuxrc</emphasis>.
-      KIWI creates the boot image automatically depending on the image type 
-      as part of the <emphasis>create</emphasis>
-      step in the image build process. Each image type has a specialized
-      image description that describes the boot image. Common functionality is
-      shared between the boot images through a set of functions. The boot image
-      descriptions follow the same principles as the system image descriptions
-      and are provided by KIWI. The boot image descriptions provided by KIWI
-      cover almost all use cases and it should not be necessary for the majority
-      of KIWI users to implement their own boot descriptions.</para>
+  <note>
+   <title>Boot Image Descriptions provided by KIWI</title>
+   <para>
+    The boot image descriptions provided by KIWI cover almost all use cases.
+    Creating custom boot descriptions should not be necessary, unless you have
+    special requirements.
+   </para>
+  </note>
 
   <figure id="fig.workflow.imagedescriptions">
-    <title>Image Descriptions</title>
-    <mediaobject>
-     <imageobject role="fo">
-      <imagedata fileref="activation.svg" format="SVG"/><!-- width="50%" -->
-     </imageobject>
-     <imageobject role="html">
-      <imagedata fileref="activation.png" format="PNG"/><!-- width="50%" -->
-     </imageobject>
-    </mediaobject>
+   <title>Image Descriptions</title>
+   <mediaobject>
+    <imageobject role="fo">
+     <imagedata fileref="activation.svg" format="SVG"/>
+<!-- width="50%" -->
+    </imageobject>
+    <imageobject role="html">
+     <imagedata fileref="activation.png" format="PNG"/>
+<!-- width="50%" -->
+    </imageobject>
+   </mediaobject>
   </figure>
 
   <variablelist>
@@ -409,8 +449,8 @@
     <term>(1) Boot Image</term>
     <listitem>
      <para>
-      Boot image descriptions are provided by KIWI, use is recommended but not
-      required.
+      Boot image descriptions are provided by KIWI, use is recommended but
+      not required.
      </para>
     </listitem>
    </varlistentry>
@@ -425,398 +465,425 @@
    </varlistentry>
   </variablelist>
 
+  <para>
+   The boot image descriptions are stored in the
+   <filename class="directory">/usr/share/kiwi/image/*boot</filename>
+   directories. KIWI selects the boot image based on the value of
+   the <sgmltag class="attribute">boot</sgmltag> attribute of the
+   <sgmltag class="element">type</sgmltag> element. The attribute value is
+   expected in the general form of <emphasis>
+   <replaceable>boottype</replaceable>/<replaceable>distribution</replaceable>
+   </emphasis>. For example to select the OEM boot image for SLES version 12
+   the element would look like the following:
+  </para>
+  <screen>&lt;type boot="oemboot/suse-SLES12"&gt;</screen>
 
-    <para>The boot image descriptions are stored in the
-    <filename class="directory">/usr/share/kiwi/image/*boot</filename>
-    directories. KIWI selects the boot image to build based on the value of
-    the <sgmltag class="attribute">boot</sgmltag> attribute of the
-    <sgmltag class="element">type</sgmltag> element. The attribute value is
-    expected in the general form of <emphasis>
-    <replaceable>boottype</replaceable>/<replaceable>distribution</replaceable>
-    </emphasis>. For example to select the OEM boot image for SLES
-    version 12 the value of the <sgmltag class="attribute">boot</sgmltag>
-    attribute should be <sgmltag class="attvalue">oemboot/suse-SLES12</sgmltag>.
-    The boot image description only represent the initrd and as such serves
-    a limited purpose. The system image description created by the person
-    building the image is ultimately the image that runs on the target system.
-    Boot image descriptions are complete and consistent descriptions that
-    allow you to build the boot image outside of the system image build
-    process.</para>
-  </sect1>
 
-  <sect1 id="sec.hooks">
-  <title>Boot Image Hook-Scripts</title>
-  <indexterm>
-    <primary>KIWI</primary>
-    <secondary>hook scripts</secondary>
-  </indexterm>
-  <indexterm>
-    <primary>hook scripts</primary>
-  </indexterm>
-  <para>All KIWI created boot images contain kiwi boot code that gets
-        executed when the image is booted for the first time. This boot
-        code is different for the various image types and provides hooks
-        to execute user defined custom shell scripts. The shell scripts
-        provided by the user may extend the first boot process and are
-        expected to exist inside the boot image in a specific location with
-        specific names. The naming and timing of the execution of
-        the hook scripts is image type dependent and described later.
-        The instructions below explain the concepts of hook scripts, which is
-        common to all image types, and how to include the scripts
-        in the initrd.</para>
-  <itemizedlist>
-    <listitem>
-      <para>All hook scripts must be located in the <filename
-            class="directory">kiwi-hooks</filename> directory at the top
-          level of the initrd. The best approach to including the hook
-          scripts in the initrd is to create an archive of a <filename
-            class="directory">kiwi-hooks</filename> directory that
-          contains the custom boot scripts.
+  <important>
+   <title>Difference Between Boot Image and System Image Descriptions</title>
+   <para>
+    The <emphasis>boot image description</emphasis> only represents the initrd
+    used to boot the system and as such serves a limited purpose. The boot image
+    descriptions is used to build the boot image independently from the
+    system image. Usually a pre-defined boot image descriptions shipped with
+    KIWI is used.
+   </para>
+   <para>
+    The system image description is used to build the image running on the
+    target system. It is manually created and usually tailor-made for a
+    specific use case.
+   </para>
+  </important>
+
+
+  <tip>
+   <title>De-activating Hooks at Boot Time</title>
+   <para>
+    The execution of hooks can be globally deactivated by passing the
+    following variable to the kernel command line:
+   </para>
+   <screen>KIWI_FORBID_HOOKS=1</screen>
+  </tip>
+
+
+  <sect2 id="sec.hooks">
+  <title>Boot Image Hook-Scripts</title><indexterm>
+
+  <primary>KIWI</primary>
+
+  <secondary>hook scripts</secondary></indexterm><indexterm>
+
+  <primary>hook scripts</primary></indexterm>
+
+  <para>
+   All KIWI created boot images contain kiwi boot code that gets executed
+   when the image is booted for the first time. This boot code differs from
+   image type to image type. It provides hooks to execute user defined
+   shell scripts.
+  </para>
+  <para>
+   These scripts may extend the firstboot process and are expected to exist
+   inside the boot image in a specific location with specific names. The
+   following instructions explain the concept of hook scripts, which is common
+   to all image types, and how to include the scripts in the initrd.
+  </para>
+
+
+  <sect3 id="sec.hooks.types">
+   <title>Script Types</title>
+   <para>
+    Hook scripts are executed using a predetermined name that is hard coded
+    into the kiwi boot code. This name is extended using the
+    <filename>.sh</filename> extension and differs by boot image type.
+    Therefore, the boot script naming in the archive must be exact. Boot
+    scripts are sourced in the kiwi boot code. This provides the hook script
+    access to all variables set in the boot environment. This also implies
+    that no separate shell process is started and the boot scripts do not need
+    to have the executable bit set. Encoding the interpreter location with the
+    <literal>#!</literal> comment is superfluous.
+   </para>
+   <para>
+    The following list provides information about the hook names, timing of
+    the execution, and the applicable boot image.
+   </para>
+
+   <variablelist>
+    <varlistentry>
+     <term><sgmltag class="element">handleSplash</sgmltag></term>
+     <listitem>
+      <para>
+       This hook is called prior to any dialog/exception message or progress
+       dialog. The hook can be used to customize the behavior of the splash
+       screen. KIWI automatically hides a plymouth or kernel based splash
+       screen if there is only one active console.
       </para>
-          <screen><command>mkdir</command> kiwi-hooks
---> place all scripts inside kiwi-hooks
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><sgmltag class="element">init</sgmltag></term>
+     <listitem>
+      <para>
+       This hook is called before udev is started. It exists only for the
+       <emphasis>PXE</emphasis> image type.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><sgmltag class="element">preconfig</sgmltag>|<sgmltag class="element">postconfig</sgmltag></term>
+     <listitem>
+      <para>
+       The hooks are called before and after the client configuration files
+       (CONF contents) are setup, respectively. The hooks only exist for the
+       <emphasis>PXE</emphasis> image type.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><sgmltag class="element">predownload</sgmltag>|<sgmltag class="element">postdownload</sgmltag></term>
+     <listitem>
+      <para>
+       The hooks are called before and after the client image receives the
+       root file system, respectively. The hooks only exist for the
+       <emphasis>PXE</emphasis> image type.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><sgmltag class="element">preImageDump</sgmltag>|<sgmltag class="element">postImageDump</sgmltag></term>
+     <listitem>
+      <para>
+       The hooks are called before and after the install image is dumped on
+       the target disk, respectively. The hooks only exist for the
+       <emphasis>OEM</emphasis> image type.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><sgmltag class="element">preLoadConfiguration</sgmltag>|<sgmltag class="element">postLoadConfiguration</sgmltag></term>
+     <listitem>
+      <para>
+       The hooks are called before and after the client configuration file
+       <filename>config.MAC</filename> is loaded, respectively. The hooks only
+       exist for the <emphasis>PXE</emphasis> image type.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><sgmltag class="element">premount</sgmltag>|<sgmltag class="element">postmount</sgmltag></term>
+     <listitem>
+      <para>
+       The hooks are called before and after the client root file system is
+       mounted, respectively. The hooks only exist for the
+       <emphasis>PXE</emphasis> image type.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><sgmltag class="element">prenetwork</sgmltag>|<sgmltag class="element">postnetwork</sgmltag></term>
+     <listitem>
+      <para>
+       The hooks are called before and after the client network is setup,
+       respectively. The hooks only exist for the <emphasis>PXE</emphasis>
+       image type.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><sgmltag class="element">prepartition</sgmltag>|<sgmltag class="element">postpartition</sgmltag></term>
+     <listitem>
+      <para>
+       The hooks are called before and after the client creates the partition
+       table on the target disk, respectively. The hooks only exist for the
+       <emphasis>PXE</emphasis> image type.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><sgmltag class="element">preprobe</sgmltag>|<sgmltag class="element">postprobe</sgmltag></term>
+     <listitem>
+      <para>
+       The hooks are called before and after the loading of modules not
+       handled by udev, respectively. The hooks only exist for the
+       <emphasis>PXE</emphasis> image type.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><sgmltag class="element">preswap</sgmltag>|<sgmltag class="element">postswap</sgmltag></term>
+     <listitem>
+      <para>
+       The hooks are called before and after the creation of the swap space,
+       respectively. The hooks only exist for the <emphasis>PXE</emphasis>
+       image type.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><sgmltag class="element">preactivate</sgmltag></term>
+     <listitem>
+      <para>
+       This hook is called before the root file system is moved to
+       <filename>/</filename>. The hook only exists for the
+       <emphasis>pxe</emphasis> image type.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><sgmltag class="element">preCallInit</sgmltag></term>
+     <listitem>
+      <para>
+       This hook is called before the initialization process, init or systemd,
+       is started. At call time the root file system has already been moved to
+       <filename>/</filename>.. The hook only exists for the
+       <emphasis>OEM</emphasis> and <emphasis>VMX</emphasis> image types.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><sgmltag class="element">preRecovery</sgmltag>|<sgmltag class="element">postRecovery</sgmltag></term>
+     <listitem>
+      <para>
+       This hook is called before and after the recovery code is processed.
+       At call time of preRecovery the recovery partition is not yet mounted.
+       At call time of postRecovery the recovery partition is still mounted
+       on <filename>/reco-save</filename>. The hook only exists for the
+       <emphasis>OEM</emphasis> image type.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><sgmltag class="element">preRecoverySetup</sgmltag>|<sgmltag class="element">postRecoverySetup</sgmltag></term>
+     <listitem>
+      <para>
+       This hook is called before and after the recovery setup is processed.
+       At call time of preRecoverySetup the recovery partition is not yet
+       mounted. At call time of postRecoverySetup the recovery partition is
+       still mounted on <emphasis>/reco-save</emphasis>. The hook only exists
+       for the <emphasis>OEM</emphasis> image type.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><sgmltag class="element">preException</sgmltag></term>
+     <listitem>
+      <para>
+       This hook is called before a system error is handled. The error
+       message is passed as parameter. This hook can be used for all image
+       types.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><sgmltag class="element">preHWdetect</sgmltag>|<sgmltag class="element">postHWdetect</sgmltag></term>
+     <listitem>
+      <para>
+       The hooks are called before and after the install image boot code
+       detects the possible target storage device(s). The hooks only exist
+       for the <emphasis>OEM</emphasis> image type.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><sgmltag class="element">preNetworkRelease</sgmltag></term>
+     <listitem>
+      <para>
+       This hook is called before the network connection is released. The
+       hook only exists for the <emphasis>PXE</emphasis> image type.
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </sect3>
+
+  <sect3 id="sec.hooks.include">
+   <title>Including Hook Scripts into the Boot Image</title>
+   <para>
+    All hook scripts must be located in the <filename
+    class="directory">kiwi-hooks</filename> directory at the top level of the
+    initrd. The best approach to including the hook scripts in the initrd is
+    to create an archive of a <filename
+    class="directory">kiwi-hooks</filename> directory that contains the custom
+    boot scripts.
+    </para>
+<screen><command>mkdir</command> kiwi-hooks
+<replaceable>place all scripts inside kiwi-hooks</replaceable>
 <command>tar</command> -cf kiwi-hooks.tgz kiwi-hooks/</screen>
     <para>
-          The tarball must be located at the top level of the image
-          description directory, this is the same level that contains
-          the <filename>config.xml</filename> file.</para>
-    </listitem>
-    <listitem>
-      <para>Hook scripts are executed using a predetermined name that
-            is hard coded into the kiwi boot code. This name is extended
-            using the <filename>.sh</filename> extension and differs by
-            boot image type. Therefore, the boot script naming in the archive
-            must be exact. Boot scripts are sourced in the kiwi boot code. This
-            provides the hook script access to all variables set in the boot
-            environment. This also implies that no separate shell process
-            is started and the boot scripts do not have to have the
-            executable bit set. Encoding the interpreter location with the
-            #! comment is superfluous.</para>
-    </listitem>
-    <listitem>
-          <para>Hook scripts are only executed from within kiwi's boot
-          code and must therefore be part of the KIWI created boot
-          image. Including the content of a tarball in the initrd is
-          accomplished by setting the value of the <sgmltag
-            class="attribute">bootinclude</sgmltag> attribute of the
-            <sgmltag class="element">archive</sgmltag> element to
-            <sgmltag class="attvalue">true</sgmltag> in the
-            <filename>config.xml</filename> file as shown below:</para>
-          <screen>&lt;packages type="image"&gt;
+     The TAR archive must be located at the top level of the image description
+     directory, this is the same level that contains the
+     <filename>config.xml</filename> file.
+   </para>
+    <para>
+     Hook scripts are only executed from within kiwi's boot code and must
+     therefore be part of the KIWI created boot image. Including the content
+     of a TAR archive in the initrd is accomplished by setting the value of
+     the <sgmltag class="attribute">bootinclude</sgmltag> attribute of the
+     <sgmltag class="element">archive</sgmltag> element to <sgmltag
+     class="attvalue">true</sgmltag> in the <filename>config.xml</filename>
+     file as shown below:
+    </para>
+<screen>&lt;packages type="image"&gt;
   &lt;archive name="kiwi-hooks.tgz" bootinclude="true"/&gt;
 &lt;/packages&gt;</screen>
-          <para>The concept of including an archive in the boot image follows
-          the same concepts described for the system image previously.
-          In order to
-          use an archive in a pre-built boot image the archive must be
-          part of the boot image description in which case it is not
-          necessary to set the <sgmltag class="attribute"
-            >bootinclude</sgmltag> attribute.</para>
+    <para>
+     The concept of including an archive in the boot image follows the same
+     concepts described for the system image previously. To use an
+     archive in a pre-built boot image the archive must be part of the boot
+     image description in which case it is not necessary to set the
+     <sgmltag class="attribute">bootinclude</sgmltag>
+     attribute.
+    </para>
+  </sect3>
+
+
+  <sect3 id="sec.hooks.post">
+   <title>Post Commands</title>
+   <para>
+    In addition to the hook script itself it is also possible to run a post
+    command after the hook script was called. This allows to run commands tied
+    to a hook script without changing the initrd and thus provides a certain
+    flexibility when writing the hook. The post command execution is based on
+    variables that can be passed to the kernel command line. The following
+    rules for the processing post commands apply:
+   </para>
+   <orderedlist>
+    <listitem>
+     <para>
+      Command post processing needs to be activated within the corresponding
+      hook script. this is achieved by setting the variable
+      <envar>KIWI_ALLOW_HOOK_CMD_<replaceable>HOOKNAME</replaceable></envar>
+      to <literal>1</literal>. For example:
+     </para>
+     <screen>KIWI_ALLOW_HOOK_CMD_preHWdetect=1</screen>
+     <para>
+      This will activate the post command execution for the
+      <literal>preHWdetect</literal> hook. If this variable is not set, the
+      post command will not be executed.
+     </para>
     </listitem>
-  </itemizedlist>
-  <para>The following list provides information about the hook names,
-      timing of the execution, and the applicable boot image.</para>
-  <itemizedlist>
     <listitem>
-      <formalpara>
-      <title>handleSplash</title>
-      <para>
-      This hook is called prior to any dialog/exception message or
-      progress dialog. The hook can be used to customize the behavior
-      of the splash screen. kiwi automatically hides a plymouth or
-      kernel based splash screen if there is only one active console
-      </para>
-      </formalpara>
+     <para>
+      The corresponding variable
+      <envar>KIWI_HOOK_CMD_<replaceable>HOOKNAME</replaceable></envar> needs
+      to passed to the Kernel command line. Its value contains the command
+      that is to be executed, for example:
+     </para>
+     <screen>KIWI_HOOK_CMD_preHWdetect="ls -l"</screen>
+     <para>
+      This will cause the <literal>preHWdetect</literal> hook to call
+      <command>ls -l</command> at the end of the hook script code.
+     </para>
     </listitem>
-
     <listitem>
-      <formalpara>
-      <title>init</title>
-      <para>
-      This hook is called before udev is started. The hook
-      exists only for the <emphasis>pxe</emphasis> image type. 
-      </para>
-      </formalpara>
+     <para>
+
+     </para>
     </listitem>
+   </orderedlist>
 
-    <listitem>
-            <formalpara>
-            <title>preconfig|postconfig</title>
-            <para>
-      The hooks are called before and after the client configuration
-            files (CONF contents) are setup, respectively. The hooks exist
-            only for the <emphasis>pxe</emphasis> image type.
-            </para>
-            </formalpara>
-        </listitem>
+   <tip>
+    <title>Disable Post Command Execution at Boot Time</title>
+    <para>
+     To disable all post commands for the current boot process pass the
+     following variable to the Kernel command line:
+    </para>
+    <screen>KIWI_FORBID_HOOK_CMDS=1</screen>
+   </tip>
+  </sect3>
+ </sect2>
+ <sect2 id="sec.bootcustomization">
+  <title>FAQ: Boot Image Customization</title><indexterm>
 
-    <listitem>
-            <formalpara>
-            <title>predownload|postdownload</title>
-            <para>
-      The hooks are called before and after the client image receives
-      the root filesystem, respectively. The hooks exist only for
-      the <emphasis>pxe</emphasis> image type.
-            </para>
-            </formalpara>
-        </listitem>
-    
-    <listitem>
-            <formalpara>
-            <title>preImageDump|postImageDump</title>
-            <para>
-      The hooks are called before and after the install image is
-      dumped on the target disk, respectively. The hooks exist only for
-      the <emphasis>oem</emphasis> image type.
-            </para>
-            </formalpara>
-        </listitem>
+  <primary>KIWI</primary>
 
-    <listitem>
-            <formalpara>
-            <title>preLoadConfiguration|postLoadConfiguration</title>
-            <para>
-      The hooks are called before and after the client configuration
-      file config.MAC is loaded, respectively. The hooks exist only for
-            the <emphasis>pxe</emphasis> image type.
-            </para>
-            </formalpara>
-        </listitem>
+  <secondary>initrd customization</secondary></indexterm><indexterm>
 
-    <listitem>
-            <formalpara>
-            <title>premount|postmount</title>
-            <para>
-      The hooks are called before and after the client root
-      filesystem is mounted, respectively. The hooks exist only for
-            the <emphasis>pxe</emphasis> image type.
-            </para>
-            </formalpara>
-        </listitem>
+  <primary>initrd customization</primary></indexterm>
 
-    <listitem>
-            <formalpara>
-            <title>prenetwork|postnetwork</title>
-            <para>
-      The hooks are called before and after the client network
-      is setup, respectively. The hooks exist only for
-      the <emphasis>pxe</emphasis> image type.
-            </para>
-            </formalpara>
-        </listitem>
-
-        <listitem>
-            <formalpara>
-            <title>prepartition|postpartition</title>
-            <para>
-      The hooks are called before and after the client creates
-      the partition table on the target disk, respectively. The hooks
-            exist only for the <emphasis>pxe</emphasis> image type.
-            </para>
-            </formalpara>
-        </listitem>
-
-        <listitem>
-            <formalpara>
-            <title>preprobe|postprobe</title>
-            <para>
-      The hooks are called before and after the loading of modules
-      not handled by udev, respectively. The hooks exist only for the
-      <emphasis>pxe</emphasis> image type.
-            </para>
-            </formalpara>
-        </listitem>
-
-        <listitem>
-            <formalpara>
-            <title>preswap|postswap</title>
-            <para>
-      The hooks are called before and after the creation of the
-      swap space, respectively. The hooks exist only for the
-            <emphasis>pxe</emphasis> image type.
-            </para>
-            </formalpara>
-        </listitem>
-
-        <listitem>
-            <formalpara>
-            <title>preactivate</title>
-            <para>
-      This hook is called before the root filesystem is moved to /
-      The hook exists only for the <emphasis>pxe</emphasis>
-            image type.
-            </para>
-            </formalpara>
-        </listitem>
-
-        <listitem>
-            <formalpara>
-            <title>preCallInit</title>
-            <para>
-            This hook is called before the initialization process,
-            init or systemd, is started. At call time the root filesystem
-            has already been moved to /. The hook exists only for the
-            <emphasis>oem</emphasis> and <emphasis>vmx</emphasis> image types.
-            </para>
-            </formalpara>
-        </listitem>   
-
-        <listitem>
-            <formalpara>
-            <title>preRecovery|postRecovery</title>
-            <para>
-            This hook is called before and after the recovery code is
-            processed. At call time of preRecovery the recovery partition is
-            not yet mounted. At call time of postRecovery the recovery partition
-            is still mounted on <emphasis>/reco-save</emphasis>.
-            The hook exists only for the <emphasis>oem</emphasis> image type.
-            </para>
-            </formalpara>
-        </listitem>
-
-        <listitem>
-            <formalpara>
-            <title>preRecoverySetup|postRecoverySetup</title>
-            <para>
-            This hook is called before and after the recovery setup is
-            processed. At call time of preRecoverySetup the recovery partition
-            is not yet mounted. At call time of postRecoverySetup the recovery
-            partition is still mounted on <emphasis>/reco-save</emphasis>.
-            The hook exists only for the <emphasis>oem</emphasis> image type.
-            </para>
-            </formalpara>
-        </listitem>
-
-        <listitem>
-            <formalpara>
-            <title>preException</title>
-            <para>
-      This hook is called before a system error is handled, the
-      actual error message is passed as parameter. This hook can be
-            used for all image types.
-            </para>
-            </formalpara>
-        </listitem>
-
-        <listitem>
-            <formalpara>
-            <title>preHWdetect|postHWdetect</title>
-            <para>
-      The hooks are called before and after the install image boot
-      code detects the possible target storage device(s).
-      The hook exists only for the <emphasis>oem</emphasis> image type.
-            </para>
-            </formalpara>
-        </listitem>
-
-        <listitem>
-            <formalpara>
-            <title>preNetworkRelease</title>
-            <para>
-      This hook is called before the network connection is released.
-      The hook exists only for the <emphasis>pxe</emphasis> image type.
-            </para>
-            </formalpara>
-        </listitem>
-  </itemizedlist>
-
-  <para>The execution of hooks can be globaly deactivated by passing the
-      following variable to the kernel commandline:</para>
-      <screen>KIWI_FORBID_HOOKS=1</screen>
-      <para>In addition to the hook
-      script itself it's also possible to run a post command after the
-      hook script was called. This allows to run commands tied to a hook
-      script without changing the initrd and thus provides a certain
-      flexibility when writing the hook. The post command execution is
-      based on variables one can pass to the kernel commandline to
-      extend an existing hook script. There are the following rules for
-      the processing of these information</para>
- <itemizedlist>
-        <listitem>
-          <formalpara>
-            <title>The hook must activate the command post
-              processing</title>
-            <para> Post hook commands are only processed if the
-              corresponding hook script activates this. The variable the
-              hook script has to set follows the naming schema:
-              KIWI_ALLOW_HOOK_CMD_|HOOKNAME|=1 For example:
-              <screen>KIWI_ALLOW_HOOK_CMD_preHWdetect=1</screen> If this
-              is set as part of the preHWdetect.sh hook script code the
-              post command execution is activated </para>
-          </formalpara>
-        </listitem>
-        <listitem>
-          <formalpara>
-            <title>KIWI_HOOK_CMD_|HOOKNAME|</title>
-            <para> The variable containing the command to become
-              executed must match the following naming schema. For
-              example:
-              <screen>KIWI_HOOK_CMD_preHWdetect="ls -l"</screen> This
-              would cause the preHWdetect hook to call <command>ls
-                -l</command> at the end of the hook script code </para>
-          </formalpara>
-        </listitem>
-        <listitem>
-          <formalpara>
-            <title>KIWI_FORBID_HOOK_CMDS</title>
-            <para> If this variable is set to something non empty the
-              post hook command execution is deactivated however the
-              basic hook script invocation is still active unless
-              KIWI_FORBID_HOOKS is also set </para>
-          </formalpara>
-        </listitem>
-      </itemizedlist>
-  </sect1>
-
-  <sect1 id="sec.bootcustomization">
-  <title>Boot Image Customization</title>
-  <indexterm>
-    <primary>KIWI</primary>
-    <secondary>initrd customization</secondary>
-  </indexterm>
-  <indexterm>
-    <primary>initrd customization</primary>
-  </indexterm>
-  <para>The KIWI provided boot image descriptions should satisfy the
-      requirements for a majority of image builds and the environments in
-      which these images are deployed. For the circumstances that require
-      customized boot images KIWI provides mechanisms in the system image
-      <filename>config.xml</filename> file to influence the boot image
-      content. Using these mechanisms allows the user to still base the
-      boot image on the KIWI provided descriptions rather than defining a
-      completely new and custom boot image description. Creating a
-      custom boot image that is not based on the KIWI provided descriptions
-      is also possible. The following question and answer section provides
-      solutions to the most common customization needs fro the initrd
-      created by kiwi.
+  <para>
+   The KIWI provided boot image descriptions should satisfy the requirements
+   for a majority of image builds and the environments in which these images
+   are deployed. In case a customized boot image is needed, KIWI provides
+   appropriate  configuration options in <filename>config.xml</filename>.
   </para>
+  <para>
+   Using these options allows users to base the boot image on
+   the KIWI provided descriptions rather than having to define a configuration
+   from scratch (however, this is possible if wanted). The following
+   question and answer section provides solutions to the most common
+   scenarios that require a customized boot image.
+  </para>
+
   <qandaset defaultlabel="qanda">
    <qandaentry>
     <question>
      <para>
-      Why is the boot image so big and can I reduce it's size ?
+      Why is the boot image so big? Can I reduce its size ?
      </para>
     </question>
     <answer>
      <para>
-KIWI includes all required tools and libraries to boot the
-            image in all circumstances in the target environment for the
-            image type. If target environment is well defined it is
-            possible to remove data from that is known not to be needed.
-            This will decrease the size of the initrd to and decrease
-            boot time. Removing files in the boot image is accomplished
-            by adding a <sgmltag class="element">strip</sgmltag> section
-            to the system image <filename>config.xml</filename> file,
-            with the <sgmltag class="attribute">type</sgmltag> attribute
-            set to <sgmltag class="attvalue">delete</sgmltag>, as shown
-            below.
+      KIWI includes all required tools and libraries to boot the image under
+      all circumstances in all target environments supported by the image
+      type. In case the target environment is well defined it is possible to
+      remove libraries, drivers and tools not needed in the target
+      environment.
      </para>
-            <screen>&lt;strip type="delete"/&gt;
+     <para>
+      This will decrease the size of the initrd and will also decrease boot
+      time. Removing files in the boot image is accomplished by adding a
+      <sgmltag class="element">strip</sgmltag> section to the system image in
+      the <filename>config.xml</filename> file, with the <sgmltag
+      class="attribute">type</sgmltag> attribute set to <sgmltag
+      class="attvalue">delete</sgmltag>, as shown below:
+     </para>
+<screen>&lt;strip type="delete"/&gt;
     &lt;file name="..."/&gt;
 &lt;/strip&gt;</screen>
-    <para>
-            Removing files that are needed my result in an image that
-            cannot be booted. </para>
+     <para>
+      Removing files that are needed my result in an image that cannot be
+      booted.
+     </para>
     </answer>
    </qandaentry>
    <qandaentry>
@@ -827,63 +894,61 @@ KIWI includes all required tools and libraries to boot the
     </question>
     <answer>
      <para>
-      KIWI uses a subset of the kernel. Should you encounter
-            problems due to a missing driver that is part of the
-            "standard" kernel but has not bee included by the kiwi build
-            process you can add the driver by adding a <sgmltag
-              class="element">drivers</sgmltag> section to the system
-            image <filename>config.xml</filename> file, as shown below.</para>
-
-            <screen>&lt;drivers&gt;
-    &lt;file name="drivers/..."/&gt;
+      KIWI uses a subset of the Kernel. Therefore drivers shipped with the
+      Kernel that have not been included by the KIWI build process, can be
+      added. Do so by adding a <sgmltag class="element">drivers</sgmltag>
+      section to the system image configuration file
+      <filename>config.xml</filename>, as follows:
+     </para>
+<screen>&lt;drivers&gt;
+  &lt;file name="drivers/..."/&gt;
 &lt;/drivers&gt;</screen>
-           <para>
-            If the driver is provided by a package, the package itself
-            needs to be specified as part of the <sgmltag
-              class="attvalue">image</sgmltag> package section and it
-            must be marked for boot image inclusion by setting the value
-            of the <sgmltag class="attribute">bootinclude</sgmltag>
-            attribute of the <sgmltag class="element">package</sgmltag>
-            element to <sgmltag class="attvalue">true</sgmltag>, as
-            shown below.</para>
-            <screen>&lt;packages type="image"/&gt;
-    &lt;package name="..." bootinclude="true"/&gt;
+     <para>
+      If the driver is provided by a package, the package itself needs to be
+      specified as part of the <sgmltag class="attvalue">image</sgmltag>
+      package section. Additionally, it must be marked for boot image
+      inclusion by setting the value of the <sgmltag
+      class="attribute">bootinclude</sgmltag> attribute of the <sgmltag
+      class="element">package</sgmltag> element to <sgmltag
+      class="attvalue">true</sgmltag>, as follows:
+     </para>
+<screen>&lt;packages type="image"/&gt;
+  &lt;package name="<replaceable>PACKAGE</replaceable>" bootinclude="true"/&gt;
 &lt;/packages&gt;</screen>
     </answer>
    </qandaentry>
    <qandaentry>
     <question>
      <para>
-      How to add missing tools/libraries?
+      How to add missing tools or libraries?
      </para>
     </question>
     <answer>
      <para>
-      Additional software can be added to the boot image with the
-            use of the <sgmltag class="attribute">bootinclude</sgmltag>
-            attribute of the <sgmltag class="element">package</sgmltag>
-            element or the <sgmltag class="element">archive</sgmltag>
-            element. At the end of the boot image creation process kiwi
-            attempts to reduce the size of the boot image by removing
-            files that are not part of a known list of required files,
-            any detectable dependencies of the files listed are
-            preserved as well. The list of known required files is hard
-            coded in the
-              <filename>/usr/share/kiwi/modules/KIWIConfig.txt</filename>
-            file. If you added files to the boot image that are needed
-            in your specific use case you need to instruct kiwi to not
-            strip the files you have added to the boot image. This is
-            accomplished by adding a <sgmltag class="element"
-              >strip</sgmltag> section to the system image
-              <filename>config.xml</filename> file, with the <sgmltag
-              class="attribute">type</sgmltag> attribute set to <sgmltag
-              class="attvalue">tools</sgmltag>, as shown below.</para>
-            <screen>&lt;strip type="tools"/&gt;
-    &lt;file name="..."/&gt;
+      Additional software can be added to the boot image with the use of the
+      <sgmltag class="attribute">bootinclude</sgmltag> attribute of the
+      <sgmltag class="element">package</sgmltag> or the <sgmltag
+      class="element">archive</sgmltag> element. At the end of the boot image
+      creation process kiwi attempts to reduce the size of the boot image by
+      removing files that are not part of a known list of required files or
+      their dependencies.
+     </para>
+     <para>
+      The list of required files is hard coded in the
+      <filename>/usr/share/kiwi/modules/KIWIConfig.txt</filename> file.  If
+      you added files to the boot image that are needed for your specific use
+      case, you need to instruct kiwi to not strip them from the image. This
+      is accomplished by adding a <sgmltag class="element" >strip</sgmltag>
+      section to the system image <filename>config.xml</filename> file, with
+      the <sgmltag class="attribute">type</sgmltag> attribute set to <sgmltag
+      class="attvalue">tools</sgmltag>, as follows:
+     </para>
+<screen>&lt;strip type="tools"/&gt;
+  &lt;file name="<replaceable>FILENAME</replaceable>"/&gt;
 &lt;/strip&gt;</screen>
-            <para>The removal/preservation of files is name based and the path
-            is immaterial. Therefore, you only have to specify the file
-            name that is to be preserved.
+     <para>
+      The removal/preservation of files is name-based only, so you do not need
+      to specify a complete path, but rather the file name.
      </para>
     </answer>
    </qandaentry>
@@ -895,137 +960,169 @@ KIWI includes all required tools and libraries to boot the
     </question>
     <answer>
      <para>
-Yes, as described in the <xref linkend="sec.hooks"/> section above,
-            KIWI supports the execution of boot code at various times for
-            various image types using <emphasis>hook</emphasis> scripts.
+      Yes, as described in the <xref linkend="sec.hooks"/> section above,
+      KIWI supports the execution of boot code at various times for various
+      image types using <emphasis>hook</emphasis> scripts.
      </para>
     </answer>
    </qandaentry>
    <qandaentry>
     <question>
      <para>
-      Is it possible to include completely custom boot code?
+      Is it possible to include completely customized boot code?
      </para>
     </question>
     <answer>
      <para>
-      No. In cases where the provided hooks are insufficient and the
-            KIWI provided boot code needs to be replaced completed it is
-            necessary to create a custom boot image description. In this case,
-            all parts of the boot image description must be created by the
-            user. It is best to use one of the KIWI provided boot descriptions
-            as a template.
+      No. In cases where the provided hooks are insufficient and the KIWI
+      provided boot code needs to be replaced completely, it is necessary to
+      create a custom boot image description. In this case, all parts of the
+      boot image description must be created by the user. It is best to use
+      one of the KIWI provided boot descriptions as a template.
      </para>
     </answer>
    </qandaentry>
-  </qandaset>  
-</sect1>
-
-  <sect1 id="sec.workflow.bootparameters">
-    <title>Boot Parameters</title>
-    <indexterm>
+   <qandaentry>
+    <question>
+     <indexterm>
       <primary>KIWI</primary>
       <secondary>boot parameters</secondary>
-    </indexterm>
-    <indexterm>
+     </indexterm>
+     <indexterm>
       <primary>boot parameters</primary>
-    </indexterm>
-    <para>A KIWI created initrd based on one of the KIWI provided boot
-      image descriptions recognizes kernel parameters that are useful
-      for debugging purposes, should the image not boot. These parameters may
-      not work if the image contains a custom boot image where the kiwi boot
-      code has been replaced, and the parameters are not recognized after
-      the initial KIWI created initrd has been replaced by the "regular"
-      distribution created initrd after the initial boot of the image.</para>
-      <variablelist>
-       <varlistentry>
-	<term><parameter>kiwidebug=1</parameter></term>
-	<listitem>
-	 <para>
-If the boot process encounters a fatal error, the
-            default behavior is to reboot the system 120 seconds. The
-              <quote>exception</quote> behavior is changed by setting
-            the <option>kiwidebug</option> parameter. With the value of
-            the parameter set to 1 the system will enter a limited shell
-            environment should a fatal error occur during boot. The
-            shell contains the standard basic commands. The
-              <filename>/var/log/kiwi.boot</filename> boot log file may
-            be consulted to develop a better understanding of the boot
-            failure. In addition to the spawned shell process kiwi also
-            starts the dropbear ssh server if the environment is
-            suitable. Support for ssh into the boot image is possible in
-            the netboot and oemboot (in PXE boot mode) boot images. For
-            isoboot and vmxboot boot images there is no remote login
-            support because they don't setup a network. In order to have
-            dropbear installed as part of the boot image the following
-            needs to be added to the system image configuration:</para>
-            <screen>&lt;packages type="image"/&gt;
-    &lt;package name="dropbear" bootinclude="true"/&gt;
+     </indexterm>
+     <para>
+      My customized boot image refuses to boot. How to debug?
+     </para>
+    </question>
+    <answer>
+     <para>
+      An initrd created by KIWI that is based on one of the KIWI- provided
+      boot image descriptions recognizes kernel parameters that are useful for
+      debugging purposes, in case the image does not boot. These parameters
+      may not work if the image contains a custom boot image where the kiwi
+      boot code has been completely.
+     </para>
+    </answer>
+   </qandaentry>
+  </qandaset>
+ </sect2>
+ <sect2 id="sec.workflow.bootparameters">
+  <title>Boot Parameters</title><indexterm>
+
+  <primary>KIWI</primary>
+
+  <secondary>boot parameters</secondary></indexterm><indexterm>
+
+  <primary>boot parameters</primary></indexterm>
+
+  <para>
+   A KIWI created initrd based on one of the KIWI provided boot image
+   descriptions recognizes kernel parameters that are useful for debugging
+   purposes, should the image not boot. These parameters may not work if the
+   image contains a custom boot image where the kiwi boot code has been
+   replaced, and the parameters are not recognized after the initial KIWI
+   created initrd has been replaced by the "regular" distribution created
+   initrd after the initial boot of the image.
+  </para>
+
+  <para>
+   If the boot process encounters a fatal error, the default behavior is
+   to reboot the system after 120 seconds. Prevent this behavior by specifying
+  </para>
+  <screen>kiwidebug=1</screen>
+  <para>
+   on the Kernel command line. With that parameter set to
+   <literal>1</literal>, the system will enter a limited shell environment in
+   case of a fatal during boot. The shell contains a basic set of commands.
+   The first place to look for debugging information should be the boot log
+   file <filename>/var/log/kiwi.boot</filename>.
+  </para>
+  <para>
+   In addition to the shell, KIWI also starts the <systemitem
+   class="daemon">dropbear</systemitem> SSH server if the environment is
+   suitable. Support for <systemitem class="daemon">dropbear</systemitem> can
+   be added to the netboot and oemboot (in PXE boot mode) boot images. For
+   isoboot and vmxboot boot images there is no remote login support because
+   they do not set up a network. It is required that the repository setup
+   provides <package>dropbear</package>.
+  </para>
+  <para>
+   To have dropbear installed as part of the boot image the following
+   needs to be added to the system image configuration:
+  </para>
+  <screen>&lt;packages type="image"/&gt;
+  &lt;package name="dropbear" bootinclude="true"/&gt;
 &lt;/packages&gt;</screen>
-            <para>It's required that the repo setup provides dropbear. Once
-            dropbear is there the kiwi boot code will start the service.
-            In order to access the boot image via ssh it's required to
-            provide a public key on the pxe server in the directory:
-              <filename>server-root/KIWI/debug_ssh.pub</filename>. kiwi
-            only searches for that filename so it's required to name it
-              <quote>debug_ssh.pub</quote>. Adding more than one public
-            key to this file is possible exactly like the common SSH
-            file <quote>authorized_keys</quote>. The path
-              <quote>server-root</quote> depends on what server type was
-            configured to download the image. By default this is done
-            via tftp. In that case the complete path to put the public
-            key to is
-              <filename>/srv/tftpboot/KIWI/debug_ssh.pub</filename>. on
-            the pxe server. If ftp or http is used the server-root path
-            is different. If a public key was found you can login as
-            follows:</para>
-            <screen><command>ssh</command> root@&lt;ip&gt;</screen>
-	    <para>It
-            might be useful to have a copy tool like scp or rsync as
-            part of the boot image as well. Adding rsync as bootincluded
-            package does not increase the size of the initrd much and
-            would allow to extract e.g the kiwi boot log as follows:</para>
-            <screen>RSYNC_RSH='ssh -l root'
-<command>rsync</command> -avz &lt;ip&gt;:/var/log/boot.kiwi .</screen>
-	</listitem>
-       </varlistentry>
-      </variablelist>
-  </sect1>
+  <para>
+   It might be useful to also include a tool for copying remote files, such
+   as <command>scp</command> or <command>rsync</command> into the boot
+   image. Note that the required packages need to be provided by the
+   repositories configured. To include <command>rsync</command>, for example,
+   add the line
+   <literal>&lt;package&nbsp;name="rsync"&nbsp;bootinclude="true"/&gt;</literal>
+   to the listing above.
+  </para>
+  <para>
+   To access the boot image via SSH it is required to provide a
+   public key on the PXE server in the directory:
+   <filename><replaceable>SERVER-ROOT</replaceable>/KIWI/debug_ssh.pub</filename>. KIWI
+   exclusively searches for that file name, so it is required to name it
+   <filename>debug_ssh.pub</filename>. <replaceable>SERVER-ROOT</replaceable>
+   depends on what server type was configured to download the image. By
+   default this is done via TFTP. In that case
+   <replaceable>SERVER-ROOT</replaceable> translates to
+   <filename>/srv/tftpboot</filename> ion the PXE server. Adjust the path
+   accordingly if having used HTTP or FTP.
+  </para>
+  <para>
+   Adding more than one public key to file is possible, the file uses the same
+   format as the common SSH file <quote>authorized_keys</quote>. If a public
+   key was found you can login as follows:
+  </para>
+  <screen>ssh root@<replaceable>IP-ADDRESS</replaceable></screen>
+  <para>
+   In case <command>rsync</command> is available, you can copy the KIWI boot
+   log to your local machine as follows:
+  </para>
+  <screen>RSYNC_RSH='ssh -l root'
+rsync -avz &lt;ip&gt;:/var/log/boot.kiwi</screen>
+ </sect2>
+</sect1>
+ <sect1 id="sec.workflow.common-specific-code">
+  <title>Distribution-Specific Code</title><indexterm>
 
-  <sect1 id="sec.workflow.common-specific-code">
-    <title>Common and Distribution Specific Code</title>
-    <indexterm>
-      <primary>KIWI</primary>
-      <secondary>common code</secondary>
-    </indexterm>
-    <indexterm>
-      <primary>KIWI</primary>
-      <secondary>distribution specific code</secondary>
-    </indexterm>
-    <para>KIWI is designed to be in principal distribution independent and
-      the majority of the kiwi implementation follows this design principal.
-      However, Linux distributions differ from each other, primarily in the
-      package management area as well as the creation and composition of
-      the boot image.</para>
+  <primary>KIWI</primary>
 
-    <para>Within the KIWI code base major areas of Linux distribution
-      differences are isolated into specific regions of the code. The
-      remainder of the code is common and distribution independent.</para>
+  <secondary>distribution specific code</secondary></indexterm>
 
-    <para>KIWI provided functions that are distribution specific contain
-      the distribution name as a prefix, such as
-      <function>suseStripKernel</function>. Scripts that are part of the boot
-      code and are distribution specific are identified by a prefix of
-      the distribution name followed by a <quote>-</quote>,
-      <command>suse-linuxrc</command> for example. When kiwi creates a boot
-      image for a SUSE distribution the <command>suse-linuxrc</command> file
-      from the boot discription is used as the <command>linuxrc</command>
-      file that the Linux kernel calls.</para>
+  <para>
+   KIWI is designed to be distribution-independent. However, Linux
+   distributions differ from each other, primarily in the package management
+   area and in the area of creation and composition of the boot image. Within
+   the KIWI code base major areas of Linux distribution differences are
+   isolated into specific regions of the code. The remainder of the code is
+   common and distribution- independent.
+  </para>
 
-    <para>With this design and implementation t is possible to maintain
-      distribution specific code in the same project while also providing
-      explicit hints to the user when distribution specific code is being
-      used. The implemented SUSE specific code can be used as a guideline
-      to support other distributions.</para>
-  </sect1>
+  <para>
+   KIWI-provided functions that are distribution-specific contain the
+   distribution name as a prefix, such as
+   <literal>suseStripKernel</literal>. Scripts that are part of the boot
+   code and are distribution-specific are identified by a prefix of the
+   distribution name followed by a <quote>-</quote>, for example
+   <literal>suse-linuxrc</literal>. When KIWI creates a boot
+   image for a SUSE distribution the <command>suse-linuxrc</command> file
+   from the boot description is used as the <command>linuxrc</command> file
+   that the Linux kernel calls.
+  </para>
+
+  <para>
+   With this design it is possible to maintain distribution-specific code in
+   the project while also providing explicit hints to the user when
+   distribution specific code is being used.  The implementation of
+   SUSE-specific code can be used as a guideline to support other
+   distributions.
+  </para>
+ </sect1>
 </chapter>

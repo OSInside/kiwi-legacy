@@ -1,997 +1,995 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE refentry PUBLIC 
+<!DOCTYPE refentry PUBLIC
   "-//OASIS//DTD DocBook XML V4.4//EN"
   "http://www.docbook.org/xml/4.4/docbookx.dtd">
-
 <refentry id="ref.kiwi.kiwi">
-  <refentryinfo>
-    <indexterm>
-      <primary>manpages</primary>
-      <secondary>kiwi</secondary>
-    </indexterm>
-    <productname>KIWI</productname>
-    <!--<productnumber></productnumber>-->
-    <date>Created: <?dbtimestamp?></date>
-    <authorgroup>
-      <author>
-        <firstname>Marcus</firstname>
-        <surname>Schaefer</surname>
-        <contrib>Developer</contrib>
-        <email>ms (AT) suse.de</email>
-      </author>
-    </authorgroup>    
-  </refentryinfo>
-  <refmeta>
-    <refentrytitle>kiwi</refentrytitle>
-    <manvolnum>1</manvolnum>
-    <refmiscinfo class="version">_KV_</refmiscinfo>
-    <refmiscinfo class="manual">KIWI Manualpage</refmiscinfo>
-  </refmeta>
-  <refnamediv>
-    <refname>kiwi</refname>
-    <refpurpose>Creating Operating System Images</refpurpose>
-  </refnamediv>
-
-  <refsynopsisdiv>
-    <title>Synopsis</title>
-    <cmdsynopsis>
-      <command>kiwi</command>
-      <group choice="req">
-        <arg choice="plain">-l</arg>
-        <arg choice="plain">--list</arg>
-      </group>
-    </cmdsynopsis>
-    <cmdsynopsis>
-      <command>kiwi</command>
-      <group choice="req">
-        <arg choice="plain">-o</arg>
-        <arg choice="plain">--clone</arg>
-      </group>
-      <arg choice="plain"><replaceable>image-path</replaceable></arg>
-      <group choice="req">
-        <arg choice="plain">-d</arg>
-      </group>
-      <arg choice="plain"><replaceable>destination</replaceable></arg>
-    </cmdsynopsis>
-    <cmdsynopsis>
-      <command>kiwi</command>
-      <group choice="req">
-        <arg choice="plain">-b</arg>
-        <arg choice="plain">--build</arg>
-      </group>
-    <arg choice="plain"><replaceable>image-path</replaceable></arg>
-      <group choice="req">
-        <arg choice="plain">-d</arg>
-      </group>
-    <arg choice="plain"><replaceable>destination</replaceable></arg>
-    </cmdsynopsis>
-  </refsynopsisdiv>
-
-  <refsect1 id="kiwi.image.basics">
-    <title>Basics</title>
-    <para>
-      KIWI is a complete imaging solution that is based on an image
-      description. Such a description is represented by a directory
-      which includes at least one <filename>config.xml</filename> file
-      and may as well include other files like scripts or configuration
-      data. The <systemitem>kiwi-templates</systemitem> package provides example descriptions
-      based on a JeOS system. JeOS means <emphasis>Just enough Operating System</emphasis>.
-      KIWI provides image templates based on that axiom which means a
-      JeOS is a small, text only based image including a predefined
-      remote source setup to allow installation of missing software
-      components at a later point in time. 
-    </para>
-    <para>
-      Detailed description of the kiwi image system
-      exists in the system design document in <ulink
-        url="file:///usr/share/doc/packages/kiwi/kiwi.pdf"/>. KIWI
-      always operates in two steps. The KIWI <option>--build</option> option just
-      combines both steps into one to make it easier to start with KIWI.
-      The first step is the preparation step and if that step was successful,
-      a creation step follows which is able to create different image output
-      types. If you have started with an example and want to add you own
-      changes it might be a good idea to clone of from this example. This
-      can be done by simply copying the entire image description or you can
-      let KIWI do that for you by using the <command>kiwi</command> <option>--clone</option> command.
-    </para>
-    <para>
-      In the preparation step,
-      you prepare a directory including the contents of your new
-      filesystem based on one or more software package source(s)
-      The creation step is based on the result of the
-      preparation step and uses the contents of the new image root tree to
-      create the output image. If the image type ISO was requested, the
-      output image would be a file with the suffix <filename
-        class="extension">.iso</filename> representing a live system on
-      CD or DVD. Other than that KIWI is able to create images for
-      virtual and para-virtual (Xen) environments as well as for USB
-      stick, PXE network clients and OEM customized Linux systems. 
-    </para>
-  </refsect1>
-  <refsect1 id="kiwi.general">
-    <title>General Options</title>
- <variablelist>
-  <varlistentry>
-    <term><optional><option>-h</option> | <option>--help</option></optional></term>
-    <listitem>
-    <para>
-     Display help.
-    </para>
-    </listitem>
-  </varlistentry>
-  <varlistentry>
-    <term><optional><option>--version</option></optional></term>
-    <listitem>
-    <para>
-     Display the KIWI version.
-    </para>
-    </listitem>
-  </varlistentry>
-  <varlistentry>
-    <term><optional><option>--check-config <replaceable>path-to-the-configuration-file</replaceable></option></optional></term>
-    <listitem>
-    <para>
-     Checks the XML configuration file.
-    </para>
-    </listitem>
-  </varlistentry>
-  <varlistentry>
-    <term><optional><option>--nocolor</option></optional></term>
-    <listitem>
-    <para>
-     Do not use colored output.
-    </para>
-    </listitem>
-  </varlistentry> </variablelist>
-
-  </refsect1>
-  <refsect1 id="kiwi.image.prepcreate">
-    <title>Image Preparation and Creation</title>
-    <cmdsynopsis>
-      <command>kiwi</command>
-      <group choice="req">
-        <arg choice="plain">-p</arg>
-        <arg choice="plain">--prepare</arg>
-      </group>
-      <arg choice="plain"><replaceable>image-path</replaceable></arg>
-      <sbr/>
-      <group choice="req">
-        <arg choice="plain">-r</arg>
-        <arg choice="plain">--root</arg>
-      </group>
-      <arg choice="plain"><replaceable>image-root</replaceable></arg>
-      <arg choice="opt">--cache <replaceable>directory</replaceable></arg>
-    </cmdsynopsis>
-
-    <cmdsynopsis>
-      <command>kiwi</command>
-      <group choice="req">
-        <arg choice="plain">-c</arg>
-        <arg choice="plain">--create</arg>
-      </group>
-      <arg choice="plain"><replaceable>image-root</replaceable></arg>
-      <sbr/>
-      <group choice="req">
-        <arg choice="plain">-d</arg>
-        <arg choice="plain">--destdir</arg>
-      </group>
-      <arg choice="plain"><replaceable>destination</replaceable></arg>
-      <arg choice="opt">--type <replaceable>image-type</replaceable></arg>
-    </cmdsynopsis>
-  </refsect1>
-
-  <refsect1 id="kiwi.image.upgrade">
-    <title>Image Upgrade</title>
-    <para>
-      If the image root tree is stored and not removed, it can be
-      used for upgrading the image according to the changes
-      made in the repositories used for this image. If a distributor
-      provides an update channel for package updates and an image
-        <filename>config.xml</filename> includes this update channel as
-      repository, it is useful to store the image root tree and upgrade
-      the tree according to changes on the update channel. Given that the
-      root tree exists it's also possible to add or remove software
-      and recreate the image of the desired type.
-    </para>    
-    <cmdsynopsis>
-      <command>kiwi</command>
-      <group choice="req">
-        <arg choice="plain">-u</arg>
-        <arg choice="plain">--upgrade</arg>
-      </group>
-      <arg choice="plain"><replaceable>image-root</replaceable></arg>
-      <arg choice="opt">--add-package <replaceable>name</replaceable></arg>
-      <arg choice="opt">--add-pattern <replaceable>name</replaceable></arg>
-    </cmdsynopsis>
-  </refsect1>
-
-  <refsect1 id="kiwi.image.system2image">
-    <title>System Analysis</title>
-    <para>
-      KIWI provides a module which allows you to analyse
-      the running system and create a report and an image description
-      representing the current state of the machine. Among others this allows
-      you to clone your currently running system into an image.
-      The system requires the zypper backend in order to work properly.
-    </para>
-    <para>
-      The process will always place it's result into the
-      <filename>/tmp/$OptionValueOf--describe</filename> directory. The reason for
-      this is because
-      <filename class="directory">/tmp</filename> is always excluded from
-      the analysis and therefore
-      we can safely place new files there without influencing the
-      process itself. You should have at least 100&nbsp;MB free space for
-      the cache file and the image description all the rest are just
-      hard links.
-    </para>
-    <para>
-      As one result a HTML based report file is created which
-      contains important information about the system. You are free to
-      ignore that information but with the risk that the image from
-      that description
-      does not represent the same system which is running at the moment. 
-      The less issues left in the report the better is the result.
-      In most cases a manual fine tuning is required. This includes
-      the repository selection and the unmanaged files along with the
-      configuration details of your currently running operating system.
-      You should understand the module as a helper to analyse running
-      linux systems.
-    </para>    
-    <cmdsynopsis><command>kiwi</command> 
-      <group choice="req">
-        <arg choice="plain">--describe</arg>
-      </group>
-      <arg choice="plain"><replaceable>name</replaceable></arg>
-    </cmdsynopsis>
-  </refsect1>
-  
-  <refsect1 id="kiwi.image.postproc">
-    <title>Image Postprocessing Modes</title>
-    <para>
-      The KIWI post-processing modes are used for special image deployment
-      tasks, like installing the image on a USB stick. So to say they are the
-      third step after preparation and creation. KIWI calls the postprocessing
-      modules automatically according to the specified output image type and
-      attributes but it's also possible to call them manually.
-    </para>    
-    <cmdsynopsis><command>kiwi</command>
-      <arg choice="plain">--bootvm <replaceable>initrd</replaceable></arg>
-      <arg choice="plain">--bootvm-system <replaceable>systemImage</replaceable></arg>
-      <arg choice="opt">--bootvm-disksize <replaceable>size</replaceable></arg>
-    </cmdsynopsis>
-    <cmdsynopsis><command>kiwi</command>
-      <arg choice="plain">--bootcd <replaceable>initrd</replaceable></arg>
-    </cmdsynopsis>
-    <cmdsynopsis><command>kiwi</command>
-      <arg choice="plain">--bootusb <replaceable>initrd</replaceable></arg>
-    </cmdsynopsis>
-    <cmdsynopsis><command>kiwi</command>
-      <arg choice="plain">--installcd <replaceable>initrd</replaceable></arg>
-      <arg choice="plain">--installcd-system <replaceable>raw-system-image</replaceable></arg>
-    </cmdsynopsis>
-    <cmdsynopsis><command>kiwi</command>
-      <arg choice="plain">--installstick <replaceable>initrd</replaceable></arg>
-      <arg choice="plain">--installstick-system <replaceable>raw-system-image</replaceable></arg>
-    </cmdsynopsis>
-    <cmdsynopsis><command>kiwi</command>
-      <arg choice="plain">--installpxe <replaceable>initrd</replaceable></arg>
-      <arg choice="plain">--installpxe-system <replaceable>raw-system-image</replaceable></arg>
-    </cmdsynopsis>
-  </refsect1>
- 
-  <refsect1>
-    <title>Image Format Conversion</title>
-    <para>
-      The KIWI format conversion is useful to perform the creation of
-    another image output format like vmdk for VMware or ovf the open
-      virtual machine format. Along with the conversion KIWI also creates
-      the virtual machine configuration according to the format if
-      there is a machine section specified in the XML description
-    </para>
-    <cmdsynopsis><command>kiwi</command>
-      <arg choice="plain">--convert <replaceable>systemImage</replaceable></arg>
-      <arg choice="opt">--format <replaceable>vmdk|ovf|qcow2|vhd</replaceable></arg>
-    </cmdsynopsis>
-  </refsect1>
- 
-  <refsect1>
-    <title>Helper Tools</title>
-    <para>
-      The helper tools provide optional functions like
-      creating a crypted password string for the users section of the
-      <filename>config.xml</filename> file as well as signing the image
-      description with an md5sum hash and adding splash data to
-      the boot image used by the bootloader.
-    </para>
-    <cmdsynopsis>
-    <command>kiwi</command> <arg choice="plain">--createpassword</arg>
+ <refentryinfo><indexterm>
+  <primary>manpages</primary>
+  <secondary>kiwi</secondary></indexterm><productname>KIWI</productname>
+<!--<productnumber></productnumber>--><date>Created: <?dbtimestamp?></date>
+  <authorgroup>
+   <author><firstname>Marcus</firstname><surname>Schaefer</surname>
+    <contrib>Developer</contrib><email>ms (AT) suse.de</email>
+   </author>
+  </authorgroup>
+ </refentryinfo>
+ <refmeta>
+  <refentrytitle>kiwi</refentrytitle>
+  <manvolnum>1</manvolnum>
+  <refmiscinfo class="version">_KV_</refmiscinfo>
+  <refmiscinfo class="manual">KIWI Manualpage</refmiscinfo>
+ </refmeta>
+ <refnamediv>
+  <refname>kiwi</refname><refpurpose>Creating Operating System Images</refpurpose>
+ </refnamediv>
+ <refsynopsisdiv>
+  <title>Synopsis</title>
+  <cmdsynopsis><command>kiwi</command><group choice="req">
+   <arg choice="plain">-l</arg>
+   <arg choice="plain">--list</arg></group>
   </cmdsynopsis>
-    <cmdsynopsis><command>kiwi</command> <arg choice="plain">--createhash
-      <replaceable>image-path</replaceable></arg>
+  <cmdsynopsis><command>kiwi</command><group choice="req">
+   <arg choice="plain">-o</arg>
+   <arg choice="plain">--clone</arg></group>
+   <arg choice="plain"><replaceable>image-path</replaceable>
+   </arg><group choice="req">
+   <arg choice="plain">-d</arg></group>
+   <arg choice="plain"><replaceable>destination</replaceable>
+   </arg>
   </cmdsynopsis>
-    <cmdsynopsis>
-      <command>kiwi</command>
-      <group choice="req">
-        <arg choice="plain">-i</arg>
-        <arg choice="plain">--info</arg>
-      </group>
-      <arg choice="plain"><replaceable>ImagePath</replaceable></arg>
-      <arg choice="req">--select
-      <replaceable>
-    repo-patterns|patterns|types|sources|size|profiles|packages|version
-    </replaceable></arg>
-    </cmdsynopsis>
-    <cmdsynopsis>
-      <command>kiwi</command>
-      <arg choice="plain">--setup-splash <replaceable>initrd</replaceable></arg>
-    </cmdsynopsis>
+  <cmdsynopsis><command>kiwi</command><group choice="req">
+   <arg choice="plain">-b</arg>
+   <arg choice="plain">--build</arg></group>
+   <arg choice="plain"><replaceable>image-path</replaceable>
+   </arg><group choice="req">
+   <arg choice="plain">-d</arg></group>
+   <arg choice="plain"><replaceable>destination</replaceable>
+   </arg>
+  </cmdsynopsis>
+ </refsynopsisdiv>
+ <refsect1 id="kiwi.image.basics">
+  <title>Basics</title>
   <para>
-  The following list describes the helper tools more detailed
+   KIWI is a complete imaging solution that is based on an image
+   description. Such a description is represented by a directory which
+   includes at least one <filename>config.xml</filename> file and may as
+   well include other files like scripts or configuration data. The
+   <systemitem>kiwi-templates</systemitem> package provides example
+   descriptions based on a JeOS system. JeOS means <emphasis>Just enough
+   Operating System</emphasis>. KIWI provides image templates based on that
+   axiom which means a JeOS is a small, text only based image including a
+   predefined remote source setup to allow installation of missing software
+   components at a later point in time.
   </para>
+  <para>
+   Detailed description of the kiwi image system exists in the system design
+   document in
+   <ulink
+        url="file:///usr/share/doc/packages/kiwi/kiwi.pdf"/>. KIWI
+   always operates in two steps. The KIWI <option>--build</option> option
+   just combines both steps into one to make it easier to start with KIWI.
+   The first step is the preparation step and if that step was successful, a
+   creation step follows which can create different image output
+   types. If you have started with an example and want to add you own
+   changes it might be a good idea to clone of from this example. This can
+   be done by simply copying the entire image description or you can let
+   KIWI do that for you by using the <command>kiwi</command>
+   <option>--clone</option> command.
+  </para>
+  <para>
+   In the preparation step, you prepare a directory including the contents
+   of your new file system based on one or more software package source(s)
+   The creation step is based on the result of the preparation step and uses
+   the contents of the new image root tree to create the output image. If
+   the image type ISO was requested, the output image would be a file with
+   the suffix <filename
+        class="extension">.iso</filename>
+   representing a live system on CD or DVD. Other than that KIWI can
+   create images for virtual and para-virtual (Xen) environments as well as
+   for USB stick, PXE network clients and OEM customized Linux systems.
+  </para>
+ </refsect1>
+ <refsect1 id="kiwi.general">
+  <title>General Options</title>
   <variablelist>
-  <varlistentry>
-    <term><optional><option>--createpassword</option></optional></term>
-    <listitem>
-    <para>
-      Create a crypted password hash and prints it on the console.
-      The user can use the string as value for the pwd attribute in
-      the XML users section
-    </para>
-    </listitem>
-  </varlistentry>
-  <varlistentry>
-    <term><optional><option>--createhash <replaceable>image-path</replaceable></option>
-    </optional></term>
-    <listitem>
-    <para>
-      Sign your image description with a md5sum. The result is written to a file
-      named <filename>.checksum.md</filename> and is checked if KIWI creates
-      an image from this description.
-    </para>
-    </listitem>
-  </varlistentry>
-  <varlistentry>
-    <term><optional>
-      <option>-i</option> | <option>--info <replaceable>image-path</replaceable></option>
-      <option>--select <replaceable>selection</replaceable></option>
-    </optional></term>
-    <listitem>
-    <para>
-      List general information about the image description. So far you can get
-      information about the available patterns in the configured repositories with
-      <replaceable>repo-patterns</replaceable>, a list of used patterns for this image
-      with <replaceable>patterns</replaceable>, a list of supported image types
-      with <replaceable>types</replaceable>, a list of source URLs with
-      <replaceable>sources</replaceable>, an estimation about the install size and
-      the size of the packages marked as to be deleted with <replaceable>size</replaceable>,
-      a list of profiles with <replaceable>profiles</replaceable>, 
-            a list of solved packages to become installed with <replaceable>packages</replaceable>,
-      and the information about the appliance name and version with <replaceable>version</replaceable>
-    </para>
-    </listitem>
-  </varlistentry>
-  <varlistentry>
-    <term><optional><option>--setup-splash <replaceable>initrd</replaceable></option>
-    </optional></term>
-    <listitem>
-    <para>
-      Create splash screen from the data inside the initrd
-      and re-create the initrd with the splash screen attached
-      to the initrd cpio archive. This enables the kernel
-      to load the splash screen at boot time. If splashy is used
-      only a link to the original initrd will be created
-    </para>
-    </listitem>
-  </varlistentry>
-  </variablelist>
-  </refsect1>
-  
-  <refsect1 id="kiwi..global.options">
-    <title>Global Options</title>
-  <variablelist>
-  <varlistentry>
-    <term><optional><option>--add-profile</option>
-      <replaceable>profile-name</replaceable></optional></term>
-    <listitem>
-    <para>
-      Use the specified profile. A profile is a part of the
-      XML image description and therefore can enhance each section
-      with additional information. For example adding packages.
-    </para>
-    </listitem>
-  </varlistentry>
-  <varlistentry>
-    <term><optional><option>--set-repo</option>
-      <replaceable>URL</replaceable></optional></term>
-    <listitem>
-    <para>
-      Set/Overwrite the repo URL for the first repo listed in the
-            configuration file that does not have a "fixed" status.
-      The change is temporary and will not be written to the
-      XML file.
-    </para>
-    </listitem>
-  </varlistentry>
-  <varlistentry>
-    <term><optional><option>--set-repotype</option>
-      <replaceable>type</replaceable></optional></term>
-    <listitem>
-    <para>
-      Set/Overwrite repo type for the first listed repo.
-      The supported repo types depends on the packagemanager.
-      Commonly supported are rpm-md, rpm-dir and yast2.
-      The change is temporary and will not be written to the
-      XML file.
-    </para>
-    </listitem>
-  </varlistentry>
-  <varlistentry>
-    <term><optional><option>--set-repoalias</option>
-      <replaceable>name</replaceable></optional></term>
-    <listitem>
-    <para>
-      Set/Overwrite alias name for the first listed repo.
-      Alias names are optional free form text. If not set the source
-      attribute value is used and builds the alias name by replacing
-      each <quote>/</quote> with a <quote>_</quote>. An alias name should be set if the
-      source argument doesn't really explain what this repository
-      contains. The change is temporary and will not be written to the
-      XML file.
-    </para>
-    </listitem>
-  </varlistentry>
-  <varlistentry>
-    <term><optional><option>--set-repoprio</option>
-      <replaceable>number</replaceable></optional></term>
-    <listitem>
-    <para>
-      Set/Overwrite priority for the first listed repo.
-      Works with the smart packagemanager only. The Channel
-      priority assigned to all packages available in
-      this channel (0 if not set). If the exact same package
-      is available in more than one channel, the highest
-      priority is used.
-    </para>
-    </listitem>
-  </varlistentry>
-  <varlistentry>
-    <term><optional><option>--add-repo
-      <replaceable>URL</replaceable></option>,
-      <option>--add-repotype <replaceable>type</replaceable></option>
-      <option>--add-repoalias <replaceable>name</replaceable></option>
-      <option>--add-repoprio <replaceable>number</replaceable></option>
-    </optional></term>
-    <listitem>
-    <para>
-      Add the given repository and type for this run of an
-      image prepare or upgrade process. Multiple
-            <option>--add-repo</option>/<option>--add-repotype</option>
-      options are possible. The change will not be written to the
-      <filename>config.xml</filename> file</para>
-    </listitem>
-  </varlistentry>
-  <varlistentry>
-    <term><optional><option>--ignore-repos</option></optional></term>
-    <listitem>
-    <para>
-      Ignore all repositories specified so far, in XML or
-      elsewhere. This option should be used in conjunction with
-      subsequent calls to <option>--add-repo</option> to specify
-      repositories at the commandline that override previous
-      specifications.
-    </para>
-    </listitem>
-  </varlistentry>
-  <varlistentry>
-    <term><optional><option>--logfile <replaceable>Filename</replaceable></option>
-      | <option>terminal</option></optional></term>
-    <listitem>
-    <para>
-      Write to the log file
-      <replaceable>Filename</replaceable> instead of the terminal.
-    </para>
-    </listitem>
-  </varlistentry>
-  <varlistentry>
-    <term><optional><option>--gzip-cmd <replaceable>cmd</replaceable></option></optional></term>
-    <listitem>
-    <para>
-      Specify an alternate command to run when compressing
-      boot and system images. Command must accept
-      <command>gzip</command> options.
-    </para>
-    </listitem>
-  </varlistentry>
-  <varlistentry>
-    <term><optional><option>--package-manager <replaceable>smart|zypper</replaceable></option>
-    </optional></term>
-    <listitem>
-    <para>
-      Set the package manager to use for this image. If set it
-      will temporarily overwrite the value set in the xml
-      description.
-    </para>
-    </listitem>
-  </varlistentry>
-  <varlistentry>
-    <term><optional><option>-A</option> | <option>--target-arch <replaceable>i586|x86_64|armv5tel|ppc</replaceable></option>
-    </optional></term>
-    <listitem>
-    <para>
-      Set a special target-architecture. This overrides the 
-      used architecture for the image-packages in <filename>zypp.conf</filename>.
-      When used with smart this option doesn't have any effect.
-    </para>
-    </listitem>
-  </varlistentry>
-  <varlistentry>
-    <term><optional><option>--disk-start-sector <replaceable>number</replaceable></option></optional></term>
-    <listitem>
-    <para>
-      The start sector value for virtual disk based images.
-      The default is 2048. For newer disks including SSD
-      this is a reasonable default. In order to use the old
-      style disk layout the value can be set to 32.
-    </para>
-    </listitem>
-  </varlistentry>
-  <varlistentry>
-    <term><optional><option>--disk-sector-size <replaceable>number</replaceable></option></optional></term>
-    <listitem>
-    <para>
-      Overwrite the default 512 byte sector size value.
-      This will influence the partition alignment.
-    </para>
-    </listitem>
-  </varlistentry>
-  <varlistentry>
-    <term><optional><option>--disk-alignment <replaceable>number</replaceable></option></optional></term>
-    <listitem>
-    <para>
-      Align the start of each partition to the specified
-      value. By default 4096 bytes are used.
-    </para>
-    </listitem>
-  </varlistentry>
-  <varlistentry>
-    <term><optional><option>--debug</option></optional></term>
-    <listitem>
-    <para>
-      Prints a stack trace in case of internal errors
-    </para>
-    </listitem>
-  </varlistentry>
-  <varlistentry>
-    <term><optional><option>--verbose <replaceable>1|2|3</replaceable></option>
-    </optional></term>
-    <listitem>
-    <para>
-      Controls the verbosity level for the instsource module
-    </para>
-    </listitem>
-  </varlistentry>
-  <varlistentry>
-    <term><optional><option>-y</option> | <option>--yes</option>
-    </optional></term>
-    <listitem>
-    <para>
-      Answer any interactive questions with yes
-    </para>
-    </listitem>
-  </varlistentry>
-  <varlistentry>
-    <term><optional><option>--create-instsource <replaceable>path-to-config.xml</replaceable></option> 
-    </optional></term>
-    <listitem>
-    <para>
-      Using this option, it is possible to create a valid installation
-      repository from blank RPM file trees. The created tree can be used directly
-      for the image creation process afterwards.
-    </para>
-    </listitem>
-  </varlistentry>
-  <varlistentry>
-    <term><optional><option>--bundle-build</option> 
-    </optional></term>
+   <varlistentry>
+    <term><optional><option>-h</option> | <option>--help</option></optional>
+    </term>
     <listitem>
      <para>
-     This option bundles the build results to be suitable for
-     publishing it in the buildservice. It allows adding a build-number
-     in combination with the <option>--bundle-id</option> option
-     as well as a SHA key to the results. It also removes intermediate
-     build results not relevant for users if they don't want to rebuild
-     the image.
-    </para>
+      Display help.
+     </para>
     </listitem>
-  </varlistentry>
-  <varlistentry>
-    <term><optional><option>--bundle-id <replaceable>build-number</replaceable></option> 
-    </optional></term>
+   </varlistentry>
+   <varlistentry>
+    <term><optional><option>--version</option></optional>
+    </term>
     <listitem>
-    <para>
-      The build-number/string in combination with <option>--bundle-build</option>
-    </para>
+     <para>
+      Display the KIWI version.
+     </para>
     </listitem>
-  </varlistentry>
-
+   </varlistentry>
+   <varlistentry>
+    <term><optional><option>--check-config <replaceable>path-to-the-configuration-file</replaceable></option></optional>
+    </term>
+    <listitem>
+     <para>
+      Checks the XML configuration file.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional><option>--nocolor</option></optional>
+    </term>
+    <listitem>
+     <para>
+      Do not use colored output.
+     </para>
+    </listitem>
+   </varlistentry>
   </variablelist>
-  </refsect1>
-
-  <refsect1 id="kiwi.prepare.options">
-    <title>Image Preparation Options</title>
+ </refsect1>
+ <refsect1 id="kiwi.image.prepcreate">
+  <title>Image Preparation and Creation</title>
+  <cmdsynopsis><command>kiwi</command><group choice="req">
+   <arg choice="plain">-p</arg>
+   <arg choice="plain">--prepare</arg></group>
+   <arg choice="plain"><replaceable>image-path</replaceable>
+   </arg>
+   <sbr/><group choice="req">
+   <arg choice="plain">-r</arg>
+   <arg choice="plain">--root</arg></group>
+   <arg choice="plain"><replaceable>image-root</replaceable>
+   </arg>
+   <arg choice="opt">--cache <replaceable>directory</replaceable>
+   </arg>
+  </cmdsynopsis>
+  <cmdsynopsis><command>kiwi</command><group choice="req">
+   <arg choice="plain">-c</arg>
+   <arg choice="plain">--create</arg></group>
+   <arg choice="plain"><replaceable>image-root</replaceable>
+   </arg>
+   <sbr/><group choice="req">
+   <arg choice="plain">-d</arg>
+   <arg choice="plain">--destdir</arg></group>
+   <arg choice="plain"><replaceable>destination</replaceable>
+   </arg>
+   <arg choice="opt">--type <replaceable>image-type</replaceable>
+   </arg>
+  </cmdsynopsis>
+ </refsect1>
+ <refsect1 id="kiwi.image.upgrade">
+  <title>Image Upgrade</title>
+  <para>
+   If the image root tree is stored and not removed, it can be used for
+   upgrading the image according to the changes made in the repositories
+   used for this image. If a distributor provides an update channel for
+   package updates and an image <filename>config.xml</filename> includes
+   this update channel as repository, it is useful to store the image root
+   tree and upgrade the tree according to changes on the update channel.
+   Given that the root tree exists it's also possible to add or remove
+   software and recreate the image of the desired type.
+  </para>
+  <cmdsynopsis><command>kiwi</command><group choice="req">
+   <arg choice="plain">-u</arg>
+   <arg choice="plain">--upgrade</arg></group>
+   <arg choice="plain"><replaceable>image-root</replaceable>
+   </arg>
+   <arg choice="opt">--add-package <replaceable>name</replaceable>
+   </arg>
+   <arg choice="opt">--add-pattern <replaceable>name</replaceable>
+   </arg>
+  </cmdsynopsis>
+ </refsect1>
+ <refsect1 id="kiwi.image.system2image">
+  <title>System Analysis</title>
+  <para>
+   KIWI provides a module which allows you to analyze the running system and
+   create a report and an image description representing the current state
+   of the machine. Among others this allows you to clone your currently
+   running system into an image. The system requires the zypper back-end in
+   order to work properly.
+  </para>
+  <para>
+   The process will always place it's result into the
+   <filename>/tmp/$OptionValueOf--describe</filename> directory. The reason
+   for this is because <filename class="directory">/tmp</filename> is always
+   excluded from the analysis and therefore we can safely place new files
+   there without influencing the process itself. You should have at least
+   100&nbsp;MB free space for the cache file and the image description all
+   the rest are just hard links.
+  </para>
+  <para>
+   As one result a HTML based report file is created which contains
+   important information about the system. You are free to ignore that
+   information but with the risk that the image from that description does
+   not represent the same system which is running at the moment. The less
+   issues left in the report the better is the result. In most cases a
+   manual fine tuning is required. This includes the repository selection
+   and the unmanaged files along with the configuration details of your
+   currently running operating system. You should understand the module as a
+   helper to analyze running linux systems.
+  </para>
+  <cmdsynopsis><command>kiwi</command><group choice="req">
+   <arg choice="plain">--describe</arg></group>
+   <arg choice="plain"><replaceable>name</replaceable>
+   </arg>
+  </cmdsynopsis>
+ </refsect1>
+ <refsect1 id="kiwi.image.postproc">
+  <title>Image Postprocessing Modes</title>
+  <para>
+   The KIWI post-processing modes are used for special image deployment
+   tasks, like installing the image on a USB stick. So to say they are the
+   third step after preparation and creation. KIWI calls the postprocessing
+   modules automatically according to the specified output image type and
+   attributes but it's also possible to call them manually.
+  </para>
+  <cmdsynopsis><command>kiwi</command>
+   <arg choice="plain">--bootvm <replaceable>initrd</replaceable>
+   </arg>
+   <arg choice="plain">--bootvm-system <replaceable>systemImage</replaceable>
+   </arg>
+   <arg choice="opt">--bootvm-disksize <replaceable>size</replaceable>
+   </arg>
+  </cmdsynopsis>
+  <cmdsynopsis><command>kiwi</command>
+   <arg choice="plain">--bootcd <replaceable>initrd</replaceable>
+   </arg>
+  </cmdsynopsis>
+  <cmdsynopsis><command>kiwi</command>
+   <arg choice="plain">--bootusb <replaceable>initrd</replaceable>
+   </arg>
+  </cmdsynopsis>
+  <cmdsynopsis><command>kiwi</command>
+   <arg choice="plain">--installcd <replaceable>initrd</replaceable>
+   </arg>
+   <arg choice="plain">--installcd-system <replaceable>raw-system-image</replaceable>
+   </arg>
+  </cmdsynopsis>
+  <cmdsynopsis><command>kiwi</command>
+   <arg choice="plain">--installstick <replaceable>initrd</replaceable>
+   </arg>
+   <arg choice="plain">--installstick-system <replaceable>raw-system-image</replaceable>
+   </arg>
+  </cmdsynopsis>
+  <cmdsynopsis><command>kiwi</command>
+   <arg choice="plain">--installpxe <replaceable>initrd</replaceable>
+   </arg>
+   <arg choice="plain">--installpxe-system <replaceable>raw-system-image</replaceable>
+   </arg>
+  </cmdsynopsis>
+ </refsect1>
+ <refsect1>
+  <title>Image Format Conversion</title>
+  <para>
+   The KIWI format conversion is useful to perform the creation of another
+   image output format like vmdk for VMware or ovf the open virtual machine
+   format. Along with the conversion KIWI also creates the virtual machine
+   configuration according to the format if there is a machine section
+   specified in the XML description
+  </para>
+  <cmdsynopsis><command>kiwi</command>
+   <arg choice="plain">--convert <replaceable>systemImage</replaceable>
+   </arg>
+   <arg choice="opt">--format <replaceable>vmdk|ovf|qcow2|vhd</replaceable>
+   </arg>
+  </cmdsynopsis>
+ </refsect1>
+ <refsect1>
+  <title>Helper Tools</title>
+  <para>
+   The helper tools provide optional functions like creating an encrypted
+   password string for the users section of the
+   <filename>config.xml</filename> file as well as signing the image
+   description with an md5sum hash and adding splash data to the boot image
+   used by the boot loader.
+  </para>
+  <cmdsynopsis><command>kiwi</command>
+   <arg choice="plain">--createpassword</arg>
+  </cmdsynopsis>
+  <cmdsynopsis><command>kiwi</command>
+   <arg choice="plain">--createhash
+      <replaceable>image-path</replaceable>
+   </arg>
+  </cmdsynopsis>
+  <cmdsynopsis><command>kiwi</command><group choice="req">
+   <arg choice="plain">-i</arg>
+   <arg choice="plain">--info</arg></group>
+   <arg choice="plain"><replaceable>ImagePath</replaceable>
+   </arg>
+   <arg choice="req">--select
+      <replaceable>
+    repo-patterns|patterns|types|sources|size|profiles|packages|version
+    </replaceable>
+   </arg>
+  </cmdsynopsis>
+  <cmdsynopsis><command>kiwi</command>
+   <arg choice="plain">--setup-splash <replaceable>initrd</replaceable>
+   </arg>
+  </cmdsynopsis>
+  <para>
+   The following list describes the helper tools more detailed
+  </para>
   <variablelist>
-  <varlistentry>
+   <varlistentry>
+    <term><optional><option>--createpassword</option></optional>
+    </term>
+    <listitem>
+     <para>
+      Create a crypted password hash and prints it on the console. The user
+      can use the string as value for the pwd attribute in the XML users
+      section
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional><option>--createhash <replaceable>image-path</replaceable></option></optional>
+    </term>
+    <listitem>
+     <para>
+      Sign your image description with a md5sum. The result is written to a
+      file named <filename>.checksum.md</filename> and is checked if KIWI
+      creates an image from this description.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional><option>-i</option> | <option>--info <replaceable>image-path</replaceable></option><option>--select <replaceable>selection</replaceable></option></optional>
+    </term>
+    <listitem>
+     <para>
+      List general information about the image description. So far you can
+      get information about the available patterns in the configured
+      repositories with <replaceable>repo-patterns</replaceable>, a list of
+      used patterns for this image with <replaceable>patterns</replaceable>,
+      a list of supported image types with <replaceable>types</replaceable>,
+      a list of source URLs with <replaceable>sources</replaceable>, an
+      estimation about the install size and the size of the packages marked
+      as to be deleted with <replaceable>size</replaceable>, a list of
+      profiles with <replaceable>profiles</replaceable>, a list of solved
+      packages to become installed with <replaceable>packages</replaceable>,
+      and the information about the appliance name and version with
+      <replaceable>version</replaceable>
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional><option>--setup-splash <replaceable>initrd</replaceable></option></optional>
+    </term>
+    <listitem>
+     <para>
+      Create splash screen from the data inside the initrd and re-create the
+      initrd with the splash screen attached to the initrd cpio archive.
+      This enables the kernel to load the splash screen at boot time. If
+      splashy is used only a link to the original initrd will be created
+     </para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+ </refsect1>
+ <refsect1 id="kiwi..global.options">
+  <title>Global Options</title>
+  <variablelist>
+   <varlistentry>
+    <term><optional><option>--add-profile</option><replaceable>profile-name</replaceable></optional>
+    </term>
+    <listitem>
+     <para>
+      Use the specified profile. A profile is a part of the XML image
+      description and therefore can enhance each section with additional
+      information. For example adding packages.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional><option>--set-repo</option><replaceable>URL</replaceable></optional>
+    </term>
+    <listitem>
+     <para>
+      Set/Overwrite the repo URL for the first repo listed in the
+      configuration file that does not have a "fixed" status. The change is
+      temporary and will not be written to the XML file.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional><option>--set-repotype</option><replaceable>type</replaceable></optional>
+    </term>
+    <listitem>
+     <para>
+      Set/Overwrite repo type for the first listed repo. The supported repo
+      types depends on the package manager. Commonly supported are rpm-md,
+      rpm-dir and yast2. The change is temporary and will not be written to
+      the XML file.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional><option>--set-repoalias</option><replaceable>name</replaceable></optional>
+    </term>
+    <listitem>
+     <para>
+      Set/Overwrite alias name for the first listed repo. Alias names are
+      optional free form text. If not set the source attribute value is used
+      and builds the alias name by replacing each <quote>/</quote> with a
+      <quote>_</quote>. An alias name should be set if the source argument
+      doesn't really explain what this repository contains. The change is
+      temporary and will not be written to the XML file.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional><option>--set-repoprio</option><replaceable>number</replaceable></optional>
+    </term>
+    <listitem>
+     <para>
+      Set/Overwrite priority for the first listed repo. Works with the smart
+      package manager only. The Channel priority assigned to all packages
+      available in this channel (0 if not set). If the exact same package is
+      available in more than one channel, the highest priority is used.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional><option>--add-repo
+      <replaceable>URL</replaceable></option>,
+      <option>--add-repotype <replaceable>type</replaceable></option><option>--add-repoalias <replaceable>name</replaceable></option><option>--add-repoprio <replaceable>number</replaceable></option></optional>
+    </term>
+    <listitem>
+     <para>
+      Add the given repository and type for this run of an image prepare or
+      upgrade process. Multiple
+      <option>--add-repo</option>/<option>--add-repotype</option> options
+      are possible. The change will not be written to the
+      <filename>config.xml</filename> file
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional><option>--ignore-repos</option></optional>
+    </term>
+    <listitem>
+     <para>
+      Ignore all repositories specified so far, in XML or elsewhere. This
+      option should be used in conjunction with subsequent calls to
+      <option>--add-repo</option> to specify repositories at the command line
+      that override previous specifications.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional><option>--logfile <replaceable>Filename</replaceable></option>
+      | <option>terminal</option></optional>
+    </term>
+    <listitem>
+     <para>
+      Write to the log file <replaceable>Filename</replaceable> instead of
+      the terminal.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional><option>--gzip-cmd <replaceable>cmd</replaceable></option></optional>
+    </term>
+    <listitem>
+     <para>
+      Specify an alternate command to run when compressing boot and system
+      images. Command must accept <command>gzip</command> options.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional><option>--package-manager <replaceable>smart|zypper</replaceable></option></optional>
+    </term>
+    <listitem>
+     <para>
+      Set the package manager to use for this image. If set it will
+      temporarily overwrite the value set in the xml description.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional><option>-A</option> | <option>--target-arch <replaceable>i586|x86_64|armv5tel|ppc</replaceable></option></optional>
+    </term>
+    <listitem>
+     <para>
+      Set a special target-architecture. This overrides the used
+      architecture for the image-packages in <filename>zypp.conf</filename>.
+      When used with smart this option doesn't have any effect.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional><option>--disk-start-sector <replaceable>number</replaceable></option></optional>
+    </term>
+    <listitem>
+     <para>
+      The start sector value for virtual disk based images. The default is
+      2048. For newer disks including SSD this is a reasonable default. In
+      order to use the old style disk layout the value can be set to 32.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional><option>--disk-sector-size <replaceable>number</replaceable></option></optional>
+    </term>
+    <listitem>
+     <para>
+      Overwrite the default 512 byte sector size value. This will influence
+      the partition alignment.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional><option>--disk-alignment <replaceable>number</replaceable></option></optional>
+    </term>
+    <listitem>
+     <para>
+      Align the start of each partition to the specified value. By default
+      4096 bytes are used.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional><option>--debug</option></optional>
+    </term>
+    <listitem>
+     <para>
+      Prints a stack trace in case of internal errors
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional><option>--verbose <replaceable>1|2|3</replaceable></option></optional>
+    </term>
+    <listitem>
+     <para>
+      Controls the verbosity level for the instsource module
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional><option>-y</option> | <option>--yes</option></optional>
+    </term>
+    <listitem>
+     <para>
+      Answer any interactive questions with yes
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional><option>--create-instsource <replaceable>path-to-config.xml</replaceable></option></optional>
+    </term>
+    <listitem>
+     <para>
+      Using this option, it is possible to create a valid installation
+      repository from blank RPM file trees. The created tree can be used
+      directly for the image creation process afterwards.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional><option>--bundle-build</option></optional>
+    </term>
+    <listitem>
+     <para>
+      This option bundles the build results to be suitable for publishing it
+      in the Build Service. It allows adding a build-number in combination
+      with the <option>--bundle-id</option> option as well as a SHA key to
+      the results. It also removes intermediate build results not relevant
+      for users if they don't want to rebuild the image.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional><option>--bundle-id <replaceable>build-number</replaceable></option></optional>
+    </term>
+    <listitem>
+     <para>
+      The build-number/string in combination with
+      <option>--bundle-build</option>
+     </para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+ </refsect1>
+ <refsect1 id="kiwi.prepare.options">
+  <title>Image Preparation Options</title>
+  <variablelist>
+   <varlistentry>
     <term><optional><option>-r</option> | <option>--root
-      <replaceable>RootPath</replaceable></option></optional></term>
+      <replaceable>RootPath</replaceable></option></optional>
+    </term>
     <listitem>
-    <para>
-      Set up the physical extend, chroot system below the given
-      root-path path. If no <option>--root</option> option is
-      given, KIWI will search for the attribute defaultroot in
-      <filename>config.xml</filename>. If no root directory is
-      known, a <command>mktemp</command> directory will be created
-      and used as root directory.
-    </para>
+     <para>
+      Set up the physical extend, chroot system below the given root-path
+      path. If no <option>--root</option> option is given, KIWI will search
+      for the attribute defaultroot in <filename>config.xml</filename>. If
+      no root directory is known, a <command>mktemp</command> directory will
+      be created and used as root directory.
+     </para>
     </listitem>
-  </varlistentry>
-  <varlistentry>
-    <term><optional><option>--force-new-root</option></optional></term>
+   </varlistentry>
+   <varlistentry>
+    <term><optional><option>--force-new-root</option></optional>
+    </term>
     <listitem>
-    <para>
-      Force creation of new root directory. If the directory
-      already exists, it is deleted.
-    </para>
+     <para>
+      Force creation of new root directory. If the directory already exists,
+      it is deleted.
+     </para>
     </listitem>
-  </varlistentry>
+   </varlistentry>
   </variablelist>
-  </refsect1>
-
-  <refsect1 id="kiwi.prepare.upgrade.options">
-    <title>Image Upgrade/Preparation Options</title>
+ </refsect1>
+ <refsect1 id="kiwi.prepare.upgrade.options">
+  <title>Image Upgrade/Preparation Options</title>
   <variablelist>
-    <varlistentry>
-        <term><optional><option>--cache</option> <replaceable>directory</replaceable>
-        </optional></term>
-        <listitem>
-        <para>
-            When specifying a cache directory, KIWI will create a cache each for
-           patterns and packages and re-use them, if possible, for subsequent
-            root tree preparations of this and/or other images 
-        </para>
-        </listitem>
-    </varlistentry>
-    <varlistentry>
-        <term><optional><option>--init-cache</option> <replaceable>image description</replaceable>
-        </optional></term>
-        <listitem>
-        <para>
-          Creates a cache from a KIWI image description.
-        </para>
-        </listitem>
-    </varlistentry>
-    <varlistentry>
-        <term><optional><option>--recycle-root</option></optional></term>
-        <listitem>
-        <para>
-         Uses an existing root tree and base the kiwi prepare step on
-         top of it. This is used to speed things up. 
-        </para>
-        </listitem>
-    </varlistentry>
-    <varlistentry>
-        <term><optional><option>--force-bootstrap</option></optional></term>
-        <listitem>
-        <para>
-          In combination with recycle-root this option forces to call
-          the bootstrap phase of kiwi, which is not considered necessary
-          under normal circumstations.
-        </para>
-        </listitem>
-    </varlistentry>
-  <varlistentry>
-    <term><optional><option>--add-package</option> <replaceable>package</replaceable>
-    </optional></term>
+   <varlistentry>
+    <term><optional><option>--cache</option><replaceable>directory</replaceable></optional>
+    </term>
     <listitem>
-    <para>
-      Add the given package name to the list of image packages
-      multiple <option>--add-package</option> options are possible. The change
-      will not be written to the XML description.
-    </para>
+     <para>
+      When specifying a cache directory, KIWI will create a cache each for
+      patterns and packages and re-use them, if possible, for subsequent
+      root tree preparations of this and/or other images
+     </para>
     </listitem>
-  </varlistentry>
-    <varlistentry>
-        <term><optional><option>--add-pattern</option> <replaceable>name</replaceable>
-        </optional></term>
-        <listitem>
-        <para>
-            Add the given pattern name to the list of image packages
-            multiple <option>--add-pattern</option> options are possible. The change
-            will not be written to the xml description. Patterns can be handled
-            by SUSE based repositories only.
-        </para>
-        </listitem>
-    </varlistentry>
-  <varlistentry>
-    <term><optional><option>--del-package</option> <replaceable>package</replaceable>
-    </optional></term>
+   </varlistentry>
+   <varlistentry>
+    <term><optional><option>--init-cache</option><replaceable>image description</replaceable></optional>
+    </term>
     <listitem>
-    <para>
-      Removes the given package by adding it the list of packages
-      to become removed. The change will not be written to the xml
-      description.
-    </para>
+     <para>
+      Creates a cache from a KIWI image description.
+     </para>
     </listitem>
-  </varlistentry>
+   </varlistentry>
+   <varlistentry>
+    <term><optional><option>--recycle-root</option></optional>
+    </term>
+    <listitem>
+     <para>
+      Uses an existing root tree and base the kiwi prepare step on top of
+      it. This is used to speed things up.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional><option>--force-bootstrap</option></optional>
+    </term>
+    <listitem>
+     <para>
+      In combination with recycle-root this option forces to call the
+      bootstrap phase of kiwi, which is not considered necessary under
+      normal circumstances.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional><option>--add-package</option><replaceable>package</replaceable></optional>
+    </term>
+    <listitem>
+     <para>
+      Add the given package name to the list of image packages multiple
+      <option>--add-package</option> options are possible. The change will
+      not be written to the XML description.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional><option>--add-pattern</option><replaceable>name</replaceable></optional>
+    </term>
+    <listitem>
+     <para>
+      Add the given pattern name to the list of image packages multiple
+      <option>--add-pattern</option> options are possible. The change will
+      not be written to the xml description. Patterns can be handled by SUSE
+      based repositories only.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional><option>--del-package</option><replaceable>package</replaceable></optional>
+    </term>
+    <listitem>
+     <para>
+      Removes the given package by adding it the list of packages to become
+      removed. The change will not be written to the xml description.
+     </para>
+    </listitem>
+   </varlistentry>
   </variablelist>
-  </refsect1>
-
-  <refsect1 id="kiwi.create.options">
-    <title>Image Creation Options</title>
+ </refsect1>
+ <refsect1 id="kiwi.create.options">
+  <title>Image Creation Options</title>
   <variablelist>
-  <varlistentry>
+   <varlistentry>
     <term><optional><option>-d</option> | <option>--destdir
-      <replaceable>DestinationPath</replaceable></option></optional></term>
+      <replaceable>DestinationPath</replaceable></option></optional>
+    </term>
     <listitem>
-    <para>
-      Specify destination directory to store the image file(s)
-      If not specified, KIWI will try to find the attribute 
-      <replaceable>defaultdestination</replaceable> which can be
-      specified in the <replaceable>preferences</replaceable> section
-      of the <filename>config.xml</filename> file. If it exists its value is used as
-      destination directory. If no destination information can be found,
+     <para>
+      Specify destination directory to store the image file(s) If not
+      specified, KIWI will try to find the attribute
+      <replaceable>defaultdestination</replaceable> which can be specified
+      in the <replaceable>preferences</replaceable> section of the
+      <filename>config.xml</filename> file. If it exists its value is used
+      as destination directory. If no destination information can be found,
       an error occurs.
-    </para>
+     </para>
     </listitem>
-  </varlistentry>
-  <varlistentry>
+   </varlistentry>
+   <varlistentry>
     <term><optional><option>-t</option> | <option>--type
-      <replaceable>Imagetype</replaceable></option></optional></term>
+      <replaceable>Imagetype</replaceable></option></optional>
+    </term>
     <listitem>
-    <para>
-      Specify the output image type to use for this image. Each type
-            is described in a <replaceable>type</replaceable> section of the
-            preferences section. At least one type has to be specified in the
-            <filename>config.xml</filename> description. By default,
-            the types specifying the <emphasis>primary</emphasis> attribute will be
-            used. If there is no primary attribute set, the first type
-            section of the preferences section is the primary type.
-            The types are only evaluated when KIWI runs the
-            <option>--create</option> step. With the
-            option <option>--type</option> one can distinguish between the
-            types stored in <filename>config.xml</filename>
-    </para>
+     <para>
+      Specify the output image type to use for this image. Each type is
+      described in a <replaceable>type</replaceable> section of the
+      preferences section. At least one type needs to be specified in the
+      <filename>config.xml</filename> description. By default, the types
+      specifying the <emphasis>primary</emphasis> attribute will be used. If
+      there is no primary attribute set, the first type section of the
+      preferences section is the primary type. The types are only evaluated
+      when KIWI runs the <option>--create</option> step. With the option
+      <option>--type</option> one can distinguish between the types stored
+      in <filename>config.xml</filename>
+     </para>
     </listitem>
-  </varlistentry>
-  <varlistentry>
-    <term><optional><option>-s</option> | <option>--strip</option></optional></term>
+   </varlistentry>
+   <varlistentry>
+    <term><optional><option>-s</option> | <option>--strip</option></optional>
+    </term>
     <listitem>
-    <para>
-      Strip shared objects and executables - only makes sense in
-      combination with <option>--create</option>
-    </para>
+     <para>
+      Strip shared objects and executables - only makes sense in combination
+      with <option>--create</option>
+     </para>
     </listitem>
-  </varlistentry>
-  <varlistentry>
+   </varlistentry>
+   <varlistentry>
     <term><optional><option>--prebuiltbootimage
-      <replaceable>Directory</replaceable></option></optional></term>
+      <replaceable>Directory</replaceable></option></optional>
+    </term>
     <listitem>
-    <para>
-      Search in <replaceable>Directory</replaceable> for
-      pre-built boot images.
-    </para>
+     <para>
+      Search in <replaceable>Directory</replaceable> for pre-built boot
+      images.
+     </para>
     </listitem>
-  </varlistentry>
-  <varlistentry>
-    <term><optional><option>--isocheck</option></optional></term>
+   </varlistentry>
+   <varlistentry>
+    <term><optional><option>--isocheck</option></optional>
+    </term>
     <listitem>
-    <para>
-      in case of an iso image the checkmedia program generates
-      a md5sum into the ISO header. If the <option>--isocheck</option> option is
-      specified a new boot menu entry will be generated which
-      allows to check this media
-    </para>
+     <para>
+      in case of an iso image the checkmedia program generates a md5sum into
+      the ISO header. If the <option>--isocheck</option> option is specified
+      a new boot menu entry will be generated which allows to check this
+      media
+     </para>
     </listitem>
-  </varlistentry>
-  <varlistentry>
-    <term><optional><option>--lvm</option></optional></term>
+   </varlistentry>
+   <varlistentry>
+    <term><optional><option>--lvm</option></optional>
+    </term>
     <listitem>
-    <para>
-      Use the logical volume manager to control the disk.
-      The partition table will include one lvm partition and
-      one standard ext2 boot partition. Use of this option
-      makes sense for the create step only and also only for
-      the image types: vmx, oem, and usb
-    </para>
+     <para>
+      Use the logical volume manager to control the disk. The partition
+      table will include one lvm partition and one standard ext2 boot
+      partition. Use of this option makes sense for the create step only and
+      also only for the image types: vmx, oem, and usb
+     </para>
     </listitem>
-  </varlistentry>
-  <varlistentry>
-    <term><optional><option>--fs-blocksize <replaceable>number</replaceable></option>
-    </optional></term>
+   </varlistentry>
+   <varlistentry>
+    <term><optional><option>--fs-blocksize <replaceable>number</replaceable></option></optional>
+    </term>
     <listitem>
-    <para>
-      When calling KIWI in creation mode this option will set
-      the block size in bytes. For ISO images with the old style
-      ramdisk setup a blocksize of 4096 bytes is required
-    </para>
+     <para>
+      When calling KIWI in creation mode this option will set the block size
+      in bytes. For ISO images with the old style ramdisk setup a block size
+      of 4096 bytes is required
+     </para>
     </listitem>
-  </varlistentry>
-  <varlistentry>
-    <term><optional><option>--fs-journalsize <replaceable>number</replaceable></option>
-    </optional></term>
+   </varlistentry>
+   <varlistentry>
+    <term><optional><option>--fs-journalsize <replaceable>number</replaceable></option></optional>
+    </term>
     <listitem>
-    <para>
-      When calling KIWI in creation mode this option will set
-      the journal size in mega bytes for ext[23] based filesystems
-      and in blocks if the reiser filesystem is used
-    </para>
+     <para>
+      When calling KIWI in creation mode this option will set the journal
+      size in mega bytes for ext[23] based file systems and in blocks if the
+      Reiser file system is used
+     </para>
     </listitem>
-  </varlistentry>
-  <varlistentry>
-    <term><optional><option>--fs-inodesize <replaceable>number</replaceable></option>
-    </optional></term>
+   </varlistentry>
+   <varlistentry>
+    <term><optional><option>--fs-inodesize <replaceable>number</replaceable></option></optional>
+    </term>
     <listitem>
-    <para>
-      When calling KIWI in creation mode this option will set
-      the inode size in bytes. This option has no effect if the
-      reiser filesystem is used
-    </para>
+     <para>
+      When calling KIWI in creation mode this option will set the inode size
+      in bytes. This option has no effect if the Reiser file system is used
+     </para>
     </listitem>
-  </varlistentry>
-  <varlistentry>
-        <term><optional><option>--fs-inoderatio <replaceable>number</replaceable></option>
-        </optional></term>
-        <listitem>
-        <para>
-            Set the bytes/inode ratio. This option has no
-            effect if the reiser filesystem is used
-        </para>
-        </listitem>
-    </varlistentry>
-  <varlistentry>
-    <term><optional><option>--fs-max-mount-count <replaceable>number</replaceable></option>
-    </optional></term>
+   </varlistentry>
+   <varlistentry>
+    <term><optional><option>--fs-inoderatio <replaceable>number</replaceable></option></optional>
+    </term>
     <listitem>
-    <para>
-      When calling kiwi in creation mode this option will set the number
-      of mounts after which the filesystem will be checked. Set to 0 to
-      disable checks. This option applies only to ext[234] filesystems.
-    </para>
+     <para>
+      Set the bytes/inode ratio. This option has no effect if the Reiser
+      file system is used
+     </para>
     </listitem>
-  </varlistentry>
-  <varlistentry>
-    <term><optional><option>--fs-check-interval <replaceable>number</replaceable></option>
-    </optional></term>
+   </varlistentry>
+   <varlistentry>
+    <term><optional><option>--fs-max-mount-count <replaceable>number</replaceable></option></optional>
+    </term>
     <listitem>
-    <para>
-      When calling kiwi in creation mode this option will set the maximal time
-      between two filesystem checks. Set to 0 to disable time-dependent checks.
-      This option applies only to ext[234] filesystems.
-    </para>
+     <para>
+      When calling kiwi in creation mode this option will set the number of
+      mounts after which the file system will be checked. Set to 0 to disable
+      checks. This option applies only to ext[234] file systems.
+     </para>
     </listitem>
-  </varlistentry>
-  <varlistentry>
-    <term><optional><option>--fat-storage <replaceable>size in MB</replaceable></option>
-    </optional></term>
+   </varlistentry>
+   <varlistentry>
+    <term><optional><option>--fs-check-interval <replaceable>number</replaceable></option></optional>
+    </term>
     <listitem>
-    <para>
-      if the syslinux bootlaoder is used this option allows to
-      specify the size of the fat partition. This is useful if
-      the fat space is not only used for booting the system but
-      also for custom data. Therefore this option makes sense
-      when building a USB stick image (image type: usb or oem)
-    </para>
+     <para>
+      When calling kiwi in creation mode this option will set the maximal
+      time between two file system checks. Set to 0 to disable time-dependent
+      checks. This option applies only to ext[234] file systems.
+     </para>
     </listitem>
-  </varlistentry>
-  <varlistentry>
-        <term><optional><option>--partitioner <replaceable>parted|fdasd</replaceable></option>
-        </optional></term>
-        <listitem>
-        <para>
-      Select the tool to create partition tables. Supported are
-      parted and fdasd (s390). By default parted is used
-        </para>
-        </listitem>
-    </varlistentry>
-  <varlistentry>
-        <term><optional><option>--check-kernel</option></optional></term>
-        <listitem>
-        <para>
-      Activates check for matching kernels between boot and
-      system image. The kernel check also tries to fix the boot
-      image if no matching kernel was found.
-        </para>
-        </listitem>
-    </varlistentry>
-  <varlistentry>
-    <term><optional><option>--mbrid <replaceable>number</replaceable></option></optional></term>
+   </varlistentry>
+   <varlistentry>
+    <term><optional><option>--fat-storage <replaceable>size in MB</replaceable></option></optional>
+    </term>
     <listitem>
-    <para>
-      Specifies a custom mbrid. The number value is treated as
-      decimal number which is internally translated into a 4byte
-      hex value. The allowed range therefore is from 0x0 to
-      max 0xffffffff. By default kiwi creates a random value
-    </para>
+     <para>
+      if the syslinux boatload is used this option allows to specify the
+      size of the fat partition. This is useful if the fat space is not only
+      used for booting the system but also for custom data. Therefore this
+      option makes sense when building a USB stick image (image type: usb or
+      oem)
+     </para>
     </listitem>
-  </varlistentry>
-  <varlistentry>
-    <term><optional><option>--edit-bootconfig <replaceable>script</replaceable></option></optional></term>
+   </varlistentry>
+   <varlistentry>
+    <term><optional><option>--partitioner <replaceable>parted|fdasd</replaceable></option></optional>
+    </term>
     <listitem>
-    <para>
-      Specifies the location of a custom script which is called
-      right before the bootloader is installed. This allows to modify
-      the bootloader configuration file written by kiwi. The scripts
-      working directory is the one which represents the image
-      structure including the bootloader configuration files. Please
-      have in mind that according to the image type, architecture
-      and bootloader type the files/directory structure and also
-      the name of the bootloader configuration files might be
+     <para>
+      Select the tool to create partition tables. Supported are parted and
+      fdasd (s390). By default parted is used
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional><option>--check-kernel</option></optional>
+    </term>
+    <listitem>
+     <para>
+      Activates check for matching kernels between boot and system image.
+      The kernel check also tries to fix the boot image if no matching
+      kernel was found.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional><option>--mbrid <replaceable>number</replaceable></option></optional>
+    </term>
+    <listitem>
+     <para>
+      Specifies a custom mbrid. The number value is treated as decimal
+      number which is internally translated into a 4byte hex value. The
+      allowed range therefore is from 0x0 to max 0xffffffff. By default kiwi
+      creates a random value
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><optional><option>--edit-bootconfig <replaceable>script</replaceable></option></optional>
+    </term>
+    <listitem>
+     <para>
+      Specifies the location of a custom script which is called right before
+      the boot loader is installed. This allows to modify the boot loader
+      configuration file written by kiwi. The scripts working directory is
+      the one which represents the image structure including the boot loader
+      configuration files. Please have in mind that according to the image
+      type, architecture and boot loader type the files/directory structure
+      and also the name of the boot loader configuration files might be
       different.
-    </para>
+     </para>
     </listitem>
-  </varlistentry>
-  <varlistentry>
-    <term><optional><option>--edit-bootinstall <replaceable>script</replaceable></option></optional></term>
+   </varlistentry>
+   <varlistentry>
+    <term><optional><option>--edit-bootinstall <replaceable>script</replaceable></option></optional>
+    </term>
     <listitem>
-    <para>
-      Specifies the location of a custom script which is called
-      right after the bootloader is installed.
-    </para>
+     <para>
+      Specifies the location of a custom script which is called right after
+      the boot loader is installed.
+     </para>
     </listitem>
-  </varlistentry>
-  <varlistentry>
-    <term><optional><option>--archive-image</option></optional></term>
+   </varlistentry>
+   <varlistentry>
+    <term><optional><option>--archive-image</option></optional>
+    </term>
     <listitem>
-    <para>
+     <para>
       When calling kiwi <option>--create</option> this option allows to pack
       the build result(s) into a tar archive.
-    </para>
+     </para>
     </listitem>
-  </varlistentry>
-
-  <varlistentry>
-    <term><optional><option>--targetdevice</option> <replaceable>device</replaceable></optional></term>
+   </varlistentry>
+   <varlistentry>
+    <term><optional><option>--targetdevice</option><replaceable>device</replaceable></optional>
+    </term>
     <listitem>
-    <para>
-      Use an alternative device instead of the loop device.
-    </para>
+     <para>
+      Use an alternative block device instead of the loop device.
+      The given location must be a block device node, not a symlink or
+      other linux device node type.
+     </para>
     </listitem>
-  </varlistentry>
+   </varlistentry>
   </variablelist>
-  </refsect1>
-
-  <refsect1 id="kiwi.moreinfo">
-    <title>For More Information</title>
-    <para>More information about KIWI, its files can be found at:</para>
-    <variablelist>
-      <varlistentry>
-        <term><ulink url="http://en.opensuse.org/Portal:KIWI"/></term>
-        <listitem>
-          <para>KIWI wiki</para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-        <term><filename>config.xml</filename></term>
-        <listitem>
-          <para>The configuration XML file that contains every
-            aspect for the image creation.</para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-        <term><ulink
-        url="file:///usr/share/doc/packages/kiwi/kiwi.pdf"/></term>
-        <listitem>
-          <para>The system documentation which describes the supported image
-            types in detail.</para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-        <term><ulink url="file:///usr/share/doc/packages/kiwi/schema/kiwi.xsd.html"/></term>
-        <listitem>
-          <para>The KIWI RELAX&nbsp;NG XML Schema documentation.
-          </para>
-        </listitem>
-      </varlistentry>
-    </variablelist>
-  </refsect1>
+ </refsect1>
+ <refsect1 id="kiwi.moreinfo">
+  <title>For More Information</title>
+  <para>
+   More information about KIWI, its files can be found at:
+  </para>
+  <variablelist>
+   <varlistentry>
+    <term><ulink url="https://opensuse.github.io/kiwi/"/>
+    </term>
+    <listitem>
+     <para>
+      KIWI wiki
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><filename>config.xml</filename>
+    </term>
+    <listitem>
+     <para>
+      The configuration XML file that contains every aspect for the image
+      creation.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><ulink
+        url="file:///usr/share/doc/packages/kiwi/kiwi.pdf"/>
+    </term>
+    <listitem>
+     <para>
+      The system documentation which describes the supported image types in
+      detail.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><ulink url="file:///usr/share/doc/packages/kiwi/schema/kiwi.xsd.html"/>
+    </term>
+    <listitem>
+     <para>
+      The KIWI RELAX&nbsp;NG XML Schema documentation.
+     </para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+ </refsect1>
 </refentry>

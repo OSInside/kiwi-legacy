@@ -1,89 +1,222 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
                          "http://www.docbook.org/xml/4.5/docbookx.dtd">
-
 <chapter id="chap.maintenance">
-  <title>Maintenance of Operating System Images</title>
-  <indexterm>
-      <primary>KIWI</primary>
-      <secondary>maintenance</secondary>
-    </indexterm>
+ <title>Maintaining Appliance Images</title><indexterm>
+ <primary>KIWI</primary>
+ <secondary>maintenance</secondary></indexterm>
+ <abstract>
   <para>
-    Creating an image often results in an appliance solution for a
-    customer and gives you the freedom of a working solution at that
-    time. But software develops and you don’t want your solution to
-    become outdated. Because of this together with an image people
-    always should think of <emphasis>image-maintenance</emphasis>. The
-    following paragraph just reflects ideas how to maintain images
-    created by KIWI:
+   Whenever you create an appliance as described in <xref
+   linkend="chap.appliance"/>, you are using a snapshot of the software
+   repositories. As time goes by, the software continues to develop and the
+   image becomes outdated. Something similar applies to the appliance
+   configuration, which may become outdated when, for example, the network
+   setup has changed or services have been replaced. Last, it may be necessary
+   to update the image description itself, for example to add or change
+   repositories. To prevent an image from becoming outdated, KIWI provides
+   means to <emphasis>maintain</emphasis> existing images.
+  </para>
+ </abstract>
+ <variablelist>
+  <varlistentry>
+   <term><command>kiwi --upgrade</command></term>
+   <listitem>
+    <para>
+     The <option>--upgrade</option> option can be used to update a previously
+     built image without making any changes to the image description. It
+     requires an existing unpacked root tree. This option can be used to update
+     software packages within an image. Since it only modifies an existing
+     root tree, it is faster than re-building an image from scratch.
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term>kiwi --prepare</term>
+   <listitem>
+    <para>
+     In case the appliance configuration or the image description needs to be
+     changed, the image root tree needs to be rebuilt with
+     <option>--prepare</option> to make these changes permanent. We
+     using this method to upgrade an existing image, it is recommended to put
+     the image description under a version control system such as git or
+     subversion. This allows to track the changes and to easily switch between
+     image versions.
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+
+ <sect1 id="sec.maintenance.packages">
+  <title>Image Maintenance: Updating Software Packages</title>
+  <para>
+   The quickest way to produce an updated image containing the latest software
+   versions from the repositories configured in the image description is to
+   use KIWI's <option>--upgrade</option> option. It optionally allows to
+   specify additional repositories (such as an update repository) or packages
+   on the command line. Using <option>--upgrade</option> requires an existing
+   unpacked image tree from a previous run of <command>kiwi
+   --prepare</command>.
+  </para>
+  <procedure>
+   <step>
+    <para>
+     Make sure you know the path to the existing unpacked root tree. In the
+     following we assume it is located at <filename
+     class="directory">/tmp/myISO</filename>. If you need to add additional
+     repositories, note down the paths and types.
+    </para>
+   </step>
+   <step>
+    <para>
+     Run the following command to update the unpacked root tree from the
+     repositories configured in the image description:
+    </para>
+    <screen>kiwi --upgrade /tmp/myISO</screen>
+    <para>
+     You can optionally specify additional repositories not yet configured in
+     the image description, or additional packages and/or patterns. The latter
+     two can be part of the added repositories or the ones already configured.
+    </para>
+    <screen>kiwi --upgrade /tmp/myISO --add-repo <replaceable>REPO</replaceable> --add-repotype <replaceable>REPO_TYPE</replaceable> \
+--add-package <replaceable>PACKAGE</replaceable> --add-pattern <replaceable>PATTERN</replaceable></screen>
+   </step>
+   <step>
+    <para>
+     Run <command>kiwi --create</command> to build the final image. The
+     following example assumes that the image is created in
+     <filename>/tmp</filename>:
+    </para>
+    <screen>kiwi --create /tmp/myISO --destdir /tmp</screen>
+   </step>
+  </procedure>
+
+  <warning>
+   <title>Adding Repositories, Packages or Patterns</title>
+   <para>
+    Repositories, packages or patterns that you specify with the --add-*
+    commands are not added to the image description! Therefore these additions
+    are not permanent and need to be specified again with the next run. If you
+    want to make these additions permanent, proceed as described in <xref
+    linkend="sec.maintenance.config"/>.
    </para>
+  </warning>
 
-  <figure id="fig.maintain">
-    <title>Image Maintenance Scenarios</title>
-    <mediaobject role="fo">
-     <imageobject>
-      <imagedata fileref="maintain.svg" format="SVG" width="75%"/>
-     </imageobject>
-     <imageobject role="html">
-      <imagedata fileref="maintain.png" format="PNG"/><!--  width="50%" -->
-     </imageobject>
-    </mediaobject>
-  </figure>
+  <important>
+   <title>Configuration Changes</title>
+   <para>
+    Running KIWI with the <option>--upgrade</option> option does not rebuild
+    the root tree&mdash;it only manipulates the existing version that was
+    created with the last <option>--prepare</option>-run. Changes to the image
+    description that have been made after the last
+    <option>--prepare</option>-run, have no effect when running the
+    <option>--upgrade</option> option.
+   </para>
+   <para>
+    In case of un-applied configuration changes, rebuild the unpacked root
+    tree from scratch with <command>kiwi --prepare</command>.
+   </para>
+  </important>
 
-  <simplelist>
-   <member>
-    (1) Image Description as part of a versioning system like Git, Subversion,
-    etc. to track changes
-   </member>
-   <member>
-    (2) Software package source changes
-   </member>
-   <member>
-    (3) Faster, because already prepared; cannot handle image description
-    changes; requires free space to store <filename>/tmp/myOSImage</filename>
-   </member>
-   <member>
-    (4) Image Description changes
-   </member>
-   <member>
-    (5) Covers all possible changes, does not require storage for prepared
-    trees, slower, because KIWI prepare runs again
-   </member>
-  </simplelist>
+ </sect1>
 
-  <para>The picture in <xref linkend="fig.maintain"
-    xrefstyle="select:label"/> shows two possible
-    scenarios which requires an image to become updated. The first
-    reason for updating an image are changes to the software, for
-    example a new kernel should be used. If this change doesn’t require
-    additional software or changes in the configuration the update can
-    be done by KIWI itself using its <option>--upgrade</option> option.
-    In combination with <option>--upgrade</option> KIWI allows to add
-    an additional repository which may be needed if the updated software
-    is not part of the original repository. An important thing to know
-    is that this additional repository is <emphasis>not</emphasis>
-    stored into the original <filename>config.xml</filename> file of the
-    image description. </para>
-  <para>Another reason for updating an image beside software updates are
-    configuration changes or enhancements, for example an image should
-    have replaced its browser with another better browser or a new
-    service like apache should be enabled. In principle it’s possible to
-    do all those changes manually within the unpacked image root tree but
-    concerning maintenance this would be a nightmare. Why, because it
-    will leave the system in an unversioned condition. Nobody knows what
-    has changed since the very first preparation of this image. So in
-    short:</para>
-  <indexterm>
-      <primary>KIWI</primary>
-      <secondary>unpacked image</secondary>
-    </indexterm>
-  <blockquote>
-    <para>Don’t modify the unpacked image root tree manually!</para>
-  </blockquote>
-  <para>Changes to the image configuration should be done within the
-    image description. The image description itself should be part of a
-    versioning system like git. All changes can be tracked down
-    then and maybe more important can be assigned to product tags and
-    branches. As a consequence an image must be prepared from scratch
-    and the old unpacked image root tree could be removed. </para>
+ <sect1 id="sec.maintenance.config">
+  <title>Image Maintenance: Modifying the Configuration</title>
+  <para>
+   In case you need to change the configuration of the appliance (see <xref
+   linkend="sec.appliance.kiwi-model"/>) or the image description (see <xref
+   linkend="chap.description"/> you need to rebuild the complete image tree by
+   running <command>kiwi --prepare</command>, to make your changes
+   permanent. It is strongly recommended to put your image description under a
+   version control system to enable tracking of changes and different version
+   builds.
+  </para>
+  <procedure>
+   <step>
+    <para>
+     Put your image description directory under a version control system such
+     as git. This step is optional, but strongly recommended.
+    </para>
+   </step>
+   <step>
+    <para>
+     Change the image description as needed. Stick to the following general
+     rules:
+    </para>
+    <substeps>
+     <step>
+      <para>
+       To add packages or patterns, modify the respective entries in
+       <filename>configuration.xml</filename>. See <xref
+       linkend="sec.description.packages"/> for details.
+      </para>
+     </step>
+     <step>
+      <para>
+       To change the list of repositories, modify the respective entries in
+       <filename>configuration.xml</filename>. See <xref
+       linkend="sec.description.repository"/> for details.
+      </para>
+     </step>
+     <step>
+      <para>
+       To change the configuration of your appliance, modify the respective
+       files in the overlay tree or provide an updated archive.
+      </para>
+     </step>
+     <step>
+      <para>
+       To change the user-defined tasks that will be carried out after the
+       installation (for example activating services), adjust the
+       <filename>configuration.sh</filename> script.
+      </para>
+     </step>
+    </substeps>
+   </step>
+   <step>
+    <para>
+     Create an unpacked root tree by running <command>kiwi
+     --prepare</command>. The following example assumes that the image
+     description is located under
+     <filename>/tmp/myISO_config</filename> and that the result is
+     written to <filename>/tmp/myISO</filename>:
+    </para>
+    <screen>kiwi --prepare /tmp/myISO_config --root /tmp/myISO</screen>
+   </step>
+   <step>
+    <para>
+     Run <command>kiwi --create</command> to build the final image. The
+     following example assumes that the image is created in
+     <filename>/tmp</filename>:
+    </para>
+    <screen>kiwi --create /tmp/myISO --destdir /tmp</screen>
+   </step>
+   <step>
+    <para>
+     When the final version of your changes has been applied, make sure to
+     check this state in to the version control system.
+    </para>
+   </step>
+  </procedure>
+
+  <important>
+   <title>Do not Manipulate the Unpacked Root Image</title>
+   <para>
+    The unpacked image directory is a directory, as far as the build system is
+    concerned and you can manipulate the content of this directory according
+    to your needs. Since it represents a system installation you can “chroot”
+    into this directory for testing purposes. The file system contains an
+    additional directory named /image that is not present in a regular
+    system. It contains information KIWI requires during the create step,
+    including a copy of the config.xml file.
+   </para>
+   <para>
+    Do not make any changes to the system, since they will get lost when
+    re-running the prepare step again. Whats more, you may introduce errors
+    that will occur during the create step, that are difficult to track. The
+    recommended way to apply changes to the unpacked image directory is to
+    change the configuration and re-run the prepare step as described above.
+   </para>
+  </important>
+ </sect1>
 </chapter>
