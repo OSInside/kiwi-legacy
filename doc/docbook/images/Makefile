@@ -1,5 +1,5 @@
 FIGDIR := src/fig
-PNGDIR := ../../images
+PNGDIR := ./
 SVGDIR := ./
 
 figs := $(wildcard $(FIGDIR)/*.fig)
