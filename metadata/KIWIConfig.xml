@@ -240,6 +240,7 @@
         <file name="stat"/>
         <file name="swapoff"/>
         <file name="swapon"/>
+        <file name="systemd-detect-virt"/>
         <file name="tac"/>
         <file name="rev"/>
         <file name="tail"/>
