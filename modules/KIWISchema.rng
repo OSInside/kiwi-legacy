@@ -2402,10 +2402,28 @@ hybrid ISO is used as disk on e.g a USB Stick. By default
 the btrfs filesystem is used</a:documentation>
         <choice>
           <value>btrfs</value>
-          <value>fat</value>
           <value>ext4</value>
           <value>xfs</value>
+          <value>fat</value>
+          <value>exfat</value>
         </choice>
+      </attribute>
+    </define>
+    <define name="k.type.hybridpersistent_filename.attribute">
+      <attribute name="hybridpersistent_filename">
+        <a:documentation>for the iso type only:
+Set the filename to use for persistency file if ex/fat is used for
+hybrid ISO write support. Default is "!Live OS's persistent storage.fs"</a:documentation>
+      </attribute>
+    </define>
+    <define name="k.type.hybridpersistent_filesize.attribute">
+      <attribute name="hybridpersistent_filesize">
+        <a:documentation>for the iso type only:
+Set the filesize to use for persistency file if ex/fat is used for
+hybrid ISO write support. Default is half of device's free space.
+The value is used as bytes by default but you can
+add "M" and/or "G" as postfix</a:documentation>
+        <ref name="volume-size-type"/>
       </attribute>
     </define>
     <define name="k.type.image.attribute">
@@ -2638,6 +2656,12 @@ are available on the host. Default timeout is 3 seconds</a:documentation>
         </optional>
         <optional>
           <ref name="k.type.hybridpersistent_filesystem.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.type.hybridpersistent_filename.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.type.hybridpersistent_filesize.attribute"/>
         </optional>
         <ref name="k.type.image.attribute"/>
         <optional>

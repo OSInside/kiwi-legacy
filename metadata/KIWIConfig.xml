@@ -159,6 +159,7 @@
         <file name="mkfs.btrfs"/>
         <file name="mkfs.cramfs"/>
         <file name="mkfs.fat"/>
+	<file name="mkfs.exfat"/>
         <file name="mkfs.ext2"/>
         <file name="mkfs.ext3"/>
         <file name="mkfs.ext4"/>
@@ -175,6 +176,7 @@
         <file name="modinfo"/>
         <file name="modprobe"/>
         <file name="mount"/>
+        <file name="mountpoint"/>
         <file name="mount.nfs"/>
         <file name="mount.nfs4"/>
         <file name="mount.zfs"/>
