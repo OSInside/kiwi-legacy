@@ -6473,9 +6473,9 @@ function setupReadWrite {
                     fi
                 fi
             fi
-        # umount the file from read-only mode then finished
-        umount $rwDevice
         fi
+        # umount the file from read-only mode when finished
+        umount $rwDevice
     fi
     return 0
 }
