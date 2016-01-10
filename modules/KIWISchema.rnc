@@ -1783,8 +1783,20 @@ div {
         ## hybrid ISO is used as disk on e.g a USB Stick. By default
         ## the btrfs filesystem is used
         attribute hybridpersistent_filesystem {
-            "btrfs" | "fat" | "ext4" | "xfs"
+            "btrfs" | "ext4" | "xfs" | "fat" | "exfat"
         }
+    k.type.hybridpersistent_filename.attribute =
+        ## for the iso type only:
+        ## Set the filename to use for persistency file if ex/fat is used for
+        ## hybrid ISO write support. Default is "!Live OS's persistent storage.fs"
+        attribute hybridpersistent_filename { text }
+    k.type.hybridpersistent_filesize.attribute =
+        ## for the iso type only:
+        ## Set the filesize to use for persistency file if ex/fat is used for
+        ## hybrid ISO write support. Default is half of device's free space.
+        ## The value is used as bytes by default but you can
+        ## add "M" and/or "G" as postfix
+        attribute hybridpersistent_filesize { volume-size-type }
     k.type.image.attribute =
         ## Specifies the image type
         attribute image {
@@ -1894,6 +1906,8 @@ div {
         k.type.hybrid.attribute? &
         k.type.hybridpersistent.attribute? &
         k.type.hybridpersistent_filesystem.attribute? &
+        k.type.hybridpersistent_filename.attribute? &
+        k.type.hybridpersistent_filesize.attribute? &
         k.type.image.attribute &
         k.type.installboot.attribute? &
         k.type.installprovidefailsafe.attribute? &
