@@ -4149,7 +4149,7 @@ function probeDevices {
     #======================================
     # Manual loading of modules
     #--------------------------------------
-    for i in rd brd edd dm-mod xennet xenblk virtio_blk loop squashfs;do
+    for i in rd brd edd dm-mod xennet xenblk virtio_blk loop squashfs fuse;do
         modprobe $i &>/dev/null
     done
     udevPending
@@ -9137,7 +9137,7 @@ function createHybridPersistent {
         local label=$(blkid $partd -s LABEL -o value)
         if [ "$label" = "hybrid" ];then
             Echo "Existing persistent hybrid partition found"
-            if [ $hybrid_fs = "fat" ];then
+            if [ "$hybrid_fs" = "fat" ] || [ "$hybrid_fs" = "exfat" ];then
                 if ! setupHybridCowDevice;then
                     Echo "Failed to setup hybrid cow device"
                     Echo "Persistent writing deactivated"
@@ -9229,7 +9229,7 @@ function createHybridPersistent {
     #======================================
     # export read-write device name
     #--------------------------------------
-    if [ $hybrid_fs = "fat" ];then
+    if [ "$hybrid_fs" = "fat" ] || [ "$hybrid_fs" = "exfat" ];then
         # The fat filesystem is not really suitable to be used as rootfs
         # for linux. Therefore we create a btrfs based file which we store
         # on the fat filesystem and loop setup it. The size of the file
@@ -9256,9 +9256,13 @@ function setupHybridCowDevice {
     local hybrid_device=$1
     mkdir -p /cow
     for i in 1 2 3;do
-        mount -L hybrid /cow && break || sleep 2
+        if [ "$hybrid_fs" = "exfat" ]; then
+            mount.exfat $hybrid_device /cow && break || sleep 2
+        else
+            mount -L hybrid /cow && break || sleep 2
+        fi
     done
-    if [ ! $? = 0 ];then
+    if ! mountpoint -q /cow; then
         Echo "Failed to mount hybrid persistent filesystem !"
         return 1
     fi
@@ -9267,11 +9271,18 @@ function setupHybridCowDevice {
         hybrid_cow_filename="/cow/${kiwi_hybridpersistent_cow_filename}"
     fi
     if [ ! -e "$hybrid_cow_filename" ];then
-        local cowsize=$(($(blockdev --getsize64 $hybrid_device) / 2))
-        local exception_handling="false"
+        # default cow filesize is half of partition's capacity
+        local cowsize="$(($(blockdev --getsize64 $hybrid_device) / 2))"
+        # but not for FAT due to the 4G file size limit
+        if [ "$hybrid_fs" = "fat" ] && [ "$cowsize" -gt 4294967295 ];then
+            cowsize=4294967295
+        fi
+        if [ ! -z "$kiwi_hybridpersistent_filesize" ];then
+            cowsize=$kiwi_hybridpersistent_filesize
+        fi
         qemu-img create "$hybrid_cow_filename" "$cowsize"
         if ! createFilesystem \
-            "$hybrid_cow_filename" "" "" "" $exception_handling "btrfs"
+            "$hybrid_cow_filename" "" "" "" "false" "ext4"
         then
             Echo "Failed to create hybrid persistent cow filesystem"
             return 1
