@@ -42,6 +42,12 @@ function lookup {
 }
 
 #======================================
+# Exports (hybrid filesystem options)
+#--------------------------------------
+# Optimized for 512kB erase block size
+export HYBRID_EXT4_OPTS="-b 4096 -O ^has_journal -E stride=128,stripe-width=128"
+
+#======================================
 # Exports (console)
 #--------------------------------------
 test -z "$ELOG_BOOTSHELL" && export ELOG_BOOTSHELL=/dev/tty2
@@ -6425,7 +6431,11 @@ function setupReadWrite {
     local rwDevice=$(echo $UNIONFS_CONFIG | cut -d , -f 1)
     local hybrid_fs=$HYBRID_PERSISTENT_FS
     local create_hybrid="no"
+    local fs_opts
     mkdir -p $rwDir
+    if [ $hybrid_fs = "ext4" ];then
+        fs_opts="$HYBRID_EXT4_OPTS"
+    fi
     if [ ! -z "$kiwi_hybridpersistent_filesystem" ];then
         hybrid_fs=$kiwi_hybridpersistent_filesystem
     fi
@@ -6449,7 +6459,7 @@ function setupReadWrite {
     if [ "$create_hybrid" = "yes" ];then
         Echo "Creating filesystem for RW data on $rwDevice..."
         if ! createFilesystem \
-            "$rwDevice" "" "" "hybrid" "false" "$hybrid_fs"
+            "$rwDevice" "" "" "hybrid" "false" "$hybrid_fs" "$fs_opts"
         then
             Echo "Failed to create ${hybrid_fs} filesystem"
             return 1
@@ -9203,9 +9213,12 @@ function createHybridPersistent {
     # create filesystem on write partition
     #--------------------------------------
     local hybrid_device=$(ddn $device $pID)
-    local exception_handling="false"
+    local fs_opts
+    if [ "$hybrid_fs" = "ext4" ];then
+        fs_opts="$HYBRID_EXT4_OPTS"
+    fi
     if ! createFilesystem \
-        $hybrid_device "" "" "hybrid" $exception_handling $hybrid_fs
+        $hybrid_device "" "" "hybrid" "false" "$hybrid_fs" "$fs_opts"
     then
         Echo "Failed to create hybrid persistent filesystem"
         Echo "Persistent writing deactivated"
