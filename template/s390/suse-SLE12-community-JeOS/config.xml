@@ -30,7 +30,7 @@
                 <oem-swapsize>512</oem-swapsize>
             </oemconfig>
         </type>
-        <type image="pxe" filesystem="ext3" boot="netboot/suse-SLES12" bootloader="zipl"/>
+        <type image="pxe" filesystem="ext3" boot="netboot/suse-SLES12"/>
     </preferences>
     <users group="root">
         <user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
