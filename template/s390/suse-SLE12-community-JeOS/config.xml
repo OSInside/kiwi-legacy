@@ -65,6 +65,7 @@
         <package name="kexec-tools"/>
         <package name="less"/>
         <package name="patch"/>
+        <package name="util-linux"/>
     </packages>
     <packages type="bootstrap">
         <package name="filesystem"/>
