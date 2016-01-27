@@ -3500,6 +3500,28 @@ function setupDefaultPXENetwork {
     echo "USERCONTROL='no'"    >> $niface
 }
 #======================================
+# getBtrfsSubVolumes
+#--------------------------------------
+function getBtrfsSubVolumes {
+    local IFS=$IFS_ORIG
+    local prefix=$1
+    btrfs subvol list $prefix | \
+        grep -v .snapshots/ | grep -v @$ | cut -f9 -d ' '
+}
+#======================================
+# mountBtrfsSubVolumes
+#--------------------------------------
+function mountBtrfsSubVolumes {
+    local IFS=$IFS_ORIG
+    local mountDevice=$1
+    local prefix=$2
+    local syspath
+    for subvol in $(getBtrfsSubVolumes "$prefix"); do
+        syspath=$(echo $subvol | tr -d @)
+        mount $mountDevice $prefix/$syspath -o subvol=$subvol
+    done
+}
+#======================================
 # setupDefaultFstab
 #--------------------------------------
 function setupDefaultFstab {
@@ -3570,6 +3592,7 @@ function updateRootDeviceFstab {
         local volpath
         local mpoint
         local mppath
+        local syspath
         for i in $(cat /.profile | grep -E 'kiwi_LVM_|kiwi_allFreeVolume');do
             variable=$(echo $i|cut -f1 -d=)
             volume=$(echo $i| cut -f3- -d_ | cut -f1 -d=)
@@ -3589,10 +3612,13 @@ function updateRootDeviceFstab {
             fi
         done
     elif [ "$FSTYPE" = "btrfs" ];then
-        local fsuuid=$(blkid $rdev -s UUID -o value)
-        for subvol in $(btrfs subvol list $prefix |grep -v @ |cut -f9 -d' ');do
-            echo "UUID=$fsuuid /$subvol btrfs subvol=@/$subvol 0 0" >> $nfstab
-        done
+        if [ "$kiwi_btrfs_root_is_snapshot" = "true" ];then
+            local fsuuid=$(blkid $rdev -s UUID -o value)
+            for subvol in $(getBtrfsSubVolumes "$prefix"); do
+                syspath=$(echo $subvol | tr -d @)
+                echo "UUID=$fsuuid $syspath btrfs subvol=$subvol 0 0" >> $nfstab
+            done
+        fi
     fi
 }
 #======================================
@@ -6957,6 +6983,10 @@ function mountSystemStandard {
                 kiwiMount "/dev/$kiwi_lvmgroup/$volume" "$prefix/$mpoint"
             fi
         done
+    elif [ "$FSTYPE" = "btrfs" ];then
+        if [ "$kiwi_btrfs_root_is_snapshot" = "true" ];then
+            mountBtrfsSubVolumes $mountDevice $prefix
+        fi
     fi
     return $?
 }
@@ -10010,8 +10040,15 @@ function restoreBtrfsSubVolumes {
     local mpoint
     local mppath
     local volbase
+    local top=@
     btrfs subvolume create $root/@ || return
-    local rootid=$(btrfs subvolume list $root | cut -f2 -d ' ')
+    if [ "$kiwi_btrfs_root_is_snapshot" = "true" ];then
+        btrfs subvolume create $root/.snapshots
+        btrfs subvolume create $root/.snapshots/1
+        btrfs subvolume snapshot $root/@ $root/.snapshots/1/snapshot
+        top=.snapshots/1/snapshot
+    fi
+    local rootid=$(btrfs subvolume list $root | grep $top | cut -f2 -d ' ')
     btrfs subvolume set-default $rootid $root || return
     for i in $(cat /.profile | grep -E 'kiwi_LVM_|kiwi_allFreeVolume');do
         variable=$(echo $i|cut -f1 -d=)
@@ -10029,6 +10066,9 @@ function restoreBtrfsSubVolumes {
         btrfs subvolume create $root/@/$mpoint || return
     done
     umount $root && mount $imageRootDevice $root
+    if [ "$kiwi_btrfs_root_is_snapshot" = "true" ];then
+        mountBtrfsSubVolumes $imageRootDevice $root
+    fi
 }
 #======================================
 # restoreLVMMetadata
