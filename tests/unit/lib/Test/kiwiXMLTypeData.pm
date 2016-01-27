@@ -1956,6 +1956,7 @@ sub test_getXMLElement{
         . 'bootfilesystem="fat32" '
         . 'bootkernel="xenk" '
         . 'bootloader="grub2" '
+        . 'btrfs_root_is_snapshot="false" '
         . 'target_blocksize="4096" '
         . 'zipl_targettype="FBA" '
         . 'bootpartsize="512" '

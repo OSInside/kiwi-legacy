@@ -3913,6 +3913,7 @@ sub __genTypeHash {
         'bootpartsize',
         'bootprofile',
         'boottimeout',
+        'btrfs_root_is_snapshot',
         'checkprebuilt',
         'compressed',
         'container',

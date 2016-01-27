@@ -62,6 +62,7 @@ sub new {
     #     bootpartsize           = ''
     #     bootprofile            = ''
     #     boottimeout            = ''
+    #     btrfs_root_is_snapshot = ''
     #     checkprebuilt          = ''
     #     compressed             = ''
     #     devicepersistency      = ''
@@ -172,6 +173,7 @@ sub new {
         volid
         wwid_wait_timeout
         zipl_targettype
+        btrfs_root_is_snapshot
     );
     $this->{supportedKeywords} = \%keywords;
     my %boolKW = map { ($_ => 1) } qw(
@@ -188,6 +190,7 @@ sub new {
         primary
         ramonly
         sizeadd
+        btrfs_root_is_snapshot
     );
     $this->{boolKeywords} = \%boolKW;
     if (! $this -> p_isInitHashRef($init) ) {
@@ -237,6 +240,7 @@ sub new {
     $this->{volid}                  = $init->{volid};
     $this->{wwid_wait_timeout}      = $init->{wwid_wait_timeout};
     $this->{target_blocksize}       = $init->{target_blocksize};
+    $this->{btrfs_root_is_snapshot} = $init->{btrfs_root_is_snapshot};
     $this->{zfsoptions}             = $init->{zfsoptions};
     # Set default values
     if (! $init->{bootloader} ) {
@@ -261,6 +265,9 @@ sub new {
     if (! $init->{sizeunit} ) {
         $this->{sizeunit} = 'M';
         $this->{defaultsizeunit} = 1;
+    }
+    if (! $init->{btrfs_root_is_snapshot} ) {
+        $this->{btrfs_root_is_snapshot} = 'false';
     }
     return $this;
 }
@@ -329,6 +336,17 @@ sub getTargetBlockSize {
     # ---
     my $this = shift;
     return $this->{target_blocksize};
+}
+
+#==========================================
+# getBtrfsRootIsSnapshot
+#------------------------------------------
+sub getBtrfsRootIsSnapshot {
+    # ...
+    # Return the configured btrfs root is snapshot value
+    # ---
+    my $this = shift;
+    return $this->{btrfs_root_is_snapshot};
 }
 
 #==========================================
@@ -925,6 +943,12 @@ sub getXMLElement {
             $element -> setAttribute('bootloader', $loader);
         }
     }
+    my $btrfs_root_is_snapshot = $this -> getBtrfsRootIsSnapshot();
+    if ($btrfs_root_is_snapshot) {
+        $element -> setAttribute(
+            'btrfs_root_is_snapshot', $btrfs_root_is_snapshot
+        );
+    }
     my $target_blocksize = $this -> getTargetBlockSize();
     if ($target_blocksize) {
         $element -> setAttribute('target_blocksize', $target_blocksize);
@@ -1223,6 +1247,23 @@ sub setTargetBlockSize {
     }
     $this->{target_blocksize} = $target_blocksize;
     return $this;
+}
+
+#==========================================
+# setBtrfsRootIsSnapshot
+#------------------------------------------
+sub setBtrfsRootIsSnapshot {
+    # ...
+    # Set the configuration for the btrfs root is snapshot feature
+    # ---
+    my $this = shift;
+    my $btrfs_root_is_snapshot = shift;
+    my %settings = (
+        attr   => 'btrfs_root_is_snapshot',
+        value  => $btrfs_root_is_snapshot,
+        caller => 'setBtrfsRootIsSnapshot'
+    );
+    return $this -> p_setBooleanValue(\%settings);
 }
 
 #==========================================
