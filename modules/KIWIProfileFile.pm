@@ -64,6 +64,7 @@ sub new {
         kiwi_bootprofile
         kiwi_bootkernel
         kiwi_boot_timeout
+        kiwi_btrfs_root_is_snapshot
         kiwi_cmdline
         kiwi_compressed
         kiwi_cpio_name
@@ -380,6 +381,8 @@ sub __updateXMLType {
         $type -> getCompressed();
     $data{kiwi_boot_timeout} =
         $type -> getBootTimeout();
+    $data{kiwi_btrfs_root_is_snapshot} =
+        $type -> getBtrfsRootIsSnapshot();
     $data{kiwi_wwid_wait_timeout} =
         $type -> getWWIDWaitTimeout();
     $data{kiwi_hybrid} =
