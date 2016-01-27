@@ -992,7 +992,10 @@ sub setupBTRFSSubVolumes {
     my $this   = shift;
     my $path   = shift;
     my $vols   = shift;
+    my $snapshot = shift;
+    my $device = shift;
     my $kiwi   = $this->{kiwi};
+    my @UmountStack = @{$this->{UmountStack}};
     my %phash  = ();
     my @paths  = ();
     if ($vols) {
@@ -1013,24 +1016,30 @@ sub setupBTRFSSubVolumes {
         }
     }
     if (! %phash) {
-        return $path;
+        return $this;
     }
     $kiwi -> info ("Creating btrfs pool\n");
     my $data = KIWIQX::qxx ('btrfs subvolume create '.$path.'/@ 2>&1');
     my $code = $? >> 8;
-    if ($code == 0) {
-        my $rootID=0;
-        $data = KIWIQX::qxx ("btrfs subvolume list $path 2>&1");
-        if ($data =~ /^ID (\d+) /) {
-            $rootID=$1;
-        }
-        if ($rootID) {
+    if ($snapshot eq 'true') {
+        if ($code == 0) {
             $data = KIWIQX::qxx (
-                "btrfs subvolume set-default $rootID $path 2>&1"
+                'btrfs subvolume create '.$path.'/@/.snapshots 2>&1'
             );
             $code = $? >> 8;
-        } else {
-            $code = 1;
+        }
+        if ($code == 0) {
+            $data = KIWIQX::qxx (
+                'mkdir -p '.$path.'/@/.snapshots/1 2>&1'
+            );
+            $code = $? >> 8;
+        }
+        if ($code == 0) {
+            my $snapshot_path = "$path/@/.snapshots/1/snapshot";
+            $data = KIWIQX::qxx (
+                "btrfs subvolume snapshot $path/@ $snapshot_path 2>&1"
+            );
+            $code = $? >> 8;
         }
     }
     if ($code == 0) {
@@ -1050,6 +1059,19 @@ sub setupBTRFSSubVolumes {
                     );
                     $code = $? >> 8;
                 }
+                if ($snapshot eq 'true') {
+                    my $snapshot_path = "$path/@/.snapshots/1/snapshot";
+                    my $subvol = "-o subvol=@/$vol";
+                    KIWIQX::qxx ("mkdir -p $snapshot_path/$vol");
+                    $data = KIWIQX::qxx (
+                        "mount $device $snapshot_path/$vol $subvol 2>&1"
+                    );
+                    $code = $? >> 8;
+                    if ($code == 0) {
+                        push @UmountStack,"umount $snapshot_path/$vol";
+                        $this->{UmountStack} = \@UmountStack;
+                    }
+                }
                 if ($code == 0) {
                     $kiwi -> done();
                 } else {
@@ -1059,13 +1081,59 @@ sub setupBTRFSSubVolumes {
             }
         }
     }
+    if ($code == 0) {
+        if ($snapshot eq 'true') {
+            $this -> setupBtrfsDefaultVolume($path, '@/.snapshots/1/snapshot');
+        } else {
+            $this -> setupBtrfsDefaultVolume($path, '@');
+        }
+    }
     if ($code != 0) {
         $kiwi -> error ("Failed to create btrfs subvolume: $data\n");
         $kiwi -> failed();
         return;
     }
-    $path.='/@';
-    return $path;
+    return $this;
+}
+
+#==========================================
+# setupBtrfsDefaultVolume
+#------------------------------------------
+sub setupBtrfsDefaultVolume {
+    # /.../
+    # set default volume for btrfs tree
+    # ----
+    my $this = shift;
+    my $path = shift;
+    my $default_volume = shift;
+    my $kiwi = $this->{kiwi};
+    if (! $default_volume) {
+        $default_volume = '@';
+    }
+    $kiwi -> info("Setting btrfs default volume to: $default_volume\n");
+    my $rootID=0;
+    my $data = KIWIQX::qxx ("btrfs subvolume list $path 2>&1");
+    my $code = $? >> 8;
+    if ($code == 0) {
+        foreach my $line (split('\n', $data)) {
+            my @elements = split(' ', $line);
+            my $volume_path = $elements[8];
+            my $volume_id = $elements[1];
+            if ($volume_path eq $default_volume) {
+                $rootID = $volume_id;
+                last;
+            }
+        }
+        if ($rootID) {
+            $data = KIWIQX::qxx (
+                "btrfs subvolume set-default $rootID $path 2>&1"
+            );
+            $code = $? >> 8;
+        } else {
+            $code = 1;
+        }
+    }
+    return $code;
 }
 
 #==========================================

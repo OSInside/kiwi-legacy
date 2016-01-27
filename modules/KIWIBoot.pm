@@ -301,6 +301,7 @@ sub new {
         $type{bootpartition}          = $xmltype -> getBootPartition();
         $type{bootpartsize}           = $xmltype -> getBootPartitionSize();
         $type{boottimeout}            = $xmltype -> getBootTimeout();
+        $type{btrfs_root_is_snapshot} = $xmltype -> getBtrfsRootIsSnapshot();
         $type{cmdline}                = $xmltype -> getKernelCmdOpts();
         $type{filesystem}             = $xmltype -> getFilesystem();
         $type{firmware}               = $xmltype -> getFirmwareType();
@@ -2682,7 +2683,10 @@ sub setupBootDisk {
             if ($FSTypeRW eq 'btrfs') {
                 if (! KIWIGlobals
                     -> instance()
-                    -> setupBTRFSSubVolumes ($loopdir,\%lvmparts)) {
+                    -> setupBTRFSSubVolumes (
+                        $loopdir,\%lvmparts,
+                        $type->{btrfs_root_is_snapshot},$root
+                    )) {
                     $this -> cleanStack ();
                     return;
                 }
@@ -2702,13 +2706,12 @@ sub setupBootDisk {
         $kiwi -> info ("Copying system image tree on disk");
         my $btrfs_sub_vol = '';
         my $rsync_cmd = 'rsync -aHXA --one-file-system ';
-        if (-e $loopdir.'/@') {
-            # /.../
-            # if we found the special btrfs subvolume named @ we
-            # sync only this volume and not the other nested sub
-            # volumes
-            # ----
-            $btrfs_sub_vol = '/@';
+        if (-e $loopdir.'/@/.snapshots') {
+            # sync target is a btrfs snapshot
+            $btrfs_sub_vol = '/@/.snapshots/1/snapshot/';
+        } elsif (-e $loopdir.'/@') {
+            # sync target is a btrfs toplevel
+            $btrfs_sub_vol = '/@/';
         }
         $status = KIWIQX::qxx (
             $rsync_cmd.$system.'/ '.$loopdir.$btrfs_sub_vol.' 2>&1'
@@ -3722,9 +3725,28 @@ sub setupBootLoaderStages {
         my $bootpath = '/boot';
         if (($type ne 'iso') && (! $this->{needBootP})) {
             if (($typeinfo->{filesystem} eq 'btrfs') && ($this->{sysdisk})) {
-                my $volumes = $this->{sysdisk} -> getVolumes();
-                if (($volumes) && (keys %{$volumes} > 0)) {
-                    $bootpath = '/@/boot';
+                my $volIDs = $this->{sysdisk} -> getVolumeIDs();
+                if ($volIDs) {
+                    my $boot_is_on_volume = 0;
+                    for my $id (@{$volIDs}) {
+                        my $name = $this->{sysdisk} -> getVolumeName($id);
+                        my $mount= $this->{sysdisk} -> getVolumeMountPoint($id);
+                        my $path = $name;
+                        if ($mount) {
+                            $path = $mount;
+                        }
+                        $path =~ s/^\/+//;
+                        if (($path eq 'boot') || ($path eq 'boot/grub2')) {
+                            $boot_is_on_volume = 1;
+                            last;
+                        }
+                    }
+                    my $snapshot = $typeinfo->{btrfs_root_is_snapshot};
+                    if ((! $boot_is_on_volume) && ($snapshot eq 'true')) {
+                        $bootpath = '/@/.snapshots/1/snapshot/boot';
+                    } else {
+                        $bootpath = '/@/boot';
+                    }
                 }
             }
         }
@@ -4423,10 +4445,30 @@ sub setupBootLoaderConfiguration {
         my $bootpath = '/boot';
         if ((! $iso) && (! $this->{needBootP})) {
             if (($type->{filesystem} eq 'btrfs') && ($this->{sysdisk})) {
-                my $volumes = $this->{sysdisk} -> getVolumes();
-                if (($volumes) && (keys %{$volumes} > 0)) {
-                    $bootpath = '/@/boot';
-                    $fodir = '/@/boot/grub2/themes/';
+                my $volIDs = $this->{sysdisk} -> getVolumeIDs();
+                if ($volIDs) {
+                    my $boot_is_on_volume = 0;
+                    for my $id (@{$volIDs}) {
+                        my $name = $this->{sysdisk} -> getVolumeName($id);
+                        my $mount= $this->{sysdisk} -> getVolumeMountPoint($id);
+                        my $path = $name;
+                        if ($mount) {
+                            $path = $mount;
+                        }
+                        $path =~ s/^\/+//;
+                        if (($path eq 'boot') || ($path eq 'boot/grub2')) {
+                            $boot_is_on_volume = 1;
+                            last;
+                        }
+                    }
+                    my $snapshot = $type->{btrfs_root_is_snapshot};
+                    if ((! $boot_is_on_volume) && ($snapshot eq 'true')) {
+                        $bootpath = '/@/.snapshots/1/snapshot/boot';
+                        $fodir = '/@/.snapshots/1/snapshot/boot/grub2/themes/';
+                    } else {
+                        $bootpath = '/@/boot';
+                        $fodir = '/@/boot/grub2/themes/';
+                    }
                 }
             }
         }

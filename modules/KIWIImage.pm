@@ -3445,7 +3445,7 @@ sub postImage {
         if (($fstype) && ($fstype eq 'btrfs')) {
             $extend = KIWIGlobals
                 -> instance()
-                -> setupBTRFSSubVolumes ($extend);
+                -> setupBTRFSSubVolumes ($extend,undef,'false',$device);
             if (! $extend) {
                 $this -> cleanLuks();
                 return;
