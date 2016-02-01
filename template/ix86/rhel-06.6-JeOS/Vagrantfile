@@ -1,0 +1,14 @@
+VAGRANTFILE_API_VERSION = "2"
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  # synced folder containing the rhel DVD iso file
+  config.vm.synced_folder "/image/CDs/", "/image/CDs"
+
+  config.vm.provider "docker" do |d|
+    d.image = "schaefi/kiwi-build-box:latest"
+    d.create_args = ["-privileged=true", "-i", "-t"]
+    # start the sshd in foreground to keep the container in running state
+    d.cmd = ["/usr/sbin/sshd", "-D"]
+    d.has_ssh = true
+  end
+end
