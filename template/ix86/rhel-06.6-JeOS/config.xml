@@ -9,7 +9,6 @@
     <profiles>
         <profile name="RedHat" description="Build for RHEL" import="true"/>
         <profile name="CentOS" description="Build for CentOS"/>
-        <profile name="Oracle" description="Build for Oracle Linux"/>
     </profiles>
     <strip type="delete">
         <file name="/usr/lib*/python2.6"/>
@@ -56,7 +55,7 @@
         <source path="iso:///image/CDs/rhel-server-6.6-x86_64-dvd.iso"/>
     </repository>
 <!-- Don't remove the following repos, they contain tools needed by kiwi -->
-    <repository type="rpm-md" priority="1" profiles="RedHat,Oracle">
+    <repository type="rpm-md" priority="1" profiles="RedHat">
         <source path="obs://Virtualization:/Appliances/RedHat_RHEL-6"/>
     </repository>
     <repository type="rpm-md" priority="1" profiles="CentOS">
@@ -117,9 +116,6 @@
     </packages>
     <packages type="image" profiles="RedHat">
         <package name="redhat-logos" bootinclude="true" bootdelete="true"/>
-    </packages>
-    <packages type="image" profiles="Oracle">
-        <package name="oracle-logos" bootinclude="true" bootdelete="true"/>
     </packages>
     <packages type="bootstrap">
         <package name="filesystem"/>
