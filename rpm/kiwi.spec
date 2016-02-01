@@ -429,7 +429,7 @@ Requires:       genisoimage
 Requires:       cdrkit-cdrtools-compat
 %endif
 Requires:       kiwi-desc-vmxboot = %{version}
-Requires:       %(echo `bash %{S:4} %{S:0} vmxboot %{myarch} %{mysystems}`)
+Requires:       %(echo `bash %{S:4} %{S:0} vmxboot %{myarch} %{mysystems}` | sed 's/\<kernel-default\>//g'`)
 %ifarch ppc ppc64 ppc64le
 %if 0%{?suse_version} >= 1315
 Requires:       grub2-powerpc-ieee1275
