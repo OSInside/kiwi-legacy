@@ -3529,21 +3529,35 @@ function setupDefaultFstab {
     # Update or create new /etc/fstab file with the default entries
     # ----
     local IFS=$IFS_ORIG
-    local prefix=$1
-    local nfstab=$prefix/etc/fstab
-    mkdir -p $prefix/etc
-    grep -q devpts $nfstab || \
-        echo "devpts  /dev/pts          devpts  mode=0620,gid=5 0 0"  >> $nfstab
-    grep -q proc $nfstab || \
-        echo "proc    /proc             proc    defaults        0 0"  >> $nfstab
-    grep -q sysfs $nfstab || \
-        echo "sysfs   /sys              sysfs   noauto          0 0"  >> $nfstab
-    grep -q debugfs $nfstab || test -e /sys/kernel/debug && \
-        echo "debugfs /sys/kernel/debug debugfs noauto          0 0"  >> $nfstab
-    grep -q usbfs $nfstab || test -e /proc/bus/usb && \
-        echo "usbfs   /proc/bus/usb     usbfs   noauto          0 0"  >> $nfstab
-    grep -q /run $nfstab || test -e /run && \
-        echo "tmpfs   /run              tmpfs   noauto          0 0"  >> $nfstab
+    local prefix=/mnt
+    local config_tmp=$1
+    local nfstab=$config_tmp/etc/fstab
+    mkdir -p $config_tmp/etc
+    if [ -e "$prefix/etc/fstab" ];then
+        cp $prefix/etc/fstab $config_tmp/etc
+    else
+        touch $config_tmp/etc/fstab
+    fi
+    if [ ! -e "$prefix/bin/systemd" ];then
+        grep -q devpts $nfstab || \
+            echo "devpts  /dev/pts          devpts  mode=0620,gid=5 0 0" \
+        >> $nfstab
+        grep -q proc $nfstab || \
+            echo "proc    /proc             proc    defaults        0 0" \
+        >> $nfstab
+        grep -q sysfs $nfstab || \
+            echo "sysfs   /sys              sysfs   noauto          0 0" \
+        >> $nfstab
+        grep -q debugfs $nfstab || test -e /sys/kernel/debug && \
+            echo "debugfs /sys/kernel/debug debugfs noauto          0 0" \
+        >> $nfstab
+        grep -q usbfs $nfstab || test -e /proc/bus/usb && \
+            echo "usbfs   /proc/bus/usb     usbfs   noauto          0 0" \
+        >> $nfstab
+        grep -q /run $nfstab || test -e /run && \
+            echo "tmpfs   /run              tmpfs   noauto          0 0" \
+        >> $nfstab
+    fi
 }
 #======================================
 # updateRootDeviceFstab
