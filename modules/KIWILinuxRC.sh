@@ -3573,6 +3573,10 @@ function updateRootDeviceFstab {
     local nfstab=$config_tmp/etc/fstab
     local diskByID=$(getDiskID $rdev)
     local opts=defaults
+    local devicepersistency="by-uuid"
+    if [ ! -z "$kiwi_devicepersistency" ];then
+        devicepersistency=$kiwi_devicepersistency
+    fi
     #======================================
     # check for custom options
     #--------------------------------------
@@ -3627,10 +3631,14 @@ function updateRootDeviceFstab {
         done
     elif [ "$FSTYPE" = "btrfs" ];then
         if [ "$kiwi_btrfs_root_is_snapshot" = "true" ];then
-            local fsuuid=$(blkid $rdev -s UUID -o value)
+            if [ $devicepersistency = "by-label" ];then
+                local device="LABEL=$(blkid $rdev -s LABEL -o value)"
+            else
+                local device="UUID=$(blkid $rdev -s UUID -o value)"
+            fi
             for subvol in $(getBtrfsSubVolumes "$prefix"); do
                 syspath=$(echo $subvol | tr -d @)
-                echo "UUID=$fsuuid $syspath btrfs subvol=$subvol 0 0" >> $nfstab
+                echo "$device $syspath btrfs subvol=$subvol 0 0" >> $nfstab
             done
         fi
     fi
