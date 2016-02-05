@@ -480,10 +480,12 @@ sub restoreRepoCache {
     #
     my $this = shift;
     my $kiwi = $this->{kiwi};
-    $kiwi -> loginfo("Restoring Zypper package cache");
-    KIWIQX::qxx(
-        "mv /var/cache/kiwi/packs /var/cache/kiwi/packages &>/dev/null"
-    );
+    if (-e '/var/cache/kiwi/packs') {
+        $kiwi -> loginfo("Restoring Zypper package cache");
+        KIWIQX::qxx(
+            "mv /var/cache/kiwi/packs /var/cache/kiwi/packages &>/dev/null"
+        );
+    }
     return $this;
 }
 
@@ -499,10 +501,12 @@ sub preserveRepoCache {
     # ---
     my $this = shift;
     my $kiwi = $this->{kiwi};
-    $kiwi -> loginfo("Preserving Zypper package cache");
-    KIWIQX::qxx(
-        "mv /var/cache/kiwi/packages /var/cache/kiwi/packs"
-    );
+    if (-e '/var/cache/kiwi/packages') {
+        $kiwi -> loginfo("Preserving Zypper package cache");
+        KIWIQX::qxx(
+            "mv /var/cache/kiwi/packages /var/cache/kiwi/packs"
+        );
+    }
     return $this;
 }
 
