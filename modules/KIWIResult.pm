@@ -409,7 +409,7 @@ sub __bundleDisk {
     }
     if ($buildinfo->exists('main','install.stick')) {
         $install = 1;
-        $ret |= $this -> __bundleExtension ('install.raw');
+        $ret |= $this -> __bundleExtension ('raw.install.raw');
     }
     if ($buildinfo->exists('main','install.pxe')) {
         $install = 1;
