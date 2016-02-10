@@ -4197,7 +4197,7 @@ function probeDevices {
     #======================================
     # Manual loading of modules
     #--------------------------------------
-    for i in rd brd edd dm-mod xennet xenblk virtio_blk loop squashfs fuse;do
+    for i in rd brd edd dm-mod xen:vif xen:vbd virtio_blk loop squashfs fuse;do
         modprobe $i &>/dev/null
     done
     udevPending
@@ -7384,7 +7384,7 @@ function waitForStorageDevice {
         if [ $check -eq 30 ];then
             return 1
         fi
-        Echo "Waiting for device $device to settle..."
+        Echo "Waiting for storage device $device to settle..."
         check=$((check + 1))
         sleep 2
     done
@@ -7429,7 +7429,7 @@ function waitForBlockDevice {
         if [ -b $device ] || [ $check -eq 4 ];then
             break
         fi
-        Echo "Waiting for device $device to settle..."
+        Echo "Waiting for block device $device to settle..."
         check=$((check + 1))
         sleep 2
     done
