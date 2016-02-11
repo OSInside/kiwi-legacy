@@ -21,7 +21,6 @@ use strict;
 use warnings;
 use Config::IniFiles;
 use Digest::SHA qw(sha256);
-use Cwd;
 
 #==========================================
 # KIWI Modules
@@ -487,11 +486,9 @@ sub __sign_with_sha256sum {
         $kiwi -> failed ();
         return;
     }
-    my $orig_cwd = getcwd;
-    chdir $tmpdir;
     while (my $entry = readdir ($dh)) {
         next if $entry eq "." || $entry eq "..";
-        next if ! -f $entry;
+        next if ! -f "$tmpdir/$entry";
         my $alg = 'sha256';
         my $sha = Digest::SHA->new($alg);
         if (! $sha) {
@@ -499,7 +496,7 @@ sub __sign_with_sha256sum {
             $kiwi -> failed ();
             return;
         }
-        $sha -> addfile ($entry);
+        $sha -> addfile ($tmpdir."/".$entry);
         my $digest = $sha -> hexdigest;
         my $fd = FileHandle -> new();
         if (! $fd -> open (">$tmpdir/$entry.sha256")) {
@@ -507,10 +504,9 @@ sub __sign_with_sha256sum {
             $kiwi -> failed ();
             return;
         }
-        print $fd $digest."\n";
+        print $fd "$digest  $entry\n";
         $fd -> close();
     }
-    chdir $orig_cwd;
     closedir $dh;
     return $this;
 }
