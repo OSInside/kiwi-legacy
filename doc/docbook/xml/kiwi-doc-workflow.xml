@@ -881,7 +881,7 @@
     &lt;file name="..."/&gt;
 &lt;/strip&gt;</screen>
      <para>
-      Removing files that are needed my result in an image that cannot be
+      Removing files that are needed may result in an image that cannot be
       booted.
      </para>
     </answer>
