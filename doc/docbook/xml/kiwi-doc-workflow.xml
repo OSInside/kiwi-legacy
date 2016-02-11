@@ -877,7 +877,7 @@
       class="attribute">type</sgmltag> attribute set to <sgmltag
       class="attvalue">delete</sgmltag>, as shown below:
      </para>
-<screen>&lt;strip type="delete"/&gt;
+<screen>&lt;strip type="delete"&gt;
     &lt;file name="..."/&gt;
 &lt;/strip&gt;</screen>
      <para>
