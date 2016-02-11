@@ -303,6 +303,7 @@ sub new {
         $type{boottimeout}            = $xmltype -> getBootTimeout();
         $type{btrfs_root_is_snapshot} = $xmltype -> getBtrfsRootIsSnapshot();
         $type{cmdline}                = $xmltype -> getKernelCmdOpts();
+        $type{devicepersistency}      = $xmltype -> getDevicePersistent();
         $type{filesystem}             = $xmltype -> getFilesystem();
         $type{firmware}               = $xmltype -> getFirmwareType();
         $type{fsmountoptions}         = $xmltype -> getFSMountOptions();
@@ -4330,7 +4331,21 @@ sub setupBootLoaderConfiguration {
         $kiwi -> info (
             "Kernel root device set to $1 via custom cmdline\n"
         );
-    } elsif ($firmware eq 'ec2') {
+    } elsif ( ($this->{type}->{devicepersistency}) && ($firmware =~ /ec2/)) {
+        # /.../
+        # With the introduction of the 4.4 kernel in openSUSE and SLE
+        # the SUSE Xen patches were all upstremead and we enabled the so
+        # called "pvops kernel" as the -default kernel. With this the
+        # behavior for PV images in EC2 changes and we can now treat
+        # PV and HVM as equals. For PV image we still need to handle
+        # pv-grub and thus we just tell it to mount with the default
+        # file system label that kiwi creates anyway. This also works
+        # for HVM and one no longer has to maintain separarate image builds
+        $kiwi -> info (
+            "Kernel root device set via label 'ROOT' for firmware $firmware\n"
+        );
+        $cmdline .= ' root=LABEL=ROOT';
+    } elsif ($firmware eq 'ec2')  {
         # /.../
         # EC2 requires to specifiy the root device in the bootloader
         # configuration. EC2 extracts this information via pygrub and
