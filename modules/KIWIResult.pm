@@ -131,13 +131,8 @@ sub buildRelease {
     #==========================================
     # Evaluate bundler method
     #------------------------------------------
-    my $type = $buildinfo->val('main','image.type');
-    if (! $type) {
-        $kiwi -> info ("--> Calling default bundler\n");
-        $result = $this -> __bundleDefault();
-        $this->DESTROY if ! $result;
-        return $result;
-    }
+    my $type = $buildinfo->val('main','image.type')//'';
+
     if ($type eq 'product') {
         $kiwi -> info ("--> Calling product bundler\n");
         $result = $this -> __bundleProduct();
@@ -165,6 +160,9 @@ sub buildRelease {
     } else {
         $kiwi -> info ("--> Calling default bundler\n");
         $result = $this -> __bundleDefault();
+    }
+    if ($result) {
+        $result = $this -> __sign_with_sha256sum();
     }
     $this->DESTROY if ! $result;
     return $result;
@@ -339,10 +337,7 @@ sub __bundleExtension {
 #------------------------------------------
 sub __bundleProduct {
     my $this = shift;
-    if ($this -> __bundleExtension ('iso')) {
-        return $this -> __sign_with_sha256sum();
-    }
-    return;
+    return $this -> __bundleExtension ('iso');
 }
 
 #==========================================
