@@ -69,6 +69,7 @@
         <file name="column"/>
         <file name="cp"/>
         <file name="cryptsetup"/>
+        <file name="ctc_configure"/>
         <file name="curl"/>
         <file name="cut"/>
         <file name="dasd_configure"/>
@@ -130,6 +131,7 @@
         <file name="init"/>
         <file name="insmod"/>
         <file name="id"/>
+        <file name="iucv_configure"/>
         <file name="kexec"/>
         <file name="kill"/>
         <file name="killall"/>
