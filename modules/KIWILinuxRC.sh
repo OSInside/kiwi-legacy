@@ -643,7 +643,7 @@ function errorLogStart {
     # Clean proc
     #--------------------------------------
     if [ $umountProc -eq 1 ];then
-        umount /proc
+        umount /proc 2>/dev/null
     fi
     #======================================
     # Enable shell debugging
