@@ -628,11 +628,11 @@ function errorLogStart {
         #======================================
         # Redirect/Clean stdout if quiet is set
         #--------------------------------------
-        exec >/dev/null
         if [ -x /usr/bin/setterm ];then
             setterm -clear all
             setterm -background black
         fi
+        exec >/dev/null
     else
         #======================================
         # Redirect stdout to console
