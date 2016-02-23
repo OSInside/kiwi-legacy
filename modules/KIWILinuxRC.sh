@@ -628,11 +628,11 @@ function errorLogStart {
         #======================================
         # Redirect/Clean stdout if quiet is set
         #--------------------------------------
-        exec >/dev/null
         if [ -x /usr/bin/setterm ];then
             setterm -clear all
             setterm -background black
         fi
+        exec >/dev/null
     else
         #======================================
         # Redirect stdout to console
@@ -643,7 +643,7 @@ function errorLogStart {
     # Clean proc
     #--------------------------------------
     if [ $umountProc -eq 1 ];then
-        umount /proc
+        umount /proc 2>/dev/null
     fi
     #======================================
     # Enable shell debugging
