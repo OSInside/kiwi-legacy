@@ -735,7 +735,7 @@ sub createYumConfig {
     KIWIQX::qxx ("echo '[main]' > $config");
     KIWIQX::qxx ("echo 'cachedir=$meta' >> $config");
     KIWIQX::qxx ("echo 'reposdir=$meta' >> $config");
-    KIWIQX::qxx ("echo 'keepcache=0' >> $config");
+    KIWIQX::qxx ("echo 'keepcache=1' >> $config");
     KIWIQX::qxx ("echo 'debuglevel=2' >> $config");
     KIWIQX::qxx ("echo 'pkgpolicy=newest' >> $config");
     KIWIQX::qxx ("echo 'tolerant=1' >> $config");
