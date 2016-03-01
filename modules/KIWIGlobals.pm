@@ -326,7 +326,10 @@ sub mount {
                 push @UmountStack,"kpartx -sd $loop";
                 $this->{UmountStack} = \@UmountStack;
                 $loop =~ s/\/dev\///;
-                $source = "/dev/mapper/".$loop."p3";
+                $source = "/dev/mapper/".$loop."p4";
+                if (! -b $source) {
+                    $source = "/dev/mapper/".$loop."p3";
+                }
                 if (! -b $source) {
                     $source = "/dev/mapper/".$loop."p2";
                 }
