@@ -124,7 +124,11 @@ sub getAlias {
     # Return the alias setting for the repository
     # ---
     my $this = shift;
-    return $this->{alias};
+    my $alias = $this->{alias};
+    if ($alias) {
+        $alias = quotemeta($alias);
+    }
+    return $alias;
 }
 
 #==========================================
