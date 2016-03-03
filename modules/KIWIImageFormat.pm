@@ -610,7 +610,7 @@ sub createGoogleComputeEngine {
     $target = $dist."-guest-gce-".$version.".tar.gz";
     $status = KIWIQX::qxx ("mv $source $gce_source 2>&1");
     $result = $? >> 8;
-    my @content= ('disk.raw');
+    my @content;
     if ($result != 0) {
         $kiwi -> error  ("Failed to prepare source image: $status");
         $kiwi -> failed ();
@@ -624,6 +624,10 @@ sub createGoogleComputeEngine {
         my %json_data;
         $json_data{licenses} = [ $license ];
         my $json_text = $json_ref ->encode( \%json_data );
+        # gce is so picky on the style, even though every json parser
+        # can read and validate the encode result, gce can't, space after
+        # colon seems required
+        $json_text =~ s/:\[/: \[/;
         if (! $json_fd -> open (">$json_meta")) {
             $kiwi -> failed ();
             $kiwi -> error  (
@@ -637,6 +641,7 @@ sub createGoogleComputeEngine {
         push @content, 'manifest.json';
         $kiwi -> done();
     }
+    push @content, 'disk.raw';
     $kiwi -> info("--> Creating GNU tar archive");
     $status = KIWIQX::qxx (
         "cd $src_dirname && tar --format=gnu -cSzf $target @content 2>&1"
