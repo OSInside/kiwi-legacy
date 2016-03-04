@@ -367,7 +367,7 @@ sub __createContainerBundle {
         return;
     }
     my $data = KIWIQX::qxx (
-        "$tar -C $origin -cJf $baseBuildDir/$imgFlName @dirlist 2>&1"
+        "$tar --xattrs -C $origin -cJf $baseBuildDir/$imgFlName @dirlist 2>&1"
     );
     my $code = $? >> 8;
     if ($code != 0) {
