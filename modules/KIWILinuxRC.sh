@@ -750,6 +750,7 @@ function udevStart {
     # start the udev daemon.
     # ----
     local IFS=$IFS_ORIG
+    local fipsEnabled=0
     #======================================
     # Check time according to build day
     #--------------------------------------
@@ -802,11 +803,17 @@ function udevStart {
             enablePlymouth=0
             break
             ;;
+        case "$o" in
+            fips=1*)
+            fipsEnabled=1
+            ;;
         esac
     done
     if [ $enablePlymouth -eq 1 ]; then
         startPlymouth
     fi
+    # start haveged
+    startHaveged
 }
 #======================================
 # moduleLoadBeforeUdev
@@ -878,6 +885,20 @@ function startPlymouth {
         plymouth show-splash &>/dev/null
         # reset tty after plymouth messed with it
         consoleInit
+    fi
+}
+#======================================
+# startHaveged
+#--------------------------------------
+function startHaveged {
+    if [ -e /usr/sbin/haveged ]; then
+       /usr/sbin/haveged
+       return
+    fi
+
+    # a source of entropy is required for VMware virtual machines
+    if [ $fipsEnabled -eq 1 ]; then
+       echo "Warning: haveged is missing. The boot may hang if /dev/random is being read."
     fi
 }
 #======================================
