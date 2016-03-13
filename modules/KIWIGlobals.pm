@@ -239,6 +239,18 @@ sub loop_delete_command {
 }
 
 #==========================================
+# push_to_umount_stack
+#------------------------------------------
+sub push_to_umount_stack {
+    my $this = shift;
+    my $entry = shift;
+    my @UmountStack = @{$this->{UmountStack}};
+    push @UmountStack, $entry;
+    $this->{UmountStack} = \@UmountStack;
+    return $this;
+}
+
+#==========================================
 # mount
 #------------------------------------------
 sub mount {

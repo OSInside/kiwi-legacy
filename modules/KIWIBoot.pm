@@ -3932,77 +3932,77 @@ sub setupBootLoaderStages {
         #==========================================
         # Use signed EFI modules from packages UEFI
         #------------------------------------------
-        if ($firmware eq "uefi") {
-            $kiwi -> info ("Importing grub2 shim/signed efi modules");
-            my $s_data      = $stages{efi}{data};
-            my $s_shim_ms   = $stages{efi}{shim_ms};
-            my $s_shim_suse = $stages{efi}{shim_suse};
-            my $s_signed    = $stages{efi}{signed};
-            my $fo_bin;
-            if ($arch eq 'x86_64') {
-                $fo_bin = 'bootx64.efi';
-            } elsif ($arch =~ /i.86/) {
-                $fo_bin = 'bootx32.efi';
-            } elsif (($arch eq 'aarch64') || ($arch eq 'arm64')) {
-                $fo_bin = 'bootaa64.efi';
-            } elsif ($arch =~ /arm/) {
-                $fo_bin = 'bootarm.efi';
-            }
-            $result = 0;
-            if ($zipped) {
-                $status= KIWIQX::qxx (
-                    "$unzip | (cd $tmpdir && cpio -i -d $s_data 2>&1)"
-                );
-            } else {
-                $status= KIWIQX::qxx (
-                    "cat $initrd | (cd $tmpdir && cpio -i -d $s_data 2>&1)"
-                );
-            }
-            if ((! -e "$tmpdir/$s_shim_ms") && (! -e "$tmpdir/$s_shim_suse")) {
-                my $s_shim = "$tmpdir/$s_shim_ms";
-                if (-e $s_shim) {
-                    $s_shim = "$tmpdir/$s_shim_suse"
-                }
-                $kiwi -> failed ();
-                $kiwi -> error  (
-                    "Can't find shim $s_shim in initrd");
-                $kiwi -> failed ();
-                return;
-            }
-            if (! -e "$tmpdir/$s_signed") {
-                $kiwi -> failed ();
-                $kiwi -> error  (
-                    "Can't find grub2 $s_signed in initrd");
-                $kiwi -> failed ();
-                return;
-            }
-            $status = KIWIQX::qxx (
-                "cp $tmpdir/$s_shim_ms $tmpdir/EFI/BOOT/$fo_bin 2>&1"
-            );
-            $result = $? >> 8;
-            if ($result != 0) {
-                $status = KIWIQX::qxx (
-                    "cp $tmpdir/$s_shim_suse $tmpdir/EFI/BOOT/$fo_bin 2>&1"
-                );
-                $result = $? >> 8;
-            }
-            if ($result != 0) {
-                $kiwi -> failed ();
-                $kiwi -> error ("Failed to copy shim module: $status");
-                $kiwi -> failed ();
-                return;
-            }
-            $status = KIWIQX::qxx (
-                "cp $tmpdir/$s_signed $tmpdir/EFI/BOOT/grub.efi 2>&1");
-            $result = $? >> 8;
-            if ($result != 0) {
-                $kiwi -> failed ();
-                $kiwi -> error ("Failed to copy signed module: $status");
-                $kiwi -> failed ();
-                return;
-            }
-            $kiwi -> done();
-        }
+        #if ($firmware eq "uefi") {
+        #    $kiwi -> info ("Importing grub2 shim/signed efi modules");
+        #    my $s_data      = $stages{efi}{data};
+        #    my $s_shim_ms   = $stages{efi}{shim_ms};
+        #    my $s_shim_suse = $stages{efi}{shim_suse};
+        #    my $s_signed    = $stages{efi}{signed};
+        #    my $fo_bin;
+        #    if ($arch eq 'x86_64') {
+        #        $fo_bin = 'bootx64.efi';
+        #    } elsif ($arch =~ /i.86/) {
+        #        $fo_bin = 'bootx32.efi';
+        #    } elsif (($arch eq 'aarch64') || ($arch eq 'arm64')) {
+        #        $fo_bin = 'bootaa64.efi';
+        #    } elsif ($arch =~ /arm/) {
+        #        $fo_bin = 'bootarm.efi';
+        #    }
+        #    $result = 0;
+        #    if ($zipped) {
+        #        $status= KIWIQX::qxx (
+        #            "$unzip | (cd $tmpdir && cpio -i -d $s_data 2>&1)"
+        #        );
+        #    } else {
+        #        $status= KIWIQX::qxx (
+        #            "cat $initrd | (cd $tmpdir && cpio -i -d $s_data 2>&1)"
+        #        );
+        #    }
+        #    if ((! -e "$tmpdir/$s_shim_ms") && (! -e "$tmpdir/$s_shim_suse")) {
+        #        my $s_shim = "$tmpdir/$s_shim_ms";
+        #        if (-e $s_shim) {
+        #            $s_shim = "$tmpdir/$s_shim_suse"
+        #        }
+        #        $kiwi -> failed ();
+        #        $kiwi -> error  (
+        #            "Can't find shim $s_shim in initrd");
+        #        $kiwi -> failed ();
+        #        return;
+        #    }
+        #    if (! -e "$tmpdir/$s_signed") {
+        #        $kiwi -> failed ();
+        #        $kiwi -> error  (
+        #            "Can't find grub2 $s_signed in initrd");
+        #        $kiwi -> failed ();
+        #        return;
+        #    }
+        #    $status = KIWIQX::qxx (
+        #        "cp $tmpdir/$s_shim_ms $tmpdir/EFI/BOOT/$fo_bin 2>&1"
+        #    );
+        #    $result = $? >> 8;
+        #    if ($result != 0) {
+        #        $status = KIWIQX::qxx (
+        #            "cp $tmpdir/$s_shim_suse $tmpdir/EFI/BOOT/$fo_bin 2>&1"
+        #        );
+        #        $result = $? >> 8;
+        #    }
+        #    if ($result != 0) {
+        #        $kiwi -> failed ();
+        #        $kiwi -> error ("Failed to copy shim module: $status");
+        #        $kiwi -> failed ();
+        #        return;
+        #    }
+        #    $status = KIWIQX::qxx (
+        #        "cp $tmpdir/$s_signed $tmpdir/EFI/BOOT/grub.efi 2>&1");
+        #    $result = $? >> 8;
+        #    if ($result != 0) {
+        #        $kiwi -> failed ();
+        #        $kiwi -> error ("Failed to copy signed module: $status");
+        #        $kiwi -> failed ();
+        #        return;
+        #    }
+        #    $kiwi -> done();
+        #}
         #==========================================
         # Create OFW grub2 boot images
         #------------------------------------------
@@ -5746,14 +5746,56 @@ sub installBootLoader {
             $grubarch = "powerpc-ieee1275";
         }
         #==========================================
-        # Mount boot partition
+        # Mount system
         #------------------------------------------
         if (! KIWIGlobals -> instance() -> mount (
-            $bootdev, $mount, undef, $xml
+            $deviceMap->{root}, $mount, undef, $xml
         )) {
-            $kiwi -> error ("Couldn't mount boot partition: $bootdev");
+            $kiwi -> error ("Couldn't mount root partition: $bootdev");
             $kiwi -> failed ();
             return;
+        }
+        if (($deviceMap->{boot}) && ($deviceMap->{boot} ne $deviceMap->{root})){
+            my $bootdir = KIWIQX::qxx ("mktemp -qdt kiwibootdev.XXXXXX");
+            chomp $bootdir;
+            KIWIGlobals -> instance() -> push_to_umount_stack (
+                "rmdir $bootdir"
+            );
+            if (! KIWIGlobals -> instance() -> mount (
+                $deviceMap->{boot}, $bootdir, undef, $xml
+            )) {
+                $kiwi -> error ("Couldn't mount boot partition: $bootdev");
+                $kiwi -> failed ();
+                $this -> cleanStack ();
+                return;
+            }
+            KIWIQX::qxx ("mount --bind $bootdir/boot $mount/boot");
+            KIWIGlobals -> instance() -> push_to_umount_stack (
+                "umount $mount/boot"
+            );
+        }
+        if ($firmware eq "uefi") {
+            KIWIQX::qxx ("mkdir -p $mount/boot/efi");
+            if (! KIWIGlobals -> instance() -> mount (
+                $deviceMap->{jump}, "$mount/boot/efi", undef, $xml
+            )) {
+                $kiwi -> error ("Couldn't mount efi boot partition: $bootdev");
+                $kiwi -> failed ();
+                $this -> cleanStack ();
+                return;
+            }
+            KIWIQX::qxx ("mount --bind /proc $mount/proc");
+            KIWIGlobals -> instance() -> push_to_umount_stack (
+                "umount $mount/proc"
+            );
+            KIWIQX::qxx ("mount --bind /sys $mount/sys");
+            KIWIGlobals -> instance() -> push_to_umount_stack (
+                "umount $mount/sys"
+            );
+            KIWIQX::qxx ("mount --bind /dev $mount/dev");
+            KIWIGlobals -> instance() -> push_to_umount_stack (
+                "umount $mount/dev"
+            );
         }
         my $stages = $mount."/boot/grub2/$grubarch";
         if (($firmware =~ /ec2|bios|ofw/) && (! -e "$stages/$grubimg")) {
@@ -5815,6 +5857,7 @@ sub installBootLoader {
                     "grub2 ppc core.elf module not found"
                 );
                 $kiwi -> failed();
+                $this -> cleanStack ();
                 return;
             }
         }
@@ -5822,6 +5865,7 @@ sub installBootLoader {
             if (! $grubtool) {
                 $kiwi -> error  ("Mandatory $grubtool not found");
                 $kiwi -> failed ();
+                $this -> cleanStack ();
                 return;
             }
             $kiwi -> info ("Installing grub2:\n");
@@ -5835,7 +5879,32 @@ sub installBootLoader {
                     "Couldn't install $loader on $loaderTarget: $status"
                 );
                 $kiwi -> failed ();
+                $this -> cleanStack ();
                 return;
+            }
+            if ($firmware eq "uefi") {
+                my $grub2_install = "$mount/usr/sbin/grub2-install";
+                KIWIQX::qxx (
+                    "cp $grub2_install $grub2_install".".orig"
+                );
+                KIWIQX::qxx (
+                    "cp $mount/bin/true $grub2_install"
+                );
+                $status = KIWIQX::qxx (
+                    "chroot $mount shim-install --removable $this->{loop}"
+                );
+                $result = $? >> 8;
+                KIWIQX::qxx (
+                    "cp $grub2_install".".orig"." $grub2_install"
+                );
+                if ($result != 0) {
+                    $kiwi -> error  (
+                        "Couldn't install shim data: $status"
+                    );
+                    $kiwi -> failed ();
+                    $this -> cleanStack ();
+                    return;
+                }
             }
         }
         #==========================================
