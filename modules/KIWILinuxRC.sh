@@ -750,6 +750,7 @@ function udevStart {
     # start the udev daemon.
     # ----
     local IFS=$IFS_ORIG
+    local enableFips=0
     #======================================
     # Check time according to build day
     #--------------------------------------
@@ -802,10 +803,17 @@ function udevStart {
             enablePlymouth=0
             break
             ;;
+        case "$o" in
+            fips=1*)
+            enableFips=1
+            ;;
         esac
     done
     if [ $enablePlymouth -eq 1 ]; then
         startPlymouth
+    fi
+    if [ $enableFips -eq 1 ];then
+        startHaveged
     fi
 }
 #======================================
@@ -878,6 +886,22 @@ function startPlymouth {
         plymouth show-splash &>/dev/null
         # reset tty after plymouth messed with it
         consoleInit
+    fi
+}
+#======================================
+# startHaveged
+#--------------------------------------
+function startHaveged {
+    if ! lookup haveged &>/dev/null; then
+        systemException \
+            "haveged is missing but required for fips" \
+        "reboot"
+    fi
+
+    if ! haveged; then
+        systemException \
+            "Failed to start haveged required for fips" \
+        "reboot"
     fi
 }
 #======================================
