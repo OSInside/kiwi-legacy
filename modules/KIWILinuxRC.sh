@@ -800,12 +800,10 @@ function udevStart {
     for o in $(cat /proc/cmdline) ; do
         case "$o" in
             plymouth.enable=0*|rd.plymouth=0*)
-            enablePlymouth=0
-            break
+                enablePlymouth=0
             ;;
-        case "$o" in
             fips=1*)
-            enableFips=1
+                enableFips=1
             ;;
         esac
     done
