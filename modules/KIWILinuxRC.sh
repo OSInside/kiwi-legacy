@@ -7571,7 +7571,14 @@ function bootImage {
 		exec /lib/mkinitrd/bin/run-init -c ./dev/console /mnt $init $option
 	else
 		# FIXME: clicfs / nfsroot / non-suse doesn't like run-init
-		exec chroot . $init $option
+		if lookup switch_root &>/dev/null;then
+			exec switch_root . $init $option
+		else
+			if lookup pivot_root &>/dev/null;then
+				pivot_root . run/initramfs
+			fi
+			exec chroot . $init $option
+		fi
 	fi
 }
 #======================================

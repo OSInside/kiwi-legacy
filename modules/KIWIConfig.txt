@@ -196,6 +196,7 @@
 		<file name="scsi_id"/>
 		<file name="scsi_tur"/>
 		<file name="rsync"/>
+		<file name="switch_root"/>
 		<file name="sed"/>
 		<file name="seq"/>
 		<file name="setctsid"/>
