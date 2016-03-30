@@ -11,15 +11,15 @@ msgstr ""
 "Project-Id-Version: kiwi.nl\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2005-07-27 16:23+0200\n"
-"PO-Revision-Date: 2014-10-10 10:20+0200\n"
-"Last-Translator: Freek de Kruijf <freek@opensuse.org>\n"
-"Language-Team: Dutch <opensuse-nl@opensuse.org>\n"
+"PO-Revision-Date: 2016-03-30 12:23+0000\n"
+"Last-Translator: Nathan Follens <nthn@unseen.is>\n"
+"Language-Team: Dutch <http://l10n.opensuse.org/projects/kiwi/master/nl/>\n"
 "Language: nl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Lokalize 1.5\n"
-"Plural-Forms: nplurals=2; plural= n != 1;\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 2.5\n"
 
 #. /.../
 #. Copyright (c) 2005 SuSE GmbH Nuernberg, Germany.  All rights reserved.
@@ -30,7 +30,7 @@ msgid "Boot continues in 10 sec"
 msgstr "Opstarten gaat verder na 10 seconden"
 
 msgid "Enter LUKS passphrase"
-msgstr "Voer LUKS wachtwoordzin in"
+msgstr "Voer LUKS-wachtwoordzin in"
 
 msgid "Do you accept the license agreement ?"
 msgstr "Accepteert u de licentieovereenkomst?"
@@ -44,7 +44,7 @@ msgid "Do you want to start the System-Restore ?"
 msgstr "Wilt u het systeemherstel starten?"
 
 msgid "Restoring base operating system..."
-msgstr "Herstellen van het basis besturingssysteem..."
+msgstr "Herstellen van het basisbesturingssysteem..."
 
 msgid "Destroying ALL data on %1, continue ?"
 msgstr "ALLE gegevens op %1 worden vernietigd, doorgaan?"
@@ -73,7 +73,7 @@ msgstr "Nee"
 
 # ok button label
 msgid "OK"
-msgstr "OK"
+msgstr "Oké"
 
 # cancel button label
 msgid "Cancel"
@@ -94,10 +94,10 @@ msgstr ""
 "/var/log/boot.kiwi voor details"
 
 msgid "Please remove the CD/DVD before reboot"
-msgstr "Gaarne de installatie cd/dvd verwijderen voor het opnieuw opstarten"
+msgstr "Verwijder de installatie-cd/dvd alvorens opnieuw op te starten"
 
 msgid "Please unplug the USB stick before reboot"
-msgstr "De installatie USB-stick uitnemen voor het opnieuw opstarten"
+msgstr "Verwijder de USB-stick alvorens opnieuw op te starten"
 
 #
 msgid "Installation..."
@@ -122,4 +122,4 @@ msgstr ""
 "aan te zetten"
 
 msgid "Please remove the CD/DVD before shutdown"
-msgstr "De installatie-cd/dvd verwijderen alvorens af te sluiten"
+msgstr "Verwijder de installatie-cd/dvd alvorens af te sluiten"
