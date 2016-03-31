@@ -3,16 +3,16 @@ msgstr ""
 "Project-Id-Version: kiwi.ko\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2005-07-29 08:51+0200\n"
-"PO-Revision-Date: 2015-07-09 01:19+0900\n"
-"Last-Translator: Yunseok Choi <xein@naver.com>\n"
-"Language-Team: Korean <xein@naver.com>\n"
+"PO-Revision-Date: 2016-03-31 16:38+0000\n"
+"Last-Translator: YunSeok Choi <xein@naver.com>\n"
+"Language-Team: Korean <http://l10n.opensuse.org/projects/kiwi/master/ko/>\n"
 "Language: ko\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 2.5\n"
 "X-Poedit-SourceCharset: UTF-8\n"
-"X-Generator: Poedit 1.5.4\n"
 
 #. /.../
 #. Copyright (c) 2005 SuSE GmbH Nuernberg, Germany.  All rights reserved.
@@ -20,7 +20,7 @@ msgstr ""
 #. boot code for KIWI 
 #.
 msgid "Boot continues in 10 sec"
-msgstr ""
+msgstr "10초 내로 부팅"
 
 msgid "Enter LUKS passphrase"
 msgstr "LUKS 암호문 입력"
@@ -34,7 +34,7 @@ msgstr "시스템-복구를 시작하시겠습니까?"
 
 # power-off message
 msgid "Do you want to start the System-Restore ?"
-msgstr "시스템-복원을 시작하시겠습니까? "
+msgstr "시스템-복원을 시작 하시겠습니까?"
 
 msgid "Restoring base operating system..."
 msgstr "기본 운영체제 복원 중..."
@@ -73,12 +73,14 @@ msgid "Exit"
 msgstr "종료"
 
 msgid "Bootloader installation has failed"
-msgstr ""
+msgstr "부트로더 설치에 실패함"
 
 msgid ""
 "The system will not be able to reboot. Please make sure to fixup and install "
 "the bootloader before next reboot. Check /var/log/boot.kiwi for details"
 msgstr ""
+"시스템이 재부팅되지 않습니다. 재부팅을 다시 시도하기 전에 문제점을 확인하여 수정하고 부트로더를 설치해주세요. /var/log/"
+"boot.kiwi 에서 자세한 내용을 확인할 수 있습니다"
 
 msgid "Please remove the CD/DVD before reboot"
 msgstr "재부팅 전에 CD/DVD 를 꺼내주세요"
@@ -104,8 +106,7 @@ msgid "Select %1 partition for installation:"
 msgstr "설치할 %1 파티션 선택:"
 
 msgid "System will be shutdown. Remove USB stick before power on"
-msgstr ""
+msgstr "시스템이 종료됩니다. 전원이 켜지기 전에 USB 스틱을 제거해주세요"
 
-#, fuzzy
 msgid "Please remove the CD/DVD before shutdown"
-msgstr "계속하기전에 설치 CD/DVD를 꺼내주세요."
+msgstr "종료하기 전에 설치 CD/DVD를 꺼내주세요"
