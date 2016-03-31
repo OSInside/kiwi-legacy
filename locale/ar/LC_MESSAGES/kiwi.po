@@ -5,16 +5,16 @@ msgstr ""
 "Project-Id-Version: @PACKAGE@\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2006-05-15 15:07+0200\n"
-"PO-Revision-Date: 2012-10-08 08:50+0300\n"
-"Last-Translator: Mohammad Alhargan <malham1@hotmail.com>\n"
-"Language-Team: http://www.vertaal.com.ar/files/opensuse-11-4/ar/list/\n"
+"PO-Revision-Date: 2016-03-31 06:09+0000\n"
+"Last-Translator: mohammad alhargan <malham1@gmail.com>\n"
+"Language-Team: Arabic <http://l10n.opensuse.org/projects/kiwi/master/ar/>\n"
 "Language: ar\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 "
 "&& n%100<=10 ? 3 : n%100>=11 ? 4 : 5;\n"
-"X-Generator: Virtaal 0.7.0\n"
+"X-Generator: Weblate 2.5\n"
 
 #. /.../
 #. Copyright (c) 2005 SuSE GmbH Nuernberg, Germany.  All rights reserved.
@@ -22,13 +22,13 @@ msgstr ""
 #. boot code for KIWI 
 #.
 msgid "Boot continues in 10 sec"
-msgstr ""
+msgstr "يستمر الإقلاع خلال 10 ثوان"
 
 msgid "Enter LUKS passphrase"
 msgstr "أدخل عبارة المرور LUKS"
 
 msgid "Do you accept the license agreement ?"
-msgstr "هل تقبل اتفاقية الترخيي ؟"
+msgstr "هل تقبل اتفاقية الترخيص؟"
 
 msgid "Do you want to start the System-Recovery ?"
 msgstr "هل تريد بدء إستعادة النظام ؟"
@@ -73,12 +73,14 @@ msgid "Exit"
 msgstr "خروج"
 
 msgid "Bootloader installation has failed"
-msgstr ""
+msgstr "فشل تثبيت محمل الإقلاع"
 
 msgid ""
 "The system will not be able to reboot. Please make sure to fixup and install "
 "the bootloader before next reboot. Check /var/log/boot.kiwi for details"
 msgstr ""
+"النظام لن يكون قادرا على إعادة تشغيل الكمبيوتر. يرجى التأكد من إصلاح وتثبيت "
+"محمل الإقلاع قبل الإقلاع التالي. راجع /var/log/boot.kiwi لمزيد من التفاصيل"
 
 msgid "Please remove the CD/DVD before reboot"
 msgstr "رجاءا أخرج قرص CD/DVD قبل إعادة التشغيل"
@@ -102,7 +104,7 @@ msgid "Select %1 partition for installation:"
 msgstr "حدد %1 قسم للتثبيت:"
 
 msgid "System will be shutdown. Remove USB stick before power on"
-msgstr ""
+msgstr "سيتم إيقاف النظام. أزل سواقة USB قبل التشغيل"
 
 msgid "Please remove the CD/DVD before shutdown"
-msgstr ""
+msgstr "الرجاء إزالة CD / DVD قبل الاغلاق"
