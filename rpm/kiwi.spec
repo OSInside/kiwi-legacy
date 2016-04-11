@@ -310,9 +310,6 @@ Requires:       syslinux
 %endif
 License:        GPL-2.0+
 Group:          System/Management
-%if 0%{?suse_version} > 1120
-BuildArch:      noarch
-%endif
 
 %description -n kiwi-pxeboot
 This package contains the basic PXE directory structure which is
