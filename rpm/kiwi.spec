@@ -310,9 +310,6 @@ Requires:       syslinux
 %endif
 License:        GPL-2.0+
 Group:          System/Management
-%if 0%{?suse_version} > 1120
-BuildArch:      noarch
-%endif
 
 %description -n kiwi-pxeboot
 This package contains the basic PXE directory structure which is
@@ -440,18 +437,24 @@ Requires:       yaboot
 %ifarch s390 s390x
 Requires:       s390-tools
 %endif
-%ifarch %ix86 x86_64
+%ifarch %ix86 x86_64 %arm aarch64
 %if 0%{?suse_version} < 1315 && 0%{?rhel_version} < 700 && 0%{?centos_version} < 700
 Requires:       grub
 %endif
 %if 0%{?suse_version} >= 1220 || 0%{?rhel_version} >= 700 || 0%{?centos_version} >= 700
 Requires:       grub2
+%endif
 %ifarch x86_64
 Requires:       grub2-x86_64-efi
 %endif
 %ifarch %ix86
 Requires:       grub2-i386-efi
 %endif
+%ifarch aarch64
+Requires:       grub2-arm64-efi
+%endif
+%ifarch %arm
+Requires:       grub2-arm-efi
 %endif
 %endif
 License:        GPL-2.0+
@@ -557,20 +560,27 @@ Requires:       yaboot
 %ifarch s390 s390x
 Requires:       s390-tools
 %endif
-%ifarch %ix86 x86_64
+%ifarch %ix86 x86_64 %arm aarch64
 %if 0%{?suse_version} < 1315 && 0%{?rhel_version} < 700 && 0%{?centos_version} < 700
 Requires:       grub
 %endif
 %if 0%{?suse_version} >= 1220 || 0%{?rhel_version} >= 700 || 0%{?centos_version} >= 700
 Requires:       grub2
+%endif
 %ifarch x86_64
 Requires:       grub2-x86_64-efi
 %endif
 %ifarch %ix86
 Requires:       grub2-i386-efi
 %endif
+%ifarch aarch64
+Requires:       grub2-arm64-efi
+%endif
+%ifarch %arm
+Requires:       grub2-arm-efi
 %endif
 %endif
+
 Summary:        KIWI - buildservice package requirements for oemboot
 License:        GPL-2.0+
 Group:          System/Management
