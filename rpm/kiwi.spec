@@ -320,8 +320,6 @@ Authors:
         Marcus Schaefer <ms@suse.com>
 %endif
 
-%ifarch %ix86 x86_64
-
 %package -n kiwi-desc-isoboot
 Summary:        KIWI - Live ISO boot templates
 Requires:       e2fsprogs
@@ -379,7 +377,6 @@ Meta-package to pull in all requires to build an isoboot media.
 It is used by Open Build Service (OBS) to provide and install the
 needed packages automatically.
 
-%endif
 
 %ifarch %ix86 x86_64 ppc ppc64 ppc64le s390 s390x %arm aarch64
 
