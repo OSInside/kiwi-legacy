@@ -3670,7 +3670,7 @@ sub setupBootLoaderStages {
             push @bios_core_modules, qw /biosdisk vga vbe multiboot/;
         }
         my @efi_core_modules = (
-            'part_gpt','efi_gop'
+            'part_gpt','efi_gop','part_msdos'
         );
         my @ofw_core_modules = (
             'ofnet','part_gpt','part_msdos'
