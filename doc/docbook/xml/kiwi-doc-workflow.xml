@@ -984,14 +984,13 @@
    </qandaentry>
    <qandaentry>
     <question>
-     <indexterm>
+     <para><indexterm>
       <primary>KIWI</primary>
       <secondary>boot parameters</secondary>
      </indexterm>
      <indexterm>
       <primary>boot parameters</primary>
      </indexterm>
-     <para>
       My customized boot image refuses to boot. How to debug?
      </para>
     </question>
