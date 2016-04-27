@@ -606,17 +606,6 @@ sub init {
     $this -> cleanMount('(cache\/(kiwi|zypp)$)|(dev$)');
     $manager -> freeLock();
     #==================================
-    # Create default fstab file
-    #----------------------------------
-    if ( ! open ($FD, '>', "$root/etc/fstab")) {
-        $kiwi -> error ("Failed to create fstab file: $!");
-        $kiwi -> failed ();
-        return;
-    }
-    print $FD "devpts /dev/pts devpts mode=0620,gid=5 0 0\n";
-    print $FD "proc   /proc    proc   defaults        0 0\n";
-    close $FD;
-    #==================================
     # Return object reference
     #----------------------------------
     return $this;
