@@ -154,8 +154,10 @@ sub executeDir {
     my $cpeid = $coll->productData()->getInfo("CPEID");
     my $repoid = $coll->productData()->getInfo("REPOID");
     my $createrepomd = $coll->productData()->getVar("CREATE_REPOMD");
+    my $metadataonly = $coll->productData()->getVar("RPMHDRS_ONLY");
     my $targetdir;
     my $newtargetdir;
+    my $params = "$this->{m_params} -H" ? $metadataonly eq "true" : "$this->{m_params}";
     ## this ugly bit creates a parameter string from a list of directories:
     # param = -d <dir1> -d <dir2> ...
     # the order is important. Idea: use map to make hash <dir> => -d for
@@ -172,7 +174,7 @@ sub executeDir {
         );
         $targetdir = $paths[0]."/".$descrdir;
         $cmd = "$this->{m_tooldir}/$this->{m_tool} "
-            . "$pathlist $this->{m_params} -o "
+            . "$pathlist $params -o "
             . $paths[0]
             . "/"
             . $descrdir;
