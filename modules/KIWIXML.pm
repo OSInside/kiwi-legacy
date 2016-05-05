@@ -258,6 +258,7 @@ sub new {
     my $arch = KIWIGlobals -> instance() -> getArch();
     my %supported = map { ($_ => 1) } qw(
         aarch64
+        aarch64_ilp32
         armv5el
         armv5tel
         armv6l
