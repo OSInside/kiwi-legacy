@@ -272,6 +272,8 @@ sub createRepositoryMetadata {
     my $cmd;
     my $call;
     my $status;
+    my $debug_medium = $this->{m_collect}->productData()->getOpt("DEBUGMEDIUM");
+    my $source_medium = $this->{m_collect}->productData()->getOpt("SOURCEMEDIUM");
     foreach my $p (@{$paths}) {
         $cmd = "$this->{m_createrepo}";
         $cmd .= " --unique-md-filenames";
@@ -279,6 +281,11 @@ sub createRepositoryMetadata {
         $cmd .= " --no-database";
         $cmd .= " --repo=\"$repoid\"" if $repoid;
         $cmd .= " --distro=\"$cpeid,$distroname\"" if $cpeid && $distroname;
+
+        # Is this the debug medium?
+        $cmd .= " --repo=debug" if ($p =~ m{.*$debug_medium$}x);
+        $cmd .= " --repo=source" if ($p =~ m{.*$source_medium$}x);
+
         $cmd .= " $p/$datadir";
         $this->logMsg("I", "Executing command <$cmd>");
         $call = $this -> callCmd($cmd);
