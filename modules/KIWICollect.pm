@@ -1367,14 +1367,14 @@ sub collectPackages {
     }
 
     # write out the channel files based on the collected rpms
-    for my $m (keys($this->{m_reportLog})) {
+    for my $m (keys(%{$this->{m_reportLog}})) {
         my $medium = $this->{m_reportLog}->{$m};
         my $fd;
         if (! open($fd, ">", $medium->{filename})) {
             die "Unable to open report file: $medium->{filename}";
         }
         print $fd "<report>\n";
-        for my $entry(sort(keys($medium->{entries}))) {
+        for my $entry(sort(keys(%{$medium->{entries}}))) {
                                                 my $binary = $medium->{entries}->{$entry};
             $this->printTrackLine(
                 $fd,
@@ -1395,7 +1395,7 @@ sub printTrackLine {
     my ($this, $fd, $prefix, $hash, $suffix, %supporthash) = @_;
     print $fd $prefix;
     my $name;
-    for my $k(sort(keys($hash))) {
+    for my $k(sort(keys(%$hash))) {
         next if $k eq 'localfile';
         print $fd " ";
         my $attribute = $k."='".$hash->{$k}."'";
