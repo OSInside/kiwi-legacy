@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: @PACKAGE@\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2005-08-18 14:46+0200\n"
-"PO-Revision-Date: 2016-06-06 11:14+0000\n"
+"PO-Revision-Date: 2016-06-06 11:17+0000\n"
 "Last-Translator: Marguerite Su <i@marguerite.su>\n"
 "Language-Team: Chinese (China) "
 "<https://l10n.opensuse.org/projects/kiwi/master/zh_CN/>\n"
@@ -29,7 +29,7 @@ msgid "Boot continues in 10 sec"
 msgstr "于 10 秒内继续引导"
 
 msgid "Enter LUKS passphrase"
-msgstr "请输入 LUKS 密钥"
+msgstr "请输入 LUKS 密码"
 
 msgid "Do you accept the license agreement ?"
 msgstr "您接受许可协议吗？"
@@ -49,7 +49,7 @@ msgid "Destroying ALL data on %1, continue ?"
 msgstr "下面操作会销毁 %1 上的全部数据，继续吗？"
 
 msgid "Clean sweep..."
-msgstr "清理扫描..."
+msgstr "深度清理..."
 
 msgid "%1 files from %2 restored..."
 msgstr "从 %2 中恢复了 %1 个文件..."
@@ -98,7 +98,7 @@ msgid "Installation..."
 msgstr "安装中..."
 
 msgid "Loading %1"
-msgstr "正在装载 %1"
+msgstr "正在加载 %1"
 
 msgid "Verifying %1"
 msgstr "正在验证 %1"
@@ -109,7 +109,7 @@ msgstr "请选择用于安装的磁盘："
 
 # dialog title for hard disk installation
 msgid "Select %1 partition for installation:"
-msgstr "选择用于安装的 %1 分区："
+msgstr "请选择用于安装的 %1 分区："
 
 msgid "System will be shutdown. Remove USB stick before power on"
 msgstr "系统将关闭。开机前请移除 USB 记忆棒"
