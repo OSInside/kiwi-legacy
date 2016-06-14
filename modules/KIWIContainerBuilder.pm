@@ -182,7 +182,7 @@ sub __applyContainerConfig {
     # Create empty fstab file
     #------------------------------------------
     my $rm = $locator -> getExecPath('rm');
-    my $cmd = "$rm $targetDir/etc/fstab";
+    my $cmd = "$rm -f $targetDir/etc/fstab";
     my $data = KIWIQX::qxx ($cmd);
     my $code = $? >> 8;
     if ($code != 0) {
