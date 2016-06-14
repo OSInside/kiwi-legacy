@@ -5687,6 +5687,7 @@ sub installBootLoader {
                 $this -> cleanStack ();
                 return;
             }
+            KIWIQX::qxx ("mkdir -p $mount/boot");
             KIWIQX::qxx ("mount --bind $bootdir/boot $mount/boot");
             KIWIGlobals -> instance() -> push_to_umount_stack (
                 "umount $mount/boot"
