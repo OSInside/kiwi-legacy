@@ -1179,7 +1179,7 @@ function installBootLoaderGrub {
             Echo "Failed to install boot loader"
             return 1
         fi
-        if [[ $kiwi_iname =~ boot-rhel ]];then
+        if [[ $kiwi_cpio_name =~ boot-rhel ]];then
             # on rhel systems grub.conf is a link to menu.lst.
             rm -f /etc/grub.conf
             ln -s /boot/grub/menu.lst /etc/grub.conf
