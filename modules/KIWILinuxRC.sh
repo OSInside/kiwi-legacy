@@ -4992,20 +4992,24 @@ function searchSwapSpace {
 # updateMTAB
 #--------------------------------------
 function updateMTAB {
-    local IFS=$IFS_ORIG
-    local prefix=$1
-    local umount=0
-    if [ ! -e /proc/mounts ];then
-        mount -t proc proc /proc
-        umount=1
-    fi
-    if [ -e /proc/self/mounts ];then
-        pushd $prefix/etc >/dev/null
-        rm -f mtab && ln -s /proc/self/mounts mtab
-        popd >/dev/null
-    fi
-    if [ $umount -eq 1 ];then
-        umount /proc
+    if [[ $kiwi_cpio_name =~ "boot-rhel-06" ]];then
+        echo "Skipping creation of /etc/mtab -> /proc/self/mounts symlink"
+    else
+        local IFS=$IFS_ORIG
+        local prefix=$1
+        local umount=0
+        if [ ! -e /proc/mounts ];then
+            mount -t proc proc /proc
+            umount=1
+        fi
+        if [ -e /proc/self/mounts ];then
+            pushd $prefix/etc >/dev/null
+            rm -f mtab && ln -s /proc/self/mounts mtab
+            popd >/dev/null
+        fi
+        if [ $umount -eq 1 ];then
+            umount /proc
+        fi
     fi
 }
 #======================================
