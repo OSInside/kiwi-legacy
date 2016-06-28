@@ -6120,7 +6120,7 @@ sub installBootLoader {
             #==========================================
             # detect disk offset of disk image file
             #------------------------------------------
-            $offset = $this -> diskOffset ($diskname);
+            $offset = $this -> diskOffset ($diskname, $this->{loop});
             if (! $offset) {
                 $kiwi -> error  ("Failed to detect disk offset");
                 $kiwi -> failed ();
@@ -6182,7 +6182,7 @@ sub installBootLoader {
                     'DiskSectorSize'
                 );
             }
-            my $chs = $this -> diskCHS($diskname);
+            my $chs = $this -> diskCHS($diskname, $this->{loop});
             my $type = $xml -> getImageType() -> getZiplTargetType();
             if (! $type) {
                 if ($bsize == 4096) {
@@ -7478,28 +7478,35 @@ sub diskOffset {
     # ---
     my $this = shift;
     my $disk = shift;
+    my $diskdev = shift;
     my $kiwi = $this->{kiwi};
     my $tool = $this->{ptool};
     my $global = KIWIGlobals -> instance();
     my $offset;
     my $result;
     my $status;
+    my $have_loop = 0;
     if ($tool eq 'fdasd') {
-        my $loop = $global -> loop_setup($disk, $this->{xml});
+        if ((! -f $diskdev) || (! -b $diskdev)) {
+            $diskdev = $global -> loop_setup($disk, $this->{xml});
+            $have_loop = 1;
+        }
         my $track_blocks = KIWIQX::qxx(
-            "fdasd -f -p $loop | grep 'blocks per track' | cut -f2 -d:"
+            "fdasd -f -p $diskdev|grep 'blocks per track' | cut -f2 -d:"
         );
         $result = $? >> 8;
         chomp $track_blocks;
         my $start_tracks = 0;
         if ($result == 0) {
             $start_tracks = KIWIQX::qxx(
-                "fdasd -f -s -p $loop | head -n 1 | tr -s ' ' | cut -f3 -d ' '"
+                "fdasd -f -s -p $diskdev|head -n 1 | tr -s ' ' | cut -f3 -d ' '"
             );
             $result = $? >> 8;
             chomp $start_tracks;
         }
-        $global -> loop_delete($loop);
+        if ($have_loop == 1) {
+            $global -> loop_delete($diskdev);
+        }
         $offset = int($track_blocks) * int($start_tracks);
     } else {
         $status = KIWIQX::qxx(
@@ -7540,6 +7547,7 @@ sub diskOffset {
 sub diskCHS {
     my $this = shift;
     my $disk = shift;
+    my $diskdev = shift;
     my $kiwi = $this->{kiwi};
     my $tool = $this->{ptool};
     my $global = KIWIGlobals -> instance();
@@ -7547,32 +7555,38 @@ sub diskCHS {
     my $tracks;
     my $blocks;
     my $result;
+    my $have_loop = 0;
     if ($tool ne 'fdasd') {
         $kiwi -> error ("CHS retrieval only implemented for fdasd");
         $kiwi -> failed();
         return;
     }
-    my $loop = $global -> loop_setup($disk, $this->{xml});
+    if ((! -f $diskdev) || (! -b $diskdev)) {
+        $diskdev = $global -> loop_setup($disk, $this->{xml});
+        $have_loop = 1;
+    }
     $cylinders = KIWIQX::qxx(
-        "fdasd -f -p $loop | grep cylinders | cut -f2 -d:"
+        "fdasd -f -p $diskdev | grep cylinders | cut -f2 -d:"
     );
     $result = $? >> 8;
     chomp $cylinders;
     if ($result == 0) {
         $tracks = KIWIQX::qxx(
-            "fdasd -f -p $loop | grep 'tracks per cylinder' | cut -f2 -d:"
+            "fdasd -f -p $diskdev | grep 'tracks per cylinder' | cut -f2 -d:"
         );
         $result = $? >> 8;
         chomp $tracks;
     }
     if ($result == 0) {
         $blocks = KIWIQX::qxx(
-            "fdasd -f -p $loop | grep 'blocks per track' | cut -f2 -d:"
+            "fdasd -f -p $diskdev | grep 'blocks per track' | cut -f2 -d:"
         );
         $result = $? >> 8;
         chomp $blocks;
     }
-    $global -> loop_delete($loop);
+    if ($have_loop == 1) {
+        $global -> loop_delete($diskdev);
+    }
     if ($result != 0) {
         $kiwi -> error ("Failed to obtain CHS geometry");
         $kiwi -> failed();
