@@ -1291,6 +1291,8 @@ sub checkLVMbind {
     }
     push @UmountStack,"vgchange -a n $vgname";
     $this->{UmountStack} = \@UmountStack;
+    # wait for the mapping to finish
+    KIWIQX::qxx ("udevadm settle --timeout=30 2>&1");
     $sdev = "/dev/mapper/$vgname-LVComp";
     if (! -e $sdev) {
         $sdev = "/dev/mapper/$vgname-LVRoot";
