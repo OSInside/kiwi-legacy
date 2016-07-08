@@ -1548,8 +1548,12 @@ sub __update_vmdk_descriptor {
         $kiwi -> failed ();
         return
     }
+    $data =~ s/\0*$//;
     my @descriptor_lines = split(/\n/, $data);
-    unshift (@descriptor_lines, 'encoding="UTF-8"');
+
+    if ($descriptor_lines[0] ne 'encoding="UTF-8"') {
+        unshift (@descriptor_lines, 'encoding="UTF-8"');
+    }
     push (@descriptor_lines, "ddb.toolsInstallType = \"$ddb_install_type\"");
     push (@descriptor_lines, "ddb.toolsVersion = \"$ddb_tools_version\"");
 
