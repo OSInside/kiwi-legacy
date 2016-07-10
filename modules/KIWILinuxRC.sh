@@ -6674,15 +6674,18 @@ function mountSystemUnionFS {
         #======================================
         # setup overlayfs mount
         #--------------------------------------
+        # overlayfs in version >= v22 behaves differently
+        # + renamed from overlayfs to overlay
+        # + requires a workdir to become mounted
+        # + requires workdir and upperdir to reside under the same mount
+        # + requires workdir and upperdir to be in separate subdirs
+        # try new mode first, if that fails then fallback to old style
         mkdir -p $rwDir/work
         mkdir -p $rwDir/rw
         local opts="rw,lowerdir=$roDir,upperdir=$rwDir/rw,workdir=$rwDir/work"
         if ! mount -t overlay -o $opts overlay $prefix;then
-            # overlayfs in version >= v22 behaves differently
-            # + renamed from overlayfs to overlay
-            # + requires a workdir to become mounted
-            # + requires workdir and upperdir to reside under the same mount
-            # + requires workdir and upperdir to be in separate subdirs
+            # overlayfs in version < v22 fallback/compat mode
+            # + does not require a workdir
             rm -rf $rwDir/work
             rm -rf $rwDir/rw
             opts="rw,lowerdir=$roDir,upperdir=$rwDir"
