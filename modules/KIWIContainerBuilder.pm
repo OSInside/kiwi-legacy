@@ -707,7 +707,7 @@ sub __disableServices {
     my $locator = $this->{locator};
     $kiwi -> info("Disable unwanted services\n");
     my $sysctl = $locator -> getExecPath('systemctl', $targetDir);
-    my $ins = $locator -> getExecPath('chkconfig', $targetDir);
+    my $ins = $locator -> getExecPath('insserv', $targetDir);
     my $croot = $locator -> getExecPath('chroot');
     if (defined $sysctl) {
         my @srvs = qw (
