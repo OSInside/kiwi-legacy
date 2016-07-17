@@ -442,6 +442,8 @@ sub __checkSelectedBootLoaderIncluded {
     push @{$pckgs}, @{$xml -> getBootstrapPackages()};
     for my $pckg (@{$pckgs}) {
         my $pname = $pckg -> getName();
+        my $version;
+        ($pname, $version) = split(/=/,$pname);
         foreach my $loaderPackage (@{$loaderPackage_list}) {
             if ($pname eq $loaderPackage) {
                 return 1;
