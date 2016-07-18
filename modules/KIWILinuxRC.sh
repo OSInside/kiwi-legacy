@@ -11148,9 +11148,13 @@ function cleanPartitionTable {
     # table label if parted is in use
     # ----
     local IFS=$IFS_ORIG
+    local plabel=msdos
+    if [ "$kiwi_firmware" = "uefi" ] || [ "$kiwi_firmware" = "efi" ];then
+        plabel=gpt
+    fi
     dd if=/dev/zero of=$imageDiskDevice bs=512 count=1 >/dev/null
     if [ $PARTITIONER = "parted" ];then
-        parted -s $imageDiskDevice mklabel msdos
+        parted -s $imageDiskDevice mklabel $plabel
     fi
 }
 #======================================
