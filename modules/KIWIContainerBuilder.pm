@@ -753,7 +753,7 @@ sub __disableServices {
         );
         foreach my $service (@services) {
             my $data = KIWIQX::qxx(
-                "$croot $targetDir $ins --remove $service"
+                "$croot $targetDir $ins --force --remove $service"
             );
             my $code = $? >> 8;
             if ($code != 0) {
