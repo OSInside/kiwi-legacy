@@ -2,7 +2,7 @@
 # Copyright (c) 2006 SUSE LINUX Products GmbH. All rights reserved.
 # Author: Marcus Schaefer <ms@suse.de>, 2006
 #
-# Makefile for OpenSuSE - KIWI Image System
+# Makefile for openSUSE - KIWI Image System
 # ---
 arch     := $(shell uname -m | grep -q ^i[3-6] && echo ix86 || uname -m)
 buildroot = /

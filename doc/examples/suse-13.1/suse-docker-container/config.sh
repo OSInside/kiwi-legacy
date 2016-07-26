@@ -2,7 +2,7 @@
 #================
 # FILE          : config.sh
 #----------------
-# PROJECT       : OpenSuSE KIWI Image System
+# PROJECT       : openSUSE KIWI Image System
 # COPYRIGHT     : (c) 2013 SUSE LLC
 #               :
 # AUTHOR        : Robert Schweikert <rjschwei@suse.com>
