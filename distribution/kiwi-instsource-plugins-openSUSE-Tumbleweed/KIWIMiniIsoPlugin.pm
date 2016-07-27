@@ -142,7 +142,8 @@ sub execute {
         $this->removeMediaCheck($isolxfiles[0]);
     }
 
-    $this -> updateInitRDNET($repoloc);
+    $this -> updateInitRDNET("./etc/linuxrc.d/10_repo", "defaultrepo=$repoloc\n");
+    $this -> updateInitRDNET("./etc/linuxrc.d/15_kexec", "kexec=1\n");
 
     my @gfxbootfiles;
     find(
@@ -320,7 +321,7 @@ sub _makecpiohead {
 # download.opensuse.org
 # https://bugzilla.opensuse.org/show_bug.cgi?id=916175
 sub updateInitRDNET {
-    my ($this, $repoloc) = @_;
+    my ($this, $file, $content) = @_;
 
     $this -> logMsg("I", "prepare initrd for NET iso");
 
@@ -331,10 +332,8 @@ sub updateInitRDNET {
     # hardcode for now
     $zipper = "xz --check=crc32";
 
-    my $linuxrc = "defaultrepo=$repoloc\n";
-
-    my ($cpio, $pad) = _makecpiohead('./etc/linuxrc.d/10_repo', [0, 0, oct(644), 1, 0, 0, 0, length($linuxrc), 0, 0, 0]);
-    $cpio .= $linuxrc;
+    my ($cpio, $pad) = _makecpiohead($file, [0, 0, oct(644), 1, 0, 0, 0, length($content), 0, 0, 0]);
+    $cpio .= $content;
     $cpio .= $pad if $pad;
     $cpio .= _makecpiohead();
 
