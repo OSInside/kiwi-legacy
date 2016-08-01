@@ -923,7 +923,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{_datadir}/kiwi/image/netboot
 %doc %{_datadir}/kiwi/image/netboot/README
 %{_datadir}/kiwi/image/netboot/suse*
+%ifarch %ix86 x86_64
 %{_datadir}/kiwi/image/netboot/rhel*
+%endif
 
 %files -n kiwi-desc-netboot-requires
 %defattr(-, root, root)
