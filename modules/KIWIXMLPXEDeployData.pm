@@ -150,6 +150,8 @@ sub createPartition {
     my $this     = shift;
     my $partInfo = shift;
     my $kiwi = $this->{kiwi};
+    my $firmware = $this->{firmware};
+    $MAX_PART_ID = '256' if $firmware =~ /efi/;
     if (ref($partInfo) ne 'HASH') {
         my $msg = 'createPartition: expecting hash ref as argument.';
         $kiwi -> error($msg);

@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<image schemaversion="6.2" name="initrd-netboot-rhel-07.0">
+    <description type="boot">
+        <author>Marcus Schaefer</author>
+        <contact>ms@novell.com</contact>
+        <specification>boot/initrd image used for PXE</specification>
+    </description>
+    <preferences>
+        <type image="cpio" bootprofile="default" bootkernel="std"/>
+        <version>2.1.1</version>
+        <packagemanager>yum</packagemanager>
+        <rpm-check-signatures>false</rpm-check-signatures>
+    </preferences>
+    <profiles>
+        <profile name="default" description="Booting default profile"/>
+        <profile name="custom" description="KERNEL: specified by bootinclude in system XML"/>
+    </profiles>
+    <drivers profiles="default">
+        <file name="crypto/*"/>
+        <file name="drivers/virtio/*"/>
+        <file name="drivers/acpi/dock.ko"/>
+        <file name="drivers/ata/*"/>
+        <file name="drivers/block/aoe/aoe.ko"/>
+        <file name="drivers/block/brd.ko"/>
+        <file name="drivers/block/cciss.ko"/>
+        <file name="drivers/block/loop.ko"/>
+        <file name="drivers/block/nbd.ko"/>
+        <file name="drivers/char/lp.ko"/>
+        <file name="drivers/gpu/drm/*"/>
+        <file name="drivers/hid/*"/>
+        <file name="drivers/hv/*"/>
+        <file name="drivers/ide/*"/>
+        <file name="drivers/input/keyboard/*"/>
+        <file name="drivers/input/mouse/*"/>
+        <file name="drivers/md/*"/>
+        <file name="drivers/message/fusion/*"/>
+        <file name="drivers/net/*"/>
+        <file name="drivers/parport/*"/>
+        <file name="drivers/scsi/*"/>
+        <file name="drivers/staging/hv/*"/>
+        <file name="drivers/usb/*"/>
+        <file name="fs/binfmt_aout.ko"/>
+        <file name="fs/binfmt_misc.ko"/>
+        <file name="fs/btrfs/*"/>
+        <file name="fs/exportfs/*"/>
+        <file name="fs/ext2/*"/>
+        <file name="fs/ext3/*"/>
+        <file name="fs/ext4/*"/>
+        <file name="fs/overlayfs/*"/>
+        <file name="fs/fat/*"/>
+        <file name="fs/fuse/*"/>
+        <file name="fs/hfs/*"/>
+        <file name="fs/jbd/*"/>
+        <file name="fs/jbd2/*"/>
+        <file name="fs/lockd/*"/>
+        <file name="fs/mbcache.ko"/>
+        <file name="fs/nfs/*"/>
+        <file name="fs/nfs_common/*"/>
+        <file name="fs/quota_v1.ko"/>
+        <file name="fs/quota_v2.ko"/>
+        <file name="fs/reiserfs/*"/>
+        <file name="fs/squashfs/*"/>
+        <file name="fs/vfat/*"/>
+        <file name="fs/xfs/*"/>
+        <file name="fs/isofs/*"/>
+        <file name="lib/crc-t10dif.ko"/>
+        <file name="lib/crc16.ko"/>
+        <file name="lib/libcrc32c.ko"/>
+        <file name="lib/zlib_deflate/zlib_deflate.ko"/>
+        <file name="net/ipv6/*"/>
+        <file name="net/packet/*"/>
+        <file name="net/sunrpc/*"/>
+    </drivers>
+    <repository type="rpm-md" status="replaceable">
+        <source path="iso:///image/CDs/RHEL-7.0-%arch-DVD.iso"/>
+    </repository>
+    <packages type="image">
+        <package name="kernel"/>
+    </packages>
+    <packages type="image" profiles="default">
+        <package name="bind-libs"/>
+        <package name="bind-utils"/>
+        <package name="cryptsetup"/>
+        <package name="curl"/>
+        <package name="dmraid"/>
+        <package name="kmod"/>
+        <package name="iputils"/>
+        <package name="linux-firmware"/>
+        <package name="kiwi-tools"/>
+        <package name="lvm2"/>
+        <package name="make"/>
+        <package name="mdadm"/>
+        <package name="net-tools"/>
+        <package name="parted"/>
+        <package name="plymouth"/>
+        <package name="plymouth-scripts"/>
+        <package name="tar"/>
+    </packages>
+    <packages type="image" profiles="custom"><!-- empty custom section to allow bootincluding custom kernel --></packages>
+    <packages type="bootstrap">
+        <package name="kbd"/>
+        <package name="iputils"/>
+        <package name="kiwi-tools"/>
+        <package name="net-tools"/>
+        <package name="plymouth"/>
+        <package name="plymouth-scripts"/>
+        <package name="tar"/>
+        <package name="dialog"/>
+        <package name="filesystem"/>
+        <package name="glibc"/>
+        <package name="glibc-common"/>
+        <package name="rsync"/>
+        <package name="tzdata"/>
+        <package name="kmod"/>
+        <package name="which"/>
+        <package name="systemd"/>
+        <package name="iproute"/>
+        <package name="psmisc"/>
+        <package name="sysvinit-tools"/>
+        <package name="e2fsprogs"/>
+    </packages>
+    <packages type="delete" profiles="default">
+        <package name="cracklib-dicts"/>
+        <package name="diffutils"/>
+        <package name="fillup"/>
+        <package name="gdbm"/>
+        <package name="info"/>
+        <package name="logrotate"/>
+        <package name="make"/>
+        <package name="mingetty"/>
+        <package name="Mesa"/>
+        <package name="pam"/>
+        <package name="pam-modules"/>
+        <package name="perl"/>
+        <package name="permissions"/>
+        <package name="python"/>
+        <package name="python-base"/>
+    </packages>
+</image>
