@@ -3655,10 +3655,10 @@ sub setupBootLoaderStages {
         my @bios_core_modules = (
             'part_msdos','part_gpt'
         );
-        if ($typeinfo->{filesystem} eq 'xfs') {
+        if (($typeinfo->{filesystem}) && ($typeinfo->{filesystem} eq 'xfs')) {
             push @core_modules, 'xfs';
         }
-        if ($typeinfo->{filesystem} eq 'btrfs') {
+        if (($typeinfo->{filesystem}) && ($typeinfo->{filesystem} eq 'btrfs')) {
             push @core_modules, 'btrfs';
         }
         if ($typeinfo->{lvm}) {
@@ -3723,7 +3723,10 @@ sub setupBootLoaderStages {
         }
         my $bootpath = '/boot';
         if (($type ne 'iso') && (! $this->{needBootP})) {
-            if (($typeinfo->{filesystem} eq 'btrfs') && ($this->{sysdisk})) {
+            if (($typeinfo->{filesystem}) &&
+                ($typeinfo->{filesystem} eq 'btrfs') &&
+                ($this->{sysdisk})
+            ) {
                 my $volIDs = $this->{sysdisk} -> getVolumeIDs();
                 if ($volIDs) {
                     my $boot_is_on_volume = 0;
