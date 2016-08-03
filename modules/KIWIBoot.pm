@@ -4381,7 +4381,10 @@ sub setupBootLoaderConfiguration {
         #==========================================
         # Theme and Fonts table
         #------------------------------------------
-        my $theme = $xml -> getPreferences() -> getBootLoaderTheme();
+        my $theme;
+        if ($xml) {
+            $theme = $xml -> getPreferences() -> getBootLoaderTheme();
+        }
         my $ascii = 'ascii.pf2';
         my $fodir = '/boot/grub2/themes/';
         my $bootpath = '/boot';
@@ -4541,13 +4544,14 @@ sub setupBootLoaderConfiguration {
             print $FD "\t".'fi'."\n";
             print $FD 'fi'."\n";
         }
-
-        print $FD 'if loadfont '.$fodir.$theme.'/'.$ascii.';then'."\n";
-        foreach my $font (@fonts) {
-            print $FD "\t".'loadfont '.$fodir.$theme.'/'.$font."\n";
+        if (defined $theme) {
+            print $FD 'if loadfont '.$fodir.$theme.'/'.$ascii.';then'."\n";
+            foreach my $font (@fonts) {
+                print $FD "\t".'loadfont '.$fodir.$theme.'/'.$font."\n";
+            }
+            print $FD "\t".'set theme='.$fodir.$theme.'/theme.txt'."\n";
+            print $FD 'fi'."\n";
         }
-        print $FD "\t".'set theme='.$fodir.$theme.'/theme.txt'."\n";
-        print $FD 'fi'."\n";
         # ----
         my $bootTimeout = 10;
         if (defined $type->{boottimeout}) {
