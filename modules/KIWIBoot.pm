@@ -3383,7 +3383,7 @@ sub setupPartIDs {
         if ($this->{partids}{boot}) {
             $entry = "kiwi_BootPart=\"$this->{partids}{boot}\"\n";
             if (! $currentIDs{$entry}) { print $ID_FD $entry }
-        } else {
+        } elsif ($this->{partids}{root}) {
             $entry = "kiwi_BootPart=\"$this->{partids}{root}\"\n";
             if (! $currentIDs{$entry}) { print $ID_FD $entry }
         }
@@ -4389,7 +4389,10 @@ sub setupBootLoaderConfiguration {
         my $fodir = '/boot/grub2/themes/';
         my $bootpath = '/boot';
         if ((! $iso) && (! $this->{needBootP})) {
-            if (($type->{filesystem} eq 'btrfs') && ($this->{sysdisk})) {
+            if (($type->{filesystem}) &&
+                ($type->{filesystem} eq 'btrfs') &&
+                ($this->{sysdisk})
+            ) {
                 my $volIDs = $this->{sysdisk} -> getVolumeIDs();
                 if ($volIDs) {
                     my $boot_is_on_volume = 0;
@@ -5633,13 +5636,26 @@ sub installBootLoader {
     my $grubtool;
     my $grubtoolopts;
     my $grubarch;
+    my $rootdev;
     #==========================================
     # Setup boot device name
     #------------------------------------------
     if ($deviceMap->{boot}) {
         $bootdev = $deviceMap->{boot};
-    } else {
+    } elsif ($deviceMap->{root}) {
         $bootdev = $deviceMap->{root};
+    } elsif ($deviceMap->{installboot}) {
+        $bootdev = $deviceMap->{installboot};
+    }
+    #==========================================
+    # Setup root device name
+    #------------------------------------------
+    if ($deviceMap->{root}) {
+        $rootdev = $deviceMap->{root};
+    } elsif ($deviceMap->{installroot}) {
+        $rootdev = $deviceMap->{installroot};
+    } else {
+        $rootdev = $bootdev;
     }
     #==========================================
     # Grub2
@@ -5674,13 +5690,13 @@ sub installBootLoader {
         # Mount system
         #------------------------------------------
         if (! KIWIGlobals -> instance() -> mount (
-            $deviceMap->{root}, $mount, undef, $xml
+            $rootdev, $mount, undef, $xml
         )) {
-            $kiwi -> error ("Couldn't mount root partition: $bootdev");
+            $kiwi -> error ("Couldn't mount root partition: $rootdev");
             $kiwi -> failed ();
             return;
         }
-        if (($deviceMap->{boot}) && ($deviceMap->{boot} ne $deviceMap->{root})){
+        if (($deviceMap->{boot}) && ($deviceMap->{boot} ne $rootdev)){
             my $bootdir = KIWIQX::qxx ("mktemp -qdt kiwibootdev.XXXXXX");
             chomp $bootdir;
             KIWIGlobals -> instance() -> push_to_umount_stack (
