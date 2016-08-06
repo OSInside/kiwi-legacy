@@ -40,5 +40,6 @@
 	<packages type="bootstrap">
 		<package name="filesystem"/>
 		<package name="glibc-locale"/>
+		<package name="module-init-tools"/> 
 	</packages>
 </image>
