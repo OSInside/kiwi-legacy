@@ -5827,7 +5827,7 @@ sub installBootLoader {
             if ($firmware eq "uefi") {
                 my $grub2_install = "$mount/usr/sbin/grub2-install";
                 KIWIQX::qxx (
-                    "cp $grub2_install $grub2_install".".orig"
+                    "cp -p $grub2_install $grub2_install".".orig"
                 );
                 KIWIQX::qxx (
                     "cp $mount/bin/true $grub2_install"
@@ -5837,7 +5837,7 @@ sub installBootLoader {
                 );
                 $result = $? >> 8;
                 KIWIQX::qxx (
-                    "cp $grub2_install".".orig"." $grub2_install"
+                    "cp -p $grub2_install".".orig"." $grub2_install"
                 );
                 if ($result != 0) {
                     $kiwi -> error  (
