@@ -2384,7 +2384,7 @@ GRUB_DEFAULT=0
 GRUB_HIDDEN_TIMEOUT=0
 GRUB_HIDDEN_TIMEOUT_QUIET=true
 GRUB_TIMEOUT=$timeout
-GRUB_CMDLINE_LINUX_DEFAULT="$cmdline"
+GRUB_CMDLINE_LINUX="$cmdline"
 GRUB_TERMINAL=console
 EOF
     #======================================
@@ -3200,8 +3200,7 @@ GRUB_DEFAULT=0
 GRUB_HIDDEN_TIMEOUT=0
 GRUB_HIDDEN_TIMEOUT_QUIET=true
 GRUB_TIMEOUT=$timeout
-GRUB_CMDLINE_LINUX_DEFAULT="$cmdline"
-GRUB_CMDLINE_LINUX=""
+GRUB_CMDLINE_LINUX="$cmdline"
 EOF
     #======================================
     # set terminal mode
