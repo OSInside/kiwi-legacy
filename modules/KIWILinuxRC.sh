@@ -1265,7 +1265,7 @@ image  = /boot/vmlinuz
 ###Don't change this comment - YaST2 identifier: Original name: linux###
 initrd = /boot/initrd
 label  = linux
-append = "$GRUB_CMDLINE_LINUX_DEFAULT"
+append = "$cmdline"
 description = "$kiwi_oemtitle"
 root = $(getDiskID $imageRootDevice)
 EOF
