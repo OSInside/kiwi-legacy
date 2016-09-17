@@ -7433,7 +7433,7 @@ function waitForLinkUp {
     local dev=$1
     local check=0
     while true;do
-        ip link ls $dev | grep -qi "state UP"
+        ip link ls $dev | grep -qi "UP"
         if [ $? = 0 ];then
             sleep 1; return 0
         fi
