@@ -7434,10 +7434,10 @@ function waitForLinkUp {
     local check=0
     if [ -x /usr/sbin/ifplugstatus ]; then
         linkstatus=ifplugstatus
-	linkgrep="link beat detected"
+        linkgrep="link beat detected"
     else
         linkstatus="ip link ls" 
-	linkgrep="state UP"
+        linkgrep="state UP"
     fi
     while true;do
         $linkstatus $dev | grep -qi "$linkgrep"
