@@ -7432,8 +7432,15 @@ function waitForLinkUp {
     local IFS=$IFS_ORIG
     local dev=$1
     local check=0
+    if [ -x /usr/sbin/ifplugstatus ]; then
+        linkstatus=ifplugstatus
+	linkgrep="link beat detected"
+    else
+        linkstatus="ip link ls" 
+	linkgrep="state UP"
+    fi
     while true;do
-        ip link ls $dev | grep -qi "state UP"
+        $linkstatus $dev | grep -qi "$linkgrep"
         if [ $? = 0 ];then
             sleep 1; return 0
         fi
