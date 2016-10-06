@@ -2263,10 +2263,13 @@ sub createImageLiveCD {
     if (! defined $gzip) {
         $attr = "-R -J -pad -joliet-long";
     }
-    if (($flags) && ($flags =~ /clic_udf|seed|overlay/)) {
-        $attr .= " -allow-limited-size -udf";
-    }
-    if (! defined $gzip) {
+    if ((($flags) && ($flags =~ /clic_udf|seed|overlay/)) &&
+	(defined $gzip)) {
+        $attr .= " -iso-level 3 -udf";
+    } elsif ((($flags) && ($flags =~ /clic_udf|seed|overlay/)) &&
+	(! defined $gzip)) {
+        $attr .= " -iso-level 4 -udf";
+    } elsif (! defined $gzip) {
         $attr .= " -iso-level 4";
     }
     if ($volid) {

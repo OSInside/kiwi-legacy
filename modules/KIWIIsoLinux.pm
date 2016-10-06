@@ -1007,7 +1007,7 @@ sub isols {
             $dir = $1;
             next;
         }
-        if(/^(.).*\s\[\s*(\d+)(\s+\d+)?\]\s+(.*?)\s*$/) {
+        if(/.*(-)[-rxw]{9}.*\s\[\s*(\d+)(\s+\d+)?\]\s+(.*?)\s*$/) {
             my $type = $1;
             $type = ' ' if $type eq '-';
             if($4 ne '.' && $4 ne '..') {
@@ -1412,7 +1412,7 @@ sub fixCatalog {
     my $t = (unpack "C", $entry2)[0];
     if ($t == 0x90 || $t == 0x91) {
         close $ISO;
-        return;
+        return $this;
     }
     substr($entry2, 12, 20) = pack "Ca19", 1, "UEFI (elilo)";
     if((unpack "C", $entry2)[0] == 0x88) {
