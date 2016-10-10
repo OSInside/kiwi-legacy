@@ -100,15 +100,17 @@ sub new {
     #------------------------------------------
     my $locator = KIWILocator -> instance();
     my $genTool = $locator -> getExecPath('genisoimage');
-    my $mkTool = $locator -> getExecPath('mkisofs');
     if ($genTool && -x $genTool) {
         $tool = $genTool;
-    } elsif ($mkTool && -x $mkTool) {
-        $tool = $mkTool;
     } else {
-        $kiwi -> error  ("No ISO creation tool found");
-        $kiwi -> failed ();
-        return;
+        my $mkTool = $locator -> getExecPath('mkisofs');
+        if ($mkTool && -x $mkTool) {
+            $tool = $mkTool;
+        } else {
+            $kiwi -> error  ("No ISO creation tool found");
+            $kiwi -> failed ();
+            return;
+        }
     }
     #=======================================
     # path setup for supported archs
