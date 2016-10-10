@@ -39,6 +39,7 @@ Provides:       kiwi:%{_mandir}/man1/KIWI::kiwirc.1.gz
 Conflicts:      kiwi-doc < 5
 Release:        0
 # requirements to build packages
+BuildRequires:  genisoimage
 BuildRequires:  diffutils
 BuildRequires:  e2fsprogs
 BuildRequires:  gcc-c++
