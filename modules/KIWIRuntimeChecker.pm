@@ -621,10 +621,12 @@ sub __checkFilesystemTool {
         }
     } elsif ($typeName eq 'iso') {
         my $genTool = $this -> {locator} -> getExecPath('genisoimage');
-        my $mkTool = $this -> {locator} -> getExecPath('mkisofs');
-        if ((! $genTool) && (! $mkTool)) {
-            $checkedFS = 'iso';
-            $toolError = 1;
+        if (! $genTool) {
+            my $mkTool = $this -> {locator} -> getExecPath('mkisofs');
+            if (! $mkTool) {
+                $checkedFS = 'iso';
+                $toolError = 1;
+            }
         }
         my $haveTool;
         if ($flag && $flag =~ /clic|clic_udf/x) {
