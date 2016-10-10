@@ -67,7 +67,6 @@ BuildRequires:  syslinux
 %endif
 %if 0%{?suse_version} > 1140
 BuildRequires:  btrfsprogs
-BuildRequires:  cdrkit-cdrtools-compat
 BuildRequires:  genisoimage
 BuildRequires:  squashfs
 BuildRequires:  zypper
@@ -239,7 +238,6 @@ Requires:       createrepo
 Requires:       inst-source-utils
 Requires:       kiwi-instsource-plugin
 Requires:       kiwi = %{version}
-Requires:       cdrkit-cdrtools-compat
 Requires:       genisoimage
 %ifarch %ix86 x86_64
 Requires:       syslinux
@@ -332,7 +330,6 @@ Requires:       syslinux
 Requires:       dosfstools
 %if 0%{?suse_version}
 Requires:       genisoimage
-Requires:       cdrkit-cdrtools-compat
 %endif
 License:        GPL-2.0+
 Group:          System/Management
@@ -350,7 +347,6 @@ Provides:       kiwi-image:iso
 Provides:       kiwi-boot:isoboot
 %if 0%{?suse_version}
 Requires:       genisoimage
-Requires:       cdrkit-cdrtools-compat
 %endif
 Requires:       kiwi-desc-isoboot = %{version}
 Requires:       %(echo `bash %{S:4} %{S:0} isoboot %{myarch} %{mysystems}`)
@@ -423,7 +419,6 @@ Provides:       kiwi-image:vmx
 Provides:       kiwi-boot:vmxboot
 %if 0%{?suse_version}
 Requires:       genisoimage
-Requires:       cdrkit-cdrtools-compat
 %endif
 Requires:       kiwi-desc-vmxboot = %{version}
 Requires:       %(echo `bash %{S:4} %{S:0} vmxboot %{myarch} %{mysystems}`)
@@ -509,7 +504,6 @@ Requires:       kiwi = %{version}
 Requires:       parted
 %if 0%{?suse_version}
 Requires:       genisoimage
-Requires:       cdrkit-cdrtools-compat
 Requires:       multipath-tools
 Requires:       mtools
 Requires:       squashfs
@@ -546,7 +540,6 @@ Provides:       kiwi-boot:oemboot
 Provides:       kiwi-boot:tbz
 %if 0%{?suse_version}
 Requires:       genisoimage
-Requires:       cdrkit-cdrtools-compat
 %endif
 Requires:       kiwi-desc-oemboot = %{version}
 Requires:       %(echo `bash %{S:4} %{S:0} oemboot %{myarch} %{mysystems}`)
