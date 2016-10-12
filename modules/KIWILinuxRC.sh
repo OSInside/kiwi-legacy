@@ -1779,7 +1779,12 @@ function setupBootLoader {
 #--------------------------------------
 function setupCryptTab {
     local IFS=$IFS_ORIG
-    local rootdevice=$(ddn $imageDiskDevice $kiwi_RootPart)
+    local rootdevice
+    if [ ! -z "$RAID" ];then
+        rootdevice=$(pxeRaidDevice $kiwi_RootPart)
+    else
+        rootdevice=$(ddn $imageDiskDevice $kiwi_RootPart)
+    fi
     local fsuuid=$(blkid $rootdevice -s UUID -o value)
     local prefix=$1
     if [ -z "$prefix" ];then
@@ -10323,6 +10328,22 @@ function pxeRaidPartitionInput {
         pxeRaidPartitionInputFDASD
     else
         pxeRaidPartitionInputGeneric
+    fi
+}
+#======================================
+# pxeRaidDevice
+#--------------------------------------
+function pxeRaidDevice {
+    # /.../
+    # Find the md device in a raid setup for the given partition
+    # number. The number of the first md device is the number of
+    # the partition - 1. Thus the md devices starts with md0 and
+    # the partition devices with e.g sda1
+    # ----
+    local IFS=$IFS_ORIG
+    local partition_count=$1
+    if [ ! -z "$RAID" ];then
+        echo "/dev/md$((partition_count - 1))"
     fi
 }
 #======================================
