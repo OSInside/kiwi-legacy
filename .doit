@@ -50,15 +50,6 @@ sub main {
     #----------------------------------------------
     my $pacdir = checkout ( $LocalSource );
     #==============================================
-    # Add empty %changelog
-    #----------------------------------------------
-    if (open (FD,">>$pacdir/kiwi.spec")) {
-        print FD "\n";
-        print FD '%changelog -n kiwi';
-        print FD "\n";
-        close FD;
-    }
-    #==============================================
     # convert spec to utf8
     #----------------------------------------------
     qx (iconv -f ISO-8859-1 -t utf8 $pacdir/kiwi.spec > $pacdir/kiwi.spec.new);
