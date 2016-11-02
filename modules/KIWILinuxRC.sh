@@ -3732,7 +3732,6 @@ function updateOtherDeviceFstab {
     # ----
     local IFS=$IFS_ORIG
     local prefix=$1
-    local prefix=$2
     local nfstab=$prefix/etc/fstab
     local index=0
     local field=0
