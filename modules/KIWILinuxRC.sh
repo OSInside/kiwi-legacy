@@ -7450,7 +7450,7 @@ function waitForStorageDevice {
     fi
     udevPending
     while true;do
-        storage_size=$(partitionSize $device &>/dev/null)
+        storage_size=$(partitionSize $device)
         if [ $storage_size -gt 0 ]; then
             sleep 1; return 0
         fi
