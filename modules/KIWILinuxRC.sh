@@ -6766,6 +6766,24 @@ function mountSystemClicFS {
     #--------------------------------------
     modprobe fuse &>/dev/null
     #======================================
+    # load ext4 module
+    #--------------------------------------
+    # ext4 is used as the container filesystem inside of the
+    # clicfs if present as kernel module it must be loaded prior
+    # to the mount of the fuse layer
+    modprobe ext4 &>/dev/null
+    #======================================
+    # make sure ext4 is in write mode
+    #--------------------------------------
+    # on older distributions the ext4 default setup is in read-only
+    # mode, which is not sufficient for a clicfs based root filesystem.
+    # the ext4 storage is not changed because the clicfs layer moves all
+    # write actions into its own blocklist but ext4 is the root of all
+    # data and thus has to allow to pass through any kind of I/O
+    if [ -e /sys/module/ext4/parameters/rw ];then
+        echo 1 > /sys/module/ext4/parameters/rw
+    fi
+    #======================================
     # create read only mount point
     #--------------------------------------
     mkdir -p $roDir
