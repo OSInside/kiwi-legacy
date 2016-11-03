@@ -295,7 +295,7 @@ sub createImageClicFS {
         $name = $rename;
     }
     #==========================================
-    # Create ext3 filesystem on extend
+    # Create ext4 filesystem on extend
     #------------------------------------------
     if (! $this -> setupEXT2 ( $name,$journal )) {
         return;
@@ -376,7 +376,7 @@ sub createImageClicFS {
         }
     }
     #==========================================
-    # Create clicfs filesystem from ext3
+    # Create clicfs filesystem from ext4
     #------------------------------------------
     $kiwi -> info (
         "Creating clicfs container: $this->{imageDest}/$name.clicfs"
