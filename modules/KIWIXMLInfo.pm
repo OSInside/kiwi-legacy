@@ -499,7 +499,7 @@ sub __getSizeEstimation {
     # with the custom script and other hook-in mechanism
     # it's not possible to forecast the end size exactly.
     # returns a list with two elements:
-    # rootsizeKB,deletionsizeKB
+    # rootsizeBytes,deletionsizeBytes
     # ---
     my $this   = shift;
     my @result = ();
@@ -846,10 +846,10 @@ sub __getTree {
                     return;
                 } else {
                     my $sizenode = XML::LibXML::Element -> new("size");
-                    $sizenode -> setAttribute ("rootsizeKB",$sizeinfo[0]);
+                    $sizenode -> setAttribute ("rootsizeBytes",$sizeinfo[0]);
                     if ($sizeinfo[1]) {
                         $sizenode -> setAttribute (
-                            "deletionsizeKB","$sizeinfo[1]"
+                            "deletionsizeBytes","$sizeinfo[1]"
                         );
                     }
                     $scan -> appendChild ($sizenode);
