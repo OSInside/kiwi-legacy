@@ -999,10 +999,15 @@ sub isols {
     my $isoinfo_opts = " -R -l -i $iso 2>/dev/null |";
     my $files;
     local $_;
-    if (! $fd -> open ("/usr/bin/isoinfo" . $isoinfo_opts)) {
-        if (! $fd -> open ("/usr/lib/genisoimage/isoinfo" . $isoinfo_opts)) {
+    my $isoinfo_cmd = "/usr/bin/isoinfo";
+    if (! -x $isoinfo_cmd){
+        $isoinfo_cmd = "/usr/lib/genisoimage/isoinfo";
+        if (! -x $isoinfo_cmd){
             return;
         }
+    }
+    if (! $fd -> open ($isoinfo_cmd . $isoinfo_opts)) {
+        return;
     }
     while(<$fd>) {
         if(/^Directory listing of\s*(\/.*\/)/) {
