@@ -3861,10 +3861,11 @@ function getKernelBootParameters {
         $prefix/boot/grub/menu.lst
         $prefix/etc/lilo.conf
         $prefix/etc/zipl.conf
+        $prefix/boot/grub2/grub.cfg
     "
     for c in $files;do
         if [ -f $c ];then
-            params=$(cat $c | grep 'root=' | head -n1)
+            params=$(cat $c | grep -v 'set root' | grep 'root=' | head -n1)
             break
         fi
     done
@@ -3873,6 +3874,7 @@ function getKernelBootParameters {
     params=$(echo $params | sed -e 's@^module@@')
     params=$(echo $params | sed -e 's@^kernel@@')
     params=$(echo $params | sed -e 's@^parameters=@@')
+    params=$(echo $params | sed -e 's@^linux .* root@root@')
     params=$(echo $params | sed -e 's@"@@g')
     params=$(echo $params)
     echo $params
