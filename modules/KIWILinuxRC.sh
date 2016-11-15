@@ -8284,6 +8284,7 @@ function activateImage {
             systemException "Failed to copy: pidof" "reboot"
         fi
     fi
+    stopMultipathd
 }
 #======================================
 # cleanImage
