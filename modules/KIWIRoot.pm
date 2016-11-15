@@ -1758,12 +1758,10 @@ sub cleanMount {
         my $data = KIWIQX::qxx ("umount \"$item\" 2>&1");
         my $code = $? >> 8;
         if (($code != 0) && ($data !~ "not mounted")) {
-            # umount failed - for /dev we can allow to lazy umount it (null might be held open)
-            if ($item =~ "/dev") {
-                $kiwi -> loginfo ("Umounting path (lazy): $item\n");
-                my $data = KIWIQX::qxx ("umount -l \"$item\" 2>&1");
-                my $code = $? >> 8;
-            }
+            # umount failed - we can try to lazy umount it (null might be held open)
+            $kiwi -> loginfo ("Umounting path (lazy): $item\n");
+            $data = KIWIQX::qxx ("umount -l \"$item\" 2>&1");
+            $code = $? >> 8;
             if ($code != 0) {
                 $kiwi -> warning ("Umount of $item failed: $data");
                 $kiwi -> skipped ();
