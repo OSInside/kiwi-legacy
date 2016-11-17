@@ -2416,6 +2416,10 @@ LOADER_TYPE="$loader_type"
 DEFAULT_APPEND="$cmdline"
 FAILSAFE_APPEND="$failsafe $cmdline"
 EOF
+    #======================================
+    # create bootloader_cmdline meta file
+    #--------------------------------------
+    echo $cmdline > $destsPrefix/tmp/bootloader_cmdline
 }
 #======================================
 # setupBootLoaderS390
@@ -2438,6 +2442,8 @@ function setupBootLoaderS390 {
     local kernel=""
     local initrd=""
     local title=""
+    local cmdline
+    local cmdline_failsafe
     #======================================
     # check for device by ID
     #--------------------------------------
@@ -2485,6 +2491,15 @@ function setupBootLoaderS390 {
     #======================================
     # create zipl.conf file
     #--------------------------------------
+    cmdline="root=$diskByID"
+    cmdline="$cmdline $KIWI_INITRD_PARAMS $KIWI_KERNEL_OPTIONS"
+    if [ ! -z "$imageDiskDevice" ];then
+        cmdline="$cmdline disk=$(getDiskID $imageDiskDevice)"
+    fi
+    if [ ! -z "$swap" ];then
+        cmdline="$cmdline resume=$swapByID"
+    fi
+    cmdline_failsafe="$cmdline x11failsafe noresume"
     local count
     local title_default
     local title_failsafe
@@ -2553,31 +2568,15 @@ function setupBootLoaderS390 {
         echo "target  = /boot/zipl"              >> $conf
         echo "image   = /boot/$kernel"           >> $conf
         echo "ramdisk = /boot/$initrd,0x2000000" >> $conf
-        echo -n "parameters = \"root=$diskByID"  >> $conf
-        if [ ! -z "$imageDiskDevice" ];then
-            echo -n " disk=$(getDiskID $imageDiskDevice)"  >> $conf
-        fi
-        if [ ! -z "$swap" ];then
-            echo -n " resume=$swapByID" >> $conf
-        fi
-        echo -n " $KIWI_INITRD_PARAMS"  >> $conf
-        echo -n " $KIWI_KERNEL_OPTIONS" >> $conf
-        echo " showopts\""              >> $conf
+        echo -n "parameters = \"$cmdline\""      >> $conf
         #======================================
         # create failsafe entry
         #--------------------------------------
-        echo "[$title_failsafe]"                 >> $conf
-        echo "target  = /boot/zipl"              >> $conf
-        echo "image   = /boot/$kernel"           >> $conf
-        echo "ramdisk = /boot/$initrd,0x2000000" >> $conf
-        echo -n "parameters = \"root=$diskByID"  >> $conf
-        if [ ! -z "$imageDiskDevice" ];then
-            echo -n " disk=$(getDiskID $imageDiskDevice)"  >> $conf
-        fi
-        echo -n " $KIWI_INITRD_PARAMS"         >> $conf
-        echo -n " $KIWI_KERNEL_OPTIONS"        >> $conf
-        echo -n " x11failsafe"                 >> $conf
-        echo " showopts\""                     >> $conf
+        echo "[$title_failsafe]"                     >> $conf
+        echo "target  = /boot/zipl"                  >> $conf
+        echo "image   = /boot/$kernel"               >> $conf
+        echo "ramdisk = /boot/$initrd,0x2000000"     >> $conf
+        echo -n "parameters = \"$cmdline_failsafe\"" >> $conf
         count=$((count + 1))
     done
     #======================================
@@ -2593,15 +2592,12 @@ function setupBootLoaderS390 {
     #--------------------------------------
     echo "LOADER_TYPE=\"$loader\""                            > $sysb
     echo "LOADER_LOCATION=\"mbr\""                           >> $sysb
-    echo -n "DEFAULT_APPEND=\"root=$diskByID"                >> $sysb
-    if [ ! -z "$swap" ];then
-        echo -n " resume=$swapByID"                          >> $sysb
-    fi
-    echo -n " $KIWI_INITRD_PARAMS $KIWI_KERNEL_OPTIONS"      >> $sysb
-    echo " showopts\""                                       >> $sysb
-    echo -n "FAILSAFE_APPEND=\"root=$diskByID"               >> $sysb
-    echo -n " $KIWI_INITRD_PARAMS $KIWI_KERNEL_OPTIONS"      >> $sysb
-    echo -n " x11failsafe noresume\""                        >> $sysb
+    echo -n "DEFAULT_APPEND=\"$cmdline\""                    >> $sysb
+    echo -n "FAILSAFE_APPEND=\"$cmdline_failsafe\""          >> $sysb
+    #======================================
+    # create bootloader_cmdline meta file
+    #--------------------------------------
+    echo $cmdline > $destsPrefix/tmp/bootloader_cmdline
 }
 #======================================
 # setupBootLoaderSyslinux
@@ -2626,6 +2622,8 @@ function setupBootLoaderSyslinux {
     local initrd=""
     local title=""
     local fbmode=$vga
+    local cmdline
+    local cmdline_failsafe
     if [ ! -z "$kiwi_oemrecovery" ];then
         local gdevreco=$recoid
     fi
@@ -2685,6 +2683,20 @@ function setupBootLoaderSyslinux {
     #======================================
     # create syslinux.cfg file
     #--------------------------------------
+    cmdline="root=$diskByID $console vga=$fbmode"
+    cmdline="$cmdline $KIWI_INITRD_PARAMS $KIWI_KERNEL_OPTIONS"
+    if [ ! -z "$imageDiskDevice" ];then
+        cmdline="$cmdline disk=$(getDiskID $imageDiskDevice)"
+    fi
+    if [ ! -z "$swap" ];then
+        cmdline="$cmdline resume=$swapByID"
+    fi
+    if [ -e /dev/xvc0 ];then
+        cmdline="$cmdline console=xvc console=tty"
+    elif [ -e /dev/hvc0 ];then
+        cmdline="$cmdline console=hvc console=tty"
+    fi
+    cmdline_failsafe="$cmdline $failsafe"
     echo "implicit 1"                   > $conf
     echo "prompt   1"                  >> $conf
     echo "TIMEOUT $kiwi_boot_timeout"  >> $conf
@@ -2735,22 +2747,7 @@ function setupBootLoaderSyslinux {
             else
                 echo "kernel /boot/$kernel"                    >> $conf
                 echo -n "append initrd=/boot/$initrd"          >> $conf
-                echo -n " root=$diskByID $console"             >> $conf
-                if [ ! -z "$imageDiskDevice" ];then
-                    echo -n " disk=$(getDiskID $imageDiskDevice)"  >> $conf
-                fi
-                echo -n " vga=$fbmode"                         >> $conf
-                if [ ! -z "$swap" ];then
-                    echo -n " resume=$swapByID"                >> $conf
-                fi
-                if [ -e /dev/xvc0 ];then
-                    echo -n " console=xvc console=tty"         >> $conf
-                elif [ -e /dev/hvc0 ];then
-                    echo -n " console=hvc console=tty"         >> $conf
-                fi
-                echo -n " $KIWI_INITRD_PARAMS"                 >> $conf
-                echo -n " $KIWI_KERNEL_OPTIONS"                >> $conf
-                echo " showopts"                               >> $conf
+                echo " $cmdline"                               >> $conf
             fi
             #======================================
             # create Failsafe entry
@@ -2764,23 +2761,7 @@ function setupBootLoaderSyslinux {
             else
                 echo "kernel /boot/$kernel"                    >> $conf
                 echo -n "append initrd=/boot/$initrd"          >> $conf
-                echo -n " root=$diskByID $console"             >> $conf
-                if [ ! -z "$imageDiskDevice" ];then
-                    echo -n " disk=$(getDiskID $imageDiskDevice)"  >> $conf
-                fi
-                echo -n " vga=$fbmode"                         >> $conf
-                if [ ! -z "$swap" ];then
-                    echo -n " resume=$swapByID"                >> $conf
-                fi
-                if [ -e /dev/xvc0 ];then
-                    echo -n " console=xvc console=tty"         >> $conf
-                elif [ -e /dev/hvc0 ];then
-                    echo -n " console=hvc console=tty"         >> $conf
-                fi
-                echo -n " $KIWI_INITRD_PARAMS"                 >> $conf
-                echo -n " $KIWI_KERNEL_OPTIONS"                >> $conf
-                echo -n " $failsafe"                           >> $conf
-                echo " showopts"                               >> $conf
+                echo " $cmdline_failsafe"                      >> $conf
             fi
             count=$((count + 1))
         fi
@@ -2813,6 +2794,10 @@ function setupBootLoaderSyslinux {
     echo -n " $KIWI_INITRD_PARAMS $KIWI_KERNEL_OPTIONS"      >> $sysb
     echo -n " $failsafe"                                     >> $sysb
     echo "\""                                                >> $sysb
+    #======================================
+    # create bootloader_cmdline meta file
+    #--------------------------------------
+    echo $cmdline > $destsPrefix/tmp/bootloader_cmdline
 }
 #======================================
 # setupBootLoaderGrub
@@ -2841,6 +2826,8 @@ function setupBootLoaderGrub {
     local title=""
     local rdisk=""
     local fbmode=$vga
+    local cmdline
+    local cmdline_failsafe
     if [ ! -z "$kiwi_oemrecovery" ];then
         local gdevreco=$((recoid - 1))
     fi
@@ -2904,6 +2891,20 @@ function setupBootLoaderGrub {
     #======================================
     # create menu.lst file
     #--------------------------------------
+    cmdline="root=$diskByID $console vga=$fbmode"
+    cmdline="$cmdline $KIWI_INITRD_PARAMS $KIWI_KERNEL_OPTIONS"
+    if [ ! -z "$imageDiskDevice" ];then
+        cmdline="$cmdline disk=$(getDiskID $imageDiskDevice)"
+    fi
+    if [ ! -z "$swap" ];then
+        cmdline="$cmdline resume=$swapByID"
+    fi
+    if [ -e /dev/xvc0 ];then
+        cmdline="$cmdline console=xvc console=tty"
+    elif [ -e /dev/hvc0 ];then
+        cmdline="$cmdline console=hvc console=tty"
+    fi
+    cmdline_failsafe="$cmdline $failsafe"
     echo "timeout $kiwi_boot_timeout"  > $menu
     if [ -f $mountPrefix/boot/grub/splash.xpm.gz ];then
         echo "splashimage=$gdev/boot/grub/splash.xpm.gz" >> $menu
@@ -2942,41 +2943,11 @@ function setupBootLoaderGrub {
                 echo " root $gdev"                                >> $menu
                 echo " kernel /boot/xen.gz"                       >> $menu
                 echo -n " module /boot/$kernel"                   >> $menu
-                echo -n " root=$diskByID"                         >> $menu
-                if [ ! -z "$imageDiskDevice" ];then
-                    echo -n " disk=$(getDiskID $imageDiskDevice)" >> $menu
-                fi
-                echo -n " $console vga=$fbmode"                   >> $menu
-                if [ ! -z "$swap" ];then
-                    echo -n " resume=$swapByID"                   >> $menu
-                fi
-                if [ -e /dev/xvc0 ];then
-                    echo -n " console=xvc console=tty"            >> $menu
-                elif [ -e /dev/hvc0 ];then
-                    echo -n " console=hvc console=tty"            >> $menu
-                fi
-                echo -n " $KIWI_INITRD_PARAMS"                    >> $menu
-                echo -n " $KIWI_KERNEL_OPTIONS"                   >> $menu
-                echo " showopts"                                  >> $menu
+                echo " $cmdline"                                  >> $menu
                 echo " module /boot/$initrd"                      >> $menu
             else
                 echo -n " kernel $gdev/boot/$kernel"              >> $menu
-                echo -n " root=$diskByID"                         >> $menu
-                if [ ! -z "$imageDiskDevice" ];then
-                    echo -n " disk=$(getDiskID $imageDiskDevice)" >> $menu
-                fi
-                echo -n " $console vga=$fbmode"                   >> $menu
-                if [ ! -z "$swap" ];then
-                    echo -n " resume=$swapByID"                   >> $menu
-                fi
-                if [ -e /dev/xvc0 ];then
-                    echo -n " console=xvc console=tty"            >> $menu
-                elif [ -e /dev/hvc0 ];then
-                    echo -n " console=hvc console=tty"            >> $menu
-                fi
-                echo -n " $KIWI_INITRD_PARAMS"                    >> $menu
-                echo -n " $KIWI_KERNEL_OPTIONS"                   >> $menu
-                echo " showopts"                                  >> $menu
+                echo " $cmdline"                                  >> $menu
                 echo " initrd $gdev/boot/$initrd"                 >> $menu
             fi
             #======================================
@@ -2988,37 +2959,11 @@ function setupBootLoaderGrub {
                 echo " root $gdev"                                >> $menu
                 echo " kernel /boot/xen.gz"                       >> $menu
                 echo -n " module /boot/$kernel"                   >> $menu
-                echo -n " root=$diskByID"                         >> $menu
-                if [ ! -z "$imageDiskDevice" ];then
-                    echo -n " disk=$(getDiskID $imageDiskDevice)" >> $menu
-                fi
-                echo -n " $console vga=$fbmode"                   >> $menu
-                echo -n " $KIWI_INITRD_PARAMS"                    >> $menu
-                echo -n " $KIWI_KERNEL_OPTIONS"                   >> $menu
-                echo -n " $failsafe"                              >> $menu
-                if [ -e /dev/xvc0 ];then
-                    echo -n " console=xvc console=tty"            >> $menu
-                elif [ -e /dev/hvc0 ];then
-                    echo -n " console=hvc console=tty"            >> $menu
-                fi
-                echo " showopts"                                  >> $menu
+                echo " $cmdline_failsafe"                         >> $menu
                 echo " module /boot/$initrd"                      >> $menu
             else
                 echo -n " kernel $gdev/boot/$kernel"              >> $menu
-                echo -n " root=$diskByID"                         >> $menu
-                if [ ! -z "$imageDiskDevice" ];then
-                    echo -n " disk=$(getDiskID $imageDiskDevice)" >> $menu
-                fi
-                echo -n " $console vga=$fbmode"                   >> $menu
-                echo -n " $KIWI_INITRD_PARAMS"                    >> $menu
-                echo -n " $KIWI_KERNEL_OPTIONS"                   >> $menu
-                echo -n " $failsafe"                              >> $menu
-                if [ -e /dev/xvc0 ];then
-                    echo -n " console=xvc console=tty"            >> $menu
-                elif [ -e /dev/hvc0 ];then
-                    echo -n " console=hvc console=tty"            >> $menu
-                fi
-                echo " showopts"                                  >> $menu
+                echo " $cmdline_failsafe"                         >> $menu
                 echo " initrd $gdev/boot/$initrd"                 >> $menu
             fi
             count=$((count + 1))
@@ -3057,20 +3002,13 @@ function setupBootLoaderGrub {
     echo "LOADER_TYPE=\"grub\""                               > $sysb
     echo "LOADER_LOCATION=\"mbr\""                           >> $sysb
     echo "DEFAULT_VGA=\"$fbmode\""                           >> $sysb  
-    echo -n "DEFAULT_APPEND=\"root=$diskByID"                >> $sysb
-    if [ ! -z "$swap" ];then
-        echo -n " resume=$swapByID"                          >> $sysb
-    fi
-    echo -n " $KIWI_INITRD_PARAMS $KIWI_KERNEL_OPTIONS"      >> $sysb
-    echo " showopts\""                                       >> $sysb
+    echo -n "DEFAULT_APPEND=\"$cmdline\""                    >> $sysb
     echo "FAILSAFE_VGA=\"$fbmode\""                          >> $sysb
-    echo -n "FAILSAFE_APPEND=\"root=$diskByID"               >> $sysb
-    if [ ! -z "$swap" ];then
-        echo -n " resume=$swapByID"                          >> $sysb
-    fi
-    echo -n " $KIWI_INITRD_PARAMS $KIWI_KERNEL_OPTIONS"      >> $sysb
-    echo -n " $failsafe"                                     >> $sysb
-    echo "\""                                                >> $sysb
+    echo -n "FAILSAFE_APPEND=\"$cmdline_failsafe\""          >> $sysb
+    #======================================
+    # create bootloader_cmdline meta file
+    #--------------------------------------
+    echo $cmdline > $destsPrefix/tmp/bootloader_cmdline
 }
 #======================================
 # setupBootLoaderGrub2
@@ -3281,6 +3219,10 @@ EOF
     echo "DEFAULT_APPEND=\"$cmdline\""            >> $sysb
     echo "FAILSAFE_APPEND=\"$failsafe $cmdline\"" >> $sysb
     #======================================
+    # create bootloader_cmdline meta file
+    #--------------------------------------
+    echo $cmdline > $destsPrefix/tmp/bootloader_cmdline
+    #======================================
     # Cleanup protective MBR
     #--------------------------------------
     if [ ! -z "$needProtectiveMBR" ];then
@@ -3313,6 +3255,8 @@ function setupBootLoaderYaboot {
     local rdisk=""
     local fbmode=$vga
     local loader_type=lilo
+    local cmdline
+    local cmdline_failsafe
     if [[ $arch =~ ppc64 ]];then
         loader_type=ppc
     fi
@@ -3374,6 +3318,20 @@ function setupBootLoaderYaboot {
     #======================================
     # create lilo.conf file
     #--------------------------------------
+    cmdline="root=$diskByID $console vga=$fbmode"
+    cmdline="$cmdline $KIWI_INITRD_PARAMS $KIWI_KERNEL_OPTIONS"
+    if [ ! -z "$imageDiskDevice" ];then
+        cmdline="$cmdline disk=$(getDiskID $imageDiskDevice)"
+    fi
+    if [ ! -z "$swap" ];then
+        cmdline="$cmdline resume=$swapByID"
+    fi
+    if [ -e /dev/xvc0 ];then
+        cmdline="$cmdline console=xvc console=tty"
+    elif [ -e /dev/hvc0 ];then
+        cmdline="$cmdline console=hvc console=tty"
+    fi
+    cmdline_failsafe="$cmdline $failsafe"
     local timeout=$((kiwi_boot_timeout * 10))
     echo "boot=$rdev"                                        >  $conf
     echo "activate"                                          >> $conf
@@ -3410,27 +3368,11 @@ function setupBootLoaderYaboot {
                     "*** lilo: Xen dom0 boot not implemented ***" \
                 "reboot"
             else
-                echo "default=\"$title\""                 >> $conf
+                echo "default=\"$title\""                     >> $conf
                 echo "image=/boot/$kernel"                    >> $conf
                 echo "label=\"$title\""                       >> $conf
                 echo "initrd=/boot/$initrd"                   >> $conf
-                echo -n "append=\"sysrq=1 panic=9"            >> $conf
-                echo -n " root=$diskByID"                     >> $conf
-                if [ ! -z "$imageDiskDevice" ];then
-                    echo -n " disk=$(getDiskID $imageDiskDevice)" >> $conf
-                fi
-                echo -n " $console vga=$fbmode"               >> $conf
-                if [ ! -z "$swap" ];then                     
-                    echo -n " resume=$swapByID"               >> $conf
-                fi
-                if [ -e /dev/xvc0 ];then
-                    echo -n " console=xvc console=tty"        >> $conf
-                elif [ -e /dev/hvc0 ];then
-                    echo -n " console=hvc0 console=tty"       >> $conf
-                fi
-                echo -n " $KIWI_INITRD_PARAMS"                >> $conf
-                echo -n " $KIWI_KERNEL_OPTIONS"               >> $conf
-                echo " showopts\""                            >> $conf
+                echo "append=\"sysrq=1 panic=9 $cmdline\""    >> $conf
             fi
             #======================================
             # create failsafe entry
@@ -3441,27 +3383,10 @@ function setupBootLoaderYaboot {
                     "*** lilo: Xen dom0 boot not implemented ***" \
                 "reboot"
             else
-                echo "image=/boot/$kernel"                    >> $conf
-                echo "label=\"$title\""                       >> $conf
-                echo "initrd=/boot/$initrd"                   >> $conf
-                echo -n "append=\"sysrq=1 panic=9"            >> $conf
-                echo -n " root=$diskByID"                     >> $conf
-                if [ ! -z "$imageDiskDevice" ];then
-                    echo -n " disk=$(getDiskID $imageDiskDevice)" >> $conf
-                fi
-                echo -n " $console vga=$fbmode"               >> $conf
-                if [ ! -z "$swap" ];then
-                    echo -n " resume=$swapByID"               >> $conf
-                fi
-                if [ -e /dev/xvc0 ];then
-                    echo -n " console=xvc console=tty"        >> $conf
-                elif [ -e /dev/hvc0 ];then
-                    echo -n " console=hvc0 console=tty"       >> $conf
-                fi
-                echo -n " $KIWI_INITRD_PARAMS"                >> $conf
-                echo -n " $KIWI_KERNEL_OPTIONS"               >> $conf
-                echo -n " $failsafe"                          >> $conf
-                echo " showopts\""                            >> $conf
+                echo "image=/boot/$kernel"                          >> $conf
+                echo "label=\"$title\""                             >> $conf
+                echo "initrd=/boot/$initrd"                         >> $conf
+                echo "append=\"sysrq=1 panic=9 $cmdline_failsafe\"" >> $conf
             fi
             count=$((count + 1))
         fi
@@ -3480,20 +3405,13 @@ function setupBootLoaderYaboot {
     echo "LOADER_TYPE=\"$loader_type\""                       > $sysb
     echo "LOADER_LOCATION=\"mbr\""                           >> $sysb
     echo "DEFAULT_VGA=\"$fbmode\""                           >> $sysb 
-    echo -n "DEFAULT_APPEND=\"root=$diskByID"                >> $sysb
-    if [ ! -z "$swap" ];then
-        echo -n " resume=$swapByID"                          >> $sysb
-    fi
-    echo -n " $KIWI_INITRD_PARAMS $KIWI_KERNEL_OPTIONS"      >> $sysb
-    echo " showopts\""                                       >> $sysb
+    echo -n "DEFAULT_APPEND=\"$cmdline\""                    >> $sysb
     echo "FAILSAFE_VGA=\"$fbmode\""                          >> $sysb
-    echo -n "FAILSAFE_APPEND=\"root=$diskByID"               >> $sysb
-    if [ ! -z "$swap" ];then
-        echo -n " resume=$swapByID"                          >> $sysb
-    fi
-    echo -n " $KIWI_INITRD_PARAMS $KIWI_KERNEL_OPTIONS"      >> $sysb
-    echo -n " $failsafe"                                     >> $sysb
-    echo "\""                                                >> $sysb
+    echo -n "FAILSAFE_APPEND=\"$cmdline_failsafe\""          >> $sysb
+    #======================================
+    # create bootloader_cmdline meta file
+    #--------------------------------------
+    echo $cmdline > $destsPrefix/tmp/bootloader_cmdline
 }
 #======================================
 # setupDefaultPXENetwork
@@ -3849,33 +3767,18 @@ function setupKernelModules {
 #--------------------------------------
 function getKernelBootParameters {
     # /.../
-    # check contents of bootloader configuration
-    # and extract cmdline parameters
+    # read contents of bootloader_cmdline metadata file
     # ----
     local IFS=$IFS_ORIG
     local prefix=$1
-    local params
-    local files="
-        $prefix/boot/syslinux/syslinux.cfg
-        $prefix/boot/syslinux/extlinux.conf
-        $prefix/boot/grub/menu.lst
-        $prefix/etc/lilo.conf
-        $prefix/etc/zipl.conf
-    "
-    for c in $files;do
-        if [ -f $c ];then
-            params=$(cat $c | grep 'root=' | head -n1)
-            break
-        fi
-    done
-    params=$(echo $params | sed -e 's@^append=@@')
-    params=$(echo $params | sed -e 's@^append@@')
-    params=$(echo $params | sed -e 's@^module@@')
-    params=$(echo $params | sed -e 's@^kernel@@')
-    params=$(echo $params | sed -e 's@^parameters=@@')
-    params=$(echo $params | sed -e 's@"@@g')
-    params=$(echo $params)
-    echo $params
+    local bootloader_cmdline=$prefix/tmp/bootloader_cmdline
+    if [ -f $bootloader_cmdline ];then
+        cat $bootloader_cmdline
+    else
+        # if no cmdline info file exists, only the root
+        # device information is populated
+        echo "root=$(getDiskID $imageRootDevice)"
+    fi
 }
 #======================================
 # kernelCheck
