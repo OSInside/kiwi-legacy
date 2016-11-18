@@ -4947,6 +4947,21 @@ function setupNic {
     ip link set dev $iface up
 }
 #======================================
+# deleteNic
+#--------------------------------------
+function deleteNic {
+    local IFS=$IFS_ORIG
+    local iface=$1
+    local address=$2
+    local netmask=$3
+    # ignore netmask if address is already cidr
+    if [[ $address =~ / ]] ; then
+        ip addr del $address dev $iface
+    else
+        ip addr del $address/$netmask dev $iface
+    fi
+}
+#======================================
 # probeNetworkCard
 #--------------------------------------
 function probeNetworkCard {
@@ -5582,7 +5597,7 @@ function releaseNetwork {
             dhclient -r \
                 -lf /var/lib/dhclient/$PXE_IFACE.lease $PXE_IFACE
         else
-            ip a del
+            deleteNic $PXE_IFACE $IPADDR $NETMASK
         fi
         #======================================
         # remove sysconfig state information
