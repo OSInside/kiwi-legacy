@@ -2419,7 +2419,7 @@ EOF
     #======================================
     # create bootloader_cmdline meta file
     #--------------------------------------
-    echo $cmdline > $destsPrefix/tmp/bootloader_cmdline
+    echo $cmdline > $destsPrefix/etc/bootloader_cmdline
 }
 #======================================
 # setupBootLoaderS390
@@ -2597,7 +2597,7 @@ function setupBootLoaderS390 {
     #======================================
     # create bootloader_cmdline meta file
     #--------------------------------------
-    echo $cmdline > $destsPrefix/tmp/bootloader_cmdline
+    echo $cmdline > $destsPrefix/etc/bootloader_cmdline
 }
 #======================================
 # setupBootLoaderSyslinux
@@ -2797,7 +2797,7 @@ function setupBootLoaderSyslinux {
     #======================================
     # create bootloader_cmdline meta file
     #--------------------------------------
-    echo $cmdline > $destsPrefix/tmp/bootloader_cmdline
+    echo $cmdline > $destsPrefix/etc/bootloader_cmdline
 }
 #======================================
 # setupBootLoaderGrub
@@ -3008,7 +3008,7 @@ function setupBootLoaderGrub {
     #======================================
     # create bootloader_cmdline meta file
     #--------------------------------------
-    echo $cmdline > $destsPrefix/tmp/bootloader_cmdline
+    echo $cmdline > $destsPrefix/etc/bootloader_cmdline
 }
 #======================================
 # setupBootLoaderGrub2
@@ -3221,7 +3221,7 @@ EOF
     #======================================
     # create bootloader_cmdline meta file
     #--------------------------------------
-    echo $cmdline > $destsPrefix/tmp/bootloader_cmdline
+    echo $cmdline > $destsPrefix/etc/bootloader_cmdline
     #======================================
     # Cleanup protective MBR
     #--------------------------------------
@@ -3411,7 +3411,7 @@ function setupBootLoaderYaboot {
     #======================================
     # create bootloader_cmdline meta file
     #--------------------------------------
-    echo $cmdline > $destsPrefix/tmp/bootloader_cmdline
+    echo $cmdline > $destsPrefix/etc/bootloader_cmdline
 }
 #======================================
 # setupDefaultPXENetwork
@@ -3771,7 +3771,7 @@ function getKernelBootParameters {
     # ----
     local IFS=$IFS_ORIG
     local prefix=$1
-    local bootloader_cmdline=$prefix/tmp/bootloader_cmdline
+    local bootloader_cmdline=$prefix/etc/bootloader_cmdline
     if [ -f $bootloader_cmdline ];then
         cat $bootloader_cmdline
     else
