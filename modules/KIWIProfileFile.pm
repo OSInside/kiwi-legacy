@@ -348,9 +348,34 @@ sub writeProfile {
             return;
         }
         binmode ($PROFILE, ":encoding(UTF-8)");
+
+        # kiwi_LVM_LV* varibles need to be included in .profiles with a
+        # correct order depending on the specified mount point if any.
+        # LVRoot is forced to be the first one and then depending on the
+        # depth level of the mount point. This prevents mounting nested
+        # mount points in wrong order during the first boot.
+        my %paths = ();
         foreach my $key (sort keys %profile) {
-            $kiwi -> loginfo ("[PROFILE]: $key=\"$profile{$key}\"\n");
-            print $PROFILE "$key=\"$profile{$key}\"\n";
+            if ($key !~ /^kiwi_LVM_.*$/) {
+                $kiwi -> loginfo ("[PROFILE]: $key=\"$profile{$key}\"\n");
+                print $PROFILE "$key=\"$profile{$key}\"\n";
+            } elsif ($key =~ /^kiwi_LVM_LVRoot$/) {
+                unshift @{$paths{0}}, $key;
+            } elsif ($profile{$key} =~ m/.*:.*:LV(.*)/) {
+                my $path = $1;
+                $path =~ s/^\///;
+                my @parts = split(/\//, $path);
+                my $part = @parts;
+                push @{$paths{$part}}, $key;
+            } else {
+                push @{$paths{0}}, $key;
+            }
+        }
+        foreach my $level (sort {($a <=> $b) || ($a cmp $b)} keys %paths) {
+            foreach my $key (@{$paths{$level}}) {
+                $kiwi -> loginfo ("[PROFILE]: $key=\"$profile{$key}\"\n");
+                print $PROFILE "$key=\"$profile{$key}\"\n";
+            }
         }
         $PROFILE -> close();
         return 1;
