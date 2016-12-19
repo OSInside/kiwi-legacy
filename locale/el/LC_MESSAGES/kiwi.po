@@ -8,15 +8,15 @@ msgstr ""
 "Project-Id-Version: @PACKAGE@\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2005-07-27 16:23+0200\n"
-"PO-Revision-Date: 2016-04-11 08:35+0000\n"
-"Last-Translator: alexandros Vennos <alexandros.venn@gmail.com>\n"
-"Language-Team: Greek <http://l10n.opensuse.org/projects/kiwi/master/el/>\n"
+"PO-Revision-Date: 2016-12-19 16:10+0000\n"
+"Last-Translator: Panagiotis Mantzios <pmantzios@hotmail.com>\n"
+"Language-Team: Greek <https://l10n.opensuse.org/projects/kiwi/master/el/>\n"
 "Language: el\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bits\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 2.5\n"
+"X-Generator: Weblate 2.6\n"
 
 #. /.../
 #. Copyright (c) 2005 SuSE GmbH Nuernberg, Germany.  All rights reserved.
@@ -81,10 +81,14 @@ msgstr "Έξοδος"
 msgid "Bootloader installation has failed"
 msgstr "Η εγκατάσταση του Bootloader απέτυχε"
 
+#, fuzzy
 msgid ""
 "The system will not be able to reboot. Please make sure to fixup and install "
 "the bootloader before next reboot. Check /var/log/boot.kiwi for details"
 msgstr ""
+"Το σύστημα δεν θα είναι σε θέση να κάνει επανεκκίνηση. Παρακαλώ διορθώστε το "
+"και εγκαταστήστε τον bootloader πριν την επόμενη επανεκκίνηση. Ελέγξτε το "
+"/var/log/boot.kiwi για περισσότερες πληροφορίες."
 
 msgid "Please remove the CD/DVD before reboot"
 msgstr "Παρακαλώ αφαιρέστε το CD/DVD πριν την επανεκκίνηση"
@@ -109,8 +113,12 @@ msgstr "Επιλέξτε δίσκο για εγκατάσταση:"
 msgid "Select %1 partition for installation:"
 msgstr "Επιλέξτε %1 κατάτμηση για εγκατάσταση:"
 
+#, fuzzy
 msgid "System will be shutdown. Remove USB stick before power on"
 msgstr ""
+"Το σύστημα θα τερματιστεί. Αφαιρέστε το USB πριν από την έναρξη του "
+"συστήματος."
 
+#, fuzzy
 msgid "Please remove the CD/DVD before shutdown"
-msgstr ""
+msgstr "Παρακαλώ αφαιρέστε το CD/DVD πριν από τον τερματισμό του συστήματος"
