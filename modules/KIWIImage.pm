@@ -1138,6 +1138,22 @@ sub createImageLiveCD {
         $rootTarget = $cmdL->getConfigDir();
     }
     my $checkBase = $rootTarget."/".$baseSystem;
+
+    #==========================================
+    # Check Memory Test dependecies
+    #------------------------------------------
+    my $checkMemtest = 0;
+    my $pckgs = $xml -> getPackages();
+    push @{$pckgs}, @{$xml -> getBootstrapPackages()};
+    for my $pckg (@{$pckgs}) {
+        my $pname = $pckg -> getName();
+        my $version;
+        ($pname, $version) = split(/=/,$pname);
+        if ($pname =~ 'memtest86.*'){
+            $checkMemtest = 1;
+        }
+    } 
+    
     #==========================================
     # Failsafe boot options
     #------------------------------------------
@@ -2137,9 +2153,11 @@ sub createImageLiveCD {
     print $IFD "label harddisk\n";
     print $IFD "  localboot 0x80"."\n";
     print $IFD "\n";
-    print $IFD "label memtest"."\n";
-    print $IFD "  kernel memtest"."\n";
-    print $IFD "\n";
+    if ($checkMemtest) {
+        print $IFD "label memtest"."\n";
+        print $IFD "  kernel memtest"."\n";
+        print $IFD "\n";
+    }
     $IFD -> close();
     #==========================================
     # setup isolinux.msg file
@@ -2163,7 +2181,9 @@ sub createImageLiveCD {
     printf ($MFD "%-20s - %s\n",$lsafe,"Live System failsafe mode");
     printf ($MFD "%-20s - %s\n","harddisk","Local boot from hard disk");
     printf ($MFD "%-20s - %s\n","mediacheck","Media check");
-    printf ($MFD "%-20s - %s\n","memtest","Memory Test");
+    if ($checkMemtest) {
+        printf ($MFD "%-20s - %s\n","memtest","Memory Test");
+    }
     print $MFD "\n";
     print $MFD "Have a lot of fun..."."\n";
     $MFD -> close();
