@@ -86,7 +86,7 @@
    </listitem>
    <listitem>
     <para>
-     Vagrant (<filename class="extension">.vagrant</filename>
+     Vagrant (<filename class="extension">.vagrant</filename>)
     </para>
    </listitem>
    <listitem>
@@ -145,9 +145,9 @@
      </para>
     </formalpara>
    </step>
-  </procedure>  
+  </procedure>
  </sect1>
- 
+
  <sect1 id="sec.introduction.howtousekiwi">
   <title>How to use KIWI?</title>
 
