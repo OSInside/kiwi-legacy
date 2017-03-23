@@ -76,7 +76,7 @@
                 <vmnic driver="e1000" interface="0" mode="bridged"/>
             </machine>
         </type>
-        <type image="oem" filesystem="ext3" boot="oemboot/suse-SLES12" installiso="true" bootloader="grub2" firmware="efi" hybrid="true" kernelcmdline="splash">
+        <type image="oem" filesystem="ext3" boot="oemboot/suse-SLES12" installiso="true" bootloader="grub2" firmware="uefi" hybrid="true" kernelcmdline="splash">
             <oemconfig>
                 <oem-systemsize>2048</oem-systemsize>
                 <oem-swap>true</oem-swap>
@@ -134,6 +134,7 @@
         <package name="systemd-sysvinit"/>
         <package name="dracut"/>
         <package name="wicked"/>
+        <package name="shim" bootinclude="true"/>
         <package name="iproute2"/>
         <package name="kiwi"/>
         <package name="kiwi-templates"/>

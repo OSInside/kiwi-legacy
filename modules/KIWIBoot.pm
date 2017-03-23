@@ -3933,6 +3933,80 @@ sub setupBootLoaderStages {
             $kiwi -> done();
         }
         #==========================================
+        # Use signed EFI modules from packages UEFI
+        #------------------------------------------
+        if (($type eq 'iso') && ($firmware eq "uefi")) {
+            $kiwi -> info ("Importing grub2 shim/signed efi modules");
+            my $s_data      = $stages{efi}{data};
+            my $s_shim_ms   = $stages{efi}{shim_ms};
+            my $s_shim_suse = $stages{efi}{shim_suse};
+            my $s_signed    = $stages{efi}{signed};
+            my $fo_bin;
+            if ($arch eq 'x86_64') {
+                $fo_bin = 'bootx64.efi';
+            } elsif ($arch =~ /i.86/) {
+                $fo_bin = 'bootx32.efi';
+            } elsif (($arch eq 'aarch64') || ($arch eq 'arm64')) {
+                $fo_bin = 'bootaa64.efi';
+            } elsif ($arch =~ /arm/) {
+                $fo_bin = 'bootarm.efi';
+            }
+            $result = 0;
+            if ($zipped) {
+                $status= KIWIQX::qxx (
+                    "$unzip | (cd $tmpdir && cpio -i -d $s_data 2>&1)"
+                );
+            } else {
+                $status= KIWIQX::qxx (
+                    "cat $initrd | (cd $tmpdir && cpio -i -d $s_data 2>&1)"
+                );
+            }
+            if ((! -e "$tmpdir/$s_shim_ms") && (! -e "$tmpdir/$s_shim_suse")) {
+                my $s_shim = "$tmpdir/$s_shim_ms";
+                if (-e $s_shim) {
+                    $s_shim = "$tmpdir/$s_shim_suse"
+                }
+                $kiwi -> failed ();
+                $kiwi -> error  (
+                    "Can't find shim $s_shim in initrd");
+                $kiwi -> failed ();
+                return;
+            }
+            if (! -e "$tmpdir/$s_signed") {
+                $kiwi -> failed ();
+                $kiwi -> error  (
+                    "Can't find grub2 $s_signed in initrd");
+                $kiwi -> failed ();
+                return;
+            }
+            $status = KIWIQX::qxx (
+                "cp $tmpdir/$s_shim_ms $tmpdir/EFI/BOOT/$fo_bin 2>&1"
+            );
+            $result = $? >> 8;
+            if ($result != 0) {
+                $status = KIWIQX::qxx (
+                    "cp $tmpdir/$s_shim_suse $tmpdir/EFI/BOOT/$fo_bin 2>&1"
+                );
+                $result = $? >> 8;
+            }
+            if ($result != 0) {
+                $kiwi -> failed ();
+                $kiwi -> error ("Failed to copy shim module: $status");
+                $kiwi -> failed ();
+                return;
+            }
+            $status = KIWIQX::qxx (
+                "cp $tmpdir/$s_signed $tmpdir/EFI/BOOT/grub.efi 2>&1");
+            $result = $? >> 8;
+            if ($result != 0) {
+                $kiwi -> failed ();
+                $kiwi -> error ("Failed to copy signed module: $status");
+                $kiwi -> failed ();
+                return;
+            }
+            $kiwi -> done();
+        }
+        #==========================================
         # Create OFW grub2 boot images
         #------------------------------------------
         if ($firmware eq 'ofw') {
@@ -4787,6 +4861,14 @@ sub setupBootLoaderConfiguration {
             }
         }
         $FD -> close();
+        #==========================================
+        # copy grub2 config file to efi path too
+        #------------------------------------------
+        if (($firmware eq "efi") || ($firmware eq "uefi")) {
+            KIWIQX::qxx (
+                "cp $tmpdir/boot/$config/grub.cfg $tmpdir/EFI/BOOT 2>&1"
+            );
+        }
         $kiwi -> done();
     }
     #==========================================
