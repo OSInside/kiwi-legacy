@@ -4154,6 +4154,12 @@ sub extractLinux {
     if (-f "$imageTree/boot/vmlinux") {
         $kernname = "vmlinux";
     }
+    #
+    # on s390x arch, kernel has /boot/image name
+    # 
+    if (-f "$imageTree/boot/image") {
+        $kernname = "image";
+    }
     if ($vconf) {
         $xendomain = $vconf -> getDomain();
     }
