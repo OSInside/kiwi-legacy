@@ -370,6 +370,9 @@ Requires:       grub
 Summary:        KIWI - buildservice package requirements for isoboot
 License:        GPL-2.0+
 Group:          System/Management
+%if 0%{?suse_version} > 1120
+BuildArch:      noarch
+%endif
 
 %description -n kiwi-desc-isoboot-requires
 Meta-package to pull in all requires to build an isoboot media.
@@ -455,6 +458,9 @@ Requires:       grub2-arm-efi
 %endif
 License:        GPL-2.0+
 Group:          System/Management
+%if 0%{?suse_version} > 1120
+BuildArch:      noarch
+%endif
 
 %description -n kiwi-desc-vmxboot-requires
 Meta-package to pull in all requires to build a vmxboot media.
@@ -486,6 +492,9 @@ Requires:       kiwi-desc-netboot = %{version}
 Requires:       %(echo `bash %{S:4} %{S:0} netboot %{myarch} %{mysystems}`)
 License:        GPL-2.0+
 Group:          System/Management
+%if 0%{?suse_version} > 1120
+BuildArch:      noarch
+%endif
 
 %description -n kiwi-desc-netboot-requires
 Meta-package to pull in all requires to build a netboot media.
@@ -578,6 +587,9 @@ Requires:       grub2-arm-efi
 Summary:        KIWI - buildservice package requirements for oemboot
 License:        GPL-2.0+
 Group:          System/Management
+%if 0%{?suse_version} > 1120
+BuildArch:      noarch
+%endif
 
 %description -n kiwi-desc-oemboot-requires
 Meta-package to pull in all requires to build a oemboot media.
