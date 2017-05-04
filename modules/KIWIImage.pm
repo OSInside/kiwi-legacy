@@ -1085,7 +1085,7 @@ sub createImageVMX {
     #==========================================
     # Create VM format/configuration
     #------------------------------------------
-    if ((defined $name->{format}) || ($xendomain eq "domU")) {
+    if ((defined $name->{format}) || ($xendomain =~ /domU/)) {
         $cmdL -> setSystemLocation (
             $idest."/".$name->{systemImage}.".raw"
         );
@@ -3131,7 +3131,7 @@ sub createImageSplit {
         #==========================================
         # Create VM format/configuration
         #------------------------------------------
-        if ((defined $name->{format}) || ($xendomain eq "domU")) {
+        if ((defined $name->{format}) || ($xendomain =~ /domU/)) {
             $cmdL -> setSystemLocation (
                 $idest."/".$name->{systemImage}.".raw"
             );
