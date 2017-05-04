@@ -3862,10 +3862,14 @@ If not specified the image name is used</a:documentation>
     </define>
     <define name="k.machine.domain.attribute">
       <attribute name="domain">
-        <a:documentation>The domain setup for the VM (xen only)</a:documentation>
+        <a:documentation>The domain setup for the VM (xen only)
+dom0 is the master domain from which xen instances are started
+domU indicates a HVM guest
+domU-PV indicates a PV guest</a:documentation>
         <choice>
           <value>dom0</value>
           <value>domU</value>
+          <value>domU-PV</value>
         </choice>
       </attribute>
     </define>

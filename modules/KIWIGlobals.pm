@@ -1697,14 +1697,17 @@ sub checkType {
 #------------------------------------------
 sub isXen {
     # ...
-    # Check if initrd is Xen based
+    # Check if a Xen PV setup is used
     # ---
     my $this  = shift;
     my $xengz = shift;
+    my $xml   = shift;
     my $isxen = 0;
     my $gdata = KIWIGlobals -> instance() -> getKiwiConfig();
     my $suf   = $gdata -> {IrdZipperSuffix};
     if ($xengz) {
+        # hypervisor found, now check if kernel-xen package is used
+        # which indicates a PV setup
         $xengz =~ s/\.$suf$//;
         $xengz =~ s/\.splash$//;
         foreach my $xen (glob ("$xengz*xen*.$suf")) {
@@ -1716,6 +1719,19 @@ sub isXen {
             my $kernel = readlink $xengz.".kernel";
             if (($kernel) && ($kernel =~ /.*-xen$/)) {
                 $isxen = 1;
+            }
+        }
+        # with the move of the kernel into a generic pvops kernel
+        # the kernel package can't be used anymore to distinguish
+        # the PV and HVM setup. Thus we have to rely on a correct
+        # domain setup
+        if ((! $isxen) && ($xml)) {
+            my $vconf = $xml -> getVMachineConfig();
+            if ($vconf) {
+                my $xendomain = $vconf -> getDomain();
+                if (($xendomain) && ($xendomain eq "domU-PV")) {
+                    $isxen = 1;
+                }
             }
         }
     }

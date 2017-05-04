@@ -214,10 +214,6 @@ sub new {
     #------------------------------------------
     $this->{gdata} = $global -> getKiwiConfig();
     #==========================================
-    # check if Xen system is used
-    #------------------------------------------
-    ($xengz, $isxen) = $global -> isXen ($initrd);
-    #==========================================
     # create tmp dir for operations
     #------------------------------------------
     $tmpdir = KIWIQX::qxx ("mktemp -qdt kiwiboot.XXXXXX");
@@ -273,6 +269,10 @@ sub new {
             $syszip = $read_result{sysz_size};
         }
     }
+    #==========================================
+    # check if Xen system is used
+    #------------------------------------------
+    ($xengz, $isxen) = $global -> isXen ($initrd, $xml);
     #==========================================
     # read origin path of XML description
     #------------------------------------------
@@ -4682,7 +4682,7 @@ sub setupBootLoaderConfiguration {
         #==========================================
         # Standard boot
         #------------------------------------------
-        if ((! $isxen) || ($isxen && $xendomain eq "domU")) {
+        if ((! $isxen) || ($isxen && $xendomain =~ "domU")) {
             if ($iso) {
                 print $FD "\t"."echo Loading linux...\n";
                 print $FD "\t"."set gfxpayload=$gfx"."\n";
@@ -4782,7 +4782,7 @@ sub setupBootLoaderConfiguration {
             $title = $this -> quoteLabel ("Failsafe -- $title");
             print $FD 'menuentry "'.$title.'"';
             print $FD ' --class opensuse --class os {'."\n";
-            if ((! $isxen) || ($isxen && $xendomain eq "domU")) {
+            if ((! $isxen) || ($isxen && $xendomain =~ "domU")) {
                 if ($iso) {
                     print $FD "\t"."echo Loading linux...\n";
                     print $FD "\t"."set gfxpayload=$gfx"."\n";
@@ -4961,7 +4961,7 @@ sub setupBootLoaderConfiguration {
         #==========================================
         # Standard boot
         #------------------------------------------
-        if ((! $isxen) || ($isxen && $xendomain eq "domU")) {
+        if ((! $isxen) || ($isxen && $xendomain =~ "domU")) {
             if ($iso) {
                 print $FD " kernel (cd)/boot/linux vga=$vga";
                 print $FD " ramdisk_size=512000 ramdisk_blocksize=4096";
@@ -5011,7 +5011,7 @@ sub setupBootLoaderConfiguration {
         if ($failsafe) {
             $title = $this -> makeLabel ("Failsafe -- $title");
             print $FD "title $title\n";
-            if ((! $isxen) || ($isxen && $xendomain eq "domU")) {
+            if ((! $isxen) || ($isxen && $xendomain =~ "domU")) {
                 if ($iso) {
                     print $FD " kernel (cd)/boot/linux vga=$vga";
                     print $FD " ramdisk_size=512000 ramdisk_blocksize=4096";
@@ -5411,7 +5411,7 @@ sub setupBootLoaderConfiguration {
         #==========================================
         # Standard boot
         #------------------------------------------
-        if ((! $isxen) || ($isxen && $xendomain eq "domU")) {
+        if ((! $isxen) || ($isxen && $xendomain =~ "domU")) {
             if ($iso) {
                 print $FD "\t"."label = $title\n";
                 print $FD "\t"."image  = /boot/linux\n";

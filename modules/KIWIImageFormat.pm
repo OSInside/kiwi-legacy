@@ -257,7 +257,7 @@ sub createMachineConfiguration {
         $kiwi -> skipped ();
         return;
     }
-    if (($bootp) && ($bootp eq "xen") && ($xend eq "domU")) {
+    if (($bootp) && ($bootp eq "xen") && ($xend =~ /domU/)) {
         $kiwi -> info ("Creating $imgtype image machine configuration\n");
         return $this -> createXENConfiguration();
     } elsif ($format eq "vmdk") {
