@@ -2703,7 +2703,10 @@ div {
         attribute arch { "ix86" | "x86_64" }
     k.machine.domain.attribute =
         ## The domain setup for the VM (xen only)
-        attribute domain { "dom0" | "domU" }
+        ## dom0 is the master domain from which xen instances are started
+        ## domU indicates a HVM guest
+        ## domU-PV indicates a PV guest
+        attribute domain { "dom0" | "domU" | "domU-PV" }
     k.machine.guestOS.attribute =
         ## The virtual guestOS identification string for the VM
         ## (vmdk and ovf, note the name designation is different for the two
