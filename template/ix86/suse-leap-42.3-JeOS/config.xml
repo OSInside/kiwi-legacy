@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<image schemaversion="6.2" name="LimeJeOS-Leap-42.3">
+    <description type="system">
+        <author>Marcus Schäfer</author>
+        <contact>ms@suse.com</contact>
+        <specification>
+            Leap 42.3 JeOS, is a small text based image
+        </specification>
+    </description>
+    <profiles>
+        <profile name="xenFlavour" description="VMX with Xen kernel"/>
+        <profile name="ec2Flavour" description="VMX with EC2/Xen kernel"/>
+        <profile name="vmxFlavour" description="VMX with default kernel" import="true"/>
+    </profiles>
+    <preferences>
+        <type image="iso" primary="true" boot="isoboot/suse-leap42.3" flags="overlay" hybrid="true" firmware="efi" kernelcmdline="splash" hybridpersistent_filesystem="ext4" hybridpersistent="true"/>
+        <version>1.42.3</version>
+        <packagemanager>zypper</packagemanager>
+        <locale>en_US</locale>
+        <keytable>us.map.gz</keytable>
+        <timezone>Europe/Berlin</timezone>
+        <hwclock>utc</hwclock>
+        <rpm-excludedocs>true</rpm-excludedocs>
+        <rpm-check-signatures>false</rpm-check-signatures>
+        <bootsplash-theme>openSUSE</bootsplash-theme>
+        <bootloader-theme>openSUSE</bootloader-theme>
+    </preferences>
+    <preferences profiles="ec2Flavour">
+        <type image="vmx" filesystem="ext3" boot="vmxboot/suse-leap42.3" bootprofile="ec2" bootkernel="ec2k" bootloader="grub2" kernelcmdline="xencons=xvc0 console=xvc0 multipath=off splash" firmware="ec2"/>
+    </preferences>
+    <preferences profiles="xenFlavour">
+        <type image="vmx" filesystem="ext3" boot="vmxboot/suse-leap42.3" bootprofile="xen" bootkernel="xenk" bootloader="grub2" kernelcmdline="splash">
+            <machine memory="512" domain="domU">
+                <vmdisk id="0" device="/dev/xvda" controller="ide"/>
+                <vmnic interface=""/>
+            </machine>
+        </type>
+        <type image="oem" filesystem="ext3" boot="oemboot/suse-leap42.3" bootprofile="xen" bootkernel="xenk" installiso="true" bootloader="grub2" kernelcmdline="splash">
+            <oemconfig>
+                <oem-systemsize>2048</oem-systemsize>
+                <oem-swap>true</oem-swap>
+                <oem-device-filter>/dev/ram</oem-device-filter>
+            </oemconfig>
+            <machine domain="dom0">
+                <vmdisk id="0" controller="ide"/>
+            </machine>
+        </type>
+    </preferences>
+    <preferences profiles="vmxFlavour">
+        <type image="vmx" filesystem="ext3" boot="vmxboot/suse-leap42.3" format="ova" bootloader="grub2" kernelcmdline="splash" firmware="efi">
+            <machine memory="4096" guestOS="sles-64" HWversion="7" arch="x86_64" ovftype="vmware">
+                <vmdisk controller="lsilogic" id="0" diskmode="streamOptimized"/>
+                <vmdvd controller="ide" id="0"/>
+                <vmnic driver="vmxnet3" interface="0" mode="bridged"/>
+            </machine>
+        </type>
+        <type image="oem" filesystem="ext3" boot="oemboot/suse-leap42.3" installiso="true" bootloader="grub2" kernelcmdline="splash" firmware="efi">
+            <oemconfig>
+                <oem-systemsize>2048</oem-systemsize>
+                <oem-swap>true</oem-swap>
+                <oem-device-filter>/dev/ram</oem-device-filter>
+            </oemconfig>
+            <machine memory="512" guestOS="suse" HWversion="4">
+                <vmdisk id="0" controller="ide"/>
+                <vmnic driver="e1000" interface="0" mode="bridged"/>
+            </machine>
+        </type>
+    </preferences>
+    <users group="root">
+        <user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
+    </users>
+    <repository type="yast2">
+        <source path="obs://leap/42.3/repo/oss"/>
+    </repository>
+    <packages type="image">
+        <namedCollection name="base"/>
+        <package name="plymouth-branding-openSUSE" bootinclude="true"/>
+        <package name="grub2-branding-openSUSE" bootinclude="true"/>
+        <package name="ifplugd"/>
+        <package name="iputils"/>
+        <package name="vim"/>
+        <package name="grub2"/>
+        <package name="syslinux"/>
+        <package name="lvm2"/>
+        <package name="plymouth"/>
+        <package name="fontconfig"/>
+        <package name="fonts-config"/>
+        <package name="tar"/>
+        <package name="parted"/>
+        <package name="kiwi"/>
+        <package name="kiwi-templates"/>
+        <package name="kiwi-desc-oemboot"/>
+        <package name="kiwi-desc-isoboot"/>
+        <package name="kiwi-desc-vmxboot"/>
+        <package name="kiwi-desc-netboot"/>
+        <package name="openssh"/>
+        <package name="iproute2"/>
+        <package name="less"/>
+        <package name="bash-completion"/>
+        <package name="dhcp-client"/>
+        <package name="which"/>
+    </packages>
+    <packages type="iso">
+        <package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
+    </packages>
+    <packages type="oem">
+        <package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
+    </packages>
+    <packages type="image" profiles="ec2Flavour">
+        <package name="kernel-ec2" replaces="kernel-default"/>
+        <package name="kernel-ec2" replaces="kernel-xen"/>
+        <package name="xen-tools" arch="x86_64" replaces=""/>
+        <package name="xen" arch="x86_64" replaces=""/>
+    </packages>
+    <packages type="image" profiles="xenFlavour">
+        <package name="kernel-xen" replaces="kernel-default"/>
+        <package name="kernel-xen" replaces="kernel-ec2"/>
+        <package name="xen-tools" arch="x86_64" replaces=""/>
+        <package name="xen" arch="x86_64" replaces=""/>
+    </packages>
+    <packages type="image" profiles="vmxFlavour">
+        <package name="kernel-default" replaces="kernel-xen"/>
+        <package name="kernel-default" replaces="kernel-ec2"/>
+        <package name="kernel-default" replaces="xen-tools"/>
+        <package name="kernel-default" replaces="xen"/>
+    </packages>
+    <packages type="bootstrap">
+        <package name="udev"/>
+        <package name="filesystem"/>
+        <package name="glibc-locale"/>
+        <package name="cracklib-dict-full"/>
+        <package name="ca-certificates"/>
+<!--
+        The installation of products in SLE12 requires the SLE12 zypper
+        Thus the following definition only works when building on SLE12
+
+        <product name="openSUSE"/>
+
+        In order to stay compatible we just install the product rpm
+        package. It's required to install the release package in the
+        bootstrap phase in order to avoid the installation of an auto
+        selected dummy-release package which later conflicts with all
+        other release packages
+-->
+        <package name="openSUSE-release"/>
+    </packages>
+    <packages type="delete">
+        <package name="kernel-debug"/>
+    </packages>
+</image>
