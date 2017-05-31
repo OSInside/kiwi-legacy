@@ -1,0 +1,4 @@
+Build instructions for local build
+==================================
+* call kiwi:
+  kiwi --build leap-42.2-JeOS -d /tmp/myimage --type vmx
