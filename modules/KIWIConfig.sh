@@ -66,7 +66,7 @@ function baseSystemdCall {
     local service_name=$1; shift
     local service=$(baseSystemdServiceInstalled "$service_name")
     if [ ! -z "$service" ];then
-        systemctl "$@" "$service"
+        systemctl "$@" "$service_name"
     fi
 }
 
