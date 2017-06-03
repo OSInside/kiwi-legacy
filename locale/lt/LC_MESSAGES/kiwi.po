@@ -10,7 +10,7 @@ msgstr ""
 "Project-Id-Version: kiwi.lt\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2006-05-15 15:07+0200\n"
-"PO-Revision-Date: 2017-06-03 19:25+0000\n"
+"PO-Revision-Date: 2017-06-24 19:06+0000\n"
 "Last-Translator: Mindaugas Baranauskas <opensuse.lietuviu.kalba@gmail.com>\n"
 "Language-Team: Lithuanian "
 "<https://l10n.opensuse.org/projects/kiwi/master/lt/>\n"
@@ -20,7 +20,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=4; plural=(n==1 ? 0 : n%10>=2 && (n%100<10 || "
 "n%100>=20) ? 1 : n%10==0 || (n%100>10 && n%100<20) ? 2 : 3);\n"
-"X-Generator: Weblate 2.6\n"
+"X-Generator: Weblate 2.13.1\n"
 
 #. /.../
 #. Copyright (c) 2005 SuSE GmbH Nuernberg, Germany.  All rights reserved.
@@ -87,6 +87,9 @@ msgid ""
 "The system will not be able to reboot. Please make sure to fixup and install "
 "the bootloader before next reboot. Check /var/log/boot.kiwi for details"
 msgstr ""
+"Sistemos nepavyks iš naujo paleisti. Prieš paleisdami iš naujo, būtinai "
+"įdiekite paleidyklę ir sutvarkykite ją. Daugiau informacijos "
+"/var/log/boot.kiwi"
 
 #
 msgid "Please remove the CD/DVD before reboot"
