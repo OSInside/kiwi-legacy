@@ -111,4 +111,4 @@ msgid "System will be shutdown. Remove USB stick before power on"
 msgstr "Systemet vil blive lukket ned. Fjern USB-pen inden computeren startes"
 
 msgid "Please remove the CD/DVD before shutdown"
-msgstr "Fjern venligst cd'en/dvd'en inden genstart"
+msgstr "Fjern venligst cd'en/dvd'en inden der lukkes ned"
