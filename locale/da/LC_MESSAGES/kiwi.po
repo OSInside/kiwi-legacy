@@ -4,15 +4,15 @@ msgstr ""
 "Project-Id-Version: @PACKAGE@\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2005-07-27 16:23+0200\n"
-"PO-Revision-Date: 2010-12-31 11:35+0100\n"
-"Last-Translator: Martin Schlander <mschlander@opensuse.org>\n"
-"Language-Team: Danish <opensuse-translation@opensuse.org>\n"
+"PO-Revision-Date: 2017-06-08 18:44+0000\n"
+"Last-Translator: scootergrisen <scootergrisen@gmail.com>\n"
+"Language-Team: Danish <https://l10n.opensuse.org/projects/kiwi/master/da/>\n"
 "Language: da\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Lokalize 1.0\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 2.6\n"
 
 #. /.../
 #. Copyright (c) 2005 SuSE GmbH Nuernberg, Germany.  All rights reserved.
@@ -20,7 +20,7 @@ msgstr ""
 #. boot code for KIWI 
 #.
 msgid "Boot continues in 10 sec"
-msgstr ""
+msgstr "Opstart fortsætter om 10 sekunder"
 
 msgid "Enter LUKS passphrase"
 msgstr "Angiv LUKS-adgangsfrase"
@@ -76,12 +76,15 @@ msgid "Exit"
 msgstr "Afslut"
 
 msgid "Bootloader installation has failed"
-msgstr ""
+msgstr "Bootloader installation er mislykkedes"
 
 msgid ""
 "The system will not be able to reboot. Please make sure to fixup and install "
 "the bootloader before next reboot. Check /var/log/boot.kiwi for details"
 msgstr ""
+"Systemet vil ikke være i stand til at genstarte. Sørg venligst for at rette "
+"op på og installere bootloaderen inden næste genstart. Tjek /var/log/"
+"boot.kiwi for detaljer"
 
 msgid "Please remove the CD/DVD before reboot"
 msgstr "Fjern venligst cd/dvd før genstart"
@@ -105,8 +108,7 @@ msgid "Select %1 partition for installation:"
 msgstr "Vælg %1 partition til installation:"
 
 msgid "System will be shutdown. Remove USB stick before power on"
-msgstr ""
+msgstr "Systemet vil blive lukket ned. Fjern USB-pen inden computeren startes"
 
-#, fuzzy
 msgid "Please remove the CD/DVD before shutdown"
-msgstr "Fjern venligst cd/dvd før genstart"
+msgstr "Fjern venligst cd'en/dvd'en inden genstart"
