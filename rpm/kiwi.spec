@@ -22,6 +22,13 @@
 %define perl_version    %(eval "`%{__perl} -V:version`"; echo $version)
 %endif
 
+# in TW and SLE12SP2 python-kiwi provides the kiwi-tools package
+%if 0%{?suse_version} > 1320 || 0%{?sle_version} >= 120200
+%bcond_with kiwitools
+%else
+%bcond_without kiwitools
+%endif
+
 Summary:        KIWI - Appliance Builder
 Url:            http://github.com/openSUSE/kiwi
 Name:           kiwi
@@ -275,6 +282,7 @@ Authors:
         Thomas Schraitle <toms@suse.com>
         Marcus Schaefer <ms@suse.com>
 
+%if %{with kiwitools}
 %package -n kiwi-tools
 Summary:        KIWI - Collection of Boot Helper Tools
 License:        GPL-2.0+
@@ -289,6 +297,7 @@ outside of the scope of kiwi appliance building.
 Authors:
 --------
         Marcus Schaefer <ms@suse.com>
+%endif
 
 %ifarch %ix86 x86_64
 
@@ -735,6 +744,12 @@ images. This is supposed to be used in Open Build Service in first place
 to track the dependencies.
 EOF
 
+%if !%{with kiwitools}
+shopt -s extglob
+rm -f %{buildroot}%{_defaultdocdir}/kiwi/README.tools
+rm -f %{buildroot}%{_bindir}/!(livestick)
+%endif
+
 %ifarch %ix86 x86_64
 %pre -n kiwi-pxeboot
 #============================================================
@@ -871,12 +886,14 @@ rm -rf $RPM_BUILD_ROOT
 # KIWI-tools files...  
 # ------------------------------------------------
 
+%if %{with kiwitools}
 %files -n kiwi-tools
 %defattr(-, root, root)
 %dir %{_defaultdocdir}/kiwi
 %doc %{_defaultdocdir}/kiwi/README.tools
 %exclude /usr/bin/livestick
 /usr/bin/*
+%endif
 #=================================================
 # KIWI-desc-* and templates...
 # ------------------------------------------------
