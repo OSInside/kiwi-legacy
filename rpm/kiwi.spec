@@ -25,8 +25,10 @@
 # in TW and SLE12SP2 python-kiwi provides the kiwi-tools package
 %if 0%{?suse_version} > 1320 || 0%{?sle_version} >= 120200
 %bcond_with kiwitools
+%bcond_with kiwipxeboot
 %else
 %bcond_without kiwitools
+%bcond_without kiwipxeboot
 %endif
 
 Summary:        KIWI - Appliance Builder
@@ -300,7 +302,7 @@ Authors:
 %endif
 
 %ifarch %ix86 x86_64
-
+%if %{with kiwipxeboot}
 %package -n kiwi-pxeboot
 Summary:        KIWI - PXE boot structure
 PreReq:         coreutils
@@ -326,6 +328,7 @@ needed to serve kiwi built images via PXE.
 Authors:
 --------
         Marcus Schaefer <ms@suse.com>
+%endif
 %endif
 
 %ifarch %ix86 x86_64
@@ -751,6 +754,7 @@ rm -f %{buildroot}%{_bindir}/!(livestick)
 %endif
 
 %ifarch %ix86 x86_64
+%if %{with kiwipxeboot}
 %pre -n kiwi-pxeboot
 #============================================================
 # create user and group tftp if they does not exist
@@ -769,6 +773,7 @@ if ( [ ! -e srv/tftpboot/pxelinux.cfg/default  ] ) ; then
     cp /srv/tftpboot/pxelinux.cfg/default.default \
         /srv/tftpboot/pxelinux.cfg/default
 fi
+%endif
 %endif
 
 %ifarch %ix86 x86_64 ppc ppc64 ppc64le s390 s390x %arm aarch64
@@ -870,7 +875,7 @@ rm -rf $RPM_BUILD_ROOT
 # KIWI-pxeboot files...  
 # ------------------------------------------------
 %ifarch %ix86 x86_64
-
+%if %{with kiwipxeboot}
 %files -n kiwi-pxeboot -f kiwi.loader
 %defattr(-, root, root)
 %dir %attr(0750,tftp,tftp) /srv/tftpboot
@@ -881,6 +886,7 @@ rm -rf $RPM_BUILD_ROOT
 %dir /srv/tftpboot/upload
 %dir /srv/tftpboot/boot
 /srv/tftpboot/pxelinux.cfg/default.default
+%endif
 %endif
 #=================================================
 # KIWI-tools files...  
