@@ -700,11 +700,16 @@ make buildroot=$RPM_BUILD_ROOT \
          install
 touch kiwi.loader
 
+%if %{with kiwipxeboot}
 %ifarch %ix86 x86_64
     install -m 644 pxeboot/pxelinux.0.config \
         $RPM_BUILD_ROOT/srv/tftpboot/pxelinux.cfg/default.default
 %else
     # no PXE boot setup for non x86 archs
+    rm -rf $RPM_BUILD_ROOT/srv/tftpboot
+    rm -rf $RPM_BUILD_ROOT/etc/permissions.d/kiwi
+%endif
+%else
     rm -rf $RPM_BUILD_ROOT/srv/tftpboot
     rm -rf $RPM_BUILD_ROOT/etc/permissions.d/kiwi
 %endif
