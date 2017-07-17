@@ -2349,7 +2349,7 @@ function setupBootLoaderS390Grub {
     elif [ -z "$kiwi_oemtitle" ];then
         title=$(makeLabel "$kname [ $gfix ]")
     else
-        title=$(makeLabel "$kiwi_oemtitle [ $gfix ]")
+        title=$(makeLabel "$kiwi_oemtitle")
     fi
     #======================================
     # check for kernel options
@@ -3092,7 +3092,7 @@ function setupBootLoaderGrub2 {
     elif [ -z "$kiwi_oemtitle" ];then
         title=$(makeLabel "$kname [ $gfix ]")
     else
-        title=$(makeLabel "$kiwi_oemtitle [ $gfix ]")
+        title=$(makeLabel "$kiwi_oemtitle")
     fi
     #======================================
     # check for kernel options
