@@ -4586,8 +4586,10 @@ sub setupBootLoaderConfiguration {
         #
         # If you encounter that we need a prefix setup for Xen HVM images
         # it has to be addressed here
-        if ((! $isxen) || ($isxen && $xendomain eq "dom0")) {
-            print $FD 'set prefix=($root)'.$bootpath.'/grub2'."\n";
+        if ($firmware !~ /ec2/) {
+            if ((! $isxen) || ($isxen && $xendomain eq "dom0")) {
+                print $FD 'set prefix=($root)'.$bootpath.'/grub2'."\n";
+            }
         }
         # print $FD "set debug=all\n";
         print $FD 'set linux=linux'."\n";
