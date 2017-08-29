@@ -1031,7 +1031,7 @@ sub setupBTRFSSubVolumes {
         }
     }
     if (! %phash) {
-        return $this;
+        return $path;
     }
     $kiwi -> info ("Creating btrfs pool\n");
     my $data = KIWIQX::qxx ('btrfs subvolume create '.$path.'/@ 2>&1');
@@ -1108,7 +1108,7 @@ sub setupBTRFSSubVolumes {
         $kiwi -> failed();
         return;
     }
-    return $this;
+    return $path;
 }
 
 #==========================================
