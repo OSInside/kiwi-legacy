@@ -1274,19 +1274,8 @@ sub checkLVMbind {
         return;
     }
     my @UmountStack = @{$this->{UmountStack}};
-    $_ = KIWIQX::qxx ("blkid $sdev 2>/dev/null");
     my $vgname = KIWIQX::qxx ("pvs --noheadings -o vg_name $sdev 2>/dev/null");
     my $result = $? >> 8;
-    if (/LVM2/) {
-        for my $i (0..5) {
-            if ($result == 0) {
-                last;
-            }
-            KIWIQX::qxx ("sleep 5");
-            $vgname = KIWIQX::qxx ("pvs --noheadings -o vg_name $sdev 2>/dev/null");
-            $result = $? >> 8;
-        }
-    }
     if ($result != 0) {
         return $sdev;
     }
