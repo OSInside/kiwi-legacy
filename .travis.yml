@@ -19,3 +19,4 @@ install:
     - cpanm -f -n $(cat .perlmodules | tr "\n" " ")
 
 script: make test
+dist: precise
