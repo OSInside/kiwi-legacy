@@ -2063,8 +2063,8 @@ sub _new_instance {
     # Read .kiwirc
     #--------------------------------------------
     my $file;
-    if (-f '.kiwirc') {
-        $file = '.kiwirc';
+    if (-f './.kiwirc') {
+        $file = './.kiwirc';
     }
     elsif (($ENV{'HOME'}) && (-f $ENV{'HOME'}.'/.kiwirc')) {
         $file = "$ENV{'HOME'}/.kiwirc";
