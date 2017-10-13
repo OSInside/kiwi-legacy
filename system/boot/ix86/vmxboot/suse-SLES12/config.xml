@@ -37,6 +37,8 @@
         <file name="drivers/message/fusion/*"/>
         <file name="drivers/net/virtio_net.ko"/>
         <file name="drivers/net/hyperv/hv_netvsc.ko"/>
+        <file name="drivers/nvme/*"/>
+        <file name="drivers/nvmem/*"/>
         <file name="drivers/scsi/*"/>
         <file name="drivers/staging/hv/*"/>
         <file name="drivers/virtio/*"/>
