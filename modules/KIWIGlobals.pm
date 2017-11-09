@@ -170,7 +170,7 @@ sub loop_setup {
     my $kiwi = $this->{kiwi};
     my $locator = KIWILocator -> instance();
     my $losetup_exec = $locator -> getExecPath("losetup");
-    my $logical_sector_size = '';
+    my $logical_block_size = '';
     if (! $losetup_exec) {
         $kiwi -> error("losetup not found on build system");
         $kiwi -> failed();
@@ -181,11 +181,11 @@ sub loop_setup {
         my $blocksize = $bldType -> getTargetBlockSize();
         my $default_blocksize = $this -> getKiwiConfigEntry('DiskSectorSize');
         if (($blocksize) && ($blocksize != $default_blocksize)) {
-            $logical_sector_size = "-L $blocksize";
+            $logical_block_size = "--logical-blocksize $blocksize";
         }
     }
     my $result = KIWIQX::qxx (
-        "$losetup_exec $logical_sector_size -f --show $source 2>&1"
+        "$losetup_exec $logical_block_size -f --show $source 2>&1"
     );
     my $status = $? >> 8;
     if ($status != 0) {
