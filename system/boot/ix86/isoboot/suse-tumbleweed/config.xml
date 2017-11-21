@@ -172,7 +172,6 @@
         <package name="openSUSE-release"/>
         <package name="pam"/>
         <package name="pam-config"/>
-        <package name="pam-modules"/>
         <package name="perl"/>
         <package name="perl-Bootloader"/>
         <package name="perl-HTML-Parser"/>
