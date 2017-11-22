@@ -163,7 +163,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 %endif
 # Tumbleweed:
 # Current Tumbleweed version, moving target
-%if 0%{?suse_version} == 1330
+%if 0%{?suse_version} >= 1330 && !0%{?sle_version}
 %define mysystems suse-tumbleweed
 %endif
 # redefine for the SLE11 case if no sles_version exists
