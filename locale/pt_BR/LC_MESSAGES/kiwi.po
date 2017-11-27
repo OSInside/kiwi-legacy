@@ -10,7 +10,7 @@ msgstr ""
 "Project-Id-Version: @PACKAGE@\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2005-08-18 14:46+0200\n"
-"PO-Revision-Date: 2016-09-27 20:18+0000\n"
+"PO-Revision-Date: 2017-11-27 18:54+0000\n"
 "Last-Translator: Luiz Fernando Ranghetti <elchevive68@gmail.com>\n"
 "Language-Team: Portuguese (Brazil) "
 "<https://l10n.opensuse.org/projects/kiwi/master/pt_BR/>\n"
@@ -19,7 +19,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
-"X-Generator: Weblate 2.6\n"
+"X-Generator: Weblate 2.13.1\n"
 
 #. /.../
 #. Copyright (c) 2005 SuSE GmbH Nuernberg, Germany.  All rights reserved.
@@ -37,11 +37,11 @@ msgstr "Você aceita o contrato de licença?"
 
 # power-off message
 msgid "Do you want to start the System-Recovery ?"
-msgstr "Você deseja iniciar a recuperação do sistema?"
+msgstr "Deseja iniciar a recuperação do sistema?"
 
 # power-off message
 msgid "Do you want to start the System-Restore ?"
-msgstr "Você deseja iniciar a restauração do sistema?"
+msgstr "Deseja iniciar a restauração do sistema?"
 
 msgid "Restoring base operating system..."
 msgstr "Restaurando o sistema operacional base..."
