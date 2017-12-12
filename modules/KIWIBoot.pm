@@ -2406,7 +2406,14 @@ sub setupBootDisk {
             #==========================================
             # Create loop device mapping table
             #------------------------------------------
-            %deviceMap = $this -> setLoopDeviceMap ($this->{loop});
+            my $it = 0;
+            while (!keys %deviceMap) {
+                if ($it++ >= 5){
+                    $kiwi -> error ("Couldn't set loop device map");
+                }
+                %deviceMap = $this -> setLoopDeviceMap ($this->{loop});
+                sleep 2;
+            }
         } else {
             #==========================================
             # Create disk device mapping table
