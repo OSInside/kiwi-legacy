@@ -10,8 +10,8 @@ msgstr ""
 "Project-Id-Version: @PACKAGE@\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2005-07-27 16:23+0200\n"
-"PO-Revision-Date: 2016-12-24 13:00+0000\n"
-"Last-Translator: Kamil Stańczyk <suszaraa@gmail.com>\n"
+"PO-Revision-Date: 2018-01-25 14:05+0000\n"
+"Last-Translator: Ewelina Michalowska <ewelina.michalowska@stgambit.com>\n"
 "Language-Team: Polish <https://l10n.opensuse.org/projects/kiwi/master/pl/>\n"
 "Language: pl\n"
 "MIME-Version: 1.0\n"
@@ -19,7 +19,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 "
 "|| n%100>=20) ? 1 : 2;\n"
-"X-Generator: Weblate 2.6\n"
+"X-Generator: Weblate 2.18\n"
 
 #. /.../
 #. Copyright (c) 2005 SuSE GmbH Nuernberg, Germany.  All rights reserved.
@@ -30,14 +30,14 @@ msgid "Boot continues in 10 sec"
 msgstr "Rozruch zostanie kontynuowany za 10 sekund"
 
 msgid "Enter LUKS passphrase"
-msgstr "Proszę podać hasło LUKS"
+msgstr "Wprowadź hasło LUKS"
 
 msgid "Do you accept the license agreement ?"
-msgstr "Zaakceptować warunki licencji?"
+msgstr "Czy akceptujesz umowę licencyjną?"
 
 # power-off message
 msgid "Do you want to start the System-Recovery ?"
-msgstr "Czy uruchomić narzędzie odzyskiwania systemu System-Recovery?"
+msgstr "Czy chcesz uruchomić narzędzie odzyskiwania systemu System-Recovery?"
 
 # power-off message
 msgid "Do you want to start the System-Restore ?"
@@ -47,13 +47,13 @@ msgid "Restoring base operating system..."
 msgstr "Przywracanie podstawowego systemu operacyjnego..."
 
 msgid "Destroying ALL data on %1, continue ?"
-msgstr "Zostaną zniszczone WSZYSTKIE dane na %1, kontynuować?"
+msgstr "Za chwilę zostaną zniszczone WSZYSTKIE dane na %1, kontynuować?"
 
 msgid "Clean sweep..."
 msgstr "Całkowite usuwanie danych..."
 
 msgid "%1 files from %2 restored..."
-msgstr "przywrócono %1 plików z %2 ..."
+msgstr "przywrócono %1 plików z %2..."
 
 msgid "backing up: %1..."
 msgstr "tworzenie kopii zapasowej: %1..."
@@ -62,7 +62,7 @@ msgid "archiving: %1..."
 msgstr "archiwizacja: %1..."
 
 msgid "restoring: %1..."
-msgstr "trwa przywracanie: %1..."
+msgstr "przywracanie: %1..."
 
 msgid "Yes"
 msgstr "Tak"
@@ -79,42 +79,41 @@ msgid "Cancel"
 msgstr "Anuluj"
 
 msgid "Exit"
-msgstr "Wyjście"
+msgstr "Zamknij"
 
 msgid "Bootloader installation has failed"
-msgstr "Instalacja programu rozruchowego nie powiodła się"
+msgstr "Instalacja programu rozruchowego nieudana"
 
 msgid ""
 "The system will not be able to reboot. Please make sure to fixup and install "
 "the bootloader before next reboot. Check /var/log/boot.kiwi for details"
 msgstr ""
-"System nie będzie wstanie się uruchomić. Proszę zainstalować program "
-"rozruchowy przed następnym rozruchem. Sprawdź /var/log/boot.kiwi by uzyskać "
-"szczegóły"
+"System nie będzie w stanie się uruchomić. Napraw problem i zainstaluj "
+"program rozruchowy przed następnym rozruchem. Szczegóły: /var/log/boot.kiwi"
 
 msgid "Please remove the CD/DVD before reboot"
-msgstr "Proszę wyjąć płytę CD/DVD przed ponownym uruchomieniem"
+msgstr "Wyjmij płytę CD/DVD przed ponownym rozruchem"
 
 msgid "Please unplug the USB stick before reboot"
-msgstr "Proszę odłączyć pamięć USB przed ponownym uruchomieniem"
+msgstr "Odłącz pamięć USB przed ponownym rozruchem"
 
 msgid "Installation..."
 msgstr "Instalacja..."
 
 msgid "Loading %1"
-msgstr "Ładowanie %1"
+msgstr "Wczytywanie %1"
 
 msgid "Verifying %1"
 msgstr "Weryfikowanie %1"
 
 msgid "Select disk for installation:"
-msgstr "Proszę wybrać dysk do instalacji:"
+msgstr "Wybierz dysk do instalacji:"
 
 msgid "Select %1 partition for installation:"
-msgstr "Proszę wybrać partycję %1 do instalacji:"
+msgstr "Wybierz partycję %1 do instalacji:"
 
 msgid "System will be shutdown. Remove USB stick before power on"
-msgstr "System zostanie zamknięty. Usuń pamięć USB przed rozruchem"
+msgstr "System zostanie zamknięty. Wyjmij pamięć USB przed włączeniem zasilania"
 
 msgid "Please remove the CD/DVD before shutdown"
-msgstr "Proszę wyjąć płytę instalacyjną przed zamknięciem"
+msgstr "Wyjmij płytę CD/DVD przed wyłączeniem"
