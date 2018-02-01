@@ -1560,16 +1560,23 @@ function updateModuleDependencies {
     # ---
     local IFS=$IFS_ORIG
     local depmodExec=$(lookup depmod 2>/dev/null)
+    local kernel_version
     if [ ! -x "$depmodExec" ];then
         Echo "Could not find depmod executable"
         Echo "Skipping module dependency update"
         systemIntegrity=unknown
         return
     fi
-    if ! $depmodExec -a;then
-        Echo "Module dependency update failed."
-        systemIntegrity=unknown
-    fi
+    for i in /lib/modules/*;do
+        if [ ! -d $i ];then
+             continue
+        fi
+        kernel_version=${i##*/}
+        if ! $depmodExec -a $kernel_version;then
+            Echo "Module dependency update failed."
+            systemIntegrity=unknown
+        fi
+    done
 }
 
 #======================================
@@ -1590,7 +1597,7 @@ function setupInitrd {
     local running
     local rlinux
     local rinitrd
-    local kernel_version=$(uname -r)
+    local kernel_version
     for i in $(find /boot/ -name "System.map*");do
         systemMap=1
     done
@@ -1618,13 +1625,19 @@ function setupInitrd {
         #--------------------------------------
         if [ -x "$dracutExec" ]; then
             # 1. dracut
-            params=" -f /boot/initrd-$kernel_version $kernel_version"
-            Echo "Creating dracut based initrd"
-            if ! $dracutExec -H $params;then
-                Echo "Can't create initrd with dracut"
-                systemIntegrity=unknown
-                bootLoaderOK=0
-            fi
+            for i in /lib/modules/*;do
+                if [ ! -d $i ];then
+                    continue
+                fi
+                kernel_version=${i##*/}
+                params=" -f /boot/initrd-$kernel_version $kernel_version"
+                Echo "Creating dracut based initrd for $kernel_version"
+                if ! $dracutExec -H $params;then
+                    Echo "Can't create initrd with dracut"
+                    systemIntegrity=unknown
+                    bootLoaderOK=0
+                fi
+            done
         elif [ -x "$mkinitrdExec" ]; then
             # 2. mkinitrd
             Echo "Creating mkinitrd based initrd"
