@@ -4608,6 +4608,12 @@ sub setupBootLoaderConfiguration {
         # console (console) or the serial terminal (serial)
         my $console_mode = 'graphics';
 
+        # Set serial console mode for ec2* firmwares. This is a hack for
+        # Azure images in order to avoid new attributes in XML schema.
+        if ($type->{firmware} =~ m/ec2/) {
+            $console_mode = 'serial'
+        }
+
         if ($console_mode eq 'console') {
             print $FD "\t".'terminal_input console'."\n";
             print $FD "\t".'terminal_output console'."\n";
