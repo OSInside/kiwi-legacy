@@ -3165,7 +3165,7 @@ EOF
 
     # Set serial console mode for ec2* firmwares. This is a hack for
     # Azure images in order to avoid new attributes in XML schema.
-    if [[ "$kiwi_firmware" =~ "ec2" ]]; then
+    if [[ "$kiwi_firmware" =~ "ec2" ]] && [ "$kiwi_format" = 'vhd-fixed' ]; then
         local serial
         serial="serial --speed=9600 --unit=0 --word=8 --parity=no --stop=1"
         echo "GRUB_SERIAL_COMMAND=\"$serial\"" >> $inst_default_grub

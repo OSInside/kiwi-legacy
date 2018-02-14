@@ -73,6 +73,7 @@ sub new {
         kiwi_displayname
         kiwi_drivers
         kiwi_firmware
+        kiwi_format
         kiwi_fsmountoptions
         kiwi_hwclock
         kiwi_hybrid
@@ -432,6 +433,8 @@ sub __updateXMLType {
         $type -> getInstallBoot();
     $data{kiwi_bootkernel} =
         $type -> getBootKernel();
+    $data{kiwi_format} = 
+        $type -> getFormat();
     $data{kiwi_fsmountoptions} =
         $type -> getFSMountOptions();
     $data{kiwi_bootprofile} =
