@@ -4611,7 +4611,7 @@ sub setupBootLoaderConfiguration {
 
         # Set serial console mode for ec2* firmwares. This is a hack for
         # Azure images in order to avoid new attributes in XML schema.
-        if ($type->{firmware} =~ m/ec2/ && $type->{format} eq 'vhd-fixed') {
+        if ($type->{firmware} =~ m/ec2/ || $type->{format} eq 'vhd-fixed') {
             $console_mode = 'serial'
         }
 
