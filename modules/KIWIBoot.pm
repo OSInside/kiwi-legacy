@@ -319,6 +319,7 @@ sub new {
         $type{type}                   = $xmltype -> getTypeName();
         $type{vga}                    = $xmltype -> getVGA();
         $type{volid}                  = $xmltype -> getVolID();
+        $type{format}                 = $xmltype -> getFormat();
         if (! $type{filesystem}) {
             my $fsro = $xmltype -> getFSReadOnly();
             my $fsrw = $xmltype -> getFSReadWrite();
@@ -4607,6 +4608,12 @@ sub setupBootLoaderConfiguration {
         # you can change the following variable to use a non graphics
         # console (console) or the serial terminal (serial)
         my $console_mode = 'graphics';
+
+        # Set serial console mode for ec2* firmwares. This is a hack for
+        # Azure images in order to avoid new attributes in XML schema.
+        if ($type->{firmware} =~ m/ec2/ || $type->{format} eq 'vhd-fixed') {
+            $console_mode = 'serial'
+        }
 
         if ($console_mode eq 'console') {
             print $FD "\t".'terminal_input console'."\n";
