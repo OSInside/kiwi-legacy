@@ -3157,11 +3157,19 @@ EOF
     #======================================
     # set terminal mode
     #--------------------------------------
-    if [ -e $unifont ];then
+    if [[ "$kiwi_firmware" =~ "ec2" ]] || [ "$kiwi_format" = 'vhd-fixed' ]; then
+        # Set serial console mode for ec2* firmwares. This is a hack for
+        # Azure images in order to avoid new attributes in XML schema.
+        local serial
+        serial="serial --speed=9600 --unit=0 --word=8 --parity=no --stop=1"
+        echo "GRUB_TERMINAL=serial"  >> $inst_default_grub
+        echo "GRUB_SERIAL_COMMAND=\"$serial\"" >> $inst_default_grub
+    elif [ -e $unifont ];then
         echo "GRUB_TERMINAL=gfxterm"  >> $inst_default_grub
     else
         echo "GRUB_TERMINAL=console"  >> $inst_default_grub
     fi
+
     #======================================
     # write etc/default/grub_installdevice
     #--------------------------------------
