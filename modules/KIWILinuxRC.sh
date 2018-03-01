@@ -7366,8 +7366,8 @@ function startShell {
             return
         fi
         Echo "Starting boot shell on $ELOG_BOOTSHELL"
-        setctsid -f $ELOG_BOOTSHELL /bin/bash -i
-        ELOGSHELL_PID=$(fuser $ELOG_BOOTSHELL | tr -d " ")
+        setctsid $ELOG_BOOTSHELL /bin/bash -i &
+        ELOGSHELL_PID=$!
         echo ELOGSHELL_PID=$ELOGSHELL_PID >> /iprocs
     fi
 }
@@ -7386,7 +7386,7 @@ function killShell {
     fi
     if [ ! -z "$ELOGSHELL_PID" ];then
         Echo "Stopping boot shell"
-        kill $ELOGSHELL_PID &>/dev/null
+        kill -9 $ELOGSHELL_PID &>/dev/null
     fi
     if [ $umountProc -eq 1 ];then
         umount /proc
