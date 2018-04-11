@@ -4645,7 +4645,6 @@ function searchBIOSBootDevice {
     local IFS=$IFS_ORIG
     local file=/boot/mbrid
     local ifix
-    local match_count
     local matched
     local curd
     local mbrML
@@ -4690,7 +4689,6 @@ function searchBIOSBootDevice {
         # initialize variables
         #--------------------------------------
         ifix=0
-        match_count=0
         try_count=$((try_count + 1))
         #======================================
         # stop after a long time of retry
@@ -4718,7 +4716,6 @@ function searchBIOSBootDevice {
             if [ "$mbrML" = "$mbrI" ] || [ "$mbrMB" = "$mbrI" ];then
                 ifix=1
                 matched=$curd
-                match_count=$(($match_count + 1))
                 if [ "$mbrML" = "$mbrI" ];then
                     export masterBootID=$mbrML
                 fi
@@ -4731,13 +4728,6 @@ function searchBIOSBootDevice {
                 fi
             fi
         done
-        #======================================
-        # Multiple matches are bad
-        #--------------------------------------
-        if [ $match_count -gt 1 ];then
-            export biosBootDevice="multiple devices matches same MBR ID: $mbrI"
-            return 2
-        fi
         #======================================
         # Found it...
         #--------------------------------------
