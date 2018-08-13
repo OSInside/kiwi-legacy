@@ -139,6 +139,7 @@ function Dialog {
     export DIALOG_CANCEL=1
     hideSplash
 cat > /tmp/fbcode << EOF
+reset
 dialog \
     --ok-label "$TEXT_OK" \
     --cancel-label "$TEXT_CANCEL" \
