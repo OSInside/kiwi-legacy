@@ -33,6 +33,7 @@
         <file name="drivers/hid/*"/>
         <file name="drivers/hv/*"/>
         <file name="drivers/ide/*"/>
+        <file name="drivers/infiniband/hw/*"/>
         <file name="drivers/md/*"/>
         <file name="drivers/message/fusion/*"/>
         <file name="drivers/net/ethernet/mellanox/*"/>
