@@ -607,7 +607,7 @@ sub createGoogleComputeEngine {
         $kiwi -> failed ();
         return;
     }
-    $target = $dist."-guest-gce-".$version.".tar.gz";
+    $target = $xml -> getImageName().$version.".tar.gz";
     $status = KIWIQX::qxx ("mv $source $gce_source 2>&1");
     $result = $? >> 8;
     my @content;
