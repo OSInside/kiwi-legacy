@@ -184,6 +184,9 @@ sub createChecks {
     if (! $this -> __hasContainerName()) {
         return;
     }
+    if (! $this -> __hasValidInstallStickSetup()) {
+        return;
+    }
     return 1;
 }
 
@@ -268,6 +271,9 @@ sub prepareChecks {
         return;
     }
     if (! $this -> __hasContainerName()) {
+        return;
+    }
+    if (! $this -> __hasValidInstallStickSetup()) {
         return;
     }
     return 1;
@@ -1946,6 +1952,34 @@ sub __here_format {
     $message =~ s/ {4}//g;
     $message.= "\n";
     return $message;
+}
+
+#==========================================
+# __hasValidInstallStickSetup
+#------------------------------------------
+sub __hasValidInstallStickSetup {
+    # ...
+    # Check if installstick="true" is set together with
+    # bootpartition="false" in type section. 
+    # This is a not supported combination
+    # ---
+    my $this = shift;
+    my $kiwi = $this->{kiwi};
+    my $xml = $this->{xml};
+    my $bldType = $xml -> getImageType();
+    my $bootpart = $bldType -> getBootPartition();
+    my $installstick = $bldType -> getInstallStick();
+    if ($bootpart eq 'false' && $installstick eq 'true') {
+        my $msg = "The use of a raw image as the installation media ";
+        $msg.= "(installstick=\"true\") without a boot partition ";
+        $msg.= "is not supported. Alternatively, it is possible build ";
+        $msg.= "an hybrid installation ISO (installiso=\"true\" ";
+        $msg.= "hybrid=\"true\") which can be also used as a raw image.";
+        $kiwi -> error($msg);
+        $kiwi -> failed();
+        return;
+    }
+    return 1;
 }
 
 1;
