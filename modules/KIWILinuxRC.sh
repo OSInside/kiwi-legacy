@@ -3452,7 +3452,7 @@ function setupDefaultPXENetwork {
     mkdir -p $prefix/etc/sysconfig/network
     cat > $niface < /dev/null
     echo "BOOTPROTO='dhcp'"    >> $niface
-    echo "STARTMODE='ifplugd'" >> $niface
+    echo "STARTMODE='auto'"    >> $niface
     echo "USERCONTROL='no'"    >> $niface
 }
 #======================================
