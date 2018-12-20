@@ -5,15 +5,16 @@ msgstr ""
 "Project-Id-Version: kiwi\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2006-05-15 15:07+0200\n"
-"PO-Revision-Date: 2010-10-16 19:47+0100\n"
-"Last-Translator: Manuel A. Vázquez <xixirei@yahoo.es>\n"
-"Language-Team: Galician <proxecto@trasno.net>\n"
+"PO-Revision-Date: 2018-03-08 15:18+0000\n"
+"Last-Translator: Manuel Vazquez <xixirei@yahoo.es>\n"
+"Language-Team: Galician <https://l10n.opensuse.org/projects/kiwi/master/gl/>"
+"\n"
 "Language: gl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n!=1);\n"
-"X-Generator: Lokalize 1.0\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 2.18\n"
 "X-Poedit-Language: Galician\n"
 
 #. /.../
@@ -22,7 +23,7 @@ msgstr ""
 #. boot code for KIWI 
 #.
 msgid "Boot continues in 10 sec"
-msgstr ""
+msgstr "O arranque continuará en 10 segundos"
 
 msgid "Enter LUKS passphrase"
 msgstr "Introducir a frase de paso LUKS"
@@ -74,12 +75,15 @@ msgid "Exit"
 msgstr "Saír"
 
 msgid "Bootloader installation has failed"
-msgstr ""
+msgstr "A instalación do cargador de arranque fallou"
 
 msgid ""
 "The system will not be able to reboot. Please make sure to fixup and install "
 "the bootloader before next reboot. Check /var/log/boot.kiwi for details"
 msgstr ""
+"O sisitema non poderá ser reiniciado. Asegúrese de corrixir e instalar o "
+"cargador de arranque antes do próximo reinicio. Para obter máis información, "
+"verifique /var/log/boot.kiwi"
 
 msgid "Please remove the CD/DVD before reboot"
 msgstr "Expulsar o CD/DVD antes de reiniciar"
@@ -103,8 +107,7 @@ msgid "Select %1 partition for installation:"
 msgstr "Seleccionar a partición %1 para a instalación:"
 
 msgid "System will be shutdown. Remove USB stick before power on"
-msgstr ""
+msgstr "Apagarase o sistema. Retire a memoria USB antes do reinicio"
 
-#, fuzzy
 msgid "Please remove the CD/DVD before shutdown"
-msgstr "Expulsar o CD/DVD antes de reiniciar"
+msgstr "Expulsar o CD/DVD antes de apagar"

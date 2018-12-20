@@ -351,7 +351,7 @@ function OEMInstall {
         #--------------------------------------
         info=/tmp/partinfo
         wmrc=/wmrc
-        loop=$(loop_setup -f --show $imageName)
+        loop=$(loop_setup $imageName)
         loop=$(echo $loop | sed -e s@^/dev/@@)
         if ! kpartx -sa /dev/$loop;then
             systemException \
@@ -946,6 +946,13 @@ function identifyDevice {
         fi
     fi
     if [ $found -eq 0 ];then
+        ux_device=/dev/$kiwi_oemunattended_id
+        if [ -e $ux_device ];then
+            found=1
+            break
+        fi
+    fi
+    if [ $found -eq 0 ];then
         systemException \
             "Storage ID: $kiwi_oemunattended_id not found" \
         "reboot"
@@ -1037,7 +1044,7 @@ function identifyDMRaid {
     #======================================
     # activate raid disks
     #--------------------------------------
-    dmraid -a y
+    dmraid -a y -p
     #======================================
     # wait for devices to settle
     #--------------------------------------

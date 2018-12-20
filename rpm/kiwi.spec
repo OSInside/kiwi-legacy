@@ -22,12 +22,21 @@
 %define perl_version    %(eval "`%{__perl} -V:version`"; echo $version)
 %endif
 
+# in TW and SLE12SP2 python-kiwi provides the kiwi-tools package
+%if 0%{?suse_version} > 1320 || 0%{?sle_version} >= 120200
+%bcond_with kiwitools
+%bcond_with kiwipxeboot
+%else
+%bcond_without kiwitools
+%bcond_without kiwipxeboot
+%endif
+
 Summary:        KIWI - Appliance Builder
 Url:            http://github.com/openSUSE/kiwi
 Name:           kiwi
 License:        GPL-2.0
 Group:          System/Management
-Version:        7.03.128
+Version:        7.04.47
 Provides:       kiwi-schema = 6.2
 Provides:       kiwi-image:aci
 Provides:       kiwi-image:lxc
@@ -39,6 +48,7 @@ Provides:       kiwi:%{_mandir}/man1/KIWI::kiwirc.1.gz
 Conflicts:      kiwi-doc < 5
 Release:        0
 # requirements to build packages
+BuildRequires:  genisoimage
 BuildRequires:  diffutils
 BuildRequires:  e2fsprogs
 BuildRequires:  gcc-c++
@@ -67,7 +77,6 @@ BuildRequires:  syslinux
 %endif
 %if 0%{?suse_version} > 1140
 BuildRequires:  btrfsprogs
-BuildRequires:  cdrkit-cdrtools-compat
 BuildRequires:  genisoimage
 BuildRequires:  squashfs
 BuildRequires:  zypper
@@ -152,7 +161,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 %endif
 # Tumbleweed:
 # Current Tumbleweed version, moving target
-%if 0%{?suse_version} == 1330
+%if 0%{?suse_version} >= 1330 && !0%{?sle_version}
 %define mysystems suse-tumbleweed
 %endif
 # redefine for the SLE11 case if no sles_version exists
@@ -239,7 +248,6 @@ Requires:       createrepo
 Requires:       inst-source-utils
 Requires:       kiwi-instsource-plugin
 Requires:       kiwi = %{version}
-Requires:       cdrkit-cdrtools-compat
 Requires:       genisoimage
 %ifarch %ix86 x86_64
 Requires:       syslinux
@@ -276,6 +284,7 @@ Authors:
         Thomas Schraitle <toms@suse.com>
         Marcus Schaefer <ms@suse.com>
 
+%if %{with kiwitools}
 %package -n kiwi-tools
 Summary:        KIWI - Collection of Boot Helper Tools
 License:        GPL-2.0+
@@ -290,9 +299,10 @@ outside of the scope of kiwi appliance building.
 Authors:
 --------
         Marcus Schaefer <ms@suse.com>
+%endif
 
 %ifarch %ix86 x86_64
-
+%if %{with kiwipxeboot}
 %package -n kiwi-pxeboot
 Summary:        KIWI - PXE boot structure
 PreReq:         coreutils
@@ -319,6 +329,7 @@ Authors:
 --------
         Marcus Schaefer <ms@suse.com>
 %endif
+%endif
 
 %ifarch %ix86 x86_64
 
@@ -332,7 +343,6 @@ Requires:       syslinux
 Requires:       dosfstools
 %if 0%{?suse_version}
 Requires:       genisoimage
-Requires:       cdrkit-cdrtools-compat
 %endif
 License:        GPL-2.0+
 Group:          System/Management
@@ -350,7 +360,6 @@ Provides:       kiwi-image:iso
 Provides:       kiwi-boot:isoboot
 %if 0%{?suse_version}
 Requires:       genisoimage
-Requires:       cdrkit-cdrtools-compat
 %endif
 Requires:       kiwi-desc-isoboot = %{version}
 Requires:       %(echo `bash %{S:4} %{S:0} isoboot %{myarch} %{mysystems}`)
@@ -423,7 +432,6 @@ Provides:       kiwi-image:vmx
 Provides:       kiwi-boot:vmxboot
 %if 0%{?suse_version}
 Requires:       genisoimage
-Requires:       cdrkit-cdrtools-compat
 %endif
 Requires:       kiwi-desc-vmxboot = %{version}
 Requires:       %(echo `bash %{S:4} %{S:0} vmxboot %{myarch} %{mysystems}`)
@@ -509,7 +517,6 @@ Requires:       kiwi = %{version}
 Requires:       parted
 %if 0%{?suse_version}
 Requires:       genisoimage
-Requires:       cdrkit-cdrtools-compat
 Requires:       multipath-tools
 Requires:       mtools
 Requires:       squashfs
@@ -546,7 +553,6 @@ Provides:       kiwi-boot:oemboot
 Provides:       kiwi-boot:tbz
 %if 0%{?suse_version}
 Requires:       genisoimage
-Requires:       cdrkit-cdrtools-compat
 %endif
 Requires:       kiwi-desc-oemboot = %{version}
 Requires:       %(echo `bash %{S:4} %{S:0} oemboot %{myarch} %{mysystems}`)
@@ -694,11 +700,16 @@ make buildroot=$RPM_BUILD_ROOT \
          install
 touch kiwi.loader
 
+%if %{with kiwipxeboot}
 %ifarch %ix86 x86_64
     install -m 644 pxeboot/pxelinux.0.config \
         $RPM_BUILD_ROOT/srv/tftpboot/pxelinux.cfg/default.default
 %else
     # no PXE boot setup for non x86 archs
+    rm -rf $RPM_BUILD_ROOT/srv/tftpboot
+    rm -rf $RPM_BUILD_ROOT/etc/permissions.d/kiwi
+%endif
+%else
     rm -rf $RPM_BUILD_ROOT/srv/tftpboot
     rm -rf $RPM_BUILD_ROOT/etc/permissions.d/kiwi
 %endif
@@ -741,7 +752,14 @@ images. This is supposed to be used in Open Build Service in first place
 to track the dependencies.
 EOF
 
+%if !%{with kiwitools}
+shopt -s extglob
+rm -f %{buildroot}%{_defaultdocdir}/kiwi/README.tools
+rm -f %{buildroot}%{_bindir}/!(livestick)
+%endif
+
 %ifarch %ix86 x86_64
+%if %{with kiwipxeboot}
 %pre -n kiwi-pxeboot
 #============================================================
 # create user and group tftp if they does not exist
@@ -760,6 +778,7 @@ if ( [ ! -e srv/tftpboot/pxelinux.cfg/default  ] ) ; then
     cp /srv/tftpboot/pxelinux.cfg/default.default \
         /srv/tftpboot/pxelinux.cfg/default
 fi
+%endif
 %endif
 
 %ifarch %ix86 x86_64 ppc ppc64 ppc64le s390 s390x %arm aarch64
@@ -861,7 +880,7 @@ rm -rf $RPM_BUILD_ROOT
 # KIWI-pxeboot files...  
 # ------------------------------------------------
 %ifarch %ix86 x86_64
-
+%if %{with kiwipxeboot}
 %files -n kiwi-pxeboot -f kiwi.loader
 %defattr(-, root, root)
 %dir %attr(0750,tftp,tftp) /srv/tftpboot
@@ -873,16 +892,19 @@ rm -rf $RPM_BUILD_ROOT
 %dir /srv/tftpboot/boot
 /srv/tftpboot/pxelinux.cfg/default.default
 %endif
+%endif
 #=================================================
 # KIWI-tools files...  
 # ------------------------------------------------
 
+%if %{with kiwitools}
 %files -n kiwi-tools
 %defattr(-, root, root)
 %dir %{_defaultdocdir}/kiwi
 %doc %{_defaultdocdir}/kiwi/README.tools
 %exclude /usr/bin/livestick
 /usr/bin/*
+%endif
 #=================================================
 # KIWI-desc-* and templates...
 # ------------------------------------------------

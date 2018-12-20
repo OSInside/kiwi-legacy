@@ -926,7 +926,7 @@ sub setupInstallCD {
     my $attr = "-R -J -f -pad -joliet-long";
     if (-s $system >= 4294967296) {
         # install image is bigger than 4g, needs extra iso options
-        $attr .= " -allow-limited-size -udf -hfs -iso-level 3";
+        $attr .= " -udf -hfs -iso-level 3";
     }
     $attr .= " -V \"$volid\"";
     $attr .= " -A \"$this->{mbrid}\"";
@@ -4317,7 +4317,7 @@ sub setupBootLoaderConfiguration {
         'powersaved=off',
         'nohz=off',
         'highres=off',
-        'processsor.max+cstate=1',
+        'processor.max+cstate=1',
         'nomodeset',
         'x11failsafe'
     );

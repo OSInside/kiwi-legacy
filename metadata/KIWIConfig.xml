@@ -131,6 +131,7 @@
         <file name="init"/>
         <file name="insmod"/>
         <file name="id"/>
+        <file name="ifplugstatus"/>
         <file name="iucv_configure"/>
         <file name="kexec"/>
         <file name="kill"/>

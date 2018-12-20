@@ -3,8 +3,8 @@ msgstr ""
 "Project-Id-Version: @PACKAGE@\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2006-05-15 15:07+0200\n"
-"PO-Revision-Date: 2002-10-08 13:38+0200\n"
-"Last-Translator: I Made Wiryana <made@nakula.rvs.uni-bielefeld.de>\n"
+"PO-Revision-Date: 2016-11-02 16:32+0700\n"
+"Last-Translator: Kukuh Syafaat <syafaatkukuh@gmail.com>\n"
 "Language-Team: Indonesian <i18n@suse.de>\n"
 "Language: id\n"
 "MIME-Version: 1.0\n"
@@ -17,41 +17,43 @@ msgstr ""
 #. This file contains the gettext keys used within a gettext call in the
 #. boot code for KIWI 
 #.
+#. boot code for KIWI
+#.
 msgid "Boot continues in 10 sec"
-msgstr ""
+msgstr "Boot berlanjut dalam 10 detik"
 
 msgid "Enter LUKS passphrase"
-msgstr ""
+msgstr "Masukkan LUKS frasa sandi"
 
 msgid "Do you accept the license agreement ?"
-msgstr ""
+msgstr "Apakah Anda menerima perjanjian lisensi?"
 
 msgid "Do you want to start the System-Recovery ?"
-msgstr ""
+msgstr "Apakah Anda ingin memulai System-Recovery?"
 
 msgid "Do you want to start the System-Restore ?"
-msgstr ""
+msgstr "Apakah Anda ingin memulai System-Restore?"
 
 msgid "Restoring base operating system..."
-msgstr ""
+msgstr "Memulihkan sistem operasi dasar..."
 
 msgid "Destroying ALL data on %1, continue ?"
-msgstr ""
+msgstr "Memusnahkan SEMUA data pada %1, lanjutkan?"
 
 msgid "Clean sweep..."
-msgstr ""
+msgstr "Menyapu bersih..."
 
 msgid "%1 files from %2 restored..."
-msgstr ""
+msgstr "%1 berkas dari %2 dipulihkan..."
 
 msgid "backing up: %1..."
-msgstr ""
+msgstr "mem-back up: %1..."
 
 msgid "archiving: %1..."
-msgstr ""
+msgstr "mengarsipkan: %1..."
 
 msgid "restoring: %1..."
-msgstr ""
+msgstr "memulihkan: %1..."
 
 msgid "Yes"
 msgstr "Ya"
@@ -68,43 +70,42 @@ msgid "Cancel"
 msgstr "Batal"
 
 msgid "Exit"
-msgstr ""
+msgstr "Keluar"
 
 msgid "Bootloader installation has failed"
-msgstr ""
+msgstr "Instalasi bootloader galat"
 
 msgid ""
 "The system will not be able to reboot. Please make sure to fixup and install "
 "the bootloader before next reboot. Check /var/log/boot.kiwi for details"
 msgstr ""
+"Sistem tidak akan dapat memula lulang. Pastikan untuk memperbaiki dan "
+"memasang  bootloader sebelum memula ulang. Periksa /var/log/boot.kiwi untuk "
+"rincian"
 
 msgid "Please remove the CD/DVD before reboot"
-msgstr ""
+msgstr "Silakan keluarkan CD/DVD sebelum memula ulang"
 
 msgid "Please unplug the USB stick before reboot"
-msgstr ""
+msgstr "Silakan cabut stik USB sebelum memula ulang"
 
-#, fuzzy
 msgid "Installation..."
-msgstr "Instalasi"
+msgstr "Instalasi..."
 
-#, fuzzy
 msgid "Loading %1"
-msgstr "Kesalahan memuatkan %1"
+msgstr "Sedang memuat %1"
 
 msgid "Verifying %1"
-msgstr ""
+msgstr "Sedang memverifikasi %1"
 
-#, fuzzy
 msgid "Select disk for installation:"
-msgstr "Instalasi Hard Disk"
+msgstr "Pilih diska untuk instalasi:"
 
-#, fuzzy
 msgid "Select %1 partition for installation:"
-msgstr "Instalasi Hard Disk"
+msgstr "Pilih partisi %1 untuk instalasi:"
 
 msgid "System will be shutdown. Remove USB stick before power on"
-msgstr ""
+msgstr "Sistem akan dimatikan. Lepas stik USB sebelum menyalakan"
 
 msgid "Please remove the CD/DVD before shutdown"
-msgstr ""
+msgstr "Silakan keluarkan CD/DVD sebelum mematikan"

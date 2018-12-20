@@ -912,7 +912,7 @@
       class="element">package</sgmltag> element to <sgmltag
       class="attvalue">true</sgmltag>, as follows:
      </para>
-<screen>&lt;packages type="image"/&gt;
+<screen>&lt;packages type="image"&gt;
   &lt;package name="<replaceable>PACKAGE</replaceable>" bootinclude="true"/&gt;
 &lt;/packages&gt;</screen>
     </answer>
@@ -943,7 +943,7 @@
       the <sgmltag class="attribute">type</sgmltag> attribute set to <sgmltag
       class="attvalue">tools</sgmltag>, as follows:
      </para>
-<screen>&lt;strip type="tools"/&gt;
+<screen>&lt;strip type="tools"&gt;
   &lt;file name="<replaceable>FILENAME</replaceable>"/&gt;
 &lt;/strip&gt;</screen>
      <para>

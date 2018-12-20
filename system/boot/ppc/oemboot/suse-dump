@@ -351,7 +351,7 @@ function OEMInstall {
         #--------------------------------------
         info=/tmp/partinfo
         wmrc=/wmrc
-        loop=$(loop_setup -f --show $imageName)
+        loop=$(loop_setup $imageName)
         loop=$(echo $loop | sed -e s@^/dev/@@)
         if ! kpartx -sa /dev/$loop;then
             systemException \
@@ -941,6 +941,13 @@ function identifyDevice {
         id_device=/dev/mapper/$kiwi_oemunattended_id
         if [ -e $id_device ];then
             ux_device=$(getDiskDevice $id_device)
+            found=1
+            break
+        fi
+    fi
+    if [ $found -eq 0 ];then
+        ux_device=/dev/$kiwi_oemunattended_id
+        if [ -e $ux_device ];then
             found=1
             break
         fi

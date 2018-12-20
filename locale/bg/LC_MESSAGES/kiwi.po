@@ -5,15 +5,16 @@ msgstr ""
 "Project-Id-Version: kiwi\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2005-07-27 16:23+0200\n"
-"PO-Revision-Date: 2011-10-11 15:59+0300\n"
-"Last-Translator: Borislav Mitev <morbid_viper@tkzs.org>\n"
-"Language-Team: Bulgarian <kde-i18n-doc@kde.org>\n"
+"PO-Revision-Date: 2017-02-20 09:32+0000\n"
+"Last-Translator: Shyukri Shyukriev <shshyukriev@suse.com>\n"
+"Language-Team: Bulgarian <https://l10n.opensuse.org/projects/kiwi/master/bg/>"
+"\n"
 "Language: bg\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Lokalize 1.2\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 2.6\n"
 
 #. /.../
 #. Copyright (c) 2005 SuSE GmbH Nuernberg, Germany.  All rights reserved.
@@ -21,7 +22,7 @@ msgstr ""
 #. boot code for KIWI 
 #.
 msgid "Boot continues in 10 sec"
-msgstr ""
+msgstr "Стартирането продължава 10 секунди"
 
 msgid "Enter LUKS passphrase"
 msgstr "Въведете LUKS паролна фраза"
@@ -77,12 +78,14 @@ msgid "Exit"
 msgstr "Изход"
 
 msgid "Bootloader installation has failed"
-msgstr ""
+msgstr "Bootloader инсталацията е неуспешна"
 
 msgid ""
 "The system will not be able to reboot. Please make sure to fixup and install "
 "the bootloader before next reboot. Check /var/log/boot.kiwi for details"
 msgstr ""
+"Системате не може да се рестратира. Моля отстранете грешките и инсталирайте "
+"bootloader преди следващ рестарт. Вижте детайли на /var/log/boot.kiwi"
 
 msgid "Please remove the CD/DVD before reboot"
 msgstr "Моля, извадете CD/DVD-то преди да рестартирате"
@@ -108,8 +111,7 @@ msgid "Select %1 partition for installation:"
 msgstr "Изберете %1 дял за инсталацията:"
 
 msgid "System will be shutdown. Remove USB stick before power on"
-msgstr ""
+msgstr "Системата ще се изключи. Премахнете USB устройството преди стартиране"
 
-#, fuzzy
 msgid "Please remove the CD/DVD before shutdown"
-msgstr "Моля, извадете CD/DVD-то преди да рестартирате"
+msgstr "Моля, извадете CD/DVD-то преди да изключите"

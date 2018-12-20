@@ -1031,7 +1031,7 @@ sub setupBTRFSSubVolumes {
         }
     }
     if (! %phash) {
-        return $this;
+        return $path;
     }
     $kiwi -> info ("Creating btrfs pool\n");
     my $data = KIWIQX::qxx ('btrfs subvolume create '.$path.'/@ 2>&1');
@@ -1108,7 +1108,7 @@ sub setupBTRFSSubVolumes {
         $kiwi -> failed();
         return;
     }
-    return $this;
+    return $path;
 }
 
 #==========================================
@@ -2045,7 +2045,7 @@ sub _new_instance {
     # Globals (generic)
     #------------------------------------------
     my %data;
-    $data{Version}         = "7.03.128";
+    $data{Version}         = "7.04.47";
     $data{Publisher}       = "SUSE LINUX GmbH";
     $data{Preparer}        = "KIWI - http://opensuse.github.com/kiwi";
     $data{ConfigName}      = "config.xml";
@@ -2063,8 +2063,8 @@ sub _new_instance {
     # Read .kiwirc
     #--------------------------------------------
     my $file;
-    if (-f '.kiwirc') {
-        $file = '.kiwirc';
+    if (-f './.kiwirc') {
+        $file = './.kiwirc';
     }
     elsif (($ENV{'HOME'}) && (-f $ENV{'HOME'}.'/.kiwirc')) {
         $file = "$ENV{'HOME'}/.kiwirc";

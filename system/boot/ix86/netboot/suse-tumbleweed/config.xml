@@ -196,6 +196,7 @@
         <package name="psmisc"/>
         <package name="sysvinit-tools"/>
         <package name="e2fsprogs"/>
+        <package name="ifplugd"/>
     </packages>
     <packages type="delete" profiles="default,diskless,xen">
         <package name="cracklib-dict-full"/>
@@ -210,7 +211,6 @@
         <package name="Mesa"/>
         <package name="openSUSE-release"/>
         <package name="pam"/>
-        <package name="pam-modules"/>
         <package name="perl"/>
         <package name="perl-Bootloader"/>
         <package name="permissions"/>

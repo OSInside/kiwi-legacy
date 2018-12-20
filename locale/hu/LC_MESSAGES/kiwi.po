@@ -8,15 +8,16 @@ msgid ""
 msgstr ""
 "Project-Id-Version: kiwi.hu\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2011-03-02 10:54+0100\n"
-"Last-Translator: Kalman Kemenczy <kkemenczy@opensuse.org>\n"
-"Language-Team: Hungarian <kde-i18n-doc@kde.org>\n"
+"PO-Revision-Date: 2018-01-29 20:03+0000\n"
+"Last-Translator: Robert Taisz <robert.taisz@emerald.hu>\n"
+"Language-Team: Hungarian <https://l10n.opensuse.org/projects/kiwi/master/hu/>"
+"\n"
 "Language: hu\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Lokalize 1.0\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 2.18\n"
 
 #. /.../
 #. Copyright (c) 2005 SuSE GmbH Nuernberg, Germany.  All rights reserved.
@@ -24,7 +25,7 @@ msgstr ""
 #. boot code for KIWI 
 #.
 msgid "Boot continues in 10 sec"
-msgstr ""
+msgstr "A rendszerindítás 10 másodperc múlva folytatódik"
 
 msgid "Enter LUKS passphrase"
 msgstr "Adja meg a LUKS jelszót"
@@ -75,12 +76,15 @@ msgid "Exit"
 msgstr "Kilépés"
 
 msgid "Bootloader installation has failed"
-msgstr ""
+msgstr "Nem sikerült a rendszertöltő telepítése"
 
 msgid ""
 "The system will not be able to reboot. Please make sure to fixup and install "
 "the bootloader before next reboot. Check /var/log/boot.kiwi for details"
 msgstr ""
+"A rendszer nem fog tudni újraindulni. A következő újraindítás előtt "
+"szüntesse meg a problémát, és telepítse a rendszertöltőt. A részleteket lásd:"
+" /var/log/boot.kiwi"
 
 msgid "Please remove the CD/DVD before reboot"
 msgstr "Újraindítás előtt vegye ki a telepítő CD/DVD-t a meghajtóból"
@@ -105,7 +109,7 @@ msgstr "Válasszon ki %1 partíciót a telepítéshez:"
 
 msgid "System will be shutdown. Remove USB stick before power on"
 msgstr ""
+"A rendszer le fog állni. Bekapcsolás előtt távolítsa el az USB-meghajtót"
 
-#, fuzzy
 msgid "Please remove the CD/DVD before shutdown"
-msgstr "Folytatás előtt kérem vegye ki a telepítő CD/DVD-t a meghajtóból"
+msgstr "Folytatás előtt vegye ki a CD-t/DVD-t a meghajtóból"

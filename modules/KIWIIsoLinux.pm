@@ -100,15 +100,17 @@ sub new {
     #------------------------------------------
     my $locator = KIWILocator -> instance();
     my $genTool = $locator -> getExecPath('genisoimage');
-    my $mkTool = $locator -> getExecPath('mkisofs');
     if ($genTool && -x $genTool) {
         $tool = $genTool;
-    } elsif ($mkTool && -x $mkTool) {
-        $tool = $mkTool;
     } else {
-        $kiwi -> error  ("No ISO creation tool found");
-        $kiwi -> failed ();
-        return;
+        my $mkTool = $locator -> getExecPath('mkisofs');
+        if ($mkTool && -x $mkTool) {
+            $tool = $mkTool;
+        } else {
+            $kiwi -> error  ("No ISO creation tool found");
+            $kiwi -> failed ();
+            return;
+        }
     }
     #=======================================
     # path setup for supported archs
@@ -997,17 +999,22 @@ sub isols {
     my $isoinfo_opts = " -R -l -i $iso 2>/dev/null |";
     my $files;
     local $_;
-    if (! $fd -> open ("/usr/bin/isoinfo" . $isoinfo_opts)) {
-        if (! $fd -> open ("/usr/lib/genisoimage/isoinfo" . $isoinfo_opts)) {
+    my $isoinfo_cmd = "/usr/bin/isoinfo";
+    if (! -x $isoinfo_cmd){
+        $isoinfo_cmd = "/usr/lib/genisoimage/isoinfo";
+        if (! -x $isoinfo_cmd){
             return;
         }
+    }
+    if (! $fd -> open ($isoinfo_cmd . $isoinfo_opts)) {
+        return;
     }
     while(<$fd>) {
         if(/^Directory listing of\s*(\/.*\/)/) {
             $dir = $1;
             next;
         }
-        if(/^(.).*\s\[\s*(\d+)(\s+\d+)?\]\s+(.*?)\s*$/) {
+        if(/.*(-)[-rxw]{9}.*\s\[\s*(\d+)(\s+\d+)?\]\s+(.*?)\s*$/) {
             my $type = $1;
             $type = ' ' if $type eq '-';
             if($4 ne '.' && $4 ne '..') {
@@ -1412,7 +1419,7 @@ sub fixCatalog {
     my $t = (unpack "C", $entry2)[0];
     if ($t == 0x90 || $t == 0x91) {
         close $ISO;
-        return;
+        return $this;
     }
     substr($entry2, 12, 20) = pack "Ca19", 1, "UEFI (elilo)";
     if((unpack "C", $entry2)[0] == 0x88) {

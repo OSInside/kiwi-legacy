@@ -107,7 +107,7 @@ fi
 #--------------------------------------
 failsafe="ide=nodma apm=off noresume edd=off"
 failsafe="$failsafe powersaved=off nohz=off"
-failsafe="$failsafe highres=off processsor.max+cstate=1"
+failsafe="$failsafe highres=off processor.max+cstate=1"
 failsafe="$failsafe nomodeset x11failsafe"
 
 #======================================
@@ -3452,7 +3452,7 @@ function setupDefaultPXENetwork {
     mkdir -p $prefix/etc/sysconfig/network
     cat > $niface < /dev/null
     echo "BOOTPROTO='dhcp'"    >> $niface
-    echo "STARTMODE='ifplugd'" >> $niface
+    echo "STARTMODE='auto'"    >> $niface
     echo "USERCONTROL='no'"    >> $niface
 }
 #======================================
@@ -4646,7 +4646,6 @@ function searchBIOSBootDevice {
     local IFS=$IFS_ORIG
     local file=/boot/mbrid
     local ifix
-    local match_count
     local matched
     local curd
     local mbrML
@@ -4691,7 +4690,6 @@ function searchBIOSBootDevice {
         # initialize variables
         #--------------------------------------
         ifix=0
-        match_count=0
         try_count=$((try_count + 1))
         #======================================
         # stop after a long time of retry
@@ -4719,7 +4717,6 @@ function searchBIOSBootDevice {
             if [ "$mbrML" = "$mbrI" ] || [ "$mbrMB" = "$mbrI" ];then
                 ifix=1
                 matched=$curd
-                match_count=$(($match_count + 1))
                 if [ "$mbrML" = "$mbrI" ];then
                     export masterBootID=$mbrML
                 fi
@@ -4732,13 +4729,6 @@ function searchBIOSBootDevice {
                 fi
             fi
         done
-        #======================================
-        # Multiple matches are bad
-        #--------------------------------------
-        if [ $match_count -gt 1 ];then
-            export biosBootDevice="multiple devices matches same MBR ID: $mbrI"
-            return 2
-        fi
         #======================================
         # Found it...
         #--------------------------------------
@@ -4965,7 +4955,12 @@ function setupNic {
     local address=$2
     local netmask=$3
     ip addr flush dev $iface
-    ip addr add $address/$netmask dev $iface
+    # ignore netmask if address is already cidr
+    if [[ $address =~ / ]] ; then
+        ip addr add $address dev $iface
+    else
+        ip addr add $address/$netmask dev $iface
+    fi
     ip link set dev $iface up
 }
 #======================================
@@ -5134,8 +5129,8 @@ function dhclientImportInfo {
         awk '{print $3}' |tr -d ';'
     )
     export DOMAIN=$(
-        cat $lease | grep 'domain-name' | grep -v 'domain-name-server' |\
-        awk '{print $3}'| tr -d ';'
+        cat $lease | grep -w 'domain-name '|\
+        awk -F \" '{print $2}'
     )
     export DNSSERVERS=$(
         cat $lease | grep 'domain-name-servers'|\
@@ -5451,10 +5446,7 @@ function setupNetworkDHCLIENT {
             grep -q "fixed-address" /var/lib/dhclient/${try_iface}.lease
         then
             export PXE_IFACE=$try_iface
-            export IPADDR=$(
-                cat /var/lib/dhclient/${try_iface}.lease |\
-                    grep 'fixed-address'| awk  '{print $2}' | tr -d ';'
-                )
+            dhclientImportInfo "$PXE_IFACE"
             break
         fi
     done
@@ -5462,10 +5454,6 @@ function setupNetworkDHCLIENT {
     # setup selected interface
     #--------------------------------------
     setupNic lo 127.0.0.1/8 255.0.0.0
-    if [ -f /var/lib/dhclient/$PXE_IFACE.lease ] &&
-        grep -q "fixed-address" /var/lib/dhclient/$PXE_IFACE.lease; then
-        dhclientImportInfo "$PXE_IFACE"
-    fi
 }
 #======================================
 # setupNetwork
@@ -5571,7 +5559,7 @@ function setupNetwork {
     if [ -z "$DNS" ] && [ -n "$DNSSERVERS" ];then
         export DNS=$DNSSERVERS
     fi
-    IFS="," ; for i in $DNS;do
+    IFS=", " ; for i in $DNS;do
         echo "nameserver $i" >> /etc/resolv.conf
     done
     export DHCPCHADDR=$(
@@ -5820,7 +5808,7 @@ function setupDNS {
     fi
     if [ -n "$nameserver" ];then
         export DNS=$nameserver
-        IFS="," ; for i in $nameserver;do
+        IFS=", " ; for i in $nameserver;do
             local line="nameserver $i"
             if ! grep -q $line $file;then
                 echo "$line" >> "$file"
@@ -6061,7 +6049,8 @@ function partedGetPartitionID {
         local name=$(parted -m -s $1 print | grep ^$2: | cut -f6 -d:)
         if lookup sgdisk &>/dev/null;then
             # map to short gdisk code
-            echo $(sgdisk -p $1 | grep -E "^   $2") | cut -f6 -d ' '
+            echo $(sgdisk -p $1 | grep -E "^   $2") | cut -f6 -d ' ' |\
+                cut -c-2
         elif [ "$name" = "lxroot" ];then
             # map lxroot to MBR type 83 (linux)
             echo 83
@@ -7438,17 +7427,49 @@ function waitForLinkUp {
     local IFS=$IFS_ORIG
     local dev=$1
     local check=0
+    local linkstatus
+    local linkgrep
+    local link_unplugged
+    local sleep_timeout=2
+    local retry_count=30
+    #======================================
+    # Wait for network drivers to pass init
+    #--------------------------------------
+    # each network interface will be switched off for a short
+    # moment when the kernel network driver is loaded. During
+    # that time the link status information would be misleading.
+    # Thus we wait a short time before the link status check
+    # is started
+    sleep 1
+    #======================================
+    # Lookup link status...
+    #--------------------------------------
+    if lookup ifplugstatus &>/dev/null;then
+        linkstatus=ifplugstatus
+        linkgrep="link beat detected"
+        link_unplugged="unplugged"
+    else
+        linkstatus="ip link ls"
+        linkgrep="state UP"
+    fi
     while true;do
-        ip link ls $dev | grep -qi "state UP"
-        if [ $? = 0 ];then
+        if [ ! -z "$link_unplugged" ];then
+            if $linkstatus $dev | grep -qi "$link_unplugged"; then
+                # interface link is not connected, error
+                return 1
+            fi
+        fi
+        if $linkstatus $dev | grep -qi "$linkgrep"; then
+            # interface link is up, success after a paranoid wait :)
             sleep 1; return 0
         fi
-        if [ $check -eq 30 ];then
+        if [ $check -eq $retry_count ];then
+            # interface link did not came up, error
             return 1
         fi
         Echo "Waiting for link up on ${dev}..."
         check=$((check + 1))
-        sleep 2
+        sleep $sleep_timeout
     done
 }
 #======================================
@@ -7459,7 +7480,10 @@ function setIPLinkUp {
     local try_iface=$1
     if ip link set dev $try_iface up;then
         if [ ! $try_iface = "lo" ];then
-            waitForLinkUp $try_iface
+            if ! waitForLinkUp $try_iface;then
+                # link did not came up, not connected ?
+                return 1
+            fi
         fi
         # success
         return 0
@@ -7617,11 +7641,11 @@ function fetchFile {
     #======================================
     # source host is required
     #--------------------------------------
+    if [ ! -z $kiwiserver ];then
+        host=$kiwiserver
+    fi
     if [ -z "$host" ]; then
-        if test -z "$SERVER"; then
-            systemException "No source server specified" "reboot"
-        fi
-        host=$SERVER
+        systemException "No source server specified" "reboot"
     fi
     #======================================
     # set default chunk size
@@ -7632,12 +7656,11 @@ function fetchFile {
     #======================================
     # set default service type
     #--------------------------------------
+    if [ ! -z $kiwiservertype ]; then
+        type=$kiwiservertype
+    fi
     if [ -z "$type" ]; then
-        if [ -z "$SERVERTYPE" ]; then
-            type="tftp"
-        else
-            type="$SERVERTYPE"
-        fi
+        type="tftp"
     fi
     #======================================
     # set source path + tool if compressed
@@ -7883,18 +7906,17 @@ function putFile {
     if test -z "$path"; then
         systemException "No path specified" "reboot"
     fi
+    if [ ! -z $kiwiserver ];then
+        host=$kiwiserver
+    fi
     if test -z "$host"; then
-        if test -z "$SERVER"; then
-            systemException "No server specified" "reboot"
-        fi
-        host=$SERVER
+        systemException "No server specified" "reboot"
+    fi
+    if [ ! -z $kiwiservertype ]; then
+        type=$kiwiservertype
     fi
     if test -z "$type"; then
-        if test -z "$SERVERTYPE"; then
-            type="tftp"
-        else
-            type="$SERVERTYPE"
-        fi
+        type="tftp"
     fi
     encoded_dest=$(encodeURL "$dest")
     case "$type" in
@@ -8233,6 +8255,7 @@ function activateImage {
             systemException "Failed to copy: pidof" "reboot"
         fi
     fi
+    stopMultipathd
 }
 #======================================
 # cleanImage
@@ -9639,7 +9662,9 @@ function partedMBToCylinder {
     # ----
     local IFS=$IFS_ORIG
     local sizeBytes=$(($1 * 1048576))
-    local cylreq=$(echo "scale=0; $sizeBytes / ($partedCylKSize * 1000)" | bc)
+    # bc truncates to zero decimal places, which results in a partition that
+    # is slightly smaller than the requested size. Add one cylinder to compensate.
+    local cylreq=$(echo "scale=0; $sizeBytes / ($partedCylKSize * 1000) + 1" | bc)
     echo $cylreq
 }
 #======================================
