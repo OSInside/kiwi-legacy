@@ -1194,7 +1194,7 @@ sub setup {
         }
         $kiwi -> done();
         my @scriptList = readdir $FD;
-        foreach my $script (@scriptList) {
+        foreach my $script (sort(@scriptList)) {
             if (-f "$root/image/config/$script") {
                 if ($manager -> setupPackageInfo ( $script )) {
                     next;
@@ -1471,7 +1471,7 @@ sub importHostPackageKeys {
     }
     my @rpm_keys = ();
     if (opendir (my $FD,$sigs)) {
-        @rpm_keys = readdir ($FD); closedir ($FD);
+        @rpm_keys = sort(readdir ($FD)); closedir ($FD);
     }
     if (@rpm_keys <= 2) {
         $kiwi -> skipped ();
@@ -1518,7 +1518,7 @@ sub exportHostPackageKeys {
     }
     my @rpm_keys = ();
     if (opendir (my $FD,"$root/rpm-sigs")) {
-        @rpm_keys = readdir ($FD); closedir ($FD);
+        @rpm_keys = sort(readdir ($FD)); closedir ($FD);
     }
     if (@rpm_keys <= 2) {
         return $this;

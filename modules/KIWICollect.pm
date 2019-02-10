@@ -2091,7 +2091,7 @@ sub collectProducts {
             $this->logMsg('I', "No products found, skipping");
             next RELEASEPACK;
         }
-        my @r = grep {$_ =~ '\.prod$'} readdir(D);
+        my @r = grep {$_ =~ '\.prod$'} sort(readdir(D));
         closedir D;
 
         # read each product file

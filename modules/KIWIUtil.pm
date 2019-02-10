@@ -260,7 +260,7 @@ sub splitPathLocal {
     my $rest   = $testlist[1];
     # read current dir to list before descent:
     opendir(DIR, $basepath) or return;
-    my @dirlist = readdir(DIR);
+    my @dirlist = sort(readdir(DIR));
     closedir(DIR);
     $this->{m_collect}->logMsg("I", "Current local directory is $basepath");
     my $atleastonce = 0;
