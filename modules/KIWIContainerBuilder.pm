@@ -352,7 +352,7 @@ sub __createContainerBundle {
     }
     my @dirlist;
     if (opendir my($dh), $origin) {
-        @dirlist = grep { !/^\.\.?$/x } readdir $dh;
+        @dirlist = grep { !/^\.\.?$/x } sort(readdir $dh);
         closedir $dh;
     } else {
         $kiwi -> failed();

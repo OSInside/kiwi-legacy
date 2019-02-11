@@ -114,7 +114,7 @@ sub loadPlugins {
         );
         return ($loaded, $avail);
     }
-    my @plugins = readdir(PLUGINDIR);
+    my @plugins = sort(readdir(PLUGINDIR));
     closedir(PLUGINDIR);
     my %plugins;
     foreach my $p(@plugins) {

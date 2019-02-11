@@ -957,7 +957,7 @@ sub __checkRootDirOutsideImageDescription {
     my @forbidden = ('config.xml', '*.kiwi');
     my $looks_like_description_dir;
     if (opendir (my $FD, $parent_dir)) {
-        my @dir_entries = readdir ($FD);
+        my @dir_entries = sort(readdir ($FD));
         closedir ($FD);
         foreach my $entry (@dir_entries) {
             if ($entry eq 'config.xml' || $entry =~ /\.kiwi$/) {
@@ -1932,7 +1932,7 @@ sub __read_pids {
     my $path = shift;
     my @pids;
     if (opendir (my $FD, $path)) {
-        foreach my $pid (readdir $FD) {
+        foreach my $pid (sort(readdir $FD)) {
             next if $pid !~ /^\d+$/;
             push @pids, $pid;
         }
