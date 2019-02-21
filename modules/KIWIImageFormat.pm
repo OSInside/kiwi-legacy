@@ -588,6 +588,7 @@ sub createGoogleComputeEngine {
     my $gce_source = $src_dirname."/disk.raw";
     my $boot = $type -> getBootImageDescript();
     my $version = $xml -> getPreferences() -> getVersion();
+    my $arch = KIWIQX::qxx ("uname -m"); chomp $arch;
     my $status;
     my $result;
     my $dist;
@@ -607,7 +608,7 @@ sub createGoogleComputeEngine {
         $kiwi -> failed ();
         return;
     }
-    $target = $xml -> getImageName().$version.".tar.gz";
+    $target = $xml -> getImageName().".".$arch."-".$version.".tar.gz";
     $status = KIWIQX::qxx ("mv $source $gce_source 2>&1");
     $result = $? >> 8;
     my @content;
