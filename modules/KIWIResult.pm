@@ -426,16 +426,14 @@ sub __bundleDisk {
         $format = 'vhdfixed';
     }
     if ($format eq 'gce') {
-        my @archives = glob ("$source/*gce-*.tar.gz");
+        my @archives = glob ("$source/*.tar.gz");
         if (! @archives) {
             $kiwi -> error  ("No GCE archive(s) found");
             $kiwi -> failed ();
             return;
         }
         foreach my $archive (@archives) {
-            if ($archive =~ /$source\/(.*gce-.*)\.tar\.gz/) {
-                return $this -> __bundleExtension ('tar.gz', $1);
-            }
+            return $this -> __bundleExtension ('tar.gz');
         }
     }
     if ($format eq 'vagrant') {
