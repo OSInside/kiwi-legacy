@@ -676,11 +676,12 @@ function udevPending {
 function udevTrigger {
     local IFS=$IFS_ORIG
     local udevadmExec=$(lookup udevadm 2>/dev/null)
-    if [ -x $udevadmExec ];then
-        $udevadmExec trigger
-    else
-        /sbin/udevtrigger
+    if [ ! -x $udevadmExec ];then
+        udevadmExec=udevadm
     fi
+    $udevadmExec control --reload
+    $udevadmExec trigger --type=subsystems --action=add
+    $udevadmExec trigger --type=devices --action=add
 }
 #======================================
 # udevSystemStart
