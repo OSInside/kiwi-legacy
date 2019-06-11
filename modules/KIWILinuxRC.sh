@@ -6026,10 +6026,9 @@ function fdasdGetPartitionID {
 function partedGetPartitionID {
     # /.../
     # prints the partition ID for the given device and number
-    # In case of a GPT map to the GUID code from the sgdisk
-    # utility. If sgdisk is not available map to the kiwi
-    # fdisk compatible hex id's which uses ee for any kind
-    # of unknown GPT partition entry
+    # In case of GPT it maps ID values according to the name kiwi
+    # defines for the partition. In case of unknown name try to use
+    # sgdisk, if available, or just default to `ee`
     # ----
     local IFS=$IFS_ORIG
     local parted=$(parted -m -s $1 print | grep -v Warning:)
@@ -6048,11 +6047,7 @@ function partedGetPartitionID {
             sed -e 's@[,; ]@@g' | tr -d 0
     else
         local name=$(parted -m -s $1 print | grep ^$2: | cut -f6 -d:)
-        if lookup sgdisk &>/dev/null;then
-            # map to short gdisk code
-            echo $(sgdisk -p $1 | grep -E "^   $2") | cut -f6 -d ' ' |\
-                cut -c-2
-        elif [ "$name" = "lxroot" ];then
+        if [ "$name" = "lxroot" ];then
             # map lxroot to MBR type 83 (linux)
             echo 83
         elif [ "$name" = "lxswap" ];then
@@ -6067,6 +6062,11 @@ function partedGetPartitionID {
         elif [ "$name" = "legacy" ];then
             # map bios grub legacy partition to MBR type ef (EFI)
             echo ef
+        elif lookup sgdisk &>/dev/null;then
+            # map to short gdisk code
+            local id=$(echo $(sgdisk -p $1 | grep -E "^   $2") |\
+            	cut -f6 -d ' ' | cut -c-2)
+            echo ${id,,}
         else
             # map anything else to ee (GPT)
             echo ee
@@ -10492,6 +10492,10 @@ function pxePartitionInputGeneric {
         if [ $partID = "fd" ] || [ ! -z "$RAID" ];then
             partID=fd
             pname=lxroot
+        fi
+        if [ $partID = "ef" ];then
+            partID=ef
+            pname=legacy
         fi
         if [ $count -eq 1 ];then
             echo -n "n p:$pname $count 1 $partSize "
