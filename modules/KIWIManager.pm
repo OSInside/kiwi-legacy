@@ -296,6 +296,18 @@ sub setupScreenCall {
     #==========================================
     # check exit code from session
     #------------------------------------------
+    if (($code != 0) && ($this->{manager} eq 'zypper')) {
+        if (($code == 104) || ($code == 105) || ($code == 106)) {
+            # Treat the following exit codes as error
+            # 104 - ZYPPER_EXIT_INF_CAP_NOT_FOUND
+            # 105 - ZYPPER_EXIT_ON_SIGNAL
+            # 106 - ZYPPER_EXIT_INF_REPOS_SKIPPED
+            $code = 1;
+        } elsif ($code >= 100) {
+            # Treat all other >=100 codes as non error codes
+            $code = 0;
+        }
+    }
     if ($code != 0) {
         $kiwi -> failed ();
         if (($logs) && ($data)) {
