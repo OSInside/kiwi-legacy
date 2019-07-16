@@ -9672,8 +9672,8 @@ function partedMBToCylinder {
     local IFS=$IFS_ORIG
     local sizeBytes=$(($1 * 1048576))
     # bc truncates to zero decimal places, which results in a partition that
-    # is slightly smaller than the requested size. Add one cylinder to compensate.
-    local cylreq=$(echo "scale=0; $sizeBytes / ($partedCylKSize * 1000) + 1" | bc)
+    # is slightly smaller than the requested size. Add half cylinder to round to nearest integer value.
+    local cylreq=$(echo "scale=1; cs = $sizeBytes / ($partedCylKSize * 1000) + 0.5; scale=0; cs/1" | bc)
     echo $cylreq
 }
 #======================================
@@ -10715,8 +10715,8 @@ function pxeRaidPartCheck {
     local raidFirst
     local raidSecond
     local size
-    local maxDiffPlus=10240  # max 10MB bigger
-    local maxDiffMinus=10240 # max 10MB smaller
+    local maxDiffPlus=12288  # max 1.5cyl ~12MB bigger
+    local maxDiffMinus=12288 # max 1.5cyl ~12MB smaller
     for n in $RAID;do
         case $field in
             0) raidLevel=$n     ; field=1 ;;
@@ -10834,8 +10834,8 @@ function pxePartCheck {
     local partMount
     local device
     local size
-    local maxDiffPlus=10240  # max 10MB bigger
-    local maxDiffMinus=10240 # max 10MB smaller
+    local maxDiffPlus=12288  # max 1.5cyl ~12MB bigger
+    local maxDiffMinus=12288 # max 1.5cyl ~12MB smaller
     IFS=","
     for i in $PART;do
         count=$((count + 1))
