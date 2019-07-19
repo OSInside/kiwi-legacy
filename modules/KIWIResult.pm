@@ -156,6 +156,9 @@ sub buildRelease {
     } elsif ($type eq 'oem') {
         $kiwi -> info ("--> Calling Disk OEM bundler\n");
         $result = $this -> __bundleDisk();
+    } elsif ($type eq 'pxe') {
+        $kiwi -> info ("--> Calling Disk PXE bundler\n");
+        $result = $this -> __bundlePXE();
     } else {
         $kiwi -> info ("--> Calling default bundler\n");
         $result = $this -> __bundleDefault();
@@ -246,6 +249,7 @@ sub __bundleMeta {
 #------------------------------------------
 sub __bundleDefault {
     my $this   = shift;
+    my $fexcl  = shift;
     my $kiwi   = $this->{kiwi};
     my $source = $this->{sourcedir};
     my $tmpdir = $this->{tmpdir};
@@ -256,6 +260,12 @@ sub __bundleDefault {
         '--exclude *.verified',
         '--exclude *.packages'
     );
+    if ($fexcl) {
+	my @files_excl = split(/ /, $fexcl);
+        foreach (@files_excl) {
+            push @excl, "--exclude $_";
+	}
+    }
     my $opts = '--no-recursion';
     my $data = KIWIQX::qxx (
         "cd $source && find . -maxdepth 1 -type f 2>&1"
@@ -469,6 +479,20 @@ sub __bundleDisk {
         return $this -> __bundleExtension ('xenconfig');
     }
     return $this;
+}
+
+#==========================================
+# __bundlePXE
+#------------------------------------------
+sub __bundlePXE {
+    my $this   = shift;
+    my $base   = $this->{imagebase};
+    my $buildinfo = $this->{buildinfo};
+
+    if ($buildinfo->exists('main','image.compressed')) {
+        return $this -> __bundleDefault($base);
+    }
+    return $this -> __bundleDefault();
 }
 
 #==========================================

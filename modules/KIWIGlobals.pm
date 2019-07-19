@@ -681,6 +681,15 @@ sub generateBuildInformation {
             $buildinfo->newval('main', 'install.pxe', 'true');
         }
     }
+    #==========================================
+    # store compressed flag
+    #------------------------------------------
+    if ($bldType) {
+        my $compressed   = $bldType -> getCompressed();;
+        if (($compressed) && ($compressed eq 'true')) {
+            $buildinfo->newval('main', 'image.compressed', 'true');
+        }
+    }
     $buildinfo->RewriteConfig();
     return $this;
 }
