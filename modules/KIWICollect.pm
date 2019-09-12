@@ -1744,6 +1744,60 @@ sub executeMetafileScripts {
     return $ret;
 }
 
+
+#==========================================
+# rpm version compare from build script
+#------------------------------------------
+sub verscmp_part {
+  my ($s1, $s2) = @_;
+  if (!defined($s1)) {
+    return defined($s2) ? -1 : 0;
+  }
+  return 1 if !defined $s2;
+  return 0 if $s1 eq $s2;
+  while (1) {
+    $s1 =~ s/^[^a-zA-Z0-9~\^]+//;
+    $s2 =~ s/^[^a-zA-Z0-9~\^]+//;
+    if ($s1 =~ s/^~//) {
+      next if $s2 =~ s/^~//;
+      return -1;
+    }
+    return 1 if $s2 =~ /^~/;
+    if ($s1 =~ s/^\^//) {
+      next if $s2 =~ s/^\^//;
+      return $s2 eq '' ? 1 : -1;
+    }
+    return $s1 eq '' ? -1 : 1 if $s2 =~ /^\^/;
+    if ($s1 eq '') {
+      return $s2 eq '' ? 0 : -1;
+    }
+    return 1 if $s2 eq '';
+    my ($x1, $x2, $r);
+    if ($s1 =~ /^([0-9]+)(.*?)$/) {
+      $x1 = $1;
+      $s1 = $2;
+      $s2 =~ /^([0-9]*)(.*?)$/;
+      $x2 = $1;
+      $s2 = $2;
+      return 1 if $x2 eq '';
+      $x1 =~ s/^0+//;
+      $x2 =~ s/^0+//;
+      $r = length($x1) - length($x2) || $x1 cmp $x2;
+    } elsif ($s1 ne '' && $s2 ne '') {
+      $s1 =~ /^([a-zA-Z]*)(.*?)$/;
+      $x1 = $1;
+      $s1 = $2;
+      $s2 =~ /^([a-zA-Z]*)(.*?)$/;
+      $x2 = $1;
+      $s2 = $2;
+      return -1 if $x1 eq '' || $x2 eq '';
+      $r = $x1 cmp $x2;
+    }
+    return $r > 0 ? 1 : -1 if $r;
+  }
+}
+
+
 #==========================================
 # lookUpAllPackages
 #------------------------------------------
@@ -1861,8 +1915,18 @@ sub lookUpAllPackages {
                             . $package->{'release'};
                     }
                     if ( $packPool->{$name}->{$repokey} ) {
-                        # we have it already from a more important repo.
-                        next;
+                        # we have it already in same repo
+                        # is this one newer?
+                        my $is_newer = verscmp_part($package->{'epoch'}, $packPool->{$name}->{$repokey}->{'epoch'});
+                        next if $is_newer < 0;
+                        if ($is_newer eq 0) {
+                           $is_newer = verscmp_part($package->{'version'}, $packPool->{$name}->{$repokey}->{'version'});
+                           next if $is_newer < 0;
+                           if ($is_newer eq 0) {
+                             $is_newer = verscmp_part($package->{'release'}, $packPool->{$name}->{$repokey}->{'release'});
+                             next if $is_newer <= 0;
+                          }
+                        }
                     }
                     # collect data for connected source rpm
                     if( $flags{'SOURCERPM'} ) {
