@@ -855,11 +855,12 @@ function OEMInstall {
             test -e /usr/bin/mst || cp /usr/bin/tail /usr/bin/mst
             (
                 touch recovery.tar.gz
-                tar --numeric-owner -czpf recovery.tar.gz . \
+                tar --numeric-owner \
                     --exclude "./dev" \
                     --exclude "./proc" \
                     --exclude "./sys" \
-                    --exclude "./recovery.*" &
+                    --exclude "./recovery.*" \
+                    -czpf recovery.tar.gz . &
                 rPID=$!
                 while kill -0 $rPID &>/dev/null;do
                     rReady=$(stat --format="%s" ./recovery.tar.gz)

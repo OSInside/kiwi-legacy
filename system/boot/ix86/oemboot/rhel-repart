@@ -707,11 +707,12 @@ function OEMRepart {
         else
             pushd /reco-root
             Echo "Creating recovery root tarball..."
-            tar --numeric-owner -czpf /reco-save/recovery.tar.gz . \
+            tar --numeric-owner \
                 --exclude "./dev" \
                 --exclude "./proc" \
                 --exclude "./sys" \
-                --exclude "./recovery.*"
+                --exclude "./recovery.*" \
+                -czpf /reco-save/recovery.tar.gz .
             popd
         fi
         mkdir /reco-save/boot
