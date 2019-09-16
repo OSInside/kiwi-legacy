@@ -711,7 +711,7 @@ echo "mysystems set to: %{mysystems}"
 
 %if 0%{?suse_version} > 1140
 %check
-make KIWIVERBTEST=1 KIWI_NO_NET=1 test
+make KIWIVERBTEST=1 KIWI_NO_NET=1 KIWI_NO_FS=1 test
 %endif
 
 %install
