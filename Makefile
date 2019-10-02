@@ -243,7 +243,7 @@ test:
 	done
 	cd tests/unit && \
 		${NONETWORKTEST} ${KIWINOFSTEST} perl /usr/bin/prove \
-		${TESTVERBOSE} .
+		${TESTVERBOSE} ${TRAVISENV} .
 
 critic:
 	#============================================

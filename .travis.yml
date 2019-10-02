@@ -17,4 +17,4 @@ before_install:
 install:
     - cpanm -f -n $(cat .perlmodules | tr "\n" " ")
 
-script: make test
+script: make TRAVISENV="-I /home/travis/perl5/lib/perl5" KIWI_NO_NET=1 KIWI_NO_FS=1 test
