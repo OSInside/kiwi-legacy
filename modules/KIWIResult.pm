@@ -484,7 +484,7 @@ sub __sign_with_sha256sum {
         $kiwi -> failed ();
         return;
     }
-    while (my $entry = sort(readdir ($dh))) {
+    foreach my $entry (sort(readdir($dh))) {
         next if $entry eq "." || $entry eq "..";
         next if ! -f "$tmpdir/$entry";
         my $alg = 'sha256';
