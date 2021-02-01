@@ -3629,6 +3629,7 @@ sub setupBootLoaderStages {
         }
         if ($firmware eq "uefi") {
             $stages{efi}{data}      = "'usr/$lib/efi/*'";
+            $stages{efi}{data_share}= "'usr/share/efi/*'";
             $stages{efi}{shim_ms}   = "usr/$lib/efi/shim.efi";
             $stages{efi}{shim_suse} = "usr/$lib/efi/shim-opensuse.efi";
             $stages{efi}{signed}    = "usr/$lib/efi/grub.efi";
@@ -3939,6 +3940,7 @@ sub setupBootLoaderStages {
         if (($type eq 'iso') && ($firmware eq "uefi")) {
             $kiwi -> info ("Importing grub2 shim/signed efi modules");
             my $s_data      = $stages{efi}{data};
+            my $s_data_share= $stages{efi}{data_share};
             my $s_shim_ms   = $stages{efi}{shim_ms};
             my $s_shim_suse = $stages{efi}{shim_suse};
             my $s_signed    = $stages{efi}{signed};
@@ -3955,11 +3957,11 @@ sub setupBootLoaderStages {
             $result = 0;
             if ($zipped) {
                 $status= KIWIQX::qxx (
-                    "$unzip | (cd $tmpdir && cpio -i -d $s_data 2>&1)"
+                    "$unzip | (cd $tmpdir && cpio -i -d $s_data -d $s_data_share 2>&1)"
                 );
             } else {
                 $status= KIWIQX::qxx (
-                    "cat $initrd | (cd $tmpdir && cpio -i -d $s_data 2>&1)"
+                    "cat $initrd | (cd $tmpdir && cpio -i -d $s_data -d $s_data_share 2>&1)"
                 );
             }
             if ((! -e "$tmpdir/$s_shim_ms") && (! -e "$tmpdir/$s_shim_suse")) {
