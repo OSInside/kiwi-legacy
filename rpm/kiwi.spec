@@ -1,7 +1,7 @@
 #
 # spec file for package kiwi
 #
-# Copyright (c) 2013 SUSE LINUX Products GmbH, Nuernberg, Germany.
+# Copyright (c) 2019 SUSE LINUX GmbH, Nuernberg, Germany.
 #
 # All modifications and additions to the file contributed by third parties
 # remain the property of their copyright owners, unless otherwise agreed
@@ -11,12 +11,11 @@
 # case the license is the MIT License). An "Open Source License" is a
 # license that conforms to the Open Source Definition (Version 1.9)
 # published by the Open Source Initiative.
+
+# Please submit bugfixes or comments via https://bugs.opensuse.org/
 #
-# Please submit bugfixes or comments via:
-#
-#       https://github.com/openSUSE/kiwi/issues
-#
-#
+
+
 #perl_verion is not defined in centos/RHEL yet
 %if 0%{?rhel_version} || 0%{?centos_version}
 %define perl_version    %(eval "`%{__perl} -V:version`"; echo $version)
@@ -32,43 +31,43 @@
 %endif
 
 Summary:        KIWI - Appliance Builder
+License:        GPL-2.0-only
+Group:          System/Management
 Url:            http://github.com/openSUSE/kiwi
 Name:           kiwi
-License:        GPL-2.0
-Group:          System/Management
 Version:        7.04.53
-Provides:       kiwi-schema = 6.2
+Release:        0
 Provides:       kiwi-image:aci
 Provides:       kiwi-image:lxc
 Provides:       kiwi-image:tbz
-Provides:       kiwi:%{_mandir}/man1/kiwi.1.gz
-Provides:       kiwi:%{_mandir}/man1/KIWI::images.sh.1.gz
+Provides:       kiwi-schema = 6.2
 Provides:       kiwi:%{_mandir}/man1/KIWI::config.sh.1.gz
+Provides:       kiwi:%{_mandir}/man1/KIWI::images.sh.1.gz
 Provides:       kiwi:%{_mandir}/man1/KIWI::kiwirc.1.gz
+Provides:       kiwi:%{_mandir}/man1/kiwi.1.gz
 Conflicts:      kiwi-doc < 5
-Release:        0
 # requirements to build packages
-BuildRequires:  genisoimage
 BuildRequires:  diffutils
 BuildRequires:  e2fsprogs
 BuildRequires:  gcc-c++
+BuildRequires:  genisoimage
 BuildRequires:  libxslt
 BuildRequires:  lvm2
 BuildRequires:  module-init-tools
-BuildRequires:  rsync
-BuildRequires:  screen
-BuildRequires:  zlib-devel
 BuildRequires:  perl-Class-Singleton
 BuildRequires:  perl-Config-IniFiles
 BuildRequires:  perl-Digest-SHA1
 BuildRequires:  perl-File-Slurp
 BuildRequires:  perl-JSON
 BuildRequires:  perl-Readonly
+BuildRequires:  perl-Test-Unit-Lite
 BuildRequires:  perl-XML-LibXML
 BuildRequires:  perl-XML-LibXML-Common
 BuildRequires:  perl-XML-SAX
 BuildRequires:  perl-libwww-perl
-BuildRequires:  perl-Test-Unit-Lite
+BuildRequires:  rsync
+BuildRequires:  screen
+BuildRequires:  zlib-devel
 %if 0%{?suse_version}
 BuildRequires:  fdupes
 %endif
@@ -82,11 +81,11 @@ BuildRequires:  squashfs
 BuildRequires:  zypper
 %endif
 # requirements to run kiwi
-Requires:       perl >= %{perl_version}
 Requires:       checkmedia
 Requires:       coreutils
 Requires:       kiwi-tools >= %{version}
 Requires:       libxslt
+Requires:       perl >= %{perl_version}
 Requires:       perl-Class-Singleton
 Requires:       perl-Config-IniFiles >= 2.49
 Requires:       perl-Digest-SHA1
@@ -97,10 +96,10 @@ Requires:       perl-XML-LibXML
 Requires:       perl-XML-LibXML-Common
 Requires:       perl-XML-SAX
 Requires:       perl-libwww-perl
+Requires:       psmisc
 Requires:       rsync
 Requires:       screen
 Requires:       tar >= 1.2.7
-Requires:       psmisc
 Requires:       util-linux
 %if 0%{?suse_version} == 1110
 Requires:       sysvinit
@@ -114,8 +113,8 @@ Requires:       gptfdisk
 Requires:       libsolv-tools
 Requires:       perl-solv
 %else
-Requires:       satsolver-tools
 Requires:       perl-satsolver >= 0.42
+Requires:       satsolver-tools
 %endif
 %if 0%{?suse_version} == 1110
 Requires:       virt-utils
@@ -210,26 +209,26 @@ Authors:
 
 %package -n kiwi-requires
 Summary:        KIWI - buildservice package requirements
+License:        GPL-2.0-only
+Group:          System/Management
 Provides:       kiwi-filesystem:btrfs
-Provides:       kiwi-filesystem:xfs
 Provides:       kiwi-filesystem:ext3
 Provides:       kiwi-filesystem:ext4
 Provides:       kiwi-filesystem:squashfs
+Provides:       kiwi-filesystem:xfs
 Provides:       kiwi-image:docker
 Requires:       btrfsprogs
 Requires:       e2fsprogs
 Requires:       kiwi = %{version}
-License:        GPL-2.0
-Group:          System/Management
 %if 0%{?rhel_version} || 0%{?centos_version}
 Provides:       kiwi-packagemanager:yum
-Requires:       yum
 Requires:       squashfs-tools
+Requires:       yum
 %endif
 %if 0%{?suse_version}
 Provides:       kiwi-packagemanager:zypper
-Requires:       zypper
 Requires:       squashfs
+Requires:       zypper
 %endif
 %if 0%{?suse_version} > 1120
 BuildArch:      noarch
@@ -243,17 +242,17 @@ needed packages automatically.
 %package -n kiwi-instsource
 Provides:       kiwi-packagemanager:instsource
 Summary:        KIWI - Product media creator
+License:        GPL-2.0-only
+Group:          System/Management
 Requires:       build
 Requires:       createrepo
-Requires:       inst-source-utils
-Requires:       kiwi-instsource-plugin
-Requires:       kiwi = %{version}
 Requires:       genisoimage
+Requires:       inst-source-utils
+Requires:       kiwi = %{version}
+Requires:       kiwi-instsource-plugin
 %ifarch %ix86 x86_64
 Requires:       syslinux
 %endif
-License:        GPL-2.0
-Group:          System/Management
 
 %description -n kiwi-instsource
 This package contains modules used for installation source creation.
@@ -269,7 +268,7 @@ Authors:
 
 %package -n kiwi-doc
 Summary:        KIWI - Appliance Builder Documentation
-License:        LGPL-2.0+
+License:        LGPL-2.0-or-later
 Group:          Documentation/Howto
 %if 0%{?suse_version} > 1120
 BuildArch:      noarch
@@ -287,7 +286,7 @@ Authors:
 %if %{with kiwitools}
 %package -n kiwi-tools
 Summary:        KIWI - Collection of Boot Helper Tools
-License:        GPL-2.0+
+License:        GPL-2.0-or-later
 Group:          System/Management
 
 %description -n kiwi-tools
@@ -305,6 +304,8 @@ Authors:
 %if %{with kiwipxeboot}
 %package -n kiwi-pxeboot
 Summary:        KIWI - PXE boot structure
+License:        GPL-2.0-or-later
+Group:          System/Management
 PreReq:         coreutils
 %if 0%{?rhel_version} || 0%{?centos_version}
 PreReq:         shadow-utils
@@ -318,8 +319,6 @@ PreReq:         pwdutils
 %ifarch %ix86 x86_64
 Requires:       syslinux
 %endif
-License:        GPL-2.0+
-Group:          System/Management
 
 %description -n kiwi-pxeboot
 This package contains the basic PXE directory structure which is
@@ -335,6 +334,8 @@ Authors:
 
 %package -n kiwi-desc-isoboot
 Summary:        KIWI - Live ISO boot templates
+License:        GPL-2.0-or-later
+Group:          System/Management
 Requires:       e2fsprogs
 Requires:       kiwi = %{version}
 %ifarch %ix86 x86_64
@@ -344,8 +345,6 @@ Requires:       dosfstools
 %if 0%{?suse_version}
 Requires:       genisoimage
 %endif
-License:        GPL-2.0+
-Group:          System/Management
 
 %description -n kiwi-desc-isoboot
 This package contains kiwi boot (initrd) descriptions for booting
@@ -356,8 +355,8 @@ Authors:
         Marcus Schaefer <ms@suse.com>
 
 %package -n kiwi-desc-isoboot-requires
-Provides:       kiwi-image:iso
 Provides:       kiwi-boot:isoboot
+Provides:       kiwi-image:iso
 %if 0%{?suse_version}
 Requires:       genisoimage
 %endif
@@ -380,7 +379,7 @@ Requires:       grub
 %endif
 %endif
 Summary:        KIWI - buildservice package requirements for isoboot
-License:        GPL-2.0+
+License:        GPL-2.0-or-later
 Group:          System/Management
 
 %description -n kiwi-desc-isoboot-requires
@@ -394,10 +393,12 @@ needed packages automatically.
 
 %package -n kiwi-desc-vmxboot
 Summary:        KIWI - Virtual Machine boot templates
-Requires:       lvm2
+License:        GPL-2.0-or-later
+Group:          System/Management
 Requires:       dosfstools
 Requires:       e2fsprogs
 Requires:       kiwi = %{version}
+Requires:       lvm2
 Requires:       parted
 %if 0%{?suse_version}
 Requires:       multipath-tools
@@ -415,8 +416,6 @@ Requires:       grub2
 Requires:       grub
 %endif
 %endif
-License:        GPL-2.0+
-Group:          System/Management
 
 %description -n kiwi-desc-vmxboot
 This package contains kiwi boot (initrd) descriptions for booting
@@ -428,8 +427,10 @@ Authors:
 
 %package -n kiwi-desc-vmxboot-requires
 Summary:        KIWI - buildservice package requirements for vmxboot
-Provides:       kiwi-image:vmx
+License:        GPL-2.0-or-later
+Group:          System/Management
 Provides:       kiwi-boot:vmxboot
+Provides:       kiwi-image:vmx
 %if 0%{?suse_version}
 Requires:       genisoimage
 %endif
@@ -465,8 +466,6 @@ Requires:       grub2-arm64-efi
 Requires:       grub2-arm-efi
 %endif
 %endif
-License:        GPL-2.0+
-Group:          System/Management
 
 %description -n kiwi-desc-vmxboot-requires
 Meta-package to pull in all requires to build a vmxboot media.
@@ -479,9 +478,9 @@ needed packages automatically.
 
 %package -n kiwi-desc-netboot
 Summary:        KIWI - PXE network boot templates
-Requires:       kiwi = %{version}
-License:        GPL-2.0+
+License:        GPL-2.0-or-later
 Group:          System/Management
+Requires:       kiwi = %{version}
 
 %description -n kiwi-desc-netboot
 kiwi boot (initrd) image for booting PXE images.
@@ -491,13 +490,13 @@ Authors:
         Marcus Schaefer <ms@suse.com>
 
 %package -n kiwi-desc-netboot-requires
-Provides:       kiwi-image:pxe
 Provides:       kiwi-boot:netboot
+Provides:       kiwi-image:pxe
 Summary:        KIWI - buildservice package requirements for netboot
+License:        GPL-2.0-or-later
+Group:          System/Management
 Requires:       kiwi-desc-netboot = %{version}
 Requires:       %(echo `bash %{S:4} %{S:0} netboot %{myarch} %{mysystems}`)
-License:        GPL-2.0+
-Group:          System/Management
 
 %description -n kiwi-desc-netboot-requires
 Meta-package to pull in all requires to build a netboot media.
@@ -510,15 +509,17 @@ needed packages automatically.
 
 %package -n kiwi-desc-oemboot
 Summary:        KIWI - Expandable Virtual Machine boot templates
-Requires:       lvm2
+License:        GPL-2.0-only
+Group:          System/Management
 Requires:       dosfstools
 Requires:       e2fsprogs
 Requires:       kiwi = %{version}
+Requires:       lvm2
 Requires:       parted
 %if 0%{?suse_version}
 Requires:       genisoimage
-Requires:       multipath-tools
 Requires:       mtools
+Requires:       multipath-tools
 Requires:       squashfs
 %endif
 %if 0%{?rhel_version} || 0%{?centos_version}
@@ -536,8 +537,6 @@ Requires:       grub
 %ifarch %arm aarch64
 Requires:       u-boot-tools
 %endif
-License:        GPL-2.0
-Group:          System/Management
 
 %description -n kiwi-desc-oemboot
 This package contains kiwi boot (initrd) descriptions for booting
@@ -548,9 +547,9 @@ Authors:
         Marcus Schaefer <ms@suse.com>
 
 %package -n kiwi-desc-oemboot-requires
-Provides:       kiwi-image:oem
 Provides:       kiwi-boot:oemboot
 Provides:       kiwi-boot:tbz
+Provides:       kiwi-image:oem
 %if 0%{?suse_version}
 Requires:       genisoimage
 %endif
@@ -588,7 +587,7 @@ Requires:       grub2-arm-efi
 %endif
 
 Summary:        KIWI - buildservice package requirements for oemboot
-License:        GPL-2.0+
+License:        GPL-2.0-or-later
 Group:          System/Management
 
 %description -n kiwi-desc-oemboot-requires
@@ -602,10 +601,10 @@ needed packages automatically.
 
 %package -n kiwi-templates
 Summary:        KIWI - JeOS system image templates
+License:        GPL-2.0-or-later
+Group:          System/Management
 PreReq:         coreutils
 Requires:       kiwi-desc-vmxboot = %{version}
-License:        GPL-2.0+
-Group:          System/Management
 
 %description -n kiwi-templates
 This package contains system image templates to easily build
@@ -620,7 +619,7 @@ Authors:
 
 %package -n kiwi-media-requires
 Summary:        Packages which should be part of the DVD media
-License:        GPL-2.0+
+License:        GPL-2.0-or-later
 Group:          System/Management
 %if 0%{?suse_version}
 Recommends:     busybox
@@ -660,7 +659,7 @@ Authors:
 Requires:       kiwi = %{version}
 Requires:       perl-Test-Unit-Lite
 Summary:        Unit tests for kiwi
-License:        GPL-2.0
+License:        GPL-2.0-only
 Group:          System/Management
 %if 0%{?suse_version} > 1120
 BuildArch:      noarch
