@@ -926,7 +926,7 @@ sub setupInstallCD {
     my $attr = "-R -J -f -pad -joliet-long";
     if (-s $system >= 4294967296) {
         # install image is bigger than 4g, needs extra iso options
-        $attr .= " -udf -hfs -iso-level 3";
+        $attr .= " -udf -iso-level 3";
     }
     $attr .= " -V \"$volid\"";
     $attr .= " -A \"$this->{mbrid}\"";
