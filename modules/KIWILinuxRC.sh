@@ -5162,11 +5162,16 @@ function setupNetworkWicked {
         # try DHCP_DISCOVER on all interfaces
         if setIPLinkUp $try_iface; then
             dhcp_info=/var/run/wicked/wicked-${try_iface}.info
-            $wicked_dhcp4 --debug all \
-                --test --test-output $dhcp_info $try_iface
-            if [ $? = 0 ] && [ -s $dhcp_info ];then
-                DHCPCD_STARTED="$DHCPCD_STARTED $try_iface"
-            fi
+            for dhcp_retry in `seq 1 5` ; do
+                $wicked_dhcp4 --debug all \
+                    --test --test-output $dhcp_info $try_iface
+                if [ $? = 0 ] && [ -s $dhcp_info ];then
+                    DHCPCD_STARTED="$DHCPCD_STARTED $try_iface"
+                    break
+                fi
+                Echo "Retrying DHCP query"
+                sleep 2
+            done
         fi
     done
     if [ -z "$DHCPCD_STARTED" ];then
